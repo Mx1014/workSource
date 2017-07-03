@@ -42,6 +42,7 @@ import com.everhomes.util.StringHelper;
  *  <li>record: 操作记录列表 com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO</li>
  *  <li>executiveGroupId: 执行业务组id</li>
  *  <li>executivePositionId: 通用岗位id</li>
+ *  <li>executiveGroupName: 业务组名称</li>
  *  <li>groupUsers: 参考com.everhomes.rest.quality.GroupUserDTO</li>
  *  <li>standardDescription: 标准内容</li>
  *  <li>categoryId: 类型id</li>
@@ -76,8 +77,10 @@ public class QualityInspectionTaskDTO {
 	
 	private String taskNumber;
 	
+	private String executiveGroupName;
+
 	private String groupName;
-	
+
 	private String categoryName;
 	
 	private Long executiveGroupId;
@@ -434,6 +437,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public String getExecutiveGroupName() {
+		return executiveGroupName;
+	}
+
+	public void setExecutiveGroupName(String executiveGroupName) {
+		this.executiveGroupName = executiveGroupName;
 	}
 
 	@Override

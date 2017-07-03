@@ -54,7 +54,7 @@ public class QualityStandardsDTO {
 	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
 	
-	@ItemType(StandardGroupDTO.class)
+	@ItemType(SampleGroupDTO.class)
 	private List<StandardGroupDTO> executiveGroup;
 
 	@ItemType(StandardGroupDTO.class)

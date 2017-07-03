@@ -18,6 +18,7 @@ public class ListNewsCommentResponse {
 	private Long nextPageAnchor;
 	@ItemType(NewsCommentDTO.class)
 	private List<NewsCommentDTO> commentList;
+	private Long commentCount;
 
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
@@ -33,6 +34,14 @@ public class ListNewsCommentResponse {
 
 	public void setCommentList(List<NewsCommentDTO> commentList) {
 		this.commentList = commentList;
+	}
+
+	public Long getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(Long commentCount) {
+		this.commentCount = commentCount;
 	}
 
 	@Override

@@ -10,13 +10,10 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.oauth2.CommonRestResponse;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -223,6 +217,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //	}
 
     private void setupScheme(Map<String, String> userAgents) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("setupScheme userAgents = {}", userAgents);
+        }
         UserContext context = UserContext.current();
         if(org.springframework.util.StringUtils.isEmpty(context.getVersion()) || context.getVersion().equals("0.0.0")){
             context.setScheme(userAgents.get("scheme"));
@@ -349,6 +346,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             try {
                 ContentServer server = contentServerService.selectContentServer();
                 Integer port = server.getPublicPort();
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Final selectContentServer port = {}", port);
+                }
                 if (80 == port || 443 == port) {
                     scheme = HTTPS;
                 } else {
@@ -358,6 +358,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 LOGGER.error("Get user agent. Failed to find content server", e);
                 scheme = HTTP;
             }
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Final parsed schema = {}", scheme);
         }
         map.put("scheme", scheme);
         return map;

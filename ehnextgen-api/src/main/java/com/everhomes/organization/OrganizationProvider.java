@@ -11,6 +11,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
+
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -300,8 +301,7 @@ public interface OrganizationProvider {
 	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
 	OrganizationMember findActiveOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
-	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, Long OrganizationId,
-			Byte operationType);
+ 
 
 	List<OrganizationMember> listOrganizationMembers(CrossShardListingLocator locator,Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken);
@@ -384,5 +384,14 @@ public interface OrganizationProvider {
 
 	Organization findUnderOrganizationByParentOrgId(Long parentOrgId);
 
-}
+	List<Long> listOrganizationIdByBuildingId(Long buildingId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
+	List<Long> listOrganizationIdByCommunityId(Long communityId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
+	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType, Byte setAdminFlag,
+			CrossShardListingLocator locator, int pageSize);
 
+	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
+	List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(
+			Long organizationId, Long buildId);
+	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
+			Byte operationType);
+} 

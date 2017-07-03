@@ -44,7 +44,9 @@ public class Post extends EhForumPosts {
     private Long communityId;
 
     private Integer namespaceId;
-    
+
+    private String ownerToken;
+
     public Post() {
     }
 
@@ -180,6 +182,14 @@ public class Post extends EhForumPosts {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getOwnerToken() {
+        return ownerToken;
+    }
+
+    public void setOwnerToken(String ownerToken) {
+        this.ownerToken = ownerToken;
     }
 
     public String toString() {

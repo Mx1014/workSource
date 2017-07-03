@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
  * <li>projectId: projectId</li>
  * <li>projectType: projectType</li>
+ * <li>status: 查询approval的状态 默认是包括禁用和启用的 1-禁用 2-启用{@link com.everhomes.rest.general_approval.GeneralApprovalStatus}</li>
  * </ul>
  * @author janson
  *
@@ -21,6 +22,7 @@ public class ListGeneralApprovalCommand {
     private String     ownerType;
     private String projectType;
     private Long projectId;
+    private Byte status;
 
 	public String getModuleType() {
 		return moduleType;
@@ -73,5 +75,13 @@ public class ListGeneralApprovalCommand {
 
 	public void setProjectId(Long projectId) {
 		this.projectId = projectId;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
 	}
 }

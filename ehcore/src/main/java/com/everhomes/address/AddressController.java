@@ -339,4 +339,22 @@ public class AddressController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /address/listCommunityApartmentsByBuildingName</b>
+     * <p>根据小区Id、楼栋号查询门牌列表(因为listApartmentsByBuildingName里面check了用户权限所以要在提供一个)</p>
+     */
+    @RequestMapping("listCommunityApartmentsByBuildingName")
+    @RestReturn(value=ListApartmentByBuildingNameCommandResponse.class)
+    public RestResponse listCommunityApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+        ListApartmentByBuildingNameCommandResponse result = this.addressService.listCommunityApartmentsByBuildingName(cmd);
+        RestResponse resp = new RestResponse();
+        if(EtagHelper.checkHeaderEtagOnly(30,result.hashCode()+"", request, response)) {
+            resp.setResponseObject(result);
+        }
+
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
 }

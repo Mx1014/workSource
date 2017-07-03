@@ -16,6 +16,7 @@ public enum CoordinationLocks {
     CREATE_PUNCH_LOG("techpark.punch.log.create"),
     DOOR_ACCESS("aclink.door.access"),
     SCHEDULE_QUALITY_TASK("quality.task.schedule"),
+    SCHEDULE_QUALITY_STAT("quality.task.stat"),
     CREATE_QUALITY_TASK("quality.task.create"),
     PAYMENT_CARD("payment.card"),
 	UPDATE_NEWS("news.update"),
@@ -74,7 +75,7 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
-    FLOW_CASE_UPDATE("flowCase.update"),
+    FLOW_CASE_UPDATE("flowCase.update"), PUNCH_DAY_SCHEDULE("punch.day.schedule"),
     ;
 
     private String code;

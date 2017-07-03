@@ -1,10 +1,11 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
+
+import java.util.List;
 
 public interface FlowListenerManager {
 
@@ -79,6 +80,7 @@ public interface FlowListenerManager {
 
 	void onFlowCaseCreated(FlowCase flowCase);
 
-	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
-			List<Tuple<String, Object>> variables);
+	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables);
+
+    void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto);
 }

@@ -12,6 +12,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -42,8 +45,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
-import com.everhomes.general_approval.GeneralForm;
-import com.everhomes.general_approval.GeneralFormProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
@@ -55,7 +56,6 @@ import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.RequestTemplateDTO;
@@ -425,7 +425,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 							FlowUserType.PROCESSOR, true);
 					if(null==templateMap.get("flowCase"+requestInfo.getFlowCaseId())){
 						GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(requestInfo.getFlowCaseId(),
-								GeneralFormDataSourceType.USER_NAME.getCode()); 
+								GeneralFormDataSourceType.USER_NAME.getCode());
 						GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
 								val.getFormOriginId(), val.getFormVersion());
 						//使用表单名称+表单id作为sheet的名称 by dengs 20170510

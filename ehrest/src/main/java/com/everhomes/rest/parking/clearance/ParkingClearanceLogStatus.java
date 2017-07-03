@@ -36,4 +36,13 @@ public enum ParkingClearanceLogStatus {
         }
         return null;
     }
+
+    public static ParkingClearanceLogStatus fromName(String name) {
+        for (ParkingClearanceLogStatus type : ParkingClearanceLogStatus.values()) {
+            if (type.name().equals(name)) {
+                return type;
+            }
+        }
+        return null;
+    }
 }

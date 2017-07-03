@@ -44,6 +44,8 @@ import java.util.List;
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
  *  <li>jumpId : 跳转模块id</li>
  *  <li>descriptionHeight : 折叠服务联盟高度  0:全部展开 大于0:折叠相应高度</li>
+ *  <li>displayFlag : 是否在app端显示服务联盟企业, 参考 {@link com.everhomes.rest.yellowPage.DisplayFlagType}</li>
+ *  <li>defaultOrder : 排序序号</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -103,7 +105,7 @@ public class ServiceAllianceDTO {
 	private String discountDesc;
 	
 	private Byte     status;
-	private Integer  defaultOrder;
+	private Long  defaultOrder;
 	
 	private String templateType;
 	
@@ -125,6 +127,16 @@ public class ServiceAllianceDTO {
 	
 	private Integer descriptionHeight;
 	
+	private Byte displayFlag;
+	
+	public Byte getDisplayFlag() {
+		return displayFlag;
+	}
+
+	public void setDisplayFlag(Byte displayFlag) {
+		this.displayFlag = displayFlag;
+	}
+
 	public String getDisplayServiceUrl() {
 		return displayServiceUrl;
 	}
@@ -296,10 +308,10 @@ public class ServiceAllianceDTO {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
-	public Integer getDefaultOrder() {
+	public Long getDefaultOrder() {
 		return defaultOrder;
 	}
-	public void setDefaultOrder(Integer defaultOrder) {
+	public void setDefaultOrder(Long defaultOrder) {
 		this.defaultOrder = defaultOrder;
 	}
 	

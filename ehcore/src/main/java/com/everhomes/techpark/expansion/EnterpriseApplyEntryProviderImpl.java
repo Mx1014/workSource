@@ -10,9 +10,11 @@ import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseOpRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhLeaseFormRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhLeasePromotionAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhLeasePromotionsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
+import com.everhomes.server.schema.tables.pojos.EhLeaseFormRequests;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionAttachments;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
 import com.everhomes.server.schema.tables.records.*;
@@ -127,15 +129,16 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AMOUNT.le(leasePromotion.getEndRentAmount()));
 		}
 		if (null != leasePromotion.getCreateUid()) {
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CREATE_UID.le(leasePromotion.getCreateUid()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CREATE_UID.eq(leasePromotion.getCreateUid()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(LeaseIssuerType.NORMAL_USER.getCode()));
 		}
 
 		if(null != locator.getAnchor()){
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.DEFAULT_ORDER.lt(locator.getAnchor()));
 		}
 		context.select().from(Tables.EH_LEASE_PROMOTIONS)
 						.where(cond)
-						.orderBy(Tables.EH_LEASE_PROMOTIONS.CREATE_TIME.desc())
+						.orderBy(Tables.EH_LEASE_PROMOTIONS.DEFAULT_ORDER.desc())
 						.limit(pageSize)
 						.fetch().map((r) -> {
 							LeasePromotion lease = ConvertHelper.convert(r, LeasePromotion.class);
@@ -145,7 +148,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 						});
 		
 		if(leasePromotions.size() >= pageSize) {
-			locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getCreateTime().getTime());
+			locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getDefaultOrder());
 		}else {
 			locator.setAnchor(null);
 		}
@@ -171,7 +174,9 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 				.getSequenceDomainFromTablePojo(EhLeasePromotions.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeasePromotions.class));
 		leasePromotion.setId(id);
-		leasePromotion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		Long now = DateHelper.currentGMTTime().getTime();
+		leasePromotion.setCreateTime(new Timestamp(now));
+		leasePromotion.setDefaultOrder(now);
 		leasePromotion.setUpdateTime(leasePromotion.getCreateTime());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		dao.insert(leasePromotion);
@@ -382,5 +387,62 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 		query.execute();
 	}
-	
+
+	@Override
+	public void createLeaseRequestForm(LeaseFormRequest leaseFormRequest) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhLeaseFormRequests.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+		leaseFormRequest.setId(id);
+		leaseFormRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhLeaseFormRequestsDao dap = new EhLeaseFormRequestsDao(context.configuration());
+		dap.insert(leaseFormRequest);
+
+	}
+
+	@Override
+	public void updateLeaseRequestForm(LeaseFormRequest leaseFormRequest) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+
+		EhLeaseFormRequestsDao dap = new EhLeaseFormRequestsDao(context.configuration());
+		dap.update(leaseFormRequest);
+
+	}
+
+	@Override
+	public void deleteLeaseRequestForm(LeaseFormRequest leaseFormRequest) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+
+		EhLeaseFormRequestsDao dap = new EhLeaseFormRequestsDao(context.configuration());
+		dap.delete(leaseFormRequest);
+
+	}
+
+	@Override
+	public LeaseFormRequest findLeaseRequestFormById(Long id) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+
+		EhLeaseFormRequestsDao dao = new EhLeaseFormRequestsDao(context.configuration());
+
+		return ConvertHelper.convert(dao.findById(id), LeaseFormRequest.class);
+
+	}
+
+	@Override
+	public LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+
+		SelectQuery query = context.selectQuery(Tables.EH_LEASE_FORM_REQUESTS);
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.SOURCE_TYPE.eq(sourceType));
+
+		return ConvertHelper.convert(query.fetchAny(), LeaseFormRequest.class);
+
+	}
 }

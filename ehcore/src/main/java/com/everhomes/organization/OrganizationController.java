@@ -286,13 +286,13 @@ public class OrganizationController extends ControllerBase {
 		return response;
 	}*/
 
-    /**
-     * <b>URL: /org/deleteOrgComment</b>
-     * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
-     */
-    /*@RequestMapping("deleteOrgComment")
-    @RestReturn(value=String.class)
-	public RestResponse deleteOrgComment(DeleteCommentCommand cmd) {
+	/**
+	 * <b>URL: /org/deleteOrgComment</b>
+	 * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
+	 */
+	/*@RequestMapping("deleteOrgComment")
+	@RestReturn(value=String.class)
+	public RestResponse deleteOrgComment(DeleteCommonCommentCommand cmd) {
 
 		// ???
 		RestResponse response = new RestResponse();

@@ -16,10 +16,12 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -68,7 +70,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
-	
+
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
+	 
 	@Autowired
 	private OrganizationService organizationService;
 	
@@ -1323,6 +1328,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		 * 分配权限
 		 */
 		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",privilegeIds);
+		
+		// 增加管理员，修改organization表中的setAdminFlag标记
+		if (org.getSetAdminFlag() == null || org.getSetAdminFlag().byteValue() == TrueOrFalseFlag.FALSE.getCode()) {
+			org.setSetAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+			organizationProvider.updateOrganization(org);
+			organizationSearcher.feedDoc(org);
+		}
 	}
 	
 	@Override
@@ -1560,6 +1572,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		privilegeIds.add(PrivilegeConstants.ORGANIZATION_ADMIN);
 		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), new ArrayList<Long>(), privilegeIds);
 
+		//删除管理员修改organization表setAdminFlag标记
+		Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if (organization != null && (organization.getSetAdminFlag() == null || organization.getSetAdminFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode())) {
+			ListServiceModuleAdministratorsCommand listCmd = ConvertHelper.convert(cmd, ListServiceModuleAdministratorsCommand.class);
+			List<OrganizationContactDTO> list = listOrganizationAdministrators(listCmd);
+			if (list == null || list.size() == 0) {
+				organization.setSetAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+				organizationProvider.updateOrganization(organization);
+				organizationSearcher.feedDoc(organization);
+			}
+		}
 	}
 
 	@Override

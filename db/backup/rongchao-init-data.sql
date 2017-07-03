@@ -1469,3 +1469,6497 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES((@address_id := @address_id+1),UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '福田区' ,'荣超大厦-2002','荣超大厦','2002','2','0',UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES((@address_id := @address_id+1),UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '福田区' ,'荣超大厦-2003','荣超大厦','2003','2','0',UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES((@address_id := @address_id+1),UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '福田区' ,'荣超大厦-2005','荣超大厦','2005','2','0',UTC_TIMESTAMP(), @namespace_id);
+
+
+-- fix #11212 add by xq.tian  2017/06/16
+-- -------------------------------------------------------
+SET @namespace_id = 999975;
+SET @organization_id = (SELECT id FROM eh_organizations WHERE name = '深圳市荣超物业管理股份有限公司' AND namespace_id = @namespace_id);
+SET @eh_organization_communities_id = (SELECT MAX(id) FROM `eh_organization_communities`);
+SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`);
+SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
+
+SET @address_id = (SELECT max(id) FROM `eh_addresses`);
+SET @building_id = (SELECT max(id) FROM `eh_buildings`);
+SET @organization_address_mapping_id = (SELECT max(id) FROM `eh_organization_address_mappings`);
+
+SET @community_id = (SELECT max(id) FROM `eh_communities`) + 5;
+SET @community_forum_id = (SELECT MAX(id) FROM `eh_forums`) + 5;
+SET @feedback_forum_id = 190568; -- 荣超统一的 feedback 论坛
+SET @shi_id = 18161;    -- 深圳
+SET @qu_id = 18162;     -- 福田
+
+-- 荣超城市中心 -------------------------------------------------------
+
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+VALUES((@community_forum_id := @community_forum_id + 1), UUID(), @namespace_id, 2, 'EhGroups', 0,'荣超城市中心论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+VALUES((@community_id := @community_id + 1), UUID(), @shi_id, '深圳市',  @qu_id, '福田区', '荣超城市中心', '荣超城市中心', '福华路31号荣超城市中心', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 0, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
+
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
+VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 114.043556, 22.322281, 'wecngpeuxqyb');
+
+INSERT INTO `eh_organization_communities`(id, organization_id, community_id)
+VALUES((@eh_organization_communities_id := @eh_organization_communities_id + 1), @organization_id, @community_id);
+
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`)
+VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());
+
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+VALUES((@building_id := @building_id + 1), @community_id, '荣超城市中心', '荣超城市中心', 0, '', '广东省深圳市福华路31号', 0, 114.043556, 22.322281, 'wecngpeuxqyb', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id);
+
+-- 荣超城市春天花园 -------------------------------------------------------
+
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+VALUES((@community_forum_id := @community_forum_id + 1), UUID(), @namespace_id, 2, 'EhGroups', 0,'荣超城市春天花园论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+VALUES((@community_id := @community_id + 1), UUID(), @shi_id, '深圳市',  @qu_id, '福田区', '荣超城市春天花园', '荣超城市春天花园', '福华路33号荣超城市春天花园', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 0, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,0, @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
+
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
+VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 114.043532, 22.322272, 'wecngpeuwvhg');
+
+INSERT INTO `eh_organization_communities`(id, organization_id, community_id)
+VALUES((@eh_organization_communities_id := @eh_organization_communities_id + 1), @organization_id, @community_id);
+
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`)
+VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());
+
+-- ----
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+VALUES((@building_id := @building_id + 1), @community_id, '皇钻玺', '皇钻玺', 0, '', '广东省深圳市福华路33号', 0, 114.043532, 22.322272, 'wecngpeuwvhg', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id);
+
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+VALUES((@building_id := @building_id + 1), @community_id, '月钻玺', '月钻玺', 0, '', '广东省深圳市福华路33号', 0, 114.043532, 22.322272, 'wecngpeuwvhg', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id);
+
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+VALUES((@building_id := @building_id + 1), @community_id, '日钻玺', '日钻玺', 0, '', '广东省深圳市福华路33号', 0, 114.043532, 22.322272, 'wecngpeuwvhg', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id);
+
+-- ----
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-2A','皇钻玺','2A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-2A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-2B','皇钻玺','2B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-2B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-2C','皇钻玺','2C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-2C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-2D','皇钻玺','2D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-2D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-2E','皇钻玺','2E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-2E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-2F','皇钻玺','2F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-2F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-2G','皇钻玺','2G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-2G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-2H','皇钻玺','2H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-2H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-3A','皇钻玺','3A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-3A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-3B','皇钻玺','3B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-3B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-3C','皇钻玺','3C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-3C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-3D','皇钻玺','3D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-3D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-3E','皇钻玺','3E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-3E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-3F','皇钻玺','3F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-3F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-3G','皇钻玺','3G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-3G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-3H','皇钻玺','3H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-3H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-4A','皇钻玺','4A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-4A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-4B','皇钻玺','4B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-4B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-4C','皇钻玺','4C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-4C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-4D','皇钻玺','4D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-4D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-4E','皇钻玺','4E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-4E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-4F','皇钻玺','4F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-4F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-4G','皇钻玺','4G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-4G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-4H','皇钻玺','4H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-4H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-5A','皇钻玺','5A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-5A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-5B','皇钻玺','5B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-5B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-5C','皇钻玺','5C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-5C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-5D','皇钻玺','5D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-5D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-5E','皇钻玺','5E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-5E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-5F','皇钻玺','5F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-5F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-5G','皇钻玺','5G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-5G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-5H','皇钻玺','5H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-5H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-6A','皇钻玺','6A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-6A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-6B','皇钻玺','6B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-6B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-6C','皇钻玺','6C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-6C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-6D','皇钻玺','6D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-6D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-6E','皇钻玺','6E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-6E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-6F','皇钻玺','6F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-6F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-6G','皇钻玺','6G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-6G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-6H','皇钻玺','6H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-6H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-7A','皇钻玺','7A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-7A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-7B','皇钻玺','7B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-7B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-7C','皇钻玺','7C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-7C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-7D','皇钻玺','7D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-7D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-7E','皇钻玺','7E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-7E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-7F','皇钻玺','7F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-7F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-7G','皇钻玺','7G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-7G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-7H','皇钻玺','7H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-7H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-8A','皇钻玺','8A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-8A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-8B','皇钻玺','8B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-8B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-8C','皇钻玺','8C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-8C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-8D','皇钻玺','8D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-8D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-8E','皇钻玺','8E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-8E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-8F','皇钻玺','8F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-8F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-8G','皇钻玺','8G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-8G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-8H','皇钻玺','8H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-8H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-9A','皇钻玺','9A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-9A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-9B','皇钻玺','9B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-9B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-9C','皇钻玺','9C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-9C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-9D','皇钻玺','9D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-9D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-9E','皇钻玺','9E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-9E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-9F','皇钻玺','9F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-9F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-9G','皇钻玺','9G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-9G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-9H','皇钻玺','9H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-9H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-10A','皇钻玺','10A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-10A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-10B','皇钻玺','10B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-10B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-10C','皇钻玺','10C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-10C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-10D','皇钻玺','10D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-10D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-10E','皇钻玺','10E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-10E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-10F','皇钻玺','10F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-10F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-10G','皇钻玺','10G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-10G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-10H','皇钻玺','10H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-10H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-11A','皇钻玺','11A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-11A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-11B','皇钻玺','11B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-11B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-11C','皇钻玺','11C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-11C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-11D','皇钻玺','11D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-11D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-11E','皇钻玺','11E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-11E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-11F','皇钻玺','11F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-11F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-11G','皇钻玺','11G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-11G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-11H','皇钻玺','11H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-11H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-12A','皇钻玺','12A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-12A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-12B','皇钻玺','12B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-12B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-12C','皇钻玺','12C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-12C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-12D','皇钻玺','12D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-12D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-12E','皇钻玺','12E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-12E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-12F','皇钻玺','12F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-12F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-12G','皇钻玺','12G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-12G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-12H','皇钻玺','12H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-12H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-13A','皇钻玺','13A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-13A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-13B','皇钻玺','13B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-13B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-13C','皇钻玺','13C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-13C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-13D','皇钻玺','13D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-13D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-13E','皇钻玺','13E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-13E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-13F','皇钻玺','13F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-13F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-13G','皇钻玺','13G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-13G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-13H','皇钻玺','13H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-13H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-14A','皇钻玺','14A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-14A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-14B','皇钻玺','14B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-14B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-14C','皇钻玺','14C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-14C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-14D','皇钻玺','14D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-14D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-14E','皇钻玺','14E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-14E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-14F','皇钻玺','14F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-14F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-14G','皇钻玺','14G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-14G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-14H','皇钻玺','14H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-14H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-15A','皇钻玺','15A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-15A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-15B','皇钻玺','15B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-15B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-15C','皇钻玺','15C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-15C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-15D','皇钻玺','15D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-15D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-15E','皇钻玺','15E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-15E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-15F','皇钻玺','15F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-15F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-15G','皇钻玺','15G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-15G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-15H','皇钻玺','15H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-15H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-16A','皇钻玺','16A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-16A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-16B','皇钻玺','16B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-16B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-16C','皇钻玺','16C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-16C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-16D','皇钻玺','16D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-16D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-16E','皇钻玺','16E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-16E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-16F','皇钻玺','16F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-16F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-16G','皇钻玺','16G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-16G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-16H','皇钻玺','16H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-16H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-17A','皇钻玺','17A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-17A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-17B','皇钻玺','17B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-17B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-17C','皇钻玺','17C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-17C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-17D','皇钻玺','17D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-17D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-17E','皇钻玺','17E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-17E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-17F','皇钻玺','17F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-17F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-17G','皇钻玺','17G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-17G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-17H','皇钻玺','17H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-17H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-18A','皇钻玺','18A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-18A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-18B','皇钻玺','18B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-18B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-18C','皇钻玺','18C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-18C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-18D','皇钻玺','18D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-18D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-18E','皇钻玺','18E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-18E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-18F','皇钻玺','18F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-18F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-18G','皇钻玺','18G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-18G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-18H','皇钻玺','18H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-18H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-19A','皇钻玺','19A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-19A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-19B','皇钻玺','19B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-19B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-19C','皇钻玺','19C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-19C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-19D','皇钻玺','19D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-19D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-19E','皇钻玺','19E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-19E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-19F','皇钻玺','19F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-19F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-19G','皇钻玺','19G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-19G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-19H','皇钻玺','19H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-19H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-20A','皇钻玺','20A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-20A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-20B','皇钻玺','20B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-20B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-20C','皇钻玺','20C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-20C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-20D','皇钻玺','20D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-20D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-20E','皇钻玺','20E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-20E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-20F','皇钻玺','20F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-20F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-20G','皇钻玺','20G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-20G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-20H','皇钻玺','20H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-20H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-21A','皇钻玺','21A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-21A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-21B','皇钻玺','21B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-21B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-21C','皇钻玺','21C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-21C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-21D','皇钻玺','21D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-21D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-21E','皇钻玺','21E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-21E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-21F','皇钻玺','21F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-21F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-21G','皇钻玺','21G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-21G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-21H','皇钻玺','21H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-21H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-22A','皇钻玺','22A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-22A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-22B','皇钻玺','22B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-22B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-22C','皇钻玺','22C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-22C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-22D','皇钻玺','22D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-22D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-22E','皇钻玺','22E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-22E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-22F','皇钻玺','22F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-22F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-22G','皇钻玺','22G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-22G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-22H','皇钻玺','22H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-22H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-23A','皇钻玺','23A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-23A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-23B','皇钻玺','23B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-23B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-23C','皇钻玺','23C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-23C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-23D','皇钻玺','23D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-23D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-23E','皇钻玺','23E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-23E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-23F','皇钻玺','23F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-23F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-23G','皇钻玺','23G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-23G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-23H','皇钻玺','23H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-23H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-24A','皇钻玺','24A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-24A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-24B','皇钻玺','24B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-24B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-24C','皇钻玺','24C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-24C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-24D','皇钻玺','24D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-24D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-24E','皇钻玺','24E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-24E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-24F','皇钻玺','24F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-24F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-24G','皇钻玺','24G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-24G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-24H','皇钻玺','24H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-24H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-25A','皇钻玺','25A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-25A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-25B','皇钻玺','25B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-25B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-25C','皇钻玺','25C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-25C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-25D','皇钻玺','25D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-25D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-25E','皇钻玺','25E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-25E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-25F','皇钻玺','25F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-25F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-25G','皇钻玺','25G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-25G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-25H','皇钻玺','25H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-25H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-26A','皇钻玺','26A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-26A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-26B','皇钻玺','26B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-26B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-26C','皇钻玺','26C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-26C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-26D','皇钻玺','26D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-26D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-26E','皇钻玺','26E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-26E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-26F','皇钻玺','26F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-26F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-26G','皇钻玺','26G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-26G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-26H','皇钻玺','26H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-26H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-27A','皇钻玺','27A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-27A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-27B','皇钻玺','27B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-27B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-27C','皇钻玺','27C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-27C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-27D','皇钻玺','27D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-27D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-27E','皇钻玺','27E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-27E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-27F','皇钻玺','27F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-27F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-27G','皇钻玺','27G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-27G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-27H','皇钻玺','27H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-27H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-28A','皇钻玺','28A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-28A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-28B','皇钻玺','28B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-28B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-28C','皇钻玺','28C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-28C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-28D','皇钻玺','28D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-28D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-28E','皇钻玺','28E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-28E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-28F','皇钻玺','28F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-28F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-28G','皇钻玺','28G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-28G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-28H','皇钻玺','28H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-28H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-29A','皇钻玺','29A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-29A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-29B','皇钻玺','29B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-29B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-29C','皇钻玺','29C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-29C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-29D','皇钻玺','29D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-29D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-29E','皇钻玺','29E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-29E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-29F','皇钻玺','29F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-29F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-29G','皇钻玺','29G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-29G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-29H','皇钻玺','29H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-29H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-30A','皇钻玺','30A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-30A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-30B','皇钻玺','30B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-30B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-30C','皇钻玺','30C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-30C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-30D','皇钻玺','30D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-30D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-30E','皇钻玺','30E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-30E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-30F','皇钻玺','30F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-30F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-30G','皇钻玺','30G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-30G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-30H','皇钻玺','30H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-30H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-31A','皇钻玺','31A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-31A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-31B','皇钻玺','31B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-31B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-31C','皇钻玺','31C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-31C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-31D','皇钻玺','31D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-31D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-31E','皇钻玺','31E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-31E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-31F','皇钻玺','31F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-31F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-31G','皇钻玺','31G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-31G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-31H','皇钻玺','31H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-31H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-32A','皇钻玺','32A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-32A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-32B','皇钻玺','32B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-32B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-32C','皇钻玺','32C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-32C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-32D','皇钻玺','32D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-32D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-32E','皇钻玺','32E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-32E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-32F','皇钻玺','32F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-32F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-32G','皇钻玺','32G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-32G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-32H','皇钻玺','32H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-32H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-33A','皇钻玺','33A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-33A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-33B','皇钻玺','33B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-33B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-33C','皇钻玺','33C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-33C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-33D','皇钻玺','33D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-33D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-33E','皇钻玺','33E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-33E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-33F','皇钻玺','33F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-33F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-33G','皇钻玺','33G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-33G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-33H','皇钻玺','33H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-33H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-34A','皇钻玺','34A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-34A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-34B','皇钻玺','34B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-34B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-34C','皇钻玺','34C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-34C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-34D','皇钻玺','34D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-34D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-34E','皇钻玺','34E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-34E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-34F','皇钻玺','34F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-34F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-34G','皇钻玺','34G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-34G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-34H','皇钻玺','34H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-34H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-35A','皇钻玺','35A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-35A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-35B','皇钻玺','35B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-35B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-35C','皇钻玺','35C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-35C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-35D','皇钻玺','35D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-35D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-35E','皇钻玺','35E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-35E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-35F','皇钻玺','35F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-35F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-35G','皇钻玺','35G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-35G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-35H','皇钻玺','35H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-35H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-36A','皇钻玺','36A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-36A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-36B','皇钻玺','36B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-36B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-36C','皇钻玺','36C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-36C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-36D','皇钻玺','36D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-36D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-36E','皇钻玺','36E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-36E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-36F','皇钻玺','36F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-36F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-36G','皇钻玺','36G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-36G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-36H','皇钻玺','36H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-36H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-37A','皇钻玺','37A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-37A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-37B','皇钻玺','37B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-37B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-37C','皇钻玺','37C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-37C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-37D','皇钻玺','37D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-37D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-37E','皇钻玺','37E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-37E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-37F','皇钻玺','37F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-37F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-37G','皇钻玺','37G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-37G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-37H','皇钻玺','37H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-37H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-38A','皇钻玺','38A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-38A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-38B','皇钻玺','38B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-38B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-38C','皇钻玺','38C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-38C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-38D','皇钻玺','38D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-38D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-38E','皇钻玺','38E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-38E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-38F','皇钻玺','38F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-38F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-38G','皇钻玺','38G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-38G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-38H','皇钻玺','38H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-38H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-39A','皇钻玺','39A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-39A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-39B','皇钻玺','39B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-39B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-39C','皇钻玺','39C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-39C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-39D','皇钻玺','39D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-39D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-39E','皇钻玺','39E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-39E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-39F','皇钻玺','39F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-39F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-39G','皇钻玺','39G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-39G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-39H','皇钻玺','39H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-39H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-40A','皇钻玺','40A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-40A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-40B','皇钻玺','40B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-40B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-40C','皇钻玺','40C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-40C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-40D','皇钻玺','40D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-40D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-40E','皇钻玺','40E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-40E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-40F','皇钻玺','40F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-40F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-40G','皇钻玺','40G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-40G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-40H','皇钻玺','40H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-40H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-41A','皇钻玺','41A','2','0',UTC_TIMESTAMP(), @namespace_id, 88.52);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-41A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-41B','皇钻玺','41B','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-41B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-41C','皇钻玺','41C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.61);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-41C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-41D','皇钻玺','41D','2','0',UTC_TIMESTAMP(), @namespace_id, 89.53);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-41D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-41E','皇钻玺','41E','2','0',UTC_TIMESTAMP(), @namespace_id, 89.82);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-41E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-41F','皇钻玺','41F','2','0',UTC_TIMESTAMP(), @namespace_id, 78.79);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-41F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-41G','皇钻玺','41G','2','0',UTC_TIMESTAMP(), @namespace_id, 66.33);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-41G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'皇钻玺-41H','皇钻玺','41H','2','0',UTC_TIMESTAMP(), @namespace_id, 89.37);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '皇钻玺-41H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-2A','月钻玺','2A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-2A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-2B','月钻玺','2B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-2B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-2C','月钻玺','2C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-2C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-2D','月钻玺','2D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-2D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-2E','月钻玺','2E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-2E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-2F','月钻玺','2F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-2F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-2G','月钻玺','2G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-2G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-2H','月钻玺','2H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-2H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-3A','月钻玺','3A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-3A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-3B','月钻玺','3B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-3B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-3C','月钻玺','3C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-3C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-3D','月钻玺','3D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-3D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-3E','月钻玺','3E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-3E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-3F','月钻玺','3F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-3F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-3G','月钻玺','3G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-3G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-3H','月钻玺','3H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-3H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-4A','月钻玺','4A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-4A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-4B','月钻玺','4B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-4B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-4C','月钻玺','4C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-4C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-4D','月钻玺','4D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-4D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-4E','月钻玺','4E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-4E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-4F','月钻玺','4F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-4F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-4G','月钻玺','4G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-4G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-4H','月钻玺','4H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-4H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-5A','月钻玺','5A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-5A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-5B','月钻玺','5B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-5B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-5C','月钻玺','5C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-5C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-5D','月钻玺','5D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-5D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-5E','月钻玺','5E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-5E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-5F','月钻玺','5F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-5F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-5G','月钻玺','5G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-5G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-5H','月钻玺','5H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-5H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-6A','月钻玺','6A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-6A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-6B','月钻玺','6B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-6B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-6C','月钻玺','6C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-6C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-6D','月钻玺','6D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-6D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-6E','月钻玺','6E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-6E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-6F','月钻玺','6F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-6F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-6G','月钻玺','6G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-6G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-6H','月钻玺','6H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-6H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-7A','月钻玺','7A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-7A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-7B','月钻玺','7B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-7B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-7C','月钻玺','7C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-7C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-7D','月钻玺','7D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-7D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-7E','月钻玺','7E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-7E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-7F','月钻玺','7F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-7F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-7G','月钻玺','7G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-7G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-7H','月钻玺','7H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-7H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-8A','月钻玺','8A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-8A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-8B','月钻玺','8B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-8B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-8C','月钻玺','8C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-8C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-8D','月钻玺','8D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-8D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-8E','月钻玺','8E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-8E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-8F','月钻玺','8F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-8F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-8G','月钻玺','8G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-8G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-8H','月钻玺','8H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-8H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-9A','月钻玺','9A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-9A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-9B','月钻玺','9B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-9B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-9C','月钻玺','9C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-9C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-9D','月钻玺','9D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-9D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-9E','月钻玺','9E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-9E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-9F','月钻玺','9F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-9F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-9G','月钻玺','9G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-9G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-9H','月钻玺','9H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-9H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-10A','月钻玺','10A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-10A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-10B','月钻玺','10B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-10B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-10C','月钻玺','10C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-10C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-10D','月钻玺','10D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-10D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-10E','月钻玺','10E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-10E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-10F','月钻玺','10F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-10F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-10G','月钻玺','10G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-10G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-10H','月钻玺','10H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-10H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-11A','月钻玺','11A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-11A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-11B','月钻玺','11B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-11B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-11C','月钻玺','11C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-11C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-11D','月钻玺','11D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-11D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-11E','月钻玺','11E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-11E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-11F','月钻玺','11F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-11F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-11G','月钻玺','11G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-11G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-11H','月钻玺','11H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-11H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-12A','月钻玺','12A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-12A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-12B','月钻玺','12B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-12B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-12C','月钻玺','12C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-12C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-12D','月钻玺','12D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-12D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-12E','月钻玺','12E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-12E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-12F','月钻玺','12F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-12F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-12G','月钻玺','12G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-12G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-12H','月钻玺','12H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-12H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-13A','月钻玺','13A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-13A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-13B','月钻玺','13B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-13B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-13C','月钻玺','13C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-13C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-13D','月钻玺','13D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-13D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-13E','月钻玺','13E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-13E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-13F','月钻玺','13F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-13F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-13G','月钻玺','13G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-13G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-13H','月钻玺','13H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-13H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-14A','月钻玺','14A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-14A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-14B','月钻玺','14B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-14B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-14C','月钻玺','14C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-14C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-14D','月钻玺','14D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-14D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-14E','月钻玺','14E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-14E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-14F','月钻玺','14F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-14F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-14G','月钻玺','14G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-14G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-14H','月钻玺','14H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-14H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-15A','月钻玺','15A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-15A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-15B','月钻玺','15B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-15B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-15C','月钻玺','15C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-15C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-15D','月钻玺','15D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-15D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-15E','月钻玺','15E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-15E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-15F','月钻玺','15F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-15F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-15G','月钻玺','15G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-15G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-15H','月钻玺','15H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-15H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-16A','月钻玺','16A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-16A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-16B','月钻玺','16B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-16B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-16C','月钻玺','16C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-16C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-16D','月钻玺','16D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-16D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-16E','月钻玺','16E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-16E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-16F','月钻玺','16F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-16F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-16G','月钻玺','16G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-16G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-16H','月钻玺','16H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-16H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-17A','月钻玺','17A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-17A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-17B','月钻玺','17B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-17B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-17C','月钻玺','17C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-17C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-17D','月钻玺','17D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-17D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-17E','月钻玺','17E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-17E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-17F','月钻玺','17F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-17F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-17G','月钻玺','17G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-17G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-17H','月钻玺','17H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-17H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-18A','月钻玺','18A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-18A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-18B','月钻玺','18B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-18B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-18C','月钻玺','18C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-18C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-18D','月钻玺','18D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-18D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-18E','月钻玺','18E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-18E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-18F','月钻玺','18F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-18F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-18G','月钻玺','18G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-18G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-18H','月钻玺','18H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-18H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-19A','月钻玺','19A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-19A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-19B','月钻玺','19B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-19B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-19C','月钻玺','19C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-19C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-19D','月钻玺','19D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-19D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-19E','月钻玺','19E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-19E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-19F','月钻玺','19F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-19F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-19G','月钻玺','19G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-19G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-19H','月钻玺','19H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-19H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-20A','月钻玺','20A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-20A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-20B','月钻玺','20B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-20B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-20C','月钻玺','20C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-20C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-20D','月钻玺','20D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-20D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-20E','月钻玺','20E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-20E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-20F','月钻玺','20F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-20F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-20G','月钻玺','20G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-20G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-20H','月钻玺','20H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-20H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-21A','月钻玺','21A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-21A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-21B','月钻玺','21B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-21B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-21C','月钻玺','21C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-21C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-21D','月钻玺','21D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-21D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-21E','月钻玺','21E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-21E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-21F','月钻玺','21F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-21F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-21G','月钻玺','21G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-21G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-21H','月钻玺','21H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-21H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-22A','月钻玺','22A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-22A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-22B','月钻玺','22B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-22B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-22C','月钻玺','22C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-22C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-22D','月钻玺','22D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-22D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-22E','月钻玺','22E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-22E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-22F','月钻玺','22F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-22F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-22G','月钻玺','22G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-22G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-22H','月钻玺','22H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-22H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-23A','月钻玺','23A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-23A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-23B','月钻玺','23B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-23B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-23C','月钻玺','23C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-23C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-23D','月钻玺','23D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-23D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-23E','月钻玺','23E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-23E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-23F','月钻玺','23F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-23F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-23G','月钻玺','23G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-23G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-23H','月钻玺','23H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-23H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-24A','月钻玺','24A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-24A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-24B','月钻玺','24B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-24B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-24C','月钻玺','24C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-24C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-24D','月钻玺','24D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-24D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-24E','月钻玺','24E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-24E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-24F','月钻玺','24F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-24F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-24G','月钻玺','24G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-24G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-24H','月钻玺','24H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-24H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-25A','月钻玺','25A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-25A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-25B','月钻玺','25B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-25B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-25C','月钻玺','25C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-25C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-25D','月钻玺','25D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-25D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-25E','月钻玺','25E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-25E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-25F','月钻玺','25F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-25F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-25G','月钻玺','25G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-25G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-25H','月钻玺','25H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-25H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-26A','月钻玺','26A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-26A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-26B','月钻玺','26B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-26B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-26C','月钻玺','26C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-26C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-26D','月钻玺','26D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-26D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-26E','月钻玺','26E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-26E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-26F','月钻玺','26F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-26F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-26G','月钻玺','26G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-26G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-26H','月钻玺','26H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-26H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-27A','月钻玺','27A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-27A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-27B','月钻玺','27B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-27B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-27C','月钻玺','27C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-27C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-27D','月钻玺','27D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-27D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-27E','月钻玺','27E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-27E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-27F','月钻玺','27F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-27F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-27G','月钻玺','27G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-27G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-27H','月钻玺','27H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-27H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-28A','月钻玺','28A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-28A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-28B','月钻玺','28B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-28B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-28C','月钻玺','28C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-28C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-28D','月钻玺','28D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-28D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-28E','月钻玺','28E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-28E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-28F','月钻玺','28F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-28F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-28G','月钻玺','28G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-28G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-28H','月钻玺','28H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-28H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-29A','月钻玺','29A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-29A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-29B','月钻玺','29B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-29B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-29C','月钻玺','29C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-29C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-29D','月钻玺','29D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-29D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-29E','月钻玺','29E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-29E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-29F','月钻玺','29F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-29F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-29G','月钻玺','29G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-29G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-29H','月钻玺','29H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-29H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-30A','月钻玺','30A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-30A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-30B','月钻玺','30B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-30B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-30C','月钻玺','30C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-30C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-30D','月钻玺','30D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-30D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-30E','月钻玺','30E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-30E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-30F','月钻玺','30F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-30F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-30G','月钻玺','30G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-30G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-30H','月钻玺','30H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-30H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-31A','月钻玺','31A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-31A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-31B','月钻玺','31B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-31B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-31C','月钻玺','31C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-31C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-31D','月钻玺','31D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-31D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-31E','月钻玺','31E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-31E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-31F','月钻玺','31F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-31F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-31G','月钻玺','31G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-31G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-31H','月钻玺','31H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-31H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-32A','月钻玺','32A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-32A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-32B','月钻玺','32B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-32B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-32C','月钻玺','32C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-32C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-32D','月钻玺','32D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-32D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-32E','月钻玺','32E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-32E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-32F','月钻玺','32F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-32F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-32G','月钻玺','32G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-32G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-32H','月钻玺','32H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-32H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-33A','月钻玺','33A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-33A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-33B','月钻玺','33B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-33B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-33C','月钻玺','33C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-33C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-33D','月钻玺','33D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-33D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-33E','月钻玺','33E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-33E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-33F','月钻玺','33F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-33F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-33G','月钻玺','33G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-33G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-33H','月钻玺','33H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-33H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-34A','月钻玺','34A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-34A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-34B','月钻玺','34B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-34B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-34C','月钻玺','34C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-34C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-34D','月钻玺','34D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-34D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-34E','月钻玺','34E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-34E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-34F','月钻玺','34F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-34F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-34G','月钻玺','34G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-34G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-34H','月钻玺','34H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-34H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-35A','月钻玺','35A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-35A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-35B','月钻玺','35B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-35B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-35C','月钻玺','35C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-35C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-35D','月钻玺','35D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-35D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-35E','月钻玺','35E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-35E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-35F','月钻玺','35F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-35F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-35G','月钻玺','35G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-35G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-35H','月钻玺','35H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-35H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-36A','月钻玺','36A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-36A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-36B','月钻玺','36B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-36B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-36C','月钻玺','36C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-36C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-36D','月钻玺','36D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-36D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-36E','月钻玺','36E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-36E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-36F','月钻玺','36F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-36F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-36G','月钻玺','36G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-36G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-36H','月钻玺','36H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-36H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-37A','月钻玺','37A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-37A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-37B','月钻玺','37B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-37B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-37C','月钻玺','37C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-37C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-37D','月钻玺','37D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-37D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-37E','月钻玺','37E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-37E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-37F','月钻玺','37F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-37F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-37G','月钻玺','37G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-37G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-37H','月钻玺','37H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-37H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-38A','月钻玺','38A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-38A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-38B','月钻玺','38B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-38B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-38C','月钻玺','38C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-38C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-38D','月钻玺','38D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-38D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-38E','月钻玺','38E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-38E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-38F','月钻玺','38F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-38F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-38G','月钻玺','38G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-38G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-38H','月钻玺','38H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-38H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-39A','月钻玺','39A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-39A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-39B','月钻玺','39B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-39B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-39C','月钻玺','39C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-39C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-39D','月钻玺','39D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-39D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-39E','月钻玺','39E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-39E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-39F','月钻玺','39F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-39F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-39G','月钻玺','39G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-39G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-39H','月钻玺','39H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-39H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-40A','月钻玺','40A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-40A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-40B','月钻玺','40B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-40B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-40C','月钻玺','40C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-40C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-40D','月钻玺','40D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-40D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-40E','月钻玺','40E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-40E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-40F','月钻玺','40F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-40F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-40G','月钻玺','40G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-40G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-40H','月钻玺','40H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-40H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-41A','月钻玺','41A','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-41A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-41B','月钻玺','41B','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-41B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-41C','月钻玺','41C','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-41C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-41D','月钻玺','41D','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-41D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-41E','月钻玺','41E','2','0',UTC_TIMESTAMP(), @namespace_id, 88.87);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-41E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-41F','月钻玺','41F','2','0',UTC_TIMESTAMP(), @namespace_id, 89.86);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-41F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-41G','月钻玺','41G','2','0',UTC_TIMESTAMP(), @namespace_id, 127.92);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-41G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'月钻玺-41H','月钻玺','41H','2','0',UTC_TIMESTAMP(), @namespace_id, 86.81);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '月钻玺-41H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2A','日钻玺','2A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2B','日钻玺','2B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2C','日钻玺','2C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2D','日钻玺','2D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2E','日钻玺','2E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2F','日钻玺','2F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2Q','日钻玺','2Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2R','日钻玺','2R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2G','日钻玺','2G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2H','日钻玺','2H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2J','日钻玺','2J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2K','日钻玺','2K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2L','日钻玺','2L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2M','日钻玺','2M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2N','日钻玺','2N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-2P','日钻玺','2P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-2P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3A','日钻玺','3A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3B','日钻玺','3B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3C','日钻玺','3C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3D','日钻玺','3D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3E','日钻玺','3E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3F','日钻玺','3F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3Q','日钻玺','3Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3R','日钻玺','3R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3G','日钻玺','3G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3H','日钻玺','3H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3J','日钻玺','3J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3K','日钻玺','3K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3L','日钻玺','3L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3M','日钻玺','3M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3N','日钻玺','3N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-3P','日钻玺','3P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-3P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4A','日钻玺','4A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4B','日钻玺','4B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4C','日钻玺','4C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4D','日钻玺','4D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4E','日钻玺','4E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4F','日钻玺','4F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4Q','日钻玺','4Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4R','日钻玺','4R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4G','日钻玺','4G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4H','日钻玺','4H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4J','日钻玺','4J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4K','日钻玺','4K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4L','日钻玺','4L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4M','日钻玺','4M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4N','日钻玺','4N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-4P','日钻玺','4P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-4P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5A','日钻玺','5A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5B','日钻玺','5B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5C','日钻玺','5C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5D','日钻玺','5D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5E','日钻玺','5E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5F','日钻玺','5F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5Q','日钻玺','5Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5R','日钻玺','5R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5G','日钻玺','5G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5H','日钻玺','5H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5J','日钻玺','5J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5K','日钻玺','5K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5L','日钻玺','5L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5M','日钻玺','5M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5N','日钻玺','5N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-5P','日钻玺','5P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-5P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6A','日钻玺','6A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6B','日钻玺','6B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6C','日钻玺','6C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6D','日钻玺','6D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6E','日钻玺','6E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6F','日钻玺','6F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6Q','日钻玺','6Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6R','日钻玺','6R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6G','日钻玺','6G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6H','日钻玺','6H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6J','日钻玺','6J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6K','日钻玺','6K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6L','日钻玺','6L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6M','日钻玺','6M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6N','日钻玺','6N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-6P','日钻玺','6P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-6P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7A','日钻玺','7A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7B','日钻玺','7B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7C','日钻玺','7C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7D','日钻玺','7D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7E','日钻玺','7E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7F','日钻玺','7F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7Q','日钻玺','7Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7R','日钻玺','7R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7G','日钻玺','7G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7H','日钻玺','7H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7J','日钻玺','7J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7K','日钻玺','7K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7L','日钻玺','7L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7M','日钻玺','7M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7N','日钻玺','7N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-7P','日钻玺','7P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-7P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8A','日钻玺','8A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8B','日钻玺','8B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8C','日钻玺','8C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8D','日钻玺','8D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8E','日钻玺','8E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8F','日钻玺','8F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8Q','日钻玺','8Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8R','日钻玺','8R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8G','日钻玺','8G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8H','日钻玺','8H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8J','日钻玺','8J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8K','日钻玺','8K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8L','日钻玺','8L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8M','日钻玺','8M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8N','日钻玺','8N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-8P','日钻玺','8P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-8P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9A','日钻玺','9A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9B','日钻玺','9B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9C','日钻玺','9C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9D','日钻玺','9D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9E','日钻玺','9E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9F','日钻玺','9F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9Q','日钻玺','9Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9R','日钻玺','9R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9G','日钻玺','9G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9H','日钻玺','9H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9J','日钻玺','9J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9K','日钻玺','9K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9L','日钻玺','9L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9M','日钻玺','9M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9N','日钻玺','9N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-9P','日钻玺','9P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-9P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10A','日钻玺','10A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10B','日钻玺','10B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10C','日钻玺','10C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10D','日钻玺','10D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10E','日钻玺','10E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10F','日钻玺','10F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10Q','日钻玺','10Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10R','日钻玺','10R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10G','日钻玺','10G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10H','日钻玺','10H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10J','日钻玺','10J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10K','日钻玺','10K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10L','日钻玺','10L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10M','日钻玺','10M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10N','日钻玺','10N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-10P','日钻玺','10P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-10P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11A','日钻玺','11A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11B','日钻玺','11B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11C','日钻玺','11C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11D','日钻玺','11D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11E','日钻玺','11E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11F','日钻玺','11F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11Q','日钻玺','11Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11R','日钻玺','11R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11G','日钻玺','11G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11H','日钻玺','11H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11J','日钻玺','11J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11K','日钻玺','11K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11L','日钻玺','11L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11M','日钻玺','11M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11N','日钻玺','11N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-11P','日钻玺','11P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-11P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12A','日钻玺','12A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12B','日钻玺','12B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12C','日钻玺','12C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12D','日钻玺','12D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12E','日钻玺','12E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12F','日钻玺','12F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12Q','日钻玺','12Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12R','日钻玺','12R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12G','日钻玺','12G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12H','日钻玺','12H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12J','日钻玺','12J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12K','日钻玺','12K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12L','日钻玺','12L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12M','日钻玺','12M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12N','日钻玺','12N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-12P','日钻玺','12P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-12P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13A','日钻玺','13A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13B','日钻玺','13B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13C','日钻玺','13C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13D','日钻玺','13D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13E','日钻玺','13E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13F','日钻玺','13F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13Q','日钻玺','13Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13R','日钻玺','13R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13G','日钻玺','13G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13H','日钻玺','13H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13J','日钻玺','13J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13K','日钻玺','13K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13L','日钻玺','13L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13M','日钻玺','13M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13N','日钻玺','13N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-13P','日钻玺','13P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-13P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14A','日钻玺','14A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14B','日钻玺','14B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14C','日钻玺','14C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14D','日钻玺','14D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14E','日钻玺','14E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14F','日钻玺','14F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14Q','日钻玺','14Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14R','日钻玺','14R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14G','日钻玺','14G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14H','日钻玺','14H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14J','日钻玺','14J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14K','日钻玺','14K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14L','日钻玺','14L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14M','日钻玺','14M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14N','日钻玺','14N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-14P','日钻玺','14P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-14P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15A','日钻玺','15A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15B','日钻玺','15B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15C','日钻玺','15C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15D','日钻玺','15D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15E','日钻玺','15E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15F','日钻玺','15F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15Q','日钻玺','15Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15R','日钻玺','15R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15G','日钻玺','15G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15H','日钻玺','15H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15J','日钻玺','15J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15K','日钻玺','15K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15L','日钻玺','15L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15M','日钻玺','15M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15N','日钻玺','15N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-15P','日钻玺','15P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-15P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16A','日钻玺','16A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16B','日钻玺','16B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16C','日钻玺','16C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16D','日钻玺','16D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16E','日钻玺','16E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16F','日钻玺','16F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16Q','日钻玺','16Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16R','日钻玺','16R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16G','日钻玺','16G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16H','日钻玺','16H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16J','日钻玺','16J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16K','日钻玺','16K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16L','日钻玺','16L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16M','日钻玺','16M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16N','日钻玺','16N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-16P','日钻玺','16P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-16P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17A','日钻玺','17A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17B','日钻玺','17B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17C','日钻玺','17C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17D','日钻玺','17D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17E','日钻玺','17E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17F','日钻玺','17F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17Q','日钻玺','17Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17R','日钻玺','17R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17G','日钻玺','17G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17H','日钻玺','17H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17J','日钻玺','17J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17K','日钻玺','17K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17L','日钻玺','17L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17M','日钻玺','17M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17N','日钻玺','17N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-17P','日钻玺','17P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-17P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18A','日钻玺','18A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18B','日钻玺','18B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18C','日钻玺','18C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18D','日钻玺','18D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18E','日钻玺','18E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18F','日钻玺','18F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18Q','日钻玺','18Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18R','日钻玺','18R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18G','日钻玺','18G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18H','日钻玺','18H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18J','日钻玺','18J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18K','日钻玺','18K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18L','日钻玺','18L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18M','日钻玺','18M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18N','日钻玺','18N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-18P','日钻玺','18P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-18P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19A','日钻玺','19A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19B','日钻玺','19B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19C','日钻玺','19C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19D','日钻玺','19D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19E','日钻玺','19E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19F','日钻玺','19F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19Q','日钻玺','19Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19R','日钻玺','19R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19G','日钻玺','19G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19H','日钻玺','19H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19J','日钻玺','19J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19K','日钻玺','19K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19L','日钻玺','19L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19M','日钻玺','19M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19N','日钻玺','19N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-19P','日钻玺','19P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-19P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20A','日钻玺','20A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20B','日钻玺','20B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20C','日钻玺','20C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20D','日钻玺','20D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20E','日钻玺','20E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20F','日钻玺','20F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20Q','日钻玺','20Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20R','日钻玺','20R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20G','日钻玺','20G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20H','日钻玺','20H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20J','日钻玺','20J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20K','日钻玺','20K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20L','日钻玺','20L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20M','日钻玺','20M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20N','日钻玺','20N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-20P','日钻玺','20P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-20P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21A','日钻玺','21A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21B','日钻玺','21B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21C','日钻玺','21C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21D','日钻玺','21D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21E','日钻玺','21E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21F','日钻玺','21F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21Q','日钻玺','21Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21R','日钻玺','21R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21G','日钻玺','21G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21H','日钻玺','21H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21J','日钻玺','21J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21K','日钻玺','21K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21L','日钻玺','21L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21M','日钻玺','21M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21N','日钻玺','21N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-21P','日钻玺','21P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-21P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22A','日钻玺','22A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22B','日钻玺','22B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22C','日钻玺','22C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22D','日钻玺','22D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22E','日钻玺','22E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22F','日钻玺','22F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22Q','日钻玺','22Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22R','日钻玺','22R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22G','日钻玺','22G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22H','日钻玺','22H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22J','日钻玺','22J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22K','日钻玺','22K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22L','日钻玺','22L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22M','日钻玺','22M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22N','日钻玺','22N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-22P','日钻玺','22P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-22P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23A','日钻玺','23A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23B','日钻玺','23B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23C','日钻玺','23C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23D','日钻玺','23D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23E','日钻玺','23E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23F','日钻玺','23F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23Q','日钻玺','23Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23R','日钻玺','23R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23G','日钻玺','23G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23H','日钻玺','23H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23J','日钻玺','23J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23K','日钻玺','23K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23L','日钻玺','23L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23M','日钻玺','23M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23N','日钻玺','23N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-23P','日钻玺','23P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-23P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24A','日钻玺','24A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24B','日钻玺','24B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24C','日钻玺','24C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24D','日钻玺','24D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24E','日钻玺','24E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24F','日钻玺','24F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24Q','日钻玺','24Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24R','日钻玺','24R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24G','日钻玺','24G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24H','日钻玺','24H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24J','日钻玺','24J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24K','日钻玺','24K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24L','日钻玺','24L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24M','日钻玺','24M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24N','日钻玺','24N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-24P','日钻玺','24P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-24P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25A','日钻玺','25A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25B','日钻玺','25B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25C','日钻玺','25C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25D','日钻玺','25D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25E','日钻玺','25E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25F','日钻玺','25F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25Q','日钻玺','25Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25R','日钻玺','25R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25G','日钻玺','25G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25H','日钻玺','25H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25J','日钻玺','25J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25K','日钻玺','25K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25L','日钻玺','25L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25M','日钻玺','25M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25N','日钻玺','25N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-25P','日钻玺','25P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-25P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26A','日钻玺','26A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26B','日钻玺','26B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26C','日钻玺','26C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26D','日钻玺','26D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26E','日钻玺','26E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26F','日钻玺','26F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26Q','日钻玺','26Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26R','日钻玺','26R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26G','日钻玺','26G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26H','日钻玺','26H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26J','日钻玺','26J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26K','日钻玺','26K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26L','日钻玺','26L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26M','日钻玺','26M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26N','日钻玺','26N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-26P','日钻玺','26P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-26P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27A','日钻玺','27A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27B','日钻玺','27B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27C','日钻玺','27C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27D','日钻玺','27D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27E','日钻玺','27E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27F','日钻玺','27F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27Q','日钻玺','27Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27R','日钻玺','27R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27G','日钻玺','27G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27H','日钻玺','27H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27J','日钻玺','27J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27K','日钻玺','27K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27L','日钻玺','27L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27M','日钻玺','27M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27N','日钻玺','27N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-27P','日钻玺','27P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-27P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28A','日钻玺','28A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28B','日钻玺','28B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28C','日钻玺','28C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28D','日钻玺','28D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28E','日钻玺','28E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28F','日钻玺','28F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28Q','日钻玺','28Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28R','日钻玺','28R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28G','日钻玺','28G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28H','日钻玺','28H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28J','日钻玺','28J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28K','日钻玺','28K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28L','日钻玺','28L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28M','日钻玺','28M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28N','日钻玺','28N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-28P','日钻玺','28P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-28P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29A','日钻玺','29A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29B','日钻玺','29B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29C','日钻玺','29C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29D','日钻玺','29D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29E','日钻玺','29E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29F','日钻玺','29F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29Q','日钻玺','29Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29R','日钻玺','29R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29G','日钻玺','29G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29H','日钻玺','29H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29J','日钻玺','29J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29K','日钻玺','29K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29L','日钻玺','29L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29M','日钻玺','29M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29N','日钻玺','29N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-29P','日钻玺','29P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-29P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30A','日钻玺','30A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30B','日钻玺','30B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30C','日钻玺','30C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30D','日钻玺','30D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30E','日钻玺','30E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30F','日钻玺','30F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30Q','日钻玺','30Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30R','日钻玺','30R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30G','日钻玺','30G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30H','日钻玺','30H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30J','日钻玺','30J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30K','日钻玺','30K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30L','日钻玺','30L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30M','日钻玺','30M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30N','日钻玺','30N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-30P','日钻玺','30P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-30P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31A','日钻玺','31A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31B','日钻玺','31B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31C','日钻玺','31C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31D','日钻玺','31D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31E','日钻玺','31E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31F','日钻玺','31F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31Q','日钻玺','31Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31R','日钻玺','31R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31G','日钻玺','31G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31H','日钻玺','31H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31J','日钻玺','31J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31K','日钻玺','31K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31L','日钻玺','31L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31M','日钻玺','31M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31N','日钻玺','31N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-31P','日钻玺','31P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-31P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32A','日钻玺','32A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32B','日钻玺','32B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32C','日钻玺','32C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32D','日钻玺','32D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32E','日钻玺','32E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32F','日钻玺','32F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32Q','日钻玺','32Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32R','日钻玺','32R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32G','日钻玺','32G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32H','日钻玺','32H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32J','日钻玺','32J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32K','日钻玺','32K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32L','日钻玺','32L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32M','日钻玺','32M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32N','日钻玺','32N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-32P','日钻玺','32P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-32P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33A','日钻玺','33A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33B','日钻玺','33B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33C','日钻玺','33C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33D','日钻玺','33D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33E','日钻玺','33E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33F','日钻玺','33F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33Q','日钻玺','33Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33R','日钻玺','33R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33G','日钻玺','33G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33H','日钻玺','33H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33J','日钻玺','33J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33K','日钻玺','33K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33L','日钻玺','33L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33M','日钻玺','33M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33N','日钻玺','33N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-33P','日钻玺','33P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-33P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34A','日钻玺','34A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34B','日钻玺','34B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34C','日钻玺','34C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34D','日钻玺','34D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34E','日钻玺','34E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34F','日钻玺','34F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34Q','日钻玺','34Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34R','日钻玺','34R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34G','日钻玺','34G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34H','日钻玺','34H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34J','日钻玺','34J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34K','日钻玺','34K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34L','日钻玺','34L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34M','日钻玺','34M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34N','日钻玺','34N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-34P','日钻玺','34P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-34P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35A','日钻玺','35A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35B','日钻玺','35B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35C','日钻玺','35C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35D','日钻玺','35D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35E','日钻玺','35E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35F','日钻玺','35F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35Q','日钻玺','35Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35R','日钻玺','35R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35G','日钻玺','35G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35H','日钻玺','35H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35J','日钻玺','35J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35K','日钻玺','35K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35L','日钻玺','35L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35M','日钻玺','35M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35N','日钻玺','35N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-35P','日钻玺','35P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-35P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36A','日钻玺','36A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36B','日钻玺','36B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36C','日钻玺','36C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36D','日钻玺','36D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36E','日钻玺','36E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36F','日钻玺','36F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36Q','日钻玺','36Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36R','日钻玺','36R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36G','日钻玺','36G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36H','日钻玺','36H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36J','日钻玺','36J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36K','日钻玺','36K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36L','日钻玺','36L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36M','日钻玺','36M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36N','日钻玺','36N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-36P','日钻玺','36P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-36P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37A','日钻玺','37A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37B','日钻玺','37B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37C','日钻玺','37C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37D','日钻玺','37D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37E','日钻玺','37E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37F','日钻玺','37F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37Q','日钻玺','37Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37R','日钻玺','37R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37G','日钻玺','37G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37H','日钻玺','37H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37J','日钻玺','37J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37K','日钻玺','37K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37L','日钻玺','37L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37M','日钻玺','37M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37N','日钻玺','37N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-37P','日钻玺','37P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-37P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38A','日钻玺','38A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38B','日钻玺','38B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38C','日钻玺','38C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38D','日钻玺','38D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38E','日钻玺','38E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38F','日钻玺','38F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38Q','日钻玺','38Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38R','日钻玺','38R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38G','日钻玺','38G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38H','日钻玺','38H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38J','日钻玺','38J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38K','日钻玺','38K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38L','日钻玺','38L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38M','日钻玺','38M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38N','日钻玺','38N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-38P','日钻玺','38P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-38P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39A','日钻玺','39A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39B','日钻玺','39B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39C','日钻玺','39C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39D','日钻玺','39D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39E','日钻玺','39E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39F','日钻玺','39F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39Q','日钻玺','39Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39R','日钻玺','39R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39G','日钻玺','39G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39H','日钻玺','39H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39J','日钻玺','39J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39K','日钻玺','39K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39L','日钻玺','39L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39M','日钻玺','39M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39N','日钻玺','39N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-39P','日钻玺','39P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-39P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40A','日钻玺','40A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40B','日钻玺','40B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40C','日钻玺','40C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40D','日钻玺','40D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40E','日钻玺','40E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40F','日钻玺','40F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40Q','日钻玺','40Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40R','日钻玺','40R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40G','日钻玺','40G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40H','日钻玺','40H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40J','日钻玺','40J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40K','日钻玺','40K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40L','日钻玺','40L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40M','日钻玺','40M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40N','日钻玺','40N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-40P','日钻玺','40P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-40P', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41A','日钻玺','41A','2','0',UTC_TIMESTAMP(), @namespace_id, 78.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41A', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41B','日钻玺','41B','2','0',UTC_TIMESTAMP(), @namespace_id, 52.57);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41B', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41C','日钻玺','41C','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41C', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41D','日钻玺','41D','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41D', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41E','日钻玺','41E','2','0',UTC_TIMESTAMP(), @namespace_id, 79.1);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41E', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41F','日钻玺','41F','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41F', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41Q','日钻玺','41Q','2','0',UTC_TIMESTAMP(), @namespace_id, 50.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41Q', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41R','日钻玺','41R','2','0',UTC_TIMESTAMP(), @namespace_id, 52.65);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41R', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41G','日钻玺','41G','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41G', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41H','日钻玺','41H','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41H', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41J','日钻玺','41J','2','0',UTC_TIMESTAMP(), @namespace_id, 54.11);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41J', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41K','日钻玺','41K','2','0',UTC_TIMESTAMP(), @namespace_id, 91.35);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41K', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41L','日钻玺','41L','2','0',UTC_TIMESTAMP(), @namespace_id, 56.3);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41L', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41M','日钻玺','41M','2','0',UTC_TIMESTAMP(), @namespace_id, 50.93);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41M', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41N','日钻玺','41N','2','0',UTC_TIMESTAMP(), @namespace_id, 52.32);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41N', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
+VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '深圳市', @qu_id, '福田区' ,'日钻玺-41P','日钻玺','41P','2','0',UTC_TIMESTAMP(), @namespace_id, 52.16);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, @address_id, '日钻玺-41P', '0');
+-- -------------------------------------------------------
+-- 荣超加客户资料菜单
+SET @id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@id := @id + 1), '37000', '', 'EhNamespaces', '999975', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@id := @id + 1), '40900', '', 'EhNamespaces', '999975', '2');
+
+delete from eh_web_menu_scopes where owner_id = 999975 and menu_id = 40900;
+
+
+
+
+
+-- 添加小区的默认场景
+select max(id) into @id from `eh_launch_pad_layouts`;
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES (@id:=@id+1, 999975, 'ServiceMarketLayout', '{"versionCode":"2017050501","versionName":"4.5.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"datetime","categoryId":0,"itemGroup":"Default","newsSize":5},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017050501, 2017050501, 2, '2017-05-05 06:36:02', 'default', 0, 0, 0);
+
+select max(id) into @id from `eh_launch_pad_items`;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'RENTAL', '资源预定', 'cs://1/image/aW1hZ2UvTVRvM09EVTFNRFZrTmpoak1qa3laVFpsTlRWa1pURXhaRFEzTURBME1Ea3pOUQ', 1, 1, 49, '{"resourceTypeId":10820,"pageType": 0}', 10, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'default', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRvNU0yRTROVEE1TTJabE16ZzRZamM0WXpJNFlqWTRZelk1WWpBMlpHTTROZw', 1, 1, 23, '', 20, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'default', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'ROUTE', '物业报修', 'cs://1/image/aW1hZ2UvTVRwbE56VmlaRFV3TVRWaU16VmtOelV4WVdNek1XSTJPVFpsWm1KaVlqUTNNdw', 1, 1, 60, '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修"}', 30, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'default', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'VIDEO_MEETING', '视频会议', 'cs://1/image/aW1hZ2UvTVRwak16ZzJOelkzWVRoalpqSTFPR1JtWVRrMU5XWmxZV1kyTWpSbU5UUXpNdw', 1, 1, 27, '', 40, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'default', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'ENTER_PARK', '租赁', 'cs://1/image/aW1hZ2UvTVRwa01UazNORGhsTnpVNFlqUXlNalpsTm1RNE56QTBOMkUxTjJNMU9EQTFaQQ', 1, 1, 28, '', 50, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'default', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'HOT_LINE', '客服', 'cs://1/image/aW1hZ2UvTVRwaE5XUXhNakZqTm1VeFptVTNNMlF4TVdRNE5UQTJZMkptWVdSaVpEUTFPUQ', 1, 1, 45, '', 60, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'default', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'CONTACTS', '通讯录', 'cs://1/image/aW1hZ2UvTVRwak56SXhaRGd3WTJGbE0yVTJZams0TkRJNE1UWm1NRFZrT0dWaVpHTmtaUQ', 1, 1, 46, '', 70, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'default', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'MORE', '更多', 'cs://1/image/aW1hZ2UvTVRvM016VTVaRFprWXpabFlUWXpaV1kwTUdNeU1UVTNPRE16Tm1SaVpURXhPQQ', 1, 1, 1, '{"itemLocation":"/home","itemGroup":"Bizs"}', 100, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'default', 0, NULL, NULL, 0, NULL);

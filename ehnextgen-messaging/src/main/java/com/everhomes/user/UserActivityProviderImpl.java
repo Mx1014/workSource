@@ -1033,4 +1033,22 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         }
         return results;
     }
+
+    @Override
+    public List<UserActivity> listUserActivetys(Long userId, Integer pageSize) {
+        List<UserActivity> results = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(Tables.EH_USER_ACTIVITIES);
+        query.addConditions(Tables.EH_USER_ACTIVITIES.UID.eq(userId));
+        query.addOrderBy(Tables.EH_USER_ACTIVITIES.CREATE_TIME.desc());
+
+        if (null != pageSize) {
+            query.addLimit(pageSize);
+        }
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, UserActivity.class));
+            return null;
+        });
+        return results;
+    }
 }

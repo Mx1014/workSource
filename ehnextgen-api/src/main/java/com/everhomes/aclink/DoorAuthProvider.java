@@ -1,14 +1,13 @@
 package com.everhomes.aclink;
 
-import java.util.List;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
 import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.user.User;
+
+import java.util.List;
 
 public interface DoorAuthProvider {
 
@@ -61,4 +60,6 @@ public interface DoorAuthProvider {
 	DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId, Byte isRemote);
 
 	Long getNextDoorAuth();
+
+    List<DoorAuth> searchVisitorDoorAuthByAdmin(Long doorId, String keyword, Byte status, int pageSize, Long startTime, Long endTime);
 }

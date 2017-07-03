@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.community.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +22,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.community.GetCommunityByUuidCommand;
-import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
-import com.everhomes.rest.community.ListCommunitesByStatusCommand;
-import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
@@ -58,6 +52,7 @@ import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.SearchSyncManager;
@@ -401,8 +396,8 @@ public class CommunityAdminController extends ControllerBase {
      * <p>导入楼栋信息excel</p>
      */
     @RequestMapping("importBuildingData")
-    @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importBuildingData(@RequestParam(value = "attachment") MultipartFile[] files){
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importBuildingData(@RequestParam("communityId") Long communityId, @RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){
@@ -410,12 +405,33 @@ public class CommunityAdminController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
 					"files is null");
 		}
-		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
-        RestResponse response = new RestResponse(importDataResponse);
+//		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
+        RestResponse response = new RestResponse(communityService.importBuildingData(communityId, files[0]));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+//    
+//    /**
+//     * <b>URL: /admin/community/importBuildingData</b>
+//     * <p>导入楼栋信息excel</p>
+//     */
+//    @RequestMapping("importBuildingData")
+//    @RestReturn(value=ImportDataResponse.class)
+//    public RestResponse importBuildingData(@RequestParam(value = "attachment") MultipartFile[] files){
+//    	User manaUser = UserContext.current().getUser();
+//    	Long userId = manaUser.getId();
+//    	if(null == files || null == files[0]){
+//    		LOGGER.error("files is null。userId="+userId);
+//    		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+//    				"files is null");
+//    	}
+//    	ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
+//    	RestResponse response = new RestResponse(importDataResponse);
+//    	response.setErrorCode(ErrorCodes.SUCCESS);
+//    	response.setErrorDescription("OK");
+//    	return response;
+//    }
     
     /**
      * <b>URL: /admin/community/qryCommunityUserEnterpriseByUserId</b>
@@ -614,8 +630,23 @@ public class CommunityAdminController extends ControllerBase {
 		communityService.communityImportOrganizationConfig(cmd);
 		return new RestResponse();
 	}
-	
-	
+
+    /**
+     *
+     * <b>URL: /admin/community/updateBuildingOrder<b>
+     * <p>
+     * 更新楼栋顺序
+     * </p>
+     */
+    @RequestMapping("updateBuildingOrder")
+    @RestReturn(String.class)
+    public RestResponse updateBuildingOrder(@Valid UpdateBuildingOrderCommand cmd){
+        communityService.updateBuildingOrder(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 	
 	
 }

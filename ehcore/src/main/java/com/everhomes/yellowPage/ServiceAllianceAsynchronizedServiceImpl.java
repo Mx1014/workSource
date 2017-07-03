@@ -11,10 +11,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.general_approval.GeneralApproval;
-import com.everhomes.general_approval.GeneralForm;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 
 import net.greghaines.jesque.Job;
 

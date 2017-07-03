@@ -145,6 +145,9 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private UserActivityProvider userActivityProvider;
 
+	@Autowired
+	private ConfigurationProvider configProvider;
+
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
@@ -764,6 +767,9 @@ public class NewsServiceImpl implements NewsService {
 		List<Comment> comments = commentProvider.listCommentByOwnerIdWithPage(EhNewsComment.class, newsId, pageAnchor,
 				pageSize + 1);
 		ListNewsCommentResponse response = new ListNewsCommentResponse();
+		News news = newsProvider.findNewsById(newsId);
+		response.setCommentCount(news.getChildCount());
+
 		if (comments != null && comments.size() > 0) {
 			if (comments.size() > pageSize) {
 				comments.remove(comments.size() - 1);
@@ -943,7 +949,38 @@ public class NewsServiceImpl implements NewsService {
 		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
 				.collect(Collectors.toList()));
 
+
+		//填充创建者信息   add by yanjun 20170606
+		populatePostUserInfo(userId, commentDTO);
 		return commentDTO;
+	}
+
+	/**
+	 * 填充创建者信息
+	 * @param userId
+	 * @param commentDTO
+	 */
+	private void populatePostUserInfo(Long userId, AddNewsCommentBySceneResponse commentDTO){
+		if(userId == null || commentDTO == null){
+			return;
+		}
+		User creator = userProvider.findUserById(userId);
+		if(creator != null) {
+			commentDTO.setCreatorNickName(creator.getNickName());
+
+			String creatorAvatar = creator.getAvatar();
+			commentDTO.setCreatorAvatar(creatorAvatar);
+
+			if(StringUtils.isEmpty(creatorAvatar)) {
+				creatorAvatar = configProvider.getValue(creator.getNamespaceId(), "user.avatar.default.url", "");
+			}
+
+			if(creatorAvatar != null && creatorAvatar.length() > 0){
+				String avatarUrl = getResourceUrlByUir(userId, creatorAvatar,
+						EntityType.USER.getCode(), userId);
+				commentDTO.setCreatorAvatarUrl(avatarUrl);
+			}
+		}
 	}
 
 	private Comment processComment(Long userId, Long newsId, AddNewsCommentBySceneCommand cmd) {
@@ -957,8 +994,9 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	private void checkCommentParameter(Long userId, AddNewsCommentBySceneCommand cmd) {
+		//新的统一评论接口没有scenetoken，不需要常见检查  add by yanjun 20170602
 		// 检查namespace是否存在
-		getNamespaceFromSceneToken(userId, cmd.getSceneToken());
+		//getNamespaceFromSceneToken(userId, cmd.getSceneToken());
 
 		// 检查评论类型
 		checkCommentType(userId, cmd.getContentType());
@@ -971,7 +1009,8 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public void deleteNewsCommentByScene(DeleteNewsCommentBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		getNamespaceFromSceneToken(userId, cmd.getSceneToken());
+		//新的统一评论接口没有scenetoken，不需要常见检查  add by yanjun 20170602
+		//getNamespaceFromSceneToken(userId, cmd.getSceneToken());
 		deleteNewsComment(userId, cmd.getNewsToken(), cmd.getId());
 	}
 

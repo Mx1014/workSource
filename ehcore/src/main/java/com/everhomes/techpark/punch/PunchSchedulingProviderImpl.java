@@ -8,6 +8,8 @@ import org.jooq.DSLContext;
 import org.jooq.DeleteWhereStep;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +32,7 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
     @Autowired
     private DbProvider dbProvider;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(PunchSchedulingProviderImpl.class);
     @Autowired
     private ShardingProvider shardingProvider;
 
@@ -146,6 +149,7 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(ownerId))
 				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.equal(ownerType)) ; 
 		step.where(condition);
+		LOGGER.debug(step.toString());
 		step.execute();
 	 
 		
