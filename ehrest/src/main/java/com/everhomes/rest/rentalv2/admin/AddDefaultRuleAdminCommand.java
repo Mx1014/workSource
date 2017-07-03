@@ -62,7 +62,6 @@ public class AddDefaultRuleAdminCommand {
 	private Byte multiTimeInterval;
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments;
-	private Byte rentalType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
 	private Double timeStep;
@@ -75,8 +74,6 @@ public class AddDefaultRuleAdminCommand {
 	private List<Integer> openWeekday;
 	@ItemType(Long.class)
 	private List<Long> closeDates;
-	private BigDecimal workdayPrice;
-	private BigDecimal weekendPrice;
 	private Double siteCounts;
 //	@ItemType(String.class)
 //	private List<String> siteNumbers;
@@ -86,10 +83,25 @@ public class AddDefaultRuleAdminCommand {
 
 	private Byte rentalStartTimeFlag;
 	private Byte rentalEndTimeFlag;
-	private BigDecimal orgMemberWorkdayPrice;
-	private BigDecimal orgMemberWeekendPrice;
 
+	@ItemType(Byte.class)
+	private List<Byte> rentalTypes;
+	@ItemType(PriceRuleDTO.class)
+	private List<PriceRuleDTO> priceRules;
+
+	@Deprecated
+	private Byte rentalType;
+	@Deprecated
+	private BigDecimal workdayPrice;
+	@Deprecated
+	private BigDecimal weekendPrice;
+	@Deprecated
+	private BigDecimal orgMemberWorkdayPrice;
+	@Deprecated
+	private BigDecimal orgMemberWeekendPrice;
+	@Deprecated
 	private BigDecimal approvingUserWorkdayPrice;
+	@Deprecated
 	private BigDecimal approvingUserWeekendPrice;
 
 	@ItemType(TimeIntervalDTO.class)
@@ -99,6 +111,23 @@ public class AddDefaultRuleAdminCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	
+	public List<Byte> getRentalTypes() {
+		return rentalTypes;
+	}
+
+	public void setRentalTypes(List<Byte> rentalTypes) {
+		this.rentalTypes = rentalTypes;
+	}
+
+	public List<PriceRuleDTO> getPriceRules() {
+		return priceRules;
+	}
+
+	public void setPriceRules(List<PriceRuleDTO> priceRules) {
+		this.priceRules = priceRules;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
