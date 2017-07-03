@@ -8,8 +8,8 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>departmentId: 部门id</li>
- * <li>userId: 用户id</li>
+ * <li>departmentIds: 部门id</li>
+ * <li>userIds: 用户id</li>
  * <li>salaryGroupId: 薪酬组id</li>
  * <li>ownerType: 'organization'</li>
  * <li>ownerId: organizationId</li>
@@ -18,10 +18,10 @@ import java.util.List;
 public class AddToOrganizationSalaryGroupCommand {
 
 	@ItemType(Long.class)
-	private List<Long> departmentId;
+	private List<Long> departmentIds;
 
 	@ItemType(Long.class)
-	private List<Long> userId;
+	private List<Long> userIds;
 
 	private Long salaryGroupId;
 
@@ -33,15 +33,15 @@ public class AddToOrganizationSalaryGroupCommand {
 
 	}
 
-	public List<Long> getDepartmentId() {
-		return departmentId;
+	public List<Long> getDepartmentIds() {
+		return departmentIds;
 	}
 
-	public void setDepartmentId(List<Long> departmentId) {
-		this.departmentId = departmentId;
+	public void setDepartmentIds(List<Long> departmentIds) {
+		this.departmentIds = departmentIds;
 	}
 
-    public Long getSalaryGroupId() {
+	public Long getSalaryGroupId() {
         return salaryGroupId;
     }
 
@@ -49,12 +49,12 @@ public class AddToOrganizationSalaryGroupCommand {
         this.salaryGroupId = salaryGroupId;
     }
 
-    public List<Long> getUserId() {
-		return userId;
+	public List<Long> getUserIds() {
+		return userIds;
 	}
 
-	public void setUserId(List<Long> userId) {
-		this.userId = userId;
+	public void setUserIds(List<Long> userIds) {
+		this.userIds = userIds;
 	}
 
 	public String getOwnerType() {

@@ -405,14 +405,14 @@ public class SalaryServiceImpl implements SalaryService {
 
         List<Long> userIdList = new ArrayList<>();
         // 1.从组织架构下查询部门下的所有人员id
-        if (!cmd.getDepartmentId().isEmpty()) {
-            List<Long> departmentId = cmd.getDepartmentId();
+        if (!cmd.getDepartmentIds().isEmpty()) {
+            List<Long> departmentId = cmd.getDepartmentIds();
 //        List<Long> result = this.organizationService.getUserIdInDepartmentId(departmentId);
 //            userIdList.addAll(result);
         }
         // 2.获取选择的人员的userId
-        if(!cmd.getUserId().isEmpty())
-            userIdList.addAll(cmd.getUserId());
+        if(!cmd.getUserIds().isEmpty())
+            userIdList.addAll(cmd.getUserIds());
         // 3.将人员添加至组织架构的薪酬组
 //        for(int i=0; i<userIdList.size(); i++)
 //        this.organizationService.addPersonnelsToSalaryGroup(userIdList.get(i),cmd.getSalaryGroupId());
@@ -509,7 +509,7 @@ public class SalaryServiceImpl implements SalaryService {
             task.setType(ImportFileTaskType.SALARY_GROUP.getCode());
             task.setCreatorUid(userId);
 
-            //  提前获取字段便于后面方法的调用
+            //  提前获取批次的字段便于后面方法的调用
             List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(cmd.getSalaryGroupId());
             task = this.importFileService.executeTask(new ExecuteImportTaskCallback() {
                 @Override
