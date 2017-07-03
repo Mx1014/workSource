@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属实体类型,</li>
  * <li>ownerId:  所属实体id</li>
  * <li>level: 业务模块级别</li>
+ * <li>type: 类型</li>
  * </ul>
  */
 public class ListServiceModulesCommand {
@@ -17,6 +18,8 @@ public class ListServiceModulesCommand {
     private Long ownerId;
 
     private Integer level;
+
+	private Byte type;
 
     public Integer getLevel() {
         return level;
@@ -47,4 +50,11 @@ public class ListServiceModulesCommand {
 		this.ownerId = ownerId;
 	}
 
+	public Byte getType() {
+		return type;
+	}
+
+	public void setType(Byte type) {
+		this.type = type;
+	}
 }

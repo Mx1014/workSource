@@ -177,4 +177,40 @@ public class ModuleController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /module/createServiceModule</b>
+     * <p>
+     *  创建模块
+     * </p>
+     */
+    @RequestMapping("createServiceModule")
+    @RestReturn(value = String.class)
+    public RestResponse createServiceModule(@Valid CreateServiceModuleCommand cmd) {
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /module/updateServiceModule</b>
+     * <p>
+     *  修改模块
+     * </p>
+     */
+    @RequestMapping("updateServiceModule")
+    @RestReturn(value = String.class)
+    public RestResponse updateServiceModule(@Valid UpdateServiceModuleCommand cmd) {
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /module/deleteServiceModule</b>
+     * <p>
+     *  删除模块
+     * </p>
+     */
+    @RequestMapping("deleteServiceModule")
+    @RestReturn(value = String.class)
+    public RestResponse deleteServiceModule(@Valid DeleteServiceModuleCommand cmd) {
+        return new RestResponse();
+    }
 }
