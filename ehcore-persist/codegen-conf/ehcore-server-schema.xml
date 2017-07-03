@@ -166,7 +166,7 @@
 	    eh_rentalv2_price_rules |
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
         eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
-	eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |
+	    eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |
 	</includes>
 
             <!-- All elements that are excluded from your schema
