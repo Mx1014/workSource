@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>
+ * <li>rentalType：类型</li>
  * <li>rentalDate：预定日期</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li>
@@ -20,6 +21,7 @@ import com.everhomes.util.StringHelper;
 public class AddRentalBillCommand {
 	@NotNull
 	private Long rentalSiteId;   
+	private Byte rentalType;
 	private Long rentalDate;
 //	@NotNull
 //	private Long startTime;
@@ -31,6 +33,14 @@ public class AddRentalBillCommand {
 //	@ItemType(SiteItemDTO.class)
 //	private List<SiteItemDTO> rentalItems;
 	private String sceneToken;
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
 
 	public String getSceneToken() {
 		return sceneToken;

@@ -43,6 +43,8 @@ import com.everhomes.rest.contract.ListContractsCommand;
 import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.OSType;
@@ -81,6 +83,9 @@ public class ContractServiceImpl implements ContractService {
 	
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+	
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -139,13 +144,14 @@ public class ContractServiceImpl implements ContractService {
     @Scheduled(cron="0 0 10 * * ?")
     @Override
     public void contractSchedule(){
-    	//使用tryEnter()防止分布式部署重复执行
-    	coordinationProvider.getNamedLock(CoordinationLocks.CONTRACT_SCHEDULE.getCode()).tryEnter(()->{
-    		sendMessageToBackTwoMonthsOrganizations();
-        	sendMessageToBackOneMonthOrganizations();
-        	sendMessageToNewOrganizations();
-    	});
-    	
+    	if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+	    	//使用tryEnter()防止分布式部署重复执行
+	    	coordinationProvider.getNamedLock(CoordinationLocks.CONTRACT_SCHEDULE.getCode()).tryEnter(()->{
+	    		sendMessageToBackTwoMonthsOrganizations();
+	        	sendMessageToBackOneMonthOrganizations();
+	        	sendMessageToNewOrganizations();
+	    	});
+    	}
     }
 
 	private void sendMessageToBackTwoMonthsOrganizations() {

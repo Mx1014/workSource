@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.everhomes.rest.hotTag.HotFlag;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -321,8 +322,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         
         
         //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天
+		//产品要求：去除“官方活动”这个条件，对所有活动适应    add by yanjun 20170629
         try {
-        	if(cmd.getOfficialFlag() == OfficialFlag.YES.getCode() && null != cmd.getStartTime()){
+        	if(null != cmd.getStartTime()){
         		SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         		Date startTime= f.parse(cmd.getStartTime());
             	if(startTime.before(DateHelper.currentGMTTime())){
@@ -360,12 +362,19 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             else{
             	activityService.createPost(cmd, post.getId()); 
             }
-            
-            HotTags tag = new HotTags();
-            tag.setName(cmd.getTag());
-            tag.setHotFlag(HotTagStatus.INACTIVE.getCode());
-            tag.setServiceType(HotTagServiceType.ACTIVITY.getCode());
-            hotTagSearcher.feedDoc(tag);
+
+            //if 与 try 防止tag保存Elastic异常导致发布活动的失败   add by yanjun
+			if(StringUtils.isNotEmpty(cmd.getTag())){
+				try{
+					HotTags tag = new HotTags();
+					tag.setName(cmd.getTag());
+					tag.setHotFlag(HotFlag.NORMAL.getCode());
+					tag.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+					hotTagSearcher.feedDoc(tag);
+				}catch (Exception e){
+					LOGGER.error("feedDoc activity tag error",e);
+				}
+			}
             
         }catch(Exception e){
             LOGGER.error("create activity error",e);

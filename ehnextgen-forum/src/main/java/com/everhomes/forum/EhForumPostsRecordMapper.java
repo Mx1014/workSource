@@ -73,6 +73,7 @@ public class EhForumPostsRecordMapper implements RecordMapper<Record, EhForumPos
         post.setEndTime(r.getValue((Field<Timestamp>)r.field("end_time")));  
         post.setOfficialFlag(r.getValue((Field<Byte>)r.field("official_flag")));
         post.setMediaDisplayFlag(r.getValue((Field<Byte>)r.field("media_display_flag")));
+        post.setTag(r.getValue((Field<String>)r.field("tag")));
         return post;
     }
 }

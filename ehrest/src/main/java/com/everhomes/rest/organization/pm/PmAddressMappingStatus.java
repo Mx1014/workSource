@@ -11,6 +11,8 @@ package com.everhomes.rest.organization.pm;
  *</ul>
  *
  */
+//已弃用，请使用AddressMappingStatus
+@Deprecated
 public enum PmAddressMappingStatus {
     DEFAULT((byte)0), LIVING((byte)1), RENT((byte)2), FREE((byte)3), DECORATE((byte)4), UNSALE((byte)5);
     

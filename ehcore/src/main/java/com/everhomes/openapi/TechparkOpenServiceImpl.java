@@ -63,6 +63,7 @@ import com.everhomes.rest.organization.OrganizationCommunityRequestType;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionType;
@@ -1130,24 +1131,24 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 //		7-保留（其他）
 		CustomerLivingStatus customerLivingStatus = CustomerLivingStatus.fromCode(livingStatus);
 		if (customerLivingStatus == null) {
-			return PmAddressMappingStatus.DEFAULT.getCode();
+			return AddressMappingStatus.DEFAULT.getCode();
 		}
 		switch (customerLivingStatus) {
 		case NOT_RENTAL:
 		case NOT_RENTING:
 		case RESERVE:
 		case RETAIN:
-			return PmAddressMappingStatus.DEFAULT.getCode();
+			return AddressMappingStatus.DEFAULT.getCode();
 			
 		case WAITING_FOR_RENTING:
-			return PmAddressMappingStatus.FREE.getCode();
+			return AddressMappingStatus.FREE.getCode();
 			
 		case NEW_RENTING:
 		case CONTINUE_RENTING:
 		case EXTEND_RENTING:
-			return PmAddressMappingStatus.RENT.getCode();
+			return AddressMappingStatus.RENT.getCode();
 		default:
-			return PmAddressMappingStatus.DEFAULT.getCode();
+			return AddressMappingStatus.DEFAULT.getCode();
 		}
 	}
 

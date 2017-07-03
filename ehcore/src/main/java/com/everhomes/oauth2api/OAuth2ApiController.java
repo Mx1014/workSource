@@ -34,24 +34,37 @@ public class OAuth2ApiController extends ControllerBase {
     @Autowired
     private UserService userService;
 
+    /**
+     * <b>URL: /oauth2api/getUserInfo</b>
+     * <p>给内部用的获取用户信息的接口</p>
+     */
     @RequestMapping("getUserInfo")
     @RestReturn(value=UserInfo.class)
     public RestResponse getUserInfo(HttpServletRequest request, HttpServletResponse response) {
         AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
-
-        //UserInfo info = this.userService.getUserInfo(accessToken.getGrantorUid());
         UserInfo info = this.userService.getUserSnapshotInfoWithPhone(accessToken.getGrantorUid());
-
-        sensitiveClean(info);
-
         return new RestResponse(info);
     }
 
-    private void sensitiveClean(UserInfo info) {
+    /**
+     * <b>URL: /oauth2api/trd/userInfo</b>
+     * <p>给第三方的获取用户信息，把一些敏感信息去掉了</p>
+     */
+    @RequestMapping("trd/userInfo")
+    @RestReturn(value=UserInfo.class)
+    public RestResponse userInfo() {
+        AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
+        UserInfo info = this.userService.getUserSnapshotInfoWithPhone(accessToken.getGrantorUid());
+        info = sensitiveClean(info);
+        return new RestResponse(info);
+    }
+
+    private UserInfo sensitiveClean(UserInfo info) {
         // 把一些敏感信息去掉    add by xq.tian  2017/06/16
-        info.setId(null);
-        info.setNamespaceId(null);
-        info.setAvatarUri(null);
-        info.setNamespaceUserToken(null);
+        UserInfo newInfo = new UserInfo();
+        newInfo.setAvatarUrl(info.getAvatarUrl());
+        newInfo.setNickName(info.getNickName());
+        newInfo.setAccountName(info.getAccountName());
+        return newInfo;
     }
 }

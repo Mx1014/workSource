@@ -3,7 +3,14 @@ package com.everhomes.yellowPage;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,16 +23,11 @@ import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralApprovalVal;
-import com.everhomes.general_approval.GeneralForm;
+import com.everhomes.general_form.GeneralForm;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.PostApprovalFormCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -37,6 +39,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
 @Component
 public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceFlowModuleListener.class);
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher serviceAllianceRequestInfoSearcher;
 	private static final long MODULE_ID = 40500;
@@ -257,5 +260,19 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	private void sendEmailAsynchronizedTask(String contents,Long userId) {
 		ServiceAllianceAsynchronizedServiceImpl handler = PlatformContext.getComponent("serviceAllianceAsynchronizedServiceImpl");
 		handler.pushToQueque(contents,userId);
+	}
+	
+	@Override
+	public void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto) {
+		Map<String, String> metaMap = messageDto.getMeta();
+		
+		FlowCase flowCase = ctx.getFlowCase();
+		//服务联盟的消息提示，标题搞成了服务联盟大分类的名称-也就是功能入口的名称。
+		if(flowCase == null){
+			LOGGER.info("onFlowMessageSend flowCase = {}", flowCase);
+			return ;
+		}
+		LOGGER.info("onFlowMessageSend title = {}",flowCase.getTitle());
+		metaMap.put(MessageMetaConstant.MESSAGE_SUBJECT, flowCase.getTitle());
 	}
 }

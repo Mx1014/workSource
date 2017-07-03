@@ -107,5 +107,6 @@ public interface ConfigConstants {
     String APP_ROUTE_BROWSER_INNER_URI = "app.route.browser.inner.uri";
     
     public static final String BIZ_SEARCH_SHOPS_API = "biz.search.shops.api";
+    public static final String QUALITY_STAT_CORN = "quality.stat.corn";
 
 }

@@ -1741,6 +1741,7 @@ public class FlowServiceImpl implements FlowService {
 
             messageDto.setMeta(meta);
 
+            flowListenerManager.onFlowMessageSend(ctx, messageDto);
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                     userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
         }
@@ -1753,7 +1754,7 @@ public class FlowServiceImpl implements FlowService {
             ft.setJson(dto.toString());
             Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60 * 1000L;
             ft.setTimeoutTick(new Timestamp(timeoutTick));
-            flowTimeoutService.pushTimeout(ft, ctx);
+            flowTimeoutService.pushTimeout(ft);
         } else {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("flowMessageTimeout remindTick did not run, ftId={}, dto={}", ft.getId(), dto);
@@ -2835,7 +2836,7 @@ public class FlowServiceImpl implements FlowService {
                 if (sel.getSourceIdB() != null) {
                     if (FlowUserSourceType.SOURCE_DUTY_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
                         FlowCase flowCase = ctx.getFlowCase();
-                        List<Long> tmp = flowUserSelectionService.findUsersByDudy(parentOrgId, flowCase.getModuleId(), flowCase.getProjectType(), flowCase.getProjectId());
+                        List<Long> tmp = flowUserSelectionService.findUsersByDudy(parentOrgId, flowCase.getModuleId(), flowCase.getProjectType(), flowCase.getProjectId(), sel.getSourceIdA());
                         users.addAll(tmp);
                         continue;
                     }
@@ -2871,10 +2872,12 @@ public class FlowServiceImpl implements FlowService {
 
                     List<Long> tmp = flowUserSelectionService.findManagersByDepartmentId(parentOrgId, departmentId, ctx.getFlowGraph().getFlow());
                     users.addAll(tmp);
+                } else if (FlowUserSourceType.SOURCE_DUTY_MANAGER.getCode().equals(sel.getSourceTypeA())) {
+                    List<Long> idList = flowUserSelectionService.findModuleDutyManagers(departmentId, flow.getModuleId(), flow.getProjectType(), flow.getProjectId());
+                    users.addAll(idList);
                 } else {
                     LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");
                 }
-
             } else if (FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
                 if (sel.getSourceIdA() != null) {
                     FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
@@ -3026,7 +3029,7 @@ public class FlowServiceImpl implements FlowService {
 
         //flush timeouts
         for (FlowTimeout ft : ctx.getTimeouts()) {
-            flowTimeoutService.pushTimeout(ft, ctx);
+            flowTimeoutService.pushTimeout(ft);
         }
     }
 
@@ -3294,13 +3297,13 @@ public class FlowServiceImpl implements FlowService {
         Flow flow = flowProvider.getFlowById(flowId);
         FlowGraphDetailDTO graphDetail = ConvertHelper.convert(flow, FlowGraphDetailDTO.class);
 
-        List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+        List<FlowUserSelectionDTO> selections = new ArrayList<>();
         graphDetail.setSupervisors(selections);
 
         List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowId
                 , FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), 0);
         if (seles != null && seles.size() > 0) {
-            seles.stream().forEach((sel) -> {
+            seles.forEach((sel) -> {
                 selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
             });
         }
@@ -3308,9 +3311,8 @@ public class FlowServiceImpl implements FlowService {
         List<FlowNodeDetailDTO> nodes = new ArrayList<>();
         graphDetail.setNodes(nodes);
         List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
-        flowNodes.sort((n1, n2) -> {
-            return n1.getNodeLevel().compareTo(n2.getNodeLevel());
-        });
+
+        flowNodes.sort(Comparator.comparing(EhFlowNodes::getNodeLevel));
 
         for (FlowNode fn : flowNodes) {
             FlowNodeDetailDTO nodeDetail = this.getFlowNodeDetail(fn.getId());
@@ -3331,7 +3333,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public void deleteSnapshotProcessUser(Long flowId, Long userId) {
         Flow flow = flowProvider.getFlowById(flowId);
-        if (!flow.getFlowMainId().equals(0l)) {
+        if (!flow.getFlowMainId().equals(0L)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "Please use a config flowId");
         }
 

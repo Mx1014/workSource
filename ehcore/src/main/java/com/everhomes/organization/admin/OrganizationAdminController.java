@@ -86,7 +86,6 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse createOrganizationMember(@Valid CreateOrganizationMemberCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-
         organizationService.createOrganizationMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -717,6 +716,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <b>URL: /admin/org/listPersonnelNotJoinGroups</b>
      * <p>查询未加入组的人员</p>
      */
+    @Deprecated
     @RequestMapping("listPersonnelNotJoinGroups")
     @RestReturn(value = ListOrganizationMemberCommandResponse.class)
     public RestResponse listPersonnelNotJoinGroups(@Valid ListPersonnelNotJoinGroupCommand cmd) {
@@ -771,19 +771,19 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /admin/org/createOrganizationPersonnel</b>
-     * <p>添加机构成员</p>
-     */
-    @RequestMapping("createOrganizationPersonnel")
-    @RestReturn(value = String.class)
-    public RestResponse createOrganizationPersonnel(@Valid CreateOrganizationMemberCommand cmd) {
-        OrganizationMemberDTO dto = organizationService.createOrganizationPersonnel(cmd);
-        RestResponse response = new RestResponse(dto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /admin/org/createOrganizationPersonnel</b>
+//     * <p>添加机构成员</p>
+//     */
+//    @RequestMapping("createOrganizationPersonnel")
+//    @RestReturn(value = String.class)
+//    public RestResponse createOrganizationPersonnel(@Valid CreateOrganizationMemberCommand cmd) {
+//        OrganizationMemberDTO dto = organizationService.createOrganizationPersonnel(cmd);
+//        RestResponse response = new RestResponse(dto);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
      * <b>URL: /admin/org/updateOrganizationPersonnel</b>
@@ -891,7 +891,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>导入企业信息</p>
      */
     @RequestMapping("importEnterpriseData")
-    @RestReturn(value = ImportFileResponse.class)
+    @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importEnterpriseData(@Valid ImportEnterpriseDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
@@ -900,12 +900,32 @@ public class OrganizationAdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }
-        ImportFileResponse<ImportEnterpriseDataDTO> importFileResponse = this.organizationService.importEnterpriseData(files[0], userId, cmd);
-        RestResponse response = new RestResponse(importFileResponse);
+        RestResponse response = new RestResponse(organizationService.importEnterpriseData(cmd, files[0], userId));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+//    
+//    /**
+//     * <b>URL: /admin/org/importEnterpriseData</b>
+//     * <p>导入企业信息</p>
+//     */
+//    @RequestMapping("importEnterpriseData")
+//    @RestReturn(value = ImportFileResponse.class)
+//    public RestResponse importEnterpriseData(@Valid ImportEnterpriseDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+//    	User manaUser = UserContext.current().getUser();
+//    	Long userId = manaUser.getId();
+//    	if (null == files || null == files[0]) {
+//    		LOGGER.error("files is null。userId=" + userId);
+//    		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+//    				"files is null");
+//    	}
+//    	ImportFileResponse<ImportEnterpriseDataDTO> importFileResponse = this.organizationService.importEnterpriseData(files[0], userId, cmd);
+//    	RestResponse response = new RestResponse(importFileResponse);
+//    	response.setErrorCode(ErrorCodes.SUCCESS);
+//    	response.setErrorDescription("OK");
+//    	return response;
+//    }
 
     /**
      * <b>URL: /admin/org/importOrganizationPersonnelData</b>

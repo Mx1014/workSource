@@ -114,4 +114,6 @@ public interface UserActivityProvider {
 	StatActiveUser findStatActiveUserByDate(java.sql.Date date, Integer namespaceId);
 
 	void createStatActiveUser(StatActiveUser stat);
+
+    List<UserActivity> listUserActivetys(Long userId, Integer pageSize);
 }

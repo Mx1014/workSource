@@ -13,8 +13,10 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLeaseIssuerAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhLeaseIssuersDao;
 import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs;
+import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs2;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuerAddresses;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuers;
+import com.everhomes.server.schema.tables.records.EhLeaseConfigs2Record;
 import com.everhomes.server.schema.tables.records.EhLeaseConfigsRecord;
 import com.everhomes.server.schema.tables.records.EhLeaseIssuerAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhLeaseIssuersRecord;
@@ -154,6 +156,16 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 		query.addConditions(Tables.EH_LEASE_CONFIGS.NAMESPACE_ID.eq(namespaceId));
 
 		return ConvertHelper.convert(query.fetchOne(), LeasePromotionConfig.class);
+	}
+
+	@Override
+	public List<LeasePromotionConfig2> listLeasePromotionConfigByNamespaceId(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseConfigs2.class));
+
+		SelectQuery<EhLeaseConfigs2Record> query = context.selectQuery(Tables.EH_LEASE_CONFIGS2);
+		query.addConditions(Tables.EH_LEASE_CONFIGS2.NAMESPACE_ID.eq(namespaceId));
+
+		return query.fetch().map(r -> ConvertHelper.convert(r, LeasePromotionConfig2.class));
 	}
 
 	@Override

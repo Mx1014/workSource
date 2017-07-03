@@ -1,13 +1,13 @@
 package com.everhomes.rest.general_approval;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
- * <li>forms: 表单列表 {@link com.everhomes.rest.general_approval.GeneralFormDTO}</li>
+ * <li>forms: 表单列表 {@link GeneralFormDTO}</li>
  * </ul>
  * @author janson
  *

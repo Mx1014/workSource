@@ -8,24 +8,13 @@ import com.bosigao2.rest.Bosigao2CardInfo;
 import com.bosigao2.rest.Bosigao2GetCardCommand;
 import com.bosigao2.rest.Bosigao2RechargeCommand;
 import com.bosigao2.rest.Bosigao2ResultEntity;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.parking.*;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.parking.*;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -34,11 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -53,7 +38,12 @@ import java.util.stream.Collectors;
 public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao2ParkingVendorHandler.class);
 	
-	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
+	private ThreadLocal<SimpleDateFormat> timeFormat = new ThreadLocal<SimpleDateFormat>(){
+		@Override
+		protected SimpleDateFormat initialValue() {
+			return 	new SimpleDateFormat("yyyyMMddHHmmss");
+		}
+	};
 
 	private static final String RECHARGE = "Parking_MonthlyFee";
 	private static final String GET_CARD = "Parking_GetMonthCard";
@@ -64,25 +54,10 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 	
 	@Autowired
 	private ParkingProvider parkingProvider;
-	
-	@Autowired
-	private LocaleStringService localeStringService;
-	
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
-	
 	@Autowired
     private ConfigurationProvider configProvider;
-	@Autowired
-    private UserProvider userProvider;
-	
-	@Autowired
-	private OrderUtil commonOrderUtil;
-	@Autowired
-    private BigCollectionProvider bigCollectionProvider;
-	
-	@Autowired
-    private DbProvider dbProvider;
 	
 	@Override
     public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -99,7 +74,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 			Bosigao2CardInfo cardInfo = JSONObject.parseObject(result.getResult().toString(), Bosigao2CardInfo.class);
 			String expireDate =  cardInfo.getExpireDate();
 			this.checkExpireDateIsNull(expireDate,plateNumber);
-
+			//计算有效期从当天235959秒计算
 			long expireTime = strToLong2(expireDate+"235959");
 			long now = System.currentTimeMillis();
 			long cardReserveTime = 0;
@@ -232,37 +207,13 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 		return result;
     }
 
-    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-
     @Override
-    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
-    	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-			if(payStatus.toLowerCase().equals("fail")) {
-				LOGGER.error("pay failed, orderNo={}", order.getId());
-			}
-			else {
-				if(recharge(order)){
-					dbProvider.execute((TransactionStatus transactionStatus) -> {
-						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						parkingProvider.updateParkingRechargeOrder(order);
-						
-						String key = "parking-recharge" + order.getId();
-						String value = String.valueOf(order.getId());
-				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-				      
-				        LOGGER.error("Delete parking order key, key={}", key);
-				        redisTemplate.delete(key);
-			        
-			        return null;
-					});
-				}
-			}
-		}
+    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+    	return recharge(order);
     }
-    
-    private boolean recharge(ParkingRechargeOrder order){
+
+	@Override
+    public boolean recharge(ParkingRechargeOrder order){
     	Bosigao2RechargeCommand cmd = new Bosigao2RechargeCommand();
 		cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));
 		cmd.setCardCode("");
@@ -270,12 +221,20 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 		cmd.setFlag(FLAG2);
 		cmd.setPayMos(order.getMonthCount().intValue()+"");
 		cmd.setAmount((order.getPrice().intValue()*100) + "");
-		cmd.setPayDate(sdf1.format(order.getPaidTime()));
+		cmd.setPayDate(timeFormat.get().format(order.getPaidTime()));
 		cmd.setChargePaidNo(order.getId().toString());
-		
+
+		Bosigao2ResultEntity cardEntity = getCard(order.getPlateNumber());
+		Bosigao2CardInfo cardInfo = JSONObject.parseObject(cardEntity.getResult().toString(), Bosigao2CardInfo.class);
+		long startPeriod = strToLong2(cardInfo.getExpireDate() + "235959");
+		order.setStartPeriod(new Timestamp(startPeriod + 1000));
+		order.setEndPeriod(Utils.getTimestampByAddNatureMonth(startPeriod, order.getMonthCount().intValue()));
+
 		ParkWebService service = new ParkWebService();
 		ParkWebServiceSoap port = service.getParkWebServiceSoap();
         String json = port.parkingSystemRequestService("", RECHARGE, cmd.toString(), "");
+
+		order.setErrorDescriptionJson(json);
 
 		Bosigao2ResultEntity result = GsonUtil.fromJson(json, Bosigao2ResultEntity.class);
 		checkResultHolderIsNull(result, order.getPlateNumber());
@@ -341,21 +300,6 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"ExpireDate is null.");
 		}
-	}
-    
-    private long strToLong(String str) {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		
-		long ts;
-		try {
-			ts = sdf.parse(str).getTime();
-		} catch (ParseException e) {
-			LOGGER.error("data format is not yyyymmdd.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"data format is not yyyymmdd.");
-		}
-		return ts;
 	}
     
 	@Override
