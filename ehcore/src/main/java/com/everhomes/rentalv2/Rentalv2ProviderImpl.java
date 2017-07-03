@@ -570,7 +570,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			}else if (rentalType == RentalType.HALFDAY || rentalType == RentalType.THREETIMEADAY) {
 				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
 				Date[] beginEndDate = calculateBeginEndDate(rentalResource, rentalCell);
-				record = getHalfDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalTypeByte, amorpm);
+				record = getHalfDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalTypeByte, amorpm, RentalType.fromCode(rentalCell.getRentalType())==RentalType.HOUR);
 			}
 			if (record != null) {
 				return true;
@@ -611,7 +611,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.fetchAny();
 	}
 
-	private Record getHalfDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end, Byte rentalType, Byte amorpm) {
+	private Record getHalfDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end, Byte rentalType, Byte amorpm, boolean isHour) {
+		if (isHour && amorpm == null) {
+			return null;
+		}
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
@@ -694,8 +697,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		
 		for (int i = 0; i < halfTimeIntervals.size(); i++) {
 			RentalTimeInterval rentalTimeInterval = halfTimeIntervals.get(i);
-			if (rentalTimeInterval.getBeginTime() <= (rentalCell.getBeginTime().getHours()+rentalCell.getBeginTime().getMinutes()/60) 
-					&& rentalTimeInterval.getEndTime() >= (rentalCell.getEndTime().getHours()+rentalCell.getEndTime().getMinutes()/60)) {
+			if (rentalTimeInterval.getBeginTime() <= (rentalCell.getBeginTime().getHours()+rentalCell.getBeginTime().getMinutes()/60.0) 
+					&& rentalTimeInterval.getEndTime() >= (rentalCell.getEndTime().getHours()+rentalCell.getEndTime().getMinutes()/60.0)) {
 				// 麻蛋的，这个表里没有标识是上午下午还是晚上，只能根据这个i来返回了，0上午1下午2晚上
 				return (byte) i;
 			}
