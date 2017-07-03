@@ -4594,6 +4594,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 					query.addOrderBy(Tables.EH_USERS.ID.desc());
 					query.addLimit(size);
+					LOGGER.debug("query sql:{}", query.getSQL());
 					query.fetch().map((r) -> {
 						UserOrganizations userOrganizations = new UserOrganizations();
 						userOrganizations.setUserId(r.getValue(Tables.EH_USER_ORGANIZATIONS.USER_ID));

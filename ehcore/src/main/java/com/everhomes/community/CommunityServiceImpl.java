@@ -1954,6 +1954,7 @@ public class CommunityServiceImpl implements CommunityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
+		Long time = System.currentTimeMillis();
 		List<UserOrganizations> users = organizationProvider.listUserOrganizations(locator, pageSize, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -1997,6 +1998,8 @@ public class CommunityServiceImpl implements CommunityService {
 				return query;
 			}
 		});
+
+		LOGGER.debug("Get user organization list time:{}", System.currentTimeMillis() - time);
 		List<CommunityUserDto> userCommunities = new ArrayList<>();
 		for(UserOrganizations r: users){
 			CommunityUserDto dto = ConvertHelper.convert(r, CommunityUserDto.class);
@@ -2032,6 +2035,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			userCommunities.add(dto);
 		}
+		LOGGER.debug("Get user detail list time:{}", System.currentTimeMillis() - time);
 		res.setNextPageAnchor(locator.getAnchor());
 		res.setUserCommunities(userCommunities);
 		return res;
