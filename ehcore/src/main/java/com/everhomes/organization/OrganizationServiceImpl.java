@@ -1114,7 +1114,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private void createActiveOrganizationCommunityRequest(Long creatorId, Long organizationId, Long communityId) {
-	    OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+        OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
         organizationCommunityRequest.setCommunityId(communityId);
         organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
         organizationCommunityRequest.setMemberId(organizationId);
@@ -1125,6 +1125,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+    }
+
+        /**
+         * 添加banner图片
+         *
+         * @param id
+         * @param attachments
+         */
     private void addAttachments(Long id, List<AttachmentDescriptor> attachments, Long userId) {
         dbProvider.execute((TransactionStatus status) -> {
 
@@ -1173,8 +1181,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	}
 
-		updateEnterprise(cmd, true);
-	}
+    @Override
+    public void updateEnterprise(UpdateEnterpriseCommand cmd) {
+        updateEnterprise(cmd, true);
+    }
 	
 	public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
         //先判断，后台管理员才能创建。状态直接设为正常
