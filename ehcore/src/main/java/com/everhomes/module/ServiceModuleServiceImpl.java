@@ -538,6 +538,20 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return 0;
     }
 
+    @Override
+    public void createServiceModule(CreateServiceModuleCommand cmd) {
+    }
+
+    @Override
+    public void updateServiceModule(UpdateServiceModuleCommand cmd) {
+
+    }
+
+    @Override
+    public void deleteServiceModule(DeleteServiceModuleCommand cmd) {
+
+    }
+
     private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {

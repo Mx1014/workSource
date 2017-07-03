@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
+import com.everhomes.acl.AuthorizationRelation;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -24,13 +26,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.module.ServiceModuleStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhServiceModules;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentRelationsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignmentRelations;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleScopes;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentRelationsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceModulePrivilegesRecord;
@@ -475,5 +470,34 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         return results;
     }
 
+    @Override
+    public void createServiceModule(ServiceModule serviceModule) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModules.class));
+        serviceModule.setId(id);
+        if(null == serviceModule.getCreateTime())
+            serviceModule.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(null == serviceModule.getUpdateTime())
+            serviceModule.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhServiceModulesDao dao = new EhServiceModulesDao(context.configuration());
+        dao.insert(serviceModule);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModules.class, id);
+    }
 
+    @Override
+    public void updateServiceModule(ServiceModule serviceModule) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        if(null == serviceModule.getUpdateTime())
+            serviceModule.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhServiceModulesDao dao = new EhServiceModulesDao(context.configuration());
+        dao.update(serviceModule);
+    }
+
+    @Override
+    public void deleteServiceModuleById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModules.class));
+        EhServiceModulesDao dao = new EhServiceModulesDao(context.configuration());
+        dao.deleteById(id);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModules.class, id);
+    }
 }

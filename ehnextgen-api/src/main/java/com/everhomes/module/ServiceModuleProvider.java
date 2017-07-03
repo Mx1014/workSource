@@ -60,4 +60,10 @@ public interface ServiceModuleProvider {
 
     List<ServiceModule> listServiceModule(String path);
 
+    void createServiceModule(ServiceModule serviceModule);
+
+    void updateServiceModule(ServiceModule serviceModule);
+
+    void deleteServiceModuleById(Long id);
+
 }

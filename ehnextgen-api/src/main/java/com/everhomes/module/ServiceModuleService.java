@@ -30,4 +30,10 @@ public interface ServiceModuleService {
 	List<CommunityDTO> listUserRelatedCommunityByModuleId(ListUserRelatedProjectByModuleCommand cmd);
 
 	Byte checkModuleManage(CheckModuleManageCommand cmd);
+
+	void createServiceModule(CreateServiceModuleCommand cmd);
+
+	void updateServiceModule(UpdateServiceModuleCommand cmd);
+
+	void deleteServiceModule(DeleteServiceModuleCommand cmd);
 }
