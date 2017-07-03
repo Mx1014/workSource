@@ -68,11 +68,11 @@ VALUES ('organization', '900023', 'zh_CN', '日期格式错误');
 
 -- merge from orgByLv started by lei.lv 20170703
 -- 1.运行建表脚本
---2.运行新增字段脚本
---4.修复organization表中group_type = 'JOB_LEVEL'的记录没有directly_enterprise_id的问题
+-- 2.运行新增字段脚本
+-- 4.修复organization表中group_type = 'JOB_LEVEL'的记录没有directly_enterprise_id的问题
 UPDATE eh_organizations set directly_enterprise_id = parent_id WHERE group_type = 'JOB_LEVEL';
 
---5.运行数据迁移脚本
+-- 5.运行数据迁移脚本
 
 SET @detail_id = 0;
 
