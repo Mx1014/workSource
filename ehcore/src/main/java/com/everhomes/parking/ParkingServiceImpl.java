@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.parking.*;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.DownloadUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -118,6 +120,8 @@ public class ParkingServiceImpl implements ParkingService {
     private BigCollectionProvider bigCollectionProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
+	@Autowired
+	private ScheduleProvider scheduleProvider;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -233,41 +237,43 @@ public class ParkingServiceImpl implements ParkingService {
     
     @Scheduled(cron="0 1 0 * * ? ")
 	public void createParkingStatistics(){
-		
-    	long now = System.currentTimeMillis();
-    	Timestamp startDate = getBeginOfDay(now);
-    	Timestamp endDate = getEndOfDay(now);
-    	
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_STATISTICS.getCode()).tryEnter(()-> {
-			
-			List<ParkingStatistic> list = parkingProvider.listParkingStatistics(null, null, null, startDate);
-			if(list.size() != 0)
-				return ;
-	    	List<ParkingLot> lots = parkingProvider.listParkingLots(null, null);
-	    	
-	    	lots.forEach(l -> {
-	    		List<ParkingRechargeOrder> orders = parkingProvider.searchParkingRechargeOrders(l.getOwnerType(), l.getOwnerId(), l.getId(), 
-	    				null, null, null, startDate, endDate, null, null, null, null, null);
-	    		BigDecimal totalAmount = new BigDecimal(0);
-	    		for(ParkingRechargeOrder o: orders) {
-	    			if(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode() == o.getRechargeStatus()) {
-	    				totalAmount = totalAmount.add(o.getPrice());
-	    			}
-	    		}
-	    		
-	    		ParkingStatistic parkingStatistic = new ParkingStatistic();
-	    		parkingStatistic.setNamespaceId(l.getNamespaceId());
-	    		parkingStatistic.setOwnerId(l.getOwnerId());
-	    		parkingStatistic.setOwnerType(l.getOwnerType());
-	    		parkingStatistic.setParkingLotId(l.getId());
-	    		parkingStatistic.setCreateTime(new Timestamp(now));
-	    		parkingStatistic.setAmount(totalAmount);
-	    		parkingStatistic.setDateStr(startDate);
-	    		
-	    		parkingProvider.createParkingStatistic(parkingStatistic);
-	    	});
-	    	
-        });
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			//执行任务区
+			long now = System.currentTimeMillis();
+			Timestamp startDate = getBeginOfDay(now);
+			Timestamp endDate = getEndOfDay(now);
+
+			this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_STATISTICS.getCode()).tryEnter(()-> {
+
+				List<ParkingStatistic> list = parkingProvider.listParkingStatistics(null, null, null, startDate);
+				if(list.size() != 0)
+					return ;
+				List<ParkingLot> lots = parkingProvider.listParkingLots(null, null);
+
+				lots.forEach(l -> {
+					List<ParkingRechargeOrder> orders = parkingProvider.searchParkingRechargeOrders(l.getOwnerType(), l.getOwnerId(), l.getId(),
+							null, null, null, startDate, endDate, null, null, null, null, null);
+					BigDecimal totalAmount = new BigDecimal(0);
+					for(ParkingRechargeOrder o: orders) {
+						if(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode() == o.getRechargeStatus()) {
+							totalAmount = totalAmount.add(o.getPrice());
+						}
+					}
+
+					ParkingStatistic parkingStatistic = new ParkingStatistic();
+					parkingStatistic.setNamespaceId(l.getNamespaceId());
+					parkingStatistic.setOwnerId(l.getOwnerId());
+					parkingStatistic.setOwnerType(l.getOwnerType());
+					parkingStatistic.setParkingLotId(l.getId());
+					parkingStatistic.setCreateTime(new Timestamp(now));
+					parkingStatistic.setAmount(totalAmount);
+					parkingStatistic.setDateStr(startDate);
+
+					parkingProvider.createParkingStatistic(parkingStatistic);
+				});
+
+			});
+		}
 		
 	}
     
@@ -402,6 +408,7 @@ public class ParkingServiceImpl implements ParkingService {
     		createFlowCaseCommand.setReferType(EntityType.PARKING_CARD_REQUEST.getCode());
     		createFlowCaseCommand.setContent("车牌号码：" + parkingCardRequest.getPlateNumber() + "\n"
     				+ "车主电话：" + parkingCardRequest.getPlateOwnerPhone());
+			createFlowCaseCommand.setCurrentOrganizationId(cmd.getRequestorEnterpriseId());
 
 			if (UserContext.getCurrentNamespaceId().equals(999983)) {
 				createFlowCaseCommand.setTitle("停车月卡申请");

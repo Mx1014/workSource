@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -15,16 +17,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-
-
-
-
-
-
+import java.util.stream.Stream;
 
 
 import javax.servlet.http.HttpServletResponse;
+
 
 
 import com.everhomes.rest.equipment.*;
@@ -33,6 +30,11 @@ import com.everhomes.rest.quality.ExecuteGroupAndPosition;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.StandardGroupDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
+
+import com.everhomes.rest.equipment.Status;
+import com.everhomes.search.QualityInspectionSampleSearcher;
+import com.everhomes.search.QualityTaskSearcher;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -62,8 +64,6 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -147,6 +147,15 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Autowired
 	private AclProvider aclProvider;
+
+	@Autowired
+	private QualityInspectionSampleSearcher sampleSearcher;
+
+	@Autowired
+	private QualityTaskSearcher taskSearcher;
+
+	@Autowired
+	private ConfigurationProvider configProvider;
 	
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
@@ -774,8 +783,12 @@ public class QualityServiceImpl implements QualityService {
 		Long targetId = cmd.getTargetId();
 		String targetType = cmd.getTargetType();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
+//        CrossShardListingLocator locator = new CrossShardListingLocator();
+//        locator.setAnchor(cmd.getPageAnchor());
+		if(null == cmd.getPageAnchor()) {
+			cmd.setPageAnchor(0L);
+		}
+		Integer offset = cmd.getPageAnchor().intValue();
         Timestamp startDate = null;
         Timestamp endDate = null;
         if(cmd.getStartDate() != null) {
@@ -820,9 +833,9 @@ public class QualityServiceImpl implements QualityService {
 
 		if(isAdmin) {
 			//管理员查询所有任务
-			tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType, 
+			tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
             		cmd.getTaskType(), null, startDate, endDate,
-            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
+            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag(), null);
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 //			List<Long> standardIds = qualityProvider.listQualityInspectionStandardGroupMapByGroup(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
@@ -846,9 +859,9 @@ public class QualityServiceImpl implements QualityService {
 					}
 
 				}
-				tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType,
+				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
 						cmd.getTaskType(), user.getId(), startDate, endDate,
-						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, executeStandardIds, cmd.getManualFlag());
+						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos);
 			}
 
 
@@ -856,10 +869,14 @@ public class QualityServiceImpl implements QualityService {
 		}
         
         Long nextPageAnchor = null;
-        if(tasks.size() > pageSize) {
-        	tasks.remove(tasks.size() - 1);
-            nextPageAnchor = tasks.get(tasks.size() - 1).getId();
-        }
+//        if(tasks.size() > pageSize) {
+//        	tasks.remove(tasks.size() - 1);
+//            nextPageAnchor = tasks.get(tasks.size() - 1).getId();
+//        }
+		if (tasks.size() > pageSize) {
+			tasks.remove(tasks.size() - 1);
+			nextPageAnchor = (long) (offset + 1);
+		}
         
         List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
         for(QualityInspectionTasks task : tasks) {
@@ -868,7 +885,6 @@ public class QualityServiceImpl implements QualityService {
         		task.setRecord(record);
             	records.add(task.getRecord());
         	}
-        	
         }
 
 		this.qualityProvider.populateRecordAttachments(records);
@@ -881,10 +897,29 @@ public class QualityServiceImpl implements QualityService {
 //			populateRecordAttachements(r, r.getAttachments());
 //			return r;
 //		});
-        
+
+		//查找当日已执行任务数
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(DateHelper.currentGMTTime());
+		Timestamp todayBegin = getDayBegin(cal);
+		Set<Long> taskIds =  qualityProvider.listRecordsTaskIdByOperatorId(user.getId(), todayBegin);
+
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, user.getId());
-        
-        return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
+		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
+		response.setTodayExecutedCount(0);
+		if(taskIds != null) {
+			response.setTodayExecutedCount(taskIds.size());
+		}
+
+        return response;
+	}
+
+	private Timestamp getDayBegin(Calendar cal) {
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.MILLISECOND, 001);
+		return new Timestamp(cal.getTimeInMillis());
 	}
 	
 	private List<ExecuteGroupAndPosition> listUserRelateGroups() {
@@ -1012,6 +1047,9 @@ public class QualityServiceImpl implements QualityService {
         	
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);
 
+			//塞执行组名
+			String executiveGroupName = getGroupName(r.getExecutiveGroupId(), r.getExecutivePositionId());
+			dto.setExecutiveGroupName(executiveGroupName);
 			Community community = communityProvider.findCommunityById(r.getTargetId());
 			if(community != null) {
 				dto.setTargetName(community.getName());
@@ -1052,6 +1090,7 @@ public class QualityServiceImpl implements QualityService {
 						}
 
 					});
+					dto.setExecutiveGroupName(dto.getGroupName());
 				}
 
 				//兼容之前specification没进到task里面的情况
@@ -1279,7 +1318,7 @@ public class QualityServiceImpl implements QualityService {
 					UserContext.current().getUser().getLocale(),
 					"text:");
 			if(record.getProcessMessage() != null) {
-				String msg = record.getProcessMessage()+attText+cmd.getMessage();
+				String msg = record.getProcessMessage()  + "<br/>" + attText+cmd.getMessage();
 				record.setProcessMessage(msg);
 			} else {
 				String msg = attText+cmd.getMessage();
@@ -1417,10 +1456,10 @@ public class QualityServiceImpl implements QualityService {
 			List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(cmd.getOperatorId());
 //			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
 			Map<String, Object> msgMap = new HashMap<String, Object>();
-		    map.put("operator", operators.get(0).getContactName());
-		    map.put("target", targets.get(0).getContactName());
-		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
+			msgMap.put("operator", operators.get(0).getContactName());
+			msgMap.put("target", targets.get(0).getContactName());
+			msgMap.put("taskName", task.getTaskName());
+			msgMap.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 			record.setProcessMessage(msg);
@@ -1428,7 +1467,7 @@ public class QualityServiceImpl implements QualityService {
 		if(cmd.getMessage() != null) {
 			
 			if(record.getProcessMessage() != null) {
-				String msg = record.getProcessMessage()+cmd.getMessage();
+				String msg = record.getProcessMessage() + "<br/>" + cmd.getMessage();
 				record.setProcessMessage(msg);
 			} else {
 				String msg = cmd.getMessage();
@@ -1554,7 +1593,7 @@ public class QualityServiceImpl implements QualityService {
 							String taskNum = timestampToStr(new Timestamp(now)) + now;
 							task.setTaskNumber(taskNum);
 							qualityProvider.createVerificationTasks(task);
-								
+							taskSearcher.feedDoc(task);
 						});
 					}
 
@@ -1648,6 +1687,7 @@ public class QualityServiceImpl implements QualityService {
 			List<AttachmentDescriptor> attachmentList, List<ReportSpecificationItemResultsDTO> itemResults) {
 		
 		qualityProvider.updateVerificationTasks(task);
+		taskSearcher.feedDoc(task);
 		qualityProvider.createQualityInspectionTaskRecords(record);
 		
 		User user = UserContext.current().getUser();
@@ -1662,7 +1702,7 @@ public class QualityServiceImpl implements QualityService {
 		Long taskId = task.getId();
 		Long recordId = record.getId();
 
-		processSpecificationItemResults(itemResults, ownerId, ownerType, targetId, targetType, taskId, recordId);
+		processSpecificationItemResults(itemResults, ownerId, ownerType, targetId, targetType, task, recordId);
 		
 		QualityInspectionTaskRecords lastRecord = qualityProvider.listLastRecordByTaskId(task.getId());
 		this.qualityProvider.populateRecordAttachment(lastRecord);
@@ -1749,7 +1789,7 @@ public class QualityServiceImpl implements QualityService {
 	 }
 	 
 	 private void processSpecificationItemResults(List<ReportSpecificationItemResultsDTO> itemResults, Long ownerId, String ownerType, 
-			 Long targetId, String targetType, Long taskId, Long recordId) {
+			 Long targetId, String targetType, QualityInspectionTasks task, Long recordId) {
 		 
 		 if(itemResults != null && itemResults.size() > 0) {
 			 Long uid = UserContext.current().getUser().getId();
@@ -1761,7 +1801,8 @@ public class QualityServiceImpl implements QualityService {
 				 result.setOwnerId(ownerId);
 				 result.setTargetId(targetId);
 				 result.setTargetType(targetType);
-				 result.setTaskId(taskId);
+				 result.setTaskId(task.getId());
+				 result.setSampleId(task.getParentId());
 				 result.setTaskRecordId(recordId);
 				 result.setTotalScore(result.getItemScore() * result.getQuantity());
 				 result.setCreatorUid(uid);
@@ -1858,6 +1899,29 @@ public class QualityServiceImpl implements QualityService {
 		}
 		
 	}
+
+	private String getGroupName(Long groupId, Long positionId) {
+		StringBuilder sb = new StringBuilder();
+		Organization group = organizationProvider.findOrganizationById(groupId);
+		OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(positionId);
+		if(group != null) {
+			sb.append(group.getName());
+
+		}
+
+		if(position != null) {
+			if(sb.length() > 0) {
+				sb.append("-");
+				sb.append(position.getName());
+
+			} else {
+				sb.append(position.getName());
+
+			}
+		}
+
+		return sb.toString();
+	}
 	
 	private QualityStandardsDTO converStandardToDto(QualityInspectionStandards standard) {
 		processRepeatSetting(standard);
@@ -1874,59 +1938,21 @@ public class QualityServiceImpl implements QualityService {
 		List<StandardGroupDTO> executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
-//			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-//			
-//			if(group != null) {
-//				dto.setGroupName(group.getName());
-//				if(r.getPositionId() != null) {
-//					//岗位名+组名共同组成groupname
-//					OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
-//					if(position != null) {
-//						dto.setGroupName(group.getName() + "-" + position.getName());
-//					}
-//				}
-//			}
-				
-			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
-			if(group != null) {
-				dto.setGroupName(group.getName());
-				
-			} 
-			
-			if(position != null) {
-				if(dto.getGroupName() != null) {
-					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
-				} else {
-					dto.setGroupName(position.getName());
 
-				}
-			}
-			
+			String groupName = getGroupName(r.getGroupId(), r.getPositionId());
+			dto.setGroupName(groupName);
         	return dto;
         }).collect(Collectors.toList());
 
 		List<StandardGroupDTO> reviewGroup = standard.getReviewGroup().stream().map((r) -> {
         	
-			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
-			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
-			if(group != null) {
-				dto.setGroupName(group.getName());
-				
-			} 
-			
-			if(position != null) {
-				if(dto.getGroupName() != null) {
-					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
-				} else {
-					dto.setGroupName(position.getName());
-
-				}
-			}
+			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
+			String groupName = getGroupName(r.getGroupId(), r.getPositionId());
+			dto.setGroupName(groupName);
 			
         	return dto;
         }).collect(Collectors.toList());
+
 		standardDto.setRepeat(repeatDto);
 		standardDto.setExecutiveGroup(executiveGroup);
 		standardDto.setReviewGroup(reviewGroup);
@@ -2412,9 +2438,25 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public QualityInspectionTaskDTO createQualityInspectionTask(CreateQualityInspectionTaskCommand cmd) {
-		
 		User user = UserContext.current().getUser();
 		long current = System.currentTimeMillis();
+
+		if(cmd.getSampleId() != null) {
+			QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
+			if(sample == null || new Timestamp(current).after(sample.getEndTime())) {
+				LOGGER.error("sample = {}", sample);
+				throw RuntimeErrorException
+						.errorWith(
+								QualityServiceErrorCode.SCOPE,
+								QualityServiceErrorCode.ERROR_SAMPLE_CANNOT_CREATE_TASK,
+								localeStringService.getLocalizedString(
+										String.valueOf(QualityServiceErrorCode.SCOPE),
+										String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_CANNOT_CREATE_TASK),
+										UserContext.current().getUser().getLocale(),
+										"sample is not exist or is closed!"));
+			}
+		}
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		String day = sdf.format(current);
 		
@@ -2428,8 +2470,11 @@ public class QualityServiceImpl implements QualityService {
 		task.setTaskName(cmd.getName());
 		task.setTaskType((byte) 1);
 		task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
-		task.setExecutiveGroupId(cmd.getGroup().getGroupId());
-		task.setExecutivePositionId(cmd.getGroup().getPositionId());
+		if(cmd.getGroup() != null) {
+			task.setExecutiveGroupId(cmd.getGroup().getGroupId());
+			task.setExecutivePositionId(cmd.getGroup().getPositionId());
+		}
+
 		task.setExecutiveExpireTime(new Timestamp(cmd.getExecutiveExpireTime()));
 		task.setCategoryId(cmd.getSpecificationId());
 		
@@ -2437,14 +2482,18 @@ public class QualityServiceImpl implements QualityService {
 		task.setCategoryPath(specification.getPath());
 		//fix bug ： byte to long old:task.setManualFlag((byte) 1);
 		task.setManualFlag(1L);
-		
-		
+		if(cmd.getSampleId() != null) {
+			task.setParentId(cmd.getSampleId());
+			task.setManualFlag(2L);
+		}
+
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
 			Timestamp startTime = new Timestamp(current);
 			task.setExecutiveStartTime(startTime);
 			String taskNum = timestampToStr(new Timestamp(current)) + current;
 			task.setTaskNumber(taskNum);
 			qualityProvider.createVerificationTasks(task);
+			taskSearcher.feedDoc(task);
 			
 			if(cmd.getTemplateFlag()) {
 				QualityInspectionTaskTemplates template = ConvertHelper.convert(task, QualityInspectionTaskTemplates.class);
@@ -2771,11 +2820,11 @@ public class QualityServiceImpl implements QualityService {
 						ScoreDTO score = new ScoreDTO();
 						if(dto.getId() == null || dto.getId() == 0L) {
 							String superiorPath = "%";
-							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, cmd.getStartTime(), cmd.getEndTime());
+							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, cmd.getStartTime(), cmd.getEndTime(), null);
 						} else {
 							QualityInspectionSpecifications parent = verifiedSpecificationById(dto.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 							String superiorPath = parent.getPath() + "%";
-							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, cmd.getStartTime(), cmd.getEndTime());
+							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, cmd.getStartTime(), cmd.getEndTime(), null);
 						}
 
 						if(score != null) {
@@ -2819,7 +2868,7 @@ public class QualityServiceImpl implements QualityService {
 		
 		List<TaskCountDTO> tasks = qualityProvider.countTasks(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getTargetType(), cmd.getTargetId(), cmd.getStartTime(), cmd.getEndTime(),
-				offset, pageSize+1);
+				offset, pageSize+1, cmd.getSampleId());
 		
 		if(tasks != null && tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
@@ -2877,8 +2926,8 @@ public class QualityServiceImpl implements QualityService {
 		
 		Long uId = UserContext.current().getUser().getId();
 //		Set<Long> taskIds = qualityProvider.listRecordsTaskIdByOperatorId(uId, cmd.getPageAnchor());
-//
-		List<Long> taskIdlist = new ArrayList<Long>();
+		Set<Long> taskIds = new HashSet<>();
+//		List<Long> taskIdlist = new ArrayList<Long>();
 //        for(final Long value : taskIds){
 //
 //        	taskIdlist.add(value);
@@ -2894,28 +2943,64 @@ public class QualityServiceImpl implements QualityService {
 //		}
 //
 //        Collections.reverse(taskIdlist);
-		List<QualityInspectionTaskRecords> taskRecords = qualityProvider.listRecordsByOperatorId(uId, new Timestamp(cmd.getPageAnchor()));
+		List<QualityInspectionTaskRecords> taskRecords = qualityProvider.listRecordsByOperatorId(uId, null);
+		Map<Long, Timestamp> taskRecordTime = new HashMap<>();
 		if(taskRecords != null ) {
 			Long startContainTime = System.currentTimeMillis();
 			for(QualityInspectionTaskRecords record : taskRecords) {
-				if(!taskIdlist.contains(record.getTaskId())) {
-					taskIdlist.add(record.getTaskId());
+//				if(!taskIdlist.contains(record.getTaskId())) {
+//					taskIdlist.add(record.getTaskId());
+//				}
+
+				Timestamp recordTime = taskRecordTime.get(record.getTaskId());
+				if(recordTime == null) {
+					taskRecordTime.put(record.getTaskId(),record.getCreateTime());
+				}else if(recordTime != null && recordTime.before(record.getCreateTime())) {
+					taskRecordTime.put(record.getTaskId(),record.getCreateTime());
 				}
 			}
+
+			taskIds = taskRecordTime.keySet();
 			Long endContainTime = System.currentTimeMillis();
 			if(LOGGER.isDebugEnabled()) {
-				LOGGER.debug("listUserHistoryTasks list contain taskRecords size = {}, taskIdlist size = {}, elapse = {}",
-						taskRecords.size(), taskIdlist.size(), endContainTime-startContainTime);
+				LOGGER.debug("listUserHistoryTasks list contain taskRecords size = {}, taskIds size = {}, elapse = {}",
+						taskRecords.size(), taskIds.size(), endContainTime-startContainTime);
 			}
 		}
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        if(taskIdlist.size() > pageSize) {
-			taskIdlist = taskIdlist.subList(0,pageSize);
-        	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
+
+		Map<Long, Timestamp> sortedMap = new LinkedHashMap<Long, Timestamp>();
+		List<Map.Entry<Long, Timestamp>> list = new ArrayList<Map.Entry<Long, Timestamp>>(taskRecordTime.entrySet());
+
+		Collections.sort(list, new Comparator<Map.Entry<Long, Timestamp>>() {
+			public int compare(Map.Entry<Long, Timestamp> o1,
+							   Map.Entry<Long, Timestamp> o2) {
+				if(o2.getValue().after(o1.getValue()))
+					return 1;
+				return -1;
+			}
+		});
+
+        if(taskIds.size() > pageSize) {
+			list = list.subList(0,pageSize);
+			response.setNextPageAnchor(list.get(list.size()-1).getKey());
+
+//			taskIdlist = taskIdlist.subList(0,pageSize);
+//        	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
         }
+
+		Iterator<Map.Entry<Long, Timestamp>> iter = list.iterator();
+		Map.Entry<Long, Timestamp> tmpEntry = null;
+		while (iter.hasNext()) {
+			tmpEntry = iter.next();
+			sortedMap.put(tmpEntry.getKey(), tmpEntry.getValue());
+		}
+
+		taskIds = sortedMap.keySet();
        
-		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIdlist);
+		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIds);
+
 		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
         for(QualityInspectionTasks task : tasks) {
         	QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
@@ -2932,9 +3017,15 @@ public class QualityServiceImpl implements QualityService {
 		for(QualityInspectionTaskRecords record : records) {
 			populateRecordAttachements(record, record.getAttachments());
 		}
-        
+
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, uId);
-		response.setTasks(dtoList);
+		Map<Long, QualityInspectionTaskDTO> tasksMap = new HashMap<>();
+		dtoList.forEach(dto -> {
+			tasksMap.put(dto.getId(), dto);
+		});
+
+		List<QualityInspectionTaskDTO> sortDto = sortedMap.entrySet().stream().map(map -> tasksMap.get(map.getKey())).collect(Collectors.toList());
+		response.setTasks(sortDto);
 		return response;
 	}
 
@@ -3005,8 +3096,900 @@ public class QualityServiceImpl implements QualityService {
 							UserContext.current().getUser().getLocale(),
 							"the template don't exist!"));
 		}
-		
-		
 	}
 
+	@Override
+	public SampleQualityInspectionDTO createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd) {
+		QualityInspectionSamples sample = ConvertHelper.convert(cmd, QualityInspectionSamples.class);
+		Long uid = UserContext.current().getUser().getId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		sample.setStartTime(new Timestamp(cmd.getStartTime()));
+		sample.setEndTime(new Timestamp(cmd.getEndTime()));
+		sample.setCreatorUid(uid);
+		sample.setNamespaceId(namespaceId);
+		sample.setStatus(Status.ACTIVE.getCode());
+		qualityProvider.createQualityInspectionSample(sample);
+		sampleSearcher.feedDoc(sample);
+
+		if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
+			cmd.getCommunityIds().forEach(communityId -> {
+				QualityInspectionSampleCommunityMap map = new QualityInspectionSampleCommunityMap();
+				map.setNamespaceId(namespaceId);
+				map.setSampleId(sample.getId());
+				map.setCommunityId(communityId);
+				qualityProvider.createQualityInspectionSampleCommunityMap(map);
+			});
+		}
+
+		if(cmd.getExecuteGroupAndPositionList() != null && cmd.getExecuteGroupAndPositionList().size() > 0) {
+			cmd.getExecuteGroupAndPositionList().forEach(execute -> {
+				QualityInspectionSampleGroupMap map = new QualityInspectionSampleGroupMap();
+				map.setNamespaceId(namespaceId);
+				map.setSampleId(sample.getId());
+				map.setOrganizationId(execute.getGroupId());
+				map.setPositionId(execute.getPositionId());
+				qualityProvider.createQualityInspectionSampleGroupMap(map);
+			});
+		}
+
+		SampleQualityInspectionDTO dto = convertQualityInspectionSampleToDTO(sample);
+		return dto;
+	}
+
+	@Override
+	public void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByParentId(cmd.getId());
+		if(tasks != null && tasks.size() > 0) {
+			LOGGER.error("the sample which id="+cmd.getId()+" has generate tasks!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_HAS_TASK,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_HAS_TASK),
+									UserContext.current().getUser().getLocale(),
+									"the sample has generate tasks!"));
+
+		}
+		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(sample == null || Status.INACTIVE.equals(Status.fromStatus(sample.getStatus()))) {
+			LOGGER.error("the sample which id="+cmd.getId()+" is not exist!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST),
+									UserContext.current().getUser().getLocale(),
+									"the sample is not exist!"));
+		}
+		sample.setStatus(Status.INACTIVE.getCode());
+		sample.setDeleteUid(UserContext.current().getUser().getId());
+		sample.setDeleteTime(new Timestamp(System.currentTimeMillis()));
+		qualityProvider.updateQualityInspectionSample(sample);
+		sampleSearcher.feedDoc(sample);
+
+	}
+
+	@Override
+	public SampleQualityInspectionDTO findSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(sample == null || Status.INACTIVE.equals(Status.fromStatus(sample.getStatus()))) {
+			LOGGER.error("the sample which id="+cmd.getId()+" is not exist!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST),
+									UserContext.current().getUser().getLocale(),
+									"the sample is not exist!"));
+		}
+		SampleQualityInspectionDTO dto = convertQualityInspectionSampleToDTO(sample);
+		return dto;
+	}
+
+	@Override
+	public ListSampleQualityInspectionResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
+
+		User user = UserContext.current().getUser();
+		Long ownerId = cmd.getOwnerId();
+		String ownerType = cmd.getOwnerType();
+		Long communityId = cmd.getCommunityId();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+		//是否是管理员
+		boolean isAdmin = false;
+		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
+		if(null != resources && 0 != resources.size()){
+			for (RoleAssignment resource : resources) {
+				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+					isAdmin = true;
+					break;
+				}
+			}
+		}
+		List<QualityInspectionSamples> samples = new ArrayList<>();
+
+		if(isAdmin) {
+			//管理员查询所有检查
+			samples = qualityProvider.listActiveQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, null, communityId);
+		} else {
+			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+			List<QualityInspectionSampleGroupMap> maps = qualityProvider.listQualityInspectionSampleGroupMapByOrgAndPosition(groupDtos);
+			if(maps != null && maps.size() > 0) {
+				List<Long> sampleIds = maps.stream().map(QualityInspectionSampleGroupMap::getSampleId).collect(Collectors.toList());
+
+				samples = qualityProvider.listActiveQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, sampleIds, communityId);
+			}
+		}
+
+		Long nextPageAnchor = null;
+		if(samples.size() > pageSize) {
+			samples.remove(samples.size() - 1);
+			nextPageAnchor = samples.get(samples.size() - 1).getId();
+		}
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		List<SampleQualityInspectionDTO> sampleQualityInspectionDTOList = samples.stream().map(sample -> {
+			SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
+			List<SampleCommunity> sampleCommunities = new ArrayList<>();
+			SampleCommunity sc = new SampleCommunity();
+			sc.setSampleId(sample.getId());
+			sc.setCommunityId(cmd.getCommunityId());
+			sc.setCommunityName(community.getName());
+			sampleCommunities.add(sc);
+			dto.setSampleCommunities(sampleCommunities);
+
+			return dto;
+		}).collect(Collectors.toList());
+
+		ListSampleQualityInspectionResponse response = new ListSampleQualityInspectionResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setSampleQualityInspectionDTOList(sampleQualityInspectionDTOList);
+
+		return response;
+	}
+
+	@Override
+	public SampleQualityInspectionDTO updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd) {
+		QualityInspectionSamples exist = qualityProvider.findQualityInspectionSample(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(exist == null || Status.INACTIVE.equals(Status.fromStatus(exist.getStatus()))) {
+			LOGGER.error("the sample which id="+cmd.getId()+" is not exist!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST),
+									UserContext.current().getUser().getLocale(),
+									"the sample is not exist!"));
+		}
+
+		Timestamp now = new Timestamp(System.currentTimeMillis());
+		if(now.after(exist.getStartTime())) {
+			LOGGER.error("the sample which id="+cmd.getId()+" has start!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_START,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_START),
+									UserContext.current().getUser().getLocale(),
+									"the sample has start!"));
+		}
+
+		QualityInspectionSamples sample = ConvertHelper.convert(cmd, QualityInspectionSamples.class);
+		sample.setStartTime(new Timestamp(cmd.getStartTime()));
+		sample.setEndTime(new Timestamp(cmd.getEndTime()));
+		sample.setStatus(exist.getStatus());
+		sample.setNamespaceId(exist.getNamespaceId());
+		sample.setSampleNumber(exist.getSampleNumber());
+		sample.setCreateTime(exist.getCreateTime());
+		sample.setCreatorUid(exist.getCreatorUid());
+		qualityProvider.updateQualityInspectionSample(sample);
+		sampleSearcher.feedDoc(sample);
+
+		List<QualityInspectionSampleCommunityMap> sampleCommunityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sample.getId());
+		List<Long> communityIds = new ArrayList<>();
+		if(sampleCommunityMaps != null && sampleCommunityMaps.size() > 0) {
+			sampleCommunityMaps.forEach(map -> {
+				communityIds.add(map.getCommunityId());
+			});
+		}
+
+		//看map表中的communityId在不在cmd里面
+		if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
+			cmd.getCommunityIds().forEach(communityId -> {
+				if(communityIds.contains(communityId)) {
+					communityIds.remove(communityId);
+					return;
+				}
+				//不在map表中的create
+				QualityInspectionSampleCommunityMap map = new QualityInspectionSampleCommunityMap();
+				map.setNamespaceId(sample.getNamespaceId());
+				map.setSampleId(sample.getId());
+				map.setCommunityId(communityId);
+				qualityProvider.createQualityInspectionSampleCommunityMap(map);
+			});
+		}
+
+		//不在cmd的删掉
+		if(communityIds.size() > 0) {
+			communityIds.forEach(communityId -> {
+				QualityInspectionSampleCommunityMap map = qualityProvider.findQualityInspectionSampleCommunityMapBySampleAndCommunity(sample.getId(), communityId);
+				qualityProvider.deleteQualityInspectionSampleCommunityMap(map);
+			});
+		}
+
+		List<QualityInspectionSampleGroupMap> sampleGroupMaps = qualityProvider.findQualityInspectionSampleGroupMapBySample(sample.getId());
+		List<ExecuteGroupAndPosition> sampleGroupAndPositions = new ArrayList<>();
+		if(sampleGroupMaps != null && sampleGroupMaps.size() > 0) {
+			sampleGroupMaps.forEach(map -> {
+				ExecuteGroupAndPosition eap = new ExecuteGroupAndPosition();
+				eap.setPositionId(map.getPositionId());
+				eap.setGroupId(map.getOrganizationId());
+				sampleGroupAndPositions.add(eap);
+			});
+		}
+
+		if(cmd.getExecuteGroupAndPositionList() != null && cmd.getExecuteGroupAndPositionList().size() > 0) {
+			cmd.getExecuteGroupAndPositionList().forEach(execute -> {
+				if(sampleGroupAndPositions.contains(execute)) {
+					sampleGroupAndPositions.remove(execute);
+					return;
+				}
+				QualityInspectionSampleGroupMap map = new QualityInspectionSampleGroupMap();
+				map.setNamespaceId(sample.getNamespaceId());
+				map.setSampleId(sample.getId());
+				map.setOrganizationId(execute.getGroupId());
+				map.setPositionId(execute.getPositionId());
+				qualityProvider.createQualityInspectionSampleGroupMap(map);
+			});
+		}
+
+		if(sampleGroupAndPositions.size() > 0) {
+			sampleGroupAndPositions.forEach(gap -> {
+				QualityInspectionSampleGroupMap map = qualityProvider.findQualityInspectionSampleGroupMapBySampleAndOrg(sample.getId(), gap.getGroupId(), gap.getPositionId());
+				qualityProvider.deleteQualityInspectionSampleGroupMap(map);
+			});
+		}
+
+		SampleQualityInspectionDTO dto = convertQualityInspectionSampleToDTO(sample);
+		return dto;
+	}
+
+	private SampleQualityInspectionDTO convertQualityInspectionSampleToDTO(QualityInspectionSamples sample) {
+		SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(sample.getCreatorUid(), sample.getOwnerId());
+		if(member != null) {
+			dto.setCreatorName(member.getContactName());
+		}
+		List<QualityInspectionSampleCommunityMap> sampleCommunityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sample.getId());
+		if(sampleCommunityMaps != null && sampleCommunityMaps.size() > 0) {
+			List<SampleCommunity> sampleCommunities = new ArrayList<>();
+			List<Long> communityIds = sampleCommunityMaps.stream().map(QualityInspectionSampleCommunityMap::getCommunityId).collect(Collectors.toList());
+			Map<Long, Community> communityMap = communityProvider.listCommunitiesByIds(communityIds);
+			sampleCommunityMaps.forEach(map -> {
+				SampleCommunity sc = new SampleCommunity();
+				sc.setSampleId(sample.getId());
+				sc.setCommunityId(map.getCommunityId());
+				Community community = communityMap.get(map.getCommunityId());
+				sc.setCommunityName(community.getName());
+				sampleCommunities.add(sc);
+			});
+
+			dto.setSampleCommunities(sampleCommunities);
+		}
+		List<QualityInspectionSampleGroupMap> sampleGroupMaps = qualityProvider.findQualityInspectionSampleGroupMapBySample(sample.getId());
+
+		if(sampleGroupMaps != null && sampleGroupMaps.size() > 0) {
+			List<SampleGroupDTO> sampleGroupDTOs = new ArrayList<>();
+			sampleGroupMaps.forEach(map -> {
+				SampleGroupDTO sampleGroupDTO = new SampleGroupDTO();
+				sampleGroupDTO.setOrganizationId(map.getOrganizationId());
+				sampleGroupDTO.setPositionId(map.getPositionId());
+				Organization group = organizationProvider.findOrganizationById(map.getOrganizationId());
+				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(map.getPositionId());
+				if(group != null) {
+					sampleGroupDTO.setOrganizationName(group.getName());
+				}
+
+				if(position != null) {
+					if(sampleGroupDTO.getOrganizationName() != null) {
+						sampleGroupDTO.setOrganizationName(sampleGroupDTO.getOrganizationName() + "-" + position.getName());
+					} else {
+						sampleGroupDTO.setOrganizationName(position.getName());
+
+					}
+				}
+				sampleGroupDTOs.add(sampleGroupDTO);
+			});
+			dto.setSampleGroupDTOs(sampleGroupDTOs);
+		}
+
+		return dto;
+	}
+
+	@Override
+	public ListQualityInspectionTasksResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd) {
+		SearchQualityTasksCommand command = ConvertHelper.convert(cmd, SearchQualityTasksCommand.class);
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		Long anchor = 0l;
+		if(cmd.getPageAnchor() != null) {
+			anchor = cmd.getPageAnchor();
+		}
+		command.setTargetId(cmd.getCommunityId());
+		command.setTargetName(cmd.getCommunityName());
+		command.setPageSize(pageSize);
+		command.setPageAnchor(anchor);
+		List<Long> taskIds = taskSearcher.query(command);
+
+		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
+		if(taskIds.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+			taskIds.remove(taskIds.size() - 1);
+        }
+		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIds);
+		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+		for(QualityInspectionTasks task : tasks) {
+			QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
+			if(record != null) {
+				task.setRecord(record);
+				records.add(task.getRecord());
+			}
+
+		}
+
+		this.qualityProvider.populateRecordAttachments(records);
+		this.qualityProvider.populateRecordItemResults(records);
+
+		for(QualityInspectionTaskRecords record : records) {
+			populateRecordAttachements(record, record.getAttachments());
+		}
+
+		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, UserContext.current().getUser().getId());
+		response.setTasks(dtoList);
+		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(sample != null) {
+			response.setSampleName(sample.getName());
+			response.setStartTime(sample.getStartTime());
+			response.setEndTime(sample.getEndTime());
+		}
+
+		Integer communityCount = qualityProvider.getSampleCommunities(cmd.getSampleId());
+		response.setCommunityCount(communityCount);
+		return response;
+	}
+
+	@Override
+	public CountScoresResponse countSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd) {
+		CountScoresResponse response = new CountScoresResponse();
+		//查列
+		CountScoresCommand command = ConvertHelper.convert(cmd, CountScoresCommand.class);
+		List<CountScoresSpecificationDTO> specificationDTOs = listChildSpecificationDTOs(command);
+		response.setSpecifications(specificationDTOs);
+		List<ScoreGroupByTargetDTO> scoresByTarget= new ArrayList<ScoreGroupByTargetDTO>();
+
+		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();
+
+		//查第一级的子结点
+		if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
+			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, null);
+		} else {
+			QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
+			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, parent.getId(), null);
+		}
+
+		Map<Long,List<QualityInspectionSpecificationDTO>> targetSpecifitionTree = new HashMap<Long,List<QualityInspectionSpecificationDTO>>();
+
+		if(cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0) {
+			for(Long target : cmd.getTargetIds()) {
+				List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<QualityInspectionSpecifications>();
+
+				if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
+					scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), target, 0L, null);
+				} else {
+					scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), target, cmd.getSpecificationId(), null);
+				}
+
+				//获得每个项目的specification tree
+//				targetSpecifitionTree.put(target, dealWithScopeSpecifications(specifications, scopeSpecifications));
+
+				List<QualityInspectionSpecificationDTO> specificationTree = dealWithScopeSpecifications(specifications, scopeSpecifications);
+
+				ScoreGroupByTargetDTO scoreGroupDto = new ScoreGroupByTargetDTO();
+				scoreGroupDto.setTargetId(target);
+				Community community = communityProvider.findCommunityById(target);
+				if(community != null) {
+					scoreGroupDto.setTargetName(community.getName());
+				}
+
+				if(specificationTree != null && specificationTree.size() > 0) {
+					List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+					for(QualityInspectionSpecificationDTO dto : specificationTree) {
+						ScoreDTO score = new ScoreDTO();
+						if(dto.getId() == null || dto.getId() == 0L) {
+							String superiorPath = "%";
+							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, null, null, cmd.getSampleId());
+						} else {
+							QualityInspectionSpecifications parent = verifiedSpecificationById(dto.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+							String superiorPath = parent.getPath() + "%";
+							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, null, null, cmd.getSampleId());
+						}
+
+						if(score != null) {
+							score.setSpecificationId(dto.getId());
+							score.setSpecificationName(dto.getName());
+							score.setSpecificationInspectionType(dto.getInspectionType());
+							score.setSpecificationScore(dto.getScore());
+							score.setSpecificationWeight(dto.getWeight());
+
+							score.setSpecificationDescription(dto.getDescription());
+
+							//规范事项的话直接显示扣了多少分 by xiongying20170123
+							if(SpecificationInspectionType.SPECIFICATION_ITEM.equals(SpecificationInspectionType.fromStatus(score.getSpecificationInspectionType()))) {
+								score.setScore(score.getScore());
+							} else {
+								Double mark = (score.getSpecificationScore() - score.getScore()) * score.getSpecificationWeight();
+								score.setScore(mark);
+							}
+
+						}
+						scores.add(score);
+					}
+
+					scoreGroupDto.setScores(scores);
+				}
+				scoresByTarget.add(scoreGroupDto);
+			}
+		}
+
+		response.setScores(scoresByTarget);
+		return response;
+	}
+
+	@Override
+	public CountSampleTasksResponse countSampleTasks(CountSampleTasksCommand cmd) {
+		QualityInspectionSampleScoreStat stat = qualityProvider.findQualityInspectionSampleScoreStat(cmd.getSampleId());
+		if(stat != null) {
+			getNewestScoreStat(stat);
+		} else {
+			stat = new QualityInspectionSampleScoreStat();
+			stat.setNamespaceId(UserContext.getCurrentNamespaceId());
+			List<QualityInspectionSampleCommunityMap> communityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(cmd.getSampleId());
+			if(communityMaps != null) {
+				stat.setCommunityCount(communityMaps.size());
+			} else {
+				stat.setCommunityCount(0);
+			}
+
+			stat.setOwnerId(cmd.getOwnerId());
+			stat.setOwnerType(cmd.getOwnerType());
+			stat.setSampleId(cmd.getSampleId());
+			stat.setTaskCount(0);
+			stat.setCorrectionCount(0);
+			stat.setCorrectionQualifiedCount(0);
+			stat.setDeductScore(0.0);
+			stat.setHighestScore(100.0);
+			stat.setLowestScore(100.0);
+
+			getNewestScoreStat(stat);
+		}
+		CountSampleTasksResponse response = ConvertHelper.convert(stat, CountSampleTasksResponse.class);
+		if(stat.getCorrectionCount() == 0) {
+			response.setCorrectionRate(0.0);
+		} else {
+			Double correctionRate = 1.00*stat.getCorrectionQualifiedCount()/stat.getCorrectionCount();
+			response.setCorrectionRate(correctionRate);
+		}
+		Double averageScore = (100*stat.getCommunityCount() - stat.getDeductScore())/stat.getCommunityCount();
+		if(averageScore < 0) {
+			averageScore = 0.00;
+		}
+		response.setAverageScore((double)Math.round(1.00*averageScore*100)/100);
+		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(sample != null) {
+			response.setName(sample.getName());
+		}
+
+		return response;
+	}
+
+	@Override
+	public CountSampleTaskScoresResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd) {
+		CountSampleTaskScoresResponse response = sampleSearcher.queryCount(cmd);
+		List<SampleTaskScoreDTO> dtos = response.getSampleTasks();
+		if(dtos != null && dtos.size() > 0) {
+			response.setSampleTasks(dtos.stream().map(dto -> {
+				QualityInspectionSampleScoreStat scoreStat = getSampleScoreStat(dto.getId(), dto.getOwnerType(), dto.getOwnerId());
+				dto.setCommunityCount(scoreStat.getCommunityCount());
+				dto.setHighestScore(scoreStat.getHighestScore());
+				dto.setLowestScore(scoreStat.getLowestScore());
+				Double averageScore = (100*scoreStat.getCommunityCount() - scoreStat.getDeductScore())/scoreStat.getCommunityCount();
+				if(averageScore < 0) {
+					averageScore = 0.0;
+				}
+				dto.setAverageScore((double)Math.round(1.00*averageScore*100)/100);
+
+				return dto;
+			}).collect(Collectors.toList()));
+		}
+//		response.setSampleTasks(dtos);
+		return response;
+	}
+
+	private QualityInspectionSampleScoreStat calculateTasks(QualityInspectionSampleScoreStat scoreStat, Timestamp now) {
+		List<QualityInspectionTasks> tasks = qualityProvider.listQualityInspectionTasksBySample(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
+
+		if(tasks != null) {
+			scoreStat.setTaskCount(scoreStat.getTaskCount() + tasks.size());
+			Integer correctionCount = 0;
+			Integer correctionQualifiedCount = 0;
+			for(QualityInspectionTasks task : tasks) {
+				if(QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
+						|| QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
+						|| QualityInspectionTaskResult.CORRECT_DELAY.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
+					correctionCount ++;
+				}
+				if(QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
+					correctionQualifiedCount ++;
+				}
+			}
+			scoreStat.setCorrectionCount(scoreStat.getCorrectionCount() + correctionCount);
+			Integer scoreStatCorrectionQualifiedCount = scoreStat.getCorrectionQualifiedCount() == null ? 0:scoreStat.getCorrectionQualifiedCount();
+			scoreStat.setCorrectionQualifiedCount(correctionQualifiedCount + scoreStatCorrectionQualifiedCount);
+		}
+
+		return scoreStat;
+	}
+
+	private List<QualityInspectionSpecificationItemResults> getNewestScoreStat(QualityInspectionSampleScoreStat scoreStat) {
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		calculateTasks(scoreStat, now);
+		Map<Long, Double> querycommunitySpecificationStats = qualityProvider.listCommunityScore(scoreStat.getSampleId());
+		if(querycommunitySpecificationStats.size() == 0) {
+			QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(scoreStat.getSampleId(), scoreStat.getOwnerType(), scoreStat.getOwnerId());
+			List<QualityInspectionSampleCommunityMap> communityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(scoreStat.getSampleId());
+			if(communityMaps != null && communityMaps.size() > 0) {
+				communityMaps.forEach(map -> {
+					createQualityInspectionSampleCommunitySpecificationStat(map.getCommunityId(), sample);
+				});
+			}
+			querycommunitySpecificationStats = qualityProvider.listCommunityScore(scoreStat.getSampleId());
+		}
+		Map<Long, Double> communitySpecificationStats = querycommunitySpecificationStats;
+		//时间段内的扣分项
+		List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
+
+		LOGGER.info("deduct sample id:{}, start time : {}, results: {}",scoreStat.getSampleId(), scoreStat.getUpdateTime(), results);
+		if(results != null) {
+			results.forEach(result -> {
+				Double statScore = communitySpecificationStats.get(result.getTargetId());
+				if(statScore != null) {
+					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
+					statScore = statScore + result.getTotalScore();
+					communitySpecificationStats.put(result.getTargetId(), statScore);
+				}
+			});
+		}
+		//按map的value排序 第一个和最后一个是扣分最少和最多的项目
+		Map<Long, Double> result = new LinkedHashMap<>();
+		communitySpecificationStats.entrySet().stream().sorted(Comparator.comparing(e->e.getValue()))
+				.forEach(e ->result.put(e.getKey(), e.getValue()));
+
+		if(result != null && result.size() > 0) {
+			scoreStat.setHighestScore(100-result.entrySet().iterator().next().getValue());
+			if(scoreStat.getHighestScore() < 0) {
+				scoreStat.setHighestScore(0.0);
+			}
+			Iterator<Map.Entry<Long, Double>> iterator = result.entrySet().iterator();
+			Map.Entry<Long, Double> tail = null;
+			while (iterator.hasNext()) {
+				tail = iterator.next();
+			}
+			scoreStat.setLowestScore(100-tail.getValue());
+			if(scoreStat.getLowestScore() < 0) {
+				scoreStat.setLowestScore(0.0);
+			}
+		}
+
+		return results;
+	}
+
+//	//按map的value排序
+//	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+//		Map<K, V> result = new LinkedHashMap<>();
+//		Stream<Map.Entry<K, V>> st = map.entrySet().stream();
+//
+//		st.sorted(Comparator.comparing(e -> e.getValue())).forEach(e -> result.put(e.getKey(), e.getValue()));
+//
+//		return result;
+//	}
+
+	private void createQualityInspectionSampleCommunitySpecificationStat(Long communityId, QualityInspectionSamples sample) {
+		//查每个项目的第一级类型
+		List<QualityInspectionSpecifications> specifications = qualityProvider.listChildrenSpecifications(sample.getOwnerType(), sample.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, SpecificationInspectionType.CATEGORY.getCode());
+		List<QualityInspectionSpecifications> scopeSpecifications = qualityProvider.listChildrenSpecifications(sample.getOwnerType(), sample.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), communityId, 0L, SpecificationInspectionType.CATEGORY.getCode());
+		List<QualityInspectionSpecificationDTO> dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+		if(dtos != null && dtos.size() > 0) {
+			dtos.forEach(dto -> {
+				QualityInspectionSampleCommunitySpecificationStat scss = new QualityInspectionSampleCommunitySpecificationStat();
+				scss.setNamespaceId(sample.getNamespaceId());
+				scss.setOwnerId(sample.getOwnerId());
+				scss.setOwnerType(sample.getOwnerType());
+				scss.setSampleId(sample.getId());
+				scss.setCommunityId(communityId);
+				scss.setSpecificationId(dto.getId());
+				scss.setSpecificationPath(dto.getPath());
+				scss.setDeductScore(0.0);
+				qualityProvider.createQualityInspectionSampleCommunitySpecificationStat(scss);
+			});
+		}
+	}
+
+	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_score_stat
+	@Override
+	public void updateSampleScoreStat() {
+		List<QualityInspectionSamples> samples = qualityProvider.listActiveQualityInspectionSamples(null);
+		if(samples != null && samples.size() > 0) {
+			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+			Map<Long, QualityInspectionSamples> samplesMap =  new HashMap<>();
+			samples.forEach(sample -> {
+				samplesMap.put(sample.getId(), sample);
+			});
+			List<Long> sampleIds = samples.stream().map(QualityInspectionSamples::getId).collect(Collectors.toList());
+			LOGGER.info("total sampleIds : {}", sampleIds);
+			//查eh_quality_inspection_sample_community_specification_stat 没有的循环添加
+			Map<Long, List<QualityInspectionSampleCommunitySpecificationStat>> sampleCommunitySpecificationStat = qualityProvider.listCommunitySpecifitionStatBySampleId(sampleIds);
+			Map<Long, QualityInspectionSamples> unStatSamples = new HashMap<>();
+			unStatSamples.putAll(samplesMap);
+			if(sampleCommunitySpecificationStat != null && sampleCommunitySpecificationStat.size() > 0) {
+				sampleCommunitySpecificationStat.entrySet().forEach(scss -> {
+					unStatSamples.remove(scss.getKey());
+				});
+			}
+			LOGGER.info("sampleIds not in eh_quality_inspection_sample_community_specification_stat: {}", unStatSamples);
+			if(unStatSamples != null && unStatSamples.size() > 0) {
+				unStatSamples.entrySet().forEach(unStatSample -> {
+					List<QualityInspectionSampleCommunityMap> scms = qualityProvider.findQualityInspectionSampleCommunityMapBySample(unStatSample.getKey());
+					if(scms != null && scms.size() > 0) {
+						scms.forEach(scm -> {
+							QualityInspectionSamples sample = unStatSample.getValue();
+							createQualityInspectionSampleCommunitySpecificationStat(scm.getCommunityId(), sample);
+						});
+					}
+				});
+			}
+
+			//查统计表
+			Map<Long, QualityInspectionSamples> unStatSampleScore= new HashMap<>();
+			unStatSampleScore.putAll(samplesMap);
+			Map<Long, QualityInspectionSampleScoreStat> sampleScoreStatMaps = qualityProvider.getQualityInspectionSampleScoreStat(sampleIds);
+			if(sampleScoreStatMaps != null && sampleScoreStatMaps.size() > 0) {
+				//更新统计表
+				sampleScoreStatMaps.entrySet().forEach(sampleScoreStatMap -> {
+					QualityInspectionSampleScoreStat stat = sampleScoreStatMap.getValue();
+					unStatSampleScore.remove(sampleScoreStatMap.getKey());
+					samplesMap.remove(sampleScoreStatMap.getKey());
+					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
+					stat.setUpdateTime(now);
+					qualityProvider.updateQualityInspectionSampleScoreStat(stat);
+					updateSampleCommunitySpecificationStat(results, now);
+				});
+			}
+			LOGGER.info("sampleIds not in EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT: {}", unStatSampleScore);
+			if(unStatSampleScore != null && unStatSampleScore.size() > 0) {
+				unStatSampleScore.entrySet().forEach(unStatSample -> {
+					QualityInspectionSamples sample = unStatSample.getValue();
+					Long sampleId = unStatSample.getKey();
+					QualityInspectionSampleScoreStat stat = new QualityInspectionSampleScoreStat();
+					List<QualityInspectionSampleCommunityMap> communityMap = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sampleId);
+					stat.setNamespaceId(sample.getNamespaceId());
+					stat.setTaskCount(0);
+					stat.setCorrectionCount(0);
+					stat.setOwnerType(sample.getOwnerType());
+					stat.setOwnerId(sample.getOwnerId());
+					stat.setSampleId(sampleId);
+					stat.setDeductScore(0.0);
+					stat.setHighestScore(100.0);
+					stat.setLowestScore(100.0);
+					if(communityMap != null && communityMap.size() > 0) {
+						stat.setCommunityCount(communityMap.size());
+					} else {
+						stat.setCommunityCount(0);
+					}
+					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
+					qualityProvider.createQualityInspectionSampleScoreStat(stat);
+					updateSampleCommunitySpecificationStat(results, now);
+				});
+			}
+
+//			if(samplesMap != null && samplesMap.size() > 0) {
+//				samplesMap.entrySet().forEach(sampleMap -> {
+//					QualityInspectionSamples sample = sampleMap.getValue();
+//					Long sampleId = sampleMap.getKey();
+//					List<QualityInspectionSampleCommunityMap> communityMap = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sampleId);
+//					QualityInspectionSampleScoreStat stat = new QualityInspectionSampleScoreStat();
+//					stat.setNamespaceId(sample.getNamespaceId());
+//					stat.setTaskCount(0);
+//					stat.setCorrectionCount(0);
+//					stat.setOwnerType(sample.getOwnerType());
+//					stat.setOwnerId(sample.getOwnerId());
+//					stat.setSampleId(sampleId);
+//					stat.setDeductScore(0.0);
+//					stat.setHighestScore(100.0);
+//					stat.setLowestScore(100.0);
+//					if(communityMap != null && communityMap.size() > 0) {
+//						stat.setCommunityCount(communityMap.size());
+//					} else {
+//						stat.setCommunityCount(0);
+//					}
+//					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
+//					qualityProvider.createQualityInspectionSampleScoreStat(stat);
+//					updateSampleCommunitySpecificationStat(results, now);
+//				});
+//			}
+		}
+	}
+
+	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_community_specification_stat的数据
+	public void updateSampleCommunitySpecificationStat(List<QualityInspectionSpecificationItemResults> results, Timestamp now) {
+		if(results != null) {
+			Map<SampleCommunitySpecification, Double> statMaps = new HashMap<>();
+			results.forEach(result -> {
+				String specification = result.getSpecificationPath();
+				String[] specificationIds = specification.substring(1,specification.length()).split("/");
+
+				SampleCommunitySpecification scs = new SampleCommunitySpecification();
+				scs.setCommunityId(result.getTargetId());
+				scs.setSampleId(result.getSampleId());
+				scs.setSpecificationId(Long.valueOf(specificationIds[0]));
+				scs.setOwnerId(result.getOwnerId());
+				scs.setOwnerType(result.getOwnerType());
+				scs.setNamespaceId(result.getNamespaceId());
+
+				if(statMaps.get(scs) == null) {
+					statMaps.put(scs, result.getTotalScore());
+				} else {
+					statMaps.put(scs, statMaps.get(scs) + result.getTotalScore());
+				}
+			});
+
+			if(statMaps != null && statMaps.size() > 0) {
+				statMaps.entrySet().forEach(statMap -> {
+					SampleCommunitySpecification scs = statMap.getKey();
+					Double deductScore = statMap.getValue();
+					QualityInspectionSampleCommunitySpecificationStat stat = qualityProvider.findBySampleCommunitySpecification(scs.getSampleId(),scs.getCommunityId(),scs.getSpecificationId());
+					if(stat != null) {
+						stat.setDeductScore(stat.getDeductScore() + deductScore);
+						stat.setUpdateTime(now);
+						qualityProvider.updateQualityInspectionSampleCommunitySpecificationStat(stat);
+					} else {
+						QualityInspectionSampleCommunitySpecificationStat newStat = ConvertHelper.convert(scs, QualityInspectionSampleCommunitySpecificationStat.class);
+						newStat.setDeductScore(deductScore);
+						qualityProvider.createQualityInspectionSampleCommunitySpecificationStat(newStat);
+
+					}
+				});
+			}
+		}
+	}
+
+
+	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId, String ownerType, Long ownerId) {
+		QualityInspectionSampleScoreStat scoreStat = qualityProvider.findQualityInspectionSampleScoreStat(sampleId);
+		if(scoreStat != null) {
+			getNewestScoreStat(scoreStat);
+		} else {
+			scoreStat = new QualityInspectionSampleScoreStat();
+			scoreStat.setNamespaceId(UserContext.getCurrentNamespaceId());
+			List<QualityInspectionSampleCommunityMap> communityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sampleId);
+			if(communityMaps != null) {
+				scoreStat.setCommunityCount(communityMaps.size());
+			} else {
+				scoreStat.setCommunityCount(0);
+			}
+
+			scoreStat.setOwnerId(ownerId);
+			scoreStat.setOwnerType(ownerType);
+			scoreStat.setSampleId(sampleId);
+			scoreStat.setTaskCount(0);
+			scoreStat.setCorrectionCount(0);
+			scoreStat.setCorrectionQualifiedCount(0);
+			scoreStat.setDeductScore(0.0);
+			scoreStat.setHighestScore(100.0);
+			scoreStat.setLowestScore(100.0);
+
+			getNewestScoreStat(scoreStat);
+		}
+		return scoreStat;
+	}
+
+	@Override
+	public CountSampleTaskSpecificationItemScoresResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd) {
+		CountSampleTaskSpecificationItemScoresResponse response = new CountSampleTaskSpecificationItemScoresResponse();
+		List<SpecificationItemScores> itemScores = new ArrayList<>();
+		QualityInspectionSampleScoreStat sampleScoreStat = qualityProvider.findQualityInspectionSampleScoreStat(cmd.getSampleId());
+		Map<Long, Double> specificationScore = qualityProvider.listSpecificationScore(cmd.getSampleId());
+		if(specificationScore == null || specificationScore.size() == 0) {
+			List<QualityInspectionSampleCommunityMap> scms = qualityProvider.findQualityInspectionSampleCommunityMapBySample(cmd.getSampleId());
+			if(scms != null && scms.size() > 0) {
+				scms.forEach(scm -> {
+//							查每个项目的第一级类型
+					List<QualityInspectionSpecifications> specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, SpecificationInspectionType.CATEGORY.getCode());
+					List<QualityInspectionSpecifications> scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), scm.getCommunityId(), 0L, SpecificationInspectionType.CATEGORY.getCode());
+					List<QualityInspectionSpecificationDTO> dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+					if(dtos != null && dtos.size() > 0) {
+						dtos.forEach(dto -> {
+							specificationScore.put(dto.getId(), 0.0);
+						});
+					}
+				});
+			}
+		}
+		Timestamp lastTime = null;
+		if(sampleScoreStat != null) {
+			lastTime = sampleScoreStat.getUpdateTime();
+		}
+		List<QualityInspectionSpecificationItemResults> itemResults = qualityProvider.listSpecifitionItemResultsBySampleId(cmd.getSampleId(), lastTime, new Timestamp(System.currentTimeMillis()));
+		List<Double> scoreList = new ArrayList<>();
+		if(itemResults != null && itemResults.size() > 0) {
+			itemResults.forEach(itemResult -> {
+				String specificationPath = itemResult.getSpecificationPath();
+				specificationPath = specificationPath.substring(1,specificationPath.length());
+				String[] pathIds = specificationPath.split("/");
+
+				Long rootSpecification = Long.valueOf(pathIds[0]);
+				if(specificationScore.get(rootSpecification) != null) {
+					specificationScore.put(rootSpecification, specificationScore.get(rootSpecification) + itemResult.getTotalScore());
+				} else {
+					specificationScore.put(rootSpecification, itemResult.getTotalScore());
+				}
+			});
+		}
+
+		specificationScore.entrySet().forEach(score -> {
+			scoreList.add(score.getValue());
+		});
+		Double totalScore = 0.0;
+		for(Double score : scoreList) {
+			totalScore = totalScore + score;
+		}
+
+		Double totaldeducted = totalScore;
+		if(specificationScore != null && specificationScore.size() > 0) {
+			specificationScore.entrySet().forEach(map -> {
+				Long specificationId = map.getKey();
+				Double deductedScore = map.getValue();
+				QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(specificationId, cmd.getOwnerType(), cmd.getOwnerId());
+				SpecificationItemScores score = new SpecificationItemScores();
+				score.setSpecificationId(specificationId);
+				score.setSpecificationDeducted(deductedScore);
+				if(Double.compare(totaldeducted, 0.0) == 0) {
+					score.setSpecificationDeductedProportion(0.0);
+				} else {
+					score.setSpecificationDeductedProportion(deductedScore/totaldeducted);
+				}
+
+				if(specification != null) {
+					score.setSpecificationName(specification.getName());
+				}
+
+				itemScores.add(score);
+			});
+		}
+
+		response.setItemScores(itemScores);
+		return response;
+	}
 }

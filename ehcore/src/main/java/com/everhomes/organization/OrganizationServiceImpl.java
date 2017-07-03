@@ -739,23 +739,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return dto;
 	}
 
-	@Override
+    @Override
 	public ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd) {
-		ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
-		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
-		SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+        ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
+        List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
+			SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
 		command.setKeyword(cmd.getKeywords());  //两个字段不一样，操蛋
 		GroupQueryResult rlt = organizationSearcher.query(command);
-		for(Long id : rlt.getIds()) {
-        	OrganizationDetailDTO dto = this.toOrganizationDetailDTO(id, cmd.getQryAdminRoleFlag());
-        	if(null != dto)
-        		dtos.add(dto);
-        }
-        addExtraInfo(dtos);
-        resp.setDtos(dtos);
+	        for(Long id : rlt.getIds()) {
+	        	OrganizationDetailDTO dto = this.toOrganizationDetailDTO(id, cmd.getQryAdminRoleFlag());
+	        	if(null != dto)
+	        		dtos.add(dto);
+	        }
+	        addExtraInfo(dtos);
+	        resp.setDtos(dtos);
         resp.setNextPageAnchor(rlt.getPageAnchor());
-		return resp;
-	}
+			return resp;
+		}
 	
 	@Override
 	public ListEnterprisesCommandResponse listEnterprises(
@@ -844,7 +844,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //		resp.setDtos(dtos);
 //		resp.setNextPageAnchor(locator.getAnchor());
 //		return resp;
-	}
+			}
 
 	@Override
 	public void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response) {
@@ -859,7 +859,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	            String[] titleNames = {"企业名称", "邮箱域名", "楼栋门牌", "注册人数", "企业人数", "客服经理", "企业管理员", "地址", "咨询电话", "入驻时间", "企业介绍"};
 	            int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
 	            excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
-	        } else {
+		}else{
 	            throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
 	                    "no data");
 	        }
@@ -878,25 +878,24 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			if (exportDetailDTO.getCheckinDate() != null) {
 				exportDetailDTO.setCheckinDateString(DateUtil.dateToStr(new Date(exportDetailDTO.getCheckinDate()), DateUtil.YMR_SLASH));
-			}
+            }
 		} catch (Exception e) {
 			LOGGER.error("dto : {}", organizationDetailDTO);
 			throw e;
-		}
+        }
 		
 		return exportDetailDTO;
-	}
+    }
 	
 	private String toAdminString(OrganizationContactDTO organizationContactDTO) {
 		return organizationContactDTO.getContactName()+"("+organizationContactDTO.getContactToken()+")";
 	}
 	
-	private void addExtraInfo(List<OrganizationDetailDTO> organizationDetailList) {
-		for (OrganizationDetailDTO organizationDetailDTO : organizationDetailList) {
-			addExtraInfo(organizationDetailDTO);
-		}
-	}
-
+    private void addExtraInfo(List<OrganizationDetailDTO> organizationDetailList) {
+        for (OrganizationDetailDTO organizationDetailDTO : organizationDetailList) {
+            addExtraInfo(organizationDetailDTO);
+        }
+    }
 	// 添加管理员列表，添加客服人员，添加注册人数, add by tt, 20161129
 	private void addExtraInfo(OrganizationDetailDTO organizationDetailDTO) {
 		addAdmins(organizationDetailDTO);
@@ -1015,72 +1014,72 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return phoneSet;
 	}
 
-	@Override
-	public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
+    @Override
+    public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
 
-		User user = UserContext.current().getUser();
+        User user = UserContext.current().getUser();
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
-		Organization organization = new Organization();
+        Organization organization = new Organization();
 
-		dbProvider.execute((TransactionStatus status) -> {
+        dbProvider.execute((TransactionStatus status) -> {
 
-			Group group = new Group();
-			group.setName(cmd.getName());
-			group.setDisplayName(cmd.getDisplayName());
-			group.setEnterpriseAddress(cmd.getAddress());
+            Group group = new Group();
+            group.setName(cmd.getName());
+            group.setDisplayName(cmd.getDisplayName());
+            group.setEnterpriseAddress(cmd.getAddress());
 
-			group.setDescription(cmd.getContactsPhone());
-			group.setStatus(OrganizationStatus.ACTIVE.getCode());
+            group.setDescription(cmd.getContactsPhone());
+            group.setStatus(OrganizationStatus.ACTIVE.getCode());
 
-			group.setCreatorUid(user.getId());
+            group.setCreatorUid(user.getId());
 
-			group.setNamespaceId(namespaceId);
+            group.setNamespaceId(namespaceId);
 
-			group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
-			groupProvider.createGroup(group);
+            group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+            groupProvider.createGroup(group);
 
-			organization.setParentId(0L);
-			organization.setLevel(1);
-			organization.setPath("");
-			organization.setName(cmd.getName());
-			organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
-			organization.setStatus(OrganizationStatus.ACTIVE.getCode());
-			organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
-			organization.setNamespaceId(namespaceId);
-			organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			organization.setGroupId(group.getId());
-			organization.setEmailDomain(cmd.getEmailDomain());
-			organizationProvider.createOrganization(organization);
+            organization.setParentId(0L);
+            organization.setLevel(1);
+            organization.setPath("");
+            organization.setName(cmd.getName());
+            organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+            organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+            organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+            organization.setNamespaceId(namespaceId);
+            organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organization.setGroupId(group.getId());
+            organization.setEmailDomain(cmd.getEmailDomain());
+            organizationProvider.createOrganization(organization);
 
-			OrganizationDetail enterprise = new OrganizationDetail();
-			enterprise.setOrganizationId(organization.getId());
-			enterprise.setAddress(cmd.getAddress());
-			enterprise.setDescription(cmd.getDescription());
-			enterprise.setAvatar(cmd.getAvatar());
-			enterprise.setCreateTime(organization.getCreateTime());
-			if(!StringUtils.isEmpty(cmd.getCheckinDate())){
-				java.sql.Date checkinDate = DateUtil.parseDate(cmd.getCheckinDate());
-				if(null != checkinDate){
-					enterprise.setCheckinDate(new Timestamp(checkinDate.getTime()));
-				}
-			}
-			enterprise.setContact(cmd.getContactsPhone());
-			enterprise.setDisplayName(cmd.getDisplayName());
-			enterprise.setPostUri(cmd.getPostUri());
-			enterprise.setMemberCount(cmd.getMemberCount());
-			enterprise.setEmailDomain(cmd.getEmailDomain());
-			enterprise.setServiceUserId(cmd.getServiceUserId());
+            OrganizationDetail enterprise = new OrganizationDetail();
+            enterprise.setOrganizationId(organization.getId());
+            enterprise.setAddress(cmd.getAddress());
+            enterprise.setDescription(cmd.getDescription());
+            enterprise.setAvatar(cmd.getAvatar());
+            enterprise.setCreateTime(organization.getCreateTime());
+            if (!StringUtils.isEmpty(cmd.getCheckinDate())) {
+                java.sql.Date checkinDate = DateUtil.parseDate(cmd.getCheckinDate());
+                if (null != checkinDate) {
+                    enterprise.setCheckinDate(new Timestamp(checkinDate.getTime()));
+                }
+            }
+            enterprise.setContact(cmd.getContactsPhone());
+            enterprise.setDisplayName(cmd.getDisplayName());
+            enterprise.setPostUri(cmd.getPostUri());
+            enterprise.setMemberCount(cmd.getMemberCount());
+            enterprise.setEmailDomain(cmd.getEmailDomain());
+            enterprise.setServiceUserId(cmd.getServiceUserId());
 			if(cmd.getLatitude()!=null)
 				enterprise.setLatitude(Double.valueOf(cmd.getLatitude()));
 			if(cmd.getLongitude()!=null)
 				enterprise.setLongitude(Double.valueOf(cmd.getLongitude()));
-			organizationProvider.createOrganizationDetail(enterprise);
+            organizationProvider.createOrganizationDetail(enterprise);
 
-			// 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
-			createActiveOrganizationCommunityRequest(user.getId(), enterprise.getOrganizationId(), cmd.getCommunityId());
+            // 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
+            createActiveOrganizationCommunityRequest(user.getId(), enterprise.getOrganizationId(), cmd.getCommunityId());
 //			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
 //			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
 //			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
@@ -1126,126 +1125,116 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
-	}
+    private void addAttachments(Long id, List<AttachmentDescriptor> attachments, Long userId) {
+        dbProvider.execute((TransactionStatus status) -> {
 
-	/**
-	 * 添加banner图片
-	 * @param id
-	 * @param attachments
-	 */
-	private void addAttachments(Long id, List<AttachmentDescriptor> attachments, Long userId){
-         dbProvider.execute((TransactionStatus status) -> {
-
- 			this.organizationProvider.deleteOrganizationAttachmentsByOrganizationId(id);
+            this.organizationProvider.deleteOrganizationAttachmentsByOrganizationId(id);
  			if (attachments != null && attachments.size() > 0) {
- 				for (AttachmentDescriptor attachmentDescriptor : attachments) {
- 					OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
- 					attachment.setCreatorUid(userId);
- 					attachment.setOrganizationId(id);
- 					attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
- 					this.organizationProvider.createOrganizationAttachment(attachment);
+ 			for (AttachmentDescriptor attachmentDescriptor : attachments) {
+ 				OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
+ 				attachment.setCreatorUid(userId);
+ 		        attachment.setOrganizationId(id);
+ 		        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+ 		      	this.organizationProvider.createOrganizationAttachment(attachment);
  				}
-			}
- 			return null;
- 		});
+ 			}
+            return null;
+        });
 
-	}
+    }
 
-	/**
-	 * 添加地址
-	 * @param id
-	 * @param addressDTOs
-	 * @param userId
-	 */
-	private void addAddresses(Long id, List<OrganizationAddressDTO> addressDTOs, Long userId){
+    /**
+     * 添加地址
+     *
+     * @param id
+     * @param addressDTOs
+     * @param userId
+     */
+    private void addAddresses(Long id, List<OrganizationAddressDTO> addressDTOs, Long userId) {
 
-		dbProvider.execute((TransactionStatus status) -> {
+        dbProvider.execute((TransactionStatus status) -> {
 
-			this.organizationProvider.deleteOrganizationAddressByOrganizationId(id);
+            this.organizationProvider.deleteOrganizationAddressByOrganizationId(id);
 
 			if (addressDTOs != null && addressDTOs.size() > 0) {
-				for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
-					OrganizationAddress address = ConvertHelper.convert(organizationAddressDTO, OrganizationAddress.class);
-					address.setOrganizationId(id);
-					address.setCreatorUid(userId);
-					address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
-				    this.organizationProvider.createOrganizationAddress(address);
+			for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
+				OrganizationAddress address = ConvertHelper.convert(organizationAddressDTO, OrganizationAddress.class);
+				address.setOrganizationId(id);
+				address.setCreatorUid(userId);
+				address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+			    this.organizationProvider.createOrganizationAddress(address);
 				}
 			}
 			
-			return null;
-		});
+            return null;
+        });
 
 	}
 
-	@Override
-	public void updateEnterprise(UpdateEnterpriseCommand cmd) {
 		updateEnterprise(cmd, true);
 	}
 	
 	public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
-		//先判断，后台管理员才能创建。状态直接设为正常
-		Organization organization = checkOrganization(cmd.getId());
-		User user = UserContext.current().getUser();
+        //先判断，后台管理员才能创建。状态直接设为正常
+        Organization organization = checkOrganization(cmd.getId());
+        User user = UserContext.current().getUser();
 
-		dbProvider.execute((TransactionStatus status) -> {
-			organization.setId(cmd.getId());
-			organization.setName(cmd.getName());
-			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			organization.setEmailDomain(cmd.getEmailDomain());
-			organizationProvider.updateOrganization(organization);
+        dbProvider.execute((TransactionStatus status) -> {
+            organization.setId(cmd.getId());
+            organization.setName(cmd.getName());
+            organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organization.setEmailDomain(cmd.getEmailDomain());
+            organizationProvider.updateOrganization(organization);
 
-			OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
-			if(null == organizationDetail){
-				organizationDetail = new OrganizationDetail();
-				organizationDetail.setOrganizationId(organization.getId());
-				organizationDetail.setCreateTime(organization.getCreateTime());
-				organizationDetail.setAddress(cmd.getAddress());
-				organizationDetail.setDescription(cmd.getDescription());
-				organizationDetail.setEmailDomain(cmd.getEmailDomain());
-				organizationDetail.setAvatar(cmd.getAvatar());
-				if(!StringUtils.isEmpty(cmd.getCheckinDate())){
+            OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+            if (null == organizationDetail) {
+                organizationDetail = new OrganizationDetail();
+                organizationDetail.setOrganizationId(organization.getId());
+                organizationDetail.setCreateTime(organization.getCreateTime());
+                organizationDetail.setAddress(cmd.getAddress());
+                organizationDetail.setDescription(cmd.getDescription());
+                organizationDetail.setEmailDomain(cmd.getEmailDomain());
+                organizationDetail.setAvatar(cmd.getAvatar());
+                if (!StringUtils.isEmpty(cmd.getCheckinDate())) {
 					java.sql.Date checkinDate = DateUtil.parseDate(cmd.getCheckinDate());
 					if(null != checkinDate){
 						organizationDetail.setCheckinDate(new Timestamp(checkinDate.getTime()));
 					}
 				}else {
 					organizationDetail.setCheckinDate(null);
-				}
-				organizationDetail.setContact(cmd.getContactsPhone());
-				organizationDetail.setDisplayName(cmd.getDisplayName());
-				organizationDetail.setPostUri(cmd.getPostUri());
-				organizationDetail.setServiceUserId(cmd.getServiceUserId());
+                }
+                organizationDetail.setContact(cmd.getContactsPhone());
+                organizationDetail.setDisplayName(cmd.getDisplayName());
+                organizationDetail.setPostUri(cmd.getPostUri());
+                organizationDetail.setServiceUserId(cmd.getServiceUserId());
 				organizationDetail.setLatitude(cmd.getLatitude());
 				organizationDetail.setLongitude(cmd.getLongitude());
 				organizationDetail.setMemberCount(cmd.getMemberCount());
-				organizationProvider.createOrganizationDetail(organizationDetail);
-			}else{
-				organizationDetail.setEmailDomain(cmd.getEmailDomain());
-				organizationDetail.setAddress(cmd.getAddress());
-				organizationDetail.setDescription(cmd.getDescription());
-				organizationDetail.setAvatar(cmd.getAvatar());
-				if(!StringUtils.isEmpty(cmd.getCheckinDate())){
+                organizationProvider.createOrganizationDetail(organizationDetail);
+            } else {
+                organizationDetail.setEmailDomain(cmd.getEmailDomain());
+                organizationDetail.setAddress(cmd.getAddress());
+                organizationDetail.setDescription(cmd.getDescription());
+                organizationDetail.setAvatar(cmd.getAvatar());
+                if (!StringUtils.isEmpty(cmd.getCheckinDate())) {
 					java.sql.Date checkinDate = DateUtil.parseDate(cmd.getCheckinDate());
 					if(null != checkinDate){
 						organizationDetail.setCheckinDate(new Timestamp(checkinDate.getTime()));
 					}
 				}else {
 					organizationDetail.setCheckinDate(null);
-				}
-				organizationDetail.setContact(cmd.getContactsPhone());
-				organizationDetail.setDisplayName(cmd.getDisplayName());
-				organizationDetail.setPostUri(cmd.getPostUri());
-				organizationDetail.setServiceUserId(cmd.getServiceUserId());
+                }
+                organizationDetail.setContact(cmd.getContactsPhone());
+                organizationDetail.setDisplayName(cmd.getDisplayName());
+                organizationDetail.setPostUri(cmd.getPostUri());
+                organizationDetail.setServiceUserId(cmd.getServiceUserId());
 				organizationDetail.setLatitude(cmd.getLatitude());
 				organizationDetail.setLongitude(cmd.getLongitude());
 				organizationDetail.setMemberCount(cmd.getMemberCount());
-				organizationProvider.updateOrganizationDetail(organizationDetail);
-			}
-
-
+                organizationProvider.updateOrganizationDetail(organizationDetail);
+            }
 			// 把小区ID移到eh_organization_community_requests后，在企业更新时需要补充小区修改，但修改小区逻辑未想好故暂时不支持 by lqs 20160512
 //			if(cmd.getCommunityId() != null) {
 //			    OrganizationCommunityRequest orgCmntyRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
@@ -1262,22 +1251,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 
 		if (updateAttachmentAndAddress) {
-			List<AttachmentDescriptor> attachments = cmd.getAttachments();
+		List<AttachmentDescriptor> attachments = cmd.getAttachments();
 
 //			if(null != attachments && 0 != attachments.size()){
-			this.addAttachments(organization.getId(), attachments, user.getId());
+            this.addAttachments(organization.getId(), attachments, user.getId());
 //			}
 
-			List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
+		List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
 //			if(null != addressDTOs && 0 != addressDTOs.size()){
-			this.addAddresses(organization.getId(), addressDTOs, user.getId());
+            this.addAddresses(organization.getId(), addressDTOs, user.getId());
 //			}
-		}
-	}
+        }
+    }
 
-	@Override
-	public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd) {
-		Organization organization = checkOrganization(cmd.getId());
+    @Override
+    public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd) {
+        Organization organization = checkOrganization(cmd.getId());
 		User user = UserContext.current().getUser();
 
 		dbProvider.execute((TransactionStatus status) -> {
@@ -1329,10 +1318,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				return null;
 			}).collect(Collectors.toList());
 
-			organizationSearcher.deleteById(cmd.getId());
-			return null;
-		});
-	}
+            organizationSearcher.deleteById(cmd.getId());
+            return null;
+        });
+    }
 
 	@Override
 	public void applyOrganizationMember(ApplyOrganizationMemberCommand cmd) {
@@ -4961,6 +4950,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setRequestType(RequestType.USER.getCode());
                 orgLog.setOperatorUid(UserContext.current().getUser().getId());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
+
 				//批准加入公司则授权
              this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
             }
@@ -5035,7 +5025,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private List<OrganizationMember> listOrganizationMemberByOrganizationPathAndContactToken(String path, String contactToken) {
         return organizationProvider.listOrganizationMemberByPath(path, null, contactToken);
     }
-
+	
 	@Override
 	public List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
@@ -5763,6 +5753,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         Integer namespaceId = exNamespaceId;
 
+		Organization org = checkOrganization(cmd.getOrganizationId());
+
         OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
 
         return this.dbProvider.execute((TransactionStatus status) -> {
@@ -5776,10 +5768,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
                 m = this.createOrganizationPersonnel(memberCmd);
             } else {
-                if (OrganizationMemberStatus.fromCode(m.getStatus()) != OrganizationMemberStatus.ACTIVE) {
-                    m.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    m.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-                    organizationProvider.updateOrganizationMember(m);
+				List<OrganizationMember> members = listOrganizationMemberByOrganizationPathAndContactToken(org.getPath(), cmd.getAccountPhone());
+				for (OrganizationMember organizationMember: members) {
+					organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+					organizationMember.setContactName(cmd.getAccountName());
+					organizationProvider.updateOrganizationMember(organizationMember);
                 }
             }
 
@@ -6081,7 +6074,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private List<ImportEnterpriseDataDTO> handleImportEnterpriseData(List list){
-		List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
+        List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
 		for(int i = 1; i < list.size(); i++) {
 			RowResult r = (RowResult)list.get(i);
 			if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) || 
@@ -6090,34 +6083,34 @@ public class OrganizationServiceImpl implements OrganizationService {
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) || 
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) || 
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
-				ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
-				if(null != r.getA())
-					data.setName(r.getA().trim());
-				if(null != r.getB())
-					data.setDisplayName(r.getB().trim());
-				if(null != r.getC())
-					data.setAdminName(r.getC().trim());
-				if(null != r.getD())
-					data.setAdminToken(r.getD().trim());
-				if(null != r.getE())
-					data.setEmail(r.getE().trim());
-				if(null != r.getF())
-					data.setBuildingName(r.getF().trim());
-				if(null != r.getG())
-					data.setAddress(r.getG().trim());
-				if(null != r.getH())
-					data.setContact(r.getH().trim());
-				if(null != r.getI())
-					data.setNumber(r.getI().trim());
-				if(null != r.getJ())
-					data.setCheckinDate(r.getJ().trim());
-				if(null != r.getK())
-					data.setDescription(r.getK().trim());
-				datas.add(data);
+			ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
+			if(null != r.getA())
+				data.setName(r.getA().trim());
+			if(null != r.getB())
+				data.setDisplayName(r.getB().trim());
+			if(null != r.getC())
+				data.setAdminName(r.getC().trim());
+			if(null != r.getD())
+				data.setAdminToken(r.getD().trim());
+			if(null != r.getE())
+				data.setEmail(r.getE().trim());
+			if(null != r.getF())
+				data.setBuildingName(r.getF().trim());
+			if(null != r.getG())
+				data.setAddress(r.getG().trim());
+			if(null != r.getH())
+				data.setContact(r.getH().trim());
+			if(null != r.getI())
+				data.setNumber(r.getI().trim());
+			if(null != r.getJ())
+				data.setCheckinDate(r.getJ().trim());
+			if(null != r.getK())
+				data.setDescription(r.getK().trim());
+			datas.add(data);
 			}
-		}
-		return datas;
-	}
+        }
+        return datas;
+    }
 
     private List<ImportOrganizationContactDataDTO> handleImportOrganizationContactData(List list) {
         List<ImportOrganizationContactDataDTO> datas = new ArrayList<>();
@@ -10057,9 +10050,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListPersonnelsV2CommandResponse response = new ListPersonnelsV2CommandResponse();
         ListOrganizationMemberCommandResponse res = this.listOrganizationPersonnels(ConvertHelper.convert(cmd, ListOrganizationContactCommand.class), false);
 
-        if(res.getMembers() == null || res.getMembers().isEmpty()){
+        if (res.getMembers() == null || res.getMembers().isEmpty()) {
             return response;
-        }else{
+        } else {
             //  查找合同到期时间
             List<Long> detailIds = new ArrayList<>();
             res.getMembers().forEach(r -> {
@@ -10067,19 +10060,20 @@ public class OrganizationServiceImpl implements OrganizationService {
             });
             List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
 
-            response.setMembers(res.getMembers().stream().map(r -> {
-                OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
+            response.setMembers(res.getMembers().stream().filter(r ->{
+                return !StringUtils.isEmpty(r.getDetailId());
+            }).map(r -> {
+                    OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
+                    //  设置合同到期时间
+                    if (endTimeList != null) {
+                        endTimeList.forEach(rr -> {
 
-                //  设置合同到期时间
-                if (endTimeList != null) {
-                    endTimeList.forEach(rr -> {
-
-                        if (rr[0].equals(dto.getDetailId())) {
-                            dto.setEndTime((java.sql.Date) rr[1]);
-                        }
-                    });
-                }
-                return dto;
+                            if (rr[0].equals(dto.getDetailId())) {
+                                dto.setEndTime((java.sql.Date) rr[1]);
+                            }
+                        });
+                    }
+                    return dto;
             }).collect(Collectors.toList()));
 
             response.setNextPageOffset(res.getNextPageOffset());
@@ -11688,6 +11682,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.createXSSFPersonnelFileTitle(row1);
 
         for (OrganizationMemberV2DTO member : members) {
+
+            //	若无 detailId 说明为非法数据
+            if(StringUtils.isEmpty(member.getDetailId()))
+                continue;
+
             XSSFRow row = sheet.createRow(rowNum++);
 
             //  写入基本信息

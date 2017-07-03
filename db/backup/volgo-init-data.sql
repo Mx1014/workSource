@@ -1003,6 +1003,9 @@ update eh_launch_pad_items set action_data = '{"url": "https://biz.zuolin.com/zl
 	
 -- fix 10934 by xiongying20170608
 SET @org_id = (select id from eh_organizations where namespace_id = 1 and name = '华润网络（深圳）有限公司');
+
+
+-- fix 10934 by xiongying20170608
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`) 
 	VALUES (10825, '华润通会议室', '0', NULL, '2', '1', '0');
 SET @namespace_id=1;

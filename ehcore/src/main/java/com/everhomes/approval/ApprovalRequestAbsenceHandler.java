@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 
 
+
 import javassist.runtime.DotClass;
 
 import org.apache.commons.lang.StringUtils;
@@ -62,8 +63,10 @@ import org.springframework.stereotype.Component;
 
 
 
+
 import ch.qos.logback.classic.Logger;
  
+
 
 
 
@@ -87,6 +90,7 @@ import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
@@ -918,6 +922,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.ABSENCE_EMPTY_TIME,
 					"time cannot be empty");
 		}
+		 
         TimeRange range = cmd.getTimeRangeList().get(0);
         SimpleDateFormat sdFormat = new SimpleDateFormat("yy-MM-dd HH:mm");
         map.put("beginTime", sdFormat.format(new Date(range.getFromTime())) ); 

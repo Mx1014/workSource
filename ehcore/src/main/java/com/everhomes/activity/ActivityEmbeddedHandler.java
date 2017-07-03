@@ -321,8 +321,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         
         
         //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天
+		//产品要求：去除“官方活动”这个条件，对所有活动适应    add by yanjun 20170629
         try {
-        	if(cmd.getOfficialFlag() == OfficialFlag.YES.getCode() && null != cmd.getStartTime()){
+        	if(null != cmd.getStartTime()){
         		SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         		Date startTime= f.parse(cmd.getStartTime());
             	if(startTime.before(DateHelper.currentGMTTime())){

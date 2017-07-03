@@ -1347,7 +1347,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 				approvalRequest.getCurrentLevel(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId()));
 	}
 
-	private ApprovalOwnerInfo getOwnerInfoFromSceneToken(String sceneTokenString) {
+	@Override
+	public ApprovalOwnerInfo getOwnerInfoFromSceneToken(String sceneTokenString) {
 		if (StringUtils.isBlank(sceneTokenString)) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"sceneToken cannot be null");
