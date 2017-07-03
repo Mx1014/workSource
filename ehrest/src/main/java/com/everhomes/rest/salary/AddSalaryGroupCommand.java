@@ -22,6 +22,9 @@ public class AddSalaryGroupCommand {
 
     private String salaryGroupName;
 
+    //  判断是否需要向组织架构添加
+    private Long salaryGroupId;
+
     private String ownerType;
 
     private Long ownerId;
@@ -44,6 +47,14 @@ public class AddSalaryGroupCommand {
 
     public void setSalaryGroupName(String salaryGroupName) {
         this.salaryGroupName = salaryGroupName;
+    }
+
+    public Long getSalaryGroupId() {
+        return salaryGroupId;
+    }
+
+    public void setSalaryGroupId(Long salaryGroupId) {
+        this.salaryGroupId = salaryGroupId;
     }
 
     public String getOwnerType() {

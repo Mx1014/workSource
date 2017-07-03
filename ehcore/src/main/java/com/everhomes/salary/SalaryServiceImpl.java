@@ -126,7 +126,7 @@ public class SalaryServiceImpl implements SalaryService {
             return dto;
         }).collect(Collectors.toList()));
 		return response;
-	}
+    }
 
     @Override
     public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd) {
@@ -134,9 +134,13 @@ public class SalaryServiceImpl implements SalaryService {
         AddSalaryGroupResponse response = new AddSalaryGroupResponse();
         if (!cmd.getSalaryGroupEntity().isEmpty()) {
 
-            //	添加批次至组织结构
-            Organization org = this.organizationService.createSalaryGroupOrganization(cmd.getOwnerId(),cmd.getSalaryGroupName());
-            Long groupId = org.getId();
+            Long groupId;
+            if (StringUtils.isEmpty(cmd.getSalaryGroupId())) {
+                //	添加批次至组织结构
+                Organization org = this.organizationService.createSalaryGroupOrganization(cmd.getOwnerId(), cmd.getSalaryGroupName());
+                groupId = org.getId();
+            } else
+                groupId = cmd.getSalaryGroupId();
 
             //  添加至薪酬组刘表
             response.setSalaryGroupEntity(cmd.getSalaryGroupEntity().stream().map(r -> {
@@ -179,6 +183,7 @@ public class SalaryServiceImpl implements SalaryService {
 
             this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
             AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
+            addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
             addCommand.setSalaryGroupName(cmd.getSalaryGroupName());
             addCommand.setOwnerType(cmd.getOwnerType());
             addCommand.setOwnerId(cmd.getOwnerId());
