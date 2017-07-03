@@ -2821,7 +2821,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     //每行8个
                     for(int w = 0; w < 8; w++) {
                         LOGGER.info("draw w : {}, row: {}, file size: {}" , w, row, files.size());
-                        if(row * 8 +w < files.size()) {
+                        if(row * 8 +w < max) {
 //                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
                             LOGGER.info("draw page: {}, Width : {}, Height: {}" , i, w * 225, height);
                             File file = new File(files.get(i*72 + row * 8 + w));
