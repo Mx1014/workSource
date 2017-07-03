@@ -164,7 +164,7 @@
         eh_user_notification_settings | eh_group_member_logs | 
         eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat |
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
-        eh_organization_member_contracts | eh_organization_member_profile_logs |
+        eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
 
 	</includes>
 
