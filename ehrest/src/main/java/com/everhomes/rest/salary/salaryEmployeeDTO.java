@@ -11,8 +11,8 @@ import java.util.List;
  * <li>userId: 员工id</li>
  * <li>employeeNo: 员工编号(可为空)</li>
  * <li>contactName: 员工姓名</li>
- * <li>departments: 员工部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
- * <li>jobPositions: 员工岗位 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>department: 员工部门 </li>
+ * <li>jobPosition: 员工岗位 </li>
  * <li>salaryGroupId: 批次id</li>
  * <li>salaryGroupName: 批次名称</li>
  * <li>isConfirmed: 工资明细:0-已设置 1-未设置</li>
@@ -26,11 +26,16 @@ public class salaryEmployeeDTO {
 
     private String contactName;
 
+/*
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> jobPositions;
+*/
+    private String department;
+
+    private String jobPosition;
 
     private Long salaryGroupId;
 
@@ -65,20 +70,20 @@ public class salaryEmployeeDTO {
         this.contactName = contactName;
     }
 
-    public List<OrganizationDTO> getDepartments() {
-        return departments;
+    public String getDepartment() {
+        return department;
     }
 
-    public void setDepartments(List<OrganizationDTO> departments) {
-        this.departments = departments;
+    public void setDepartment(String department) {
+        this.department = department;
     }
 
-    public List<OrganizationDTO> getJobPositions() {
-        return jobPositions;
+    public String getJobPosition() {
+        return jobPosition;
     }
 
-    public void setJobPositions(List<OrganizationDTO> jobPositions) {
-        this.jobPositions = jobPositions;
+    public void setJobPosition(String jobPosition) {
+        this.jobPosition = jobPosition;
     }
 
     public Long getSalaryGroupId() {

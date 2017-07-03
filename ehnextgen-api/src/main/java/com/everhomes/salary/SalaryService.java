@@ -41,6 +41,9 @@ public interface SalaryService {
 	public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd);
 
 
+	public void addToOrganizationSalaryGroup(AddToOrganizationSalaryGroupCommand cmd);
+
+
 	public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse);
 
 

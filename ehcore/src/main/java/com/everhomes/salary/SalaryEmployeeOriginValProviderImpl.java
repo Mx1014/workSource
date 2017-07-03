@@ -86,11 +86,13 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 	}
 
 	@Override
-    public void deleteSalaryEmployeeOriginValByGroupIdUserId(Long groupId, Long userId){
+    public void deleteSalaryEmployeeOriginValByGroupIdUserId(Long groupId, Long userId,String ownerType, Long ownerId){
         DSLContext context = this.getContext(AccessSpec.readWrite());
         context.delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
                 .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_ID.eq(userId))
                 .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(groupId))
+                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_TYPE.eq(ownerType))
                 .execute();
     }
 
