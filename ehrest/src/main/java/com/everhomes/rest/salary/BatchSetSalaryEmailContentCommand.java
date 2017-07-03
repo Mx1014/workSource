@@ -7,7 +7,7 @@ import java.util.List;
 /**
  *
  * <ul>参数:
- * <li>salaryGroupCmd: 单个批次设置参数</li>
+ * <li>salaryGroupCmd: 单个批次设置参数参考 {@link com.everhomes.rest.salary.SetSalaryEmailContentCommand}</li>
  * </ul>
  */
 public class BatchSetSalaryEmailContentCommand {
