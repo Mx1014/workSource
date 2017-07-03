@@ -2943,20 +2943,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 					if(maps != null && maps.size() > 0) {
 						for(OrganizationJobPositionMap map : maps) {
 							ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-							group.setGroupId(map.getOrganizationId());
+							group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
 							group.setPositionId(map.getJobPositionId());
 							groupDtos.add(group);
 
-							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
-							if(groupOrg != null) {
-								//取path后的第一个路径 为顶层公司 by xiongying 20170323
+//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
+//							if(groupOrg != null) {
+//								//取path后的第一个路径 为顶层公司 by xiongying 20170323
 								String[] path = organization.getPath().split("/");
 								Long organizationId = Long.valueOf(path[1]);
-
-								group.setGroupId(organizationId);
-								group.setPositionId(map.getJobPositionId());
-								groupDtos.add(group);
-							}
+								ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
+								topGroup.setGroupId(organizationId);
+								topGroup.setPositionId(map.getJobPositionId());
+								groupDtos.add(topGroup);
+//							}
 
 						}
 

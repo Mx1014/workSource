@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 
 /**
  * <ul>
@@ -36,7 +37,8 @@ public class UpdateBuildingAdminCommand {
 	private String aliasName;
 	
 	private Long managerUid;
-	
+	private String managerName;
+
 	private String contact;
 	
 	private String address;
@@ -66,6 +68,36 @@ public class UpdateBuildingAdminCommand {
 	private String airConditionDescription;
 	private String securityDescription;
 	private String fireControlDescription;
+
+	private Long generalFormId;
+	private Byte customFormFlag;
+
+	@ItemType(PostApprovalFormItem.class)
+	private List<PostApprovalFormItem> formValues;
+
+	public Long getGeneralFormId() {
+		return generalFormId;
+	}
+
+	public void setGeneralFormId(Long generalFormId) {
+		this.generalFormId = generalFormId;
+	}
+
+	public Byte getCustomFormFlag() {
+		return customFormFlag;
+	}
+
+	public void setCustomFormFlag(Byte customFormFlag) {
+		this.customFormFlag = customFormFlag;
+	}
+
+	public List<PostApprovalFormItem> getFormValues() {
+		return formValues;
+	}
+
+	public void setFormValues(List<PostApprovalFormItem> formValues) {
+		this.formValues = formValues;
+	}
 
 	public Long getId() {
 		return id;
@@ -258,4 +290,13 @@ public class UpdateBuildingAdminCommand {
 	public void setFloorCount(String floorCount) {
 		this.floorCount = floorCount;
 	}
+
+	public String getManagerName() {
+		return managerName;
+	}
+
+	public void setManagerName(String managerName) {
+		this.managerName = managerName;
+	}
+
 }

@@ -3,11 +3,14 @@ package com.everhomes.rest.techpark.expansion;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
-
  * <li>sourceId：来源ID：黄页ID</li>
  * <li>sourceType：来源类型building /market_zone /for_rent/office_cubicle(工位)的 参考{@link com.everhomes.rest.techpark.expansion.ApplyEntrySourceType}}</li>
  * <li>enterpriseName：申请公司名</li>
@@ -19,7 +22,12 @@ import com.everhomes.util.StringHelper;
  * <li>communityId：园区ID</li>
  * <li>namespaceId：命名空间</li>
  * <li>description：随便写一点什么</li> 
- * <li>contractId：合同id-如果有的话</li> 
+ * <li>contractId：合同id-如果有的话</li>
+ * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
+ * <li>addressId：门牌id</li>
+ * <li>buildingId：楼栋id</li>
+ * <li>requestFormId：申请表单id</li>
+ * <li>formValues: 审批项中，每项对应的值{@link com.everhomes.rest.general_approval.PostApprovalFormItem} </li>
  * </ul>
  */
 public class EnterpriseApplyEntryCommand {
@@ -51,10 +59,29 @@ public class EnterpriseApplyEntryCommand {
 
 	private Long contractId;
 
-	private String issuerType;
-
 	private Long addressId;
 	private Long buildingId;
+
+	@ItemType(PostApprovalFormItem.class)
+	private List<PostApprovalFormItem> formValues;
+
+	private Long requestFormId;
+
+	public List<PostApprovalFormItem> getFormValues() {
+		return formValues;
+	}
+
+	public void setFormValues(List<PostApprovalFormItem> formValues) {
+		this.formValues = formValues;
+	}
+
+	public Long getRequestFormId() {
+		return requestFormId;
+	}
+
+	public void setRequestFormId(Long requestFormId) {
+		this.requestFormId = requestFormId;
+	}
 
 	public Long getAddressId() {
 		return addressId;
@@ -70,14 +97,6 @@ public class EnterpriseApplyEntryCommand {
 
 	public void setBuildingId(Long buildingId) {
 		this.buildingId = buildingId;
-	}
-
-	public String getIssuerType() {
-		return issuerType;
-	}
-
-	public void setIssuerType(String issuerType) {
-		this.issuerType = issuerType;
 	}
 
 	public String getSourceType() {

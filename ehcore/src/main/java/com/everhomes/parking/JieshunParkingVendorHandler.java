@@ -611,4 +611,10 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 	public void lockParkingCar(LockParkingCarCommand cmd) {
 
 	}
+
+	@Override
+	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -1,0 +1,156 @@
+{
+	"eh_acls":
+	[
+		{
+			"id": 115963,
+			"owner_type": "EhOrganizations",
+			"owner_id": 1000750,
+			"grant_type": 1,
+			"privilege_id": 10,
+			"role_id": 11,
+			"order_seq": 0,
+			"creator_uid": 226707,
+			"create_time": "2017-02-09 10:07:37",
+			"namespace_id": 999992,
+			"role_type": "EhUsers",
+			"scope": "EhOrganizations1000750.admin"
+		}
+	],
+	"eh_talent_categories":
+	[
+		{
+			"id": 1,
+			"namespace_id": 999992,
+			"name": "分类",
+			"status": 2,
+			"creator_uid": 11,
+			"create_time": "2017-05-16 13:42:26",
+			"update_time": "2017-05-16 13:42:26",
+			"operator_uid": 11
+		},
+		{
+			"id": 2,
+			"namespace_id": 999992,
+			"name": "分类2",
+			"status": 2,
+			"creator_uid": 11,
+			"create_time": "2017-05-16 13:42:26",
+			"update_time": "2017-05-16 13:42:26",
+			"operator_uid": 11
+		},
+		{
+			"id": 3,
+			"namespace_id": 999992,
+			"name": "分类3",
+			"status": 2,
+			"creator_uid": 11,
+			"create_time": "2017-05-16 13:42:26",
+			"update_time": "2017-05-16 13:42:26",
+			"operator_uid": 11
+		}
+	],
+	"eh_talents":
+	[
+		{
+			"id": 1,
+			"namespace_id": 999992,
+			"owner_type": "community",
+			"owner_id": 240111044331051304,
+			"name": "tt_test",
+			"avatar_uri": "https://www.baidu.com",
+			"phone": "13265767391",
+			"gender": 1,
+			"position": "软件",
+			"category_id": 1,
+			"experience": 10,
+			"graduate_school": "中山大学",
+			"degree": 1,
+			"remark": "我是详情",
+			"enabled": 1,
+			"default_order": 0,
+			"status": 2,
+			"creator_uid": 11,
+			"create_time": "2017-05-16 13:53:19",
+			"update_time": "2017-05-16 13:53:19",
+			"operator_uid": 11
+		},
+		{
+			"id": 2,
+			"namespace_id": 999992,
+			"owner_type": "community",
+			"owner_id": 240111044331051304,
+			"name": "tt_test2",
+			"avatar_uri": "https://www.baidu.com",
+			"phone": "13265767391",
+			"gender": 1,
+			"position": "软件",
+			"category_id": 1,
+			"experience": 10,
+			"graduate_school": "中山大学",
+			"degree": 1,
+			"remark": "我是详情",
+			"enabled": 1,
+			"default_order": 0,
+			"status": 2,
+			"creator_uid": 11,
+			"create_time": "2017-05-16 13:53:19",
+			"update_time": "2017-05-16 13:53:19",
+			"operator_uid": 11
+		},{
+			"id": 3,
+			"namespace_id": 999992,
+			"owner_type": "community",
+			"owner_id": 240111044331051304,
+			"name": "tt_test3",
+			"avatar_uri": "https://www.baidu.com",
+			"phone": "13265767391",
+			"gender": 1,
+			"position": "软件",
+			"category_id": 1,
+			"experience": 10,
+			"graduate_school": "中山大学",
+			"degree": 1,
+			"remark": "我是详情",
+			"enabled": 1,
+			"default_order": 0,
+			"status": 2,
+			"creator_uid": 11,
+			"create_time": "2017-05-16 13:53:19",
+			"update_time": "2017-05-16 13:53:19",
+			"operator_uid": 11
+		}
+	],
+	"eh_talent_query_histories":
+	[
+		{
+			"id": 1,
+			"namespace_id": 999992,
+			"keyword": "分类",
+			"status": 2,
+			"creator_uid": 11,
+			"create_time": "2017-05-16 14:10:04",
+			"update_time": "2017-05-16 14:10:04",
+			"operator_uid": 11
+		},
+		{
+			"id": 2,
+			"namespace_id": 999992,
+			"keyword": "分类2",
+			"status": 2,
+			"creator_uid": 11,
+			"create_time": "2017-05-16 14:10:04",
+			"update_time": "2017-05-16 14:10:04",
+			"operator_uid": 11
+		},
+		{
+			"id": 3,
+			"namespace_id": 999992,
+			"keyword": "分类3",
+			"status": 2,
+			"creator_uid": 11,
+			"create_time": "2017-05-16 14:10:04",
+			"update_time": "2017-05-16 14:10:04",
+			"operator_uid": 11
+		}
+	]
+}

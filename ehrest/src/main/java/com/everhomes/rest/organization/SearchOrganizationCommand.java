@@ -6,10 +6,12 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>communityId: 用户当前所有小区ID</li>
  *  <li>namespaceId : 域</li>
+ *  <li>setAdminFlag : 是否设置了管理员</li>
  *  <li>keyword: 内容关键字</li>
  *  <li>organizationType : 机构类型 ，详情{@link com.everhomes.rest.organization.organizationType}</li>
  *  <li>pageAnchor: 本页开始锚点</li>
  *  <li>pageSize: 每页的数量</li>
+ *  <li>buildingName: 楼栋名称</li>
  * </ul>
  *
  */
@@ -18,13 +20,26 @@ public class SearchOrganizationCommand {
     private String keyword;
     
     private Long communityId;
-    
+    private Byte setAdminFlag;
     private Long pageAnchor;
     private Integer pageSize;
     
     private String organizationType;
+    private String buildingName;
     
-    public Integer getNamespaceId() {
+    public String getBuildingName() {
+		return buildingName;
+	}
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+	public Byte getSetAdminFlag() {
+		return setAdminFlag;
+	}
+	public void setSetAdminFlag(Byte setAdminFlag) {
+		this.setAdminFlag = setAdminFlag;
+	}
+	public Integer getNamespaceId() {
         return namespaceId;
     }
     public void setNamespaceId(Integer namespaceId) {

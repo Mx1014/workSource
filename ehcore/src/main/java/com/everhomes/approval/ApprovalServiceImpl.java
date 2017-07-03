@@ -24,7 +24,12 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
@@ -37,6 +42,10 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rentalv2.RentalOrder;
+import com.everhomes.rentalv2.RentalResourceType;
+import com.everhomes.rentalv2.Rentalv2Controller;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
@@ -133,6 +142,10 @@ import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -171,7 +184,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ApprovalServiceImpl.class);
 	@Autowired
 	private NamespaceProvider namespaceProvider;
-	 
+	
+    
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 
@@ -1333,7 +1347,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 				approvalRequest.getCurrentLevel(), ownerInfo.getOwnerType(), ownerInfo.getOwnerId()));
 	}
 
-	private ApprovalOwnerInfo getOwnerInfoFromSceneToken(String sceneTokenString) {
+	@Override
+	public ApprovalOwnerInfo getOwnerInfoFromSceneToken(String sceneTokenString) {
 		if (StringUtils.isBlank(sceneTokenString)) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"sceneToken cannot be null");
@@ -1422,7 +1437,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 
 		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
-
+		CreateApprovalRequestBySceneResponse response = new CreateApprovalRequestBySceneResponse();
 		ApprovalRequest result = dbProvider.execute(s -> {
 			// 1. 申请表增加一条记录
 			// 前置处理器，处理一些特定审批类型的数据检查等操作
@@ -1442,7 +1457,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 				createApprovalOpRequest(userId, approvalRequest, cmd.getReason());
 
 				// 4. 后置处理器，处理时间，回调考勤接口更新打卡相关接口
-				handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
+				String flowCaseUrl = handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
+				response.setFlowCaseUrl(flowCaseUrl);
 
 				// 5. 发消息给第一级审批者
 				List<ApprovalFlowLevel> nextLevelUser = approvalFlowLevelProvider.listApprovalFlowLevel(approvalRequest.getFlowId(),
@@ -1451,10 +1467,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 				return approvalRequest;
 			});
-
-		return new CreateApprovalRequestBySceneResponse(handler.processBriefApprovalRequest(result));
+		response.setApprovalRequest(handler.processBriefApprovalRequest(result)); 
+		return response;
 	}
-
 	private void createApprovalOpRequest(Long userId, ApprovalRequest approvalRequest, String processMessage) {
 		ApprovalOpRequest approvalOpRequest = new ApprovalOpRequest();
 		approvalOpRequest.setRequestId(approvalRequest.getId());
@@ -1576,10 +1591,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 									if (ListUtils.isEmpty(nextLevelUser)) {
 										// 如果不存在下一级别的审批人，说明此单审批结束
 										// 1. 修改审批状态为同意
-										approvalRequest.setCurrentLevel(approvalRequest.getNextLevel());
-										approvalRequest.setNextLevel(null);
-										approvalRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
-										updateApprovalRequest(userId, approvalRequest);
+//										approvalRequest.setCurrentLevel(approvalRequest.getNextLevel());
+//										approvalRequest.setNextLevel(null);
+//										approvalRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
+//										updateApprovalRequest(userId, approvalRequest);
 										// 2. 发消息给申请单创建者
 										sendMessageToCreator(approvalRequest, null);
 										// 3. 最终同意回调业务方法
@@ -1611,7 +1626,27 @@ public class ApprovalServiceImpl implements ApprovalService {
 			return true;
 		});
 	}
-
+	public void finishApproveApprovalRequest(ApprovalRequest approvalRequest){
+		// 1. 修改审批状态为同意
+		approvalRequest.setCurrentLevel(approvalRequest.getNextLevel());
+		approvalRequest.setNextLevel(null);
+		approvalRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
+		updateApprovalRequest(getUserId(), approvalRequest);
+		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
+		// 3. 最终同意回调业务方法
+		handler.processFinalApprove(approvalRequest);
+		
+		// 4.对于请假的,要计算入每个月的考勤统计
+		handler.calculateRangeStat(approvalRequest);
+		ApprovalOpRequest approvalOpRequest = new ApprovalOpRequest();
+		approvalOpRequest.setRequestId(approvalRequest.getId());
+		approvalOpRequest.setOperatorUid(UserContext.current().getUser().getId());
+		approvalOpRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		approvalOpRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
+		approvalOpRequest.setFlowId(approvalRequest.getFlowId());
+		approvalOpRequest.setLevel(approvalRequest.getCurrentLevel());
+		approvalOpRequestProvider.createApprovalOpRequest(approvalOpRequest); 
+	}
 	private void sendMessageToNextLevel(List<ApprovalFlowLevel> nextLevelUser, ApprovalRequest approvalRequest) {
 		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
 		String body = handler.processMessageToNextLevelBody(approvalRequest);
@@ -1925,7 +1960,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 //>>>>>>> 3.11.0
 	}
 
-	private ApprovalRequestHandler getApprovalRequestHandler(Byte approvalType) {
+	public ApprovalRequestHandler getApprovalRequestHandler(Byte approvalType) {
 		if (approvalType != null) {
 			ApprovalRequestHandler handler = PlatformContext.getComponent(ApprovalRequestHandler.APPROVAL_REQUEST_OBJECT_PREFIX
 					+ approvalType);

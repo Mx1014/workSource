@@ -3,6 +3,7 @@ package com.everhomes.techpark.expansion;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.techpark.expansion.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 
@@ -45,5 +46,11 @@ public interface EnterpriseApplyEntryService {
 	ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd);
 
 	List<AddressDTO>  listLeaseIssuerApartments(ListLeaseIssuerApartmentsCommand cmd);
+
+	void updateLeasePromotionRequestForm(@Valid UpdateLeasePromotionRequestFormCommand cmd);
+
+	LeaseFormRequestDTO getLeasePromotionRequestForm(@Valid GetLeasePromotionRequestFormCommand cmd);
+
+	void updateLeasePromotionOrder(@Valid UpdateLeasePromotionOrderCommand cmd);
 	
 }

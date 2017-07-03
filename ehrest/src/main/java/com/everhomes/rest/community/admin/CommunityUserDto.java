@@ -25,6 +25,8 @@ public class CommunityUserDto {
 	private String     userName;
 	
 	private String     nikeName;
+
+	private String organizationMemberName;
 	
 	private Long     communityId;
 	
@@ -48,6 +50,8 @@ public class CommunityUserDto {
     private String position;
     private String identityNumber;
     private Byte gender;
+
+	private Long recentlyActiveTime;
 
 	@ItemType(OrganizationDetailDTO.class)
 	private List<OrganizationDetailDTO> organizations;
@@ -196,5 +200,19 @@ public class CommunityUserDto {
 		this.gender = gender;
 	}
 
-	
+	public Long getRecentlyActiveTime() {
+		return recentlyActiveTime;
+	}
+
+	public void setRecentlyActiveTime(Long recentlyActiveTime) {
+		this.recentlyActiveTime = recentlyActiveTime;
+	}
+
+	public String getOrganizationMemberName() {
+		return organizationMemberName;
+	}
+
+	public void setOrganizationMemberName(String organizationMemberName) {
+		this.organizationMemberName = organizationMemberName;
+	}
 }

@@ -7,10 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -139,5 +141,29 @@ public class ScheduleAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /admin/schedule/getRunningFlag</b>
+     * <p>获取是否执行任务调度flag</p>
+     */
+    @RequestMapping("getRunningFlag")
+    @RestReturn(value=Byte.class)
+    @RequireAuthentication(false)
+    public RestResponse getRunningFlag() {
+        Map<String, Byte> result = new HashMap<>();
+        result.put("runningFlag", scheduleProvider.getRunningFlag());
+        return new RestResponse(result);
+    }
+
+    /**
+     * <b>URL: /admin/schedule/setRunningFlag</b>
+     * <p>设置任务调度flag</p>
+     */
+    @RequestMapping("setRunningFlag")
+    @RestReturn(value=String.class)
+    public RestResponse setRunningFlag(@RequestParam(value="runningFlag", required=true) Byte runningFlag) {
+        scheduleProvider.setRunningFlag(runningFlag);
+        return new RestResponse();
     }
 }

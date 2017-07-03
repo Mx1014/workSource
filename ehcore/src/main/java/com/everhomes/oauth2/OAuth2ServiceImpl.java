@@ -1,14 +1,5 @@
 package com.everhomes.oauth2;
 
-import java.net.URI;
-import java.net.URLDecoder;
-import java.sql.Timestamp;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -18,6 +9,13 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.net.URI;
+import java.sql.Timestamp;
 
 @Component
 public class OAuth2ServiceImpl implements OAuth2Service {
@@ -49,9 +47,11 @@ public class OAuth2ServiceImpl implements OAuth2Service {
    
     @Override
     public URI confirmAuthorization(User user, AuthorizationCommand cmd) {
-        if(!"code".equals(cmd.getresponse_type()))
+        if (!"code".equals(cmd.getresponse_type())) {
+            LOGGER.error("Only code response type is supported, response_type = {}", cmd.getresponse_type());
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE, OAuth2ServiceErrorCode.ERROR_UNSUPPORTED_RESPONSE_TYPE,
                     "Only code response type is supported");
+        }
 
         AuthorizationCode code = new AuthorizationCode();
         code.setScope(cmd.getScope());
@@ -68,6 +68,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         try {
             return new URI(redirectUrl);
         } catch(Exception e) {
+            LOGGER.error("confirmAuthorization new URI error", e);
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE, OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST,
                     "Invalid redirect URI parameter");
         }

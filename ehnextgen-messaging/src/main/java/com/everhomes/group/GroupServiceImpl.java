@@ -934,7 +934,13 @@ public class GroupServiceImpl implements GroupService {
                 member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 createPendingGroupMember(member, scope);
             }
-            
+
+            // 在后台俱乐部成员要显示手机号 #11814 update by xq.tian  2017/06/28
+            GroupPrivacy groupPrivacy = GroupPrivacy.fromCode(group.getPrivateFlag());
+            if (groupPrivacy == GroupPrivacy.PUBLIC) {
+                member.setPhonePrivateFlag(GroupMemberPhonePrivacy.PUBLIC.getCode());
+            }
+
             // send notifications to applicant and other members
             if (needNotify) {
             	if(GroupJoinPolicy.fromCode(group.getJoinPolicy()) == GroupJoinPolicy.FREE) {
@@ -962,6 +968,8 @@ public class GroupServiceImpl implements GroupService {
             		&& GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
                 member.setRequestorComment(cmd.getRequestText());
             	member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());  //有可能被拒绝了重复加入
+                // 在后台俱乐部成员要显示手机号 #11814 update by xq.tian  2017/06/28
+                member.setPhonePrivateFlag(GroupMemberPhonePrivacy.PUBLIC.getCode());
             	groupProvider.updateGroupMember(member);
             	if (needNotify) {
             		sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
@@ -1618,32 +1626,34 @@ public class GroupServiceImpl implements GroupService {
         List<GroupMember> members = null;
         Long nextPageAnchor = null;
         
-        //如果是按创建者、管理员、成员顺序排序再按加入时间排序，不能按锚点分页，add by tt, 20161115
+        // 如果是按创建者、管理员、成员顺序排序再按加入时间排序，不能按锚点分页，add by tt, 20161115
 
         // 俱乐部的成员需要按创建者、管理员、成员的顺序按加入时间倒序排列，add by tt, 20161103
-        if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+        if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP
+                && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
 //        	if (TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.FALSE) {
 //				query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.ne(group.getCreatorUid()));
 //			}
 //			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
 			Long from = pageAnchor * pageSize;
-			members = groupProvider.listPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getKeyword(), cmd.getStatus(), from, pageSize+1, TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE, group.getCreatorUid());
+            boolean includeCreator = TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE;
+            members = groupProvider.listPublicGroupMembersByStatus(
+                    cmd.getGroupId(), cmd.getKeyword(), cmd.getStatus(),
+                    from, pageSize+1, includeCreator, group.getCreatorUid());
 			if(members.size() > pageSize) {
 	            members.remove(members.size() - 1);
 	            nextPageAnchor = pageAnchor + 1;
 	        }
-		}else {
+		} else {
 			CrossShardListingLocator locator = new CrossShardListingLocator(group.getId());
 	        locator.setAnchor(cmd.getPageAnchor());
 	        
-	        members = this.groupProvider.queryGroupMembers(locator, pageSize + 1,
-	            (loc,query) -> {
-	                if(cmd.getStatus() != null) {
-	                    query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getStatus()));
-	                }
-	                
-	                return query;
-	            });
+	        members = this.groupProvider.queryGroupMembers(locator, pageSize + 1, (loc,query) -> {
+                if(cmd.getStatus() != null) {
+                    query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getStatus()));
+                }
+                return query;
+            });
 	        
 	        if(members.size() > pageSize) {
 	            members.remove(members.size() - 1);
@@ -1651,9 +1661,9 @@ public class GroupServiceImpl implements GroupService {
 	        }
 		}
 
-        List<GroupMemberDTO> memberDtos = members.stream()
-                .map((r) -> { return ConvertHelper.convert(r, GroupMemberDTO.class);})
-                .collect(Collectors.toList());
+        List<GroupMemberDTO> memberDtos = members.stream().map(
+                (r) -> ConvertHelper.convert(r, GroupMemberDTO.class)).collect(Collectors.toList());
+
         populateGroupMemberDTOs(operatorUid, group, memberDtos);
         
         if(LOGGER.isInfoEnabled()) {
@@ -1662,8 +1672,7 @@ public class GroupServiceImpl implements GroupService {
                 + ", groupId=" + groupId + ", status=" + cmd.getStatus() + ", pageAnchor=" + cmd.getPageAnchor() 
                 + ", pageSize=" + pageSize + ", nextPageAnchor=" + nextPageAnchor + ", elapse=" + (endTime - startTime));
         }
-        
-        return new ListMemberCommandResponse(nextPageAnchor, memberDtos); 
+        return new ListMemberCommandResponse(nextPageAnchor, memberDtos);
     }
     
     @Override
@@ -2354,31 +2363,34 @@ public class GroupServiceImpl implements GroupService {
         
         // 按产品设计，每个人在整个系统中只有一个头像，故即使是圈成员也要从用户中拿头像 by xiongying 20160505
         User user = userProvider.findUserById(groupMember.getMemberId());
-        if(user == null)
-        	LOGGER.error("The user related to the member not existed, userId=" + userId 
-                    + ", memberId=" + groupMember.getMemberId() + ", groupMember=" + groupMember);
-        
-        String memberAvatar = user.getAvatar();
-//        String memberAvatar = null;
-        if(memberAvatar != null && memberAvatar.length() > 0) {
-            try{
-                String url = contentServerService.parserUri(memberAvatar, EntityType.USER.getCode(), groupMember.getMemberId());
-                groupMember.setMemberAvatarUrl(url);
-            }catch(Exception e){
-                LOGGER.error("Failed to parse avatar uri of group member, userId=" + userId 
-                    + ", groupMember=" + groupMember, e);
+        if(user != null) {
+            String memberAvatar = user.getAvatar();
+            if(memberAvatar != null && memberAvatar.length() > 0) {
+                try {
+                    String url = contentServerService.parserUri(memberAvatar, EntityType.USER.getCode(), groupMember.getMemberId());
+                    groupMember.setMemberAvatarUrl(url);
+                } catch(Exception e) {
+                    LOGGER.error("Failed to parse avatar uri of group member, userId=" + userId
+                            + ", groupMember=" + groupMember, e);
+                }
             }
+        } else {
+            LOGGER.error("The user related to the member not existed, userId=" + userId
+                    + ", memberId=" + groupMember.getMemberId() + ", groupMember=" + groupMember);
         }
-        
+
         String memberNickName = groupMember.getMemberNickName();
-        if(memberNickName == null && user!= null) {
+        if(memberNickName == null && user != null) {
             groupMember.setMemberNickName(user.getNickName());
         }
-        
+
         GroupMemberPhonePrivacy phonePrivateFlag = GroupMemberPhonePrivacy.fromCode(groupMember.getPhonePrivateFlag());
-        if(phonePrivateFlag == GroupMemberPhonePrivacy.PUBLIC) {
-            UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(groupMember.getMemberId(), 
-                IdentifierType.MOBILE.getCode());
+        GroupPrivacy groupPrivacy = GroupPrivacy.fromCode(group.getPrivateFlag());
+        if(phonePrivateFlag == GroupMemberPhonePrivacy.PUBLIC
+                // 在后台俱乐部成员要显示手机号 #11814 update by xq.tian  2017/06/28
+                || groupPrivacy == GroupPrivacy.PUBLIC) {
+            UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(
+                    groupMember.getMemberId(), IdentifierType.MOBILE.getCode());
             if(userIdentifier != null) {
                 groupMember.setCellPhone(userIdentifier.getIdentifierToken());
             }
@@ -2390,13 +2402,13 @@ public class GroupServiceImpl implements GroupService {
                 EntityType.USER.getCode(), inviterUid);
             if(inviterGroupMember != null) {
                 groupMember.setInviterNickName(inviterGroupMember.getMemberNickName());
-                String inviterMemberAvatar = groupMember.getMemberAvatar();
+                String inviterMemberAvatar = inviterGroupMember.getMemberAvatar();
                 if(inviterMemberAvatar != null && inviterMemberAvatar.length() > 0) {
                     groupMember.setInviterAvatar(inviterMemberAvatar);
-                    try{
+                    try {
                         String url = contentServerService.parserUri(inviterMemberAvatar, EntityType.USER.getCode(), groupMember.getMemberId());
                         groupMember.setInviterAvatarUrl(url);
-                    }catch(Exception e){
+                    } catch(Exception e) {
                         LOGGER.error("Failed to parse avatar uri of group member, userId=" + userId 
                             + ", groupMember=" + groupMember, e);
                     }

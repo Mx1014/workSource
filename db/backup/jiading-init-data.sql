@@ -356,3 +356,16 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 delete from eh_launch_pad_items where namespace_id = 999974 and item_label = '一键上网';
 update eh_launch_pad_items set display_flag = 0 where namespace_id = 999974 and item_label in('服务联盟', '智能门禁', '视频会议', '企业通讯录');
 update eh_rentalv2_resource_types set status = 2 where namespace_id = 999974;
+
+-- 添加菜单 add by sw 20170623
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),30500,'', 'EhNamespaces', 999974,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),31000,'', 'EhNamespaces', 999974,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES((@menu_scope_id := @menu_scope_id + 1),32000,'', 'EhNamespaces', 999974,2);	
+	
+-- 更新TEEC电商链接
+update eh_configurations set value = 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999973&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdefault%3Fpos%3D1%26_k%3Dzlbiz#sign_suffix' where id = 1389;
+	

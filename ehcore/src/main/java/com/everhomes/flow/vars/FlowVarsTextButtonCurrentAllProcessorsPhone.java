@@ -1,17 +1,11 @@
 package com.everhomes.flow.vars;
 
-import java.util.List;
-
+import com.everhomes.flow.*;
+import com.everhomes.rest.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowEventLog;
-import com.everhomes.flow.FlowEventLogProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowVariableTextResolver;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.User;
+import java.util.List;
 
 /**
  * 按钮文本的 本节点处理人姓名
@@ -29,9 +23,19 @@ public class FlowVarsTextButtonCurrentAllProcessorsPhone implements FlowVariable
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-		List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId()
-				, ctx.getFlowCase().getStepCount()-1l); //stepCount-1 的原因是，当前节点处理人是上一个 stepCount 计算的 node_enter 的值
-		String txt = "";
+
+        //stepCount-1 的原因是，当前节点处理人是上一个 stepCount 计算的 node_enter 的值
+        long stepCount = ctx.getFlowCase().getStepCount() - 1L;
+        // 如果下一个节点还是当前节点，说明stepCount也没变，所以不用减 1
+        if (ctx.getCurrentNode() != null && ctx.getCurrentNode().equals(ctx.getNextNode())) {
+            stepCount = ctx.getFlowCase().getStepCount();
+        }
+
+        List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(
+                ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId()
+                , stepCount);
+
+        String txt = "";
 		int i = 0;
 		
 		if(logs != null && logs.size() > 0) {
