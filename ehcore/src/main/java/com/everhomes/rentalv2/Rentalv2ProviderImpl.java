@@ -569,7 +569,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				record = getMonthCloseRecord(context, rentalResource.getId(), rentalCell.getResourceRentalDate());
 			}else if (rentalType == RentalType.HALFDAY || rentalType == RentalType.THREETIMEADAY) {
 				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
-				record = getHalfDayCloseRecord(context, rentalResource.getId(), rentalCell.getResourceRentalDate(), rentalTypeByte, amorpm);
+				Date[] beginEndDate = calculateBeginEndDate(rentalResource, rentalCell);
+				record = getHalfDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalTypeByte, amorpm);
 			}
 			if (record != null) {
 				return true;
@@ -610,12 +611,13 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.fetchAny();
 	}
 
-	private Record getHalfDayCloseRecord(DSLContext context, Long resourceId, Date resourceRentalDate, Byte rentalType, Byte amorpm) {
+	private Record getHalfDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end, Byte rentalType, Byte amorpm) {
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
-				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.eq(resourceRentalDate))
-				.and(Tables.EH_RENTALV2_CELLS.AMORPM.eq(amorpm))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(begin))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.le(end))
+				.and(amorpm == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.AMORPM.eq(amorpm))
 				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
 				.fetchAny();
 	}
