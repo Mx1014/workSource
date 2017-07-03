@@ -117,4 +117,10 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 		.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.GROUP_ENTITY_ID.eq(groupEntryId)).execute();
 		
 	}
+
+	@Override
+	public void deletePeriodVals(Long employeeId) {
+		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(employeeId)).execute();
+	}
 }

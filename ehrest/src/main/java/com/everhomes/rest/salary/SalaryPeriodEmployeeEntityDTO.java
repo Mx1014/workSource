@@ -12,7 +12,7 @@ package com.everhomes.rest.salary;
 public class SalaryPeriodEmployeeEntityDTO {
 
     private Long salaryEmployeeId;
-    private Long groupEntiryId;
+    private Long groupEntityId;
     private String groupEntityName;
     private String salaryValue;
 	private Byte isFormula;
@@ -21,12 +21,6 @@ public class SalaryPeriodEmployeeEntityDTO {
 	}
 	public void setSalaryEmployeeId(Long salaryEmployeeId) {
 		this.salaryEmployeeId = salaryEmployeeId;
-	}
-	public Long getGroupEntryId() {
-		return groupEntiryId;
-	}
-	public void setGroupEntryId(Long groupEntryId) {
-		this.groupEntiryId = groupEntryId;
 	}
 	public String getGroupEntryName() {
 		return groupEntityName;
@@ -47,5 +41,13 @@ public class SalaryPeriodEmployeeEntityDTO {
 
 	public void setIsFormula(Byte isFormula) {
 		this.isFormula = isFormula;
+	}
+
+	public Long getGroupEntityId() {
+		return groupEntityId;
+	}
+
+	public void setGroupEntityId(Long groupEntityId) {
+		this.groupEntityId = groupEntityId;
 	}
 }
