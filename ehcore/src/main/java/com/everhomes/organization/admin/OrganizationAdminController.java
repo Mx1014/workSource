@@ -1,22 +1,5 @@
 package com.everhomes.organization.admin;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.organization.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -26,31 +9,33 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
-import com.everhomes.rest.enterprise.ApproveContactCommand;
-import com.everhomes.rest.enterprise.BatchApproveContactCommand;
-import com.everhomes.rest.enterprise.BatchRejectContactCommand;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
-import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
-import com.everhomes.rest.enterprise.RejectContactCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
-import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
-import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
-import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
-import com.everhomes.rest.organization.pm.PmBuildingDTO;
-import com.everhomes.rest.organization.pm.PmManagementsResponse;
-import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
-import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/org")
@@ -741,7 +726,7 @@ public class OrganizationAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/org/ listOrgAuthPersonnels</b>
+     * <b>URL: /admin/org/listOrgAuthPersonnels</b>
      * <p>认证通讯录列表</p>
      */
     @RequestMapping("listOrgAuthPersonnels")

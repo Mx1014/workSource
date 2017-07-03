@@ -261,7 +261,9 @@ public interface OrganizationProvider {
 	
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
 
-	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
+    List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds);
+
+    OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId, String email);
  
 	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
 	Organization findOrganizationByName(String name, Integer namespaceId);
@@ -338,4 +340,7 @@ public interface OrganizationProvider {
 			Long organizationId, Long buildId);
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
 			Byte operationType);
-} 
+
+    List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword, String orgNameKeyword, List<Long> orgIds,
+                                                        Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, int pageSize);
+}

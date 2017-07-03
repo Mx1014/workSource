@@ -19,7 +19,6 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -61,11 +60,11 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.QuestionMetaActionData;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -77,8 +76,6 @@ import com.everhomes.rest.group.GroupJoinPolicy;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.launchpad.ItemKind;
-import com.everhomes.rest.common.Router;
-import com.everhomes.rest.community.ImportBuildingDataDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
@@ -132,9 +129,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -143,6 +137,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class OrganizationServiceImpl implements OrganizationService {
@@ -4864,13 +4860,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 			member.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
 			member.setTargetId(identifier.getOwnerUid());
 			member.setGroupType(organization.getGroupType());
-			member.setGroupPath(organization.getPath());
-			organizationProvider.createOrganizationMember(member);
+            member.setGroupPath(organization.getPath());
+            member.setContactDescription(cmd.getContactDescription());
+            organizationProvider.createOrganizationMember(member);
 
-			member.setCreatorUid(user.getId());
-			member.setNickName(user.getNickName());
-			member.setAvatar(user.getAvatar());
-			member.setApplyDescription(cmd.getContactDescription());
+            member.setCreatorUid(user.getId());
+            member.setNickName(user.getNickName());
+            member.setAvatar(user.getAvatar());
 
 			return member;
 		});
@@ -4932,6 +4928,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 //						"organization member status error.");
 			}else{
 				member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                member.setOperatorUid(operatorUid);
+                member.setApproveTime(System.currentTimeMillis());
 				updateEnterpriseContactStatus(operator.getId(), member);
 				DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
 				sendMessageForContactApproved(member);
@@ -4970,6 +4968,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 //			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
 //					"organization member status error.");
 		}else{
+		    member.setOperatorUid(operatorUid);
+		    member.setApproveTime(System.currentTimeMillis());
 			deleteEnterpriseContactStatus(operatorUid, member);
 			sendMessageForContactReject(member);
 		}
@@ -5373,8 +5373,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		response.setNextPageAnchor(locator.getAnchor());
 
 		response.setMembers(organizationMembers.stream().map((c) ->{
-			return ConvertHelper.convert(c, OrganizationMemberDTO.class);
-		}).collect(Collectors.toList()));
+            OrganizationMemberDTO dto = ConvertHelper.convert(c, OrganizationMemberDTO.class);
+            User operator = userProvider.findUserById(c.getOperatorUid());
+            UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
+            dto.setOperatorName(operator.getNickName());
+            dto.setOperatorPhone(operatorIdentifier.getIdentifierToken());
+            return dto;
+        }).collect(Collectors.toList()));
 
 		return response;
 	}
@@ -5429,7 +5434,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
 
-		if(null != userIdentifier){
+		if(null != userIdentifier) {
 			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
 			OrganizationMemberDTO dto = new OrganizationMemberDTO();
 			dto.setTargetId(user.getId());
@@ -7061,8 +7066,8 @@ System.out.println();
 		Map<String, String> map = new HashMap<String, String>();
         map.put("enterpriseName", org.getName());
         map.put("userName", null == member.getContactName() ? member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2") : member.getContactName());
-        if (member.getApplyDescription() != null && member.getApplyDescription().length() > 0) {
-            map.put("description", String.format("(%s)", member.getApplyDescription()));
+        if (member.getContactDescription() != null && member.getContactDescription().length() > 0) {
+            map.put("description", String.format("(%s)", member.getContactDescription()));
         } else {
             map.put("description", "");
         }

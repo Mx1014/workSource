@@ -23,6 +23,6 @@ public interface UserGroupHistoryProvider {
 
     UserGroupHistory queryUserGroupHistoryByAddressId(Long userId, Long addressId);
 
-	List<UserGroupHistory> queryUserGroupHistoryByGroupIds(List<Long> groupIds, CrossShardListingLocator locator, int pageSize);
+	List<UserGroupHistory> queryUserGroupHistoryByGroupIds(String userInfoKeyword, String communityKeyword, List<Long> groupIds, CrossShardListingLocator locator, int pageSize);
 
 }

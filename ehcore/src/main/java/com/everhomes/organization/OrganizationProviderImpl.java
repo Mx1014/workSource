@@ -1611,7 +1611,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
-		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		List<OrganizationMember> result  = new ArrayList<>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgCommoand.getId());
 		cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(orgCommoand.getStatus()));
@@ -1678,41 +1678,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public List<OrganizationMember> listOrganizationPersonnels(String keywords, List<Long> orgIds,Byte memberStatus , Byte contactSignedupStatus, CrossShardListingLocator locator,Integer pageSize) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		pageSize = pageSize + 1;
-		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
-		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(orgIds);
-		cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(memberStatus));
+        return listOrganizationPersonnels(keywords, null, orgIds, memberStatus, contactSignedupStatus, locator, pageSize);
+    }
 
-		if(!StringUtils.isEmpty(keywords)){
-			Condition cond1 = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords);
-			cond1 = cond1.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%"+keywords+"%"));
-			cond = cond.and(cond1);
-		}
-
-		if(contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
-			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
-			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
-		}
-
-		query.addConditions(cond);
-		if(null != locator.getAnchor())
-			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
-		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-		query.addLimit(pageSize);
-		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, OrganizationMember.class));
-			return null;
-		});
-		locator.setAnchor(null);
-
-		if(result.size() >= pageSize){
-			result.remove(result.size() - 1);
-			locator.setAnchor(result.get(result.size() - 1).getId());
-		}
-		return result;
-	}
 	@Override
 	public boolean updateOrganizationMemberByIds(List<Long> ids, Organization org) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -2895,7 +2863,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return results;
- 
+	}
+
+	@Override
+	public List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds) {
+		List<OrganizationCommunityRequest> results = new ArrayList<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.in(communityIds));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationCommunityRequest.class));
+			return null;
+		});
+		return results;
 	}
 
 	@Override
@@ -3044,7 +3026,66 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		return results;
 	}
-	public void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap){
+
+    @Override
+    public List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword, String orgNameKeyword, List<Long> orgIds,
+                              Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        pageSize = pageSize + 1;
+        List<OrganizationMember> result  = new ArrayList<>();
+
+        SelectQuery<Record> query = context.select(Tables.EH_ORGANIZATION_MEMBERS.fields()).from(Tables.EH_ORGANIZATION_MEMBERS).getQuery();
+
+        query.addSelect(Tables.EH_ORGANIZATIONS.NAME);
+        query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.JOIN, Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+
+        query.addSelect(Tables.EH_USERS.NICK_NAME);
+        query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID));
+
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(orgIds));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(memberStatus));
+
+        if (!StringUtils.isEmpty(userInfoKeyword)) {
+            Field<String> keyword = DSL.concat("%", userInfoKeyword, "%");
+
+            Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(keyword);
+
+            cond = cond.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like(keyword)).or(Tables.EH_USERS.NICK_NAME.like(keyword));
+            query.addConditions(cond);
+        }
+
+        if (!StringUtils.isEmpty(orgNameKeyword)) {
+            Field<String> keyword = DSL.concat("%", orgNameKeyword, "%");
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword));
+        }
+
+        if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
+        }
+
+        if (null != locator.getAnchor()) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            OrganizationMember member = RecordHelper.convert(r, OrganizationMember.class);
+            member.setOrganizationName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
+            member.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            result.add(member);
+            return member;
+        });
+        locator.setAnchor(null);
+
+        if(result.size() >= pageSize) {
+            result.remove(result.size() - 1);
+            locator.setAnchor(result.get(result.size() - 1).getId());
+        }
+        return result;
+    }
+
+    public void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationJobPositionMapsDao dao = new EhOrganizationJobPositionMapsDao(context.configuration());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationJobPositionMaps.class));

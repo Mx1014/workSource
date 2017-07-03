@@ -28,6 +28,7 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.util.RecordHelper;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -784,16 +785,39 @@ public class GroupProviderImpl implements GroupProvider {
     	
     	return groupList;
     }
-    
+
     @Override
-    public List<GroupMember> listGroupMemberByGroupIds(List<Long> groupIds, ListingLocator locator, Integer pageSize,  ListingQueryBuilderCallback queryBuilderCallback){
-    	List<List<GroupMember>> groupMembers = new ArrayList<List<GroupMember>>();
+    public List<Group> listGroupByCommunityIds(List<Long> communityIds, ListingQueryBuilderCallback queryBuilderCallback){
+    	List<Group> groupList = new ArrayList<>();
+
+    	dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
+            groupList, (DSLContext context, Object reducingContext) -> {
+                SelectQuery<EhGroupsRecord> query = context.selectQuery(Tables.EH_GROUPS);
+                 if(queryBuilderCallback != null) {
+                        queryBuilderCallback.buildCondition(null, query);
+                 }
+                 query.addConditions(Tables.EH_GROUPS.INTEGRAL_TAG2.in(communityIds));
+
+                 query.fetch().map((r) -> {
+                     groupList.add(ConvertHelper.convert(r, Group.class));
+                     return null;
+                 });
+            return true;
+    	});
+    	return groupList;
+    }
+
+    @Override
+    public List<GroupMember> listGroupMemberByGroupIds(List<Long> groupIds, ListingLocator locator, Integer pageSize,
+                                                       ListingQueryBuilderCallback queryBuilderCallback) {
+    	List<List<GroupMember>> groupMembers = new ArrayList<>();
     	
     	int count = null == pageSize ? 0 : pageSize + 1;
     	
     	dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
     			groupMembers, (DSLContext context, Object reducingContext) -> {
-    				SelectQuery<EhGroupMembersRecord> query = context.selectQuery(Tables.EH_GROUP_MEMBERS);
+    				SelectQuery<Record> query = context.select(Tables.EH_GROUP_MEMBERS.fields())
+                            .from(Tables.EH_GROUP_MEMBERS).getQuery();
     				 if(queryBuilderCallback != null) {
     	                    queryBuilderCallback.buildCondition(locator, query);
     	             }
@@ -803,7 +827,7 @@ public class GroupProviderImpl implements GroupProvider {
     				 }
     				
     				 List<GroupMember> groupList = query.fetch().map((r) -> {
-    					 return ConvertHelper.convert(r, GroupMember.class);
+    					 return RecordHelper.convert(r, GroupMember.class);
     	             });
     				 
     				 locator.setAnchor(null);
