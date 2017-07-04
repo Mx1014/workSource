@@ -19,6 +19,7 @@ import com.everhomes.rest.organization.OrganizationDTO;
  * <li>salaryPeriod: 所属类型:Organization</li>
  * <li>paidMoney: 实发工资</li>
  * <li>checkFlag: 核算标准0-未核算 1-核算</li>
+ * <li>canCheck: 是否可以核算 0-否 1-是</li>
  * <li>periodEmployeeEntitys: 批次档期的字段列表 参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeEntityDTO}</li>
  * </ul>
  */
@@ -44,6 +45,7 @@ public class SalaryPeriodEmployeeDTO {
     private String salaryPeriod;
     private Long userId;
 	private Byte checkFlag;
+	private Byte canCheck;
 	public List<SalaryPeriodEmployeeEntityDTO> getPeriodEmployeeEntitys() {
 		return periodEmployeeEntitys;
 	}
@@ -119,5 +121,13 @@ public class SalaryPeriodEmployeeDTO {
 
 	public void setJobPositions(String jobPositions) {
 		this.jobPositions = jobPositions;
+	}
+
+	public Byte getCanCheck() {
+		return canCheck;
+	}
+
+	public void setCanCheck(Byte canCheck) {
+		this.canCheck = canCheck;
 	}
 }

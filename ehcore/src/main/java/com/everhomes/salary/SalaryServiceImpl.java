@@ -698,11 +698,11 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public ListPeriodSalaryEmployeesResponse listPeriodSalaryEmployees(ListPeriodSalaryEmployeesCommand cmd) {
-		//1.查entities
-		
-		//2.查人员 periodGroupId 可以确定:公司,薪酬组和期数
-		List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(cmd.getSalaryPeriodGroupId());
-		ListPeriodSalaryEmployeesResponse response = new ListPeriodSalaryEmployeesResponse();
+        ListPeriodSalaryEmployeesResponse response = new ListPeriodSalaryEmployeesResponse();
+        //1.查entities
+
+        //2.查人员 periodGroupId 可以确定:公司,薪酬组和期数
+        List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(cmd.getSalaryPeriodGroupId());
 		if(null == result )
 			return response;
         response.setSalaryPeriodEmployees(result.stream().map(r ->{	
