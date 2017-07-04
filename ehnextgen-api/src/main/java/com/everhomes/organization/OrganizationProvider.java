@@ -404,8 +404,7 @@ public interface OrganizationProvider {
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 
 	//	根据 group_type 查找薪酬组 added by R 20170630
-	List<Organization> listOrganizationsByGroupType(String groupType);
-
+	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId);
 	//查询组织下内有效的人数
 	Integer countOrganizationMemberDetailsByOrgId(Integer namespaceId, Long organizationId);
 }
