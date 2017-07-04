@@ -136,3 +136,33 @@ CREATE TABLE `eh_salary_employee_period_vals` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;
 
 
+-- DROP TABLE IF EXISTS `eh_uniongroup_configures`;
+CREATE TABLE `eh_uniongroup_configures` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `enterprise_id` bigint(20) DEFAULT 0,
+  `group_type` varchar(32) COMMENT 'SalaryGroup,PunchGroup',
+  `group_id` bigint(20) NOT NULL COMMENT 'id of group',
+  `target_id` bigint(20) DEFAULT NULL COMMENT 'id of target, organization or memberDetail',
+  `target_type` varchar(32) COMMENT 'organziation,memberDetail',
+  `operator_uid` bigint(20),
+  `update_time` datetime,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--  DROP TABLE IF EXISTS `eh_uniongroup_member_details`;
+CREATE TABLE `eh_uniongroup_member_details` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `group_type` varchar(32) COMMENT 'SalaryGroup,PunchGroup',
+  `group_id` bigint(20) NOT NULL COMMENT 'id of group',
+  `detail_id` bigint(20) DEFAULT NULL COMMENT 'id of target, only memberDetail',
+  `target_type` VARCHAR(64),
+  `target_id` BIGINT NOT NULL,
+  `enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id' ,
+  `contact_name` VARCHAR(64) COMMENT 'the name of the member',
+  `contact_token` VARCHAR(128) COMMENT 'phone number, reference for eh_organization_member contact_token',
+  `update_time` datetime,
+  `operator_uid` bigint(20),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -4651,6 +4651,32 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return null;
 	}
+
+	@Override
+	public Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType) {
+		Map<Long, String> orgMap = new HashMap<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATIONS.as("t2");
+		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("organization_id").eq(t2.field("id")));
+		Condition condition = t1.field("namespace_id").eq(namespaceId);
+		condition = condition.and(t2.field("namespace_id").eq(namespaceId));
+		condition = condition.and(t1.field("detail_id").eq(detailId));
+		condition = condition.and(t2.field("group_type").eq(OrganizationGroupType.fromCode(organizationGroupType).getCode()));
+		condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
+				.and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
+		Result result = step.where(condition).fetch();
+		if (result != null) {
+			result.map(r -> {
+				orgMap.put(Long.valueOf(r.getValue(t1.field("organization_id")).toString()), r.getValue(t2.field("name")).toString());
+				return null;
+			});
+		}
+		if (orgMap.size() > 0) {
+			return orgMap;
+		}
+		return null;
+	}
 	
 	@Override
 	public List<Organization> listOrganizationsByGroupType(String groupType) {
