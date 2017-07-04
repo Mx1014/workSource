@@ -164,6 +164,7 @@
         eh_talents | eh_talent_categories | eh_talent_query_histories |
         eh_user_notification_settings | eh_group_member_logs | 
         eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat |
+        eh_news_communities |
         </includes>
 
             <!-- All elements that are excluded from your schema
