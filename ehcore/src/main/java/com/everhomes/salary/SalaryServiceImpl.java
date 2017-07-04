@@ -14,9 +14,15 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.salary.*;
 import com.everhomes.rest.techpark.punch.NormalFlag;
+import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
+import com.everhomes.rest.uniongroup.UniongroupTarget;
+import com.everhomes.rest.uniongroup.UniongroupTargetType;
+import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -133,6 +139,9 @@ public class SalaryServiceImpl implements SalaryService {
 	
 	@Autowired
     private ImportFileService importFileService;
+
+	@Autowired
+    private UniongroupService uniongroupService;
 
 	@Override
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
@@ -284,7 +293,7 @@ public class SalaryServiceImpl implements SalaryService {
 	    ListSalaryGroupResponse response = new ListSalaryGroupResponse();
 
         //  获取所有批次
-	    List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType("SALARYGROUP");
+	    List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
 
 	    //  查询相关人数
@@ -420,19 +429,35 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void addToOrganizationSalaryGroup(AddToOrganizationSalaryGroupCommand cmd) {
 
-        List<Long> userIdList = new ArrayList<>();
-        // 1.从组织架构下查询部门下的所有人员id
-        if (!cmd.getDepartmentIds().isEmpty()) {
-            List<Long> departmentId = cmd.getDepartmentIds();
-//        List<Long> result = this.organizationService.getUserIdInDepartmentId(departmentId);
-//            userIdList.addAll(result);
+        //  通过组织架构的接口来实现人员的添加
+        SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
+        command.setGroupId(cmd.getSalaryGroupId());
+        command.setGroupType(UniongroupType.SALARYGROUP.getCode());
+        command.setEnterpriseId(cmd.getOwnerId());
+        List<UniongroupTarget> targets = new ArrayList<>();
+
+        //  1.将部门 id 传入targets
+        if(!cmd.getDepartmentIds().isEmpty()){
+            cmd.getDepartmentIds().forEach(r ->{
+                UniongroupTarget target = new UniongroupTarget();
+                target.setId(r);
+                target.setType(UniongroupTargetType.ORGANIZATION.getCode());
+                targets.add(target);
+            });
         }
-        // 2.获取选择的人员的userId
-        if(!cmd.getUserIds().isEmpty())
-            userIdList.addAll(cmd.getUserIds());
+
+        //  2.将选择的人员的 detailId 传入 targets
+        if(!cmd.getUserIds().isEmpty()){
+            cmd.getUserIds().forEach(r ->{
+                UniongroupTarget target = new UniongroupTarget();
+                target.setId(r);
+                target.setType(UniongroupTargetType.MEMBERDETAIL.getCode());
+                targets.add(target);
+            });
+        }
+
         // 3.将人员添加至组织架构的薪酬组
-//        for(int i=0; i<userIdList.size(); i++)
-//        this.organizationService.addPersonnelsToSalaryGroup(userIdList.get(i),cmd.getSalaryGroupId());
+        this.uniongroupService.saveUniongroupConfigures(command);
     }
 
     @Override

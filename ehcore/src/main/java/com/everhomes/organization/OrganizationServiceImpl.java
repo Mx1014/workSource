@@ -92,6 +92,7 @@ import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -12125,7 +12126,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organization.setName(name);
         organization.setDirectlyEnterpriseId(organizationId);
-		organization.setGroupType("SALARYGROUP");
+		organization.setGroupType(UniongroupType.SALARYGROUP.getCode());
         organization.setLevel(parOrg.getLevel()+1);
 		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
 		organization.setCreatorUid(user.getId());
@@ -12133,6 +12134,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		return organization;
 	}
+
 }
 
 
