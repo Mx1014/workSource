@@ -77,6 +77,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 		Long currentOrgId = cmd.getCurrentOrgId();
 		if(null == domain){
 			LOGGER.error("domain not configured, userId = {}", userId);
+			domain = new Domain();
+			domain.setPortalType(PortalType.PM.getCode());
 //			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.DOMAIN_NOT_CONFIGURED,
 //					"domain not configured");
 		}
