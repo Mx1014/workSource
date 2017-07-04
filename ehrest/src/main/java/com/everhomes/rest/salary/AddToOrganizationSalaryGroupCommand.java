@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>departmentIds: 部门id</li>
- * <li>userIds: 用户id</li>
+ * <li>detailIds: 用户DetailId</li>
  * <li>salaryGroupId: 薪酬组id</li>
  * <li>ownerType: 'organization'</li>
  * <li>ownerId: organizationId</li>
@@ -21,7 +21,7 @@ public class AddToOrganizationSalaryGroupCommand {
 	private List<Long> departmentIds;
 
 	@ItemType(Long.class)
-	private List<Long> userIds;
+	private List<Long> detailIds;
 
 	private Long salaryGroupId;
 
@@ -49,12 +49,12 @@ public class AddToOrganizationSalaryGroupCommand {
         this.salaryGroupId = salaryGroupId;
     }
 
-	public List<Long> getUserIds() {
-		return userIds;
+	public List<Long> getDetailIds() {
+		return detailIds;
 	}
 
-	public void setUserIds(List<Long> userIds) {
-		this.userIds = userIds;
+	public void setDetailIds(List<Long> detailIds) {
+		this.detailIds = detailIds;
 	}
 
 	public String getOwnerType() {

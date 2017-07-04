@@ -455,8 +455,8 @@ public class SalaryServiceImpl implements SalaryService {
         }
 
         //  2.将选择的人员的 detailId 传入 targets
-        if(!cmd.getUserIds().isEmpty()){
-            cmd.getUserIds().forEach(r ->{
+        if(!cmd.getDetailIds().isEmpty()){
+            cmd.getDetailIds().forEach(r ->{
                 UniongroupTarget target = new UniongroupTarget();
                 target.setId(r);
                 target.setType(UniongroupTargetType.MEMBERDETAIL.getCode());
