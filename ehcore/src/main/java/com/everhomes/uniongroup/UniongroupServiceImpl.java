@@ -41,8 +41,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
-//        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Integer namespaceId = 1000000;
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         /**处理配置表**/
         UniongroupType uniongroupType = UniongroupType.fromCode(cmd.getGroupType());
         List<UniongroupConfigures> configureList = new ArrayList<>();
@@ -163,9 +162,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd) {
-//        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Integer namespaceId = 1000000;
-        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId(),cmd.getOwnerId());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId(), cmd.getOwnerId());
         if (details != null) {
             return details.stream().map(r -> {
                 return ConvertHelper.convert(r, UniongroupMemberDetailsDTO.class);
@@ -180,10 +178,9 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public List listUniongroupMemberDetailsWithCondition(String keywords, Long department, Long groupId, String groupType, Boolean allGroupFlag) {
-        //        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Integer namespaceId = 1000000;
-        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(namespaceId, groupId, UniongroupType.fromCode(groupType).getCode());
+    public List listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(namespaceId, cmd.getOwnerId(), cmd.getGroupId(), UniongroupType.fromCode(cmd.getGroupType()).getCode());
         //查询部门和岗位
         for (UniongroupMemberDetail detail : details) {
             Map depart_map = this.organizationProvider.listOrganizationsOfDetail(namespaceId, detail.getId(), OrganizationGroupType.DEPARTMENT.getCode());

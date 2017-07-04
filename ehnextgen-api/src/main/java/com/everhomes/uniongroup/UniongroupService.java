@@ -3,6 +3,7 @@ package com.everhomes.uniongroup;
 
 import com.everhomes.rest.uniongroup.GetUniongroupConfiguresCommand;
 import com.everhomes.rest.uniongroup.ListUniongroupMemberDetailsCommand;
+import com.everhomes.rest.uniongroup.ListUniongroupMemberDetailsWithConditionCommand;
 import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
 
 import java.util.List;
@@ -30,6 +31,6 @@ public interface UniongroupService {
     public void deleteUniongroupConfigures(UniongroupConfigures uniongroupConfigure);
 
     /**根据条件查询记录**/
-    public List listUniongroupMemberDetailsWithCondition(String keywords, Long department, Long groupId, String groupType, Boolean allGroupFlag);
+    public List listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd);
 
 }

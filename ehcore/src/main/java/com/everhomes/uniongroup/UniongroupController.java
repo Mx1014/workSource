@@ -57,11 +57,17 @@ public class UniongroupController extends ControllerBase {
         return response;
     }
 
-//    public RestResponse listUniongroupMemberDetailsWithCondition(){
-//        RestResponse response = new RestResponse(uniongroupService.listUniongroupMemberDetailsByGroupId(cmd));
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
+    /**
+     * <p>获取组关系(条件查询)</p>
+     * <b>URL: /uniongroup/listUniongroupMemberDetailsWithCondition</b>
+     */
+    @RequestMapping("listUniongroupMemberDetailsByGroupId")
+    @RestReturn(value = UniongroupMemberDetailsDTO.class, collection = true)
+    public RestResponse listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd){
+        RestResponse response = new RestResponse(uniongroupService.listUniongroupMemberDetailsWithCondition(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

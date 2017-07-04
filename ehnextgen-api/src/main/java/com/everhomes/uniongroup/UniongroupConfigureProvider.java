@@ -35,7 +35,7 @@ public interface UniongroupConfigureProvider {
 
     void deleteUniongroupMemberDetailsByDetailIds(Integer namespaceId, List<Long> detailIds);
 
-    List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long groupId, String groupType);
+    List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long ownerId, Long groupId, String groupType);
 
     List<UniongroupMemberDetail> listUniongroupMemberDetailsWithCondition(Integer namespaceId, Long groupId, String groupType);
 }
