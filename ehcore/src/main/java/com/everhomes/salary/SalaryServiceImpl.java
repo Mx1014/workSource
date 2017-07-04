@@ -822,6 +822,11 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
+    public Object listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd) {
+        return null;
+    }
+
+    @Override
 	public void setSalaryEmailContent(SetSalaryEmailContentCommand cmd) {
 		//TODO: email content 应该跟着批次走
 		if(cmd.getSalaryGroupId() == null){

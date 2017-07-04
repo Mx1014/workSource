@@ -9,6 +9,9 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属类型:Organization</li>
  * <li>ownerId: 所属id</li>
  * <li>salaryPeriodGroupId: 某期薪酬批次id</li>
+ * <li>organizationId : 筛选的部门id </li>
+ * <li>keyWords: 搜索关键字</li>
+ * <li>checkFlag: 0-未核算 1-已核算 不传null 不过滤</li>
  * </ul>
  */
 public class ListPeriodSalaryEmployeesCommand {
@@ -18,6 +21,12 @@ public class ListPeriodSalaryEmployeesCommand {
 	private Long ownerId;
 
 	private Long salaryPeriodGroupId;
+
+	private String organizationId;
+
+	private String keyWords;
+
+	private Byte checkFlag;
 
 	public ListPeriodSalaryEmployeesCommand() {
 
@@ -59,4 +68,27 @@ public class ListPeriodSalaryEmployeesCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public String getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(String organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public String getKeyWords() {
+		return keyWords;
+	}
+
+	public void setKeyWords(String keyWords) {
+		this.keyWords = keyWords;
+	}
+
+	public Byte getCheckFlag() {
+		return checkFlag;
+	}
+
+	public void setCheckFlag(Byte checkFlag) {
+		this.checkFlag = checkFlag;
+	}
 }

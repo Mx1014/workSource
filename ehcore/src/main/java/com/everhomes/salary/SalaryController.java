@@ -304,6 +304,15 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
+	 * <p>17-2.查询公司下所有批次的内容(说明+字段)</p>
+	 * <b>URL: /salary/listPeriodSalaryEmailContents</b>
+	 */
+	@RequestMapping("listPeriodSalaryEmailContents")
+	@RestReturn(ListPeriodSalaryEmailContentsResponse.class)
+	public RestResponse listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd){
+		return new RestResponse(salaryService.listPeriodSalaryEmailContents(cmd));
+	}
+	/**
 	 * <p>18.设置工资条邮件内容</p>
 	 * <b>URL: /salary/setSalaryEmailContent</b>
 	 */
