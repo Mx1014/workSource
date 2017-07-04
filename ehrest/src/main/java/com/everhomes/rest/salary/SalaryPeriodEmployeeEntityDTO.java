@@ -7,6 +7,7 @@ package com.everhomes.rest.salary;
  * <li>groupEntityName: 字段项名称</li>
  * <li>salaryValue: 字段项值</li>
  * <li>isFormula: 是否为公式 0-否 1-是</li>
+ * <li>entityType: entity类型 0-文本 1-数值</li>
  * </ul>
  * */
 public class SalaryPeriodEmployeeEntityDTO {
@@ -16,6 +17,7 @@ public class SalaryPeriodEmployeeEntityDTO {
     private String groupEntityName;
     private String salaryValue;
 	private Byte isFormula;
+	private Byte entityType;
 	public Long getSalaryEmployeeId() {
 		return salaryEmployeeId;
 	}
@@ -49,5 +51,13 @@ public class SalaryPeriodEmployeeEntityDTO {
 
 	public void setGroupEntityId(Long groupEntityId) {
 		this.groupEntityId = groupEntityId;
+	}
+
+	public Byte getEntityType() {
+		return entityType;
+	}
+
+	public void setEntityType(Byte entityType) {
+		this.entityType = entityType;
 	}
 }
