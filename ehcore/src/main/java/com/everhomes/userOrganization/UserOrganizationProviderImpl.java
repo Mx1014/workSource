@@ -80,7 +80,7 @@ public class UserOrganizationProviderImpl implements UserOrganizationProvider {
         assert (userOrganizations.getId() == null);
         userOrganizations.setStatus(UserOrganizationStatus.INACTIVE.getCode());
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhUserOrganizationsDao dao = new EhUserOrganizationsDao();
+        EhUserOrganizationsDao dao = new EhUserOrganizationsDao(context.configuration());
         dao.update(userOrganizations);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganizations.class, userOrganizations.getId());
         return userOrganizations;

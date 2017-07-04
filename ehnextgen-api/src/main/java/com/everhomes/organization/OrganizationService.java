@@ -504,5 +504,6 @@ public interface OrganizationService {
 	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
 	List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path,
 			Long userId);
+	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
 
 }

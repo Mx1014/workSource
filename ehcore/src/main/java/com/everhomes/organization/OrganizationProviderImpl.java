@@ -4651,4 +4651,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return null;
 	}
+
+	@Override
+	public boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.notEqual(OrganizationGroupType.ENTERPRISE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
+		List<EhOrganizationMembersRecord> records = query.fetch();
+		if(records != null){
+			if(records.size() > 1){
+				return false;
+			}
+		}
+		return true;
+	}
 }

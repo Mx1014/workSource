@@ -1,7 +1,9 @@
 package com.everhomes.organization.admin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -1205,6 +1207,21 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse exportImportFileFailResultXls(@Valid GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
         organizationService.exportImportFileFailResultXls(cmd, httpResponse);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/org/checkIfLastOnNode</b>
+     * <p></p>
+     */
+    @RequestMapping("checkIfLastOnNode")
+    @RestReturn(value = String.class)
+    public RestResponse checkIfLastOnNode(@Valid DeleteOrganizationPersonnelByContactTokenCommand cmd, HttpServletResponse httpResponse) {
+        Map map = new HashMap<>();
+        map.put("isLastOne", organizationService.checkIfLastOnNode(cmd));
+        RestResponse response = new RestResponse(map);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

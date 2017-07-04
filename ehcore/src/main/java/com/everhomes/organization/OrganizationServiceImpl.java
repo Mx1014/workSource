@@ -5052,6 +5052,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return listOrganizationMemberByOrganizationPathAndContactToken(path, userIdentifier.getIdentifierToken());
 	}
 
+    @Override
+    public String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //先判断是否是子公司
+        Organization org = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
+        if(org != null){
+            if(org.getParentId() == 0L){//为总公司
+                if(organizationProvider.checkIfLastOnNode(namespaceId, cmd.getOrganizationId(), cmd.getContactToken(), org.getPath())){//如果是总公司下最后一个onNode节点
+                    return DeleteOrganizationContactScopeType.ALL_NOTE.getCode();
+                }else {//不是最后一个节点
+                    return "0";
+                }
+            }else{//为分公司
+                if(organizationProvider.checkIfLastOnNode(namespaceId, cmd.getOrganizationId(), cmd.getContactToken(), org.getPath())) {//如果是分公司下最后一个onNode节点
+                    if(organizationProvider.checkIfLastOnNode(namespaceId, cmd.getOrganizationId(), cmd.getContactToken(), "/" + org.getParentId())) {//继续查询是否是总公司下最后一个onNode节点
+                        return DeleteOrganizationContactScopeType.ALL_NOTE.getCode();
+                    }else{//是分公司最后一个节点而不是总公司最后一个节
+                        return DeleteOrganizationContactScopeType.CHILD_ENTERPRISE.getCode();
+                    }
+                }else{//不是总公司最后一个节点
+                    return "0";
+                }
+            }
+        }
+        return "0";
+    }
+
     /**
      * 根据contactToken退出删除organization path路径下的所有机构
      *
