@@ -68,7 +68,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         /**处理关系表**/
         //1.查询本次保存中所有勾选部门的所有人员detailId集合detailIds
         List<Long> orgIds = cmd.getTargets().stream().filter((r) -> {
-            return r.getType().equals(UniongroupTargetType.fromCode("ORGANIZATION").getCode());
+            return r.getType().equals(UniongroupTargetType.ORGANIZATION.getCode());
         }).map((r) -> {
             return r.getId();
         }).collect(Collectors.toList());

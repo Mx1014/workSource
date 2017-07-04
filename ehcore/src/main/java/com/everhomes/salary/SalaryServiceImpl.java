@@ -479,7 +479,7 @@ public class SalaryServiceImpl implements SalaryService {
         List<UniongroupTarget> targets = new ArrayList<>();
 
         //  1.将部门 id 传入targets
-        if(!cmd.getDepartmentIds().isEmpty()){
+        if(!StringUtils.isEmpty(cmd.getDepartmentIds())){
             cmd.getDepartmentIds().forEach(r ->{
                 UniongroupTarget target = new UniongroupTarget();
                 target.setId(r);
@@ -489,7 +489,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
 
         //  2.将选择的人员的 detailId 传入 targets
-        if(!cmd.getDetailIds().isEmpty()){
+        if(!StringUtils.isEmpty(cmd.getDetailIds())){
             cmd.getDetailIds().forEach(r ->{
                 UniongroupTarget target = new UniongroupTarget();
                 target.setId(r);
@@ -497,6 +497,8 @@ public class SalaryServiceImpl implements SalaryService {
                 targets.add(target);
             });
         }
+
+        command.setTargets(targets);
 
         // 3.将人员添加至组织架构的薪酬组
         this.uniongroupService.saveUniongroupConfigures(command);
