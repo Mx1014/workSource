@@ -63,6 +63,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
@@ -9570,7 +9571,15 @@ public class OrganizationServiceImpl implements OrganizationService {
         Set<Long> targetIdSet = new HashSet<>();
         for (ServiceModuleAssignment assignment : assignments) {
             if (EntityType.fromCode(assignment.getTargetType()) == EntityType.ORGANIZATIONS) {
-                targetIdSet.add(assignment.getTargetId());
+                //包含子部门，就拿path下面所有的机构
+                if(IncludeChildFlagType.YES == IncludeChildFlagType.fromCode(assignment.getIncludeChildFlag())){
+                    Organization organization = organizationProvider.findOrganizationById(assignment.getTargetId());
+                    if(null != organization){
+                        addPathOrganizationId(organization.getPath(), targetIdSet);
+                    }
+                }else{
+                    targetIdSet.add(assignment.getTargetId());
+                }
             }
         }
         //循环查找targetIdSet
