@@ -273,7 +273,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>15-2.保存某个批次的核算后数值和更改状态</p>
+	 * <p>15-2.批量设置核算状态</p>
 	 * <b>URL: /salary/batchSetEmployeeCheckFlag</b>
 	 */
 	@RequestMapping("batchSetEmployeeCheckFlag")
@@ -315,7 +315,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>18-2.批量设置工资条邮件内容</p>
+	 * <p>19-2.批量设置工资条邮件和显示字段</p>
 	 * <b>URL: /salary/batchUpdateSalaryGroupEntitiesVisable</b>
 	 */
 	@RequestMapping("batchUpdateSalaryGroupEntitiesVisable")
