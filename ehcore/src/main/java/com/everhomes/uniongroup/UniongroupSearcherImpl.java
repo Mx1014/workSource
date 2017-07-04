@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2017/7/3.
  */
-public class UniongroupSearcherImpl extends AbstractElasticSearch implements UniongroupSearcher{
+public class UniongroupSearcherImpl extends AbstractElasticSearch implements UniongroupSearcher {
     @Override
     public void deleteById(Long id) {
 
@@ -49,7 +49,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     }
 
 
-    private XContentBuilder createDoc(UniongroupMemberDetail uniongroupMemberDetail){
+   /* private XContentBuilder createDoc(UniongroupMemberDetail uniongroupMemberDetail){
         try{
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("id", uniongroupMemberDetail.getId());
@@ -83,4 +83,5 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         }
         return null;
     }
+}*/
 }
