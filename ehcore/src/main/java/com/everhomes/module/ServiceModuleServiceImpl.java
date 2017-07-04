@@ -540,6 +540,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public void createServiceModule(CreateServiceModuleCommand cmd) {
+        ServiceModule module = ConvertHelper.convert(cmd, ServiceModule.class);
+        module.setLevel(2);
+        serviceModuleProvider.createServiceModule(module);
     }
 
     @Override
