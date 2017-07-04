@@ -187,8 +187,7 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("createServiceModule")
     @RestReturn(value = String.class)
     public RestResponse createServiceModule(@Valid CreateServiceModuleCommand cmd) {
-        serviceModuleService.createServiceModule(cmd);
-        return new RestResponse();
+        return new RestResponse(serviceModuleService.createServiceModule(cmd));
     }
 
     /**
@@ -200,8 +199,7 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("updateServiceModule")
     @RestReturn(value = String.class)
     public RestResponse updateServiceModule(@Valid UpdateServiceModuleCommand cmd) {
-        serviceModuleService.updateServiceModule(cmd);
-        return new RestResponse();
+        return new RestResponse(serviceModuleService.updateServiceModule(cmd));
     }
 
     /**

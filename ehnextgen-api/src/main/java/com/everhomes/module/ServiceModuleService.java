@@ -31,9 +31,9 @@ public interface ServiceModuleService {
 
 	Byte checkModuleManage(CheckModuleManageCommand cmd);
 
-	void createServiceModule(CreateServiceModuleCommand cmd);
+	ServiceModuleDTO createServiceModule(CreateServiceModuleCommand cmd);
 
-	void updateServiceModule(UpdateServiceModuleCommand cmd);
+	ServiceModuleDTO updateServiceModule(UpdateServiceModuleCommand cmd);
 
 	void deleteServiceModule(DeleteServiceModuleCommand cmd);
 

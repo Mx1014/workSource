@@ -110,13 +110,17 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             list = serviceModuleProvider.listServiceModule();
         }
         return list.stream().map(r -> {
-            ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
-            dto.setCreateTime(r.getCreateTime().getTime());
-            dto.setUpdateTime(r.getUpdateTime().getTime());
-            User operator = userProvider.findUserById(dto.getOperatorUid());
-            if(null != operator) dto.setOperatorUName(operator.getNickName());
-            return dto;
+            return processServiceModuleDTO(r);
         }).collect(Collectors.toList());
+    }
+
+    private ServiceModuleDTO processServiceModuleDTO(ServiceModule module){
+        ServiceModuleDTO dto = ConvertHelper.convert(module, ServiceModuleDTO.class);
+        dto.setCreateTime(module.getCreateTime().getTime());
+        dto.setUpdateTime(module.getUpdateTime().getTime());
+        User operator = userProvider.findUserById(module.getOperatorUid());
+        if(null != operator) dto.setOperatorUName(operator.getNickName());
+        return dto;
     }
 
     @Override
@@ -558,7 +562,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     @Override
-    public void createServiceModule(CreateServiceModuleCommand cmd) {
+    public ServiceModuleDTO createServiceModule(CreateServiceModuleCommand cmd) {
         User user = UserContext.current().getUser();
         ServiceModule parentModule = checkServiceModule(cmd.getParentId());
         ServiceModule module = ConvertHelper.convert(cmd, ServiceModule.class);
@@ -569,10 +573,11 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         module.setCreatorUid(user.getId());
         module.setOperatorUid(user.getId());
         serviceModuleProvider.createServiceModule(module);
+        return processServiceModuleDTO(module);
     }
 
     @Override
-    public void updateServiceModule(UpdateServiceModuleCommand cmd) {
+    public ServiceModuleDTO updateServiceModule(UpdateServiceModuleCommand cmd) {
         User user = UserContext.current().getUser();
         ServiceModule module = checkServiceModule(cmd.getId());
         module.setDescription(cmd.getDescription());
@@ -580,6 +585,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         module.setInstanceConfig(cmd.getInstanceConfig());
         module.setOperatorUid(user.getId());
         serviceModuleProvider.updateServiceModule(module);
+        return processServiceModuleDTO(module);
     }
 
     @Override
