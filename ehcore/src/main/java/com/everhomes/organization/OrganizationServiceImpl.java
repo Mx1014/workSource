@@ -12126,10 +12126,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organization.setName(name);
         organization.setDirectlyEnterpriseId(organizationId);
+        organization.setParentId(organizationId);
 		organization.setGroupType(UniongroupType.SALARYGROUP.getCode());
         organization.setLevel(parOrg.getLevel()+1);
 		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
 		organization.setCreatorUid(user.getId());
+		organization.setOperatorUid(user.getId());
 		organizationProvider.createOrganization(organization);
 
 		return organization;

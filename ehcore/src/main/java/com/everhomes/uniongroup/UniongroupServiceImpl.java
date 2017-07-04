@@ -163,8 +163,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd) {
-//        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Integer namespaceId = 1000000;
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId(),cmd.getOwnerId());
         if (details != null) {
             return details.stream().map(r -> {
