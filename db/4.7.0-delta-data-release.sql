@@ -68,11 +68,11 @@ VALUES ('organization', '900023', 'zh_CN', '日期格式错误');
 
 -- merge from orgByLv started by lei.lv 20170703
 -- 1.运行建表脚本
---2.运行新增字段脚本
---4.修复organization表中group_type = 'JOB_LEVEL'的记录没有directly_enterprise_id的问题
+-- 2.运行新增字段脚本
+-- 4.修复organization表中group_type = 'JOB_LEVEL'的记录没有directly_enterprise_id的问题
 UPDATE eh_organizations set directly_enterprise_id = parent_id WHERE group_type = 'JOB_LEVEL';
 
---5.运行数据迁移脚本
+-- 5.运行数据迁移脚本
 
 SET @detail_id = 0;
 
@@ -248,4 +248,16 @@ select @id:=@id+1,
 from eh_rentalv2_resources t2
 where t2.rental_type is not null;
 
-
+-- merge from energyqrcode by xiongying20170703
+update eh_energy_meters m set m.bill_category_id = (select cs.id from eh_energy_meter_categories cs where cs.name = 
+    (select c.name from eh_energy_meter_categories c where c.id = m.bill_category_id) 
+    and cs.community_id = m.community_id and cs.category_type = 1);
+update eh_energy_meters m set m.service_category_id = (select cs.id from eh_energy_meter_categories cs where cs.name = 
+    (select c.name from eh_energy_meter_categories c where c.id = m.service_category_id) 
+    and cs.community_id = m.community_id and cs.category_type = 2);
+update eh_energy_meters m set m.cost_formula_id = (select fs.id from eh_energy_meter_formulas fs where fs.name = 
+    (select f.name from eh_energy_meter_formulas f where f.id = m.cost_formula_id) 
+    and fs.community_id = m.community_id and fs.formula_type = 2);
+update eh_energy_meters m set m.amount_formula_id = (select fs.id from eh_energy_meter_formulas fs where fs.name = 
+    (select f.name from eh_energy_meter_formulas f where f.id = m.amount_formula_id) 
+    and fs.community_id = m.community_id and fs.formula_type = 1);

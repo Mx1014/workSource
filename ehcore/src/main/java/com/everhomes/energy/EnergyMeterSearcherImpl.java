@@ -113,7 +113,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
     }
 
     @Override
-    public SearchEnergyMeterResponse queryMeters(SearchEnergyMeterCommand cmd) {
+    public List<Long> getMeterIds(SearchEnergyMeterCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -193,9 +193,22 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query energy meters, builder={}", builder);
         }
-        
+
         SearchResponse rsp = builder.execute().actionGet();
         List<Long> ids = getIds(rsp);
+
+        return ids;
+    }
+
+    @Override
+    public SearchEnergyMeterResponse queryMeters(SearchEnergyMeterCommand cmd) {
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0L;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+
+        List<Long> ids = getMeterIds(cmd);
         SearchEnergyMeterResponse response = new SearchEnergyMeterResponse();
         if (ids.size() > pageSize) {
             ids.remove(ids.size() - 1);
