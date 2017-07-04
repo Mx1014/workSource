@@ -316,12 +316,12 @@ public class SalaryController extends ControllerBase {
 
 	/**
 	 * <p>18-2.批量设置工资条邮件内容</p>
-	 * <b>URL: /salary/batchSetSalaryEmailContent</b>
+	 * <b>URL: /salary/batchUpdateSalaryGroupEntitiesVisable</b>
 	 */
-	@RequestMapping("batchSetSalaryEmailContent")
+	@RequestMapping("batchUpdateSalaryGroupEntitiesVisable")
 	@RestReturn(String.class)
-	public RestResponse batchSetSalaryEmailContent(BatchSetSalaryEmailContentCommand cmd){
-		salaryService.batchSetSalaryEmailContent(cmd);
+	public RestResponse batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd){
+		salaryService.batchUpdateSalaryGroupEntitiesVisable(cmd);
 		return new RestResponse();
 	}
 	/**

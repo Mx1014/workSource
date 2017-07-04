@@ -94,5 +94,5 @@ public interface SalaryService {
 
 	public void revokeSendPeriodSalary(SendPeriodSalaryCommand cmd);
 
-	void batchSetSalaryEmailContent(BatchSetSalaryEmailContentCommand cmd);
+	void batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd);
 }

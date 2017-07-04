@@ -53,8 +53,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.eclipse.jdt.internal.compiler.parser.Parser.name;
-
 @Component
 public class SalaryServiceImpl implements SalaryService {
 
@@ -817,9 +815,9 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 
     @Override
-    public void batchSetSalaryEmailContent(BatchSetSalaryEmailContentCommand cmd) {
-        for (SetSalaryEmailContentCommand cmd1 : cmd.getSalaryGroupCmd()) {
-            setSalaryEmailContent(cmd1);
+    public void batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd) {
+        for (UpdateSalaryGroupEntitiesVisableCommand cmd1 : cmd.getSalaryGroupCmd()) {
+            updateSalaryGroupEntitiesVisable(cmd1);
         }
     }
 
