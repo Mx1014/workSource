@@ -2785,7 +2785,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 BufferedImage.TYPE_INT_RGB);
 
         Graphics graphics = image.getGraphics();
-        graphics.setFont(new Font("宋体", Font.PLAIN, 15));
+        graphics.setFont(new Font("wqy-zenhei", Font.PLAIN, 15));
         graphics.setColor(Color.WHITE);
         graphics.fillRect(0, 0, imageWidth, imageHeight);
         graphics.setColor(Color.BLACK);
