@@ -2,12 +2,13 @@ package com.everhomes.rest.uniongroup;
 
 import com.everhomes.util.StringHelper;
 
-/**
- * Created by Administrator on 2017/6/29.
- */
 public class ListUniongroupMemberDetailsCommand {
 
     private Long groupId;
+
+    private String ownerType;
+
+    private Long ownerId;
 
     public ListUniongroupMemberDetailsCommand() {
 
@@ -24,6 +25,22 @@ public class ListUniongroupMemberDetailsCommand {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

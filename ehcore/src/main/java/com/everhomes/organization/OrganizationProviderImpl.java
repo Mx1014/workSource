@@ -4679,10 +4679,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public List<Organization> listOrganizationsByGroupType(String groupType) {
+	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select().from(Tables.EH_ORGANIZATIONS)
 				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
+				.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId))
 				.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
 	}
 }

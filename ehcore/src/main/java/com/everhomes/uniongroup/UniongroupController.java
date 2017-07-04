@@ -46,9 +46,9 @@ public class UniongroupController extends ControllerBase {
 
     /**
      * <p>获取组关系</p>
-     * <b>URL: /uniongroup/getUniongroupMemberDetailsByGroupId</b>
+     * <b>URL: /uniongroup/listUniongroupMemberDetailsByGroupId</b>
      */
-    @RequestMapping("getUniongroupMemberDetailsByGroupId")
+    @RequestMapping("listUniongroupMemberDetailsByGroupId")
     @RestReturn(value = UniongroupMemberDetailsDTO.class, collection = true)
     public RestResponse listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd){
         RestResponse response = new RestResponse(uniongroupService.listUniongroupMemberDetailsByGroupId(cmd));
