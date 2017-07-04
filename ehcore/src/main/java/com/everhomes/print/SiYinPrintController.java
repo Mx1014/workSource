@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.print;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -197,11 +198,11 @@ public class SiYinPrintController extends ControllerBase {
 	  * <p>获取用户登录的URL，/print/informPrint，提供给前端生成二维码</p>
 	  */
 	 @RequestMapping("getPrintLogonUrl")
-	 @RestReturn(value=GetPrintLogonUrlResponse.class)
+	 @RestReturn(value=String.class)
 	 @RequireAuthentication(false)
 	 public RestResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
-		
-	     RestResponse response = new RestResponse(siyinPrintService.getPrintLogonUrl(cmd));
+		 GetPrintLogonUrlResponse res = siyinPrintService.getPrintLogonUrl(cmd);
+	     RestResponse response = new RestResponse(Base64.getEncoder().encodeToString(res.toString().getBytes()));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
