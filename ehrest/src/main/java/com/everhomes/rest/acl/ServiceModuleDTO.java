@@ -48,7 +48,7 @@ public class ServiceModuleDTO implements Serializable {
 
 	private Long operatorUid;
 
-	private Long operatorUName;
+	private String operatorUName;
 
 	private String instanceConfig;
 
@@ -148,11 +148,11 @@ public class ServiceModuleDTO implements Serializable {
 		this.operatorUid = operatorUid;
 	}
 
-	public Long getOperatorUName() {
+	public String getOperatorUName() {
 		return operatorUName;
 	}
 
-	public void setOperatorUName(Long operatorUName) {
+	public void setOperatorUName(String operatorUName) {
 		this.operatorUName = operatorUName;
 	}
 

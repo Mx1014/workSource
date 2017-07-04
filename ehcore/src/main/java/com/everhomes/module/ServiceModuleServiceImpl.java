@@ -109,9 +109,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }else{
             list = serviceModuleProvider.listServiceModule();
         }
-
         return list.stream().map(r -> {
             ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
+            dto.setCreateTime(r.getCreateTime().getTime());
+            dto.setUpdateTime(r.getUpdateTime().getTime());
+            User operator = userProvider.findUserById(dto.getOperatorUid());
+            if(null != operator) dto.setOperatorUName(operator.getNickName());
             return dto;
         }).collect(Collectors.toList());
     }
