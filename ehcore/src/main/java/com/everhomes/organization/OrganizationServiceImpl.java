@@ -2159,18 +2159,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 				//把机构入驻的园区关系修改成无效
 				deleteCurrentOrganizationCommunityReqeust(user.getId(), org.getId());
-                //把机构下的所有人员修改成无效
-                List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(null, org.getPath(), null, null, new CrossShardListingLocator(), 1000000);
-                for (OrganizationMember member: members) {
-					member.setOperatorUid(user.getId());
-					member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
-					organizationProvider.updateOrganizationMember(member);
-					//解除门禁权限
-					doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
-				}
-                //把user_organization表中的相应记录更新为失效
-                inactiveUserOrganizationWithMembers(members);
 			}
+            //把机构下的所有人员修改成无效
+            List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+            for (OrganizationMember member: members) {
+                member.setOperatorUid(user.getId());
+                member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
+                organizationProvider.updateOrganizationMember(member);
+                //解除门禁权限
+                doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
+            }
+            //把user_organization表中的相应记录更新为失效
+            inactiveUserOrganizationWithMembers(members);
 			return null;
 		});
 
