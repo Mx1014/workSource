@@ -1,5 +1,7 @@
 package com.everhomes.rest.portal;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -11,6 +13,8 @@ import java.util.List;
  */
 public class PortalItemCategoryRank {
     private Long itemCategoryId;
+
+    @ItemType(Long.class)
     private List<Long> itemIds;
 
     public Long getItemCategoryId() {
