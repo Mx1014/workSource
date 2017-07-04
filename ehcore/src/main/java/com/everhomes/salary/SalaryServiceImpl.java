@@ -739,9 +739,17 @@ public class SalaryServiceImpl implements SalaryService {
 	public ListPeriodSalaryEmployeesResponse listPeriodSalaryEmployees(ListPeriodSalaryEmployeesCommand cmd) {
         ListPeriodSalaryEmployeesResponse response = new ListPeriodSalaryEmployeesResponse();
         //1.查entities
-
+        SalaryGroup periodGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
+        List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(periodGroup.getOrganizationGroupId());
+        response.setSalaryGroupEntitys(groupEntities.stream().map(r -> {
+            SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
+            return dto;
+        }).collect(Collectors.toList()));
         //2.查人员 periodGroupId 可以确定:公司,薪酬组和期数
-        List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(cmd.getSalaryPeriodGroupId());
+        Organization org = organizationProvider.findOrganizationById(punchService.getTopEnterpriseId(cmd.getOwnerId()));
+        List<Long> userIds = punchService.listDptUserIds(org, cmd.getOrganizationId(), cmd.getKeyWords(), NormalFlag.YES.getCode());
+
+        List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployees(cmd.getSalaryPeriodGroupId(),userIds,cmd.getCheckFlag());
 		if(null == result )
 			return response;
         response.setSalaryPeriodEmployees(result.stream().map(r ->{	

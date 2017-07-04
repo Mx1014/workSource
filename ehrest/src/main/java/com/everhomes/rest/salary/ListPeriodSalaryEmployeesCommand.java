@@ -22,7 +22,7 @@ public class ListPeriodSalaryEmployeesCommand {
 
 	private Long salaryPeriodGroupId;
 
-	private String organizationId;
+	private Long organizationId;
 
 	private String keyWords;
 
@@ -68,13 +68,6 @@ public class ListPeriodSalaryEmployeesCommand {
 		return StringHelper.toJsonString(this);
 	}
 
-	public String getOrganizationId() {
-		return organizationId;
-	}
-
-	public void setOrganizationId(String organizationId) {
-		this.organizationId = organizationId;
-	}
 
 	public String getKeyWords() {
 		return keyWords;
@@ -90,5 +83,13 @@ public class ListPeriodSalaryEmployeesCommand {
 
 	public void setCheckFlag(Byte checkFlag) {
 		this.checkFlag = checkFlag;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }
