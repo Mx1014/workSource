@@ -707,15 +707,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public void deleteEquipmentStandardRelations(
 			DeleteEquipmentStandardRelationsCommand cmd) {
-		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
-		
-		if(EquipmentStatus.fromStatus(equipment.getStatus()) == EquipmentStatus.INACTIVE) {
-			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
-					EquipmentServiceErrorCode.ERROR_EQUIPMENT_ALREADY_DELETED,
- 				"设备已删除");
-		}
 		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_DELETE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), equipment.getTargetId(), cmd.getOwnerId(), privilegeId);
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMapById(cmd.getId());
 		if(map == null) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
