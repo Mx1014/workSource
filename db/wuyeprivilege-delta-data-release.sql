@@ -237,8 +237,12 @@ update `eh_web_menus` set level = (length(path)-length(replace(path,'/','')));
 update `eh_web_menus` set `category` = 'module' where level > 1;
 update `eh_web_menus` set `category` = 'classify' where level = 1;
 
+-- 补充超管数据
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+insert into `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid` , `create_time` , `namespace_id` , `role_type`) select (@acl_id := @acl_id + 1),`owner_type`, `owner_id`,1,10, target_id, 0,1,now(),0, target_type from `eh_acl_role_assignments` where role_id = 1001 and target_type = 'EhUsers' and target_id not in (select role_id from eh_acls where role_type = 'EhUsers' and privilege_id = 10);
 
-
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+insert into `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid` , `create_time` , `namespace_id` , `role_type`) select (@acl_id := @acl_id + 1),`owner_type`, `owner_id`,1,15, target_id, 0,1,now(),0, target_type from `eh_acl_role_assignments` where role_id = 1005 and target_type = 'EhUsers' and target_id not in (select role_id from eh_acls where role_type = 'EhUsers' and privilege_id = 15);
 
 
 
