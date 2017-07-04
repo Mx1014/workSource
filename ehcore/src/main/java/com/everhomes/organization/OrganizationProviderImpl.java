@@ -3715,9 +3715,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
-		if(null != groupTypes && groupTypes.size() > 0)
-			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
-
+		if(null != groupTypes){
+			if(groupTypes.size() > 0){
+				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+			}
+		}
 		if(!StringUtils.isEmpty(contactToken)){
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
 		}
