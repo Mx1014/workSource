@@ -61,7 +61,7 @@ public class UniongroupController extends ControllerBase {
      * <p>获取组关系(条件查询)</p>
      * <b>URL: /uniongroup/listUniongroupMemberDetailsWithCondition</b>
      */
-    @RequestMapping("listUniongroupMemberDetailsByGroupId")
+    @RequestMapping("listUniongroupMemberDetailsWithCondition")
     @RestReturn(value = UniongroupMemberDetailsDTO.class, collection = true)
     public RestResponse listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd){
         RestResponse response = new RestResponse(uniongroupService.listUniongroupMemberDetailsWithCondition(cmd));
