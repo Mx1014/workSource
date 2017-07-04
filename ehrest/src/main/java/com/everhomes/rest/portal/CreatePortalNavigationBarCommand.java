@@ -8,8 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>name: 门户导航栏名称</li>
  * <li>description: 门户itemGroup描述</li>
- * <li>actionType: 内容类型</li>
- * <li>actionData: 内容需要的参数，类型 我：无参数 门户：门户id(例如：{'layoutId':1})，业务应用：应用id(例如：{'moduleAppId':1}</li>
+ * <li>targetType: 对象类型</li>
+ * <li>targetId: 对象id</li>
  * </ul>
  */
 public class CreatePortalNavigationBarCommand {
@@ -18,20 +18,20 @@ public class CreatePortalNavigationBarCommand {
 
 	private String description;
 
-	private String actionType;
+	private String targetType;
 
-	private String actionData;
+	private Long targetId;
 
 	public CreatePortalNavigationBarCommand() {
 
 	}
 
-	public CreatePortalNavigationBarCommand(String name, String description, String actionType, String actionData) {
+	public CreatePortalNavigationBarCommand(String name, String description, String targetType, Long targetId) {
 		super();
 		this.name = name;
 		this.description = description;
-		this.actionType = actionType;
-		this.actionData = actionData;
+		this.targetType = targetType;
+		this.targetId = targetId;
 	}
 
 	public String getName() {
@@ -50,20 +50,20 @@ public class CreatePortalNavigationBarCommand {
 		this.description = description;
 	}
 
-	public String getActionType() {
-		return actionType;
+	public String getTargetType() {
+		return targetType;
 	}
 
-	public void setActionType(String actionType) {
-		this.actionType = actionType;
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
 
-	public String getActionData() {
-		return actionData;
+	public Long getTargetId() {
+		return targetId;
 	}
 
-	public void setActionData(String actionData) {
-		this.actionData = actionData;
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	@Override

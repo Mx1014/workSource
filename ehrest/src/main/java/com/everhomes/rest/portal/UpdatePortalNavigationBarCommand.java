@@ -21,21 +21,21 @@ public class UpdatePortalNavigationBarCommand {
 
 	private String description;
 
-	private String actionType;
+	private String targetType;
 
-	private String actionData;
+	private Long targetId;
 
 	public UpdatePortalNavigationBarCommand() {
 
 	}
 
-	public UpdatePortalNavigationBarCommand(Long id, String name, String description, String actionType, String actionData) {
+	public UpdatePortalNavigationBarCommand(Long id, String name, String description, String targetType, Long targetId) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.actionType = actionType;
-		this.actionData = actionData;
+		this.targetType = targetType;
+		this.targetId = targetId;
 	}
 
 	public Long getId() {
@@ -62,20 +62,20 @@ public class UpdatePortalNavigationBarCommand {
 		this.description = description;
 	}
 
-	public String getActionType() {
-		return actionType;
+	public String getTargetType() {
+		return targetType;
 	}
 
-	public void setActionType(String actionType) {
-		this.actionType = actionType;
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
 
-	public String getActionData() {
-		return actionData;
+	public Long getTargetId() {
+		return targetId;
 	}
 
-	public void setActionData(String actionData) {
-		this.actionData = actionData;
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	@Override
