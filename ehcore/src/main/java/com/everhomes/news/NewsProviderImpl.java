@@ -5,6 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.daos.EhNewsCommunitiesDao;
+import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
+import com.everhomes.user.UserContext;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
@@ -100,7 +103,19 @@ public class NewsProviderImpl implements NewsProvider {
 		return getReadOnlyContext().select(Tables.EH_NEWS.TOP_INDEX.max()).from(Tables.EH_NEWS).where(Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId))
 		.fetchOne().value1();
 	}
-	
+
+	@Override
+	public void createNewsCommunity(NewsCommunity newsCommunity) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewsCommunities.class));
+		newsCommunity.setId(id);
+		newsCommunity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		newsCommunity.setCreatorUid(UserContext.current().getUser().getId());
+
+		EhNewsCommunitiesDao dao = new EhNewsCommunitiesDao(context.configuration());
+		getReadWriteDao().insert(newsCommunity);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNewsCommunities.class, null);
+	}
+
 	private EhNewsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
