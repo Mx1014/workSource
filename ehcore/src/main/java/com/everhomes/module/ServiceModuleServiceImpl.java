@@ -101,6 +101,22 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     @Override
+    public List<ServiceModuleDTO> listAllServiceModules(ListServiceModulesCommand cmd){
+        List<ServiceModule> list = null;
+        if(null != cmd.getParentId()){
+            ServiceModule serviceModule = checkServiceModule(cmd.getParentId());
+            list = serviceModuleProvider.listServiceModule(serviceModule.getPath() + "/%");
+        }else{
+            list = serviceModuleProvider.listServiceModule();
+        }
+
+        return list.stream().map(r -> {
+            ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public List<ServiceModuleDTO> listTreeServiceModules(ListServiceModulesCommand cmd) {
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
@@ -540,19 +556,43 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public void createServiceModule(CreateServiceModuleCommand cmd) {
+        User user = UserContext.current().getUser();
+        ServiceModule parentModule = checkServiceModule(cmd.getParentId());
         ServiceModule module = ConvertHelper.convert(cmd, ServiceModule.class);
         module.setLevel(2);
+        module.setPath(parentModule.getPath());
+        module.setLevel(parentModule.getLevel() + 1);
+        module.setStatus(ServiceModuleStatus.ACTIVE.getCode());
+        module.setCreatorUid(user.getId());
+        module.setOperatorUid(user.getId());
         serviceModuleProvider.createServiceModule(module);
     }
 
     @Override
     public void updateServiceModule(UpdateServiceModuleCommand cmd) {
-
+        User user = UserContext.current().getUser();
+        ServiceModule module = checkServiceModule(cmd.getId());
+        module.setDescription(cmd.getDescription());
+        module.setName(cmd.getName());
+        module.setInstanceConfig(cmd.getInstanceConfig());
+        module.setOperatorUid(user.getId());
+        serviceModuleProvider.updateServiceModule(module);
     }
 
     @Override
     public void deleteServiceModule(DeleteServiceModuleCommand cmd) {
+        ServiceModule module = checkServiceModule(cmd.getId());
+        serviceModuleProvider.deleteServiceModuleById(module.getId());
+    }
 
+    private ServiceModule checkServiceModule(Long id){
+        ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(id);
+        if(null == serviceModule){
+            LOGGER.error("Unable to find the serviceModule.moduleId = {}", id);
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "Unable to find the serviceModule.");
+        }
+        return serviceModule;
     }
 
     private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {

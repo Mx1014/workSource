@@ -298,6 +298,11 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
+    public List<ServiceModule> listServiceModule() {
+        return listServiceModule("");
+    }
+
+    @Override
     public List<ServiceModule> listServiceModule(Integer level, Byte type) {
         List<ServiceModule> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
@@ -324,7 +329,10 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
 
         Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
-        cond = cond.and(Tables.EH_SERVICE_MODULES.PATH.like(path));
+        if(!org.springframework.util.StringUtils.isEmpty(path)){
+            cond = cond.and(Tables.EH_SERVICE_MODULES.PATH.like(path));
+        }
+
         query.addConditions(cond);
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModule.class));
@@ -479,6 +487,10 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             serviceModule.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         if(null == serviceModule.getUpdateTime())
             serviceModule.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(null == serviceModule.getPath()){
+            serviceModule.setPath("");
+        }
+        serviceModule.setPath(serviceModule.getPath() + "/" + id);
         EhServiceModulesDao dao = new EhServiceModulesDao(context.configuration());
         dao.insert(serviceModule);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModules.class, id);

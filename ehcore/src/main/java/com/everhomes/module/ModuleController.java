@@ -187,6 +187,7 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("createServiceModule")
     @RestReturn(value = String.class)
     public RestResponse createServiceModule(@Valid CreateServiceModuleCommand cmd) {
+        serviceModuleService.createServiceModule(cmd);
         return new RestResponse();
     }
 
@@ -199,6 +200,7 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("updateServiceModule")
     @RestReturn(value = String.class)
     public RestResponse updateServiceModule(@Valid UpdateServiceModuleCommand cmd) {
+        serviceModuleService.updateServiceModule(cmd);
         return new RestResponse();
     }
 
@@ -211,6 +213,19 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("deleteServiceModule")
     @RestReturn(value = String.class)
     public RestResponse deleteServiceModule(@Valid DeleteServiceModuleCommand cmd) {
+        serviceModuleService.deleteServiceModule(cmd);
         return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /module/listAllServiceModules</b>
+     * <p>
+     * 全部的业务模块列表
+     * </p>
+     */
+    @RequestMapping("listAllServiceModules")
+    @RestReturn(value = ServiceModuleDTO.class, collection = true)
+    public RestResponse listAllServiceModules(@Valid ListServiceModulesCommand cmd) {
+        return new RestResponse(serviceModuleService.listAllServiceModules(cmd));
     }
 }

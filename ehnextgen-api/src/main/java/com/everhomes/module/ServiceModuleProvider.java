@@ -66,4 +66,6 @@ public interface ServiceModuleProvider {
 
     void deleteServiceModuleById(Long id);
 
+    List<ServiceModule> listServiceModule();
+
 }

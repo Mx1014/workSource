@@ -9,9 +9,12 @@ import com.everhomes.util.StringHelper;
  * <li>name：模块名称</li>
  * <li>instanceConfig：模块参数，比如第三方链接值就是{"url":"http......."}</li>
  * <li>description：描述</li>
+ * <li>parentId：父级ID</li>
  * </ul>
  */
 public class CreateServiceModuleCommand {
+
+	private Long parentId;
 
 	private Byte type;
 
@@ -20,6 +23,14 @@ public class CreateServiceModuleCommand {
 	private String description;
 
 	private String instanceConfig;
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
 
 	public Byte getType() {
 		return type;

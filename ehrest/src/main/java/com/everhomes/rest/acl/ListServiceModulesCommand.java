@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId:  所属实体id</li>
  * <li>level: 业务模块级别</li>
  * <li>type: 类型</li>
+ * <li>parentId: 父级id</li>
  * </ul>
  */
 public class ListServiceModulesCommand {
@@ -21,7 +22,17 @@ public class ListServiceModulesCommand {
 
 	private Byte type;
 
-    public Integer getLevel() {
+	private Long parentId;
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	public Integer getLevel() {
         return level;
     }
 
