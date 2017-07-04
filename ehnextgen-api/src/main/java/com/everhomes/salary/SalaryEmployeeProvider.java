@@ -20,4 +20,6 @@ public interface SalaryEmployeeProvider {
 	List<SalaryEmployee> listSalaryEmployees(List<Long> userIds, List<String> periods);
 
 	void updateSalaryEmployeeCheckFlag(List<Long> salaryEmployeeIds, Byte checkFlag);
+
+	List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> userIds, Byte checkFlag);
 }

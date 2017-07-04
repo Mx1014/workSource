@@ -162,6 +162,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd) {
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId(), cmd.getOwnerId());
         if (details != null) {

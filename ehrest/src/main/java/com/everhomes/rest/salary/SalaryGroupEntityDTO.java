@@ -26,9 +26,9 @@ public class SalaryGroupEntityDTO {
     private Byte type;
     private Long categoryId;
     private String categoryName;
-    private String name;
-    private Byte editableFlag;
-    private Byte numberType;
+	private String name;
+	private Byte editableFlag;
+	private Byte numberType;
     private String defaultValue;
     private Byte needCheck;
     private Integer defaultOrder;
