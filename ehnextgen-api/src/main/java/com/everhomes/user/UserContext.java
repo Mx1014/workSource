@@ -3,7 +3,6 @@ package com.everhomes.user;
 
 import com.everhomes.app.App;
 import com.everhomes.namespace.Namespace;
-import org.springframework.util.StringUtils;
 
 public class UserContext {
     private static ThreadLocal<UserContext> s_userContexts = new ThreadLocal<UserContext>();
@@ -83,7 +82,12 @@ public class UserContext {
 	public static void setCurrentUser(User user) {
 		current().setUser(user);
 	}
-	
+
+	public static Long currentUserId() {
+        User user = current().getUser();
+        return user != null ? user.getId() : null;
+    }
+
 	public static Integer getCurrentNamespaceId(Integer namespaceId){
 		UserContext context = s_userContexts.get();
 		
