@@ -285,20 +285,20 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    public ListSalaryGroupResponse listSalaryGroup(ListSalaryGroupCommand cmd){
+    public ListSalaryGroupResponse listSalaryGroup(ListSalaryGroupCommand cmd) {
 
-	    Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-	    ListSalaryGroupResponse response = new ListSalaryGroupResponse();
+        ListSalaryGroupResponse response = new ListSalaryGroupResponse();
 
         //  获取所有批次
-	    List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
-	    //  获取公司总人数
-        Integer totalCount = this.organizationProvider.countOrganizationMemberDetailsByOrgId(namespaceId,cmd.getOwnerId());
+        //  获取公司总人数
+        Integer totalCount = this.organizationProvider.countOrganizationMemberDetailsByOrgId(namespaceId, cmd.getOwnerId());
 
         //  拼接关联人数
-        response.setSalaryGroupList(organizations.stream().map(p ->{
+        response.setSalaryGroupList(organizations.stream().map(p -> {
             SalaryGroupListDTO dto = new SalaryGroupListDTO();
             dto.setSalaryGroupId(p.getId());
             dto.setSalaryGroupName(p.getName());
@@ -307,27 +307,21 @@ public class SalaryServiceImpl implements SalaryService {
             command.setOwnerId(cmd.getOwnerId());
             command.setOwnerType(cmd.getOwnerType());
             List<UniongroupMemberDetailsDTO> lists = this.uniongroupService.listUniongroupMemberDetailsByGroupId(command);
-            dto.setRelevantNum(lists.size());
-            //  设置相关人数
-/*            if(!lists.isEmpty()){
-                lists.forEach(q -> {
-                    if(q[0].equals(dto.getSalaryGroupId()))
-                        dto.setRelevantNum((Integer)q[1]);
-                });
-            }*/
+            if (!StringUtils.isEmpty(lists))
+                dto.setRelevantNum(lists.size());
             return dto;
         }).collect(Collectors.toList()));
 
 
-	    //  查询相关人数
+        //  查询相关人数
 /*	    List<Long> salaryGroupIds = new ArrayList<>();
-	    organizations.forEach(r ->{
+        organizations.forEach(r ->{
 	        Long salaryGroupId = r.getId();
             salaryGroupIds.add(salaryGroupId);
         });
 	    List<Object[]> lists = this.salaryEmployeeOriginValProvider.getRelevantNumbersByGroupId(salaryGroupIds);
 */
-	    return response;
+        return response;
     }
 
 
