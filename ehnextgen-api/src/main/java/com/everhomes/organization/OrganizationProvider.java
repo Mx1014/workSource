@@ -402,5 +402,7 @@ public interface OrganizationProvider {
 
 	Set<Long> listMemberDetailIdWithExclude(Integer namespaceId, String big_path, List<String> small_path);
 
+	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
+
 }
 
