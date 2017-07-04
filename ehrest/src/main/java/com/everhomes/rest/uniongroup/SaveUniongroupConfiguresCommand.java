@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.uniongroup;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class SaveUniongroupConfiguresCommand {
     private Long groupId;
 
     private Long enterpriseId;
-
+    @ItemType(UniongroupTarget.class)
     private List<UniongroupTarget> targets;
 
     public SaveUniongroupConfiguresCommand() {
