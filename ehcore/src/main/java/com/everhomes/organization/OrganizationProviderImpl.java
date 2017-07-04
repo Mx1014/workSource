@@ -4685,4 +4685,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
 				.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
 	}
+
+	@Override
+	public Integer countOrganizationMemberDetailsByOrgId(Integer namespaceId, Long organizationId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId);
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+		return context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchCount();
+	}
 }
