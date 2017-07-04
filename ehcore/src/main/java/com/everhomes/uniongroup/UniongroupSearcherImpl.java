@@ -1,8 +1,5 @@
 package com.everhomes.uniongroup;
 
-import com.everhomes.address.Address;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.AbstractElasticSearch;
@@ -11,8 +8,8 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/7/3.
@@ -24,13 +21,14 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     }
 
     @Override
-    public void bulkUpdate(List<Organization> organizations) {
+    public void bulkUpdate(List<UniongroupMemberDetail> uniongroupMemberDetails) {
 
     }
 
     @Override
-    public void feedDoc(Organization organization) {
-
+    public void feedDoc(UniongroupMemberDetail uniongroupMemberDetail) {
+        XContentBuilder source = createDoc(uniongroupMemberDetail);
+        feedDoc(uniongroupMemberDetail.getId().toString(), source);
     }
 
     @Override
@@ -40,6 +38,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
     @Override
     public GroupQueryResult query(SearchOrganizationCommand cmd) {
+
         return null;
     }
 
@@ -49,8 +48,8 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     }
 
 
-   /* private XContentBuilder createDoc(UniongroupMemberDetail uniongroupMemberDetail){
-        try{
+    private XContentBuilder createDoc(UniongroupMemberDetail uniongroupMemberDetail) {
+        try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("id", uniongroupMemberDetail.getId());
             b.field("namespaceId", uniongroupMemberDetail.getNamespaceId());
@@ -64,24 +63,27 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             b.field("contact_token", uniongroupMemberDetail.getContactToken());
             b.field("update_time", uniongroupMemberDetail.getUpdateTime());
             b.field("operator_uid", uniongroupMemberDetail.getOperatorUid());
-            String tagStr = group.getTag();
-            if((null != tagStr) && (!tagStr.isEmpty())) {
-                String[] tags = tagStr.split(",");
-                if(tags.length > 0) {
-                    b.startArray("tags");
-                    for(String tag : tags) {
-                        String newTag = tag.trim();
-                        b.startObject().field("department_name", uniongroupMemberDetail.get)
-                                .field("department_id", newTag)
-                                .endObject();
-                    }
-                    b.endArray();
+            Map<Long, String> department = uniongroupMemberDetail.getDepartment();
+            if (department.size() > 0) {
+                for (Long i : department.keySet()) {
+                    b.startObject().field("department_id", i)
+                            .field("department_name", department.get(i))
+                            .endObject();
                 }
+                b.endArray();
+            }
+            Map<Long, String> job_level = uniongroupMemberDetail.getJob_position();
+            if (department.size() > 0) {
+                for (Long i : department.keySet()) {
+                    b.startObject().field("job_position_id", i)
+                            .field("job_position_name", department.get(i))
+                            .endObject();
+                }
+                b.endArray();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
-}*/
 }

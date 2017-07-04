@@ -122,7 +122,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                 uniongroupMemberDetails.setGroupId(cmd.getGroupId());
                 uniongroupMemberDetails.setGroupType(uniongroupType.getCode());
                 uniongroupMemberDetails.setDetailId(r);
-                uniongroupMemberDetails.setEnterpriseId(detail.getOrganizationId());
+                uniongroupMemberDetails.setEnterpriseId(cmd.getEnterpriseId());
                 uniongroupMemberDetails.setTargetType(detail.getTargetType());
                 uniongroupMemberDetails.setTargetId(detail.getTargetId());
                 uniongroupMemberDetails.setNamespaceId(detail.getNamespaceId());
