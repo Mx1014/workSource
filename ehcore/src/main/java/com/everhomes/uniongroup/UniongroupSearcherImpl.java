@@ -4,6 +4,8 @@ import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.UniongroupSearcher;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
@@ -22,7 +24,16 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
     @Override
     public void bulkUpdate(List<UniongroupMemberDetail> uniongroupMemberDetails) {
-
+        BulkRequestBuilder brb = getClient().prepareBulk();
+        for (UniongroupMemberDetail detail : uniongroupMemberDetails) {
+            XContentBuilder source = createDoc(detail);
+            if(null != source) {
+                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType()).id(detail.getId().toString()).source(source));
+            }
+        }
+        if (brb.numberOfActions() > 0) {
+            brb.execute().actionGet();
+        }
     }
 
     @Override

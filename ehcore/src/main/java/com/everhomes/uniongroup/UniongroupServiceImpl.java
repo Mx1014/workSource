@@ -9,6 +9,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.uniongroup.*;
+import com.everhomes.search.UniongroupSearcher;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -38,6 +39,9 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private UniongroupSearcher uniongroupSearcher;
 
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
@@ -180,18 +184,20 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = 1000000;
         List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(namespaceId, cmd.getOwnerId(), cmd.getGroupId(), UniongroupType.fromCode(cmd.getGroupType()).getCode());
         //查询部门和岗位
         for (UniongroupMemberDetail detail : details) {
-            Map depart_map = this.organizationProvider.listOrganizationsOfDetail(namespaceId, detail.getId(), OrganizationGroupType.DEPARTMENT.getCode());
+            Map depart_map = this.organizationProvider.listOrganizationsOfDetail(namespaceId, detail.getDetailId(), OrganizationGroupType.DEPARTMENT.getCode());
             if (depart_map != null)
                 detail.setDepartment(depart_map);
-            Map jobp_map = this.organizationProvider.listOrganizationsOfDetail(namespaceId, detail.getId(), OrganizationGroupType.JOB_POSITION.getCode());
+            Map jobp_map = this.organizationProvider.listOrganizationsOfDetail(namespaceId, detail.getDetailId(), OrganizationGroupType.JOB_POSITION.getCode());
             if (jobp_map != null) {
                 detail.setJob_position(jobp_map);
             }
         }
+        uniongroupSearcher.bulkUpdate(details);
         return details;
     }
 
