@@ -81,10 +81,26 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public List<Project> getAuthorizationProjectsByAuthIdAndTargets(String authType, Long authId, List<Target> targets){
+		return this.getAuthorizationProjectsByAuthIdAndTargets(null, authType, authId, targets);
+	}
+
+	@Override
+	public List<Project> getManageAuthorizationProjectsByAuthAndTargets(String authType, Long authId, List<Target> targets){
+		return this.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.MANAGE.getCode(), authType, authId, targets);
+	}
+
+	@Override
+	public List<Project> getAuthorizationProjectsByAuthIdAndTargets(String identityType, String authType, Long authId, List<Target> targets){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Project> result  = new ArrayList<>();
 		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType);
-		cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		if(null != authId){
+			cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		}
+
+		if(null != identityType){
+			cond = cond.and(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(identityType));
+		}
 		Condition targetCond = null;
 		for (Target target:targets) {
 			if(null == targetCond){
@@ -103,6 +119,35 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 					result.add(new Project(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_TYPE).toString(), Long.valueOf(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_ID).toString())));
 					return null;
 				});
+		return result;
+	}
+
+	@Override
+	public List<String> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<String> result  = new ArrayList<>();
+		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType);
+		if(null != authId){
+			cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		}
+		Condition targetCond = null;
+		for (Target target:targets) {
+			if(null == targetCond){
+				targetCond = Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId()));
+			}else{
+				targetCond = targetCond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+			}
+		}
+		cond = cond.and(targetCond);
+		cond = cond.and(Tables.EH_AUTHORIZATIONS.SCOPE.isNotNull());
+		context.select(Tables.EH_AUTHORIZATIONS.SCOPE)
+				.from(Tables.EH_AUTHORIZATIONS)
+				.where(cond)
+				.groupBy(Tables.EH_AUTHORIZATIONS.SCOPE)
+				.fetch().map((r) -> {
+			result.add(r.getValue(Tables.EH_AUTHORIZATIONS.SCOPE));
+			return null;
+		});
 		return result;
 	}
 
@@ -262,8 +307,8 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public Long createAuthorization(Authorization authorization) {
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Authorization.class));
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(Authorization.class));
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizations.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
 		if(null == authorization.getCreateTime())
 			authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		if(null == authorization.getUpdateTime())
@@ -276,8 +321,8 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public long createAuthorizations(List<Authorization> authorizations) {
-		long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Authorization.class), (long)authorizations.size());
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(Authorization.class));
+		long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizations.class), (long)authorizations.size());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
 		List<EhAuthorizations> auths = new ArrayList<>();
 		for (Authorization authorization: authorizations) {
 			id ++;
@@ -293,7 +338,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public void updateAuthorization(Authorization authorization) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(Authorization.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
 		if(null == authorization.getUpdateTime())
 			authorization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhAuthorizationsDao dao = new EhAuthorizationsDao(context.configuration());
@@ -313,7 +358,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public void deleteAuthorizationById(Long id){
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(Authorization.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
 		EhAuthorizationsDao dao = new EhAuthorizationsDao(context.configuration());
 		dao.deleteById(id);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAuthorizations.class, id);
@@ -328,8 +373,8 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public Long createAuthorizationRelation(AuthorizationRelation authorizationRelation) {
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(AuthorizationRelation.class));
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AuthorizationRelation.class));
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizationRelations.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizationRelations.class));
 		if(null == authorizationRelation.getCreateTime())
 			authorizationRelation.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		authorizationRelation.setId(id);
@@ -340,7 +385,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public void deleteAuthorizationRelationById(Long id){
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AuthorizationRelation.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizationRelations.class));
 		EhAuthorizationRelationsDao dao = new EhAuthorizationRelationsDao(context.configuration());
 		dao.deleteById(id);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAuthorizationRelations.class, id);
@@ -348,7 +393,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public void updateAuthorizationRelation(AuthorizationRelation authorizationRelation) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AuthorizationRelation.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizationRelations.class));
 		if(null == authorizationRelation.getUpdateTime())
 			authorizationRelation.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhAuthorizationRelationsDao dao = new EhAuthorizationRelationsDao(context.configuration());

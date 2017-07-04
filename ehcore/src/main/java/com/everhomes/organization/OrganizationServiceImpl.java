@@ -36,6 +36,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.menu.Target;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
@@ -76,6 +77,7 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
@@ -248,6 +250,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private ImportFileService importFileService;
+
+    @Autowired
+    private AuthorizationProvider authorizationProvider;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -2409,6 +2414,81 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public List<OrganizationSimpleDTO> listUserRelateOrgs(ListUserRelatedOrganizationsCommand cmd) {
         return listUserRelateOrgs(cmd, UserContext.current().getUser());
+    }
+
+
+    @Override
+    public List<OrganizationSimpleDTO> listUserRelateOrganizations(ListUserRelatedOrganizationsCommand cmd){
+        Long userId = UserContext.current().getUser().getId();
+        return listUserRelateOrganizations(userId);
+    }
+
+    public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId){
+        List<OrganizationSimpleDTO> orgs = new ArrayList<>();
+
+        List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
+        Set<Long> organizationIds = new HashSet<>();
+        for (RoleAssignment roleAssignment: roleAssignments) {
+            if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
+                organizationIds.add(roleAssignment.getOwnerId());
+            }
+        }
+
+        Set<Long> orgIds = new HashSet<>();
+        List<Target> targets = new ArrayList<>();
+        targets.add(new Target(EntityType.USER.getCode(), userId));
+
+        List<Project> projects = authorizationProvider.getManageAuthorizationProjectsByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
+        for (Project project: projects) {
+            if(EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS){
+                organizationIds.add(project.getProjectId());
+            }
+        }
+
+        List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
+        for (OrganizationMember member: orgMembers) {
+            if(OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())){
+                Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+                if(null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())){
+                    addPathOrganizationId(org.getPath(), orgIds);
+                }
+            }
+
+        }
+
+        //把用户所有关联的部门放到targets里面查询
+        for (Long orgId: orgIds) {
+            targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
+        }
+
+        //获取人员和人员所有机构所赋予模块的所属项目范围
+        List<String> scopes = authorizationProvider.getAuthorizationScopesByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
+        for (String scope: scopes) {
+            if(null != scope){
+                String[] scopeStrs = scope.split("\\.");
+                if(scopeStrs.length == 2){
+                    if(EntityType.AUTHORIZATION_RELATION == EntityType.fromCode(scopeStrs[0])){
+                        AuthorizationRelation authorizationRelation = authorizationProvider.findAuthorizationRelationById(Long.valueOf(scopeStrs[1]));
+                        if(EntityType.fromCode(authorizationRelation.getOwnerType()) == EntityType.ORGANIZATIONS){
+                            organizationIds.add(authorizationRelation.getOwnerId());
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Long organizationId: organizationIds) {
+            Organization org = organizationProvider.findOrganizationById(organizationId);
+            if(null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()){
+                OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
+                //物业或业委增加小区Id和小区name信息
+                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                    this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+                }
+                orgs.add(tempSimpleOrgDTO);
+            }
+        }
+        return orgs;
     }
 
     //Added by Janson 20161217
@@ -6393,17 +6473,26 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         List<OrganizationDTO> orgs = getOrganizationMemberGroups(groupTypes, userId, organizationId);
         for (OrganizationDTO dto: orgs) {
-            String[] idStrs = dto.getPath().split("/");
-            for (String idStr: idStrs) {
-                if(!StringUtils.isEmpty(idStr)){
-                    Long id = Long.valueOf(idStr);
-                    if(!orgnaizationIds.contains(id)){
-                        orgnaizationIds.add(id);
-                    }
-                }
-            }
+            addPathOrganizationId(dto.getPath(), orgnaizationIds);
         }
         return orgnaizationIds;
+    }
+
+    private void addPathOrganizationId(String path, List<Long> orgnaizationIds){
+        String[] idStrs = path.split("/");
+        for (String idStr: idStrs) {
+            if(!StringUtils.isEmpty(idStr)){
+                Long id = Long.valueOf(idStr);
+                orgnaizationIds.add(id);
+            }
+        }
+    }
+
+    private void addPathOrganizationId(String path, Set<Long> orgnaizationIds){
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.addAll(orgnaizationIds);
+        this.addPathOrganizationId(path, orgIds);
+        orgnaizationIds.addAll(orgIds);
     }
 
     @Override
@@ -8989,11 +9078,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         List<OrganizationMember> organizationMembers = null;
-        if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
+        if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE || (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode()))) {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
         } else {
             List<String> groupTypes = new ArrayList<>();
             groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypes.add(OrganizationGroupType.GROUP.getCode());
             organizationMembers = this.organizationProvider.listOrganizationMemberByPath(cmd.getKeywords(), org.getPath(), groupTypes, visibleFlag, locator, pageSize);
         }
 

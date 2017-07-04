@@ -223,10 +223,26 @@ insert into `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 insert into `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) values((@module_privilege_id := @module_privilege_id + 1),'20800','1','10011','设备巡检管理权限','0',NOW());   -- 定义模块的管理权限， 其中privilege_type 代表权限类型，1管理权限，直接管理模块id
 insert into `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) values((@module_privilege_id := @module_privilege_id + 1),'20800','2','10011','设备巡检全部权限','0',NOW());   -- 定义模块的全部权限， 其中privilege_type 代表权限类型，2模块全部权限，直接管理模块id
 
+update `eh_web_menus` set `condition_type` = 'project' where `path` like '/20000/20600%';
+update `eh_web_menus` set `condition_type` = 'project' where `path` like '/20000/20800%';
 
+-- 删除以前的通过授权规则授权的数据
+delete from `eh_acls` where scope like '%.M%';
 
+-- 删除以前的通过授权规则的数据
+delete from `eh_service_module_assignments` where relation_id = 0;
 
+-- 补充菜单数据
+update `eh_web_menus` set level = (length(path)-length(replace(path,'/','')));
+update `eh_web_menus` set `category` = 'module' where level > 1;
+update `eh_web_menus` set `category` = 'classify' where level = 1;
 
+-- 补充超管数据
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+insert into `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid` , `create_time` , `namespace_id` , `role_type`) select (@acl_id := @acl_id + 1),`owner_type`, `owner_id`,1,10, target_id, 0,1,now(),0, target_type from `eh_acl_role_assignments` where role_id = 1001 and target_type = 'EhUsers' and target_id not in (select role_id from eh_acls where role_type = 'EhUsers' and privilege_id = 10);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+insert into `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid` , `create_time` , `namespace_id` , `role_type`) select (@acl_id := @acl_id + 1),`owner_type`, `owner_id`,1,15, target_id, 0,1,now(),0, target_type from `eh_acl_role_assignments` where role_id = 1005 and target_type = 'EhUsers' and target_id not in (select role_id from eh_acls where role_type = 'EhUsers' and privilege_id = 15);
 
 
 

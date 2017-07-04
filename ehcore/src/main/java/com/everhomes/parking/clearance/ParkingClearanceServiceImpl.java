@@ -1,39 +1,6 @@
 // @formatter:off
 package com.everhomes.parking.clearance;
 
-import static com.everhomes.rest.parking.ParkingLocalStringCode.SCOPE_STRING_STATUS;
-import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.APPLY_PRIVILEGE_ID;
-import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.MODULE_ID;
-import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.PROCESS_PRIVILEGE_ID;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.constraints.Size;
-import javax.validation.metadata.ConstraintDescriptor;
-
-import com.everhomes.rest.common.PortalType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -47,7 +14,6 @@ import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.parking.ParkingLot;
@@ -72,6 +38,26 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.constraints.Size;
+import javax.validation.metadata.ConstraintDescriptor;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.everhomes.rest.parking.ParkingLocalStringCode.SCOPE_STRING_STATUS;
+import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.*;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 /**
@@ -500,7 +486,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     }
 
     private void checkCurrentUserNotInOrg(Long orgId) {
-        if (orgId == null) {
+        /*if (orgId == null) {
             LOGGER.error("Invalid parameter organizationId [ null ]");
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter organizationId [ null ]");
@@ -511,7 +497,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             LOGGER.error("User is not in the organization.");
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "User is not in the organization.");
-        }
+        }*/
     }
 
     // 参数校验方法

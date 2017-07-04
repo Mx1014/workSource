@@ -461,4 +461,11 @@ public interface OrganizationService {
 	List<OrganizationDTO> listAllPmOrganizations();
 
 	List<Long> getIncludeOrganizationIdsByUserId(Long userId, Long organizationId);
+
+	/**
+	 * 最新 获取用户所包含的机构列表，如果用户是某个机构的管理员或者模块管理员或者细化的权限，就拥有这个机构，不一定用户非得在此机构的通讯录
+	 * @param cmd
+	 * @return
+     */
+	List<OrganizationSimpleDTO> listUserRelateOrganizations(ListUserRelatedOrganizationsCommand cmd);
 }

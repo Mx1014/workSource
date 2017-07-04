@@ -646,7 +646,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return assignment;
     }
 
-    private List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {
+    @Override
+    public List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {
         List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, ownerType, ownerId, ServiceModuleScopeApplyPolicy.REVERT.getCode());
 
         if (null == scopes || scopes.size() == 0) {
