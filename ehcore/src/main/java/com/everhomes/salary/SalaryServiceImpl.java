@@ -35,6 +35,7 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
+import org.apache.tools.ant.taskdefs.Sleep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import sun.awt.windows.ThemeReader;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -233,6 +235,10 @@ public class SalaryServiceImpl implements SalaryService {
 
             //  删除个人设定中与薪酬组相关的字段
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(cmd.getSalaryGroupId());
+
+            try {
+                Thread.sleep(5000);
+            }catch (Exception e ){}
         }
     }
 
@@ -326,9 +332,39 @@ public class SalaryServiceImpl implements SalaryService {
 
 
     @Override
-	public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
+    public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
 
-        //  将前端信息传递给组织架构的接口获取相关信息
+        //  1.将前端信息传递给组织架构的接口获取相关信息
+        ListUniongroupMemberDetailsCommand command = new ListUniongroupMemberDetailsCommand();
+        command.setOwnerId(cmd.getOwnerId());
+        command.setOwnerType(cmd.getOwnerType());
+        command.setGroupId(cmd.getSalaryGroupId());
+
+        //  2.查询所有人员
+        List<UniongroupMemberDetailsDTO> results = this.uniongroupService.listUniongroupMemberDetailsByGroupId(command);
+
+        //  3.查询所有批次
+        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+
+        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+
+        if (!StringUtils.isEmpty(results)) {
+            response.setSalaryEmployeeDTO(results.stream().map(r -> {
+                salaryEmployeeDTO dto = new salaryEmployeeDTO();
+                dto.setUserId(r.getDetailId());
+                dto.setContactName(r.getContactName());
+                dto.setSalaryGroupId(r.getGroupId());
+                //  拼接薪酬组名称
+                if (!StringUtils.isEmpty(organizations)) {
+                    organizations.forEach(s -> {
+                        if (s.getId().equals(r.getGroupId()))
+                            dto.setSalaryGroupName(s.getName());
+                    });
+                }
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+
 /*        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setKeywords(cmd.getKeywords());
         command.setOrganizationId(cmd.getOrganizationId());
@@ -338,11 +374,9 @@ public class SalaryServiceImpl implements SalaryService {
         //  2.通过对实发工资的判断来拼接字符串，反映是否设置了工资明细
         //  一次性读取所有userid的实发工资值然后做拼接
 
-        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
-
-
-		return new ListSalaryEmployeesResponse();
-	}
+//        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+        return response;
+    }
 
     @Override
     public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {

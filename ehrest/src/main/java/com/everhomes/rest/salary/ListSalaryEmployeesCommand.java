@@ -22,6 +22,10 @@ public class ListSalaryEmployeesCommand {
 
 	private Byte isException;
 
+	private String ownerType;
+
+	private Long ownerId;
+
 	public ListSalaryEmployeesCommand() {
 
 	}
@@ -64,6 +68,22 @@ public class ListSalaryEmployeesCommand {
 
 	public void setIsException(Byte isException) {
 		this.isException = isException;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override
