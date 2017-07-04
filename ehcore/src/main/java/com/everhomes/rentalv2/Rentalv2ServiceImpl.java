@@ -3937,7 +3937,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 					
 					// 多种模式的情况下，一种模式下关闭的其它模式下对应的时间段也要关闭
-					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && rentalSiteRules.size() > 1) {
+					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
 						calculateCurrentStatus(dto, rs, rsr, priceRules);
 					}
 					
