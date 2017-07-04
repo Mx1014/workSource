@@ -98,7 +98,7 @@ import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
+import com.everhomes.sms.*;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
@@ -273,6 +273,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private GroupProvider groupProvider;
 
+    @Autowired
+    private SmsBlackListProvider smsBlackListProvider;
+
 	private static final String DEVICE_KEY = "device_login";
 
 	@PostConstruct
@@ -382,10 +385,12 @@ public class UserServiceImpl implements UserService {
      * 校验短信发送频率
      */
     private void verifySmsTimes(String smsAction, String identifierToken, String deviceId) {
-    	//added by janson 消息序列化不正确的根本原因在于这里 03-31
+        checkSmsBlackList(smsAction, identifierToken);
+
+    	// added by janson 消息序列化不正确的根本原因在于这里 03-31
         RedisTemplate template = bigCollectionProvider.getMapAccessor("sendSmsTimes", "").getTemplate(new StringRedisSerializer());
         // 设置value的序列化，要不然下面的increment方法会报错 
-//        template.setValueSerializer(new StringRedisSerializer()); 坚决不用这种写法，会导致消息模块报错！因为这个是设置全局的 template
+        // template.setValueSerializer(new StringRedisSerializer()); 坚决不用这种写法，会导致消息模块报错！因为这个是设置全局的 template
         ValueOperations op = template.opsForValue();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -394,6 +399,8 @@ public class UserServiceImpl implements UserService {
         Integer smsTimesDeviceForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.device.timesForADay", "20"));
         Integer smsTimesPhoneForAnHour = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForAnHour", "3"));
         Integer smsTimesPhoneForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForADay", "5"));
+
+        // Integer smsTimesInBlackList = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.times.blacklist", "5"));
 
         // 老版本的客户端没有deviceId
         boolean hasDeviceId = StringUtils.isNotBlank(deviceId);
@@ -410,6 +417,7 @@ public class UserServiceImpl implements UserService {
         } else {
             Integer t = Integer.valueOf((String) times);
             if (t >= smsTimesPhoneForADay) {
+                createSmsBlackList(smsAction, identifierToken);
                 LOGGER.error("Verification code request is too frequent, please try again after 24 hours. phone={}, times={}", identifierToken, t);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
                         "Verification code request is too frequent, please try again after 24 hours");
@@ -488,6 +496,25 @@ public class UserServiceImpl implements UserService {
         if (hasDeviceId) {
             op.increment(deviceHourKey, 1L);
             op.increment(deviceDayKey, 1L);
+        }
+    }
+
+    private void createSmsBlackList(String smsAction, String identifierToken) {
+        SmsBlackList blackList = new SmsBlackList();
+        blackList.setReason(smsAction);
+        blackList.setContactToken(identifierToken);
+        blackList.setStatus(SmsBlackListStatus.BLOCK.getCode());
+        blackList.setCreateType(SmsBlackListCreateType.SYSTEM.getCode());
+        blackList.setNamespaceId(UserContext.getCurrentNamespaceId());
+        smsBlackListProvider.createSmsBlackList(blackList);
+    }
+
+    private void checkSmsBlackList(String smsAction, String identifierToken) {
+        SmsBlackList blackList = smsBlackListProvider.findByContactToken(identifierToken);
+        if (blackList != null && Objects.equals(blackList.getStatus(), SmsBlackListStatus.BLOCK.getCode())) {
+            LOGGER.info("sms black list user try to send sms, smsAction = {}, contactToken = {}", smsAction, identifierToken);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_BLACK_LIST,
+                    "Hi guys, you are black list user.");
         }
     }
 
