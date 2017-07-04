@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -115,5 +117,16 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	public void updateSalaryEmployeeCheckFlag(List<Long> salaryEmployeeIds, Byte checkFlag) {
 		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEES).set(Tables.EH_SALARY_EMPLOYEES.STATUS, checkFlag)
 				.where(Tables.EH_SALARY_EMPLOYEES.ID.in(salaryEmployeeIds)).execute();
+	}
+
+	@Override
+	public List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> userIds, Byte checkFlag) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.USER_ID.in(userIds));
+		step.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
+		if(null != checkFlag)
+			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
+		return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
 	}
 }
