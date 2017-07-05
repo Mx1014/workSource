@@ -298,14 +298,27 @@ public class SalaryServiceImpl implements SalaryService {
         //  获取所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
+        //  存储所有薪酬组 id
+        List<Long> salaryGroupIds = organizations.stream().map(r -> {
+            Long salaryGroupId = r.getId();
+            return salaryGroupId;
+        }).collect(Collectors.toList());
+
         //  获取公司总人数
         Integer totalCount = this.organizationProvider.countOrganizationMemberDetailsByOrgId(namespaceId, cmd.getOwnerId());
 
-        //  关联人数
+/*        ListOrganizationContactCommand cvdfvfd = new ListOrganizationContactCommand();
+        cvdfvfd.setOrganizationId(cmd.getOwnerId());
+        cvdfvfd.setPageSize(800);
+        ListOrganizationContactCommandResponse res = this.organizationService.listOrganizationContacts(cvdfvfd);
+        System.out.println(res.getMembers().size());*/
+
+        //  关联人数一次性获取
         Integer relevantCount = 0;
+        List<Object[]> relevantCounts = this.uniongroupService.listUniongroupMemberCount(namespaceId, salaryGroupIds, cmd.getOwnerId());
 
         //  拼接关联人数
-        for(int i=0; i<organizations.size();i++){
+        for (int i = 0; i < organizations.size(); i++) {
 
             SalaryGroupListDTO dto = new SalaryGroupListDTO();
             dto.setSalaryGroupId(organizations.get(i).getId());
@@ -314,10 +327,15 @@ public class SalaryServiceImpl implements SalaryService {
             command.setGroupId(organizations.get(i).getId());
             command.setOwnerId(cmd.getOwnerId());
             command.setOwnerType(cmd.getOwnerType());
-            List<UniongroupMemberDetailsDTO> lists = this.uniongroupService.listUniongroupMemberDetailsByGroupId(command);
-            if (!StringUtils.isEmpty(lists)){
-                dto.setRelevantNum(lists.size());
-                relevantCount += lists.size();
+//            List<UniongroupMemberDetailsDTO> lists = this.uniongroupService.listUniongroupMemberDetailsByGroupId(command);
+            if (!StringUtils.isEmpty(relevantCounts)) {
+                for (int j = 0; j < relevantCounts.size(); j++) {
+                    if (relevantCounts.get(j)[0].equals(dto.getSalaryGroupId())) {
+                        dto.setRelevantNum((Integer) relevantCounts.get(j)[1]);
+                        relevantCount += (Integer) relevantCounts.get(j)[1];
+                        break;
+                    }
+                }
             }
             results.add(dto);
         }
