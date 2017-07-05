@@ -916,6 +916,8 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd) {
         for (UpdateSalaryGroupEntitiesVisableCommand cmd1 : cmd.getSalaryGroupCmd()) {
+            cmd1.setOwnerId(cmd.getOwnerId());
+            cmd1.setOwnerType(cmd.getOwnerType());
             updateSalaryGroupEntitiesVisable(cmd1);
         }
     }
@@ -1095,10 +1097,13 @@ public class SalaryServiceImpl implements SalaryService {
 			// 2.循环薪酬组取里面的人员
 			List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryOrg.getId());
             List<UniongroupMemberDetailsDTO> members = uniongroupService.listUniongroupMemberDetailsByGroupId(salaryOrg.getId());
+            if(null == members) {
+                LOGGER.error("salaryOrg no members :" + salaryOrg);
+                continue;
+            }
             List<Long> userIds = members.stream().map(r->{
                 return r.getTargetId();
             }).collect(Collectors.toList());
-
 			for (Long userId : userIds) {
 				SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
 				employee.setSalaryGroupId(salaryGroup.getId());
