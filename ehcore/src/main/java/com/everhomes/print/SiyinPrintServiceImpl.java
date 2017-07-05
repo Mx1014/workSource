@@ -311,7 +311,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         //将通知登陆的接口返回给前端
         String logonURL = configurationProvider.getValue(PrintErrorCode.PRINT_INFORM_URL, "");
         GetPrintLogonUrlResponse response = new GetPrintLogonUrlResponse();
-        response.setLogonURL(logonURL);
         response.setIdentifierToken(identifierToken);
         response.setScanTimes(timeout*1000*getScale(unit)/scanTimeout);
         response.setType("pc");
