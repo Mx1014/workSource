@@ -236,9 +236,9 @@ public class SalaryServiceImpl implements SalaryService {
             //  删除个人设定中与薪酬组相关的字段
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(cmd.getSalaryGroupId());
 
-            try {
+/*            try {
                 Thread.sleep(5000);
-            }catch (Exception e ){}
+            }catch (Exception e ){}*/
         }
     }
 

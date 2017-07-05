@@ -7,16 +7,18 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>keywords: 搜索关键词</li>
- * <li>organizationId: 组织id</li>
+ * <li>organizationId: 部门id</li>
  * <li>salaryGroupId: 薪酬批次id</li>
  * <li>isException: 是否筛选异常员工: 0-否 1-是</li>
+ * <li>ownerType: 'organization'</li>
+ * <li>ownerId: 公司organizationId</li>
  * </ul>
  */
 public class ListSalaryEmployeesCommand {
 
 	private String keywords;
 
-	private Long organizationId;
+	private Long departmentId;
 
 	private Long salaryGroupId;
 
@@ -30,10 +32,10 @@ public class ListSalaryEmployeesCommand {
 
 	}
 
-	public ListSalaryEmployeesCommand(String keywords, Long organizationId, Long salaryGroupId, Byte isException) {
+	public ListSalaryEmployeesCommand(String keywords, Long departmentId, Long salaryGroupId, Byte isException) {
 		super();
 		this.keywords = keywords;
-		this.organizationId = organizationId;
+		this.departmentId = departmentId;
 		this.salaryGroupId = salaryGroupId;
 		this.isException = isException;
 	}
@@ -46,12 +48,12 @@ public class ListSalaryEmployeesCommand {
 		this.keywords = keywords;
 	}
 
-	public Long getOrganizationId() {
-		return organizationId;
+	public Long getDepartmentId() {
+		return departmentId;
 	}
 
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
+	public void setDepartmentId(Long departmentId) {
+		this.departmentId = departmentId;
 	}
 
 	public Long getSalaryGroupId() {
