@@ -12,6 +12,7 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
 
+import com.everhomes.userOrganization.UserOrganizations;
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -205,7 +206,7 @@ public interface OrganizationProvider {
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
 	
     List<OrganizationMember> listOrganizationMemberByOrganizationIds(ListingLocator locator, int pageSize, Condition cond, List<Long> organizationIds);
-    
+
     List<OrganizationMember> listOrganizationMemberByTokens(String contactPhone, List<Long> organizationIds);
     
     Organization findOrganizationByParentAndName(Long parentId, String name);
@@ -301,8 +302,7 @@ public interface OrganizationProvider {
 	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
 	OrganizationMember findActiveOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
-	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, Long OrganizationId,
-			Byte operationType);
+ 
 
 	List<OrganizationMember> listOrganizationMembers(CrossShardListingLocator locator,Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken);
@@ -329,6 +329,62 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listUsersOfEnterprise(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	
 	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
+	List<OrganizationMember> convertMemberListAsDetailList(List<OrganizationMember> old_list);
+	/**New**/
+    List<Object[]> findContractEndTimeById(List<Long> detailIds);
+    List<OrganizationMemberDetails> findDetailInfoListByIdIn(List<Long> detailIds);
+    List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator,Integer pageSize,Organization org, List<String> groupTypes, String keywords);
+
+	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
+	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
+    void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
+	void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId);
+
+
+
+    void createOranizationMemberEducationInfo(OrganizationMemberEducations education);
+    OrganizationMemberEducations findOrganizationEducationInfoById(Long id);
+    void deleteOranizationMemberEducationInfo(OrganizationMemberEducations education);
+    void updateOranizationMemberEducationInfo(OrganizationMemberEducations education);
+	List<OrganizationMemberEducations> listOrganizationMemberEducations(Long detailId);
+
+	void createOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
+	OrganizationMemberWorkExperiences findOrganizationWorkExperienceById(Long id);
+	void deleteOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
+	void updateOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
+    List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId);
+
+
+	void createOranizationMemberInsurance(OrganizationMemberInsurances insurance);
+    OrganizationMemberInsurances  findOrganizationInsuranceById(Long id);
+    void deleteOranizationMemberInsurance(OrganizationMemberInsurances insurance);
+    void updateOrganizationMemberInsurance(OrganizationMemberInsurances insurance);
+    List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId);
+
+
+    void createOranizationMemberContract(OrganizationMemberContracts contract);
+    OrganizationMemberContracts findOrganizationContractById(Long id);
+    void deleteOranizationMemberContract(OrganizationMemberContracts contract);
+    void updateOrganizationMemberContract(OrganizationMemberContracts contract);
+
+    void updateOrganizationEmploymentTime(Long detailId,java.sql.Date employeeTime);
+    boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
+    void updateProfileIntegrity(Long detailId, Integer integrity);
+    void createProfileLogs(OrganizationMemberProfileLogs log);
+
+	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
+
+	OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
+
+	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails);
+
+	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails, Boolean needUpdate);
+
+    List<OrganizationMemberProfileLogs> listMemberRecordChanges(Long detailId);
+
+	Organization findUnderOrganizationByParentOrgId(Long parentOrgId);
+
+	List<OrganizationMember> listOrganizationMembersByPhoneAndNamespaceId(String phone, Integer namespaceId);
 
 	List<Long> listOrganizationIdByBuildingId(Long buildingId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
 	List<Long> listOrganizationIdByCommunityId(Long communityId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
@@ -341,4 +397,14 @@ public interface OrganizationProvider {
 			Long organizationId, Long buildId);
 
 	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
-} 
+	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
+			Byte operationType);
+
+	List<UserOrganizations> listUserOrganizations(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback callback);
+
+	Set<Long> listMemberDetailIdWithExclude(Integer namespaceId, String big_path, List<String> small_path);
+
+	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
+
+}
+

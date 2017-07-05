@@ -7,7 +7,7 @@ public interface ParkingErrorCode {
 
     int ERROR_PLATE_EXIST = 10002;  //车牌已有月卡
     int ERROR_PLATE_APPLIED = 10003;  //车牌已申请
-    int ERROR_PLATE_NULL = 10005;  //车牌号为空
+    int ERROR_RECHARGE_ORDER = 10005;  //网络通讯失败，充值出错
     int ERROR_REQUEST_SERVER = 10004;  //服务器通讯异常，请稍后再试！
 
     int ERROR_TEMP_FEE = 10010;  //费用已过期

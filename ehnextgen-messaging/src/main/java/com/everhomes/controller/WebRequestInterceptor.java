@@ -455,6 +455,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if (app.getAppKey().equalsIgnoreCase(AppConstants.APPKEY_BORDER)) {
             User user = this.userProvider.findUserById(User.ROOT_UID);
             UserContext.current().setUser(user);
+        } else  {
+            // 由于把发短信的相关接口加入到使用签名的行列来，此时由于使用了UserContext会引起空指针，
+            // 故需要为这个场景加上UserContext， by lqs 20170629
+            setupAnnonymousUserContext();
         }
     }
 

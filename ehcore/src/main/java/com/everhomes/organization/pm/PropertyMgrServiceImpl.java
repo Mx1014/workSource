@@ -10,6 +10,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -93,6 +94,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.Convert;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
@@ -412,7 +414,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					m.setOrganizationId(organizationId);
 					m.setCommunityId(community.getId());
 					m.setOrganizationAddress(address.getAddress());
-					m.setLivingStatus(PmAddressMappingStatus.DEFAULT.getCode());
+					m.setLivingStatus(AddressMappingStatus.DEFAULT.getCode());
 					propertyMgrProvider.createPropAddressMapping(m);
 				}
 			}
@@ -892,7 +894,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			dto.setLivingStatus(mapping.getLivingStatus());
 		}
 		else{
-			dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
+			dto.setLivingStatus(AddressMappingStatus.LIVING.getCode());
 		}
 		return dto;
 	}
@@ -1867,21 +1869,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		long organizationId = org.getId();
 
-		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.DEFAULT.getCode());
-		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.LIVING.getCode());
-		int rentCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.RENT.getCode());
-		int freeCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.FREE.getCode());
-		int decorateCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.DECORATE.getCode());
-		int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.UNSALE.getCode());
-		dto.setAptCount(community.getAptCount()==null ?0 : community.getAptCount());
+		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.DEFAULT.getCode());
+		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.LIVING.getCode());
+		int rentCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.RENT.getCode());
+		int freeCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.FREE.getCode());
+		int saledCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.SALED.getCode());
+		int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, AddressMappingStatus.UNSALE.getCode());
+		int sum = defaultCount + liveCount + rentCount + freeCount + saledCount + unsaleCount;
+		dto.setAptCount(sum);
 		dto.setFamilyCount(familyCount);
 		dto.setUserCount(userCount);
 		dto.setDefaultCount(defaultCount);
 		dto.setLiveCount(liveCount);
 		dto.setRentCount(rentCount);
 		dto.setFreeCount(freeCount);
-		dto.setDecorateCount(decorateCount);
+		dto.setSaledCount(saledCount);
 		dto.setUnsaleCount(unsaleCount);
+		dto.setHasOwnerCount(liveCount + rentCount + saledCount);
+		dto.setNoOwnerCount(freeCount + unsaleCount);
 		return dto;
 	}
 
@@ -1911,24 +1916,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setUserCount(userCount);
 		Integer temp = null;
 		int sum = 0;
-		dto.setDefaultCount(temp = (temp = result.get(PmAddressMappingStatus.DEFAULT.getCode())) == null ? 0 : temp);
-		sum += temp;
-		dto.setLiveCount(temp = (temp = result.get(PmAddressMappingStatus.LIVING.getCode())) == null ? 0 : temp);
-		sum += temp;
-		dto.setRentCount(temp = (temp = result.get(PmAddressMappingStatus.RENT.getCode())) == null ? 0 : temp);
-		sum += temp;
-		dto.setFreeCount(temp = (temp = result.get(PmAddressMappingStatus.FREE.getCode())) == null ? 0 : temp);
-		sum += temp;
-		dto.setDecorateCount(temp = (temp = result.get(PmAddressMappingStatus.DECORATE.getCode())) == null ? 0 : temp);
-		sum += temp;
-		dto.setUnsaleCount(temp = (temp = result.get(PmAddressMappingStatus.UNSALE.getCode())) == null ? 0 : temp);
-		sum += temp;
-		dto.setAptCount(sum);
+		int defaultCount = (temp = result.get(AddressMappingStatus.DEFAULT.getCode())) == null ? 0 : temp;
+		dto.setDefaultCount(defaultCount);
+		int livingCount = (temp = result.get(AddressMappingStatus.LIVING.getCode())) == null ? 0 : temp;
+		dto.setLiveCount(livingCount);
+		int rentCount = (temp = result.get(AddressMappingStatus.RENT.getCode())) == null ? 0 : temp;
+		dto.setRentCount(rentCount);
+		int freeCount = (temp = result.get(AddressMappingStatus.FREE.getCode())) == null ? 0 : temp;
+		dto.setFreeCount(freeCount);
+		int saledCount = (temp = result.get(AddressMappingStatus.SALED.getCode())) == null ? 0 : temp;
+		dto.setSaledCount(saledCount);
+		int unsaleCount = (temp = result.get(AddressMappingStatus.UNSALE.getCode())) == null ? 0 : temp;
+		dto.setUnsaleCount(unsaleCount);
+		sum = defaultCount + livingCount + rentCount + freeCount + saledCount + unsaleCount;
 		
 		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
 		if (sum == 0) {
 			return getApartmentStatistics(cmd);
 		}
+		dto.setAptCount(sum);
+		dto.setHasOwnerCount(livingCount + rentCount + saledCount);
+		dto.setNoOwnerCount(freeCount + unsaleCount);
 		
 		return dto;
 	}
@@ -2018,8 +2026,172 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return propCommunityContactdtos;
 
 	}
+	
+    private Long findOrganizationByCommunity(Community community) {
+        if (community != null) {
+            List<OrganizationCommunityDTO> list = organizationProvider.findOrganizationCommunityByCommunityId(community.getId());
+            if (list != null && !list.isEmpty()) {
+                return list.get(0).getOrganizationId();
+            }
+        }
+        return null;
+    }
+    
+	@Override
+	public void createApartment(CreateApartmentCommand cmd) {
+		if (cmd.getCommunityId() == null || cmd.getStatus() == null || StringUtils.isEmpty(cmd.getBuildingName())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+		}
+		if (StringUtils.isEmpty(cmd.getApartmentName())) {
+			throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_APARTMENT_NAME_EMPTY, "apartment name cannot be empty");
+		}
+		Community community = checkCommunity(cmd.getCommunityId());
+		Long organizationId = findOrganizationByCommunity(community);
 
-	private List<PropFamilyDTO> listNewPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
+        Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), cmd.getBuildingName());
+
+        if (null == building) {
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists building name");
+        }
+
+        Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + cmd.getApartmentName());
+        if (address == null) {
+        	address = new Address();
+            address.setCommunityId(community.getId());
+            address.setCityId(community.getCityId());
+            address.setCityName(community.getCityName());
+            address.setAreaId(community.getAreaId());
+            address.setAreaName(community.getAreaName());
+            address.setBuildingName(building.getName());
+            address.setApartmentName(cmd.getApartmentName());
+            address.setAreaSize(cmd.getAreaSize());
+            address.setAddress(building.getName() + "-" + cmd.getApartmentName());
+            address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+            address.setNamespaceId(community.getNamespaceId());
+        	addressProvider.createAddress(address);
+		}else if (AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
+			address.setAreaSize(cmd.getAreaSize());
+            address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+            addressProvider.updateAddress(address);
+		}else {
+			throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
+		}
+        
+        insertOrganizationAddressMapping(organizationId, community, address, cmd.getStatus());
+	}
+
+    @Override
+	public void updateApartment(UpdateApartmentCommand cmd) {
+    	Address address = addressProvider.findAddressById(cmd.getId());
+    	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+		}
+    	if (cmd.getStatus() != null) {
+    		Community community = checkCommunity(address.getCommunityId());
+    		Long organizationId = findOrganizationByCommunity(community);
+    		CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+    		communityAddressMapping.setLivingStatus(cmd.getStatus());
+    		organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+		}else {
+			if (!StringUtils.isEmpty(cmd.getApartmentName())) {
+	    		Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
+	    		if (other != null && other.getId() != cmd.getId()) {
+	    			throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
+	    		}
+	    		address.setApartmentName(cmd.getApartmentName());
+	    		address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
+			}else if (cmd.getAreaSize() != null) {
+				address.setAreaSize(cmd.getAreaSize());
+			}
+	    	addressProvider.updateAddress(address);
+		}
+	}
+
+	@Override
+	public GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd) {
+		GetApartmentDetailResponse response = new GetApartmentDetailResponse();
+		Address address = addressProvider.findAddressById(cmd.getId());
+    	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+		}
+    	Community community = checkCommunity(address.getCommunityId());
+		Long organizationId = findOrganizationByCommunity(community);
+		CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+		
+		response.setBuildingName(address.getBuildingName());
+		response.setApartmentName(address.getApartmentName());
+		response.setAreaSize(address.getAreaSize());
+		if (communityAddressMapping != null) {
+			response.setStatus(communityAddressMapping.getLivingStatus());
+		}else {
+			response.setStatus(address.getLivingStatus());
+		}
+		
+		if (CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
+			OrganizationAddress organizationAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
+			if (organizationAddress != null) {
+				Organization organization = organizationProvider.findOrganizationById(organizationAddress.getOrganizationId());
+				if (organization != null) {
+					response.setEnterpriseName(organization.getName());
+				}
+			}
+		}else {
+			List<OrganizationOwnerAddress> organizationOwnerAddresses = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(address.getNamespaceId(), address.getId());
+			if (organizationOwnerAddresses != null) {
+				List<OrganizationOwnerDTO> owerList = organizationOwnerAddresses.stream().map(this::convert).collect(Collectors.toList());
+				response.setOwerList(owerList);
+			}
+		}
+		response.setCommunityType(community.getCommunityType());
+		return response;
+	}
+	
+	private OrganizationOwnerDTO convert(OrganizationOwnerAddress organizationOwnerAddress) {
+		OrganizationOwnerDTO organizationOwnerDTO = new OrganizationOwnerDTO();
+		OrganizationOwner organizationOwner = propertyMgrProvider.findOrganizationOwnerById(organizationOwnerAddress.getOrganizationOwnerId());
+		if (organizationOwner != null) {
+			organizationOwnerDTO.setContactName(organizationOwner.getContactName());
+			organizationOwnerDTO.setContactToken(organizationOwner.getContactToken());
+		}
+		return organizationOwnerDTO;
+	}
+
+	@Override
+	public void deleteApartment(DeleteApartmentCommand cmd) {
+		Address address = addressProvider.findAddressById(cmd.getId());
+    	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+		}
+    	address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+    	addressProvider.updateAddress(address);
+    	addressProvider.updateOrganizationAddressMapping(address.getId());
+    	addressProvider.updateOrganizationAddress(address.getId());
+    	addressProvider.updateOrganizationOwnerAddress(address.getId());
+	}
+
+	private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
+		if (organizationId != null && community != null && address != null) {
+            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
+            if (communityAddressMapping == null) {
+                communityAddressMapping = new CommunityAddressMapping();
+                communityAddressMapping.setOrganizationId(organizationId);
+                communityAddressMapping.setCommunityId(community.getId());
+                communityAddressMapping.setAddressId(address.getId());
+                communityAddressMapping.setOrganizationAddress(address.getAddress());
+                communityAddressMapping.setLivingStatus(livingStatus);
+                communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+                organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+            }else {
+				communityAddressMapping.setLivingStatus(livingStatus);
+				communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			}
+        }
+    }
+
+	@Override
+	public ListPropApartmentsResponse listNewPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
 		//检查参数
 		checkListPropApartmentByKeywordParamters(cmd);
 		
@@ -2045,9 +2217,44 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<PropFamilyDTO> resultList = aptList.stream().map(apartmentDTO->convertToPropFamilyDTO(cmd, apartmentDTO, familyMap, ownerCountMap, 
 				communityAddressMappingMap, billOwedMap)).collect(Collectors.toList());
 		
-		return resultList;
+		PropAptStatisticDTO statistics = getStatistics(resultList);
+		
+		ListPropApartmentsResponse response = ConvertHelper.convert(statistics, ListPropApartmentsResponse.class);
+		response.setResultList(resultList);
+		
+		return response;
 	}
 	
+	private PropAptStatisticDTO getStatistics(List<PropFamilyDTO> resultList) {
+		PropAptStatisticDTO statistics = new PropAptStatisticDTO();
+		int userCount = 0;
+		Map<Byte, Integer> map = new HashMap<>();
+		map.put(AddressMappingStatus.DEFAULT.getCode(), 0);
+		map.put(AddressMappingStatus.LIVING.getCode(), 0);
+		map.put(AddressMappingStatus.RENT.getCode(), 0);
+		map.put(AddressMappingStatus.FREE.getCode(), 0);
+		map.put(AddressMappingStatus.SALED.getCode(), 0);
+		map.put(AddressMappingStatus.UNSALE.getCode(), 0);
+		
+		for (PropFamilyDTO propFamilyDTO : resultList) {
+			map.put(propFamilyDTO.getLivingStatus(), map.get(propFamilyDTO.getLivingStatus()) + 1);
+			userCount += propFamilyDTO.getMemberCount();
+		}
+		
+		statistics.setDefaultCount(map.get(AddressMappingStatus.DEFAULT.getCode()));
+		statistics.setLiveCount(map.get(AddressMappingStatus.LIVING.getCode()));
+		statistics.setRentCount(map.get(AddressMappingStatus.RENT.getCode()));
+		statistics.setFreeCount(map.get(AddressMappingStatus.FREE.getCode()));
+		statistics.setSaledCount(map.get(AddressMappingStatus.SALED.getCode()));
+		statistics.setUnsaleCount(map.get(AddressMappingStatus.UNSALE.getCode()));
+		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount());
+		statistics.setUserCount(userCount);
+		statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
+		statistics.setNoOwnerCount(statistics.getFreeCount() + statistics.getUnsaleCount());
+		
+		return statistics;
+	}
+
 	private PropFamilyDTO convertToPropFamilyDTO(ListPropApartmentsByKeywordCommand cmd, ApartmentDTO apartmentDTO, Map<Long, Family> familyMap,
 			Map<Long, Integer> ownerCountMap, Map<Long, CommunityAddressMapping> communityAddressMappingMap, Map<Long, Byte> billOwedMap) {
 		Long addressId = apartmentDTO.getAddressId();
@@ -2103,7 +2310,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setLivingStatus(mapping.getLivingStatus());
 			}
 			else{
-				dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
+				dto.setLivingStatus(AddressMappingStatus.LIVING.getCode());
 			}
 		}
 	}
@@ -2151,7 +2358,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public List<PropFamilyDTO> listPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
 		// 优化门牌性能，by tt, 20170428
-		return listNewPropApartmentsByKeyword(cmd);
+		return listNewPropApartmentsByKeyword(cmd).getResultList();
 //		List<PropFamilyDTO> list = new ArrayList<PropFamilyDTO>();
 //		User user  = UserContext.current().getUser();
 //

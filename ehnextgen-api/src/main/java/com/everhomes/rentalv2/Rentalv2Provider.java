@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.rentalv2.MaxMinPrice;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 
 public interface Rentalv2Provider {
@@ -276,5 +277,18 @@ public interface Rentalv2Provider {
 	List<RentalOrder> findRentalSiteBillBySiteRuleIds(List<Long> siteRuleIds);
 
 	List<RentalCell> getRentalCellsByIds(List<Long> cellIds);
+
+
+	Double countRentalSiteBillBySiteRuleId(Long cellId);
+
+
+	Double countRentalSiteBillOfAllScene(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules);
+
+
+	MaxMinPrice findMaxMinPrice(Long ownerId, Byte rentalType);
+
+
+	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
+			List<Rentalv2PriceRule> priceRules);
 
 }

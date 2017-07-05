@@ -46,4 +46,7 @@ public interface AddressProvider {
 	List<Address> listAddressByNamespaceType(Integer namespaceId, Long communityId, String namespaceType);
 	Map<Byte, Integer> countApartmentByLivingStatus(Long communityId);
 	Integer countApartment(Long communityId);
+	void updateOrganizationOwnerAddress(Long id);
+	void updateOrganizationAddress(Long id);
+	void updateOrganizationAddressMapping(Long id);
 }

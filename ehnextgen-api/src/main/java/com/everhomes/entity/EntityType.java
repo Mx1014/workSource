@@ -4,6 +4,7 @@ package com.everhomes.entity;
 import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.techpark.expansion.LeasePromotion;
 
 /**
  * <p>实体类型:</p>
@@ -57,6 +58,7 @@ public enum EntityType {
     AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
     ZUOLIN_ADMIN("EhZuolinAdmins"),
     ALL("EhAll"),
+    LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
     ORGANIZATION_FILE("EhOrganizationFiles"),
     CHILD_PROJECT("child_project");

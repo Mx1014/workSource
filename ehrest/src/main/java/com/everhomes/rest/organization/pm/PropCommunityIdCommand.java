@@ -17,8 +17,8 @@ public class PropCommunityIdCommand {
     public PropCommunityIdCommand() {
     }
 
-  
-    public Long getCommunityId() {
+
+	public Long getCommunityId() {
 		return communityId;
 	}
 

@@ -64,6 +64,8 @@ import com.everhomes.util.StringHelper;
  * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * <li>resourceTypeId: 资源类型id</li>
  * <li>payMode: 支付模式</li>
+ * <li>sitePriceRules: 价格策略，参考{@link com.everhomes.rest.rentalv2.SitePriceRuleDTO}</li>
+ * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -87,11 +89,6 @@ public class RentalSiteDTO {
 	private String notice; 
 	private java.lang.String     coverUri;
 	private java.lang.String     coverUrl;
-	private java.lang.Byte       discountType;
-	private java.math.BigDecimal fullPrice;
-	private java.math.BigDecimal cutPrice;
-	private java.lang.Double     discountRatio;
-	private java.lang.Byte       rentalType;
 	private Double   timeStep;
 	private Long  dayBeginTime;
 	private Long  dayEndTime;
@@ -130,6 +127,38 @@ public class RentalSiteDTO {
 
     private Long resourceTypeId;
     private Byte payMode;
+
+    private Byte unauthVisible;
+    
+    @ItemType(SitePriceRuleDTO.class)
+    private List<SitePriceRuleDTO> sitePriceRules;
+    
+    @Deprecated
+	private java.lang.Byte       discountType;
+    @Deprecated
+	private java.math.BigDecimal fullPrice;
+    @Deprecated
+	private java.math.BigDecimal cutPrice;
+    @Deprecated
+	private java.lang.Double     discountRatio;
+    @Deprecated
+	private java.lang.Byte       rentalType;
+    
+	public Byte getUnauthVisible() {
+		return unauthVisible;
+	}
+
+	public void setUnauthVisible(Byte unauthVisible) {
+		this.unauthVisible = unauthVisible;
+	}
+
+	public List<SitePriceRuleDTO> getSitePriceRules() {
+		return sitePriceRules;
+	}
+
+	public void setSitePriceRules(List<SitePriceRuleDTO> sitePriceRules) {
+		this.sitePriceRules = sitePriceRules;
+	}
 
 	@Override
     public String toString() {

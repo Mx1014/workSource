@@ -99,9 +99,15 @@ public interface SmsTemplateCode {
 
     int PM_TASK_ASSIGN_NODE_CODE= 47;
     int PM_TASK_ASSIGN_NODE_SUPERVISE_CODE= 48;
-    int PM_TASK_PROCESSING_BUTTON_APPROVE_CODE= 49;
+    int PM_TASK_PROCESSING_BUTTON_APPROVE_CODE= 49; 
+    
+    // 视频会议短信
+    int VIDEO_EXPIRATION_REMINDER = 51;
+    int VIDEO_TRIAL_EXPIRATION_REMINDER = 52;
+    
+     
 
     // 资源预约短信模板
     int RENTAL_PROCESSOR_SUCCESS_CODE = 50; // 正中会-预成功:【正在会】客户{客户姓名}（{客户联系方式}）完成支付，成功预约{使用时间}的{资源名称}，请提前做好相关准备工作。
-
+ 
 }

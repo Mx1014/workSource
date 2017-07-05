@@ -15,6 +15,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -24,6 +25,9 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.ExecuteImportTaskCallback;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -34,13 +38,20 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.ImportOrganizationContactDataDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
 import com.everhomes.rest.region.RegionAdminStatus;
@@ -87,6 +98,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private DbProvider dbProvider;
+    
+    @Autowired
+    private ImportFileService importFileService;
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -1106,6 +1120,24 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return response;
     }
 
+    @Override
+    public ListApartmentByBuildingNameCommandResponse listCommunityApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd) {
+        if (cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid communityId, buildingName parameter");
+
+        int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size",
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, (long) pageSize);
+        ListApartmentByBuildingNameCommandResponse response = new ListApartmentByBuildingNameCommandResponse();
+
+        List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(),
+                cmd.getBuildingName(), offset, pageSize);
+        response.setApartmentList(list);
+        return response;
+    }
+
     private static void sortApartment(List<ApartmentDTO> results) {
         if (results == null || results.isEmpty())
             return;
@@ -1611,7 +1643,155 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     }
 
-    private void updateCommunityAptCount(Community community) {
+    @Override
+	public Object importParkAddressData(ImportAddressCommand cmd, MultipartFile file) {
+    	Long userId = UserContext.current().getUser().getId();
+    	ImportFileTask task = new ImportFileTask();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+						"File content is empty");
+			}
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId(cmd.getCommunityId());
+			task.setType(ImportFileTaskType.APARTMENT.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+				ImportFileResponse response = new ImportFileResponse();
+				List<ImportApartmentDataDTO> datas = handleImportApartmentData(resultList);
+				if(datas.size() > 0){
+					//设置导出报错的结果excel的标题
+					response.setTitle(datas.get(0));
+					datas.remove(0);
+				}
+				List<ImportFileResultLog<ImportApartmentDataDTO>> results = importApartment(datas, userId, cmd);
+				response.setTotalCount((long)datas.size());
+				response.setFailCount((long)results.size());
+				response.setLogs(results);
+				return response;
+			}, task);
+
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+	}
+
+	private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,
+			Long userId, ImportAddressCommand cmd) {
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+
+		List<ImportFileResultLog<ImportApartmentDataDTO>> errorLogs = new ArrayList<>(); 
+		for (ImportApartmentDataDTO data : datas) {
+			ImportFileResultLog<ImportApartmentDataDTO> log = new ImportFileResultLog<>(AddressServiceErrorCode.SCOPE);
+			if (StringUtils.isEmpty(data.getBuildingName())) {
+				log.setData(data);
+				log.setErrorLog("building name is null");
+				log.setCode(AddressServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
+				errorLogs.add(log);
+				continue;
+			}
+			
+			if (StringUtils.isEmpty(data.getApartmentName())) {
+				log.setData(data);
+				log.setErrorLog("apartment name is null");
+				log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_NAME_EMPTY);
+				errorLogs.add(log);
+				continue;
+			}
+			
+			if (StringUtils.isNotEmpty(data.getAreaSize())) {
+				try {
+					Double.parseDouble(data.getAreaSize());
+				} catch (Exception e) {
+					log.setData(data);
+					log.setErrorLog("area size is not number");
+					log.setCode(AddressServiceErrorCode.ERROR_AREA_SIZE_NOT_NUMBER);
+					errorLogs.add(log);
+					continue;
+				}
+			}
+			
+			importApartment(community, data);
+		}
+
+        updateCommunityAptCount(community);
+        
+		return errorLogs;
+	}
+	
+	private void importApartment(Community community, ImportApartmentDataDTO data) {
+		Long organizationId = findOrganizationByCommunity(community);
+
+        Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
+
+        if (null == building) {
+            building = new Building();
+            // 补充域空间信息，以免一直查到的都是左邻域的楼栋，从而产生重新 by lqs 20161110
+            building.setNamespaceId(community.getNamespaceId());
+            building.setCommunityId(community.getId());
+            building.setName(data.getBuildingName());
+            building.setOperatorUid(UserContext.current().getUser().getId());
+            building = communityProvider.createBuilding(building.getOperatorUid(), building);
+        }
+
+        double areaSize = 0;
+        try {
+            areaSize = Double.parseDouble(data.getAreaSize());
+        } catch (Exception e) {
+        }
+
+        Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());
+        if (address == null) {
+        	address = new Address();
+            address.setCommunityId(community.getId());
+            address.setCityId(community.getCityId());
+            address.setCityName(community.getCityName());
+            address.setAreaId(community.getAreaId());
+            address.setAreaName(community.getAreaName());
+            address.setBuildingName(building.getName());
+            address.setApartmentName(data.getApartmentName());
+            address.setAreaSize(areaSize);
+            address.setAddress(building.getName() + "-" + data.getApartmentName());
+            address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+            address.setNamespaceId(community.getNamespaceId());
+        	addressProvider.createAddress(address);
+		}else {
+			address.setAreaSize(areaSize);
+            address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+            addressProvider.updateAddress(address);
+		}
+
+        Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
+        insertOrganizationAddressMapping(organizationId, community, address, livingStatus);
+	}
+
+	private List<ImportApartmentDataDTO> handleImportApartmentData(List resultList) {
+		List<ImportApartmentDataDTO> list = new ArrayList<>();
+		for(int i = 1; i < resultList.size(); i++) {
+			RowResult r = (RowResult) resultList.get(i);
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD())) {
+				ImportApartmentDataDTO data = new ImportApartmentDataDTO();
+				data.setBuildingName(trim(r.getA()));
+				data.setApartmentName(trim(r.getB()));
+				data.setStatus(trim(r.getC()));
+				data.setAreaSize(trim(r.getD()));
+				list.add(data);
+			}
+		}
+		return list;
+	}
+	
+	private String trim(String string) {
+		return string == null ? "" : string.trim();
+	}
+	
+	private void updateCommunityAptCount(Community community) {
         if (community != null) {
             Integer count = addressProvider.countApartment(community.getId());
             if (community.getAptCount() == null || community.getAptCount().intValue() != count.intValue()) {
@@ -1724,28 +1904,32 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (null != addr) {
                 LOGGER.error("Data already exists. data = " + arr[0] + "|" + arr[1] + "|" + arr[2]);
-                insertOrganizationAddressMapping(organizationId, community, addr);
+                insertOrganizationAddressMapping(organizationId, community, addr, AddressMappingStatus.DEFAULT.getCode());
                 continue;
             }
             addressProvider.createAddress(address);
-            insertOrganizationAddressMapping(organizationId, community, address);
+            insertOrganizationAddressMapping(organizationId, community, address, AddressMappingStatus.DEFAULT.getCode());
         }
     }
 
-    private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address) {
+    private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
         if (organizationId != null && community != null && address != null) {
             CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
             if (communityAddressMapping == null) {
-                CommunityAddressMapping addressMapping = new CommunityAddressMapping();
-                addressMapping.setOrganizationId(organizationId);
-                addressMapping.setCommunityId(community.getId());
-                addressMapping.setAddressId(address.getId());
-                addressMapping.setOrganizationAddress(address.getAddress());
-                addressMapping.setLivingStatus(PmAddressMappingStatus.DEFAULT.getCode());
-                addressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                addressMapping.setUpdateTime(addressMapping.getCreateTime());
-                organizationProvider.createOrganizationAddressMapping(addressMapping);
-            }
+                communityAddressMapping = new CommunityAddressMapping();
+                communityAddressMapping.setOrganizationId(organizationId);
+                communityAddressMapping.setCommunityId(community.getId());
+                communityAddressMapping.setAddressId(address.getId());
+                communityAddressMapping.setOrganizationAddress(address.getAddress());
+                communityAddressMapping.setLivingStatus(livingStatus);
+                communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+                organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+            }else {
+				communityAddressMapping.setLivingStatus(livingStatus);
+				communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			}
         }
     }
 

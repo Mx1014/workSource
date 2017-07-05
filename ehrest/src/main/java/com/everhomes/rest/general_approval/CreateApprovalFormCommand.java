@@ -1,9 +1,9 @@
 package com.everhomes.rest.general_approval;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul> 
@@ -13,22 +13,22 @@ import com.everhomes.util.StringHelper;
  * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
  * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
  * <li>formName: 表单名字</li>
- * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
+ * <li>formFields: 表单控件数据 {@link GeneralFormFieldDTO}</li>
  * </ul>
  * @author janson
  *
  */
-public class CreateApprovalFormCommand { 
+public class CreateApprovalFormCommand {
     private Long     ownerId;
     private String     ownerType;
     private Long     moduleId;
     private String     moduleType;
     private Long     organizationId;
     private String     formName;
-    
+
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
- 
+
 	public Long getOwnerId() {
 		return ownerId;
 	}

@@ -11,6 +11,13 @@ import com.everhomes.rest.quality.*;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.util.ConvertHelper;
+
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.search.QualityInspectionSampleSearcher;
+import com.everhomes.search.QualityTaskSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +27,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.quality.QualityService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.address.CommunityDTO;
@@ -39,7 +45,13 @@ public class QualityController extends ControllerBase {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
-	
+
+	@Autowired
+	private QualityInspectionSampleSearcher sampleSearcher;
+
+	@Autowired
+	private QualityTaskSearcher taskSearcher;
+
 	/**
 	 * <b>URL: /quality/creatQualityStandard</b>
 	 * <p>创建品质核查标准</p>
@@ -407,7 +419,7 @@ public class QualityController extends ControllerBase {
 	@RequestMapping("createQualityInspectionTask")
 	@RestReturn(value = QualityInspectionTaskDTO.class)
 	public RestResponse createQualityInspectionTask(CreateQualityInspectionTaskCommand cmd) {
-		
+
 		QualityInspectionTaskDTO task = qualityService.createQualityInspectionTask(cmd);
 		
 		RestResponse response = new RestResponse(task);
@@ -606,5 +618,232 @@ public class QualityController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /quality/createSampleQualityInspection</b>
+	 * <p>创建品质核查例行检查</p>
+	 */
+	@RequestMapping("createSampleQualityInspection")
+	@RestReturn(value = SampleQualityInspectionDTO.class)
+	public RestResponse createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd) {
+
+		SampleQualityInspectionDTO routineQualityInspection = qualityService.createSampleQualityInspection(cmd);
+
+		RestResponse response = new RestResponse(routineQualityInspection);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/updateSampleQualityInspection</b>
+	 * <p>修改品质核查例行检查</p>
+	 */
+	@RequestMapping("updateSampleQualityInspection")
+	@RestReturn(value = SampleQualityInspectionDTO.class)
+	public RestResponse updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd) {
+
+		SampleQualityInspectionDTO routineQualityInspection = qualityService.updateSampleQualityInspection(cmd);
+
+		RestResponse response = new RestResponse(routineQualityInspection);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/findSampleQualityInspection</b>
+	 * <p>查看品质核查例行检查</p>
+	 */
+	@RequestMapping("findSampleQualityInspection")
+	@RestReturn(value = SampleQualityInspectionDTO.class)
+	public RestResponse findSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+
+		SampleQualityInspectionDTO routineQualityInspection = qualityService.findSampleQualityInspection(cmd);
+
+		RestResponse response = new RestResponse(routineQualityInspection);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/deleteSampleQualityInspection</b>
+	 * <p>删除品质核查例行检查</p>
+	 */
+	@RequestMapping("deleteSampleQualityInspection")
+	@RestReturn(value = String.class)
+	public RestResponse deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+
+		qualityService.deleteSampleQualityInspection(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/searchSampleQualityInspection</b>
+	 * <p>列出品质核查例行检查-web</p>
+	 */
+	@RequestMapping("searchSampleQualityInspection")
+	@RestReturn(value = ListSampleQualityInspectionResponse.class)
+	public RestResponse searchSampleQualityInspection(SearchSampleQualityInspectionCommand cmd) {
+
+		ListSampleQualityInspectionResponse routineQualityInspections = sampleSearcher.query(cmd);
+
+		RestResponse response = new RestResponse(routineQualityInspections);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/listSampleQualityInspection</b>
+	 * <p>列出品质核查例行检查-app</p>
+	 */
+	@RequestMapping("listSampleQualityInspection")
+	@RestReturn(value = ListSampleQualityInspectionResponse.class)
+	public RestResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
+
+		ListSampleQualityInspectionResponse routineQualityInspections = qualityService.listSampleQualityInspection(cmd);
+
+		RestResponse response = new RestResponse(routineQualityInspections);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/listSampleQualityInspectionTasks</b>
+	 * <p>列出品质核查例行检查生成的任务-web</p>
+	 */
+	@RequestMapping("listSampleQualityInspectionTasks")
+	@RestReturn(value = ListQualityInspectionTasksResponse.class)
+	public RestResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd) {
+
+		ListQualityInspectionTasksResponse tasks = qualityService.listSampleQualityInspectionTasks(cmd);
+
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/countSampleTaskScores</b>
+	 * <p>检查分数统计</p>
+	 */
+	@RequestMapping("countSampleTaskScores")
+	@RestReturn(value = CountSampleTaskScoresResponse.class)
+	public RestResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd) {
+
+		CountSampleTaskScoresResponse scores = qualityService.countSampleTaskScores(cmd);
+
+		RestResponse response = new RestResponse(scores);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/countSampleTasks</b>
+	 * <p>检查生成的任务统计</p>
+	 */
+	@RequestMapping("countSampleTasks")
+	@RestReturn(value = CountSampleTasksResponse.class)
+	public RestResponse countSampleTasks(CountSampleTasksCommand cmd) {
+
+		CountSampleTasksResponse tasks = qualityService.countSampleTasks(cmd);
+
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/countSampleTaskCommunityScores</b>
+	 * <p>检查关联的各项目分数统计</p>
+	 */
+	@RequestMapping("countSampleTaskCommunityScores")
+	@RestReturn(value = CountScoresResponse.class)
+	public RestResponse countSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd) {
+
+		CountScoresResponse scores = qualityService.countSampleTaskCommunityScores(cmd);
+
+		RestResponse response = new RestResponse(scores);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/countSampleTaskSpecificationItemScores</b>
+	 * <p>检查关联各扣分项占比</p>
+	 */
+	@RequestMapping("countSampleTaskSpecificationItemScores")
+	@RestReturn(value = CountSampleTaskSpecificationItemScoresResponse.class)
+	public RestResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd) {
+
+		CountSampleTaskSpecificationItemScoresResponse scores = qualityService.countSampleTaskSpecificationItemScores(cmd);
+
+		RestResponse response = new RestResponse(scores);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/syncQualityTaskIndex</b>
+	 * <p>搜索索引同步</p>
+	 * @return {String.class}
+	 */
+	@RequestMapping("syncQualityTaskIndex")
+	@RestReturn(value=String.class)
+	public RestResponse syncQualityTaskIndex() {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		taskSearcher.syncFromDb();
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /quality/syncQualitySampleIndex</b>
+	 * <p>搜索索引同步</p>
+	 * @return {String.class}
+	 */
+	@RequestMapping("syncQualitySampleIndex")
+	@RestReturn(value=String.class)
+	public RestResponse syncQualitySampleIndex() {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		sampleSearcher.syncFromDb();
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /quality/updateSampleScoreStatTest</b>
+	 * <p>统计测试</p>
+	 * @return {String.class}
+	 */
+	@RequestMapping("updateSampleScoreStatTest")
+	@RestReturn(value=String.class)
+	public RestResponse updateSampleScoreStatTest() {
+
+		qualityService.updateSampleScoreStat();
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
 }

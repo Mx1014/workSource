@@ -6,6 +6,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Date;
 
@@ -450,6 +452,71 @@ public class EnergyConsumptionController extends ControllerBase {
         return response(energyConsumptionService.listEnergyDefaultSettingTemplates());
     }
 
+    /**
+     * <p>通过二维码获取表记的信息</p>
+     * <b>URL: /energy/findEnergyMeterByQRCode</b>
+     */
+    @RestReturn(EnergyMeterDTO.class)
+    @RequestMapping("findEnergyMeterByQRCode")
+    public RestResponse findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd) {
+        return response(energyConsumptionService.findEnergyMeterByQRCode(cmd));
+    }
 
+    /**
+     * <p>获取表记的二维码</p>
+     * <b>URL: /energy/getEnergyMeterQRCode</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("getEnergyMeterQRCode")
+    public RestResponse getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd) {
+        return response(energyConsumptionService.getEnergyMeterQRCode(cmd));
+    }
+
+    /**
+     * <b>URL: /energy/exportEnergyMeterQRCode</b>
+     * <p>导出表记二维码</p>
+     */
+    @RequestMapping("exportEnergyMeterQRCode")
+    @RestReturn(value = String.class)
+    public RestResponse exportEnergyMeterQRCode(ExportEnergyMeterQRCodeCommand cmd, HttpServletResponse response) {
+
+        energyConsumptionService.exportEnergyMeterQRCode(cmd, response);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /energy/exportSearchEnergyMeterQRCode</b>
+     * <p>导出全部表记二维码</p>
+     */
+    @RequestMapping("exportSearchEnergyMeterQRCode")
+    @RestReturn(value = String.class)
+    public RestResponse exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response) {
+
+        energyConsumptionService.exportSearchEnergyMeterQRCode(cmd, response);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <p>批量抄表</p>
+     * <b>URL: /energy/batchReadEnergyMeter</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("batchReadEnergyMeter")
+    public RestResponse batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd) {
+        energyConsumptionService.batchReadEnergyMeter(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 
 }

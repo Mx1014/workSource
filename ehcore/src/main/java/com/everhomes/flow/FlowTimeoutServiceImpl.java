@@ -68,7 +68,7 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
     }*/
 
     @Override
-    public void pushTimeout(FlowTimeout ft, FlowCaseState ctx) {
+    public void pushTimeout(FlowTimeout ft) {
     	//FlowTimeoutAction
     	flowTimeoutProvider.createFlowTimeout(ft);
 
