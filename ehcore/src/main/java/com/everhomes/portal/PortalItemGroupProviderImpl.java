@@ -4,6 +4,7 @@ package com.everhomes.portal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.portal.PortalItemGroupStatus;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,10 +35,9 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 	public void createPortalItemGroup(PortalItemGroup portalItemGroup) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemGroups.class));
 		portalItemGroup.setId(id);
+		portalItemGroup.setName(EhPortalItemGroups.class.getName() + id);
 		portalItemGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalItemGroup.setCreatorUid(UserContext.current().getUser().getId());
 		portalItemGroup.setUpdateTime(portalItemGroup.getCreateTime());
-		portalItemGroup.setOperatorUid(portalItemGroup.getCreatorUid());
 		getReadWriteDao().insert(portalItemGroup);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItemGroups.class, null);
 	}
@@ -46,7 +46,6 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 	public void updatePortalItemGroup(PortalItemGroup portalItemGroup) {
 		assert (portalItemGroup.getId() != null);
 		portalItemGroup.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalItemGroup.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(portalItemGroup);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemGroups.class, portalItemGroup.getId());
 	}
@@ -58,8 +57,10 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 	}
 	
 	@Override
-	public List<PortalItemGroup> listPortalItemGroup() {
+	public List<PortalItemGroup> listPortalItemGroup(Long layoutId) {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_GROUPS)
+				.where(Tables.EH_PORTAL_ITEM_GROUPS.STATUS.eq(PortalItemGroupStatus.ACTIVE.getCode()))
+				.and(Tables.EH_PORTAL_ITEM_GROUPS.LAYOUT_ID.eq(layoutId))
 				.orderBy(Tables.EH_PORTAL_ITEM_GROUPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItemGroup.class));
 	}

@@ -3,11 +3,13 @@ package com.everhomes.rest.portal;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
+
 /**
  * 
  * <ul>参数:
  * <li>id: 门户itemGroup的id</li>
- * <li>name: 门户itemGroup名称</li>
+ * <li>label: 门户itemGroup名称</li>
  * <li>description: 门户itemGroup描述</li>
  * <li>separatorFlag: 底部隔栏flag</li>
  * <li>separatorHeight: 底部隔栏高度</li>
@@ -20,13 +22,13 @@ public class UpdatePortalItemGroupCommand {
 
 	private Long id;
 
-	private String name;
+	private String label;
 
 	private String description;
 
 	private Byte separatorFlag;
 
-	private Double separatorHeight;
+	private BigDecimal separatorHeight;
 
 	private String widget;
 
@@ -38,10 +40,10 @@ public class UpdatePortalItemGroupCommand {
 
 	}
 
-	public UpdatePortalItemGroupCommand(Long id, String name, String description, Byte separatorFlag, Double separatorHeight, String widget, String style, String instanceConfig) {
+	public UpdatePortalItemGroupCommand(Long id, String label, String description, Byte separatorFlag, BigDecimal separatorHeight, String widget, String style, String instanceConfig) {
 		super();
 		this.id = id;
-		this.name = name;
+		this.label = label;
 		this.description = description;
 		this.separatorFlag = separatorFlag;
 		this.separatorHeight = separatorHeight;
@@ -58,12 +60,12 @@ public class UpdatePortalItemGroupCommand {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getLabel() {
+		return label;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	public String getDescription() {
@@ -82,11 +84,11 @@ public class UpdatePortalItemGroupCommand {
 		this.separatorFlag = separatorFlag;
 	}
 
-	public Double getSeparatorHeight() {
+	public BigDecimal getSeparatorHeight() {
 		return separatorHeight;
 	}
 
-	public void setSeparatorHeight(Double separatorHeight) {
+	public void setSeparatorHeight(BigDecimal separatorHeight) {
 		this.separatorHeight = separatorHeight;
 	}
 

@@ -4,6 +4,7 @@ package com.everhomes.portal;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.launchpad.ItemDisplayFlag;
 import com.everhomes.rest.portal.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -31,7 +32,16 @@ public class PortalServiceImpl implements PortalService {
 	private PortalLayoutTemplateProvider portalLayoutTemplateProvider;
 
 	@Autowired
+	private PortalItemGroupProvider portalItemGroupProvider;
+
+	@Autowired
 	private DbProvider dbProvider;
+
+	@Autowired
+	private PortalItemProvider portalItemProvider;
+
+	@Autowired
+	private PortalContentScopeProvider portalContentScopeProvider;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -71,7 +81,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public void createPortalLayout(CreatePortalLayoutCommand cmd) {
+	public PortalLayout createPortalLayout(CreatePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		PortalLayout portalLayout = ConvertHelper.convert(cmd, PortalLayout.class);
@@ -90,24 +100,26 @@ public class PortalServiceImpl implements PortalService {
 			}
 			return null;
 		});
-
-
+		return portalLayout;
 	}
 
 	@Override
-	public void updatePortalLayout(UpdatePortalLayoutCommand cmd) {
+	public PortalLayout updatePortalLayout(UpdatePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
 		portalLayout.setName(cmd.getName());
 		portalLayout.setDescription(cmd.getDescription());
 		portalLayout.setOperatorUid(user.getId());
 		portalLayoutProvider.updatePortalLayout(portalLayout);
+		return portalLayout;
 	}
 
 	@Override
 	public void deletePortalLayout(DeletePortalLayoutCommand cmd) {
+		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
 		portalLayout.setStatus(PortalLayoutStatus.INACTIVE.getCode());
+		portalLayout.setOperatorUid(user.getId());
 		portalLayoutProvider.updatePortalLayout(portalLayout);
 	}
 
@@ -124,27 +136,65 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public ListPortalItemGroupsResponse listPortalItemGroups(ListPortalItemGroupsCommand cmd) {
-	
-		return new ListPortalItemGroupsResponse();
+		List<PortalItemGroup> portalItemGroups = portalItemGroupProvider.listPortalItemGroup(cmd.getLayoutId());
+		return new ListPortalItemGroupsResponse(portalItemGroups.stream().map(r ->{
+			return processPortalItemGroupDTO(r);
+		}).collect(Collectors.toList()));
 	}
 
 	@Override
-	public void createPortalItemGroup(CreatePortalItemGroupCommand cmd) {
+	public PortalItemGroup createPortalItemGroup(CreatePortalItemGroupCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		PortalItemGroup portalItemGroup = ConvertHelper.convert(cmd, PortalItemGroup.class);
+		portalItemGroup.setNamespaceId(namespaceId);
+		portalItemGroup.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
+		portalItemGroup.setCreatorUid(user.getId());
+		portalItemGroup.setOperatorUid(user.getId());
+		portalItemGroupProvider.createPortalItemGroup(portalItemGroup);
+		return portalItemGroup;
 	}
 
 	@Override
-	public void updatePortalItemGroup(UpdatePortalItemGroupCommand cmd) {
-	
-
+	public PortalItemGroup updatePortalItemGroup(UpdatePortalItemGroupCommand cmd) {
+		User user = UserContext.current().getUser();
+		PortalItemGroup portalItemGroup = checkPortalItemGroup(cmd.getId());
+		portalItemGroup.setLabel(cmd.getLabel());
+		portalItemGroup.setSeparatorFlag(cmd.getSeparatorFlag());
+		portalItemGroup.setSeparatorHeight(cmd.getSeparatorHeight());
+		portalItemGroup.setWidget(cmd.getWidget());
+		portalItemGroup.setStyle(cmd.getStyle());
+		portalItemGroup.setInstanceConfig(cmd.getInstanceConfig());
+		portalItemGroup.setOperatorUid(user.getId());
+		portalItemGroupProvider.updatePortalItemGroup(portalItemGroup);
+		return portalItemGroup;
 	}
 
 	@Override
 	public void deletePortalItemGroup(DeletePortalItemGroupCommand cmd) {
-	
+		User user = UserContext.current().getUser();
+		PortalItemGroup portalItemGroup = checkPortalItemGroup(cmd.getId());
+		portalItemGroup.setStatus(PortalItemGroupStatus.INACTIVE.getCode());
+		portalItemGroup.setOperatorUid(user.getId());
+		portalItemGroupProvider.updatePortalItemGroup(portalItemGroup);
+	}
 
+	private PortalItemGroup checkPortalItemGroup(Long id){
+		PortalItemGroup portalItemGroup = portalItemGroupProvider.findPortalItemGroupById(id);
+		if(null != portalItemGroup){
+			LOGGER.error("Unable to find the portalItemGroup.id = {}", id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the portalItemGroup.");
+		}
+
+		return portalItemGroup;
+	}
+
+	private PortalItemGroupDTO processPortalItemGroupDTO(PortalItemGroup portalItemGroup){
+		PortalItemGroupDTO dto = ConvertHelper.convert(portalItemGroup, PortalItemGroupDTO.class);
+		dto.setCreateTime(portalItemGroup.getCreateTime().getTime());
+		dto.setUpdateTime(portalItemGroup.getUpdateTime().getTime());
+		return dto;
 	}
 
 	@Override
@@ -154,21 +204,46 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public void createPortalItem(CreatePortalItemCommand cmd) {
-	
+	public PortalItem createPortalItem(CreatePortalItemCommand cmd) {
+		PortalItemGroup portalItemGroup = checkPortalItemGroup(cmd.getItemGroupId());
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		PortalItem portalItem = ConvertHelper.convert(cmd, PortalItem.class);
+		portalItem.setNamespaceId(namespaceId);
+		portalItem.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
+		portalItem.setCreatorUid(user.getId());
+		portalItem.setOperatorUid(user.getId());
+		portalItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+		portalItem.setGroupName(portalItemGroup.getName());
+		portalItem.setItemLocation("/" + portalItem.getGroupName());
+		portalItemProvider.createPortalItem(portalItem);
+		cmd.getScopes()
+		return portalItem;
 
 	}
 
 	@Override
-	public void updatePortalItem(UpdatePortalItemCommand cmd) {
-	
-
+	public PortalItem updatePortalItem(UpdatePortalItemCommand cmd) {
+		User user = UserContext.current().getUser();
+		PortalItem portalItem = checkPortalItem(cmd.getId());
+		portalItem.setOperatorUid(user.getId());
 	}
 
 	@Override
 	public void deletePortalItem(DeletePortalItemCommand cmd) {
 	
 
+	}
+
+	private PortalItem checkPortalItem(Long id){
+		PortalItem portalItem = portalItemProvider.findPortalItemById(id)
+		if(null != portalItem){
+			LOGGER.error("Unable to find the portalItem.id = {}", id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the portalItem.");
+		}
+
+		return portalItem;
 	}
 
 	@Override

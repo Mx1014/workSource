@@ -34,10 +34,9 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	public void createPortalItem(PortalItem portalItem) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalItems.class));
 		portalItem.setId(id);
+		portalItem.setName(EhPortalItems.class.getName() + id);
 		portalItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalItem.setCreatorUid(UserContext.current().getUser().getId());
 		portalItem.setUpdateTime(portalItem.getCreateTime());
-		portalItem.setOperatorUid(portalItem.getCreatorUid());
 		getReadWriteDao().insert(portalItem);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItems.class, null);
 	}
@@ -46,7 +45,6 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	public void updatePortalItem(PortalItem portalItem) {
 		assert (portalItem.getId() != null);
 		portalItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalItem.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(portalItem);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItems.class, portalItem.getId());
 	}

@@ -3,6 +3,8 @@ package com.everhomes.rest.portal;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
+
 /**
  * 
  * <ul>参数:
@@ -26,7 +28,7 @@ public class CreatePortalItemGroupCommand {
 
 	private Byte separatorFlag;
 
-	private Double separatorHeight;
+	private BigDecimal separatorHeight;
 
 	private String widget;
 
@@ -38,7 +40,7 @@ public class CreatePortalItemGroupCommand {
 
 	}
 
-	public CreatePortalItemGroupCommand(Long layoutId, String label, String description, Byte separatorFlag, Double separatorHeight, String widget, String style, String instanceConfig) {
+	public CreatePortalItemGroupCommand(Long layoutId, String label, String description, Byte separatorFlag, BigDecimal separatorHeight, String widget, String style, String instanceConfig) {
 		super();
 		this.layoutId = layoutId;
 		this.label = label;
@@ -82,11 +84,11 @@ public class CreatePortalItemGroupCommand {
 		this.separatorFlag = separatorFlag;
 	}
 
-	public Double getSeparatorHeight() {
+	public BigDecimal getSeparatorHeight() {
 		return separatorHeight;
 	}
 
-	public void setSeparatorHeight(Double separatorHeight) {
+	public void setSeparatorHeight(BigDecimal separatorHeight) {
 		this.separatorHeight = separatorHeight;
 	}
 

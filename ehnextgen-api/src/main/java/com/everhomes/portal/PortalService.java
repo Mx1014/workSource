@@ -21,10 +21,10 @@ public interface PortalService {
 	public ListPortalLayoutsResponse listPortalLayouts(ListPortalLayoutsCommand cmd);
 
 
-	public void createPortalLayout(CreatePortalLayoutCommand cmd);
+	public PortalLayout createPortalLayout(CreatePortalLayoutCommand cmd);
 
 
-	public void updatePortalLayout(UpdatePortalLayoutCommand cmd);
+	public PortalLayout updatePortalLayout(UpdatePortalLayoutCommand cmd);
 
 
 	public void deletePortalLayout(DeletePortalLayoutCommand cmd);
@@ -33,10 +33,10 @@ public interface PortalService {
 	public ListPortalItemGroupsResponse listPortalItemGroups(ListPortalItemGroupsCommand cmd);
 
 
-	public void createPortalItemGroup(CreatePortalItemGroupCommand cmd);
+	public PortalItemGroup createPortalItemGroup(CreatePortalItemGroupCommand cmd);
 
 
-	public void updatePortalItemGroup(UpdatePortalItemGroupCommand cmd);
+	public PortalItemGroup updatePortalItemGroup(UpdatePortalItemGroupCommand cmd);
 
 
 	public void deletePortalItemGroup(DeletePortalItemGroupCommand cmd);
@@ -45,10 +45,10 @@ public interface PortalService {
 	public ListPortalItemsResponse listPortalItems(ListPortalItemsCommand cmd);
 
 
-	public void createPortalItem(CreatePortalItemCommand cmd);
+	public PortalItem createPortalItem(CreatePortalItemCommand cmd);
 
 
-	public void updatePortalItem(UpdatePortalItemCommand cmd);
+	public PortalItem updatePortalItem(UpdatePortalItemCommand cmd);
 
 
 	public void deletePortalItem(DeletePortalItemCommand cmd);
