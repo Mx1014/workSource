@@ -8,14 +8,14 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Administrator on 2017/7/3.
- */
+
+@Component
 public class UniongroupSearcherImpl extends AbstractElasticSearch implements UniongroupSearcher {
     @Override
     public void deleteById(Long id) {
