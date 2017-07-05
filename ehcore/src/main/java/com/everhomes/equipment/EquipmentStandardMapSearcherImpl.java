@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -125,7 +126,12 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	public SearchEquipmentStandardRelationsResponse query(
 			SearchEquipmentStandardRelationsCommand cmd) {
 		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_LIST, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		if(cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
+			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+		} else {
+			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		}
+
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
