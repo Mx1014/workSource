@@ -38,4 +38,6 @@ public interface UniongroupConfigureProvider {
     List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long ownerId, Long groupId, String groupType);
 
     List<UniongroupMemberDetail> listUniongroupMemberDetailsWithCondition(Integer namespaceId, Long groupId, String groupType);
+
+    List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId);
 }

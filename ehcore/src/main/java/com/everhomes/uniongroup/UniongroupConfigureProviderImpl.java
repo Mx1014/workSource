@@ -211,6 +211,25 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
+    public List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
+        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
+        List<UniongroupMemberDetail> result = new ArrayList<>();
+        if (records != null) {
+            records.stream().map(r -> {
+                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
+                return null;
+            }).collect(Collectors.toList());
+        }
+        if (result != null && result.size() != 0) {
+            return result;
+        }
+        return null;
+    }
+    @Override
     public void deleteUniongroupMemberDetailsByDetailIds(Integer namespaceId, List<Long> detailIds) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
