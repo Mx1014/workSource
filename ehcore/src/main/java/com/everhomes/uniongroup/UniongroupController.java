@@ -1,11 +1,15 @@
 // @formatter:off
 package com.everhomes.uniongroup;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.uniongroup.*;
+import com.everhomes.search.UniongroupSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +20,9 @@ public class UniongroupController extends ControllerBase {
 
     @Autowired
     private UniongroupService uniongroupService;
+
+    @Autowired
+    private UniongroupSearcher uniongroupSearcher;
 
     /**
      * <p>保存组配置</p>
@@ -68,6 +75,22 @@ public class UniongroupController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /uniongroup/syncUniongroupDetailsIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncUniongroupDetailsIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncUniongroupDetailsIndex() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        uniongroupSearcher.syncUniongroupDetailsIndes();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
 
 }

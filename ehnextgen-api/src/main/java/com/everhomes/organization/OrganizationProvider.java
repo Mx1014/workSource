@@ -407,5 +407,8 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId);
 	//查询组织下内有效的人数
 	Integer countOrganizationMemberDetailsByOrgId(Integer namespaceId, Long organizationId);
+
+	//查询所有总公司
+	List<Organization> listHeadEnterprises();
 }
 

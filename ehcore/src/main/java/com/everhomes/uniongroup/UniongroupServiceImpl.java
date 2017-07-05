@@ -205,22 +205,14 @@ public class UniongroupServiceImpl implements UniongroupService {
         search_cmd.setDepartmentId(cmd.getDepartmentId());
         search_cmd.setEnterpriseId(cmd.getOwnerId());
         search_cmd.setKeyword(cmd.getKeywords());
-        uniongroupSearcher.query(search_cmd);
+        search_cmd.setPageAnchor(cmd.getPageAnchor());
+        search_cmd.setPageSize(cmd.getPageSize());
+        List<UniongroupMemberDetail> list = uniongroupSearcher.query(search_cmd);
 
-
-        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(namespaceId, cmd.getOwnerId(), cmd.getGroupId(), UniongroupType.fromCode(cmd.getGroupType()).getCode());
-        //查询部门和岗位
-        for (UniongroupMemberDetail detail : details) {
-            Map depart_map = this.organizationProvider.listOrganizationsOfDetail(namespaceId, detail.getDetailId(), OrganizationGroupType.DEPARTMENT.getCode());
-            if (depart_map != null)
-                detail.setDepartment(depart_map);
-            Map jobp_map = this.organizationProvider.listOrganizationsOfDetail(namespaceId, detail.getDetailId(), OrganizationGroupType.JOB_POSITION.getCode());
-            if (jobp_map != null) {
-                detail.setJob_position(jobp_map);
-            }
+        if(list != null && list.size() > 0){
+            return list;
         }
-        uniongroupSearcher.bulkUpdate(details);
-        return details;
+        return null;
     }
 
     private Organization checkOrganization(Long orgId) {

@@ -15,7 +15,7 @@ public interface UniongroupSearcher {
 
     void feedDoc(UniongroupMemberDetail uniongroupMemberDetail);
 
-    void syncFromDb();
+    void syncUniongroupDetailsIndes();
 
     List query(SearchUniongroupDetailCommand cmd);
 }

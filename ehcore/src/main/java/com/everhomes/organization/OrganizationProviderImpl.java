@@ -4703,4 +4703,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		return context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).groupBy(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).fetchCount();
 	}
+
+	@Override
+	public List<Organization> listHeadEnterprises() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+		step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
+		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+	}
 }

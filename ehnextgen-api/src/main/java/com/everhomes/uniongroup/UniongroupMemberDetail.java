@@ -10,6 +10,8 @@ public class UniongroupMemberDetail extends EhUniongroupMemberDetails {
 
     private static final long serialVersionUID = 8751516334864351356L;
 
+    private String employeeNo;
+
     private Map<Long, String> department;
 
     private Map<Long, String> job_position;
@@ -33,5 +35,13 @@ public class UniongroupMemberDetail extends EhUniongroupMemberDetails {
 
     public void setJob_position(Map<Long, String> job_position) {
         this.job_position = job_position;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
     }
 }
