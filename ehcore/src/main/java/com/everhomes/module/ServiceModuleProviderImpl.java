@@ -368,7 +368,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         List<ServiceModule> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
         SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
-
+        pageSize = pageSize + 1;
         if(null != queryBuilderCallback)
             queryBuilderCallback.buildCondition(locator, query);
         if(null != locator && null != locator.getAnchor())
