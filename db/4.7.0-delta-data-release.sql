@@ -266,3 +266,6 @@ update eh_energy_meters m set m.amount_formula_id = (select fs.id from eh_energy
 SET @max_locale_id = (SELECT max(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@max_locale_id := @max_locale_id + 1), 'user', '300004', 'zh_CN', '对不起，您的手机号在我们的黑名单列表');
+
+-- 能耗换链接 add by xiongying20170705
+UPDATE eh_launch_pad_items SET action_data = '{"url":"http://core.zuolin.com/energy-management/build/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' WHERE `item_label` LIKE '%能耗%';
