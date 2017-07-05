@@ -227,6 +227,10 @@ public class SalaryServiceImpl implements SalaryService {
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
             this.organizationProvider.deleteOrganization(organization);
 
+            //  组织架构删除薪酬组人员关联及配置
+            this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getSalaryGroupId(),cmd.getOwnerId());
+            this.uniongroupService.deleteUniongroupMemberDetailByGroupId(cmd.getSalaryGroupId(),cmd.getOwnerId());
+
             //  删除薪酬组定义的字段
             this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
 

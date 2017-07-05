@@ -7,11 +7,17 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>salaryGroupId: 薪酬批次id</li>
+ * <li>ownerType: 'organization'</li>
+ * <li>ownerId: organizationId</li>
  * </ul>
  */
 public class DeleteSalaryGroupCommand {
 
 	private Long salaryGroupId;
+
+	private String ownerType;
+
+	private Long ownerId;
 
 	public DeleteSalaryGroupCommand() {
 
@@ -28,6 +34,22 @@ public class DeleteSalaryGroupCommand {
 
 	public void setSalaryGroupId(Long salaryGroupId) {
 		this.salaryGroupId = salaryGroupId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override
