@@ -249,6 +249,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
+	@Override
+	public List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<Organization> result  = new ArrayList<Organization>();
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		if(!StringUtils.isEmpty(organizationType)) {
+			query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType));
+		}
+
+		if (null != parentId) {
+			query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
+		}
+		if (null != pageAnchor) {
+			query.addConditions(Tables.EH_ORGANIZATIONS.ID.gt(pageAnchor));
+		}
+
+		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.asc());
+		if (null != pageSize) {
+			query.addLimit(pageSize);
+		}
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+		return result;
+	}
+
 
 	@Override
 	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize) {

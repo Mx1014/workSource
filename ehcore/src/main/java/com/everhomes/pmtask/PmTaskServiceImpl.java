@@ -589,7 +589,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		cmd.setSourceType(PmTaskSourceType.APP.getCode());
 
 		User user = UserContext.current().getUser();
-		Integer namespaceId = cmd.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
@@ -650,7 +650,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		cmd.setAddressType(PmTaskAddressType.FAMILY.getCode());
 
-		Integer namespaceId = cmd.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}

@@ -36,7 +36,7 @@ public interface OrganizationProvider {
     List<Organization> findOrganizationByCommunityId(Long communityId);
     List<Organization> findOrganizationByPath(String path);
     List<Organization> listOrganizations(String organizationType,String name, Integer pageOffset,Integer pageSize);
-    
+	List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize);
     void createOrganizationMember(OrganizationMember organizationMember);
     void updateOrganizationMember(OrganizationMember organizationMember);
     void deleteOrganizationMemberById(Long id);
