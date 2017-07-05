@@ -1104,8 +1104,11 @@ public class SalaryServiceImpl implements SalaryService {
 					if(null != salaryEmployeeOriginVals && !(entity.getNumberType()!= null
                             && entity.getNumberType().equals(SalaryEntityNumberType.FORMULA.getCode()))){
 						SalaryEmployeeOriginVal originVal = findOriginVal(entity.getId(), salaryEmployeeOriginVals);
-                        val.setSalaryValue(originVal.getSalaryValue());
-					}
+                        if(null != originVal)
+                            val.setSalaryValue(originVal.getSalaryValue());
+                        else
+                            val.setSalaryValue(entity.getDefaultValue());
+                    }
                     salaryEmployeePeriodVals.add(val);
                 }
 				processSalaryEmployeePeriodVals(salaryGroupEntities,salaryEmployeeOriginVals,salaryEmployeePeriodVals);
