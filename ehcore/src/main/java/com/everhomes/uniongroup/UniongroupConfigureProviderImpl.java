@@ -18,6 +18,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -271,6 +272,35 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
 
+
+    @Override
+    public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+/*        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.in(groupIds));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId));
+        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
+        List<UniongroupMemberDetail> result = new ArrayList<>();
+        if (records != null) {
+            records.stream().map(r -> {
+                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
+                return null;
+            }).collect(Collectors.toList());
+        }
+        if (result != null && result.size() != 0) {
+            return result;
+        }*/
+        return   context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID, DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))
+                .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.in(groupIds))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                .groupBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID)
+                .fetchInto(Object[].class);
+    }
     /**
      * Configure
      **/

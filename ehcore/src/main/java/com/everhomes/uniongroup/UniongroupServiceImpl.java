@@ -244,4 +244,9 @@ public class UniongroupServiceImpl implements UniongroupService {
         }).collect(Collectors.toList());
         return underOrgPaths;
     }
+
+    @Override
+    public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId){
+        return this.uniongroupConfigureProvider.listUniongroupMemberCount(namespaceId,groupIds,ownerId);
+    }
 }
