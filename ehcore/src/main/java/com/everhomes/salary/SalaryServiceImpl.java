@@ -1081,6 +1081,7 @@ public class SalaryServiceImpl implements SalaryService {
             List<UniongroupMemberDetailsDTO> members = uniongroupService.listUniongroupMemberDetailsByGroupId(salaryOrg.getId());
             if(null == members) {
                 LOGGER.error("salaryOrg no members :" + salaryOrg);
+                continue;
             }
             List<Long> userIds = members.stream().map(r->{
                 return r.getTargetId();
