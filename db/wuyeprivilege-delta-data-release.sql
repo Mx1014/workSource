@@ -244,7 +244,10 @@ insert into `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 insert into `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid` , `create_time` , `namespace_id` , `role_type`) select (@acl_id := @acl_id + 1),`owner_type`, `owner_id`,1,15, target_id, 0,1,now(),0, target_type from `eh_acl_role_assignments` where role_id = 1005 and target_type = 'EhUsers' and target_id not in (select role_id from eh_acls where role_type = 'EhUsers' and privilege_id = 15);
 
-
+-- 提示语 add by sfyan 20170705
+select max(id) into @id from `eh_locale_strings`;
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'privilege', '100051', 'zh_CN', '管理员已存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'privilege', '100053', 'zh_CN', '管理员不存在');
 
 
 
