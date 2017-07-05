@@ -5149,9 +5149,11 @@ public class PunchServiceImpl implements PunchService {
 		}
 		else{
 
-			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			LOGGER.error("owenr id and type not the same with database db=[" +
+					obj.getOwnerType()+obj.getOwnerId()+"],cmd=["
+					+cmd.getOwnerType()+ cmd.getOwnerId()+"]");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid owner type or  Id parameter in the command");
+					"owenr id and type not the same with database");
 		}
 	
 
