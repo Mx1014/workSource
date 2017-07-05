@@ -4,6 +4,7 @@ package com.everhomes.salary;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.salary.*;
+import com.everhomes.rest.uniongroup.RefreshPeriodValsCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -383,6 +384,16 @@ public class SalaryController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse exportSalarySendHistory(ExportSalarySendHistoryCommand cmd, HttpServletResponse httpResponse){
 		salaryService.exportSalarySendHistory(cmd,httpResponse);
+		return new RestResponse();
+	}
+	/**
+	 * <p>22.刷新某一期的值</p>
+	 * <b>URL: /salary/refreshPeriodVals</b>
+	 */
+	@RequestMapping("refreshPeriodVals")
+	@RestReturn(String.class)
+	public RestResponse refreshPeriodVals(RefreshPeriodValsCommand cmd){
+		salaryService.monthScheduled(cmd.getPeriod());
 		return new RestResponse();
 	}
 

@@ -40,4 +40,10 @@ public interface UniongroupConfigureProvider {
     List<UniongroupMemberDetail> listUniongroupMemberDetailsWithCondition(Integer namespaceId, Long groupId, String groupType);
 
     List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId);
+
+    List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId);
+
+    void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId);
+
+    void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId);
 }

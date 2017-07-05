@@ -18,6 +18,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -270,7 +271,36 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         return null;
     }
 
+    //  added by RN
+    @Override
+    public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return   context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID, DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))
+                .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.in(groupIds))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                .groupBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID)
+                .fetchInto(Object[].class);
+    }
 
+    @Override
+    public void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_UNIONGROUP_CONFIGURES)
+                .where(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_ID.eq(groupId))
+                .and(Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID.eq(organizationId))
+                .execute();
+    }
+
+    @Override
+    public void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(organizationId))
+                .execute();
+    }
     /**
      * Configure
      **/
