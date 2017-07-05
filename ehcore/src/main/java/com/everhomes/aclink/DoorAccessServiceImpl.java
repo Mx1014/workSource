@@ -3677,7 +3677,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             vo.setNickName(r.getNickname());
             vo.setPhone(r.getPhone());
             vo.setOrganization(r.getOrganization());
-            vo.setGoDoor(String.valueOf(r.getCurrStorey()));
+            vo.setGoDoor(r.getCurrStorey() != null ? String.valueOf(r.getCurrStorey()) : "");
             vo.setDescription(r.getDescription());
 
             Date d1 = new Date(r.getValidEndMs());
