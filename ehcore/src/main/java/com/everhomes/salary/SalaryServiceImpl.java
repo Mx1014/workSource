@@ -11,10 +11,7 @@ import com.everhomes.mail.MailHandler;
 import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportFileTaskType;
-import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.salary.*;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.uniongroup.*;
@@ -236,9 +233,9 @@ public class SalaryServiceImpl implements SalaryService {
             //  删除个人设定中与薪酬组相关的字段
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(cmd.getSalaryGroupId());
 
-            try {
+/*            try {
                 Thread.sleep(5000);
-            }catch (Exception e ){}
+            }catch (Exception e ){}*/
         }
     }
 
@@ -338,13 +335,11 @@ public class SalaryServiceImpl implements SalaryService {
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
 
         //  1.将前端信息传递给组织架构的接口获取相关信息
-        ListUniongroupMemberDetailsCommand command = new ListUniongroupMemberDetailsCommand();
-        command.setOwnerId(cmd.getOwnerId());
-        command.setOwnerType(cmd.getOwnerType());
-        command.setGroupId(cmd.getSalaryGroupId());
+        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        command.setOrganizationId(cmd.getOwnerId());
 
         //  2.查询所有人员
-        List<UniongroupMemberDetailsDTO> results = this.uniongroupService.listUniongroupMemberDetailsByGroupId(command);
+        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
 
         //  3.查询所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
@@ -352,7 +347,7 @@ public class SalaryServiceImpl implements SalaryService {
         ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
 
         if (!StringUtils.isEmpty(results)) {
-            response.setSalaryEmployeeDTO(results.stream().map(r -> {
+            response.setSalaryEmployeeDTO(results.getMembers().stream().map(r -> {
                 salaryEmployeeDTO dto = new salaryEmployeeDTO();
                 dto.setUserId(r.getDetailId());
                 dto.setContactName(r.getContactName());
