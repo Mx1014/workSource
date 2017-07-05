@@ -1,10 +1,7 @@
 // @formatter:off
 package com.everhomes.uniongroup;
 
-import com.everhomes.rest.uniongroup.GetUniongroupConfiguresCommand;
-import com.everhomes.rest.uniongroup.ListUniongroupMemberDetailsCommand;
-import com.everhomes.rest.uniongroup.ListUniongroupMemberDetailsWithConditionCommand;
-import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
+import com.everhomes.rest.uniongroup.*;
 
 import java.util.List;
 
@@ -24,6 +21,8 @@ public interface UniongroupService {
      * 根据组Id获取组内人员记录
      **/
     public List listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd);
+
+    List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(Long groupId);
 
     /**
      * 删除一条配置记录

@@ -1057,13 +1057,18 @@ public class SalaryServiceImpl implements SalaryService {
 	 * 内容: 本期(本月) 薪酬组生成salarygroup和employee
 	 * */
 	@Scheduled(cron = "5 5 0 1 * ?")
-	public void monthScheduled(){
+        public void monthScheduled() {
         Calendar periodCalendar = Calendar.getInstance();
-        periodCalendar.add(Calendar.MONTH,-1);
+        periodCalendar.add(Calendar.MONTH, -1);
         String period = monthSF.get().format(periodCalendar.getTime());
-		//TODO : 1.获取所有的薪酬组
-		List<Organization> salaryOrganizations = null;
-		for (Organization salaryOrg : salaryOrganizations) {
+        monthScheduled(period);
+    }
+    @Override
+    public void monthScheduled(String period){
+        // : 1.获取所有的薪酬组
+        List<Organization> salaryOrganizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), null);
+
+        for (Organization salaryOrg : salaryOrganizations) {
 			SalaryGroup salaryGroup = new SalaryGroup();
 			salaryGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
@@ -1074,9 +1079,13 @@ public class SalaryServiceImpl implements SalaryService {
 			salaryGroup.setOwnerId(punchService.getTopEnterpriseId(salaryOrg.getDirectlyEnterpriseId()));
 			salaryGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
 			salaryGroupProvider.createSalaryGroup(salaryGroup);
-			//TODO : 2.循环薪酬组取里面的人员
+			// 2.循环薪酬组取里面的人员
 			List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryOrg.getId());
-			List<Long> userIds = null;
+            List<UniongroupMemberDetailsDTO> members = uniongroupService.listUniongroupMemberDetailsByGroupId(salaryOrg.getId());
+            List<Long> userIds = members.stream().map(r->{
+                return r.getTargetId();
+            }).collect(Collectors.toList());
+
 			for (Long userId : userIds) {
 				SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
 				employee.setSalaryGroupId(salaryGroup.getId());

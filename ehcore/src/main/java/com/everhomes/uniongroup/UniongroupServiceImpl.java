@@ -178,6 +178,19 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
+    public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(Long groupId) {
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(groupId);
+        if (details != null) {
+            return details.stream().map(r -> {
+                return ConvertHelper.convert(r, UniongroupMemberDetailsDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
     public void deleteUniongroupConfigures(UniongroupConfigures uniongroupConfigure) {
         this.uniongroupConfigureProvider.deleteUniongroupConfigres(uniongroupConfigure);
     }
@@ -186,6 +199,15 @@ public class UniongroupServiceImpl implements UniongroupService {
     public List listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd) {
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         Integer namespaceId = 1000000;
+
+        SearchUniongroupDetailCommand search_cmd = new SearchUniongroupDetailCommand();
+        search_cmd.setNamespaceId(namespaceId);
+        search_cmd.setDepartmentId(cmd.getDepartmentId());
+        search_cmd.setEnterpriseId(cmd.getOwnerId());
+        search_cmd.setKeyword(cmd.getKeywords());
+        uniongroupSearcher.query(search_cmd);
+
+
         List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(namespaceId, cmd.getOwnerId(), cmd.getGroupId(), UniongroupType.fromCode(cmd.getGroupType()).getCode());
         //查询部门和岗位
         for (UniongroupMemberDetail detail : details) {
@@ -200,7 +222,6 @@ public class UniongroupServiceImpl implements UniongroupService {
         uniongroupSearcher.bulkUpdate(details);
         return details;
     }
-
 
     private Organization checkOrganization(Long orgId) {
         Organization org = organizationProvider.findOrganizationById(orgId);
