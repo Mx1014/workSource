@@ -3688,11 +3688,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
             User u = userProvider.findUserById(r.getApproveUserId());
             if(u != null) {
-                if(u.getNickName() != null) {
-                    vo.setApproveUserName(u.getNickName());
-                } else {
-                    vo.setApproveUserName(u.getAccountName());
-                }
+                vo.setApproveUserName(getRealName(u));
             }
             return vo;
         }).collect(Collectors.toList());
