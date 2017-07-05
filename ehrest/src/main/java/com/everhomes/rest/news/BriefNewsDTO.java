@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>likeFlag: 点赞状态，0未点赞，1不喜欢，2已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
  * <li>newsUrl: 新闻链接(供分享)</li>
  * <li>categoryId: 新闻类型ID</li>
+ * <li>commentFlag: 新闻是否可以评论，1：可以 0：禁止 {@link NewsNormalFlag}</li>
  * </ul>
  */
 public class BriefNewsDTO {
@@ -38,6 +39,15 @@ public class BriefNewsDTO {
 	private Byte likeFlag;
 	private String newsUrl;
 	private Long categoryId;
+	private Byte commentFlag;
+
+	public Byte getCommentFlag() {
+		return commentFlag;
+	}
+
+	public void setCommentFlag(Byte commentFlag) {
+		this.commentFlag = commentFlag;
+	}
 
 	public String getNewsToken() {
 		return newsToken;

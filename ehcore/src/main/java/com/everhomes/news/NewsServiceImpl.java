@@ -15,7 +15,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.news.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,40 +40,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.news.AddNewsCommentCommand;
-import com.everhomes.rest.news.AddNewsCommentForWebCommand;
-import com.everhomes.rest.news.AddNewsCommentResponse;
-import com.everhomes.rest.news.AttachmentDescriptor;
-import com.everhomes.rest.news.BriefNewsDTO;
-import com.everhomes.rest.news.CommentStatus;
-import com.everhomes.rest.news.CreateNewsCommand;
-import com.everhomes.rest.news.CreateNewsResponse;
-import com.everhomes.rest.news.DeleteNewsCommand;
-import com.everhomes.rest.news.DeleteNewsCommentCommand;
-import com.everhomes.rest.news.GetNewsContentCommand;
-import com.everhomes.rest.news.GetNewsContentResponse;
-import com.everhomes.rest.news.GetNewsDetailInfoCommand;
-import com.everhomes.rest.news.GetNewsDetailInfoResponse;
-import com.everhomes.rest.news.ImportNewsCommand;
-import com.everhomes.rest.news.ListNewsCommand;
-import com.everhomes.rest.news.ListNewsCommentCommand;
-import com.everhomes.rest.news.ListNewsCommentResponse;
-import com.everhomes.rest.news.ListNewsResponse;
-import com.everhomes.rest.news.NewsAttachmentDTO;
-import com.everhomes.rest.news.NewsCommentContentType;
-import com.everhomes.rest.news.NewsCommentDTO;
-import com.everhomes.rest.news.NewsCommentDeleteFlag;
-import com.everhomes.rest.news.NewsContentType;
-import com.everhomes.rest.news.NewsOwnerType;
-import com.everhomes.rest.news.NewsServiceErrorCode;
-import com.everhomes.rest.news.NewsStatus;
-import com.everhomes.rest.news.NewsTopFlag;
-import com.everhomes.rest.news.SearchNewsCommand;
-import com.everhomes.rest.news.SearchNewsResponse;
-import com.everhomes.rest.news.SetNewsLikeFlagCommand;
-import com.everhomes.rest.news.SetNewsLikeFlagForWebCommand;
-import com.everhomes.rest.news.SetNewsTopFlagCommand;
-import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneResponse;
@@ -148,6 +117,9 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private ConfigurationProvider configProvider;
 
+	@Autowired
+	private CommunityProvider communityProvider;
+
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
@@ -158,10 +130,19 @@ public class NewsServiceImpl implements NewsService {
 		//黑名单权限校验 by sfyan20161213
 		checkBlacklist(null, null);
 
-		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
 		newsProvider.createNews(news);
+
+		if (null != cmd.getCommunityIds()) {
+			cmd.getCommunityIds().forEach(m -> {
+				NewsCommunity newsCommunity = new NewsCommunity();
+				newsCommunity.setNewsId(news.getId());
+				newsCommunity.setCommunityId(m);
+				newsProvider.createNewsCommunity(newsCommunity);
+			});
+		}
 
 		syncNews(news.getId());
 
@@ -215,7 +196,7 @@ public class NewsServiceImpl implements NewsService {
 		}
 	}
 
-	private Organization checkOwner(Long userId, Long ownerId, String ownerType) {
+	private Integer checkOwner(Long userId, Long ownerId, String ownerType) {
 		if (ownerId == null || StringUtils.isEmpty(ownerType)) {
 			LOGGER.error(
 					"Invalid parameters, operatorId=" + userId + ", ownerType=" + ownerType + ", ownerId=" + ownerId);
@@ -231,21 +212,34 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		// 目前只有一种ownerType即organization，所以不做判断了，如果后面改成了多个，可以把返回值改成Object，然后在调用者中逐个判断
-		Organization organization = organizationProvider.findOrganizationById(ownerId);
-		if (organization == null) {
-			LOGGER.error(
-					"Invalid owner id, operatorId=" + userId + ", ownerType=" + ownerType + ", ownerId=" + ownerId);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "Invalid owner id");
+		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
+			Organization organization = organizationProvider.findOrganizationById(ownerId);
+			if (organization == null) {
+				LOGGER.error(
+						"Invalid owner id, operatorId=" + userId + ", ownerType=" + ownerType + ", ownerId=" + ownerId);
+				throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+						NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "Invalid owner id");
+			}
+
+			return organization.getNamespaceId();
+		}else {
+			Community community = communityProvider.findCommunityById(ownerId);
+			if (community == null) {
+				LOGGER.error(
+						"Invalid owner id, operatorId=" + userId + ", ownerType=" + ownerType + ", ownerId=" + ownerId);
+				throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+						NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "Invalid owner id");
+			}
+			return community.getNamespaceId();
 		}
 
-		return organization;
+//		return organization;
 	}
 
 	@Override
 	public void importNews(ImportNewsCommand cmd, MultipartFile[] files) {
 		Long userId = UserContext.current().getUser().getId();
-		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		// 读取Excel数据
 		List<News> newsList = getNewsFromExcel(userId, namespaceId, cmd, files);
 		newsProvider.createNewsList(newsList);
@@ -326,29 +320,40 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
-		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
-		return listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+
+		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+
+		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
+
+		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
+			return listNews(userId, namespaceId, null, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+		}else {
+			return listNews(userId, namespaceId, cmd.getOwnerId(), cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+		}
 	}
 
 	@Override
 	public ListNewsResponse listNewsForWeb(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = UserContext.getCurrentNamespaceId();
-		return listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
+		return listNews(userId, namespaceId, null, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize());
 	}
-	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long categoryId,Long pageAnchor, Integer pageSize) {
-		return listNews(userId, namespaceId,categoryId, pageAnchor, pageSize, false);
+	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long communityId, Long categoryId,Long pageAnchor, Integer pageSize) {
+		return listNews(userId, namespaceId, communityId, categoryId, pageAnchor, pageSize, false);
 	}
 
-	private ListNewsResponse listNews(Long userId, Integer namespaceId,Long categoryId, Long pageAnchor, Integer pageSize,
+	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long communityId, Long categoryId, Long pageAnchor, Integer pageSize,
 			boolean isScene) {
 		if(null == categoryId)
 			categoryId = 0L;
 		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
 		pageAnchor = pageAnchor == null ? 0 : pageAnchor;
 		Long from = pageAnchor * pageSize;
-		List<BriefNewsDTO> list = newsProvider.listNews(categoryId,namespaceId, from, pageSize + 1).stream()
-				.map(news -> convertNewsToBriefNewsDTO(userId, news, isScene)).collect(Collectors.toList());
+
+		Boolean commentForbiddenFlag = newsProvider.getCommentForbiddenFlag(categoryId, namespaceId);
+
+		List<BriefNewsDTO> list = newsProvider.listNews(communityId, categoryId, namespaceId, from, pageSize + 1).stream()
+				.map(news -> convertNewsToBriefNewsDTO(userId, news, isScene, commentForbiddenFlag)).collect(Collectors.toList());
 
 		if (list.size() > pageSize) {
 			pageAnchor += 1;
@@ -364,7 +369,7 @@ public class NewsServiceImpl implements NewsService {
 		return response;
 	}
 
-	private BriefNewsDTO convertNewsToBriefNewsDTO(Long userId, News news, boolean isScene) {
+	private BriefNewsDTO convertNewsToBriefNewsDTO(Long userId, News news, boolean isScene, Boolean commentForbiddenFlag) {
 		BriefNewsDTO newsDTO = ConvertHelper.convert(news, BriefNewsDTO.class);
 		newsDTO.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news.getId()));
 		if (!isScene) {
@@ -376,7 +381,12 @@ public class NewsServiceImpl implements NewsService {
 				.getUser().getId()));
 		}
 		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
-		
+
+		newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
+		if (commentForbiddenFlag) {
+			newsDTO.setCommentFlag(NewsNormalFlag.DISABLED.getCode());
+		}
+
 		return newsDTO;
 	}
 
@@ -405,7 +415,7 @@ public class NewsServiceImpl implements NewsService {
 					SearchNewsResponse.class);
 		}
 		final Long userId = UserContext.current().getUser().getId();
-		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
@@ -559,7 +569,7 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public void setNewsTopFlag(SetNewsTopFlagCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
-		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(() -> {
 
@@ -881,7 +891,7 @@ public class NewsServiceImpl implements NewsService {
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
-		return ConvertHelper.convert(listNews(userId, namespaceId,cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), true),
+		return ConvertHelper.convert(listNews(userId, namespaceId, null, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), true),
 				ListNewsBySceneResponse.class);
 	}
 

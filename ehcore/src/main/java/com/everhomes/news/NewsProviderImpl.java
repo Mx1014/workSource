@@ -8,9 +8,7 @@ import java.util.stream.Collectors;
 import com.everhomes.server.schema.tables.daos.EhNewsCommunitiesDao;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
 import com.everhomes.user.UserContext;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -89,13 +87,33 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public List<News> listNews(Long categoryId,Integer namespaceId, Long from, Integer pageSize) {
-		SelectConditionStep<Record> step =  getReadOnlyContext().select().from(Tables.EH_NEWS).where(Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode())) ;
-		if(null != categoryId)
-			step.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
-		return step.orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
-				.limit(from.intValue(), pageSize.intValue()).fetch().map(r -> ConvertHelper.convert(r, News.class));
+	public List<News> listNews(Long communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize) {
+		SelectJoinStep<Record> step =  getReadOnlyContext().select().from(Tables.EH_NEWS);
+
+		Condition cond = Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()));
+		if(null != categoryId) {
+			cond = cond.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
+		}
+		if (communityId != null) {
+			step.join(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
+		}
+
+		return step.where(cond).orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
+				.limit(from.intValue(), pageSize).fetch().map(r -> ConvertHelper.convert(r, News.class));
+	}
+
+	@Override
+	public Boolean getCommentForbiddenFlag(Long categoryId, Integer namespaceId) {
+		final Integer[] count = new Integer[1];
+		count[0] = getReadOnlyContext().selectCount().from(Tables.EH_NEWS_COMMENT_FORBID_RULE)
+				.where(Tables.EH_NEWS_COMMENT_FORBID_RULE.CATEGORY_ID.eq(categoryId)
+						.and(Tables.EH_NEWS_COMMENT_FORBID_RULE.NAMESPACE_ID.eq(namespaceId))).fetchOneInto(Integer.class);
+
+		if(count[0] > 0) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -111,9 +129,17 @@ public class NewsProviderImpl implements NewsProvider {
 		newsCommunity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		newsCommunity.setCreatorUid(UserContext.current().getUser().getId());
 
-		EhNewsCommunitiesDao dao = new EhNewsCommunitiesDao(context.configuration());
-		getReadWriteDao().insert(newsCommunity);
+		EhNewsCommunitiesDao dao = new EhNewsCommunitiesDao(getContext(AccessSpec.readWrite()).configuration());
+		dao.insert(newsCommunity);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNewsCommunities.class, null);
+	}
+
+	@Override
+	public void deleteNewsCommunity(Long newsId) {
+		DeleteQuery query = getContext(AccessSpec.readWrite()).deleteQuery(Tables.EH_NEWS_COMMUNITIES);
+		query.addConditions(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(newsId));
+
+		query.execute();
 	}
 
 	private EhNewsDao getReadWriteDao() {
