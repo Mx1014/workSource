@@ -39,7 +39,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
 @Component
-public class PmProviderImpl implements PmTaskProvider{
+public class PmTaskProviderImpl implements PmTaskProvider{
 	
 	@Autowired 
     private SequenceProvider sequenceProvider;

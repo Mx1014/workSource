@@ -9,6 +9,7 @@ import com.everhomes.server.schema.tables.daos.EhNewsCommunitiesDao;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
 import com.everhomes.user.UserContext;
 import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -96,11 +97,12 @@ public class NewsProviderImpl implements NewsProvider {
 			cond = cond.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
 		}
 		if (communityId != null) {
-			step.join(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
+			step.leftOuterJoin(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
+			cond = cond.and(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID.eq(communityId));
 		}
 
 		return step.where(cond).orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
-				.limit(from.intValue(), pageSize).fetch().map(r -> ConvertHelper.convert(r, News.class));
+				.limit(from.intValue(), pageSize).fetch().map(new DefaultRecordMapper(Tables.EH_NEWS.recordType(), News.class));
 	}
 
 	@Override
