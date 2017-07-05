@@ -130,7 +130,7 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 	VALUES (35748, 1034291, 240111044331050361, @address_id, 'D座101', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387254855,UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'下沉式广场','下沉式广场','101','2','0',UTC_TIMESTAMP(), 999972);
+	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'下沉式广场','下沉式广场','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES (35749, 1034291, 240111044331050361, @address_id, '下沉式广场101', '0');
 
