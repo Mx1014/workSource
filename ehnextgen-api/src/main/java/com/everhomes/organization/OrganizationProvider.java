@@ -391,8 +391,6 @@ public interface OrganizationProvider {
 	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType, Byte setAdminFlag,
 			CrossShardListingLocator locator, int pageSize);
 
-
-	List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize);
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(
 			Long organizationId, Long buildId);
 

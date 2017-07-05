@@ -10047,11 +10047,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         return listOrganizationContactByJobPositionId(enterpriseId, null, jobPositionId);
     }
 
-	@Override
-	public List<OrganizationMember> listOrganizationContactByJobPositionId(List<Long> organizationIds, Long jobPositionId){
-        return listOrganizationContactByJobPositionId(null, organizationIds, jobPositionId);
-    }
-
     private List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, List<Long> organizationIds, Long jobPositionId) {
         List<Long> jobPositionIds = new ArrayList<>();
         if (null != enterpriseId) {
