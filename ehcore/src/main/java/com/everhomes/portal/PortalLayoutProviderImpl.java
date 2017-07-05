@@ -4,6 +4,7 @@ package com.everhomes.portal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.portal.PortalLayoutStatus;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,9 +36,7 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalLayouts.class));
 		portalLayout.setId(id);
 		portalLayout.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalLayout.setCreatorUid(UserContext.current().getUser().getId());
 		portalLayout.setUpdateTime(portalLayout.getCreateTime());
-		portalLayout.setOperatorUid(portalLayout.getCreatorUid());
 		getReadWriteDao().insert(portalLayout);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalLayouts.class, null);
 	}
@@ -60,6 +59,7 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 	@Override
 	public List<PortalLayout> listPortalLayout() {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAYOUTS)
+				.where(Tables.EH_PORTAL_LAYOUTS.STATUS.eq(PortalLayoutStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_PORTAL_LAYOUTS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLayout.class));
 	}
