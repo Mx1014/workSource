@@ -37,5 +37,5 @@ public interface ServiceModuleService {
 
 	void deleteServiceModule(DeleteServiceModuleCommand cmd);
 
-	List<ServiceModuleDTO> listAllServiceModules(ListServiceModulesCommand cmd);
+	ListServiceModulesResponse listAllServiceModules(ListServiceModulesCommand cmd);
 }

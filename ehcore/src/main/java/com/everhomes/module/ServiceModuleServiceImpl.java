@@ -132,9 +132,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 return null;
             }
         });
-        return list.stream().map(r -> {
+        ListServiceModulesResponse res = new ListServiceModulesResponse();
+        res.setNextPageAnchor(locator.getAnchor());
+        res.setDtos(list.stream().map(r -> {
             return processServiceModuleDTO(r);
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList()));
+
+        return res;
     }
 
     private ServiceModuleDTO processServiceModuleDTO(ServiceModule module){

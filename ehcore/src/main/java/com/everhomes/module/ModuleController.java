@@ -222,7 +222,7 @@ public class ModuleController extends ControllerBase {
      * </p>
      */
     @RequestMapping("listAllServiceModules")
-    @RestReturn(value = ServiceModuleDTO.class, collection = true)
+    @RestReturn(value = ListServiceModulesResponse.class, collection = true)
     public RestResponse listAllServiceModules(@Valid ListServiceModulesCommand cmd) {
         return new RestResponse(serviceModuleService.listAllServiceModules(cmd));
     }
