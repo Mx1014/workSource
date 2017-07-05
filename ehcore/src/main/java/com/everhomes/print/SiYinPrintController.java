@@ -197,7 +197,7 @@ public class SiYinPrintController extends ControllerBase {
 	  * <p>获取用户登录的URL，/print/informPrint，提供给前端生成二维码</p>
 	  */
 	 @RequestMapping("getPrintLogonUrl")
-	 @RestReturn(value=String.class)
+	 @RestReturn(value=GetPrintLogonUrlResponse.class)
 	 @RequireAuthentication(false)
 	 public RestResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
 	     RestResponse response = new RestResponse(siyinPrintService.getPrintLogonUrl(cmd));

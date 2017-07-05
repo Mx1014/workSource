@@ -294,7 +294,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	@Override
-	public String getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
+	public GetPrintLogonUrlResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
 		// TODO 再商议
 		//将identifierToken丢到redis
 		String identifierToken = UUID.randomUUID().toString();
@@ -315,7 +315,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         response.setIdentifierToken(identifierToken);
         response.setScanTimes(timeout*1000*getScale(unit)/scanTimeout);
         response.setType("pc");
-        return Base64.getEncoder().encodeToString(response.toString().getBytes());
+        response.setBase64(Base64.getEncoder().encodeToString(response.toString().getBytes()));
+        return response;
 	}
 
 	@Override
