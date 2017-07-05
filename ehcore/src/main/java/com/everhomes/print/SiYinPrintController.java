@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.print;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -201,8 +200,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=String.class)
 	 @RequireAuthentication(false)
 	 public RestResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
-		 GetPrintLogonUrlResponse res = siyinPrintService.getPrintLogonUrl(cmd);
-	     RestResponse response = new RestResponse(Base64.getEncoder().encodeToString(res.toString().getBytes()));
+	     RestResponse response = new RestResponse(siyinPrintService.getPrintLogonUrl(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -215,7 +213,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("logonPrint")
 	 @RestReturn(value=String.class)
 	 @RequireAuthentication(false)
-	 public  DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
+	 public  DeferredResult<RestResponse> logonPrint(@RequestParam(value="identifierToken", required=true)String identifierToken) {
 //	 public RestResponse logonPrint(LogonPrintCommand cmd) {
 		
 //	     RestResponse response = new RestResponse(siyinPrintService.logonPrint(cmd));
@@ -224,7 +222,7 @@ public class SiYinPrintController extends ControllerBase {
 //	     DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
 //	     deferredResult.setResult(response);
 //	     return response;
-	     return siyinPrintService.logonPrint(cmd);
+	     return siyinPrintService.logonPrint(identifierToken);
 	 }
 	 
 	 /**

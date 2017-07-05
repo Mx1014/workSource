@@ -7,6 +7,7 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
@@ -75,10 +75,8 @@ import com.everhomes.rest.print.ListPrintUserOrganizationsCommand;
 import com.everhomes.rest.print.ListPrintUserOrganizationsResponse;
 import com.everhomes.rest.print.ListPrintingJobsCommand;
 import com.everhomes.rest.print.ListPrintingJobsResponse;
-import com.everhomes.rest.print.LogonPrintCommand;
 import com.everhomes.rest.print.PayPrintOrderCommand;
 import com.everhomes.rest.print.PrintErrorCode;
-import com.everhomes.rest.print.PrintImmediatelyCommand;
 import com.everhomes.rest.print.PrintJobTypeType;
 import com.everhomes.rest.print.PrintLogonStatusType;
 import com.everhomes.rest.print.PrintOrderDTO;
@@ -97,14 +95,11 @@ import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.xml.XMLToJSON;
-
-import sun.misc.BASE64Decoder;
 /**
  * 
  *  @author:dengs 2017年6月22日
@@ -299,7 +294,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	@Override
-	public GetPrintLogonUrlResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
+	public String getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
 		// TODO 再商议
 		//将identifierToken丢到redis
 		String identifierToken = UUID.randomUUID().toString();
@@ -320,23 +315,23 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         response.setIdentifierToken(identifierToken);
         response.setScanTimes(timeout*1000*getScale(unit)/scanTimeout);
         response.setType("pc");
-        return response;
+        return Base64.getEncoder().encodeToString(response.toString().getBytes());
 	}
 
 	@Override
-	public DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
+	public DeferredResult<RestResponse> logonPrint(String identifierToken) {
 		// TODO 
 		//不知道这里对不对
 		DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
 		RestResponse response =  new RestResponse();
 		String subject = PRINT_SUBJECT;
 		int scanTimeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_LOGON_SCAN_TIMOUT, 10000);
-		localBusSubscriberBuilder.build(subject + "." + cmd.getIdentifierToken(), new LocalBusOneshotSubscriber() {
+		localBusSubscriberBuilder.build(subject + "." + identifierToken, new LocalBusOneshotSubscriber() {
 		    @Override
 		    public Action onLocalBusMessage(Object sender, String subject,
 		                                    Object logonResponse, String path) {
 		        //这里可以清掉redis的uid
-		    	String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken();
+		    	String key = REDIS_PRINT_IDENTIFIER_TOKEN + identifierToken;
 		    	deleteValueOperations(key);
 		    	
 //		    	ValueOperations<String, String> valueOperations = getValueOperations(key);
@@ -362,6 +357,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public InformPrintResponse informPrint(InformPrintCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		if(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode() == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
+		}
 		
 		//验证redis中存的identifierToken
         String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken();
@@ -393,7 +391,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
             }
         });
        
-        return new InformPrintResponse(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
+        return new InformPrintResponse(PrintLogonStatusType.LOGON_SUCCESS.getCode());
     
 	}
 

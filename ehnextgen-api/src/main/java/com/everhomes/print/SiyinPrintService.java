@@ -55,9 +55,9 @@ public interface SiyinPrintService {
 
 	GetPrintUserEmailResponse getPrintUserEmail(GetPrintUserEmailCommand cmd);
 
-	GetPrintLogonUrlResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd);
+	String getPrintLogonUrl(GetPrintLogonUrlCommand cmd);
 
-	DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd);
+	DeferredResult<RestResponse> logonPrint(String identifierToken);
 
 	InformPrintResponse informPrint(InformPrintCommand cmd);
 
