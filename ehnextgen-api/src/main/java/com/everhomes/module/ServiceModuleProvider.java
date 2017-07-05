@@ -3,6 +3,8 @@ package com.everhomes.module;
 
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import org.jooq.Condition;
 
 public interface ServiceModuleProvider {
@@ -67,5 +69,7 @@ public interface ServiceModuleProvider {
     void deleteServiceModuleById(Long id);
 
     List<ServiceModule> listServiceModule();
+
+    List<ServiceModule> listServiceModule(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
 }

@@ -24,6 +24,10 @@ public class ListServiceModulesCommand {
 
 	private Long parentId;
 
+	private Integer pageSize;
+
+	private Long pageAnchor;
+
 	public Long getParentId() {
 		return parentId;
 	}
@@ -67,5 +71,21 @@ public class ListServiceModulesCommand {
 
 	public void setType(Byte type) {
 		this.type = type;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 }

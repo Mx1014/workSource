@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.acl.AuthorizationRelation;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.Condition;
@@ -358,6 +360,32 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             results.add(ConvertHelper.convert(r, ServiceModule.class));
             return null;
         });
+        return results;
+    }
+
+    @Override
+    public List<ServiceModule> listServiceModule(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback){
+        List<ServiceModule> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+        SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+
+        if(null != queryBuilderCallback)
+            queryBuilderCallback.buildCondition(locator, query);
+        if(null != locator && null != locator.getAnchor())
+            query.addConditions(Tables.EH_SERVICE_MODULES.ID.lt(locator.getAnchor()));
+        query.addOrderBy(Tables.EH_SERVICE_MODULES.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModule.class));
+            return null;
+        });
+        if(null!= locator)
+            locator.setAnchor(null);
+
+        if(results.size() >= pageSize){
+            results.remove(results.size() - 1);
+            locator.setAnchor(results.get(results.size() - 1).getId());
+        }
         return results;
     }
 

@@ -6,8 +6,12 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
@@ -18,6 +22,8 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -28,6 +34,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +76,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
 
     @Override
     public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
@@ -101,14 +112,26 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     @Override
-    public List<ServiceModuleDTO> listAllServiceModules(ListServiceModulesCommand cmd){
-        List<ServiceModule> list = null;
-        if(null != cmd.getParentId()){
-            ServiceModule serviceModule = checkServiceModule(cmd.getParentId());
-            list = serviceModuleProvider.listServiceModule(serviceModule.getPath() + "/%");
-        }else{
-            list = serviceModuleProvider.listServiceModule();
-        }
+    public ListServiceModulesResponse listAllServiceModules(ListServiceModulesCommand cmd){
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<ServiceModule> list = serviceModuleProvider.listServiceModule(locator, pageSize, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                String path = null;
+                if(null != cmd.getParentId()){
+                    ServiceModule serviceModule = checkServiceModule(cmd.getParentId());
+                    path = serviceModule.getPath() + "/%";
+                }
+                query.addConditions(Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode()));
+                if(!StringUtils.isEmpty(path)){
+                    query.addConditions(Tables.EH_SERVICE_MODULES.PATH.like(path));
+
+                }
+                return null;
+            }
+        });
         return list.stream().map(r -> {
             return processServiceModuleDTO(r);
         }).collect(Collectors.toList());
