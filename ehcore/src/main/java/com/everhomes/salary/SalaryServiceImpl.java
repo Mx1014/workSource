@@ -1079,8 +1079,9 @@ public class SalaryServiceImpl implements SalaryService {
 			// 2.循环薪酬组取里面的人员
 			List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryOrg.getId());
             List<UniongroupMemberDetailsDTO> members = uniongroupService.listUniongroupMemberDetailsByGroupId(salaryOrg.getId());
-            if(null == members)
-                throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,SalaryConstants.ERROR_SALARY_GROUP_STATUS,"salaryOrg no members :"+ salaryOrg);
+            if(null == members) {
+                LOGGER.error("salaryOrg no members :" + salaryOrg);
+            }
             List<Long> userIds = members.stream().map(r->{
                 return r.getTargetId();
             }).collect(Collectors.toList());
