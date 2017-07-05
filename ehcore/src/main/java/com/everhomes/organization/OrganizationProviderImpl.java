@@ -4689,9 +4689,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public Integer countOrganizationMemberDetailsByOrgId(Integer namespaceId, Long organizationId) {
+		Organization org = this.findOrganizationById(organizationId);
+		if(org == null){
+			LOGGER.error("org is not matched, orgId={},", organizationId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"org is not matched");
+		}
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId);
-		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-		return context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchCount();
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath()+"%"));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.INACTIVE.getCode()));
+		return context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).groupBy(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).fetchCount();
 	}
 }
