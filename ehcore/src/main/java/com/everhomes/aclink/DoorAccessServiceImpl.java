@@ -1829,6 +1829,25 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return profile.getItemValue();
     }
     
+    private void updateLinglingExtraStorey(DoorLinglingExtraKeyDTO extra) {
+        for(Long storey : extra.getStoreyAuthList()) {
+            DoorLinglingAuthStoreyInfo info = new DoorLinglingAuthStoreyInfo();
+            info.setStorey(storey);
+            if(storey.equals(44l)) {
+                info.setDisplayName("45A");
+            } else if(storey.equals(57l)) {
+                info.setDisplayName("56A");
+            } else if(storey.equals(58l)) {
+                info.setDisplayName("56B");
+            } else if(storey.equals(59l)) {
+                info.setDisplayName("57");
+            } else if(storey.equals(60l)) {
+                info.setDisplayName("58");
+            }
+            
+        }
+    }
+    
     private void doLinglingQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         List<String> hardwares = new ArrayList<String>();
@@ -1946,6 +1965,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
                 extra.setAuthStorey(storeyAuthList.get(0));
                 extra.setStoreyAuthList(storeyAuthList);
+                updateLinglingExtraStorey(extra);
             }
         } catch(Exception ex) {
             LOGGER.error("storeyAuth failed", ex);
@@ -3696,7 +3716,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         String[] propertyNames = {"nickName", "phone", "organization", "goDoor", "description", "availableTime", "approveUserName", "authTime"};
         String[] titleNames = {"姓名", "手机号", "来访单位", "所去楼层", "来访事由", "有效期", "授权人", "授权时间"};
         int[] columnSizes = {20, 20, 20, 20, 20, 20, 20, 20};
-        String fileName = String.format("访客授权_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        String fileName = String.format("visitor_auth_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
         ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, "访客授权");
         excelUtils.writeExcel(propertyNames, titleNames, columnSizes, voList);
     }
