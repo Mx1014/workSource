@@ -3791,6 +3791,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public void deletePunchRule(DeleteCommonCommand cmd) {
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		List<PunchRuleOwnerMap> punchRuleMaps = this.punchProvider.queryPunchRuleOwnerMapsByRuleId(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getId());
 		if(null == punchRuleMaps){
 			//验证是否有这个权限删除这个owner的rule
@@ -3816,6 +3817,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public ListPunchRulesResponse listPunchRules(ListPunchRulesCommonCommand cmd) {
 		ListPunchRulesResponse response = new ListPunchRulesResponse();
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -3858,6 +3860,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid owner type or  Id parameter in the command");
 		}
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		if (null == cmd.getTargetId() ||null == cmd.getTargetType()) {
 			LOGGER.error("Invalid owner type or  Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3887,6 +3890,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public ListPunchRuleMapsResponse listPunchRuleMaps(ListPunchRuleMapsCommand cmd) {
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		ListPunchRuleMapsResponse response = new ListPunchRuleMapsResponse();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(0L);
