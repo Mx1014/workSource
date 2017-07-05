@@ -296,6 +296,7 @@ public class SalaryServiceImpl implements SalaryService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         ListSalaryGroupResponse response = new ListSalaryGroupResponse();
+        List<SalaryGroupListDTO> results = new ArrayList<>();
 
         //  获取所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
@@ -303,30 +304,32 @@ public class SalaryServiceImpl implements SalaryService {
         //  获取公司总人数
         Integer totalCount = this.organizationProvider.countOrganizationMemberDetailsByOrgId(namespaceId, cmd.getOwnerId());
 
+        //  关联人数
+        Integer relevantCount = 0;
+
         //  拼接关联人数
-        response.setSalaryGroupList(organizations.stream().map(p -> {
+        for(int i=0; i<organizations.size();i++){
+
             SalaryGroupListDTO dto = new SalaryGroupListDTO();
-            dto.setSalaryGroupId(p.getId());
-            dto.setSalaryGroupName(p.getName());
+            dto.setSalaryGroupId(organizations.get(i).getId());
+            dto.setSalaryGroupName(organizations.get(i).getName());
             ListUniongroupMemberDetailsCommand command = new ListUniongroupMemberDetailsCommand();
-            command.setGroupId(p.getId());
+            command.setGroupId(organizations.get(i).getId());
             command.setOwnerId(cmd.getOwnerId());
             command.setOwnerType(cmd.getOwnerType());
             List<UniongroupMemberDetailsDTO> lists = this.uniongroupService.listUniongroupMemberDetailsByGroupId(command);
-            if (!StringUtils.isEmpty(lists))
+            if (!StringUtils.isEmpty(lists)){
                 dto.setRelevantNum(lists.size());
-            return dto;
-        }).collect(Collectors.toList()));
+                relevantCount += lists.size();
+            }
+            results.add(dto);
+        }
 
+        response.setSalaryGroupList(results);
+        response.setTotalCount(totalCount);
+        response.setRelevantCount(relevantCount);
+        response.setIrrelevantCount(totalCount - relevantCount);
 
-        //  查询相关人数
-/*	    List<Long> salaryGroupIds = new ArrayList<>();
-        organizations.forEach(r ->{
-	        Long salaryGroupId = r.getId();
-            salaryGroupIds.add(salaryGroupId);
-        });
-	    List<Object[]> lists = this.salaryEmployeeOriginValProvider.getRelevantNumbersByGroupId(salaryGroupIds);
-*/
         return response;
     }
 
@@ -479,7 +482,7 @@ public class SalaryServiceImpl implements SalaryService {
         List<UniongroupTarget> targets = new ArrayList<>();
 
         //  1.将部门 id 传入targets
-        if(!cmd.getDepartmentIds().isEmpty()){
+        if(!StringUtils.isEmpty(cmd.getDepartmentIds())){
             cmd.getDepartmentIds().forEach(r ->{
                 UniongroupTarget target = new UniongroupTarget();
                 target.setId(r);
@@ -489,7 +492,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
 
         //  2.将选择的人员的 detailId 传入 targets
-        if(!cmd.getDetailIds().isEmpty()){
+        if(!StringUtils.isEmpty(cmd.getDetailIds())){
             cmd.getDetailIds().forEach(r ->{
                 UniongroupTarget target = new UniongroupTarget();
                 target.setId(r);
@@ -497,6 +500,8 @@ public class SalaryServiceImpl implements SalaryService {
                 targets.add(target);
             });
         }
+
+        command.setTargets(targets);
 
         // 3.将人员添加至组织架构的薪酬组
         this.uniongroupService.saveUniongroupConfigures(command);
