@@ -40,6 +40,15 @@ public class GetNewsDetailInfoResponse {
 	private Byte likeFlag;
 	private String newsUrl;
 	private String coverUri;
+	private Byte commentFlag;
+
+	public Byte getCommentFlag() {
+		return commentFlag;
+	}
+
+	public void setCommentFlag(Byte commentFlag) {
+		this.commentFlag = commentFlag;
+	}
 
 	public String getNewsToken() {
 		return newsToken;

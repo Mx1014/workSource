@@ -26,7 +26,9 @@ public enum NewsOwnerType {
         if(code.equalsIgnoreCase(ORGANIZATION.getCode())) {
         	return ORGANIZATION;
         }
-
+		if(code.equalsIgnoreCase(COMMUNITY.getCode())) {
+			return COMMUNITY;
+		}
         return null;
     }
 }
