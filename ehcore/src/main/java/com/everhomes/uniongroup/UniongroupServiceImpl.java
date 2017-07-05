@@ -178,6 +178,19 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
+    public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(Long groupId) {
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(groupId);
+        if (details != null) {
+            return details.stream().map(r -> {
+                return ConvertHelper.convert(r, UniongroupMemberDetailsDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
     public void deleteUniongroupConfigures(UniongroupConfigures uniongroupConfigure) {
         this.uniongroupConfigureProvider.deleteUniongroupConfigres(uniongroupConfigure);
     }

@@ -82,7 +82,7 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 	@Override
 	public List<SalaryGroupEntity> listSalaryGroupEntity() {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
-				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.ID.asc())
+				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
 	}
 
