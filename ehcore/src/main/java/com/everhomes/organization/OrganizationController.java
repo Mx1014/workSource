@@ -419,7 +419,7 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value = OrganizationSimpleDTO.class, collection = true)
     public RestResponse listUserRelatedOrganizations(@Valid ListUserRelatedOrganizationsCommand cmd) throws Exception {
 
-        List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs(cmd);
+        List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrganizations(cmd);
         RestResponse response = new RestResponse(list);
 
         response.setErrorCode(ErrorCodes.SUCCESS);
