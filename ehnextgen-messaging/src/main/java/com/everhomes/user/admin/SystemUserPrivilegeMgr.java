@@ -112,7 +112,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         if(0 < serviceModules.size()){
             //校验是否拥有模块管理权限
             ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
-            return checkModuleAdmin(ownerType, ownerId, userId, module.getParentId());
+            Long moduleId = module.getId();
+            if(module.getLevel() > 2){
+                moduleId = module.getParentId();
+            }
+            return checkModuleAdmin(ownerType, ownerId, userId, moduleId);
         }
         //校验是否拥有全部模块的管理权限
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
