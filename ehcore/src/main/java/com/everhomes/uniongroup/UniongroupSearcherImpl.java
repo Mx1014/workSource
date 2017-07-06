@@ -69,32 +69,36 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
 
     @Override
-    public void syncUniongroupDetailsIndes() {
+    public void syncUniongroupDetailsIndexs() {
         this.deleteAll();
         List<Organization> orgs = this.organizationProvider.listHeadEnterprises();
-        List<UniongroupMemberDetail> total_detals = new ArrayList<>();
         for (Organization org : orgs) {
-            List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(org.getNamespaceId(), org.getId(), null, UniongroupType.SALARYGROUP.getCode());
-            if (details != null && details.size() > 0) {
-                //查询部门和岗位和工号
-                for (UniongroupMemberDetail detail : details) {
-                    OrganizationMemberDetails member_detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detail.getDetailId());
-                    if(member_detail != null)
-                        detail.setEmployeeNo(member_detail.getEmployeeNo());
-                    Map depart_map = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(), detail.getDetailId(), OrganizationGroupType.DEPARTMENT.getCode());
-                    if (depart_map != null)
-                        detail.setDepartment(depart_map);
-                    Map jobp_map = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(), detail.getDetailId(), OrganizationGroupType.JOB_POSITION.getCode());
-                    if (jobp_map != null) {
-                        detail.setJob_position(jobp_map);
-                    }
-                }
-                this.bulkUpdate(details);
-                LOGGER.info("uniongroupDetails process count: " + total_detals.size());
-            }
+            this.syncUniongroupDetailsAtOrg(org);
         }
 /*        this.optimize(1);
         this.refresh();*/
+    }
+
+    @Override
+    public void syncUniongroupDetailsAtOrg(Organization org) {
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(org.getNamespaceId(), org.getId(), null, UniongroupType.SALARYGROUP.getCode());
+        if (details != null && details.size() > 0) {
+            //查询部门和岗位和工号
+            for (UniongroupMemberDetail detail : details) {
+                OrganizationMemberDetails member_detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detail.getDetailId());
+                if(member_detail != null)
+                    detail.setEmployeeNo(member_detail.getEmployeeNo());
+                Map depart_map = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(), detail.getDetailId(), OrganizationGroupType.DEPARTMENT.getCode());
+                if (depart_map != null)
+                    detail.setDepartment(depart_map);
+                Map jobp_map = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(), detail.getDetailId(), OrganizationGroupType.JOB_POSITION.getCode());
+                if (jobp_map != null) {
+                    detail.setJob_position(jobp_map);
+                }
+            }
+            this.bulkUpdate(details);
+            LOGGER.info("uniongroupDetails process count: " + details.size());
+        }
     }
 
 

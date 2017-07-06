@@ -86,7 +86,7 @@ public class UniongroupController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse syncUniongroupDetailsIndex() {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        uniongroupSearcher.syncUniongroupDetailsIndes();
+        uniongroupSearcher.syncUniongroupDetailsIndexs();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
