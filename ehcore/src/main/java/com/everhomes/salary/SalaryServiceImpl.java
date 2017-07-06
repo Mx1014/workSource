@@ -778,7 +778,7 @@ public class SalaryServiceImpl implements SalaryService {
 		abnormalNumber += unLinkNumber;
 		//判断2:关联了批次,但是实发工资为"-"
 		//查询eh_salary_employee_period_vals 本期 的 实发工资(entity_id=98)数据为null的记录数
-		Integer nullSalaryNumber = salaryEmployeePeriodValProvider.countSalaryEmployeePeriodsByPeriodAndEntity(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getPeriod(),SalaryConstants.ENTITY_ID_SHIFA);
+		Integer nullSalaryNumber = salaryEmployeePeriodValProvider.countSalaryEmployeePeriodsByPeriodAndEntity(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getPeriod(), SalaryConstants.ENTITY_ID_SHIFA);
 		abnormalNumber += nullSalaryNumber;
 		return new GetAbnormalEmployeeNumberResponse(abnormalNumber);
 	}
@@ -919,7 +919,7 @@ public class SalaryServiceImpl implements SalaryService {
 	public void checkPeriodSalary(CheckPeriodSalaryCommand cmd) {
 		//检验是否合算完成
 		if(salaryEmployeeProvider.countUnCheckEmployee(cmd.getSalaryPeriodGroupId())>0)
-			throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,SalaryConstants.ERROR_HAS_EMPLOYEE_UNCHECK,"there are some employee uncheck");
+			throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE, SalaryConstants.ERROR_HAS_EMPLOYEE_UNCHECK,"there are some employee uncheck");
 		
 		//将本期group置为已核算
 		SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
@@ -1206,13 +1206,34 @@ public class SalaryServiceImpl implements SalaryService {
                 val.setGroupEntityId(entity.getId());
                 val.setGroupEntityName(entity.getName());
                 val.setUserId(userId);
-                if (entity.getType().equals(SalaryEntityType.TEXT.getCode()) || entity.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
+                val.setOriginEntityId(entity.getId());
+                if (entity.getType().equals(SalaryEntityType.TEXT.getCode())) {
+                    val.setSalaryValue(processSalaryValue(entity.getOriginEntityId(),userId));
+                } else if (entity.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
                     val.setSalaryValue(entity.getDefaultValue());
                 }
                 salaryEmployeeOriginVals.add(val);
             }
         }
     }
+
+    private String processSalaryValue(Long originEntityId, Long userId) {
+        // TODO: 2017/7/6
+        if(originEntityId.equals(SalaryConstants.ENTITY_ID_GONGHAO)){
+            //TODO: 工号
+
+        }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_BUMEN)){
+            // TODO: 2017/7/6
+        }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_NAME)){
+            
+        }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_BANKNO)){
+
+        }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_SHENFENZHENG)){
+
+        }
+        return "";
+    }
+
     /**
      * 计算 period Vals 的值
      * */
