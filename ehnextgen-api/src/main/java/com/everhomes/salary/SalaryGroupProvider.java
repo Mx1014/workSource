@@ -20,4 +20,6 @@ public interface SalaryGroupProvider {
 	List<SalaryGroup> listSalaryGroup(Byte code, Timestamp date);
 
 	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
+
+	void deleteSalaryGroup(Long organizationGroupId, String salaryPeriod);
 }

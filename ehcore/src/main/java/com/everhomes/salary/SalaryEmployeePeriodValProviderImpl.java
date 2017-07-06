@@ -3,6 +3,7 @@ package com.everhomes.salary;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,5 +123,13 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 	public void deletePeriodVals(Long employeeId) {
 		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
 				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(employeeId)).execute();
+	}
+
+	@Override
+	public void createSalaryEmployeePeriodVals(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals) {
+		salaryEmployeePeriodVals.stream().map(r -> {
+			createSalaryEmployeePeriodVal(r);
+			return null;
+		});
 	}
 }

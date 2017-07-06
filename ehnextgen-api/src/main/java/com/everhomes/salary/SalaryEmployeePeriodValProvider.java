@@ -21,4 +21,6 @@ public interface SalaryEmployeePeriodValProvider {
 	void updateSalaryEmployeePeriodVal(Long salaryEmployeeId, Long groupEntryId, String salaryValue);
 
 	void deletePeriodVals(Long employeeId);
+
+	void createSalaryEmployeePeriodVals(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals);
 }

@@ -115,4 +115,11 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 				.where(Tables.EH_SALARY_GROUPS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_SALARY_GROUPS.OWNER_TYPE.eq(ownerType)).execute();
 	}
+
+	@Override
+	public void deleteSalaryGroup(Long organizationGroupId, String salaryPeriod) {
+		getReadWriteContext().delete(Tables.EH_SALARY_GROUPS)
+				.where(Tables.EH_SALARY_GROUPS.ORGANIZATION_GROUP_ID.eq(organizationGroupId))
+				.and(Tables.EH_SALARY_GROUPS.SALARY_PERIOD.eq(salaryPeriod)).execute();
+	}
 }

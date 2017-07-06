@@ -129,4 +129,13 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 		return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
 	}
+
+	@Override
+	public void deleteSalaryEmployee(Long ownerId, Long userId, Long salaryGroupId) {
+		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.USER_ID.eq(userId))
+				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
+				.and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId)).execute();
+
+	}
 }
