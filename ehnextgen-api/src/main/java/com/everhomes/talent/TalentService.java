@@ -6,6 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.rest.talent.ClearTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
+import com.everhomes.rest.talent.CreateOrUpdateRequestSettingCommand;
+import com.everhomes.rest.talent.CreateOrUpdateRequestSettingResponse;
 import com.everhomes.rest.talent.DeleteTalentCategoryCommand;
 import com.everhomes.rest.talent.DeleteTalentCommand;
 import com.everhomes.rest.talent.DeleteTalentQueryHistoryCommand;
@@ -62,5 +64,11 @@ public interface TalentService {
 
 
 	public void clearTalentQueryHistory(ClearTalentQueryHistoryCommand cmd);
+
+
+	public CreateOrUpdateRequestSettingResponse createOrUpdateRequestSetting(CreateOrUpdateRequestSettingCommand cmd);
+
+
+	public CreateOrUpdateRequestSettingResponse findRequestSetting();
 
 }

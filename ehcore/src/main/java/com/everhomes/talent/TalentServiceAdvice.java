@@ -33,6 +33,7 @@ public class TalentServiceAdvice {
     private static final List<String> enterpriseAdminAPIList = new ArrayList<>();
     
     static {
+    	// 这里的都是企业管理员有权限访问的接口，其它接口都是只有超级管理员才有权限访问
     	enterpriseAdminAPIList.add("listTalentCategory");
     	enterpriseAdminAPIList.add("listTalent");
     	enterpriseAdminAPIList.add("listTalentQueryHistory");
