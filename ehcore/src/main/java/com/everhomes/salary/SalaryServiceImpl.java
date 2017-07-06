@@ -887,11 +887,7 @@ public class SalaryServiceImpl implements SalaryService {
 			}else if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_SHIFA)) {
 				dto.setPaidMoney(new BigDecimal(r2.getSalaryValue()));
 			}
-			SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityById(r2.getGroupEntityId());
-			if (null != groupEntity.getNumberType() && groupEntity.getNumberType().equals(NormalFlag.YES.getCode())) {
-				dto2.setSalaryValue(groupEntity.getDefaultValue());
-				dto2.setIsFormula(NormalFlag.YES.getCode());
-			}
+
 			return dto2;
         }).collect(Collectors.toList()));
 		return dto;
@@ -904,6 +900,10 @@ public class SalaryServiceImpl implements SalaryService {
         if (null == entity) {
             LOGGER.error("group entity is null nameId is:"+ r.getGroupEntityName()+r.getGroupEntityId());
             return dto;
+        }
+        if (null != entity.getNumberType() && entity.getNumberType().equals(NormalFlag.YES.getCode())) {
+            dto.setSalaryValue(entity.getDefaultValue());
+            dto.setIsFormula(NormalFlag.YES.getCode());
         }
         dto.setEntityType(entity.getType());
         dto.setDefaultOrder(entity.getDefaultOrder());
