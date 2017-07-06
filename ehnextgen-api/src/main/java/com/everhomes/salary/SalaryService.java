@@ -6,6 +6,7 @@ import com.everhomes.rest.salary.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.text.ParseException;
 import java.util.List;
 
 public interface SalaryService {
@@ -83,7 +84,7 @@ public interface SalaryService {
 	public void sendPeriodSalary(SendPeriodSalaryCommand cmd);
 
 
-	void monthScheduled(String period);
+	void monthScheduled(String period) throws ParseException;
 
 	public ListSalarySendHistoryResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd);
 

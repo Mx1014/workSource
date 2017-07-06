@@ -7,7 +7,6 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.search.UniongroupSearcher;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
@@ -53,7 +52,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         if (targets != null) {
             targets.stream().map(r -> {
                 //------------------------------重复项过滤规则：后更新的规则覆盖先更新的规则------------------------------
-                UniongroupConfigures old_uc = this.uniongroupConfigureProvider.findUniongroupConfiguresByTargetId(namespaceId, r.getId());
+                UniongroupConfigures old_uc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, r.getId());
                 if (old_uc != null) {
                     this.uniongroupConfigureProvider.deleteUniongroupConfigres(old_uc);
                 }
@@ -78,7 +77,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         }).collect(Collectors.toList());
         //------------------------------包含关系过滤规则：小范围规则覆盖大范围规则------------------------------
 
-        List<Long> old_ids = this.uniongroupConfigureProvider.listOrgTargetIdsOfUniongroupConfigures(namespaceId);
+        List<Long> old_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId);
         List<Organization> old_orgs = this.organizationProvider.listOrganizationsByIds(old_ids);
 
         //获得每个org的groupPath，并找寻是否存在其子部门的记录

@@ -1,5 +1,6 @@
 package com.everhomes.search;
 
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.uniongroup.SearchUniongroupDetailCommand;
 import com.everhomes.uniongroup.UniongroupMemberDetail;
 
@@ -15,7 +16,9 @@ public interface UniongroupSearcher {
 
     void feedDoc(UniongroupMemberDetail uniongroupMemberDetail);
 
-    void syncUniongroupDetailsIndes();
+    void syncUniongroupDetailsIndexs();
+
+    void syncUniongroupDetailsAtOrg(Organization org);
 
     List query(SearchUniongroupDetailCommand cmd);
 }

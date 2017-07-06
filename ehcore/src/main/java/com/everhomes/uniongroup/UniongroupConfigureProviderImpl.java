@@ -65,11 +65,11 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public UniongroupConfigures findUniongroupConfiguresByTargetId(Integer namespaceId, Long TargetId) {
+    public UniongroupConfigures findUniongroupConfiguresByCurrentId(Integer namespaceId, Long currentId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.TARGET_ID.eq(TargetId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_ID.eq(currentId));
         EhUniongroupConfiguresRecord record = query.fetchOne();
         if (record != null) {
             return ConvertHelper.convert(record, UniongroupConfigures.class);
@@ -117,13 +117,13 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public List<Long> listOrgTargetIdsOfUniongroupConfigures(Integer namespaceId) {
+    public List<Long> listOrgCurrentIdsOfUniongroupConfigures(Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
         Result result = query.fetch();
         if (result != null) {
-            return result.getValues("target_id", Long.class);
+            return result.getValues("current_id", Long.class);
         }
         return null;
     }
