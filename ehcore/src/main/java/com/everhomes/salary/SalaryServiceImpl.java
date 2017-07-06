@@ -1225,7 +1225,7 @@ public class SalaryServiceImpl implements SalaryService {
         }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_BUMEN)){
             // TODO: 2017/7/6
         }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_NAME)){
-            
+
         }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_BANKNO)){
 
         }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_SHENFENZHENG)){
