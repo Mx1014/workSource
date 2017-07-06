@@ -358,9 +358,10 @@ public class SalaryServiceImpl implements SalaryService {
         command.setOwnerId(cmd.getOwnerId());
         if(!StringUtils.isEmpty(cmd.getDepartmentId()))
         command.setDepartmentId(cmd.getDepartmentId());
-        if(!StringUtils.isEmpty(cmd.getSalaryGroupId())){
-        command.setGroupId(cmd.getSalaryGroupId());
-        command.setGroupType(UniongroupType.SALARYGROUP.getCode());}
+        if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
+            command.setGroupId(cmd.getSalaryGroupId());
+            command.setGroupType(UniongroupType.SALARYGROUP.getCode());
+        }
         if(!StringUtils.isEmpty(cmd.getKeywords()))
         command.setKeywords(cmd.getKeywords());
         command.setPageAnchor(cmd.getPageAnchor());

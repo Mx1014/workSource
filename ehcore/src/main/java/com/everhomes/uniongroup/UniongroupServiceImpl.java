@@ -199,8 +199,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd) {
-       Integer namespaceId = UserContext.getCurrentNamespaceId();
-//        Integer namespaceId = 1000000;
+//       Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = 1000000;
 
         SearchUniongroupDetailCommand search_cmd = new SearchUniongroupDetailCommand();
         search_cmd.setNamespaceId(namespaceId);
