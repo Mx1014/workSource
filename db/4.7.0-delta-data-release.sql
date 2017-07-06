@@ -595,3 +595,5 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1), CONCAT(menu_id, '0'), `menu_name`, `owner_type`, `owner_id`, `apply_policy` FROM eh_web_menu_scopes WHERE menu_id IN (SELECT id FROM `eh_web_menus` WHERE id IN (SELECT menu_id FROM `eh_web_menu_privileges` WHERE privilege_id IN (SELECT privilege_id FROM eh_acls WHERE role_id = 1005 AND privilege_id > 10000)) OR id IN (20000,20600,20660,40000,40700,50000,60000,70000,80000));
 
+update `eh_web_menus` set status = 2 where type = 'organization';
+
