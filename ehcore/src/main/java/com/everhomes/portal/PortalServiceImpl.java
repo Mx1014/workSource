@@ -217,7 +217,11 @@ public class PortalServiceImpl implements PortalService {
 		portalItem.setGroupName(portalItemGroup.getName());
 		portalItem.setItemLocation("/" + portalItem.getGroupName());
 		portalItemProvider.createPortalItem(portalItem);
-		cmd.getScopes()
+		if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
+			for (PortalScope portalScope: cmd.getScopes() ) {
+
+			}
+		}
 		return portalItem;
 
 	}
@@ -236,7 +240,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	private PortalItem checkPortalItem(Long id){
-		PortalItem portalItem = portalItemProvider.findPortalItemById(id)
+		PortalItem portalItem = portalItemProvider.findPortalItemById(id);
 		if(null != portalItem){
 			LOGGER.error("Unable to find the portalItem.id = {}", id);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
