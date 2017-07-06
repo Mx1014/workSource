@@ -2541,7 +2541,7 @@ public class QualityProviderImpl implements QualityProvider {
 		QualityInspectionSampleScoreStat stat = context.select()
 				.from(Tables.EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT)
 				.where(Tables.EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT.SAMPLE_ID.eq(sampleId))
-				.fetchOneInto(QualityInspectionSampleScoreStat.class);
+				.fetchAnyInto(QualityInspectionSampleScoreStat.class);
 
 		return stat;
 	}
