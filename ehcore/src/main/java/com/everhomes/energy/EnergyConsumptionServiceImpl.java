@@ -15,18 +15,15 @@ import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.appurl.AppUrlDTO;
-import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.energy.*;
-import com.everhomes.rest.equipment.EquipmentsDTO;
-import com.everhomes.rest.equipment.QRCodeFlag;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
@@ -35,7 +32,6 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
-import com.everhomes.user.OSType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -189,6 +185,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
 //    @Override
 //    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
@@ -2531,11 +2530,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
 
-        ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
-        listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
-        listUserRelatedProjectByModuleIdCommand.setModuleId(49100L);
+        ListUserRelatedProjectByModuleCommand listUserRelatedProjectByModuleCommand = new ListUserRelatedProjectByModuleCommand();
+        listUserRelatedProjectByModuleCommand.setOrganizationId(cmd.getOrganizationId());
+        listUserRelatedProjectByModuleCommand.setModuleId(49100L);
 
-        List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
+        List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(listUserRelatedProjectByModuleCommand);
 
         if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
             SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");

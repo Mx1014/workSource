@@ -165,4 +165,6 @@ public interface UserService {
      * @return
      */
     MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
+
+    SearchUsersResponse searchUsers(SearchUsersCommand cmd);
 }

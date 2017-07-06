@@ -5,11 +5,12 @@ package com.everhomes.rest.acl;
  * <ul>
  * <li>ZUOLIN: 左邻web系统菜单</li>
  * <li>PARK: 园区web系统菜单</li>
+ * <li>ORGANIZATION: 企业web系统菜单</li>
  * </ul>
  */
 public enum WebMenuType {
 	
-    ZUOLIN("zuolin"), PARK("park");
+    ZUOLIN("zuolin"), PARK("park"), ORGANIZATION("organization");
     
     private String code;
     private WebMenuType(String code) {

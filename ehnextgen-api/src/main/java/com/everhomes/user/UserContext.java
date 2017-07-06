@@ -2,6 +2,7 @@
 package com.everhomes.user;
 
 import com.everhomes.app.App;
+import com.everhomes.domain.Domain;
 import com.everhomes.namespace.Namespace;
 
 public class UserContext {
@@ -14,7 +15,8 @@ public class UserContext {
     private String version;
     private String versionRealm;
     private String scheme;
-    
+    private Domain domain;
+
     public UserContext() {
     }
     
@@ -130,5 +132,13 @@ public class UserContext {
 
     public void setScheme(String scheme) {
         this.scheme = scheme;
+    }
+
+    public Domain getDomain() {
+        return domain;
+    }
+
+    public void setDomain(Domain domain) {
+        this.domain = domain;
     }
 }

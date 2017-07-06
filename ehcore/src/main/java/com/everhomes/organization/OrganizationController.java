@@ -419,7 +419,7 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value = OrganizationSimpleDTO.class, collection = true)
     public RestResponse listUserRelatedOrganizations(@Valid ListUserRelatedOrganizationsCommand cmd) throws Exception {
 
-        List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs(cmd);
+        List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrganizations(cmd);
         RestResponse response = new RestResponse(list);
 
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -604,7 +604,20 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    //8. 报修贴修改状态
+	/**
+	 * <b>URL: /org/listAllPmOrganizations</b>
+	 * <p>查询 所有域空间物业管理公司</p>
+	 */
+	@RequestMapping("listAllPmOrganizations")
+	@RestReturn(value=OrganizationTreeDTO.class, collection = true)
+	public RestResponse listAllPmOrganizations(){
+		//TODO:加权限校验
+		RestResponse res = new RestResponse(organizationService.listAllPmOrganizations());
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
 
     /**
      * <b>URL: /org/setOrgTopicStatus</b>
