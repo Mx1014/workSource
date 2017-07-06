@@ -249,7 +249,9 @@ public class ParkingServiceImpl implements ParkingService {
 				dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 
 			}else {
+        		LOGGER.info("parking enabled flow, flow={}", flow);
 				Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
+				LOGGER.info("parking main flow, flow={}", mainFlow);
 				if (null != mainFlow) {
 					if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
 						dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
