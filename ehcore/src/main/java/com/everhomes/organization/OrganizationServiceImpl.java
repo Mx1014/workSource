@@ -4950,7 +4950,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setApplyDescription(cmd.getContactDescription());
 
             /**创建企业级的member/detail/user_organiztion记录**/
-            createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
+            OrganizationMember tempMember = createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
+            member.setId(tempMember.getId());
 
             return member;
         });
@@ -9716,6 +9717,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             String address = configProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.address", "smtp.mxhichina.com");
             String passwod = configProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.passwod", "abc123!@#");
             int port = configProvider.getIntValue(UserContext.getCurrentNamespaceId(), "mail.smtp.port", 25);
+            LOGGER.debug("\n mail text : " + mailText);
 //			new Mailer(address, port , account , passwod).sendMail(email);
             //另一种发送方式
             String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
@@ -12260,7 +12262,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMember.setOrganizationId(hiddenDirectId);
             organizationMember.setDetailId(new_detail_id);
             organizationProvider.createOrganizationMember(organizationMember);
-            _organizationMember.setId(organizationMember.getId());// add by xq.tian 2017/07/05
         }
         return organizationMember;// add by xq.tian 2017/07/05
     }
