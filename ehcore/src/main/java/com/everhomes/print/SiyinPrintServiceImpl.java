@@ -437,7 +437,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			response.setNextPageAnchor(printOrdersList.get(printOrdersList.size()-1).getId());
 			printOrdersList.remove(printOrdersList.size()-1);
 		}
-		response.setPrintOrdersList(printOrdersList.stream().map(r->ConvertHelper.convert(r, PrintOrderDTO.class)).collect(Collectors.toList()));
+		response.setPrintOrdersList(printOrdersList.stream().map(r->{
+			PrintOrderDTO dto = ConvertHelper.convert(r, PrintOrderDTO.class);
+			dto.setOrderTotalAmount(r.getOrderTotalFee());
+			return dto;
+		}).collect(Collectors.toList()));
 		return response;
 	}
 
