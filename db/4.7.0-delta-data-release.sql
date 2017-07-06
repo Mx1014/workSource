@@ -611,4 +611,5 @@ delete from `eh_web_menu_scopes` where menu_id in (select id from `eh_web_menus`
 
 delete from `eh_web_menu_scopes` where menu_id in (80000);
 
-
+update `eh_web_menus` set `status` = 2 where id = 49100;
+update `eh_web_menus` set `status` = 2 where path like '/20000/49100/%';

@@ -6624,22 +6624,23 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setTargetType(OrganizationMemberTargetType.USER.getCode());
             organizationProvider.updateOrganizationMember(member);
 
-            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
-            detail.setTargetId(member.getTargetId());
-            detail.setTargetType(member.getTargetType());
-            organizationProvider.updateOrganizationMemberDetails(detail,detail.getId());
+            if(null != member.getDetailId()){
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+                detail.setTargetId(member.getTargetId());
+                detail.setTargetType(member.getTargetType());
+                organizationProvider.updateOrganizationMemberDetails(detail,detail.getId());
 
-            User user = userProvider.findUserById(member.getTargetId());
-            user.setNickName(detail.getContactName());
-            if (StringUtils.isEmpty(user.getAvatar())) {
-                user.setAvatar(detail.getAvatar());
+                User user = userProvider.findUserById(member.getTargetId());
+                user.setNickName(detail.getContactName());
+                if (StringUtils.isEmpty(user.getAvatar())) {
+                    user.setAvatar(detail.getAvatar());
+                }
+                if (StringUtils.isEmpty(user.getAvatar())) {
+                    user.setAvatar(configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "user.avatar.undisclosured.url", ""));
+                }
+
+                userProvider.updateUser(user);
             }
-
-            if (StringUtils.isEmpty(user.getAvatar())) {
-                user.setAvatar(configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "user.avatar.undisclosured.url", ""));
-            }
-
-            userProvider.updateUser(user);
             return null;
         });
     }
@@ -10902,7 +10903,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setGender(member.getGender());
             detail.setEmployeeType(member.getEmployeeType());
             detail.setEmployeeNo(member.getEmployeeNo() != null ? member.getEmployeeNo() : "");
-            detail.setCheckInTime(detail.getCheckInTime());
+            detail.setCheckInTime(member.getCheckInTime());
         }
         return detail;
     }
