@@ -540,4 +540,6 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10005', 'zh_CN', '网络通讯失败，充值出错');
 UPDATE eh_parking_recharge_orders set status = 3 where recharge_status = 2;
 
-
+-- 不给单独授权的module状态置0 add by xiongying20170706
+update eh_service_modules set status = 0 where name = '巡检项资料库管理';
+update eh_service_modules set status = 0 where name = '巡检项设置';
