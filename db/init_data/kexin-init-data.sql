@@ -1574,3 +1574,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- 服务联盟一级分类 办事指南改为园区办事，by dengs,20170706
 update eh_service_alliance_categories SET `name`='园区办事' WHERE id=155 AND namespace_id='999983';
 update eh_service_alliance_categories SET `path`='园区办事/办事指南' WHERE id=73 AND namespace_id='999983';
+
+-- 物业报修，改投诉建议  by dengs,20170706
+update eh_service_alliance_jump_module SET module_name = '投诉建议',module_url='zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=投诉建议'
+where namespace_id='999983' AND module_name='物业报修';
