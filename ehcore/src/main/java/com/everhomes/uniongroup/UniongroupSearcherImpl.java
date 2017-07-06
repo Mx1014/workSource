@@ -112,8 +112,9 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         if (cmd.getGroupId() != null && cmd.getGroupId() != 0L) {
             bqb = bqb.must(QueryBuilders.termQuery("groupId", cmd.getGroupId()));
         }
-        if (cmd.getKeyword() != null &&!cmd.getKeyword().isEmpty()){
-            bqb = bqb.must(QueryBuilders.matchQuery("contactName", cmd.getKeyword()));
+        if (cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()){
+            bqb = bqb.should(QueryBuilders.matchQuery("contactName", cmd.getKeyword()));
+            bqb = bqb.should(QueryBuilders.matchQuery("employeeNo", cmd.getKeyword())).minimumNumberShouldMatch(1);
         }
 
         builder.setFrom(cmd.getPageAnchor().intValue() * cmd.getPageSize()).setSize(cmd.getPageSize() + 1);
