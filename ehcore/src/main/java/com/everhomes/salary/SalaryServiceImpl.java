@@ -1114,7 +1114,7 @@ public class SalaryServiceImpl implements SalaryService {
             calendar.set(Calendar.MONTH,-1);
             lastPeriod =  monthSF.get().format(calendar.getTime());
         } catch (ParseException e) {
-            e.printStackTrace();
+            LOGGER.error("parse exception ",e);
         }
 
         // : 1.获取所有的薪酬组
