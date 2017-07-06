@@ -424,15 +424,21 @@ public class NewsServiceImpl implements NewsService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
-		return searchNews(userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), pageAnchor, pageSize);
+		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
+
+		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
+			return searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), pageAnchor, pageSize);
+
+		}else {
+			return searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), pageAnchor, pageSize);
+		}
 	}
  
 	/**
 	 * 拼接搜索串的部分移出来并增加highlight部分，以便后续处理
 	 * xiongying
 	 */
-	private String getSearchJson(Long userId, Integer namespaceId, Long categoryId, String keyword, Long pageAnchor,
- 
+	private String getSearchJson(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword, Long pageAnchor,
 			Integer pageSize) {
 		Long from = pageAnchor * pageSize;
 
@@ -459,7 +465,10 @@ public class NewsServiceImpl implements NewsService {
 				.getJSONObject("bool").getJSONArray("must");
 		must.add(JSONObject.parse("{\"term\":{\"namespaceId\":" + namespaceId + "}}"));
 		must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.ACTIVE.getCode() + "}}"));
- 
+		if (null != communityId) {
+			must.add(JSONObject.parse("{\"term\":{\"communityIds\":" + communityId + "}}"));
+		}
+
 		//设置过滤条件
 		if(null != categoryId){
 			must.add(JSONObject.parse("{ \"term\": { \"categoryId\": "+categoryId+"}} "));
@@ -470,14 +479,14 @@ public class NewsServiceImpl implements NewsService {
 	}
 	
 
-	private SearchNewsResponse searchNews(Long userId, Integer namespaceId, Long categoryId, String keyword, Long pageAnchor,
+	private SearchNewsResponse searchNews(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword, Long pageAnchor,
 			Integer pageSize) {
 		
 
-		String jsonString = getSearchJson(userId, namespaceId,categoryId, keyword, pageAnchor, pageSize);
+		String jsonString = getSearchJson(communityId, userId, namespaceId,categoryId, keyword, pageAnchor, pageSize);
  
 		// 需要查询的字段
-		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
+		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds";
 
 		// 从es查询
 		JSONArray result = searchProvider.query(SearchUtils.NEWS, jsonString, fields);
@@ -488,6 +497,8 @@ public class NewsServiceImpl implements NewsService {
 			result.remove(result.size() - 1);
 			nextPageAnchor = pageAnchor + 1;
 		}
+
+		Boolean commentForbiddenFlag = newsProvider.getCommentForbiddenFlag(categoryId, namespaceId);
 
 		// 转换结果到返回值
 		List<BriefNewsDTO> list = result.stream().map(r -> {
@@ -505,6 +516,12 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setTopFlag(o.getByte("topFlag"));
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
 			newsDTO.setCategoryId(o.getLong("categoryId"));
+
+			newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
+			if (commentForbiddenFlag) {
+				newsDTO.setCommentFlag(NewsNormalFlag.DISABLED.getCode());
+			}
+
 			return newsDTO;
 		}).collect(Collectors.toList());
 
@@ -1201,7 +1218,7 @@ public class NewsServiceImpl implements NewsService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
-		String jsonString = getSearchJson(userId, namespaceId,null, cmd.getKeyword(), pageAnchor, pageSize);
+		String jsonString = getSearchJson(null, userId, namespaceId,null, cmd.getKeyword(), pageAnchor, pageSize);
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
 

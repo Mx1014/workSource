@@ -98,7 +98,7 @@ public class NewsProviderImpl implements NewsProvider {
 			cond = cond.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
 		}
 		if (communityId != null) {
-			step.leftOuterJoin(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
+			step.join(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
 			cond = cond.and(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID.eq(communityId));
 		}
 
