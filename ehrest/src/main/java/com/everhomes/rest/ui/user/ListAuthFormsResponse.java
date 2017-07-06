@@ -8,12 +8,12 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * <li>sourceDto : 表单列表，现在包括</li>
+ * <li>sourceDto : 表单列表，现在 参考 {@link com.everhomes.rest.ui.user.FormSourceDTO}</li>
  * </ul>
  *
  *  @author:dengs 2017年7月6日
  */
-public class ListAuthFormResponse {
+public class ListAuthFormsResponse {
 	
 	@ItemType(FormSourceDTO.class)
 	List<FormSourceDTO> sourceDto;

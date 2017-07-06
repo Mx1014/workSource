@@ -166,5 +166,5 @@ public interface UserService {
      */
     MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
     
-	ListAuthFormResponse listAuthForm();
+	ListAuthFormsResponse listAuthForms();
 }

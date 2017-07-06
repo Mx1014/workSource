@@ -41,7 +41,7 @@ import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.ui.user.ListAuthFormResponse;
+import com.everhomes.rest.ui.user.ListAuthFormsResponse;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
@@ -299,13 +299,13 @@ public class UserUiController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /ui/user/getAuthFormSource</b>
+	 * <b>URL: /ui/user/listAuthForms</b>
 	 * <p>获取张江高科的家庭认证和公司认证的sourceType,sourceId</p>
 	 */
-	@RequestMapping("getAuthFormSource")
-	@RestReturn(value=ListAuthFormResponse.class)
+	@RequestMapping("listAuthForms")
+	@RestReturn(value=ListAuthFormsResponse.class)
 	public RestResponse listAuthForm() {
-		ListAuthFormResponse listAuthFormResponse = userService.listAuthForm();
+		ListAuthFormsResponse listAuthFormResponse = userService.listAuthForms();
 		RestResponse response = new RestResponse(listAuthFormResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
