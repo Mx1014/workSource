@@ -235,7 +235,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(organizationType != null && !"".equals(organizationType)) {
 			query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType));
 		}
-		if(name != null && !"".equals(name)) {
+		if(!StringUtils.isEmpty(name)) {
 			query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
 		}
 
@@ -248,6 +248,35 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return result;
 	}
+
+	@Override
+	public List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<Organization> result  = new ArrayList<Organization>();
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		if(!StringUtils.isEmpty(organizationType)) {
+			query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType));
+		}
+
+		if (null != parentId) {
+			query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
+		}
+		if (null != pageAnchor) {
+			query.addConditions(Tables.EH_ORGANIZATIONS.ID.gt(pageAnchor));
+		}
+
+		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.asc());
+		if (null != pageSize) {
+			query.addLimit(pageSize);
+		}
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+		return result;
+	}
+
 
 	@Override
 	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize) {
@@ -4344,7 +4373,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		EhOrganizationMemberInsurancesDao dao = new EhOrganizationMemberInsurancesDao(context.configuration());
 		dao.update(insurance);
 	}
-
     @Override
 	public 	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId){
         if(detailId == null)
@@ -4552,13 +4580,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return list;
 	}
-/**
+	/**
 	 * add by janson
 	 * @param organizationId
 	 * @param buildId
 	 * @return
 	 */
-@Override
+	@Override
 	public List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(Long organizationId, Long buildId) {
 		
 		List<OrganizationAddress> ea = new ArrayList<OrganizationAddress>();

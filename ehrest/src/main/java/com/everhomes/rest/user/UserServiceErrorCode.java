@@ -36,4 +36,6 @@ public interface UserServiceErrorCode {
     int ERROR_SMS_TOO_FREQUENT_DAY = 300003;//验证码请求过于频繁，请24小时后重试
     int ERROR_SMS_BLACK_LIST = 300004;//对不起，您的手机号在我们的黑名单列表
 
+    static final int DOMAIN_NOT_CONFIGURED = 400000;
+
 }
