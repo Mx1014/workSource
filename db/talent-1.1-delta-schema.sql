@@ -25,7 +25,7 @@ CREATE TABLE `eh_talent_requests` (
   `owner_id` BIGINT,
   `requestor` VARCHAR(64),
   `phone` VARCHAR(64),
-  `organization_name` ,
+  `organization_name` VARCHAR(128),
   `talent_id` BIGINT,
   `form_origin_id` BIGINT,
   `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
