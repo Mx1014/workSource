@@ -127,9 +127,8 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 
 	@Override
 	public void createSalaryEmployeePeriodVals(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals) {
-		salaryEmployeePeriodVals.stream().map(r -> {
+		for (SalaryEmployeePeriodVal r : salaryEmployeePeriodVals) {
 			createSalaryEmployeePeriodVal(r);
-			return null;
-		});
+		}
 	}
 }
