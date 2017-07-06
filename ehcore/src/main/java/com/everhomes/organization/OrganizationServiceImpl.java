@@ -9717,6 +9717,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             String address = configProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.address", "smtp.mxhichina.com");
             String passwod = configProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.passwod", "abc123!@#");
             int port = configProvider.getIntValue(UserContext.getCurrentNamespaceId(), "mail.smtp.port", 25);
+            LOGGER.debug("\n mail text : " + mailText);
 //			new Mailer(address, port , account , passwod).sendMail(email);
             //另一种发送方式
             String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
