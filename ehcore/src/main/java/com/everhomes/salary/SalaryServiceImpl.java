@@ -1198,7 +1198,7 @@ public class SalaryServiceImpl implements SalaryService {
      * */
     private void processSalaryEmployeeOriginValsBeforeCalculate(List<SalaryGroupEntity> salaryGroupEntities, List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals, Long userId){
         //如果这个个人没设置vals 就用批次设置的默认值
-        if(null == salaryEmployeeOriginVals){
+        if (null == salaryEmployeeOriginVals || salaryEmployeeOriginVals.size() == 0) {
             salaryEmployeeOriginVals = new ArrayList<>();
             for (SalaryGroupEntity entity : salaryGroupEntities) {
                 SalaryEmployeeOriginVal val = ConvertHelper.convert(entity, SalaryEmployeeOriginVal.class);
