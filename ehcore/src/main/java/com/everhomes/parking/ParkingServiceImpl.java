@@ -245,9 +245,17 @@ public class ParkingServiceImpl implements ParkingService {
         	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
         			FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
         	
-        	if(null == flow)
-        		dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
-        	else {
+        	if(null == flow) {
+				dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+
+			}else {
+				Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
+				if (null != mainFlow) {
+					if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
+						dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+					}
+				}
+
         		String tag1 = flow.getStringTag1();
             	Integer flowMode = Integer.valueOf(tag1);
             	dto.setFlowMode(flowMode);
@@ -1575,9 +1583,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (order.getStatus() == ParkingRechargeOrderStatus.FAILED.getCode()) {
 			//TODO:
-			order.setId(order.getId() + 1);
 			if (handler.recharge(order)) {
-				order.setId(order.getId() - 1);
 				order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
 				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 				parkingProvider.updateParkingRechargeOrder(order);
@@ -1587,7 +1593,7 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_RECHARGE_ORDER,
 				"Parking recharge failed.");
 	}
 

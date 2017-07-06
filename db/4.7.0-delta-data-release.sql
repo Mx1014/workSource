@@ -577,3 +577,21 @@ UPDATE eh_locale_templates SET TEXT = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4
 <br>
 谢谢，${appName}</p>${note}</body></html>'
 WHERE scope = 'verify.mail' AND CODE =1 ;
+
+
+
+-- 菜单整理脚本 add by sfyan 20170706
+-- 给菜单补上moduleid
+update `eh_web_menus` set module_id = SUBSTRING_INDEX(REVERSE(SUBSTRING_INDEX(path, ",", 2)), ",", 1) where path like '/20000/%' and module_id is null; 
+update `eh_web_menus` set module_id = SUBSTRING_INDEX(REVERSE(SUBSTRING_INDEX(path, ",", 2)), ",", 1) where path like '/40000/%' and module_id is null;
+
+-- 屏蔽掉物业公司不要的菜单
+UPDATE eh_web_menus SET STATUS = 0 WHERE ID IN (SELECT WW.ID FROM (SELECT ID FROM eh_web_menus WHERE ID NOT IN (select ID from `eh_web_menus` where id in (select menu_id from `eh_web_menu_privileges` where privilege_id in (select privilege_id from eh_acls where role_id = 1001 and privilege_id > 10000)) or id in (10000,20000,30000,40000,50000,40700,50000,60000,70000,80000,41200,70000))) WW)
+
+-- 新配置给普通企业的菜单
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) select concat(id,'0'),`name`, concat(`parent_id`,'0'), `icon_url`, `data_type`, `leaf_flag`, `status`, concat(right(replace(path, '/', '0/'), length(replace(path, '/', '0/')) - 1), '0'), 'organization', `sort_num`, `module_id`, `level`, `condition_type`, `category` from `eh_web_menus` where id in (select menu_id from `eh_web_menu_privileges` where privilege_id in (select privilege_id from eh_acls where role_id = 1005 and privilege_id > 10000)) or id in (20000,20600,20660,40000,40700,50000,60000,70000,80000);
+
+-- 给域空间的普通企业配置菜单
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+insert into `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) select (@menu_scope_id := @menu_scope_id + 1), concat(menu_id, '0'), `menu_name`, `owner_type`, `owner_id`, `apply_policy` from eh_web_menu_scopes where menu_id in (select id from `eh_web_menus` where id in (select menu_id from `eh_web_menu_privileges` where privilege_id in (select privilege_id from eh_acls where role_id = 1005 and privilege_id > 10000)) or id in (20000,20600,20660,40000,40700,50000,60000,70000,80000));
+
