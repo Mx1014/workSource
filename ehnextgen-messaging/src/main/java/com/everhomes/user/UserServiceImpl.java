@@ -401,7 +401,8 @@ public class UserServiceImpl implements UserService {
         Integer smsTimesPhoneForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForADay", "5"));
 
         // 老版本的客户端没有deviceId
-        boolean hasDeviceId = StringUtils.isNotBlank(deviceId);
+        // boolean hasDeviceId = StringUtils.isNotBlank(deviceId);
+        boolean hasDeviceId = false;// 客户端传来的deviceId有问题，先不校验这个
 
         // 每个手机号每天发送次数≤5
         String phoneDayKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.PHONE.name(), SmsVerify.Duration.DAY.name(), identifierToken);
