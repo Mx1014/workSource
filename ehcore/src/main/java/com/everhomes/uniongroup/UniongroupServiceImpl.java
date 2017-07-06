@@ -62,8 +62,8 @@ public class UniongroupServiceImpl implements UniongroupService {
                 uc.setEnterpriseId(cmd.getEnterpriseId());
                 uc.setGroupType(uniongroupType.getCode());
                 uc.setGroupId(cmd.getGroupId());
-                uc.setTargetType(UniongroupTargetType.fromCode(r.getType()).getCode());
-                uc.setTargetId(r.getId());
+                uc.setCurrentType(UniongroupTargetType.fromCode(r.getType()).getCode());
+                uc.setCurrentId(r.getId());
                 configureList.add(uc);
                 return null;
             }).collect(Collectors.toList());
