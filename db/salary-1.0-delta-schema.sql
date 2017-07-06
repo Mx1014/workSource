@@ -72,6 +72,7 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   `namespace_id` INT ,
   `group_id` BIGINT COMMENT '标签(统计分类) organization group表pk', 
   `user_id` BIGINT ,
+  `user_detail_id` BIGINT ,
   `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
   `group_entity_name` VARCHAR(32),  
   `origin_entity_id` BIGINT,
@@ -108,6 +109,7 @@ CREATE TABLE `eh_salary_employees` (
   `namespace_id` INT ,
   `salary_period` VARCHAR(32) COMMENT 'example:201705',
   `user_id` BIGINT ,
+  `user_detail_id` BIGINT ,
   `creator_uid` BIGINT COMMENT'人员id',
   `organization_group_id` BIGINT COMMENT '标签(统计分类) organization group表pk',  
   `salary_group_id` BIGINT COMMENT '标签(统计分类) salary group表pk',   
@@ -138,31 +140,31 @@ CREATE TABLE `eh_salary_employee_period_vals` (
 
 -- DROP TABLE IF EXISTS `eh_uniongroup_configures`;
 CREATE TABLE `eh_uniongroup_configures` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `enterprise_id` bigint(20) DEFAULT 0,
-  `group_type` varchar(32) COMMENT 'SalaryGroup,PunchGroup',
-  `group_id` bigint(20) NOT NULL COMMENT 'id of group',
-  `target_id` bigint(20) DEFAULT NULL COMMENT 'id of target, organization or memberDetail',
-  `target_type` varchar(32) COMMENT 'organziation,memberDetail',
-  `operator_uid` bigint(20),
-  `update_time` datetime,
+  `enterprise_id` BIGINT(20) DEFAULT 0,
+  `group_type` VARCHAR(32) COMMENT 'SalaryGroup,PunchGroup',
+  `group_id` BIGINT(20) NOT NULL COMMENT 'id of group',
+  `target_id` BIGINT(20) DEFAULT NULL COMMENT 'id of target, organization or memberDetail',
+  `target_type` VARCHAR(32) COMMENT 'organziation,memberDetail',
+  `operator_uid` BIGINT(20),
+  `update_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --  DROP TABLE IF EXISTS `eh_uniongroup_member_details`;
 CREATE TABLE `eh_uniongroup_member_details` (
-  `id` bigint(20) NOT NULL,
+  `id` BIGINT(20) NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `group_type` varchar(32) COMMENT 'SalaryGroup,PunchGroup',
-  `group_id` bigint(20) NOT NULL COMMENT 'id of group',
-  `detail_id` bigint(20) DEFAULT NULL COMMENT 'id of target, only memberDetail',
+  `group_type` VARCHAR(32) COMMENT 'SalaryGroup,PunchGroup',
+  `group_id` BIGINT(20) NOT NULL COMMENT 'id of group',
+  `detail_id` BIGINT(20) DEFAULT NULL COMMENT 'id of target, only memberDetail',
   `target_type` VARCHAR(64),
   `target_id` BIGINT NOT NULL,
   `enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id' ,
   `contact_name` VARCHAR(64) COMMENT 'the name of the member',
   `contact_token` VARCHAR(128) COMMENT 'phone number, reference for eh_organization_member contact_token',
-  `update_time` datetime,
-  `operator_uid` bigint(20),
+  `update_time` DATETIME,
+  `operator_uid` BIGINT(20),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
