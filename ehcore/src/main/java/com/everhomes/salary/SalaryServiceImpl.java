@@ -32,7 +32,6 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
-import org.apache.tools.ant.taskdefs.Sleep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import sun.awt.windows.ThemeReader;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -929,7 +927,8 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
 	public void setSalaryEmailContent(SetSalaryEmailContentCommand cmd) {
-		//TODO: email content 应该跟着批次走
+		//email content
+
 		if(cmd.getSalaryGroupId() == null){
 			salaryGroupProvider.updateSalaryGroupEmailContent(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEmailContent());
 		}else {
@@ -1091,9 +1090,11 @@ public class SalaryServiceImpl implements SalaryService {
 			salaryGroup.setOrganizationGroupId(salaryOrg.getId());
 			salaryGroup.setNamespaceId(salaryOrg.getNamespaceId());
 			salaryGroup.setOwnerType("organization");
+            salaryGroup.setGroupName(salaryOrg.getName());
 			salaryGroup.setOwnerId(punchService.getTopEnterpriseId(salaryOrg.getDirectlyEnterpriseId()));
 			salaryGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
-			salaryGroupProvider.createSalaryGroup(salaryGroup);
+            salaryGroupProvider.deleteSalaryGroup(salaryGroup.getOrganizationGroupId(), salaryGroup.getSalaryPeriod());
+            salaryGroupProvider.createSalaryGroup(salaryGroup);
 			// 2.循环薪酬组取里面的人员
 			List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryOrg.getId());
             List<UniongroupMemberDetailsDTO> members = uniongroupService.listUniongroupMemberDetailsByGroupId(salaryOrg.getId());
@@ -1106,7 +1107,9 @@ public class SalaryServiceImpl implements SalaryService {
             }).collect(Collectors.toList());
 			for (Long userId : userIds) {
 				SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
+                employee.setUserId(userId);
 				employee.setSalaryGroupId(salaryGroup.getId());
+                salaryEmployeeProvider.deleteSalaryEmployee(employee.getOwnerId(),employee.getUserId(),employee.getSalaryGroupId());
 				salaryEmployeeProvider.createSalaryEmployee(employee);
 				//  获取个人的项目字段
 				List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(employee.getOwnerType(), employee.getOwnerId(), userId);
@@ -1130,6 +1133,7 @@ public class SalaryServiceImpl implements SalaryService {
                     salaryEmployeePeriodVals.add(val);
                 }
 				processSalaryEmployeePeriodVals(salaryGroupEntities,salaryEmployeeOriginVals,salaryEmployeePeriodVals);
+                salaryEmployeePeriodValProvider.createSalaryEmployeePeriodVals(salaryEmployeePeriodVals);
 			}
 		}
 

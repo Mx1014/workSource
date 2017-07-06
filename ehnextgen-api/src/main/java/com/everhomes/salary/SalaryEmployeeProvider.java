@@ -22,4 +22,6 @@ public interface SalaryEmployeeProvider {
 	void updateSalaryEmployeeCheckFlag(List<Long> salaryEmployeeIds, Byte checkFlag);
 
 	List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> userIds, Byte checkFlag);
+
+	void deleteSalaryEmployee(Long ownerId, Long userId, Long salaryGroupId);
 }
