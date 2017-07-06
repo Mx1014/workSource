@@ -864,10 +864,11 @@ public class SalaryServiceImpl implements SalaryService {
 
 	private SalaryPeriodEmployeeDTO processSalaryPeriodEmployeeDTO(SalaryEmployee r) {
 		SalaryPeriodEmployeeDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeDTO.class);
-		//TODO: 列表一些字段值
-		//岗位
-
-		//批次名
+		//岗位 
+        // TODO: 2017/7/6 这里和荣男的实现重叠了,重构一下
+        SalaryEmployeeDTO detailDTO = getPersonnelInfoByUserIdForSalary(r.getUserId());
+        dto.setJobPositions(detailDTO.getJobPosition());
+        //批次名
 		Organization org = organizationProvider.findOrganizationById(r.getOrganizationGroupId());
 		dto.setSalaryGroupId(r.getOrganizationGroupId());
 		if(null != org)
@@ -1060,7 +1061,7 @@ public class SalaryServiceImpl implements SalaryService {
 			List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryGroup.getOrganizationGroupId());
 			List<SalaryEmployeePeriodVal> employeeEntityVals = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(employee.getId());
 			String entityTable = processEntityTableString(groupEntities, employeeEntityVals);
-			//TODO: 人事档案给接口
+			//TODO: 人事档案给接口 发邮件
 			String toAddress = "";
 			String emailSubject = "";
 			sendSalaryEmail(salaryGroup.getNamespaceId(),toAddress, emailSubject,salaryGroup.getEmailContent(), entityTable);
