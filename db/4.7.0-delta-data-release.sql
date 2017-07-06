@@ -543,3 +543,5 @@ UPDATE eh_parking_recharge_orders set status = 3 where recharge_status = 2;
 -- 不给单独授权的module状态置0 add by xiongying20170706
 update eh_service_modules set status = 0 where name = '巡检项资料库管理';
 update eh_service_modules set status = 0 where name = '巡检项设置';
+update eh_service_modules set status = 0 where name = '绩效考核';
+update eh_service_modules set status = 0 where name = '修改记录';
