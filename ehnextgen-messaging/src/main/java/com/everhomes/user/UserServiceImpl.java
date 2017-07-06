@@ -509,7 +509,8 @@ public class UserServiceImpl implements UserService {
         smsBlackListProvider.createSmsBlackList(blackList);
     }
 
-    private void checkSmsBlackList(String smsAction, String identifierToken) {
+    @Override
+    public void checkSmsBlackList(String smsAction, String identifierToken) {
         SmsBlackList blackList = smsBlackListProvider.findByContactToken(identifierToken);
         if (blackList != null && Objects.equals(blackList.getStatus(), SmsBlackListStatus.BLOCK.getCode())) {
             LOGGER.info("sms black list user try to send sms, smsAction = {}, contactToken = {}", smsAction, identifierToken);
