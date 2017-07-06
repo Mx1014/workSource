@@ -5,8 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.user.User;
-import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,11 +62,19 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 	
 	@Override
 	public List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long salaryId) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
-				.where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryId))
-				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
-	}
+        SelectQuery<Record> query = getReadOnlyContext().select(Tables.EH_SALARY_GROUP_ENTITIES.fields()).getQuery();
+        query.addFrom(Tables.EH_SALARY_GROUP_ENTITIES,Tables.EH_SALARY_DEFAULT_ENTITIES);
+        query.addSelect(Tables.EH_SALARY_DEFAULT_ENTITIES.DEFAULT_FLAG);
+        query.addConditions(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryId));
+        query.addConditions(Tables.EH_SALARY_GROUP_ENTITIES.ORIGIN_ENTITY_ID.eq(Tables.EH_SALARY_DEFAULT_ENTITIES.ID));
+        query.addOrderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc());
+
+/*        return query.fetch().map(r ->{
+            return  ConvertHelper.convert(r, SalaryGroupEntity.class);
+        });*/
+
+        return  query.fetchInto(SalaryGroupEntity.class);
+    }
 
 	//	按员工批次表导出规则查询
     @Override

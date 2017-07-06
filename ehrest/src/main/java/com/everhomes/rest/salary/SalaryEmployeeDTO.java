@@ -15,10 +15,12 @@ import java.util.List;
  * <li>jobPosition: 员工岗位 </li>
  * <li>salaryGroupId: 批次id</li>
  * <li>salaryGroupName: 批次名称</li>
+ * <li>idNumber: 身份证号</li>
+ * <li>salaryCardNumber: 银行卡号</li>
  * <li>isConfirmed: 工资明细:0-已设置 1-未设置</li>
  * </ul>
  */
-public class salaryEmployeeDTO {
+public class SalaryEmployeeDTO {
 
     private Long userId;
 
@@ -36,9 +38,13 @@ public class salaryEmployeeDTO {
 
     private String salaryGroupName;
 
+    private String idNumber;
+
+    private String salaryCardNumber;
+
     private Byte isConfirmed;
 
-    public salaryEmployeeDTO() {
+    public SalaryEmployeeDTO() {
     }
 
     public Long getUserId() {
@@ -103,6 +109,22 @@ public class salaryEmployeeDTO {
 
     public void setSalaryGroupName(String salaryGroupName) {
         this.salaryGroupName = salaryGroupName;
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
+    }
+
+    public String getSalaryCardNumber() {
+        return salaryCardNumber;
+    }
+
+    public void setSalaryCardNumber(String salaryCardNumber) {
+        this.salaryCardNumber = salaryCardNumber;
     }
 
     public Byte getIsConfirmed() {

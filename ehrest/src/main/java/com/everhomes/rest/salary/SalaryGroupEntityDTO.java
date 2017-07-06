@@ -5,6 +5,7 @@ package com.everhomes.rest.salary;
  * <ul> 
  * <li>id: id</li>
  * <li>groupId: 批次id</li>
+ * <li>defaultFlag: 是否为缺省参数:0-否 1-是</li>
  * <li>type: 字段类型:0-文本类 1-数值类</li>
  * <li>categoryId: 项目标签(统计分类) id</li>
  * <li>categoryName: 项目标签(统计分类)名称 example:基础,应发,应收,合计</li>
@@ -23,6 +24,7 @@ public class SalaryGroupEntityDTO {
 	private Long id;
 	private Long groupId;
 	private Long originEntityId;
+	private Byte defaultFlag;
     private Byte type;
     private Long categoryId;
     private String categoryName;
@@ -50,7 +52,15 @@ public class SalaryGroupEntityDTO {
         this.originEntityId = originEntityId;
     }
 
-    public Byte getType() {
+	public Byte getDefaultFlag() {
+		return defaultFlag;
+	}
+
+	public void setDefaultFlag(Byte defaultFlag) {
+		this.defaultFlag = defaultFlag;
+	}
+
+	public Byte getType() {
 		return type;
 	}
 	public void setType(Byte type) {

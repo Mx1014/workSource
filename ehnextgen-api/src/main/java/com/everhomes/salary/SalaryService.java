@@ -100,4 +100,8 @@ public interface SalaryService {
 	void batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd);
 
 	Object listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd);
+
+
+	//  added by R, for salaryGroup 20170706
+	SalaryEmployeeDTO getPersonnelInfoByUserIdForSalary(Long userId);
 }
