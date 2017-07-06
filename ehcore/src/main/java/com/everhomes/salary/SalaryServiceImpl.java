@@ -352,7 +352,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
-
+/*
         //  1.将前端信息传递给组织架构的接口获取相关信息
         ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
         command.setOwnerId(cmd.getOwnerId());
@@ -364,7 +364,7 @@ public class SalaryServiceImpl implements SalaryService {
         }
         if(!StringUtils.isEmpty(cmd.getKeywords()))
         command.setKeywords(cmd.getKeywords());
-        command.setPageAnchor(cmd.getPageAnchor());
+        command.setPageAnchor(Long.valueOf("0"));
         command.setPageSize(cmd.getPageSize());
 
         //  2.查询所有人员
@@ -411,11 +411,40 @@ public class SalaryServiceImpl implements SalaryService {
         command.setKeywords(cmd.getKeywords());
         command.setOrganizationId(cmd.getOrganizationId());
         command
-        List<OrganizationMember> members = this.organizationService.listOrganizationPersonnels()*/
+        List<OrganizationMember> members = this.organizationService.listOrganizationPersonnels()
         //  2.通过对实发工资的判断来拼接字符串，反映是否设置了工资明细
         //  一次性读取所有userid的实发工资值然后做拼接
 
-//        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+//        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();*/
+
+        //  1.将前端信息传递给组织架构的接口获取相关信息
+        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        command.setOrganizationId(cmd.getOwnerId());
+
+        //  2.查询所有人员
+        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
+
+        //  3.查询所有批次
+        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+
+        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+
+        if (!StringUtils.isEmpty(results)) {
+            response.setSalaryEmployeeDTO(results.getMembers().stream().map(r -> {
+                salaryEmployeeDTO dto = new salaryEmployeeDTO();
+                dto.setUserId(r.getDetailId());
+                dto.setContactName(r.getContactName());
+                dto.setSalaryGroupId(r.getGroupId());
+                //  拼接薪酬组名称
+                if (!StringUtils.isEmpty(organizations)) {
+                    organizations.forEach(s -> {
+                        if (s.getId().equals(r.getGroupId()))
+                            dto.setSalaryGroupName(s.getName());
+                    });
+                }
+                return dto;
+            }).collect(Collectors.toList()));
+        }
         return response;
     }
 
