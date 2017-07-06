@@ -9708,6 +9708,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         String mailSubject = this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
                 VerifyMailTemplateCode.SUBJECT_CODE, RentalNotificationTemplateCode.locale, "加入企业验证邮件");
         map.put("title", mailSubject);
+        LOGGER.debug("map = "+map);
 //		Email email = new EmailBuilder()
 //	    .from(appName,account)
 //	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail())
