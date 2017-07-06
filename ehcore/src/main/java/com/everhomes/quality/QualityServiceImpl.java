@@ -2717,15 +2717,15 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualitySpecificationsResponse listQualitySpecifications(
 			ListQualitySpecificationsCommand cmd) {
-		if(SpecificationInspectionType.CATEGORY.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))) {
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_LIST, 0L);
+		if(SpecificationInspectionType.SPECIFICATION.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))){
+			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_LIST, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {
 				userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 			}
-		} else if(SpecificationInspectionType.SPECIFICATION.equals(SpecificationInspectionType.fromStatus(cmd.getInspectionType()))){
-			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_LIST, 0L);
+		} else {
+			Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_LIST, 0L);
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getScopeId(), cmd.getOwnerId(), privilegeId);
 			} else {

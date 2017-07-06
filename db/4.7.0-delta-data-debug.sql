@@ -13,5 +13,5 @@ UPDATE eh_locale_templates SET TEXT = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4
 <br>
 如非本人操作，请忽略此邮件。
 <br>
-谢谢，${appName}</p>${note}</body></html>'
+谢谢，${appName}</p></body></html>'
 WHERE scope = 'verify.mail' AND CODE =1 ;

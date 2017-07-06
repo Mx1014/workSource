@@ -9704,10 +9704,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             appName = namespace.getName();
         map.put("appName", appName);
         map.put("verifyUrl", verifyUrl);
-        String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
         String mailSubject = this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
                 VerifyMailTemplateCode.SUBJECT_CODE, RentalNotificationTemplateCode.locale, "加入企业验证邮件");
-        map.put("title", mailSubject);
+        map.put("title", mailSubject);        
+        String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
+ 
+//        LOGGER.debug("\n mailText = " + mailText);
 //		Email email = new EmailBuilder()
 //	    .from(appName,account)
 //	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail())
