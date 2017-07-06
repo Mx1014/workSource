@@ -389,15 +389,15 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setSalaryGroupId(r.getGroupId());
                 if(!StringUtils.isEmpty(r.getEmployeeNo()))
                 dto.setEmployeeNo(r.getEmployeeNo());
-                for(Long k : r.getDepartment().keySet()){
-                    department += r.getDepartment().get(k);
-                }
-                for(Long k : r.getJobPosition().keySet()){
-                    jobPosition += r.getJobPosition().get(k);
-                }
-                if(!StringUtils.isEmpty(department))
+                if (!StringUtils.isEmpty(r.getDepartment()))
+                    for (Long k : r.getDepartment().keySet()) {
+                        department += r.getDepartment().get(k);
+                    }
+                if (!StringUtils.isEmpty(r.getJobPosition()))
+                    for (Long k : r.getJobPosition().keySet()) {
+                        jobPosition += r.getJobPosition().get(k);
+                    }
                 dto.setDepartment(department);
-                if(!StringUtils.isEmpty(jobPosition))
                 dto.setJobPosition(jobPosition);
                 //  拼接薪酬组名称
                 for(int i=0; i<organizations.size(); i++){

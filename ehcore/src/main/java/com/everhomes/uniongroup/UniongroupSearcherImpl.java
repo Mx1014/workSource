@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -142,7 +143,8 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             detail.setContactToken(m.get("contactToken").toString());
             SimpleDateFormat simpleDateFormat  = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             TimeZone utcZone = TimeZone.getTimeZone("UTC");
-            detail.setEmployeeNo(m.get("employeeNo").toString());
+            if (!StringUtils.isEmpty(m.get("employeeNo")))
+                detail.setEmployeeNo(m.get("employeeNo").toString());
             simpleDateFormat.setTimeZone(utcZone);
             try {
                 Date myDate = simpleDateFormat.parse(m.get("updateTime").toString());
