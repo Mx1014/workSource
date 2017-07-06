@@ -3854,4 +3854,10 @@ public class UserServiceImpl implements UserService {
 	    
 	    return resp;
 	}
+
+	@Override
+	public ListAuthFormResponse listAuthForm() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import com.everhomes.rest.organization.*;
-import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +25,10 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.family.ListNeighborUsersCommand;
 import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
 import com.everhomes.rest.family.ParamType;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
-import com.everhomes.rest.ui.user.GetUserOpPromotionCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.ui.user.ListContactBySceneRespose;
@@ -41,9 +41,10 @@ import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.user.ListUserOpPromotionsRespose;
+import com.everhomes.rest.ui.user.ListAuthFormResponse;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.WebTokenGenerator;
 
 /**
@@ -302,10 +303,10 @@ public class UserUiController extends ControllerBase {
 	 * <p>获取张江高科的家庭认证和公司认证的sourceType,sourceId</p>
 	 */
 	@RequestMapping("getAuthFormSource")
-	@RestReturn(value=listAuthFormResponse.class)
+	@RestReturn(value=ListAuthFormResponse.class)
 	public RestResponse listAuthForm() {
-		List<SceneDTO> sceneDtoList = userService.listAuthForm();
-		RestResponse response = new RestResponse(sceneDtoList);
+		ListAuthFormResponse listAuthFormResponse = userService.listAuthForm();
+		RestResponse response = new RestResponse(listAuthFormResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
