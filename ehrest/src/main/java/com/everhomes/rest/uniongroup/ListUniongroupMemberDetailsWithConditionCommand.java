@@ -11,7 +11,8 @@ public class ListUniongroupMemberDetailsWithConditionCommand {
     private Long departmentId;
     private Long groupId;
     private String groupType;
-    private Boolean allGroupFlag;
+    private Long pageAnchor;
+    private Integer pageSize;
 
     public Long getOwnerId() {
         return ownerId;
@@ -53,13 +54,22 @@ public class ListUniongroupMemberDetailsWithConditionCommand {
         this.groupType = groupType;
     }
 
-    public Boolean getAllGroupFlag() {
-        return allGroupFlag;
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setAllGroupFlag(Boolean allGroupFlag) {
-        this.allGroupFlag = allGroupFlag;
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
