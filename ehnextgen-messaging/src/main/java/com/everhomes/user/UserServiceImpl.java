@@ -400,8 +400,6 @@ public class UserServiceImpl implements UserService {
         Integer smsTimesPhoneForAnHour = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForAnHour", "3"));
         Integer smsTimesPhoneForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForADay", "5"));
 
-        // Integer smsTimesInBlackList = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.times.blacklist", "5"));
-
         // 老版本的客户端没有deviceId
         boolean hasDeviceId = StringUtils.isNotBlank(deviceId);
 
