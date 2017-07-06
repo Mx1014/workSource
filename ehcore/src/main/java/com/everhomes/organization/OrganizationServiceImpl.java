@@ -10903,7 +10903,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setGender(member.getGender());
             detail.setEmployeeType(member.getEmployeeType());
             detail.setEmployeeNo(member.getEmployeeNo() != null ? member.getEmployeeNo() : "");
-            detail.setCheckInTime(detail.getCheckInTime());
+            detail.setCheckInTime(member.getCheckInTime());
         }
         return detail;
     }
