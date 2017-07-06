@@ -93,7 +93,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
                     detail.setDepartment(depart_map);
                 Map jobp_map = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(), detail.getDetailId(), OrganizationGroupType.JOB_POSITION.getCode());
                 if (jobp_map != null) {
-                    detail.setJob_position(jobp_map);
+                    detail.setJobPosition(jobp_map);
                 }
             }
             this.bulkUpdate(details);
@@ -189,7 +189,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
                 }
                 b.endArray();
             }
-            Map<Long, String> job_position = uniongroupMemberDetail.getJob_position();
+            Map<Long, String> job_position = uniongroupMemberDetail.getJobPosition();
             if (job_position != null && job_position.size() > 0) {
                 b.startArray("job_position");
                 for (Long i : job_position.keySet()) {
