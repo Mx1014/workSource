@@ -141,6 +141,26 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             detail.setEnterpriseId(Long.valueOf(m.get("enterpriseId").toString()));
             detail.setContactName(m.get("contactName").toString());
             detail.setContactToken(m.get("contactToken").toString());
+            if (m.get("department") != null){
+                List<Map> department = (List<Map>) m.get("department");
+                Map departmentMap = new HashMap<>();
+                if(department.size() > 0){
+                    department.forEach(r ->{
+                        departmentMap.put(r.get("department_id"), r.get("department_name"));
+                    });
+                }
+                detail.setDepartment(departmentMap);
+            }
+            if (m.get("job_position") != null){
+                List<Map> jobPosition = (List<Map>) m.get("job_position");
+                Map jobPositionMap = new HashMap<>();
+                if(jobPosition.size() > 0){
+                    jobPosition.forEach(r ->{
+                        jobPositionMap.put(r.get("job_position_id"), r.get("job_position_name"));
+                    });
+                }
+                detail.setDepartment(jobPositionMap);
+            }
             SimpleDateFormat simpleDateFormat  = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             TimeZone utcZone = TimeZone.getTimeZone("UTC");
             if (!StringUtils.isEmpty(m.get("employeeNo")))
