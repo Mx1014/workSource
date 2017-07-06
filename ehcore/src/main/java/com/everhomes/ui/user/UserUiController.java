@@ -296,5 +296,19 @@ public class UserUiController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /ui/user/getAuthFormSource</b>
+	 * <p>获取张江高科的家庭认证和公司认证的sourceType,sourceId</p>
+	 */
+	@RequestMapping("getAuthFormSource")
+	@RestReturn(value=listAuthFormResponse.class)
+	public RestResponse listAuthForm() {
+		List<SceneDTO> sceneDtoList = userService.listAuthForm();
+		RestResponse response = new RestResponse(sceneDtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }
