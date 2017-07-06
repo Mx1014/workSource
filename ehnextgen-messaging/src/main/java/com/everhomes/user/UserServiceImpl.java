@@ -417,7 +417,7 @@ public class UserServiceImpl implements UserService {
             Integer t = Integer.valueOf((String) times);
             if (t >= smsTimesPhoneForADay) {
                 createSmsBlackList(smsAction, identifierToken);
-                LOGGER.error("Verification code request is too frequent, please try again after 24 hours. phone={}, times={}", identifierToken, t);
+                LOGGER.error("Verification code request is too frequent with phone, please try again after 24 hours. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
                         "Verification code request is too frequent, please try again after 24 hours");
             }
@@ -435,7 +435,7 @@ public class UserServiceImpl implements UserService {
             } else {
                 Integer t = Integer.valueOf((String) times);
                 if (t >= smsTimesDeviceForADay) {
-                    LOGGER.error("Verification code request is too frequent, please try again after 24 hours. deviceId={}, times={}", deviceId, t);
+                    LOGGER.error("Verification code request is too frequent with device, please try again after 24 hours. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
                     throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
                             "Verification code request is too frequent, please try again after 24 hours");
                 }
@@ -451,7 +451,7 @@ public class UserServiceImpl implements UserService {
         } else {
             Integer t = Integer.valueOf((String) times);
             if (t >= smsTimesPhoneForAnHour) {
-                LOGGER.error("Verification code request is too frequent, please 1 hour to try again. phone={}, times={}", identifierToken, t);
+                LOGGER.error("Verification code request is too frequent with phone, please 1 hour to try again. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
                         "Verification code request is too frequent, please 1 hour to try again");
             }
@@ -467,7 +467,7 @@ public class UserServiceImpl implements UserService {
             } else {
                 Integer t = Integer.valueOf((String) times);
                 if (t >= smsTimesDeviceForAnHour) {
-                    LOGGER.error("Verification code request is too frequent, please 1 hour to try again. deviceId={}, times={}", deviceId, t);
+                    LOGGER.error("Verification code request is too frequent with device, please 1 hour to try again. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
                     throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
                             "Verification code request is too frequent, please 1 hour to try again");
                 }
