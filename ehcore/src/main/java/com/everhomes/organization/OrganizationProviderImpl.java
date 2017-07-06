@@ -4699,4 +4699,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return true;
 	}
+
+	@Override
+	public boolean checkOneOfOrganizationWithContextToken(String path, String contactToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
+		List<EhOrganizationMembersRecord> records = query.fetch();
+		if(records != null){
+			if(records.size() > 1){
+				return true;
+			}
+		}
+		return false;
+	}
 }

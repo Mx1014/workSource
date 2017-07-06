@@ -4950,7 +4950,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setApplyDescription(cmd.getContactDescription());
 
             /**创建企业级的member/detail/user_organiztion记录**/
-            member = createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
+            OrganizationMember tempMember = createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
+            member.setId(tempMember.getId());
 
             return member;
         });
@@ -9703,9 +9704,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             appName = namespace.getName();
         map.put("appName", appName);
         map.put("verifyUrl", verifyUrl);
-        String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
         String mailSubject = this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
                 VerifyMailTemplateCode.SUBJECT_CODE, RentalNotificationTemplateCode.locale, "加入企业验证邮件");
+        map.put("title", mailSubject);        
+        String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
+ 
+        LOGGER.debug("\n mailText = " + mailText);
 //		Email email = new EmailBuilder()
 //	    .from(appName,account)
 //	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail())
@@ -9716,6 +9720,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             String address = configProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.address", "smtp.mxhichina.com");
             String passwod = configProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.passwod", "abc123!@#");
             int port = configProvider.getIntValue(UserContext.getCurrentNamespaceId(), "mail.smtp.port", 25);
+//            LOGGER.debug("\n mail text : " + mailText);
 //			new Mailer(address, port , account , passwod).sendMail(email);
             //另一种发送方式
             String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
@@ -10079,8 +10084,21 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return query;
                 }
             });
-            return members;
+            List<OrganizationMember> depart_members = new ArrayList<>();
+            for(Long orgId :organizationIds){
+                members.stream().map(r ->{
+                    Organization org = this.checkOrganization(orgId);
+                    if(org != null){
+                        if(this.organizationProvider.checkOneOfOrganizationWithContextToken(org.getPath(), r.getContactToken())){
+                            depart_members.add(r);
+                        }
+                    }
+                   return null;
+                }).collect(Collectors.toList());
+            }
+            return depart_members;
         }
+
         return new ArrayList<>();
     }
 

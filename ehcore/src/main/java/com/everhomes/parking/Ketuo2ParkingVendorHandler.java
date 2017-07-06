@@ -426,7 +426,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 
 				if(count > 1) {
 					order.setMonthCount(new BigDecimal(count -1) );
-					order.setPrice(new BigDecimal(order.getPrice().intValue()*100 - payMoney));
+					order.setPrice(new BigDecimal((order.getPrice().intValue() * 100 - payMoney) / 100));
 					if(rechargeMonthlyCard(order)) {
 						updateFlowStatus(order);
 			    		return true;
@@ -811,8 +811,9 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			calendar.setTimeInMillis(now);
 			int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 			int today = calendar.get(Calendar.DAY_OF_MONTH);
+			//科兴要求：按30天计算
 			dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
-					.add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1)).divide(new BigDecimal(maxDay), RoundingMode.HALF_EVEN)) );
+					.add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1)).divide(new BigDecimal(30), RoundingMode.HALF_EVEN)) );
 
 		}
 

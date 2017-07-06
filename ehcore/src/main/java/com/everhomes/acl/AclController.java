@@ -43,8 +43,8 @@ public class AclController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createOrganizationAdmin(@Valid CreateOrganizationAdminCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId())){
-            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.ORG_ADMIN_CREATE);
+        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
+            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_CREATE);
         }
         rolePrivilegeService.createOrganizationAdmin(cmd);
         RestResponse response =  new RestResponse();
@@ -153,8 +153,8 @@ public class AclController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse deleteOrganizationAdministrators(@Valid DeleteOrganizationAdminCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId())){
-            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.ORG_ADMIN_DELETE);
+        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
+            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_DELETE);
         }
         rolePrivilegeService.deleteOrganizationAdministrators(cmd);
         RestResponse response = new RestResponse();
@@ -218,8 +218,8 @@ public class AclController extends ControllerBase {
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId())){
-            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.ORG_ADMIN_LIST);
+        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
+            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_LIST);
         }
         RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

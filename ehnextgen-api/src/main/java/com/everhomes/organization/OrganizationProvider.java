@@ -404,5 +404,7 @@ public interface OrganizationProvider {
 
 	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
 
+	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
+
 }
 

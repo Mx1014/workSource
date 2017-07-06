@@ -38,6 +38,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.parking.ParkingCardRequest;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
@@ -1901,8 +1902,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		List<FamilyDTO> families = new ArrayList<>();
 				if(familyList != null && familyList.size() > 0) {
 					familyList.forEach(f -> {
-						if(f.getCommunityId().equals(communityId))
-							families.add(f);
+						if(GroupMemberStatus.ACTIVE.equals(f.getMembershipStatus())) {
+							if(f.getCommunityId().equals(communityId))
+								families.add(f);
+						}
+
 					});
 				}
 				
@@ -1914,8 +1918,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		List<FamilyDTO> families = new ArrayList<>();
 				if(familyList != null && familyList.size() > 0) {
 					familyList.forEach(f -> {
-						if(f.getCommunityId().equals(communityId))
-							families.add(f);
+						if(GroupMemberStatus.ACTIVE.equals(f.getMembershipStatus())) {
+							if(f.getCommunityId().equals(communityId))
+								families.add(f);
+						}
+
 					});
 				}
 

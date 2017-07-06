@@ -149,12 +149,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
 		JSONObject jsonParam = new JSONObject();
 
-		//ceshi TODO:记得删掉
-		if (order.getId() % 2 ==0) {
-			jsonParam.put("CardID", card.getCardID());
-
-		}
-
+		jsonParam.put("CardID", card.getCardID());
 		jsonParam.put("ParkingID", card.getParkingID());
 		jsonParam.put("MonthNum", String.valueOf(order.getMonthCount().intValue()));
 		jsonParam.put("Amount", cost);
@@ -190,10 +185,6 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 	private BosigaoTempFee getTempFee(String plateNumber) {
 		BosigaoTempFee tempFee = null;
 
-		//TODO:
-		if ("粤B22222".equals(plateNumber)) {
-			return ParkingTest.createTestTempFee();
-		}
 
 		String url = configProvider.getValue("parking.techpark.url", "");
 		String companyId = configProvider.getValue("parking.techpark.companyId", "");
@@ -222,14 +213,6 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	private boolean payTempCardFee(ParkingRechargeOrder order){
-
-		if ("粤B22222".equals(order.getPlateNumber())) {
-			if (order.getId() % 2 ==0) {
-				return true;
-
-			}
-			return false;
-		}
 
 		String parkingId = configProvider.getValue("parking.techpark.parkingId", "");
 		if (verifyParkingCar(order.getPlateNumber(), parkingId)) {
