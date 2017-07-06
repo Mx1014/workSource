@@ -369,7 +369,7 @@ public class SalaryServiceImpl implements SalaryService {
         if (!StringUtils.isEmpty(results)) {
             response.setSalaryEmployeeDTO(results.getMembers().stream().map(r -> {
                 salaryEmployeeDTO dto = new salaryEmployeeDTO();
-                dto.setUserId(r.getDetailId());
+                dto.setUserId(r.getTargetId());
                 dto.setContactName(r.getContactName());
                 dto.setSalaryGroupId(r.getGroupId());
                 //  拼接薪酬组名称
