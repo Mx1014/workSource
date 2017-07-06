@@ -4950,7 +4950,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setApplyDescription(cmd.getContactDescription());
 
             /**创建企业级的member/detail/user_organiztion记录**/
-            member = createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
+            createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
 
             return member;
         });
@@ -12260,6 +12260,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMember.setOrganizationId(hiddenDirectId);
             organizationMember.setDetailId(new_detail_id);
             organizationProvider.createOrganizationMember(organizationMember);
+            _organizationMember.setId(organizationMember.getId());// add by xq.tian 2017/07/05
         }
         return organizationMember;// add by xq.tian 2017/07/05
     }
