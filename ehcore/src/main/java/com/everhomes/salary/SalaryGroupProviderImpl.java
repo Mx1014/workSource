@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -125,10 +126,13 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 
 	@Override
 	public SalaryGroup findSalaryGroupByOrgId(Long id, String lastPeriod) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
+		Record result = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
 				.where(Tables.EH_SALARY_GROUPS.ORGANIZATION_GROUP_ID.eq(id))
 				.and(Tables.EH_SALARY_GROUPS.SALARY_PERIOD.eq(lastPeriod))
-				.fetchOne().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
+				.fetchOne();
+		if(null == result)
+			return null;
+		return ConvertHelper.convert(result, SalaryGroup.class);
 	}
 
 }

@@ -1155,7 +1155,9 @@ public class SalaryServiceImpl implements SalaryService {
 				salaryEmployeeProvider.createSalaryEmployee(employee);
 				//  获取个人的项目字段
 				List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(employee.getOwnerType(), employee.getOwnerId(), userId);
+                LOGGER.debug("\n entities ++ " + salaryGroupEntities);
                 processSalaryEmployeeOriginValsBeforeCalculate(salaryGroupEntities, salaryEmployeeOriginVals,userId);
+                LOGGER.debug("\n after before calculate : salary origin  Vals ++ " + salaryEmployeeOriginVals);
                 List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals = new ArrayList<>();
                 //3.循环人员搞vals
 				for (SalaryGroupEntity entity : salaryGroupEntities) {
@@ -1175,6 +1177,7 @@ public class SalaryServiceImpl implements SalaryService {
                     salaryEmployeePeriodVals.add(val);
                 }
 				processSalaryEmployeePeriodVals(salaryGroupEntities,salaryEmployeeOriginVals,salaryEmployeePeriodVals);
+                LOGGER.debug("\n salary Period Vals ++ " + salaryEmployeePeriodVals);
                 salaryEmployeePeriodValProvider.createSalaryEmployeePeriodVals(salaryEmployeePeriodVals);
 			}
 		}

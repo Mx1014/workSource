@@ -25,7 +25,7 @@ public interface UniongroupConfigureProvider {
 
     void createUniongroupMemberDetail(UniongroupMemberDetail uniongroupMemberDetail);
 
-    public void batchCreateUniongroupMemberDetail(List<EhUniongroupMemberDetails> unionDetailList);
+    void batchCreateUniongroupMemberDetail(List<EhUniongroupMemberDetails> unionDetailList);
 
     void updateUniongroupMemberDetail(UniongroupMemberDetail uniongroupMemberDetail);
 
@@ -36,8 +36,6 @@ public interface UniongroupConfigureProvider {
     void deleteUniongroupMemberDetailsByDetailIds(Integer namespaceId, List<Long> detailIds);
 
     List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long ownerId, Long groupId, String groupType);
-
-    List<UniongroupMemberDetail> listUniongroupMemberDetailsWithCondition(Integer namespaceId, Long groupId, String groupType);
 
     List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId);
 
