@@ -537,7 +537,24 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'privilege', '100053', 'zh_CN', '管理员不存在');
 
 -- 修改路由配置 add by sfyan 20170706
+-- 修改路由配置 add by sfyan 20170706
 update `eh_web_menus` set data_type = 'react:/admin-management/admin-list' where id = 60100;
 update `eh_web_menus` set data_type = 'react:/bussiness-authorization/authorization-list' where id = 60200;
+update `eh_service_modules` set type = 1 where path like '/10000%';
+update `eh_service_modules` set type = 1 where path like '/20000%';
+update `eh_service_modules` set type = 1 where path like '/30000%';
+update `eh_service_modules` set type = 1 where path like '/40000%';
+update `eh_service_modules` set type = 2 where path like '/50000%';
+update `eh_service_modules` set type = 0 where path like '/60000%';
 
+
+-- 停车充值 add by sw 20170706
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10005', 'zh_CN', '网络通讯失败，充值出错');
+UPDATE eh_parking_recharge_orders set status = 3 where recharge_status = 2;
+
+-- 不给单独授权的module状态置0 add by xiongying20170706
+update eh_service_modules set status = 0 where name = '巡检项资料库管理';
+update eh_service_modules set status = 0 where name = '巡检项设置';
+update eh_service_modules set status = 0 where name = '绩效考核';
+update eh_service_modules set status = 0 where name = '修改记录';
 
