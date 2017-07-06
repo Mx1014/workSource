@@ -9,14 +9,14 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>salaryEmployeeDTO: 基础字段参考{@link com.everhomes.rest.salary.salaryEmployeeDTO}</li>
+ * <li>salaryEmployeeDTO: 基础字段参考{@link com.everhomes.rest.salary.SalaryEmployeeDTO}</li>
  * <li>exceptionCount: 异常人数</li>
  * </ul>
  */
 public class ListSalaryEmployeesResponse {
 
-	@ItemType(salaryEmployeeDTO.class)
-	private List<salaryEmployeeDTO> salaryEmployeeDTO;
+	@ItemType(SalaryEmployeeDTO.class)
+	private List<SalaryEmployeeDTO> salaryEmployeeDTO;
 
 	private Integer exceptionCount;
 
@@ -24,16 +24,16 @@ public class ListSalaryEmployeesResponse {
 
 	}
 
-	public ListSalaryEmployeesResponse(List<salaryEmployeeDTO> salaryEmployeeDTO) {
+	public ListSalaryEmployeesResponse(List<SalaryEmployeeDTO> salaryEmployeeDTO) {
 		super();
 		this.salaryEmployeeDTO = salaryEmployeeDTO;
 	}
 
-	public List<salaryEmployeeDTO> getSalaryEmployeeDTO() {
+	public List<SalaryEmployeeDTO> getSalaryEmployeeDTO() {
 		return salaryEmployeeDTO;
 	}
 
-	public void setSalaryEmployeeDTO(List<salaryEmployeeDTO> salaryEmployeeDTO) {
+	public void setSalaryEmployeeDTO(List<SalaryEmployeeDTO> salaryEmployeeDTO) {
 		this.salaryEmployeeDTO = salaryEmployeeDTO;
 	}
 

@@ -100,4 +100,6 @@ public interface SalaryService {
 	void batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd);
 
 	Object listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd);
+
+	SalaryEmployeeDTO getPersonnelInfoByUserIdForSalary(Integer namespaceId, Long userId);
 }

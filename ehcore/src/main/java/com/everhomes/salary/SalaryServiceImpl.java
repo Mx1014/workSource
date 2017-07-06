@@ -431,7 +431,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         if (!StringUtils.isEmpty(results)) {
             response.setSalaryEmployeeDTO(results.getMembers().stream().map(r -> {
-                salaryEmployeeDTO dto = new salaryEmployeeDTO();
+                SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
                 dto.setUserId(r.getDetailId());
                 dto.setContactName(r.getContactName());
                 dto.setSalaryGroupId(r.getGroupId());
@@ -1479,5 +1479,30 @@ public class SalaryServiceImpl implements SalaryService {
 				});
     }
 
+    //  added by R, for salaryGroup 20170706
+    @Override
+    public SalaryEmployeeDTO getPersonnelInfoByUserIdForSalary(Integer namespaceId, Long userId){
+//        PersonnelsDetailsV2Response response = new PersonnelsDetailsV2Response();
 
+        SalaryEmployeeDTO result = new SalaryEmployeeDTO();
+        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByTargetId(userId);
+        Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,memberDetails.getId(),OrganizationGroupType.DEPARTMENT.getCode());
+        String department = "";
+        result.setContactName(memberDetails.getContactName());
+        if(!StringUtils.isEmpty(memberDetails.getEmployeeNo()))
+            result.setEmployeeNo(memberDetails.getEmployeeNo());
+        if(!StringUtils.isEmpty(departMap)){
+            for(Long k : departMap.keySet()){
+                department += (departMap.get(k) + ",");
+            }
+            department = department.substring(0,department.length()-1);
+        }
+        result.setDepartment(department);
+        if(!StringUtils.isEmpty(memberDetails.getSalaryCardNumber()))
+            result.setSalaryCardNumber(memberDetails.getSalaryCardNumber());
+        if(!StringUtils.isEmpty(memberDetails.getIdNumber()))
+            result.setIdNumber(memberDetails.getIdNumber());
+
+        return result;
+    }
 }

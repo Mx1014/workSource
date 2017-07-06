@@ -12137,19 +12137,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return organization;
 	}
 
-	//  added by R, for salaryGroup 20170706
-    @Override
-    public PersonnelsDetailsV2Response getPersonnelInfoByUserIdForSalary(Long userId){
-        PersonnelsDetailsV2Response response = new PersonnelsDetailsV2Response();
-
-        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByTargetId(userId);
-
-        OrganizationMemberBackGroundDTO backGround = ConvertHelper.convert(memberDetails,OrganizationMemberBackGroundDTO.class);
-        if(backGround != null){
-            response.setBackGround(backGround);
-        }
-        return response;
-    }
 }
 
 

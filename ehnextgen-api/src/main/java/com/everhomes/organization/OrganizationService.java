@@ -507,5 +507,4 @@ public interface OrganizationService {
 
 	// added by R, for salaryGroup 20170630
 	public Organization createSalaryGroupOrganization(Long organizationId, String name);
-	public PersonnelsDetailsV2Response getPersonnelInfoByUserIdForSalary(Long userId);
 }
