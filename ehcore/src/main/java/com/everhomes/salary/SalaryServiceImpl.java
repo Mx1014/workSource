@@ -901,6 +901,10 @@ public class SalaryServiceImpl implements SalaryService {
 			SalaryEmployeePeriodVal r) {
 		SalaryPeriodEmployeeEntityDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeEntityDTO.class);
         SalaryGroupEntity entity = salaryGroupEntityProvider.findSalaryGroupEntityById(r.getGroupEntityId());
+        if (null == entity) {
+            LOGGER.error("group entity is null nameId is:"+ r.getGroupEntityName()+r.getGroupEntityId());
+            return dto;
+        }
         dto.setEntityType(entity.getType());
         dto.setDefaultOrder(entity.getDefaultOrder());
         dto.setEditableFlag(entity.getEditableFlag());
