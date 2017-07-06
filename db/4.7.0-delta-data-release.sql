@@ -536,7 +536,8 @@ select max(id) into @id from `eh_locale_strings`;
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'privilege', '100051', 'zh_CN', '管理员已存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'privilege', '100053', 'zh_CN', '管理员不存在');
 
-
-
+-- 修改路由配置 add by sfyan 20170706
+update `eh_web_menus` set data_type = 'react:/admin-management/admin-list' where id = 60100;
+update `eh_web_menus` set data_type = 'react:/bussiness-authorization/authorization-list' where id = 60200;
 
 
