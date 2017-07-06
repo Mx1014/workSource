@@ -1191,11 +1191,12 @@ public class SalaryServiceImpl implements SalaryService {
                 //3.循环人员搞vals
 				for (SalaryGroupEntity entity : salaryGroupEntities) {
 					SalaryEmployeePeriodVal val = new SalaryEmployeePeriodVal();
-					val.setOwnerType(entity.getOwnerType());
+                    val.setOwnerType(entity.getOwnerType());
 					val.setOwnerId(entity.getOwnerId());
 					val.setGroupEntityId(entity.getId());
 					val.setSalaryEmployeeId(employee.getId());
-					if(null != salaryEmployeeOriginVals && !(entity.getNumberType()!= null
+                    val.setGroupEntityName(entity.getName());
+                    if(null != salaryEmployeeOriginVals && !(entity.getNumberType()!= null
                             && entity.getNumberType().equals(SalaryEntityNumberType.FORMULA.getCode()))){
 						SalaryEmployeeOriginVal originVal = findOriginVal(entity.getId(), salaryEmployeeOriginVals);
                         if(null != originVal)
@@ -1228,14 +1229,13 @@ public class SalaryServiceImpl implements SalaryService {
      * */
     private void processSalaryEmployeeOriginValsBeforeCalculate(List<SalaryGroupEntity> salaryGroupEntities, List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals, Long userId){
         //如果这个个人没设置vals 就用批次设置的默认值
-        if(null == salaryEmployeeOriginVals){
-            salaryEmployeeOriginVals = new ArrayList<>();
+        if (salaryEmployeeOriginVals.size() == 0) {
             for (SalaryGroupEntity entity : salaryGroupEntities) {
                 SalaryEmployeeOriginVal val = ConvertHelper.convert(entity, SalaryEmployeeOriginVal.class);
                 val.setGroupEntityId(entity.getId());
                 val.setGroupEntityName(entity.getName());
                 val.setUserId(userId);
-                if (entity.getType().equals(SalaryEntityType.TEXT) || entity.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
+                if (entity.getType().equals(SalaryEntityType.TEXT.getCode()) || entity.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
                     val.setSalaryValue(entity.getDefaultValue());
                 }
                 salaryEmployeeOriginVals.add(val);
@@ -1249,7 +1249,9 @@ public class SalaryServiceImpl implements SalaryService {
                                                   List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals,
                                                   List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals) {
 
-		//循环vals 用把公式部分给搞出来
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("javascript");
+        //循环vals 用把公式部分给搞出来
 		int loopTimes = 0;
 		Map<String, String> valueMap = new HashMap<String, String> ();
 		while(true){
@@ -1271,13 +1273,15 @@ public class SalaryServiceImpl implements SalaryService {
                         String format = entity.getDefaultValue();
                         Template freeMarkerTemplate = null;
                         String templateKey = getTemplateKEY(entity);
+                        if (entity.getType().equals(SalaryEntityType.TEXT.getCode())) {
+                            val.setSalaryValue(entity.getDefaultValue());
+                            continue;
+                        }
                         templateLoader.putTemplate(templateKey, format);
                         freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
                         String evalString = "result = " + FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, valueMap);
                         if(!evalString.contains("${")){
                             //如果没有${ 说明全部参数都替换成了数字 则进行计算
-                            ScriptEngineManager manager = new ScriptEngineManager();
-                            ScriptEngine engine = manager.getEngineByName("javascript");
                             String result = engine.eval(evalString).toString();
                             val.setSalaryValue(result);
                             valueMap.put(val.getGroupEntityName(), val.getSalaryValue());
