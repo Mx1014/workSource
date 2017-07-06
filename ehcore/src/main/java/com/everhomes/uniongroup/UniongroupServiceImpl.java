@@ -152,6 +152,9 @@ public class UniongroupServiceImpl implements UniongroupService {
                 return null;
             });
         }
+
+        //5.同步搜索引擎
+        this.uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()));
     }
 
     @Override
