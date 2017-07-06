@@ -33,6 +33,7 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
+import org.apache.xmlbeans.impl.soap.Detail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1251,18 +1252,17 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private String processSalaryValue(Long originEntityId, Long userId) {
-        // TODO: 2017/7/6
+        SalaryEmployeeDTO dto = getPersonnelInfoByUserIdForSalary(userId);
         if(originEntityId.equals(SalaryConstants.ENTITY_ID_GONGHAO)){
-            //TODO: 工号
-
+            return dto.getEmployeeNo();
         }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_BUMEN)){
-            // TODO: 2017/7/6
+            return dto.getDepartment();
         }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_NAME)){
-
+            return dto.getContactName();
         }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_BANKNO)){
-
+            return dto.getSalaryCardNumber();
         }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_SHENFENZHENG)){
-
+            return dto.getIdNumber();
         }
         return "";
     }
@@ -1485,11 +1485,12 @@ public class SalaryServiceImpl implements SalaryService {
 
     //  added by R, for salaryGroup 20170706
     @Override
-    public SalaryEmployeeDTO getPersonnelInfoByUserIdForSalary(Integer namespaceId, Long userId){
+    public SalaryEmployeeDTO getPersonnelInfoByUserIdForSalary(Long userId){
 //        PersonnelsDetailsV2Response response = new PersonnelsDetailsV2Response();
 
         SalaryEmployeeDTO result = new SalaryEmployeeDTO();
         OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByTargetId(userId);
+        Integer namespaceId = memberDetails.getNamespaceId();
         Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,memberDetails.getId(),OrganizationGroupType.DEPARTMENT.getCode());
         String department = "";
         result.setContactName(memberDetails.getContactName());

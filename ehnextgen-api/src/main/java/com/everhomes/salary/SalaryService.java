@@ -101,5 +101,7 @@ public interface SalaryService {
 
 	Object listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd);
 
-	SalaryEmployeeDTO getPersonnelInfoByUserIdForSalary(Integer namespaceId, Long userId);
+
+	//  added by R, for salaryGroup 20170706
+	SalaryEmployeeDTO getPersonnelInfoByUserIdForSalary(Long userId);
 }
