@@ -536,7 +536,8 @@ select max(id) into @id from `eh_locale_strings`;
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'privilege', '100051', 'zh_CN', '管理员已存在');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'privilege', '100053', 'zh_CN', '管理员不存在');
 
-
-
+-- 停车充值 add by sw 20170706
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10005', 'zh_CN', '网络通讯失败，充值出错');
+UPDATE eh_parking_recharge_orders set status = 3 where recharge_status = 2;
 
 
