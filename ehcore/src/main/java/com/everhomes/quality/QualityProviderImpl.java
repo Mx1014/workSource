@@ -337,7 +337,9 @@ public class QualityProviderImpl implements QualityProvider {
 						con3 = con3.or(con4);
 					}
 				}
-				con2 = con2.and(con3);
+				if(con3 != null) {
+					con2 = con2.and(con3);
+				}
 				con2 = con2.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskStatus.NONE.getCode()));
 				con = con.or(con2);
 			}
@@ -2539,7 +2541,7 @@ public class QualityProviderImpl implements QualityProvider {
 		QualityInspectionSampleScoreStat stat = context.select()
 				.from(Tables.EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT)
 				.where(Tables.EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT.SAMPLE_ID.eq(sampleId))
-				.fetchOneInto(QualityInspectionSampleScoreStat.class);
+				.fetchAnyInto(QualityInspectionSampleScoreStat.class);
 
 		return stat;
 	}

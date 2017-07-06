@@ -6,13 +6,11 @@ import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -26,7 +24,6 @@ import com.everhomes.server.schema.tables.pojos.EhExpressOrders;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.StringHelper;
 
 @Component
 public class ExpressOrderProviderImpl implements ExpressOrderProvider {
@@ -104,12 +101,6 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 				.limit(condition.getPageSize()+1)
 				.fetch()
 				.map(r->ConvertHelper.convert(r, ExpressOrder.class));
-	}
-
-	@Override
-	public Object query(String query) {
-		Result<Record> result = getReadOnlyContext().fetch(query);
-		return result != null ? result.toString() : null;
 	}
 
 	private EhExpressOrdersDao getReadWriteDao() {
