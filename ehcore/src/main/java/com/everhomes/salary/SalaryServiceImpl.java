@@ -16,6 +16,7 @@ import com.everhomes.rest.salary.*;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.uniongroup.UniongroupMemberDetail;
 import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -355,29 +356,55 @@ public class SalaryServiceImpl implements SalaryService {
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
 
         //  1.将前端信息传递给组织架构的接口获取相关信息
-        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-        command.setOrganizationId(cmd.getOwnerId());
+        ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
+        command.setOwnerId(cmd.getOwnerId());
+        if(!StringUtils.isEmpty(cmd.getDepartmentId()))
+        command.setDepartmentId(cmd.getDepartmentId());
+        if(!StringUtils.isEmpty(cmd.getSalaryGroupId())){
+        command.setGroupId(cmd.getSalaryGroupId());
+        command.setGroupType(UniongroupType.SALARYGROUP.getCode());}
+        if(!StringUtils.isEmpty(cmd.getKeywords()))
+        command.setKeywords(cmd.getKeywords());
+        command.setPageAnchor(cmd.getPageAnchor());
+        command.setPageSize(cmd.getPageSize());
 
         //  2.查询所有人员
-        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
+//        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
+        List<UniongroupMemberDetail> results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
 
+//        listUniongroupMemberDetailsWithCondition
         //  3.查询所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
         ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
 
         if (!StringUtils.isEmpty(results)) {
-            response.setSalaryEmployeeDTO(results.getMembers().stream().map(r -> {
+            response.setSalaryEmployeeDTO(results.stream().map(r -> {
                 salaryEmployeeDTO dto = new salaryEmployeeDTO();
-                dto.setUserId(r.getDetailId());
+                String department = "";
+                String jobPosition = "";
+                dto.setUserId(r.getTargetId());
+                dto.setDetailId(r.getDetailId());
                 dto.setContactName(r.getContactName());
                 dto.setSalaryGroupId(r.getGroupId());
+                if(!StringUtils.isEmpty(r.getEmployeeNo()))
+                dto.setEmployeeNo(r.getEmployeeNo());
+                if (!StringUtils.isEmpty(r.getDepartment()))
+                    for (Long k : r.getDepartment().keySet()) {
+                        department += r.getDepartment().get(k);
+                    }
+                if (!StringUtils.isEmpty(r.getJobPosition()))
+                    for (Long k : r.getJobPosition().keySet()) {
+                        jobPosition += r.getJobPosition().get(k);
+                    }
+                dto.setDepartment(department);
+                dto.setJobPosition(jobPosition);
                 //  拼接薪酬组名称
-                if (!StringUtils.isEmpty(organizations)) {
-                    organizations.forEach(s -> {
-                        if (s.getId().equals(r.getGroupId()))
-                            dto.setSalaryGroupName(s.getName());
-                    });
+                for(int i=0; i<organizations.size(); i++){
+                    if (organizations.get(i).getId().equals(r.getGroupId())) {
+                        dto.setSalaryGroupName(organizations.get(i).getName());
+                        break;
+                    }
                 }
                 return dto;
             }).collect(Collectors.toList()));

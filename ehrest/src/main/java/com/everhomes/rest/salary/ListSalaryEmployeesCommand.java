@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>isException: 是否筛选异常员工: 0-否 1-是</li>
  * <li>ownerType: 'organization'</li>
  * <li>ownerId: 公司organizationId</li>
+ * <li>pageAnchor: </li>
+ * <li>pageSize: 页面大小</li>
  * </ul>
  */
 public class ListSalaryEmployeesCommand {
@@ -27,6 +29,10 @@ public class ListSalaryEmployeesCommand {
 	private String ownerType;
 
 	private Long ownerId;
+
+	private Long pageAnchor;
+
+	private Integer pageSize;
 
 	public ListSalaryEmployeesCommand() {
 
@@ -86,6 +92,22 @@ public class ListSalaryEmployeesCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	@Override

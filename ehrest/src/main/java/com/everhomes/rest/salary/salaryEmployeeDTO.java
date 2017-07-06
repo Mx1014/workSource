@@ -22,17 +22,12 @@ public class salaryEmployeeDTO {
 
     private Long userId;
 
+    private Long detailId;
+
     private String employeeNo;
 
     private String contactName;
 
-/*
-    @ItemType(OrganizationDTO.class)
-    private List<OrganizationDTO> departments;
-
-    @ItemType(OrganizationDTO.class)
-    private List<OrganizationDTO> jobPositions;
-*/
     private String department;
 
     private String jobPosition;
@@ -52,6 +47,14 @@ public class salaryEmployeeDTO {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public String getEmployeeNo() {
