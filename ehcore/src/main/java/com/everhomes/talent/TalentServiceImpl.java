@@ -21,22 +21,26 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.talent.ClearTalentQueryHistoryCommand;
-import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
-import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
 import com.everhomes.rest.talent.CreateOrUpdateRequestSettingCommand;
 import com.everhomes.rest.talent.CreateOrUpdateRequestSettingResponse;
+import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
+import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
 import com.everhomes.rest.talent.DeleteTalentCategoryCommand;
 import com.everhomes.rest.talent.DeleteTalentCommand;
 import com.everhomes.rest.talent.DeleteTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.EnableTalentCommand;
 import com.everhomes.rest.talent.GetTalentDetailCommand;
 import com.everhomes.rest.talent.GetTalentDetailResponse;
+import com.everhomes.rest.talent.GetTalentRequestDetailCommand;
+import com.everhomes.rest.talent.GetTalentRequestDetailResponse;
 import com.everhomes.rest.talent.ImportTalentCommand;
 import com.everhomes.rest.talent.ListTalentCategoryCommand;
 import com.everhomes.rest.talent.ListTalentCategoryResponse;
 import com.everhomes.rest.talent.ListTalentCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryResponse;
+import com.everhomes.rest.talent.ListTalentRequestCommand;
+import com.everhomes.rest.talent.ListTalentRequestResponse;
 import com.everhomes.rest.talent.ListTalentResponse;
 import com.everhomes.rest.talent.TalentCategoryDTO;
 import com.everhomes.rest.talent.TalentDTO;
@@ -482,4 +486,16 @@ public class TalentServiceImpl implements TalentService {
 		return UserContext.getCurrentNamespaceId();
 	} 
 	
+	@Override
+	public ListTalentRequestResponse listTalentRequest(ListTalentRequestCommand cmd) {
+	
+		return new ListTalentRequestResponse();
+	}
+
+	@Override
+	public GetTalentRequestDetailResponse getTalentRequestDetail(GetTalentRequestDetailCommand cmd) {
+	
+		return new GetTalentRequestDetailResponse();
+	}
+
 }

@@ -23,6 +23,8 @@ import com.everhomes.rest.talent.DeleteTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.EnableTalentCommand;
 import com.everhomes.rest.talent.GetTalentDetailCommand;
 import com.everhomes.rest.talent.GetTalentDetailResponse;
+import com.everhomes.rest.talent.GetTalentRequestDetailCommand;
+import com.everhomes.rest.talent.GetTalentRequestDetailResponse;
 import com.everhomes.rest.talent.ImportTalentCommand;
 import com.everhomes.rest.talent.ListMessageSenderCommand;
 import com.everhomes.rest.talent.ListMessageSenderResponse;
@@ -31,6 +33,8 @@ import com.everhomes.rest.talent.ListTalentCategoryResponse;
 import com.everhomes.rest.talent.ListTalentCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryResponse;
+import com.everhomes.rest.talent.ListTalentRequestCommand;
+import com.everhomes.rest.talent.ListTalentRequestResponse;
 import com.everhomes.rest.talent.ListTalentResponse;
 import com.everhomes.rest.talent.MessageSenderDTO;
 import com.everhomes.rest.talent.TalentDTO;
@@ -229,6 +233,26 @@ public class TalentController extends ControllerBase {
 	@RestReturn(ListMessageSenderResponse.class)
 	public RestResponse listMessageSender(ListMessageSenderCommand cmd){
 		return new RestResponse(talentService.findRequestSetting());
+	}
+
+	/**
+	 * <p>19.申请记录列表</p>
+	 * <b>URL: /talent/listTalentRequest</b>
+	 */
+	@RequestMapping("listTalentRequest")
+	@RestReturn(ListTalentRequestResponse.class)
+	public RestResponse listTalentRequest(ListTalentRequestCommand cmd){
+		return new RestResponse(talentService.listTalentRequest(cmd));
+	}
+
+	/**
+	 * <p>20.申请记录详情</p>
+	 * <b>URL: /talent/getTalentRequestDetail</b>
+	 */
+	@RequestMapping("getTalentRequestDetail")
+	@RestReturn(GetTalentRequestDetailResponse.class)
+	public RestResponse getTalentRequestDetail(GetTalentRequestDetailCommand cmd){
+		return new RestResponse(talentService.getTalentRequestDetail(cmd));
 	}
 
 }
