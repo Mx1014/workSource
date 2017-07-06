@@ -52,6 +52,7 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -76,6 +77,7 @@ import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Security;
@@ -1830,6 +1832,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     
     private void updateLinglingExtraStorey(DoorLinglingExtraKeyDTO extra) {
+        List<DoorLinglingAuthStoreyInfo> storeyInfos = new ArrayList<>();
         for(Long storey : extra.getStoreyAuthList()) {
             DoorLinglingAuthStoreyInfo info = new DoorLinglingAuthStoreyInfo();
             info.setStorey(storey);
@@ -1844,8 +1847,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             } else if(storey.equals(60l)) {
                 info.setDisplayName("58");
             }
-            
+            storeyInfos.add(info);
         }
+        extra.setStoreyInfos(storeyInfos);
     }
     
     private void doLinglingQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
