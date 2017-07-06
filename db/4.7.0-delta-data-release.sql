@@ -602,3 +602,13 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 
 update `eh_web_menus` set status = 2 where type = 'organization';
 
+-- 整理菜单的scope add by sfyan 20170706
+delete from `eh_web_menu_scopes` where owner_id in (select ww.owner_id from (select owner_id  from `eh_web_menu_scopes` where menu_id in (select id from `eh_web_menus` where `path` like '/200000%') group by owner_id having count(*) = 1) ww) and menu_id = 200000;
+
+delete from `eh_web_menu_scopes` where owner_id in (select ww.owner_id from (select owner_id  from `eh_web_menu_scopes` where menu_id in (select id from `eh_web_menus` where `path` like '/400000%') group by owner_id having count(*) = 1) ww) and menu_id = 400000;
+
+delete from `eh_web_menu_scopes` where menu_id in (select id from `eh_web_menus` where `path` like '/80000/%');
+
+delete from `eh_web_menu_scopes` where menu_id in (80000);
+
+
