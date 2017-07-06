@@ -66,7 +66,7 @@ INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `
 
 -- eh_organizations: 1024291 我 加 1万 你加2万
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
-	VALUES(1034291, 0, 'PM', '中关村四季青军民融合产业园圈', '中关村四季青军民融合产业园项目是海淀区军民融合产业“一体三园”黄金布局中的重要组成部分，也是四季青镇军民融合产业集群的核心园区。园区占地面积50000平米，总建筑面积90000余平米，可招商面积67000平米。园区将向广大入驻企业提供绿色生态的办公环境、丰富完善的配套服务、智能化的工作生活体验，并通过引入13个军种联络处、武器装备信息采购平台等多方资源，为入驻企业提供便利的军地对接一站式服务，真正成为“军转民、民参与”这一国家战略的重要成果转化平台。', '/1034291', 1, 2, 'ENTERPRISE', 999972, 1031239);
+	VALUES(1034291, 0, 'PM', '中关村四季青军民融合产业园', '中关村四季青军民融合产业园项目是海淀区军民融合产业“一体三园”黄金布局中的重要组成部分，也是四季青镇军民融合产业集群的核心园区。园区占地面积50000平米，总建筑面积90000余平米，可招商面积67000平米。园区将向广大入驻企业提供绿色生态的办公环境、丰富完善的配套服务、智能化的工作生活体验，并通过引入13个军种联络处、武器装备信息采购平台等多方资源，为入驻企业提供便利的军地对接一站式服务，真正成为“军转民、民参与”这一国家战略的重要成果转化平台。', '/1034291', 1, 2, 'ENTERPRISE', 999972, 1031239);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
 	VALUES(1131889, 240111044331050361, 'organization', 1034291, 3, 0, UTC_TIMESTAMP()); 
 
@@ -287,7 +287,10 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),34000,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50000,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50100,'', 'EhNamespaces', 999972,2);
+
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50200,'', 'EhNamespaces', 999972,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50210,'', 'EhNamespaces', 999972,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50220,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50300,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50400,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50500,'', 'EhNamespaces', 999972,2);

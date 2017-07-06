@@ -29,7 +29,7 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     private Integer profileIntegrity;
 
-    private Date CheckInTime;
+    private Date checkInTime;
 
 	private String employeeNo;
 
@@ -135,13 +135,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
         this.profileIntegrity = profileIntegrity;
     }
 
-    public Date getCheckInTime() {
-        return CheckInTime;
-    }
-
-    public void setCheckInTime(Date checkInTime) {
-        CheckInTime = checkInTime;
-    }
 
 	public String getEmployeeNo() {
 		return employeeNo;
@@ -164,4 +157,11 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
         return StringHelper.toJsonString(this);
     }
 
+    public Date getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(Date checkInTime) {
+        this.checkInTime = checkInTime;
+    }
 }
