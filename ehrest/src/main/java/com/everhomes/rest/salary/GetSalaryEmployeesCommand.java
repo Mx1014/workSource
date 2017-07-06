@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>userId: 用户id</li>
+ * <li>detailId: 用户档案id</li>
  * <li>salaryGroupId: 批次id</li>
  * <li>ownerType: 'organization'</li>
  * <li>owernId: organizationId</li>
@@ -15,6 +16,8 @@ import com.everhomes.util.StringHelper;
 public class GetSalaryEmployeesCommand {
 
 	private Long userId;
+
+	private Long detailId;
 
 	private Long salaryGroupId;
 
@@ -33,6 +36,14 @@ public class GetSalaryEmployeesCommand {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public Long getDetailId() {
+		return detailId;
+	}
+
+	public void setDetailId(Long detailId) {
+		this.detailId = detailId;
 	}
 
 	public Long getSalaryGroupId() {

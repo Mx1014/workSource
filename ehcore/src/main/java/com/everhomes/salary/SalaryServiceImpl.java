@@ -202,6 +202,7 @@ public class SalaryServiceImpl implements SalaryService {
             organization.setName(cmd.getSalaryGroupName());
             this.organizationProvider.updateOrganization(organization);
 
+            //  先删除原有字段后添加
             this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
             AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
             addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
@@ -235,10 +236,6 @@ public class SalaryServiceImpl implements SalaryService {
 
             //  删除个人设定中与薪酬组相关的字段
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(cmd.getSalaryGroupId());
-
-/*            try {
-                Thread.sleep(5000);
-            }catch (Exception e ){}*/
         }
     }
 
@@ -369,10 +366,7 @@ public class SalaryServiceImpl implements SalaryService {
         command.setPageSize(cmd.getPageSize());
 
         //  2.查询所有人员
-//        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
         List<UniongroupMemberDetail> results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
-
-//        listUniongroupMemberDetailsWithCondition
         //  3.查询所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
@@ -415,7 +409,6 @@ public class SalaryServiceImpl implements SalaryService {
         command.setOrganizationId(cmd.getOrganizationId());
         command
         List<OrganizationMember> members = this.organizationService.listOrganizationPersonnels()*/
-//        this.organizationService.listUniongroupMemeberDetailsWithCondition();
         //  2.通过对实发工资的判断来拼接字符串，反映是否设置了工资明细
         //  一次性读取所有userid的实发工资值然后做拼接
 
@@ -445,20 +438,21 @@ public class SalaryServiceImpl implements SalaryService {
                 SalaryEmployeeOriginValDTO dto = new SalaryEmployeeOriginValDTO();
                 dto.setSalaryGroupId(r.getGroupId());
                 dto.setUserId(cmd.getUserId());
+                dto.setDetailId(cmd.getDetailId());
                 dto.setGroupEntityId(r.getId());
                 dto.setOriginEntityId(r.getOriginEntityId());
                 dto.setGroupEntityName(r.getName());
 
                 //  为对应字段赋值
                 if (!salaryEmployeeOriginVals.isEmpty()) {
-                    salaryEmployeeOriginVals.stream().forEach(s -> {
-                        if (r.getName().equals(s.getGroupEntityName())) {
-                            dto.setSalaryValue(s.getSalaryValue());
-                            dto.setId(s.getId());
+                    for (int i = 0; i < salaryEmployeeOriginVals.size(); i++) {
+                        if (r.getName().equals(salaryEmployeeOriginVals.get(i).getGroupEntityName())) {
+                            dto.setSalaryValue(salaryEmployeeOriginVals.get(i).getSalaryValue());
+                            dto.setId(salaryEmployeeOriginVals.get(i).getId());
+                            break;
                         }
-                    });
+                    }
                 }
-
                 results.add(dto);
             });
             return results;
@@ -502,6 +496,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private void createSalaryEmployeeOriginVal(SalaryEmployeeOriginValDTO dto, String ownerType, Long ownerId) {
         SalaryEmployeeOriginVal originVal = new SalaryEmployeeOriginVal();
+        originVal.setUserDetailId(dto.getDetailId());
         originVal.setOwnerType(ownerType);
         originVal.setOwnerId(ownerId);
         originVal.setGroupId(dto.getSalaryGroupId());

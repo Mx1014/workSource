@@ -4,6 +4,7 @@ package com.everhomes.rest.salary;
  * <ul>
  * <li>salaryGroupId: 批次id</li>
  * <li>userId: 用户id</li>
+ * <li>detailId: 用户档案id</li>
  * <li>groupEntityId: 项目字段id</li>
  * <li>originEntityId: 项目字段原始id</li>
  * <li>groupEntityName: 项目字段名称</li>
@@ -17,6 +18,8 @@ public class SalaryEmployeeOriginValDTO {
     private Long salaryGroupId;
 
     private Long userId;
+
+    private Long detailId;
 
     private Long groupEntityId;
 
@@ -51,6 +54,14 @@ public class SalaryEmployeeOriginValDTO {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public Long getGroupEntityId() {
