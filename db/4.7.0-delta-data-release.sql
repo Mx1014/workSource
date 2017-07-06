@@ -548,7 +548,9 @@ UPDATE `eh_service_modules` SET TYPE = 0 WHERE path LIKE '/60000%';
 
 
 -- 停车充值 add by sw 20170706
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10005', 'zh_CN', '网络通讯失败，充值出错');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10005', 'zh_CN', '网络通讯失败，缴费出错');
+UPDATE eh_parking_recharge_orders set error_description = 'status状态是2,rechargestatus状态为1,付款成功,充值失败的老数据', status = -1 where status = 2 and recharge_status = 1;
+
 UPDATE eh_parking_recharge_orders SET STATUS = 3 WHERE recharge_status = 2;
 
 -- 不给单独授权的module状态置0 add by xiongying20170706
