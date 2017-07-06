@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -133,16 +134,20 @@ public class NewsServiceImpl implements NewsService {
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
-		newsProvider.createNews(news);
 
-		if (null != cmd.getCommunityIds()) {
-			cmd.getCommunityIds().forEach(m -> {
-				NewsCommunity newsCommunity = new NewsCommunity();
-				newsCommunity.setNewsId(news.getId());
-				newsCommunity.setCommunityId(m);
-				newsProvider.createNewsCommunity(newsCommunity);
-			});
-		}
+		dbProvider.execute((TransactionStatus status) -> {
+			newsProvider.createNews(news);
+
+			if (null != cmd.getCommunityIds()) {
+				cmd.getCommunityIds().forEach(m -> {
+					NewsCommunity newsCommunity = new NewsCommunity();
+					newsCommunity.setNewsId(news.getId());
+					newsCommunity.setCommunityId(m);
+					newsProvider.createNewsCommunity(newsCommunity);
+				});
+			}
+			return null;
+		});
 
 		syncNews(news.getId());
 
@@ -1134,6 +1139,7 @@ public class NewsServiceImpl implements NewsService {
 	private void syncNews(Long id) {
 		News news = newsProvider.findNewsById(id);
 		if (news != null) {
+			news.setCommunityIds(newsProvider.listNewsCommunities(id));
 			//正则表达式去掉content中的富文本内容 modified by xiongying20160908
 			String content = news.getContent();
 			content = removeTag(content);

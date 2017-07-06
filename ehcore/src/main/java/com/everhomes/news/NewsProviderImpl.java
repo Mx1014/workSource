@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.server.schema.tables.daos.EhNewsCommunitiesDao;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
+import com.everhomes.server.schema.tables.records.EhNewsCommunitiesRecord;
 import com.everhomes.user.UserContext;
 import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
@@ -134,6 +135,14 @@ public class NewsProviderImpl implements NewsProvider {
 		EhNewsCommunitiesDao dao = new EhNewsCommunitiesDao(getContext(AccessSpec.readWrite()).configuration());
 		dao.insert(newsCommunity);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNewsCommunities.class, null);
+	}
+
+	@Override
+	public List<Long> listNewsCommunities(Long newsId) {
+		SelectQuery<EhNewsCommunitiesRecord> query = getReadOnlyContext().selectQuery(Tables.EH_NEWS_COMMUNITIES);
+		query.addConditions(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(newsId));
+
+		return query.fetch(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID);
 	}
 
 	@Override

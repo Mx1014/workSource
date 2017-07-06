@@ -25,5 +25,7 @@ public interface NewsProvider {
 
 	void createNewsCommunity(NewsCommunity newsCommunity);
 
+	List<Long> listNewsCommunities(Long newsId);
+
 	Boolean getCommentForbiddenFlag(Long categoryId, Integer namespaceId);
 }
