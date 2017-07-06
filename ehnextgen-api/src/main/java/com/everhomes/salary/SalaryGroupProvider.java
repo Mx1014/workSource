@@ -22,4 +22,6 @@ public interface SalaryGroupProvider {
 	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
 
 	void deleteSalaryGroup(Long organizationGroupId, String salaryPeriod);
+
+	SalaryGroup findSalaryGroupByOrgId(Long id, String lastPeriod);
 }

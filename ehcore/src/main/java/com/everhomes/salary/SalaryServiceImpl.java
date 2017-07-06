@@ -50,6 +50,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -375,6 +376,7 @@ public class SalaryServiceImpl implements SalaryService {
         if (!StringUtils.isEmpty(results)) {
             response.setSalaryEmployeeDTO(results.stream().map(r -> {
                 salaryEmployeeDTO dto = new salaryEmployeeDTO();
+                //// TODO: 2017/7/6 职位和部门
                 String department = "";
                 String jobPosition = "";
                 dto.setUserId(r.getTargetId());
@@ -1104,7 +1106,17 @@ public class SalaryServiceImpl implements SalaryService {
         monthScheduled(period);
     }
     @Override
-    public void monthScheduled(String period){
+    public void monthScheduled(String period)  {
+        Calendar calendar = Calendar.getInstance();
+        String lastPeriod = "";
+        try {
+            calendar.setTime(monthSF.get().parse(period));
+            calendar.set(Calendar.MONTH,-1);
+            lastPeriod =  monthSF.get().format(calendar.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         // : 1.获取所有的薪酬组
         List<Organization> salaryOrganizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), null);
 
@@ -1119,6 +1131,9 @@ public class SalaryServiceImpl implements SalaryService {
             salaryGroup.setGroupName(salaryOrg.getName());
 			salaryGroup.setOwnerId(punchService.getTopEnterpriseId(salaryOrg.getDirectlyEnterpriseId()));
 			salaryGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
+            SalaryGroup lastGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryOrg.getId(), lastPeriod);
+            if(null != lastGroup)
+                salaryGroup.setEmailContent(lastGroup.getEmailContent());
             salaryGroupProvider.deleteSalaryGroup(salaryGroup.getOrganizationGroupId(), salaryGroup.getSalaryPeriod());
             salaryGroupProvider.createSalaryGroup(salaryGroup);
 			// 2.循环薪酬组取里面的人员
