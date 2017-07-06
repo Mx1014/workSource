@@ -84,7 +84,7 @@ public interface SalaryService {
 	public void sendPeriodSalary(SendPeriodSalaryCommand cmd);
 
 
-	void monthScheduled(String period) throws ParseException;
+	void monthScheduled(String period) ;
 
 	public ListSalarySendHistoryResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd);
 
