@@ -539,6 +539,13 @@ public class NewsServiceImpl implements NewsService {
 		}
 		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 		newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());// 未登录用户id为0
+
+		Boolean commentForbiddenFlag = newsProvider.getCommentForbiddenFlag(news.getCategoryId(), news.getNamespaceId());
+
+		newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
+		if (commentForbiddenFlag) {
+			newsDTO.setCommentFlag(NewsNormalFlag.DISABLED.getCode());
+		}
 		return newsDTO;
 	}
 

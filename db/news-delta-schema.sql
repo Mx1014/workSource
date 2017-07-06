@@ -7,7 +7,7 @@ CREATE TABLE `eh_news_communities` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `eh_news_comment_forbid_rule` (
+CREATE TABLE `eh_news_comment_rule` (
   `id` bigint(20) NOT NULL,
   `category_id` bigint(20) NOT NULL DEFAULT '0',
   `creator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record creator user id',
