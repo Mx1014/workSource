@@ -9709,6 +9709,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         map.put("title", mailSubject);        
         String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
  
+        LOGGER.debug("\n mailText = " + mailText);
 //		Email email = new EmailBuilder()
 //	    .from(appName,account)
 //	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail())
