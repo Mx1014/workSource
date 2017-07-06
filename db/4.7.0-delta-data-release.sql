@@ -552,7 +552,12 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('par
 UPDATE eh_parking_recharge_orders set error_description = 'status状态是2,rechargestatus状态为1,付款成功,充值失败的老数据', status = -1 where status = 2 and recharge_status = 1;
 
 UPDATE eh_parking_recharge_orders SET STATUS = 3 WHERE recharge_status = 2;
-
+UPDATE eh_parking_lots set contact = 13632650699 where id = 10001;
+UPDATE eh_parking_lots set contact = 13510551322 where id = 10003;
+UPDATE eh_parking_lots set contact = 18927485550 where id = 10004;
+UPDATE eh_parking_lots set contact = 18718523489 where id = 10006;
+UPDATE eh_parking_lots set contact = 13918348877 where id = 10021;
+UPDATE eh_parking_lots set contact = 18051307125 where id = 10023;
 -- 不给单独授权的module状态置0 add by xiongying20170706
  
  
