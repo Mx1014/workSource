@@ -266,10 +266,6 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         return null;
     }
 
-    @Override
-    public List<UniongroupMemberDetail> listUniongroupMemberDetailsWithCondition(Integer namespaceId, Long groupId, String groupType) {
-        return null;
-    }
 
     //  added by RN
     @Override
