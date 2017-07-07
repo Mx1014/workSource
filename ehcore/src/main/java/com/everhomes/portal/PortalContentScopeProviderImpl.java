@@ -2,9 +2,12 @@
 package com.everhomes.portal;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +27,9 @@ import com.everhomes.util.DateHelper;
 @Component
 public class PortalContentScopeProviderImpl implements PortalContentScopeProvider {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(PortalContentScopeProviderImpl.class);
+
+
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -35,10 +41,27 @@ public class PortalContentScopeProviderImpl implements PortalContentScopeProvide
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalContentScopes.class));
 		portalContentScope.setId(id);
 		portalContentScope.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalContentScope.setCreatorUid(UserContext.current().getUser().getId());
 		portalContentScope.setUpdateTime(portalContentScope.getCreateTime());
-		portalContentScope.setOperatorUid(portalContentScope.getCreatorUid());
 		getReadWriteDao().insert(portalContentScope);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalContentScopes.class, null);
+	}
+
+	@Override
+	public void createPortalContentScopes(List<PortalContentScope> portalContentScopes) {
+		LOGGER.debug("create portal itemGroup size = {}", portalContentScopes.size());
+		if(portalContentScopes.size() == 0){
+			return;
+		}
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalContentScopes.class), (long)portalContentScopes.size());
+		List<EhPortalContentScopes> scopes = new ArrayList<>();
+		for (PortalContentScope scope: portalContentScopes) {
+			id ++;
+			scope.setId(id);
+			scope.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			scope.setUpdateTime(scope.getCreateTime());
+			scopes.add(ConvertHelper.convert(scope, EhPortalContentScopes.class));
+		}
+		getReadWriteDao().insert(scopes);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalContentScopes.class, null);
 	}
 

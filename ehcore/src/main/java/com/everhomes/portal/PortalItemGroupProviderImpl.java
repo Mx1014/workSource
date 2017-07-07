@@ -2,10 +2,13 @@
 package com.everhomes.portal;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.rest.portal.PortalItemGroupStatus;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +28,8 @@ import com.everhomes.util.DateHelper;
 @Component
 public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(PortalItemGroupProviderImpl.class);
+
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -35,12 +40,33 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 	public void createPortalItemGroup(PortalItemGroup portalItemGroup) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemGroups.class));
 		portalItemGroup.setId(id);
-		portalItemGroup.setName(EhPortalItemGroups.class.getName() + id);
+		portalItemGroup.setName(EhPortalItemGroups.class.getSimpleName() + id);
 		portalItemGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		portalItemGroup.setUpdateTime(portalItemGroup.getCreateTime());
 		getReadWriteDao().insert(portalItemGroup);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItemGroups.class, null);
 	}
+
+	@Override
+	public void createPortalItemGroups(List<PortalItemGroup> portalItemGroups) {
+		LOGGER.debug("create portal itemGroup size = {}", portalItemGroups.size());
+		if(portalItemGroups.size() == 0){
+			return;
+		}
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemGroups.class), (long)portalItemGroups.size());
+		List<EhPortalItemGroups> groups = new ArrayList<>();
+		for (PortalItemGroup group: portalItemGroups) {
+			id ++;
+			group.setId(id);
+			group.setName(EhPortalItemGroups.class.getSimpleName() + id);
+			group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			group.setUpdateTime(group.getCreateTime());
+			groups.add(ConvertHelper.convert(group, EhPortalItemGroups.class));
+		}
+		getReadWriteDao().insert(groups);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItemGroups.class, null);
+	}
+
 
 	@Override
 	public void updatePortalItemGroup(PortalItemGroup portalItemGroup) {

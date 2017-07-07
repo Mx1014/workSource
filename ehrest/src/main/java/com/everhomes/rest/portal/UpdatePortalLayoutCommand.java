@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>id: 门户layout的id</li>
- * <li>name: 门户layout名称</li>
+ * <li>label: 门户layout名称</li>
  * <li>description: 门户layout描述</li>
  * </ul>
  */
@@ -15,7 +15,7 @@ public class UpdatePortalLayoutCommand {
 
 	private Long id;
 
-	private String name;
+	private String label;
 
 	private String description;
 
@@ -23,10 +23,10 @@ public class UpdatePortalLayoutCommand {
 
 	}
 
-	public UpdatePortalLayoutCommand(Long id, String name, String description) {
+	public UpdatePortalLayoutCommand(Long id, String label, String description) {
 		super();
 		this.id = id;
-		this.name = name;
+		this.label = label;
 		this.description = description;
 	}
 
@@ -38,12 +38,12 @@ public class UpdatePortalLayoutCommand {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getLabel() {
+		return label;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	public String getDescription() {

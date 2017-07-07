@@ -3,13 +3,20 @@ package com.everhomes.rest.portal;
 
 /**
  * <ul>组内控件类型
- * <li>NAVIGATOR：导航</li>
- * <li>BANNERS: banner</li>
- * <li>BULLETINS：滚动广告组件</li>
- * <li>NEWS：有时间轴新闻版块</li>
- * <li>NEWS_FLASH：无时间轴新闻版块</li>
- * <li>OPPUSH：运营版块</li>
- * <li>TAB：分页签Tabs</li>
+ * <li>DEFAULT("Default")：默认</li>
+ *
+ * <li>NAVIGATOR_METRO("Metro"): Metro win8风格</li>
+ * <li>NAVIGATOR_LIGHT("Light")：Light 轻风格</li>
+ * <li>NAVIGATOR_GLLERY("Gallery")：Gallery 自定义风格</li>
+ *
+ * <li>OPPUSH_LIST_VIEW("ListView")：列表</li>
+ * <li>OPPUSH_HORIZONTAL_SCROLL_VIEW("HorizontalScrollView")：左右滑动</li>
+ * <li>OPPUSH_LARGE_IMAGE_LIST_VIEW("LargeImageListView")：大图列表</li>
+ *
+ * <li>PURE_TEXT("PureText")：纯文本</li>
+ * <li>TEXT_WITH_BOARD("TextWithBoard")：带边框的文本</li>
+ * <li>TEXT_WITH_ICON("TextWithIcon")：icon型（小图）</li>
+ * <li>TEXT_WITH_IMAGE("TextWithImage")：image型（大图）</li>
  * </ul>
  */
 public enum PortalItemGroupWidgetStyle {
@@ -18,9 +25,9 @@ public enum PortalItemGroupWidgetStyle {
     NAVIGATOR_METRO("Metro"),
     NAVIGATOR_LIGHT("Light"),
     NAVIGATOR_GLLERY("Gallery"),
-    BULLETINS("Bulletins"),
-    OPPUSH("OPPush"),
-    TAB("Tab");
+    OPPUSH_LIST_VIEW("ListView"),
+    OPPUSH_HORIZONTAL_SCROLL_VIEW("HorizontalScrollView"),
+    OPPUSH_LARGE_IMAGE_LIST_VIEW("LargeImageListView"),;
 
     private String code;
 

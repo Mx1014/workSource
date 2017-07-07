@@ -4,6 +4,7 @@ package com.everhomes.portal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.portal.PortalLayoutTemplateStatus;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,6 +61,7 @@ public class PortalLayoutTemplateProviderImpl implements PortalLayoutTemplatePro
 	@Override
 	public List<PortalLayoutTemplate> listPortalLayoutTemplate() {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAYOUT_TEMPLATES)
+				.where(Tables.EH_PORTAL_LAYOUT_TEMPLATES.STATUS.eq(PortalLayoutTemplateStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_PORTAL_LAYOUT_TEMPLATES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLayoutTemplate.class));
 	}

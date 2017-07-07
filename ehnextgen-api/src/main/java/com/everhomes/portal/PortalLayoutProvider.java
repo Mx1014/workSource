@@ -11,6 +11,6 @@ public interface PortalLayoutProvider {
 
 	PortalLayout findPortalLayoutById(Long id);
 
-	List<PortalLayout> listPortalLayout();
+	List<PortalLayout> listPortalLayout(Integer namespaceId);
 
 }

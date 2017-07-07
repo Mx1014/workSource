@@ -3,13 +3,13 @@ package com.everhomes.rest.portal;
 
 /**
  * <ul>组内控件类型
- * <li>NAVIGATOR：导航</li>
- * <li>BANNERS: banner</li>
- * <li>BULLETINS：滚动广告组件</li>
- * <li>NEWS：有时间轴新闻版块</li>
- * <li>NEWS_FLASH：无时间轴新闻版块</li>
- * <li>OPPUSH：运营版块</li>
- * <li>TAB：分页签Tabs</li>
+ * <li>NAVIGATOR("Navigator")：导航</li>
+ * <li>BANNERS("Banners"): banner</li>
+ * <li>BULLETINS("Bulletins")：滚动广告组件</li>
+ * <li>NEWS("News")：有时间轴新闻版块</li>
+ * <li>NEWS_FLASH("NewsFlash")：无时间轴新闻版块</li>
+ * <li>OPPUSH("OPPush")：运营版块</li>
+ * <li>TAB("Tab")：分页签Tabs</li>
  * </ul>
  */
 public enum PortalItemGroupWidget {

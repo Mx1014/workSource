@@ -3,6 +3,8 @@ package com.everhomes.portal;
 
 import com.everhomes.rest.portal.*;
 
+import java.util.List;
+
 public interface PortalService {
 
 
@@ -21,10 +23,10 @@ public interface PortalService {
 	public ListPortalLayoutsResponse listPortalLayouts(ListPortalLayoutsCommand cmd);
 
 
-	public PortalLayout createPortalLayout(CreatePortalLayoutCommand cmd);
+	public PortalLayoutDTO createPortalLayout(CreatePortalLayoutCommand cmd);
 
 
-	public PortalLayout updatePortalLayout(UpdatePortalLayoutCommand cmd);
+	public PortalLayoutDTO updatePortalLayout(UpdatePortalLayoutCommand cmd);
 
 
 	public void deletePortalLayout(DeletePortalLayoutCommand cmd);
@@ -33,10 +35,10 @@ public interface PortalService {
 	public ListPortalItemGroupsResponse listPortalItemGroups(ListPortalItemGroupsCommand cmd);
 
 
-	public PortalItemGroup createPortalItemGroup(CreatePortalItemGroupCommand cmd);
+	public PortalItemGroupDTO createPortalItemGroup(CreatePortalItemGroupCommand cmd);
 
 
-	public PortalItemGroup updatePortalItemGroup(UpdatePortalItemGroupCommand cmd);
+	public PortalItemGroupDTO updatePortalItemGroup(UpdatePortalItemGroupCommand cmd);
 
 
 	public void deletePortalItemGroup(DeletePortalItemGroupCommand cmd);
@@ -45,10 +47,10 @@ public interface PortalService {
 	public ListPortalItemsResponse listPortalItems(ListPortalItemsCommand cmd);
 
 
-	public PortalItem createPortalItem(CreatePortalItemCommand cmd);
+	public PortalItemDTO createPortalItem(CreatePortalItemCommand cmd);
 
 
-	public PortalItem updatePortalItem(UpdatePortalItemCommand cmd);
+	public PortalItemDTO updatePortalItem(UpdatePortalItemCommand cmd);
 
 
 	public void deletePortalItem(DeletePortalItemCommand cmd);
@@ -97,5 +99,7 @@ public interface PortalService {
 
 
 	public void publish(PublishCommand cmd);
+
+	List<PortalLayoutTemplateDTO> listPortalLayoutTemplates();
 
 }

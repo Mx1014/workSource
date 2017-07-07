@@ -13,4 +13,5 @@ public interface PortalContentScopeProvider {
 
 	List<PortalContentScope> listPortalContentScope();
 
+	void createPortalContentScopes(List<PortalContentScope> portalContentScopes);
 }

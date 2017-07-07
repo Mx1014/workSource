@@ -13,4 +13,6 @@ public interface PortalItemGroupProvider {
 
 	List<PortalItemGroup> listPortalItemGroup(Long layoutId);
 
+	void createPortalItemGroups(List<PortalItemGroup> portalItemGroups);
+
 }

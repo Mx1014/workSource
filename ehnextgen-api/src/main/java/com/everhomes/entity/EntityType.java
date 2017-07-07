@@ -59,6 +59,8 @@ public enum EntityType {
     ALL("EhAll"),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
     ORGANIZATION_FILE("EhOrganizationFiles"),
+    PORTAL_ITEM(EhPortalItems.class.getSimpleName()),
+    PORTAL_ITEM_CATEGORY(EhPortalItems.class.getSimpleName()),
     CHILD_PROJECT("child_project");
 
     private String code;

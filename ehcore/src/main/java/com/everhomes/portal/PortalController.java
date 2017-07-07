@@ -62,6 +62,16 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>门户layout模板列表</p>
+	 * <b>URL: /portal/listPortalLayoutTemplates</b>
+	 */
+	@RequestMapping("listPortalLayoutTemplates")
+	@RestReturn(PortalLayoutTemplateDTO.class)
+	public RestResponse listPortalLayoutTemplates(){
+		return new RestResponse(portalService.listPortalLayoutTemplates());
+	}
+
+	/**
 	 * <p>5.门户layout列表</p>
 	 * <b>URL: /portal/listPortalLayouts</b>
 	 */

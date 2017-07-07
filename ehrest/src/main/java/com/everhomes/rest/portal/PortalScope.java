@@ -1,5 +1,9 @@
 package com.everhomes.rest.portal;
 
+import com.everhomes.discover.ItemType;
+
+import java.util.List;
+
 /**
  * <ul>
  * <li>scopeType: 范围类型</li>
@@ -8,7 +12,9 @@ package com.everhomes.rest.portal;
  */
 public class PortalScope {
     private String scopeType;
-    private Long scopeIds;
+
+    @ItemType(Long.class)
+    private List<Long> scopeIds;
 
     public String getScopeType() {
         return scopeType;
@@ -18,11 +24,11 @@ public class PortalScope {
         this.scopeType = scopeType;
     }
 
-    public Long getScopeIds() {
+    public List<Long> getScopeIds() {
         return scopeIds;
     }
 
-    public void setScopeIds(Long scopeIds) {
+    public void setScopeIds(List<Long> scopeIds) {
         this.scopeIds = scopeIds;
     }
 }

@@ -37,6 +37,7 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 		portalLayout.setId(id);
 		portalLayout.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		portalLayout.setUpdateTime(portalLayout.getCreateTime());
+		portalLayout.setName(EhPortalLayouts.class.getSimpleName() + id);
 		getReadWriteDao().insert(portalLayout);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalLayouts.class, null);
 	}
@@ -57,9 +58,10 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 	}
 	
 	@Override
-	public List<PortalLayout> listPortalLayout() {
+	public List<PortalLayout> listPortalLayout(Integer namespaceId) {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAYOUTS)
 				.where(Tables.EH_PORTAL_LAYOUTS.STATUS.eq(PortalLayoutStatus.ACTIVE.getCode()))
+				.and(Tables.EH_PORTAL_LAYOUTS.NAMESPACE_ID.eq(namespaceId))
 				.orderBy(Tables.EH_PORTAL_LAYOUTS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLayout.class));
 	}
