@@ -153,8 +153,22 @@ public class SalaryController extends ControllerBase {
         return response;
     }
 
+	/**
+	 * <p>3-3.修改人员批次</p>
+	 * <b>URL: /salary/updateSalaryEmployeesGroup</b>
+	 */
+	@RequestMapping("updateSalaryEmployeesGroup")
+	@RestReturn(value = String.class)
+	public RestResponse updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
+		this.salaryService.updateSalaryEmployeesGroup(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
     /**
-     * <p>3-3.编辑人员批次详情,有增加没有更新</p>
+     * <p>3-4.编辑人员批次详情,有增加没有更新</p>
      * <b>URL: /salary/updateSalaryEmployees</b>
      */
     @RequestMapping("updateSalaryEmployees")
@@ -167,9 +181,8 @@ public class SalaryController extends ControllerBase {
         return response;
     }
 
-
 	/**
-	 * <p>3-4.添加(关联)人员至组织架构的薪酬组</p>
+	 * <p>3-5.添加(关联)人员至组织架构的薪酬组</p>
 	 * <b>URL: /salary/addToOrganizationSalaryGroup</b>
 	 */
 	@RequestMapping("addToOrganizationSalaryGroup")
