@@ -240,6 +240,11 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
+    public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId){
+        return this.uniongroupConfigureProvider.countUnionGroupMemberDetailsByOrgId(namespaceId,ownerId);
+    }
+
+    @Override
     public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId){
         return this.uniongroupConfigureProvider.listUniongroupMemberCount(namespaceId,groupIds,ownerId);
     }

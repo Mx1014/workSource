@@ -5,8 +5,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.salary.*;
 import com.everhomes.rest.uniongroup.RefreshPeriodValsCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -211,9 +213,8 @@ public class SalaryController extends ControllerBase {
 	@RestReturn(ImportFileTaskDTO.class)
 	public RestResponse importSalaryGroup(ImportSalaryGroupCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
         User user = UserContext.current().getUser();
-//        Long userId = manaUser.getId();
 /*        if (null == files || null == files[0]) {
-            LOGGER.error("files is null, userId=" + userId);
+            LOGGER.error("files is null, userId=" + user.getId());
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }*/

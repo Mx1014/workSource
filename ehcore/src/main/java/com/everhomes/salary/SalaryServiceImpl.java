@@ -729,6 +729,19 @@ public class SalaryServiceImpl implements SalaryService {
         return datas;
     }
 
+    //  数字转换(1-A,2-B...)
+    private static String GetExcelLetter(int n) {
+        String s = "";
+        while (n > 0) {
+            int m = n % 26;
+            if (m == 0)
+                m = 26;
+            s = (char) (m + 64) + s;
+            n = (n - m) / 26;
+        }
+        return s;
+    }
+
     private List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> importSalaryFiles(
             List<ImportSalaryEmployeeOriginValDTO> datas, List<SalaryGroupEntity> salaryGroupEntities,
             Long userId, ImportSalaryGroupCommand cmd) {
@@ -797,18 +810,6 @@ public class SalaryServiceImpl implements SalaryService {
             dto.setGroupEntityName();
         });*/
 
-    }
-
-    private static String GetExcelLetter(int n) {
-        String s = "";
-        while (n > 0) {
-            int m = n % 26;
-            if (m == 0)
-                m = 26;
-            s = (char) (m + 64) + s;
-            n = (n - m) / 26;
-        }
-        return s;
     }
 
 	@Override
