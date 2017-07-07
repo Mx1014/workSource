@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>   
+ * <li>rentalType：类型</li>   
  * <li>rentalBillId：订单id</li>
  * <li>rentalItems：List<SiteItemDTO> 商品列表</li>
  * <li>rentalAttachments：List<AttachmentDTO> 附件列表</li>
@@ -21,6 +22,7 @@ public class AddRentalBillItemCommand {
 //	private Long rentalSiteId;   
 	@NotNull
 	private Long rentalBillId; 
+	private Byte rentalType;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> rentalItems;
 	@ItemType(AttachmentDTO.class)
@@ -43,6 +45,14 @@ public class AddRentalBillItemCommand {
 	 
 	public Long getRentalBillId() {
 		return rentalBillId;
+	}
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
 	}
 
 	public void setRentalBillId(Long rentalBillId) {

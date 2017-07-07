@@ -4,9 +4,12 @@ package com.everhomes.organization;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.util.StringHelper;
 
+import java.sql.Date;
+
 public class OrganizationMember extends EhOrganizationMembers implements Comparable<OrganizationMember> {
 
-    private java.lang.String nickName;
+    private static final long serialVersionUID = -4420904659870582839L;
+	private java.lang.String   nickName;
     // private java.lang.String   avatar;
 
     private String initial;
@@ -16,13 +19,23 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     private java.lang.Long creatorUid;
 
-    private boolean isCreate;
+	private boolean isCreate;
 
-    private String applyDescription;// 申请加入公司时填写的描述信息   add by xq.tian  2017/05/02
+	private String applyDescription;// 申请加入公司时填写的描述信息   add by xq.tian  2017/05/02
 
-    private static final long serialVersionUID = 2994038655987093227L;
+    private Byte employeeStatus;
 
-    public OrganizationMember() {
+    private Date employmentTime;
+
+    private Integer profileIntegrity;
+
+    private Date checkInTime;
+
+	private String employeeNo;
+
+	private Byte employeeType;
+
+	public OrganizationMember() {
     }
 
 
@@ -99,9 +112,56 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     }
 
 
+    public Byte getEmployeeStatus() {
+        return employeeStatus;
+    }
+    public void setEmployeeStatus(Byte employeeStatus) {
+        this.employeeStatus = employeeStatus;
+    }
+
+    public Date getEmploymentTime() {
+        return employmentTime;
+    }
+
+    public void setEmploymentTime(Date employmentTime) {
+        this.employmentTime = employmentTime;
+    }
+
+    public Integer getProfileIntegrity() {
+        return profileIntegrity;
+    }
+
+    public void setProfileIntegrity(Integer profileIntegrity) {
+        this.profileIntegrity = profileIntegrity;
+    }
+
+
+	public String getEmployeeNo() {
+		return employeeNo;
+	}
+
+	public void setEmployeeNo(String employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
+	public Byte getEmployeeType() {
+		return employeeType;
+	}
+
+	public void setEmployeeType(Byte employeeType) {
+		this.employeeType = employeeType;
+	}
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
+    public Date getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(Date checkInTime) {
+        this.checkInTime = checkInTime;
+    }
 }

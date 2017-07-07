@@ -51,7 +51,7 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	    ListCommunityByNamespaceCommandResponse response = new ListCommunityByNamespaceCommandResponse();
 	    
 	    // TODO: 暂时先不分页查，后面再补
-	    int namespaceId = UserContext.getCurrentNamespaceId();
+	    int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 //	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
 //	    
 //	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
@@ -84,7 +84,7 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 		}
 	    CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());		
-		List<CommunityDTO> communityList = communityProvider.listCommunitiesByType(communityIds, cmd.getCommunityType(), locator, pageSize);		
+		List<CommunityDTO> communityList = communityProvider.listCommunitiesByType(namespaceId, communityIds, cmd.getCommunityType(), locator, pageSize);
         response.setCommunities(communityList);
         
         if(LOGGER.isDebugEnabled()) {

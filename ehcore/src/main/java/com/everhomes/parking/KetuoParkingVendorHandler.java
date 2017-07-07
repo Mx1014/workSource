@@ -1,65 +1,47 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.annotation.PreDestroy;
-
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.parking.ketuo.*;
 import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.order.OrderUtil;
 import com.everhomes.parking.ketuo.KetuoTempFee;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO")
 public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoParkingVendorHandler.class);
 	
-	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
-	
+	private ThreadLocal<SimpleDateFormat> timeFormat = new ThreadLocal<SimpleDateFormat>() {
+		@Override
+		protected SimpleDateFormat initialValue() {
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		}
+	};
+	private ThreadLocal<SimpleDateFormat> dateFormat = new ThreadLocal<SimpleDateFormat>() {
+		@Override
+		protected SimpleDateFormat initialValue() {
+			return new SimpleDateFormat("yyyyMMdd");
+		}
+	};
+
 	private static final String RECHARGE = "/api/pay/CardRecharge";
 	private static final String GET_CARD = "/api/pay/GetCarCardInfo";
 	private static final String GET_TYPES = "/api/pay/GetCarTypeList";
@@ -67,31 +49,21 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private static final String GET_TEMP_FEE = "/api/pay/GetParkingPaymentInfo";
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
 	private static final String RULE_TYPE = "1"; //只显示ruleType = 1时的充值项
-	
-	private CloseableHttpClient httpclient = HttpClients.createDefault();
-	
+
 	@Autowired
 	private ParkingProvider parkingProvider;
-	@Autowired
-	private LocaleStringService localeStringService;
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
     private ConfigurationProvider configProvider;
 	@Autowired
-    private UserProvider userProvider;
-	@Autowired
-	private OrderUtil commonOrderUtil;
-	@Autowired
-    private BigCollectionProvider bigCollectionProvider;
-	@Autowired
-    private DbProvider dbProvider;
+	private LocaleStringService localeService;
 	
 	@Override
     public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
         
-    	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
+    	List<ParkingCardDTO> resultList = new ArrayList<>();
 		GetParkingCardsResponse response = new GetParkingCardsResponse();
 		response.setCards(resultList);
 
@@ -102,7 +74,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			String expireDate = card.getValidTo();
 			this.checkExpireDateIsNull(expireDate,plateNumber);
 
-			long expireTime = strToLong(expireDate);
+			long expireTime = Utils.strToDate(expireDate);
 			long now = System.currentTimeMillis();
 			long cardReserveTime = 0;
 			
@@ -110,8 +82,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
 	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
+	    		//存的天数
 	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
-
 	    	}
 			
 			if(expireTime + cardReserveTime < now){
@@ -141,7 +113,6 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			resultList.add(parkingCardDTO);
 		}else {
 			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
-
 		}
         
         return response;
@@ -195,9 +166,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
 			String locale = "zh_CN";
 			String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-//			dto.setRateName(r.getRuleName());
 			dto.setRateName(rateName);
-//			dto.setCardType(r.getRuleType());
 			dto.setCardType(r.getTypeName());
 			dto.setMonthCount(new BigDecimal(r.getRuleAmount()));
 			dto.setPrice(new BigDecimal(Integer.parseInt(r.getRuleMoney()) / 100));
@@ -208,48 +177,47 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		return result;
     }
 
-    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-
     @Override
-    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
-    	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-			if(payStatus.toLowerCase().equals("fail")) {
-				LOGGER.error("pay failed, orderNo={}", order.getId());
-			}
-			else {
-				if(recharge(order)){
-					dbProvider.execute((TransactionStatus transactionStatus) -> {
-						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						parkingProvider.updateParkingRechargeOrder(order);
-						
-						String key = "parking-recharge" + order.getId();
-						String value = String.valueOf(order.getId());
-				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-				      
-				        LOGGER.error("Delete parking order key, key={}", key);
-				        redisTemplate.delete(key);
-			        
-			        return null;
-					});
-				}
-			}
-		}
+    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+
+    	return recharge(order);
+//    	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
+//			if(payStatus.toLowerCase().equals("fail")) {
+//				LOGGER.error("pay failed, orderNo={}", order.getId());
+//			}else {
+//				if(recharge(order)){
+//					dbProvider.execute((TransactionStatus transactionStatus) -> {
+//						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
+//						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+//						parkingProvider.updateParkingRechargeOrder(order);
+//
+//						String key = "parking-recharge" + order.getId();
+//						String value = String.valueOf(order.getId());
+//				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+//				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+//
+//				        LOGGER.error("Delete parking order key, key={}", key);
+//				        redisTemplate.delete(key);
+//
+//			        return null;
+//					});
+//				}
+//			}
+//		}
     }
     
     @Override
     public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
-    	LOGGER.error("Not support create parkingRechageRate.");
+    	LOGGER.error("Not support create parkingRechargeRate.");
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-				"Not support create parkingRechageRate.");
+				"Not support create parkingRechargeRate.");
     }
     
     @Override
     public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
-    	LOGGER.error("Not support delete parkingRechageRate.");
+    	LOGGER.error("Not support delete parkingRechargeRate.");
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-				"Not support delete parkingRechageRate.");
+				"Not support delete parkingRechargeRate.");
     }
     
     private void checkExpireDateIsNull(String expireDate,String plateNo) {
@@ -259,36 +227,6 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 					"ExpireDate is null.");
 		}
 	}
-    
-    private long strToLong(String str) {
-
-		long ts;
-		try {
-			ts = sdf1.parse(str).getTime();
-		} catch (ParseException e) {
-			LOGGER.error("data format is not yyyyMMddHHmmss, str={}", str);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"data format is not yyyyMMddHHmmss.");
-		}
-		return ts;
-	}
-    
-	
-//	@Scheduled(cron="0 0 0/2 * * ? ")
-//	@Override
-//	public void refreshParkingRechargeOrderStatus() {
-//		LOGGER.info("refresh recharge status.");
-//		List<ParkingRechargeOrder> orderList = parkingProvider.findWaitingParkingRechargeOrders(ParkingLotVendor.KETUO);
-//		orderList.stream().map(order -> {
-//			
-//			if(recharge(order)){
-//				order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-//				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-//				parkingProvider.updateParkingRechargeOrder(order);
-//			}
-//			return null;
-//		});
-//	}
 	
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
@@ -309,7 +247,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private List<KetuoCardType> getCardType() {
 		List<KetuoCardType> result = new ArrayList<>();
 		JSONObject param = new JSONObject();
-		String json = post(param, GET_TYPES);
+		String json = postToKetuo(param, GET_TYPES);
 		KetuoJsonEntity<KetuoCardType> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCardType>>(){});
 
 		if(entity.isSuccess()){
@@ -324,10 +262,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		List<KetuoCardRate> result = new ArrayList<>();
 		JSONObject param = new JSONObject();
 		param.put("carType", carType);
-		String json = post(param, GET_CARd_RULE);
-		
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		String json = postToKetuo(param, GET_CARd_RULE);
 		
 		KetuoJsonEntity<KetuoCardRate> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCardRate>>(){});
 		if(entity.isSuccess()){
@@ -340,13 +275,11 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private KetuoCard getCard(String plateNumber) {
 		KetuoCard card = null;
 		JSONObject param = new JSONObject();
-		
+
+		//储能月卡车没有 归属地区分,接口对接，传参需要截取地区，比如 粤B88888, 传参B88888 eg.
 		plateNumber = plateNumber.substring(1, plateNumber.length());
 		param.put("plateNo", plateNumber);
-		String json = post(param, GET_CARD);
-        
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		String json = postToKetuo(param, GET_CARD);
         
 		KetuoJsonEntity<KetuoCard> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCard>>(){});
 		if(entity.isSuccess()){
@@ -362,84 +295,92 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
 
 		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
-		Long time = strToLong(oldValidEnd);
-		String validStart = sdf1.format(addDays(time, 1));
-		String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
-		
-		param.put("cardId", Integer.parseInt(order.getCardNumber()));
+		Long time = Utils.strToDate(oldValidEnd);
+
+		//储能月卡充值开始时间 只加一秒
+		Timestamp tempStart = Utils.addSeconds(time, 1);
+		Timestamp tempEnd = Utils.getTimestampByAddMonth(time, order.getMonthCount().intValue());
+
+		String validStart = timeFormat.get().format(tempStart);
+		String validEnd = timeFormat.get().format(tempEnd);
+
+		param.put("cardId", card.getCardId());
 		//修改科托ruleType 固定为1 表示月卡车
 		param.put("ruleType", RULE_TYPE);
 	    param.put("ruleAmount", String.valueOf(order.getMonthCount().intValue()));
-	    param.put("payMoney", order.getPrice().intValue()*100);
-	    param.put("startTime", validStart);
-	    param.put("endTime", validEnd);
-		String json = post(param, RECHARGE);
-        
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
-        
-//		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
-//		
-//		return entity.isSuccess();
+	    // 支付金额（分）
+	    param.put("payMoney", order.getPrice().intValue() * 100);
+	    //续费开始时间 yyyy-MM-dd HH:mm:ss 每月第一天的 0点0分0秒
+		param.put("startTime", validStart);
+		//续费结束时间 yyyy-MM-dd HH:mm:ss 每月最后一天的23点59分59秒
+		param.put("endTime", validEnd);
+		String json = postToKetuo(param, RECHARGE);
+
+		//将充值信息存入订单
+		order.setErrorDescriptionJson(json);
+		order.setStartPeriod(tempStart);
+		order.setEndPeriod(tempEnd);
+
 		JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
-		if(null != obj ) {
+
+		if(null != obj) {
 			int resCode = (int) obj;
-			if(resCode == 0)
+			if(resCode == 0) {
 				return true;
-			
+			}
 		}
+		//充值失败时，将返回的错误信息记录下来
+		Object resMsg = jsonObject.get("resMsg");
+
+		if (null != resMsg) {
+			String msg = (String) resMsg;
+			order.setErrorDescription(msg);
+		}
+
 		return false;
     }
 	
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-//		KetuoTempFee tempFee = getTempFee(order.getPlateNumber());
 		param.put("orderNo", order.getOrderToken());
-//		param.put("amount", order.getPrice().intValue()*100);
 		param.put("amount", order.getPrice().intValue() * 100);
 	    param.put("discount", 0);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?4:5);
-		String json = post(param, PAY_TEMP_FEE);
-        
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
-        
-//		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
-//		
-//		return entity.isSuccess();
+		String json = postToKetuo(param, PAY_TEMP_FEE);
+
         JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
 		if(null != obj ) {
 			int resCode = (int) obj;
 			if(resCode == 0)
 				return true;
-			
 		}
 		return false;
     }
 
-	private boolean recharge(ParkingRechargeOrder order){
+	@Override
+	public boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);
 		return payTempCardFee(order);
     }
 	
-	public String post(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost(configProvider.getValue("parking.chuneng.url", "") + type);
-		StringBuilder result = new StringBuilder();
-		
+	private String postToKetuo(JSONObject param, String type) {
+
+		String url = configProvider.getValue("parking.chuneng.url", "") + type;
         String key = configProvider.getValue("parking.chuneng.key", "");
-        String iv = sdf2.format(new Date());
         String user = configProvider.getValue("parking.chuneng.user", "");
         String pwd = configProvider.getValue("parking.chuneng.pwd", "");
+
         String data = null;
+		String iv = dateFormat.get().format(new Date());
+
 		try {
 			data = EncryptUtil.getEncString(param, key, iv);
 		} catch (Exception e) {
@@ -447,80 +388,20 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Parking encrypt param error.");
 		}
-		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("data", data));
-		CloseableHttpResponse response = null;
-		InputStream instream = null;
-		try {
-			httpPost.setEntity(new UrlEncodedFormEntity(nvps, "UTF8"));
-			httpPost.addHeader("user", user);
-			httpPost.addHeader("pwd", pwd);
-			response = httpclient.execute(httpPost);
-			HttpEntity entity = response.getEntity();
-			
-			if (entity != null) {
-				instream = entity.getContent();
-				BufferedReader reader = null;
-				reader = new BufferedReader(new InputStreamReader(instream,"utf8"));
-				String s;
-            	
-            	while((s = reader.readLine()) != null){
-            		result.append(s);
-				}
-			}
-		} catch (IOException e) {
-			LOGGER.error("Parking request error, param={}, key={}, iv={}", param, key, iv, e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Parking request error.");
-		}finally {
-            try {
-            	instream.close();
-				response.close();
-			} catch (IOException e) {
-				LOGGER.error("Parking close instream, response error, param={}, key={}, iv={}", param, key, iv, e);
-			}
-        }
-		String json = result.toString();
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Data from ketuo, json={}", json);
-		
-		return json;
-	}
-	
-	//储能月卡充值开始时间 只加一秒
-	private Timestamp addDays(Long oldPeriod, int seconds) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		calendar.add(Calendar.SECOND, seconds);
-		Timestamp time = new Timestamp(calendar.getTimeInMillis());
-		
-		return time;
-	}
-	
-	private Timestamp addMonth(Long oldPeriod, int month) {
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		
-		int day = calendar.get(Calendar.DAY_OF_MONTH); 
-		if(day == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			calendar.add(Calendar.MONTH, month);
-			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}else{
-			calendar.add(Calendar.MONTH, month);
-//			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-//			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}
-		
-		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
-		
-		return newPeriod;
+		Map<String, String> params = new HashMap<>();
+		params.put("data", data);
+		Map<String, String> headers = new HashMap<>();
+		headers.put("user", user);
+		headers.put("pwd", pwd);
+
+		LOGGER.info("Parking info, namespace={}", this.getClass().getName());
+		return Utils.post(url, params, headers);
+
 	}
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		//储能月卡车没有 归属地区分
+
 		String plateNumber = order.getPlateNumber();
 
 		KetuoCard cardInfo = getCard(plateNumber);
@@ -539,17 +420,13 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
-		
 	}
 
 	private KetuoTempFee getTempFee(String plateNumber) {
 		KetuoTempFee tempFee = null;
 		JSONObject param = new JSONObject();
 		param.put("plateNo", plateNumber);
-		String json = post(param, GET_TEMP_FEE);
-        
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		String json = postToKetuo(param, GET_TEMP_FEE);
         
 		KetuoJsonEntity<KetuoTempFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTempFee>>(){});
 		if(entity.isSuccess()){
@@ -571,25 +448,13 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		if(null == tempFee)
 			return dto;
 		dto.setPlateNumber(plateNumber);
-		dto.setEntryTime(strToLong(tempFee.getEntryTime()));
-		dto.setPayTime(strToLong(tempFee.getPayTime()));
+		dto.setEntryTime(Utils.strToDate(tempFee.getEntryTime()));
+		dto.setPayTime(Utils.strToDate(tempFee.getPayTime()));
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
 		dto.setPrice(new BigDecimal(tempFee.getPayable() / 100));
-//		dto.setPrice(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
 		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
-	}
-
-	@PreDestroy
-	public void destroy() {
-		if (null != httpclient) {
-			try {
-				httpclient.close();
-			} catch (IOException e) {
-				LOGGER.error("Close httpclient error.");
-			}
-		}
 	}
 
 	@Override

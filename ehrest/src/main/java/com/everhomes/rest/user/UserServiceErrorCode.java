@@ -34,5 +34,8 @@ public interface UserServiceErrorCode {
     int ERROR_SMS_MIN_DURATION = 300001;//发送验证码时间不得小于60s
     int ERROR_SMS_TOO_FREQUENT_HOUR = 300002;//验证码请求过于频繁，请1小时候重试
     int ERROR_SMS_TOO_FREQUENT_DAY = 300003;//验证码请求过于频繁，请24小时后重试
+    int ERROR_SMS_BLACK_LIST = 300004;//对不起，您的手机号在我们的黑名单列表
+
+    static final int DOMAIN_NOT_CONFIGURED = 400000;
 
 }

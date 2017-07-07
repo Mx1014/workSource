@@ -241,6 +241,21 @@ public class UserController extends ControllerBase {
 		SignupToken token = userService.signup(cmd, request);
 		return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
 	}
+	
+    /**
+     * <b>URL: /user/signupByAppKey</b>
+     * <p>注册，由于注册接口配有@RequireAuthentication(false)，也就是不需要登录即可以调用，这导致会有人攻击服务器而不停消耗短信。
+     *        为了防止被攻击，假定只有APP才能够注册发验证码（若WEB需要发验证码，需要添加额外的图片验证码来防止机器攻击。由于老版本
+     *        仍然在使用，故老版本还是使用老接口而不能直接改老接口，从而新增加一个接口去掉@RequireAuthentication(false)。客户端对所有
+     *        接口都加上签名，而把需要发短信的两个接口都换成新的接口。 by lqs 20170626</p>
+     * @return 注册临时token
+     */
+    @RequestMapping("signupByAppKey")
+    @RestReturn(String.class)
+    public RestResponse signupByAppKey(@Valid SignupCommand cmd, HttpServletRequest request) {
+        SignupToken token = userService.signup(cmd, request);
+        return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
+    }
 
 	/**
 	 * <b>URL: /user/resendVerificationCode</b>
@@ -261,6 +276,29 @@ public class UserController extends ControllerBase {
 		this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode(), request);
 		return new RestResponse("OK");
 	}
+
+    /**
+     * <b>URL: /user/resendVerificationCodeByAppKey</b>
+     * <p>重新发送验证码，由于注册接口配有@RequireAuthentication(false)，也就是不需要登录即可以调用，这导致会有人攻击服务器而不停消耗短信。
+     *        为了防止被攻击，假定只有APP才能够注册发验证码（若WEB需要发验证码，需要添加额外的图片验证码来防止机器攻击。由于老版本
+     *        仍然在使用，故老版本还是使用老接口而不能直接改老接口，从而新增加一个接口去掉@RequireAuthentication(false)。客户端对所有
+     *        接口都加上签名，而把需要发短信的两个接口都换成新的接口。 by lqs 20170626</p>
+     * @return 如果正常则返回OK，错误则返回错误信息
+     */
+    @RequestMapping("resendVerificationCodeByAppKey")
+    @RequireAuthentication(false)
+    @RestReturn(String.class)
+    public RestResponse resendVerificationCodeByAppKey(@Valid ResendVerificationCodeCommand cmd, HttpServletRequest request) {
+        SignupToken token = WebTokenGenerator.getInstance().fromWebToken(cmd.getSignupToken(), SignupToken.class);
+        if(token == null) {
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
+        }
+
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode(), request);
+        return new RestResponse("OK");
+    }
 
 	/**
 	 * <b>URL: /user/verifyAndLogon</b>
@@ -699,6 +737,23 @@ public class UserController extends ControllerBase {
 		userService.resendVerficationCode(cmd, request);
 		return new RestResponse("OK");
 	}
+
+    /**
+     * <b>URL: /user/resendVerificationCodeByIdentifierAndAppKey</b>
+     * <p>忘记密码，由于注册接口配有@RequireAuthentication(false)，也就是不需要登录即可以调用，这导致会有人攻击服务器而不停消耗短信。
+     *        为了防止被攻击，假定只有APP才能够注册发验证码（若WEB需要发验证码，需要添加额外的图片验证码来防止机器攻击。由于老版本
+     *        仍然在使用，故老版本还是使用老接口而不能直接改老接口，从而新增加一个接口去掉@RequireAuthentication(false)。客户端对所有
+     *        接口都加上签名，而把需要发短信的两个接口都换成新的接口。 by lqs 20170626</p>
+     * @return OK
+     */
+    @RequestMapping("resendVerificationCodeByIdentifierAndAppKey")
+    @RestReturn(String.class)
+    public RestResponse resendVerificationCodeByIdentifierAndAppKey(@Valid ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request){
+        assert StringUtils.isNotEmpty(cmd.getIdentifier());
+
+        userService.resendVerficationCode(cmd, request);
+        return new RestResponse("OK");
+    }
 
 	/**
 	 * <b>URL: /user/verfiyAndReset</b>
@@ -1160,5 +1215,18 @@ public class UserController extends ControllerBase {
 		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
 		userProvider.updateUser(user);
 		return new RestResponse("OK");
+	}
+
+	/**
+	 * <b>URL: /user/searchUsers</b>
+	 * <p>搜索用户</p>
+	 */
+	@RequestMapping(value = "searchUsers")
+	@RestReturn(value = SearchUsersResponse.class)
+	public RestResponse searchUsers(@Valid SearchUsersCommand cmd) {
+		RestResponse resp = new RestResponse(userService.searchUsers(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
 	}
 }
