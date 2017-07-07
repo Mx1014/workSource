@@ -1053,7 +1053,10 @@ public class SalaryServiceImpl implements SalaryService {
 				salaryGroupEntityProvider.updateSalaryGroupEntityVisible(r.getId(),r.getVisibleFlag());
 				return null;
 			});
-			return null;
+            Organization salaryOrg = organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
+            salaryOrg.setEmailContent(cmd.getEmailContent());
+            organizationProvider.updateOrganization(salaryOrg);
+            return null;
 		});
 	}
 
