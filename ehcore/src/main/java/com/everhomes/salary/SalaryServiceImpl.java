@@ -1045,11 +1045,23 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public void updateSalaryGroupEntitiesVisable(UpdateSalaryGroupEntitiesVisableCommand cmd) {
 		this.dbProvider.execute((TransactionStatus status) -> {
-			cmd.getSalaryGroupEntities().stream().map(r ->{
-				salaryGroupEntityProvider.updateSalaryGroupEntityVisible(r.getId(),r.getVisibleFlag());
-				return null;
-			});
-			return null;
+
+            Organization salaryOrg = organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
+            if (null == salaryOrg) {
+                LOGGER.error(" cmd error no that organization cmd : "+ cmd);
+                return null;
+            }
+            salaryOrg.setEmailContent(cmd.getEmailContent());
+            organizationProvider.updateOrganization(salaryOrg);
+            if (null == cmd.getSalaryGroupEntities()) {
+                LOGGER.error(" cmd error no entities cmd : "+ cmd);
+                return null;
+            }
+            cmd.getSalaryGroupEntities().stream().map(r ->{
+                salaryGroupEntityProvider.updateSalaryGroupEntityVisible(r.getId(),r.getVisibleFlag());
+                return null;
+            });
+            return null;
 		});
 	}
 
