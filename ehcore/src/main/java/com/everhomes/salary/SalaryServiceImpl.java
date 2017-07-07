@@ -891,7 +891,7 @@ public class SalaryServiceImpl implements SalaryService {
 			return null;
 		dto.setPeriodEmployeeEntitys(result.stream().map(r2 ->{	
 			SalaryPeriodEmployeeEntityDTO dto2 = processSalaryPeriodEmployeeEntityDTO(r2);
-			dto2.setIsFormula(NormalFlag.NO.getCode());
+//			dto2.setIsFormula(NormalFlag.NO.getCode());
 			if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_GONGHAO)) {
 				dto.setEmployeeNo(r2.getSalaryValue());
 			}else if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_NAME)) {
@@ -915,12 +915,13 @@ public class SalaryServiceImpl implements SalaryService {
             LOGGER.error("group entity is null nameId is:"+ r.getGroupEntityName()+r.getGroupEntityId());
             return dto;
         }
-        if (null != entity.getNumberType() && entity.getNumberType().equals(NormalFlag.YES.getCode())) {
-            dto.setSalaryValue(entity.getDefaultValue());
-            dto.setIsFormula(NormalFlag.YES.getCode());
-        }
+//        if (null != entity.getNumberType() && entity.getNumberType().equals(NormalFlag.YES.getCode())) {
+//            dto.setSalaryValue(entity.getDefaultValue());
+//            dto.setIsFormula(NormalFlag.YES.getCode());
+//        }
         dto.setEntityType(entity.getType());
         dto.setDefaultOrder(entity.getDefaultOrder());
+        dto.setSalaryValue(r.getSalaryValue());
         dto.setEditableFlag(entity.getEditableFlag());
         dto.setNeedCheck(entity.getNeedCheck());
         dto.setNumberType(entity.getNumberType());
@@ -988,17 +989,29 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 
     @Override
+    public ListPeriodSalaryEmailContentsResponse listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd) {
+        ListPeriodSalaryEmailContentsResponse response = new ListPeriodSalaryEmailContentsResponse();
+        // : 1.获取所有的薪酬组
+        List<Organization> salaryOrganizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+        if (null == salaryOrganizations) {
+            return response;
+        }
+        response.setSalaryGroupResps(new ArrayList<>());
+        for (Organization salaryOrg : salaryOrganizations) {
+            GetPeriodSalaryEmailContentCommand cmd1 = new GetPeriodSalaryEmailContentCommand(cmd.getOwnerType(), cmd.getOwnerId(), salaryOrg.getId());
+            GetPeriodSalaryEmailContentResponse resp1 = getPeriodSalaryEmailContent(cmd1);
+            response.getSalaryGroupResps().add(resp1);
+        }
+        return response;
+    }
+
+    @Override
     public void batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd) {
         for (UpdateSalaryGroupEntitiesVisableCommand cmd1 : cmd.getSalaryGroupCmd()) {
             cmd1.setOwnerId(cmd.getOwnerId());
             cmd1.setOwnerType(cmd.getOwnerType());
             updateSalaryGroupEntitiesVisable(cmd1);
         }
-    }
-
-    @Override
-    public Object listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd) {
-        return null;
     }
 
     @Override
