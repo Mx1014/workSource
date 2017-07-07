@@ -476,7 +476,7 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setGroupEntityId(r.getId());
                 dto.setOriginEntityId(r.getOriginEntityId());
                 dto.setGroupEntityName(r.getName());
-
+                dto.setSalaryValue(r.getDefaultValue());
                 //  为对应字段赋值
                 if (!salaryEmployeeOriginVals.isEmpty()) {
                     for (int i = 0; i < salaryEmployeeOriginVals.size(); i++) {
@@ -499,10 +499,19 @@ public class SalaryServiceImpl implements SalaryService {
 
         User user = UserContext.current().getUser();
         if(!cmd.getEmployeeOriginVal().isEmpty()){
-            Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
+//            Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
             Long groupId = cmd.getEmployeeOriginVal().get(0).getSalaryGroupId();
 
             //  添加到组织架构的薪酬组中，没有增加有则覆盖
+            AddToOrganizationSalaryGroupCommand command = new AddToOrganizationSalaryGroupCommand();
+            command.setOwnerId(cmd.getOwnerId());
+            command.setOwnerType(cmd.getOwnerType());
+            command.setSalaryGroupId(groupId);
+            List<Long> detailIds = new ArrayList<>();
+            detailIds.add(cmd.getDetailId());
+            command.setDetailIds(detailIds);
+            this.addToOrganizationSalaryGroup(command);
+/*
             SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
             command.setEnterpriseId(cmd.getOwnerId());
             command.setGroupType(UniongroupType.SALARYGROUP.getCode());
@@ -512,15 +521,16 @@ public class SalaryServiceImpl implements SalaryService {
             targets.add(target);
             command.setTargets(targets);
             this.uniongroupService.saveUniongroupConfigures(command);
+*/
 
             //  添加到薪酬组的个人设定中
-            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId,cmd.getOwnerType(),cmd.getOwnerId());
+            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
             if(originVals.isEmpty()){
                 cmd.getEmployeeOriginVal().stream().forEach(r -> {
                     this.createSalaryEmployeeOriginVal(r, cmd.getOwnerType(),cmd.getOwnerId());
                 });
             }else{
-                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(groupId, userId,cmd.getOwnerType(),cmd.getOwnerId());
+                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(groupId,cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
                 cmd.getEmployeeOriginVal().stream().forEach(s ->{
                     this.createSalaryEmployeeOriginVal(s,cmd.getOwnerType(),cmd.getOwnerId());
                 });
@@ -535,6 +545,7 @@ public class SalaryServiceImpl implements SalaryService {
         originVal.setOwnerId(ownerId);
         originVal.setGroupId(dto.getSalaryGroupId());
         originVal.setUserId(dto.getUserId());
+        originVal.setUserDetailId(dto.getDetailId());
         originVal.setGroupEntityId(dto.getGroupEntityId());
         originVal.setGroupEntityName(dto.getGroupEntityName());
         originVal.setOriginEntityId(dto.getOriginEntityId());
