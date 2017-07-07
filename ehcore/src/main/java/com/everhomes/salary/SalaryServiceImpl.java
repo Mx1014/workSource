@@ -870,7 +870,7 @@ public class SalaryServiceImpl implements SalaryService {
         //1.查entities
         SalaryGroup periodGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(periodGroup.getOrganizationGroupId());
-        response.setSalaryGroupEntitys(groupEntities.stream().map(r -> {
+        response.setSalaryGroupEntities(groupEntities.stream().map(r -> {
             SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
             return dto;
         }).collect(Collectors.toList()));
