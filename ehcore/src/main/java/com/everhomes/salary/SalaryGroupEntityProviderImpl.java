@@ -76,6 +76,23 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
         return  query.fetchInto(SalaryGroupEntity.class);
     }
 
+
+	@Override
+	public List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long organizationGroupId, Byte code) {
+		SelectQuery<Record> query = getReadOnlyContext().select(Tables.EH_SALARY_GROUP_ENTITIES.fields()).getQuery();
+		query.addFrom(Tables.EH_SALARY_GROUP_ENTITIES, Tables.EH_SALARY_DEFAULT_ENTITIES);
+		query.addSelect(Tables.EH_SALARY_DEFAULT_ENTITIES.DEFAULT_FLAG);
+		query.addConditions(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(organizationGroupId));
+		query.addConditions(Tables.EH_SALARY_GROUP_ENTITIES.VISIBLE_FLAG.eq(code));
+		query.addConditions(Tables.EH_SALARY_GROUP_ENTITIES.ORIGIN_ENTITY_ID.eq(Tables.EH_SALARY_DEFAULT_ENTITIES.ID));
+		query.addOrderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc());
+
+/*        return query.fetch().map(r ->{
+			return  ConvertHelper.convert(r, SalaryGroupEntity.class);
+        });*/
+
+		return query.fetchInto(SalaryGroupEntity.class);
+	}
 	//	按员工批次表导出规则查询
     @Override
     public List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryId) {
@@ -107,6 +124,7 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
                 .where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(groupId))
                 .execute();
     }
+
 
 	private EhSalaryGroupEntitiesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());

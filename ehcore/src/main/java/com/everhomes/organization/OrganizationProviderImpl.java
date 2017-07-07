@@ -4709,11 +4709,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 //		onvertHelper.convert(getReadOnlyDao().findById(id), SalaryGroupEntity.class)
-		return context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+		List<OrganizationMemberDetails> results =  context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
 				.where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId))
-				.fetchOneInto(OrganizationMemberDetails.class);
+				.fetchInto(OrganizationMemberDetails.class);
 //				.fetchInto(OrganizationMemberDetails.class);
 //		.fetchOne(OrganizationMemberDetails.class);
+		if(null == results || results.size() == 0)
+			return  null ;
+		return results.get(0);
 	}
 
 	@Override

@@ -994,13 +994,14 @@ public class SalaryServiceImpl implements SalaryService {
 	public GetPeriodSalaryEmailContentResponse getPeriodSalaryEmailContent(GetPeriodSalaryEmailContentCommand cmd) {
 
 		Organization salaryGroup = organizationProvider.findOrganizationById(cmd.getSalaryOrgId());
+
 		List<SalaryGroupEntity> results = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryGroup.getId());
 		List<SalaryGroupEntityDTO> entities = results.stream().map(r -> {
 			SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
 			return dto;
 		}).collect(Collectors.toList());
-		return new GetPeriodSalaryEmailContentResponse(salaryGroup.getEmailContent(),entities);
-	}
+        return new GetPeriodSalaryEmailContentResponse(salaryGroup.getEmailContent(), entities, salaryGroup.getName(), salaryGroup.getId());
+    }
 
     @Override
     public ListPeriodSalaryEmailContentsResponse listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd) {
@@ -1035,8 +1036,7 @@ public class SalaryServiceImpl implements SalaryService {
 		if(cmd.getSalaryGroupId() == null){
 			organizationProvider.updateSalaryGroupEmailContent(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEmailContent());
 		}else {
-			SalaryGroup periodGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
-            Organization salaryOrg = organizationProvider.findOrganizationById(periodGroup.getOrganizationGroupId());
+            Organization salaryOrg = organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
             salaryOrg.setEmailContent(cmd.getEmailContent());
             organizationProvider.updateOrganization(salaryOrg);
 		}
@@ -1099,12 +1099,13 @@ public class SalaryServiceImpl implements SalaryService {
 		List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(salaryPeriodGroup.getId());
         Organization salaryOrg = organizationProvider.findOrganizationById(salaryPeriodGroup.getOrganizationGroupId());
         for (SalaryEmployee employee : employees) {
-			List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryPeriodGroup.getOrganizationGroupId());
-			List<SalaryEmployeePeriodVal> employeeEntityVals = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(employee.getId());
+            List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryPeriodGroup.getOrganizationGroupId(), NormalFlag.YES.getCode());
+            List<SalaryEmployeePeriodVal> employeeEntityVals = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(employee.getId());
 			String entityTable = processEntityTableString(groupEntities, employeeEntityVals);
 			//TODO: 人事档案给接口 发邮件
-			String toAddress = "";
-			String emailSubject = "";
+            SalaryEmployeeDTO employeeDTO = getPersonnelInfoByUserIdForSalary(employee.getUserId());
+            String toAddress = "";
+			String emailSubject = "薪酬发放";
 			sendSalaryEmail(salaryPeriodGroup.getNamespaceId(),toAddress, emailSubject,salaryOrg.getEmailContent(), entityTable);
 		}
 	}
