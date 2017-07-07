@@ -111,11 +111,16 @@ public class PortalServiceImpl implements PortalService {
 					PortalItemGroupJson[] jsonObjs = (PortalItemGroupJson[])StringHelper.fromJsonString(template.getTemplateJson(), PortalItemGroupJson[].class);
 					for (PortalItemGroupJson jsonObj: jsonObjs) {
 						PortalItemGroup portalItemGroup = ConvertHelper.convert(jsonObj, PortalItemGroup.class);
+						String instanceConfig = StringHelper.toJsonString(jsonObj.getInstanceConfig());
+						if(!StringUtils.isEmpty(instanceConfig) && !"null".equals(instanceConfig)){
+							portalItemGroup.setInstanceConfig(instanceConfig);
+						}
 						portalItemGroup.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
 						portalItemGroup.setLayoutId(portalLayout.getId());
 						portalItemGroup.setCreatorUid(user.getId());
 						portalItemGroup.setOperatorUid(user.getId());
 						groups.add(portalItemGroup);
+
 					}
 					portalItemGroupProvider.createPortalItemGroups(groups);
 				}
