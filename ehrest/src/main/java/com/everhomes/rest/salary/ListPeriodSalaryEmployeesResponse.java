@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>salaryGroupEntitys: 字段项列表 参考{@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
+ * <li>salaryGroupEntities: 字段项列表 参考{@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
  * <li>salaryPeriodEmployees: 某薪酬批次的员工核算列表参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeDTO}</li>
  * </ul>
  */
@@ -17,7 +17,7 @@ public class ListPeriodSalaryEmployeesResponse {
 
 
 	@ItemType(SalaryGroupEntityDTO.class)
-	private List<SalaryGroupEntityDTO> salaryGroupEntitys;
+	private List<SalaryGroupEntityDTO> salaryGroupEntities;
 	
 	@ItemType(SalaryPeriodEmployeeDTO.class)
 	private List<SalaryPeriodEmployeeDTO> salaryPeriodEmployees;
@@ -44,12 +44,12 @@ public class ListPeriodSalaryEmployeesResponse {
 		return StringHelper.toJsonString(this);
 	}
 
-	public List<SalaryGroupEntityDTO> getSalaryGroupEntitys() {
-		return salaryGroupEntitys;
+	public List<SalaryGroupEntityDTO> getSalaryGroupEntities() {
+		return salaryGroupEntities;
 	}
 
-	public void setSalaryGroupEntitys(List<SalaryGroupEntityDTO> salaryGroupEntitys) {
-		this.salaryGroupEntitys = salaryGroupEntitys;
+	public void setSalaryGroupEntities(List<SalaryGroupEntityDTO> salaryGroupEntities) {
+		this.salaryGroupEntities = salaryGroupEntities;
 	}
 
 }

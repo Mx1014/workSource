@@ -20,13 +20,13 @@ import com.everhomes.rest.organization.OrganizationDTO;
  * <li>paidMoney: 实发工资</li>
  * <li>checkFlag: 核算标准0-未核算 1-核算</li>
  * <li>canCheck: 是否可以核算 0-否 1-是</li>
- * <li>periodEmployeeEntitys: 批次档期的字段列表 参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeEntityDTO}</li>
+ * <li>periodEmployeeEntities: 批次档期的字段列表 参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeEntityDTO}</li>
  * </ul>
  */
 public class SalaryPeriodEmployeeDTO {
 
 	@ItemType(SalaryPeriodEmployeeEntityDTO.class)
-	private List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys;
+	private List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntities;
 	private Long id ;
 
     private String employeeNo;
@@ -46,11 +46,11 @@ public class SalaryPeriodEmployeeDTO {
     private Long userId;
 	private Byte checkFlag;
 	private Byte canCheck;
-	public List<SalaryPeriodEmployeeEntityDTO> getPeriodEmployeeEntitys() {
-		return periodEmployeeEntitys;
+	public List<SalaryPeriodEmployeeEntityDTO> getPeriodEmployeeEntities() {
+		return periodEmployeeEntities;
 	}
-	public void setPeriodEmployeeEntitys(List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys) {
-		this.periodEmployeeEntitys = periodEmployeeEntitys;
+	public void setPeriodEmployeeEntities(List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntities) {
+		this.periodEmployeeEntities = periodEmployeeEntities;
 	}
 	public String getSalaryPeriod() {
 		return salaryPeriod;
