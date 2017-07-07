@@ -487,6 +487,11 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
+    public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
+
+    }
+
+    @Override
     public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd) {
 
         User user = UserContext.current().getUser();
