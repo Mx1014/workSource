@@ -45,7 +45,15 @@ public class CreateNewsCommand {
 	private String sourceUrl;
 	@ItemType(Long.class)
 	private List<Long> communityIds;
+	private String visibleType;
 
+	public String getVisibleType() {
+		return visibleType;
+	}
+
+	public void setVisibleType(String visibleType) {
+		this.visibleType = visibleType;
+	}
 
 	public List<Long> getCommunityIds() {
 		return communityIds;

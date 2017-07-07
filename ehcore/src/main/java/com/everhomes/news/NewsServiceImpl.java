@@ -18,6 +18,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.news.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.slf4j.Logger;
@@ -392,7 +393,21 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setCommentFlag(NewsNormalFlag.DISABLED.getCode());
 		}
 
+		newsDTO.setProjectDTOS(setProjectDTOs(news.getId()));
+
 		return newsDTO;
+	}
+
+	private List<ProjectDTO> setProjectDTOs(Long newsId) {
+		List<Long> communityIds = newsProvider.listNewsCommunities(newsId);
+		Map<Long, Community> temp = communityProvider.listCommunitiesByIds(communityIds);
+		return temp.values().stream().map(r -> {
+			ProjectDTO projectDTO = new ProjectDTO();
+			projectDTO.setProjectId(r.getId());
+			projectDTO.setProjectName(r.getName());
+
+			return projectDTO;
+		}).collect(Collectors.toList());
 	}
 
 	private UserLikeType getUserLikeFlag(Long userId, Long newsId) {
@@ -919,12 +934,16 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		Integer namespaceId = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
+		SceneTokenDTO sceneTokenDTO = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
+		Integer namespaceId = sceneTokenDTO.getNamespaceId();
+
+		Long communityId = sceneTokenDTO.getEntityId();
+
 		return ConvertHelper.convert(listNews(userId, namespaceId, null, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), true),
 				ListNewsBySceneResponse.class);
 	}
 
-	private Integer getNamespaceFromSceneToken(Long userId, String sceneToken) {
+	private SceneTokenDTO getNamespaceFromSceneToken(Long userId, String sceneToken) {
 		if (StringUtils.isEmpty(sceneToken)) {
 			LOGGER.error("Invalid parameters, operatorId=" + userId + ", sceneToken=" + sceneToken);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -939,7 +958,7 @@ public class NewsServiceImpl implements NewsService {
 
 		//检查游客是否能继续访问此场景 by sfyan 20161009
 		userService.checkUserScene(SceneType.fromCode(sceneTokenDTO.getScene()));
-		return sceneTokenDTO.getNamespaceId();
+		return sceneTokenDTO;
 	}
 
 	@Override
@@ -1103,6 +1122,8 @@ public class NewsServiceImpl implements NewsService {
 				if (list != null && list.size() > 0) {
 					StringBuilder sb = new StringBuilder();
 					list.forEach(n -> {
+						n.setCommunityIds(newsProvider.listNewsCommunities(n.getId()));
+
 						//正则表达式去掉content中的富文本内容 modified by xiongying20160908
 						String content = n.getContent();
 						content = removeTag(content);

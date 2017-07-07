@@ -1422,6 +1422,14 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS).fetchOne().value1();
 
         });
+        syncTableSequence(null, EhNewsCommentRule.class, Tables.EH_NEWS_COMMENT_RULE.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_NEWS_COMMENT_RULE.ID.max()).from(Tables.EH_NEWS_COMMENT_RULE).fetchOne().value1();
+
+        });
+        syncTableSequence(null, EhNewsCommunities.class, Tables.EH_NEWS_COMMUNITIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_NEWS_COMMUNITIES.ID.max()).from(Tables.EH_NEWS_COMMUNITIES).fetchOne().value1();
+
+        });
     }
 
     @SuppressWarnings("rawtypes")

@@ -109,9 +109,9 @@ public class NewsProviderImpl implements NewsProvider {
 	@Override
 	public Boolean getCommentForbiddenFlag(Long categoryId, Integer namespaceId) {
 		final Integer[] count = new Integer[1];
-		count[0] = getReadOnlyContext().selectCount().from(Tables.EH_NEWS_COMMENT_FORBID_RULE)
-				.where(Tables.EH_NEWS_COMMENT_FORBID_RULE.CATEGORY_ID.eq(categoryId)
-						.and(Tables.EH_NEWS_COMMENT_FORBID_RULE.NAMESPACE_ID.eq(namespaceId))).fetchOneInto(Integer.class);
+		count[0] = getReadOnlyContext().selectCount().from(Tables.EH_NEWS_COMMENT_RULE)
+				.where(Tables.EH_NEWS_COMMENT_RULE.CATEGORY_ID.eq(categoryId)
+						.and(Tables.EH_NEWS_COMMENT_RULE.NAMESPACE_ID.eq(namespaceId))).fetchOneInto(Integer.class);
 
 		if(count[0] > 0) {
 			return true;

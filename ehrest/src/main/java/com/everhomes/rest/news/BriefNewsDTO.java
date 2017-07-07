@@ -3,7 +3,10 @@
 package com.everhomes.rest.news;
 
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -40,6 +43,26 @@ public class BriefNewsDTO {
 	private String newsUrl;
 	private Long categoryId;
 	private Byte commentFlag;
+	private String visibleType;
+
+	@ItemType(ProjectDTO.class)
+	private List<ProjectDTO> projectDTOS;
+
+	public List<ProjectDTO> getProjectDTOS() {
+		return projectDTOS;
+	}
+
+	public void setProjectDTOS(List<ProjectDTO> projectDTOS) {
+		this.projectDTOS = projectDTOS;
+	}
+
+	public String getVisibleType() {
+		return visibleType;
+	}
+
+	public void setVisibleType(String visibleType) {
+		this.visibleType = visibleType;
+	}
 
 	public Byte getCommentFlag() {
 		return commentFlag;
