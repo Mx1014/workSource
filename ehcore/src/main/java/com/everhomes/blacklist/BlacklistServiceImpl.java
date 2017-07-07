@@ -260,7 +260,7 @@ public class BlacklistServiceImpl implements BlacklistService{
 					if(null != userBlacklist){
 						userBlacklist.setStatus(UserBlacklistStatus.INACTIVE.getCode());
 						blacklistProvider.updateUserBlacklist(userBlacklist);
-						rolePrivilegeService.deleteAcls(cmd.getOwnerType(),cmd.getOwnerId(),EntityType.USER.getCode(),userBlacklist.getOwnerUid(), null, privilegeIds);
+						rolePrivilegeService.deleteAcls(cmd.getOwnerType(),cmd.getOwnerId(),EntityType.USER.getCode(),userBlacklist.getOwnerUid(), privilegeIds);
 					}
 				}
 				return null;

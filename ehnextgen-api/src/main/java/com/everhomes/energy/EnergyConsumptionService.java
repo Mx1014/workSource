@@ -8,6 +8,7 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -239,4 +240,11 @@ public interface EnergyConsumptionService {
     List<EnergyMeterDefaultSettingTemplateDTO> listEnergyDefaultSettingTemplates();
 
     ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
+
+    EnergyMeterDTO findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd);
+    void batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd);
+
+    String getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd);
+    void exportEnergyMeterQRCode(ExportEnergyMeterQRCodeCommand cmd, HttpServletResponse response);
+    void exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response);
 }

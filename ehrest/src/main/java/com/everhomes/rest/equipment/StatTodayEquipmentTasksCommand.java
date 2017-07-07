@@ -4,6 +4,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *  <li>ownerId: 任务所属公司id</li>
+ *  <li>ownerType: 任务所属公司类型</li>
  *  <li>targetId: 任务所属项目等的id</li>
  *  <li>targetType: 任务所属项目类型，如community</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
@@ -13,6 +15,10 @@ import com.everhomes.util.StringHelper;
  */
 public class StatTodayEquipmentTasksCommand {
 
+    private Long ownerId;
+
+    private String ownerType;
+
     private Long targetId;
 
     private String targetType;
@@ -20,6 +26,22 @@ public class StatTodayEquipmentTasksCommand {
     private Long inspectionCategoryId;
 
     private Long dateTime;
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
     public Long getDateTime() {
         return dateTime;

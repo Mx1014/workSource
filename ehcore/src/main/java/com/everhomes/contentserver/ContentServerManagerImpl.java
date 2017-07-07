@@ -164,9 +164,9 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
         if (resource != null) {
             request.setFilename(resource.getResourceName());
-            if (LOGGER.isDebugEnabled()) {
+            /*if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("build object meta data {}", resource.getResourceName());
-            }
+            }*/
         }
     }
 

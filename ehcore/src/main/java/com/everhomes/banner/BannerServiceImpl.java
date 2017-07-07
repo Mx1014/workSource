@@ -15,7 +15,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -1110,12 +1109,12 @@ public class BannerServiceImpl implements BannerService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid ownerType parameter.");
 		}
-		User user = UserContext.current().getUser();
+		/*User user = UserContext.current().getUser();
 		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), ownerId);
 		if(member == null){
 			LOGGER.error("User {} is not in the organization {}.", user.getId(), ownerId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"User is not in the organization.");
-		}
+		}*/
 	}
 }

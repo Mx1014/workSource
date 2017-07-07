@@ -24,6 +24,7 @@ import com.everhomes.techpark.expansion.LeasePromotion;
  * <li>BUILDING: 楼栋</li>
  * <li>APPURLS: app 信息</li>
  * <li>NEWS: 新闻</li>
+ * <li>EhZuolinAdmins: 左邻管理</li>
  * </ul>
  */
 public enum EntityType {
@@ -53,9 +54,14 @@ public enum EntityType {
     PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
     ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
     PM_TASK(EhPmTasks.class.getSimpleName()),
+    SERVICE_MODULE(EhServiceModules.class.getSimpleName()),
+    AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
+    ZUOLIN_ADMIN("EhZuolinAdmins"),
+    ALL("EhAll"),
     LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
-    ORGANIZATION_FILE("EhOrganizationFiles");
+    ORGANIZATION_FILE("EhOrganizationFiles"),
+    CHILD_PROJECT("child_project");
 
     private String code;
     
