@@ -347,7 +347,7 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
 
-        //  1.将前端信息传递给组织架构的接口获取相关信息
+        /*//  1.将前端信息传递给组织架构的接口获取相关信息
         ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
         command.setOwnerId(cmd.getOwnerId());
         if(!StringUtils.isEmpty(cmd.getDepartmentId()))
@@ -399,7 +399,7 @@ public class SalaryServiceImpl implements SalaryService {
                 }
                 return dto;
             }).collect(Collectors.toList()));
-        }
+        }*/
 
 /*        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setKeywords(cmd.getKeywords());
@@ -411,7 +411,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 //        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();*/
 
-/*        //  1.将前端信息传递给组织架构的接口获取相关信息
+        //  1.将前端信息传递给组织架构的接口获取相关信息
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(cmd.getOwnerId());
 
@@ -439,7 +439,7 @@ public class SalaryServiceImpl implements SalaryService {
                 }
                 return dto;
             }).collect(Collectors.toList()));
-        }*/
+        }
         return response;
     }
 
