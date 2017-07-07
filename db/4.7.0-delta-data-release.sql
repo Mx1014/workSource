@@ -595,3 +595,11 @@ insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 insert into `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) select (@menu_scope_id := @menu_scope_id + 1), concat(menu_id, '0'), `menu_name`, `owner_type`, `owner_id`, `apply_policy` from eh_web_menu_scopes where menu_id in (select id from `eh_web_menus` where id in (select menu_id from `eh_web_menu_privileges` where privilege_id in (select privilege_id from eh_acls where role_id = 1005 and privilege_id > 10000)) or id in (20000,20600,20660,40000,40700,50000,60000,70000,80000));
 
+-- 补上关联审批查看权限 add by xiongying20170707
+SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
+SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+SET @privilege_id = (SELECT MAX(id) FROM `eh_acl_privileges`);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检关联审批审核权限', '设备巡检 业务模块权限', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.relation.list', @privilege_id, '', '0', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 巡检关联审批查看权限','0',NOW());
