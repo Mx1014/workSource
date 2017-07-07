@@ -23,7 +23,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import freemarker.cache.StringTemplateLoader;
@@ -32,7 +31,10 @@ import freemarker.template.Template;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -420,10 +422,45 @@ public class SalaryServiceImpl implements SalaryService {
         //  3.查询所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
+        List<Long> uniongroupDetailIds = new ArrayList<>();
+
+        if(cmd.getSalaryGroupId() != null){
+            //将前端信息传递给组织架构的接口获取相关信息
+            ListUniongroupMemberDetailsWithConditionCommand uniongroup_command = new ListUniongroupMemberDetailsWithConditionCommand();
+            if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
+                uniongroup_command.setGroupId(cmd.getSalaryGroupId());
+            }
+            if (!StringUtils.isEmpty(cmd.getKeywords()))
+                uniongroup_command.setKeywords(cmd.getKeywords());
+            if(!StringUtils.isEmpty(cmd.getDepartmentId()))
+                uniongroup_command.setDepartmentId(cmd.getDepartmentId());
+            uniongroup_command.setGroupType(UniongroupType.SALARYGROUP.getCode());
+            uniongroup_command.setOwnerId(cmd.getOwnerId());
+            uniongroup_command.setPageAnchor(Long.valueOf("0"));
+            uniongroup_command.setPageSize(cmd.getPageSize());
+
+            //  查询关联的人员
+            List<UniongroupMemberDetail> uniongroupMemberDetails = this.uniongroupService.listUniongroupMemberDetailsWithCondition(uniongroup_command);
+
+            // 获取关联人员detailId的集合
+            uniongroupDetailIds.addAll(uniongroupMemberDetails.stream().map(r ->{return r.getDetailId();}).collect(Collectors.toList()));
+        }
+
+
+        //过滤
         ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
 
+        List<OrganizationMemberDTO> dtos = new ArrayList<>();
         if (!StringUtils.isEmpty(results)) {
-            response.setSalaryEmployeeDTO(results.getMembers().stream().map(r -> {
+            if (uniongroupDetailIds.size() > 0) {
+                dtos = results.getMembers().stream().filter(r -> {
+                    return uniongroupDetailIds.contains(r.getDetailId());
+                }).collect(Collectors.toList());
+            } else {
+                dtos = results.getMembers();
+            }
+
+            response.setSalaryEmployeeDTO(dtos.stream().map(r -> {
                 SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
                 dto.setUserId(r.getTargetId());
                 dto.setDetailId(r.getDetailId());
@@ -439,6 +476,7 @@ public class SalaryServiceImpl implements SalaryService {
                 return dto;
             }).collect(Collectors.toList()));
         }
+
         return response;
     }
 

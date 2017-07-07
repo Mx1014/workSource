@@ -3,7 +3,6 @@ package com.everhomes.uniongroup;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
-import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.organization.*;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.search.UniongroupSearcher;
@@ -11,7 +10,6 @@ import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.elasticsearch.common.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -237,10 +235,16 @@ public class UniongroupServiceImpl implements UniongroupService {
        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         SearchUniongroupDetailCommand search_cmd = new SearchUniongroupDetailCommand();
-        search_cmd.setNamespaceId(namespaceId);
-        search_cmd.setDepartmentId(cmd.getDepartmentId());
+
+        if (cmd.getDepartmentId() != null)
+            search_cmd.setDepartmentId(cmd.getDepartmentId());
         search_cmd.setEnterpriseId(cmd.getOwnerId());
-        search_cmd.setKeyword(cmd.getKeywords());
+        if (cmd.getKeywords() != null)
+            search_cmd.setKeyword(cmd.getKeywords());
+        if(cmd.getGroupId() != null)
+            search_cmd.setGroupId(cmd.getGroupId());
+
+        search_cmd.setNamespaceId(namespaceId);
         search_cmd.setPageAnchor(cmd.getPageAnchor());
         search_cmd.setPageSize(cmd.getPageSize());
         List<UniongroupMemberDetail> list = uniongroupSearcher.query(search_cmd);
