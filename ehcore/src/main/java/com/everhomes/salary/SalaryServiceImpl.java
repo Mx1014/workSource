@@ -1194,7 +1194,7 @@ public class SalaryServiceImpl implements SalaryService {
                 processSalaryEmployeeOriginValsBeforeCalculate(salaryGroupEntities, salaryEmployeeOriginVals,userId);
                 LOGGER.debug("\n after before calculate : salary origin  Vals ++ " + salaryEmployeeOriginVals);
                 List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals = new ArrayList<>();
-                //3.循环人员搞vals
+                //3.循环每一个批次设置的字段项，给他做成本期的periodVal 如果entity不是计算公式就设置值，如果是公式就空
 				for (SalaryGroupEntity entity : salaryGroupEntities) {
 					SalaryEmployeePeriodVal val = new SalaryEmployeePeriodVal();
                     val.setOwnerType(entity.getOwnerType());
@@ -1270,6 +1270,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     /**
      * 计算 period Vals 的值
+     * @param salaryEmployeePeriodVals : 要计算的本期Vals列表，传入的时候数值类都需要填写，公式类都为null
      * */
 	private void processSalaryEmployeePeriodVals( List<SalaryGroupEntity> salaryGroupEntities,
                                                   List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals,
