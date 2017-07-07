@@ -1,13 +1,6 @@
 // @formatter:off
 package com.everhomes.community;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.everhomes.acl.*;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.general_form.GeneralFormService;
@@ -47,6 +40,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.configuration.Configurations;
 import com.everhomes.configuration.ConfigurationsProvider;
@@ -56,6 +50,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
+import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
@@ -66,104 +62,69 @@ import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceDetail;
-import com.everhomes.namespace.NamespaceResource;
-import com.everhomes.namespace.NamespaceResourceProvider;
-import com.everhomes.namespace.NamespacesProvider;
-import com.everhomes.organization.ExecuteImportTaskCallback;
-import com.everhomes.organization.ImportFileService;
-import com.everhomes.organization.ImportFileTask;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationDetail;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationMemberLog;
-import com.everhomes.organization.OrganizationOwner;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.module.ServiceModuleAssignment;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.namespace.*;
+import com.everhomes.organization.*;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
-import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
-import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
-import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
-import com.everhomes.rest.community.admin.CommunityImportBaseConfigCommand;
-import com.everhomes.rest.community.admin.CommunityImportOrganizationConfigCommand;
-import com.everhomes.rest.community.admin.CommunityManagerDTO;
-import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
-import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
-import com.everhomes.rest.community.admin.CommunityUserDto;
-import com.everhomes.rest.community.admin.CommunityUserResponse;
-import com.everhomes.rest.community.admin.CountCommunityUserResponse;
-import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
-import com.everhomes.rest.community.admin.CreateCommunityCommand;
-import com.everhomes.rest.community.admin.CreateCommunityResponse;
-import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
-import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
-import com.everhomes.rest.community.admin.ImportCommunityCommand;
-import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
-import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsCommand;
-import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsResponse;
-import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
-import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
-import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
-import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
-import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
-import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
-import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
-import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
-import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
-import com.everhomes.rest.community.admin.SmsTemplate;
-import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
-import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
-import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
-import com.everhomes.rest.community.admin.UpdateResourceCategoryCommand;
-import com.everhomes.rest.community.admin.UserCommunityDTO;
-import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
-import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
-import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.community.*;
+import com.everhomes.rest.community.admin.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.group.GroupDiscriminator;
-import com.everhomes.rest.group.GroupJoinPolicy;
-import com.everhomes.rest.group.GroupMemberDTO;
-import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.group.GroupPostFlag;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.messaging.QuestionMetaObject;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.group.*;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionServiceErrorCode;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
+import com.everhomes.techpark.expansion.LeaseFormRequest;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
+import org.jooq.JoinType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class CommunityServiceImpl implements CommunityService {
@@ -1497,15 +1458,21 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
-		Long communityId = cmd.getCommunityId();
+		// Long communityId = cmd.getCommunityId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+        if (resourceList == null) {
+            return new CommunityAuthUserAddressResponse();
+        }
+        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
 
-		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
+        List<Group> groups = groupProvider.listGroupByCommunityIds(communityIds, (loc, query) -> {
             Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
             query.addConditions(c);
             return query;
         });
 		
-		List<Long> groupIds = new ArrayList<Long>(); 
+		List<Long> groupIds = new ArrayList<>();
 		for (Group group : groups) {
 			groupIds.add(group.getId());
 		}
@@ -1514,41 +1481,73 @@ public class CommunityServiceImpl implements CommunityService {
 		locator.setAnchor(cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<GroupMember> groupMembers = null;
-		if(cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.REJECT.getCode()))
-			groupMembers =  listCommunityRejectUserAddress(groupIds,locator,pageSize);
-		else
-			groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,pageSize,(loc, query) -> {
-			Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
-			c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
-            query.addConditions(c);
-            if(null != locator.getAnchor())
-            	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
-			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
-            return query;
-			});
-		
-		
-		List<GroupMemberDTO> dtos = groupMembers.stream().map(r->{
+
+        if (cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.REJECT.getCode())) {
+            groupMembers = listCommunityRejectUserAddress(cmd.getUserInfoKeyword(), cmd.getCommunityKeyword(), groupIds, locator, pageSize);
+        } else {
+            groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator, pageSize, (loc, query) -> {
+                Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+                c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
+
+                if (StringUtils.isNotBlank(cmd.getUserInfoKeyword())) {
+                    String keyword = "%" + cmd.getUserInfoKeyword() + "%";
+                    query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
+                    query.addConditions(Tables.EH_USERS.NICK_NAME.like(keyword));
+                }
+                if (StringUtils.isNotBlank(cmd.getCommunityKeyword())) {
+                    String keyword = "%" + cmd.getCommunityKeyword() + "%";
+                    query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
+                    query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_GROUPS.INTEGRAL_TAG2.eq(Tables.EH_COMMUNITIES.ID));
+                    query.addConditions(Tables.EH_COMMUNITIES.NAME.like(keyword));
+                }
+
+                query.addConditions(c);
+                if (null != locator.getAnchor()) {
+                    query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
+                }
+                query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
+                return query;
+            });
+        }
+
+        List<GroupMemberDTO> dtos = groupMembers.stream().map(r -> {
 			GroupMemberDTO dto = ConvertHelper.convert(r, GroupMemberDTO.class);
 			Group group = groupProvider.findGroupById(dto.getGroupId());
-			if(null != group){
+			if(null != group) {
 				Address address = addressProvider.findAddressById(group.getFamilyAddressId());
-				if(null != address){
+				if (null != address) {
 					dto.setAddressId(address.getId());
 					dto.setApartmentName(address.getApartmentName());
 					dto.setBuildingName(address.getBuildingName());
 				}
-			}
-			
+                Long communityId = group.getFamilyCommunityId();
+                Community community = communityProvider.findCommunityById(communityId);
+                if (community != null) {
+                    dto.setCityName(community.getCityName());
+                    dto.setAreaName(community.getAreaName());
+                    dto.setCommunityName(community.getName());
+                }
+            }
+
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(dto.getMemberId(), IdentifierType.MOBILE.getCode());
-			if(null != userIdentifier){
+			if(null != userIdentifier) {
 				dto.setCellPhone(userIdentifier.getIdentifierToken());
 				User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-				if(null != user){
+				if(null != user) {
 					dto.setInviterNickName(user.getNickName());
 				}
 			}
-			return dto;
+            if (r.getOperatorUid() != null) {
+                userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(r.getOperatorUid(), IdentifierType.MOBILE.getCode());
+                if(null != userIdentifier) {
+                    dto.setOperatorPhone(userIdentifier.getIdentifierToken());
+                    User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                    if(null != user) {
+                        dto.setOperatorName(user.getNickName());
+                    }
+                }
+            }
+            return dto;
 		}).collect(Collectors.toList());
 		
 		CommunityAuthUserAddressResponse res = new CommunityAuthUserAddressResponse();
@@ -1558,14 +1557,14 @@ public class CommunityServiceImpl implements CommunityService {
 		return res;
 	}
 	
-	private List<GroupMember> listCommunityRejectUserAddress(List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
-		List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByGroupIds(groupIds,locator,pageSize);
-		return histories.stream().map(r->{
-			GroupMember dto = ConvertHelper.convert(r, GroupMember.class);
-			dto.setMemberId(r.getOwnerUid()); 
-			dto.setApproveTime(r.getCreateTime());
-			return dto;
-			}).collect(Collectors.toList());
+	private List<GroupMember> listCommunityRejectUserAddress(String userInfoKeyword, String communityKeyword, List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
+		List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByGroupIds(userInfoKeyword, communityKeyword, groupIds, locator, pageSize);
+		return histories.stream().map(r -> {
+            GroupMember dto = ConvertHelper.convert(r, GroupMember.class);
+            dto.setMemberId(r.getOwnerUid());
+            dto.setApproveTime(r.getCreateTime());
+            return dto;
+        }).collect(Collectors.toList());
 	}
 
 
@@ -2833,17 +2832,24 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 	}
 
-
 	@Override
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
-		// TODO Auto-generated method 
-		ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
-		List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(cmd.getCommunityId());
-		if(null == orgs || orgs.size() == 0)
-			return response;
+		// TODO Auto-generated method
+        ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
-		List<Long> orgIds = new ArrayList<Long>();
-		for(OrganizationCommunityRequest org : orgs){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+        if (resourceList == null) {
+            return response;
+        }
+        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
+        List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(communityIds);
+        if (null == orgs || orgs.size() == 0) {
+            return response;
+        }
+
+		List<Long> orgIds = new ArrayList<>();
+		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -2851,28 +2857,33 @@ public class CommunityServiceImpl implements CommunityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
-
 		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(
-				cmd.getKeywords(),orgIds, cmd.getStatus(), null, locator, pageSize);
+				cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
 
-		if(0 == organizationMembers.size()){
+		if(0 == organizationMembers.size()) {
 			return response;
 		}
 
 		response.setNextPageAnchor(locator.getAnchor());
 
-		response.setMembers(organizationMembers.stream().map((c) ->{
-			ComOrganizationMemberDTO dto = ConvertHelper.convert(c, ComOrganizationMemberDTO.class);
-			Organization org = this.organizationProvider.findOrganizationById(c.getOrganizationId());
-			dto.setOrganizationName(org.getName());
-			return dto;
-		}).collect(Collectors.toList()));
+        List<ComOrganizationMemberDTO> dtoList = organizationMembers.stream()
+            .map((c) -> {
+                ComOrganizationMemberDTO dto = ConvertHelper.convert(c, ComOrganizationMemberDTO.class);
+                if (c.getOperatorUid() != null) {
+                    User operator = userProvider.findUserById(c.getOperatorUid());
+                    UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
+                    dto.setOperatorName(operator.getNickName());
+                    dto.setOperatorPhone(operatorIdentifier.getIdentifierToken());
+                }
+                return dto;
+            }).collect(Collectors.toList());
+
+        response.setMembers(dtoList);
 
 		return response;
 	}
 
-
-	@Override 
+	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) { 
 		if(null == cmd.getUserId() )
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
