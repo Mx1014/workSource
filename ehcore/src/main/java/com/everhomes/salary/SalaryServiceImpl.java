@@ -1022,7 +1022,6 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public void batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd) {
-        LOGGER.debug(cmd.toString());
         for (UpdateSalaryGroupEntitiesVisableCommand cmd1 : cmd.getSalaryGroupCmd()) {
             cmd1.setOwnerId(cmd.getOwnerId());
             cmd1.setOwnerType(cmd.getOwnerType());
