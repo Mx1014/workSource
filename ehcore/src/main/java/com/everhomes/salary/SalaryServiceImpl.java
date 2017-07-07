@@ -1058,11 +1058,10 @@ public class SalaryServiceImpl implements SalaryService {
                 return null;
             }
             LOGGER.debug("cmd" + cmd);
-            cmd.getSalaryGroupEntities().stream().map(r ->{
-                LOGGER.debug("UPDATE VISIBLE +"+r.getId()+"+"+r.getVisibleFlag());
-                salaryGroupEntityProvider.updateSalaryGroupEntityVisible(r.getId(),r.getVisibleFlag());
-                return null;
-            });
+            for (SalaryGroupEntityDTO r : cmd.getSalaryGroupEntities()) {
+                LOGGER.debug("UPDATE VISIBLE +" + r.getId() + "+" + r.getVisibleFlag());
+                salaryGroupEntityProvider.updateSalaryGroupEntityVisible(r.getId(), r.getVisibleFlag());
+            }
             return null;
 		});
 	}
