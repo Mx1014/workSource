@@ -547,10 +547,15 @@ UPDATE `eh_service_modules` SET TYPE = 0 WHERE path LIKE '/60000%';
 
 -- 停车充值 add by sw 20170706
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10005', 'zh_CN', '网络通讯失败，缴费出错');
-UPDATE eh_parking_recharge_orders set error_description = 'status状态是2,rechargestatus状态为1,付款成功,充值失败的老数据', status = -1 where status = 2 and recharge_status = 1;
+UPDATE eh_parking_recharge_orders SET error_description = 'status状态是2,rechargestatus状态为1,付款成功,充值失败的老数据', STATUS = -1 WHERE STATUS = 2 AND recharge_status = 1;
 
 UPDATE eh_parking_recharge_orders SET STATUS = 3 WHERE recharge_status = 2;
-
+UPDATE eh_parking_lots set contact = 13632650699 where id = 10001;
+UPDATE eh_parking_lots set contact = 13510551322 where id = 10003;
+UPDATE eh_parking_lots set contact = 18927485550 where id = 10004;
+UPDATE eh_parking_lots set contact = 18718523489 where id = 10006;
+UPDATE eh_parking_lots set contact = 13918348877 where id = 10021;
+UPDATE eh_parking_lots set contact = 18051307125 where id = 10023;
 -- 不给单独授权的module状态置0 add by xiongying20170706
  
  
@@ -575,25 +580,39 @@ UPDATE eh_locale_templates SET TEXT = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4
 <br>
 如非本人操作，请忽略此邮件。
 <br>
-谢谢，${appName}</p>${note}</body></html>'
+谢谢，${appName}</p></body></html>'
 WHERE scope = 'verify.mail' AND CODE =1 ;
 
 
 
 -- 菜单整理脚本 add by sfyan 20170706
 -- 给菜单补上moduleid
-update `eh_web_menus` set module_id = REVERSE(SUBSTRING_INDEX(REVERSE(SUBSTRING_INDEX(path, "/", 3)), "/", 1)) where path like '/20000/%' and module_id is null; 
-update `eh_web_menus` set module_id = REVERSE(SUBSTRING_INDEX(REVERSE(SUBSTRING_INDEX(path, "/", 3)), "/", 1))  where path like '/40000/%' and module_id is null;
+UPDATE `eh_web_menus` SET module_id = REVERSE(SUBSTRING_INDEX(REVERSE(SUBSTRING_INDEX(path, "/", 3)), "/", 1)) WHERE path LIKE '/20000/%' AND module_id IS NULL; 
+UPDATE `eh_web_menus` SET module_id = REVERSE(SUBSTRING_INDEX(REVERSE(SUBSTRING_INDEX(path, "/", 3)), "/", 1))  WHERE path LIKE '/40000/%' AND module_id IS NULL;
 
 -- 屏蔽掉物业公司不要的菜单
-UPDATE eh_web_menus SET STATUS = 0 WHERE ID IN (SELECT WW.ID FROM (SELECT ID FROM eh_web_menus WHERE ID NOT IN (select ID from `eh_web_menus` where id in (select menu_id from `eh_web_menu_privileges` where privilege_id in (select privilege_id from eh_acls where role_id = 1001 and privilege_id > 10000)) or id in (10000,20000,30000,40000,50000,40700,50000,60000,70000,80000,41200,70000))) WW);
+UPDATE eh_web_menus SET STATUS = 0 WHERE ID IN (SELECT WW.ID FROM (SELECT ID FROM eh_web_menus WHERE ID NOT IN (SELECT ID FROM `eh_web_menus` WHERE id IN (SELECT menu_id FROM `eh_web_menu_privileges` WHERE privilege_id IN (SELECT privilege_id FROM eh_acls WHERE role_id = 1001 AND privilege_id > 10000)) OR id IN (10000,20000,30000,40000,50000,40700,50000,60000,70000,80000,41200,70000))) WW);
 
 -- 新配置给普通企业的菜单
-insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) select concat(id,'0'),`name`, concat(`parent_id`,'0'), `icon_url`, `data_type`, `leaf_flag`, `status`, concat(right(replace(path, '/', '0/'), length(replace(path, '/', '0/')) - 1), '0'), 'organization', `sort_num`, `module_id`, `level`, `condition_type`, `category` from `eh_web_menus` where id in (select menu_id from `eh_web_menu_privileges` where privilege_id in (select privilege_id from eh_acls where role_id = 1005 and privilege_id > 10000)) or id in (20000,20600,20660,40000,40700,50000,60000,70000,80000);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) SELECT CONCAT(id,'0'),`name`, CONCAT(`parent_id`,'0'), `icon_url`, `data_type`, `leaf_flag`, `status`, CONCAT(RIGHT(REPLACE(path, '/', '0/'), LENGTH(REPLACE(path, '/', '0/')) - 1), '0'), 'organization', `sort_num`, `module_id`, `level`, `condition_type`, `category` FROM `eh_web_menus` WHERE id IN (SELECT menu_id FROM `eh_web_menu_privileges` WHERE privilege_id IN (SELECT privilege_id FROM eh_acls WHERE role_id = 1005 AND privilege_id > 10000)) OR id IN (20000,20600,20660,40000,40700,50000,60000,70000,80000);
 
 -- 给域空间的普通企业配置菜单
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-insert into `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) select (@menu_scope_id := @menu_scope_id + 1), concat(menu_id, '0'), `menu_name`, `owner_type`, `owner_id`, `apply_policy` from eh_web_menu_scopes where menu_id in (select id from `eh_web_menus` where id in (select menu_id from `eh_web_menu_privileges` where privilege_id in (select privilege_id from eh_acls where role_id = 1005 and privilege_id > 10000)) or id in (20000,20600,20660,40000,40700,50000,60000,70000,80000));
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) SELECT (@menu_scope_id := @menu_scope_id + 1), CONCAT(menu_id, '0'), `menu_name`, `owner_type`, `owner_id`, `apply_policy` FROM eh_web_menu_scopes WHERE menu_id IN (SELECT id FROM `eh_web_menus` WHERE id IN (SELECT menu_id FROM `eh_web_menu_privileges` WHERE privilege_id IN (SELECT privilege_id FROM eh_acls WHERE role_id = 1005 AND privilege_id > 10000)) OR id IN (20000,20600,20660,40000,40700,50000,60000,70000,80000));
+
+update `eh_web_menus` set status = 2 where type = 'organization';
+
+-- 整理菜单的scope add by sfyan 20170706
+delete from `eh_web_menu_scopes` where owner_id in (select ww.owner_id from (select owner_id  from `eh_web_menu_scopes` where menu_id in (select id from `eh_web_menus` where `path` like '/200000%') group by owner_id having count(*) = 1) ww) and menu_id = 200000;
+
+delete from `eh_web_menu_scopes` where owner_id in (select ww.owner_id from (select owner_id  from `eh_web_menu_scopes` where menu_id in (select id from `eh_web_menus` where `path` like '/400000%') group by owner_id having count(*) = 1) ww) and menu_id = 400000;
+
+delete from `eh_web_menu_scopes` where menu_id in (select id from `eh_web_menus` where `path` like '/80000/%');
+
+delete from `eh_web_menu_scopes` where menu_id in (80000);
+
+update `eh_web_menus` set `status` = 2 where id = 49100;
+update `eh_web_menus` set `status` = 2 where path like '/20000/49100/%';
 
 -- 补上关联审批查看权限 add by xiongying20170707
 SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
@@ -603,3 +622,6 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.relation.list', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
     VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 巡检关联审批查看权限','0',NOW());
+
+
+

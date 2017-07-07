@@ -1737,7 +1737,7 @@ public class FlowServiceImpl implements FlowService {
             Map<String, String> meta = new HashMap<>();
             meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
             meta.put(MessageMetaConstant.META_OBJECT, rmo.toString());
-            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, ctx.getModuleName());
+            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, flowCase.getTitle());
 
             messageDto.setMeta(meta);
 

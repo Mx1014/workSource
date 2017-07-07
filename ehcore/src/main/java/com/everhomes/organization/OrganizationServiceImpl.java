@@ -6624,22 +6624,23 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setTargetType(OrganizationMemberTargetType.USER.getCode());
             organizationProvider.updateOrganizationMember(member);
 
-            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
-            detail.setTargetId(member.getTargetId());
-            detail.setTargetType(member.getTargetType());
-            organizationProvider.updateOrganizationMemberDetails(detail,detail.getId());
+            if(null != member.getDetailId()){
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+                detail.setTargetId(member.getTargetId());
+                detail.setTargetType(member.getTargetType());
+                organizationProvider.updateOrganizationMemberDetails(detail,detail.getId());
 
-            User user = userProvider.findUserById(member.getTargetId());
-            user.setNickName(detail.getContactName());
-            if (StringUtils.isEmpty(user.getAvatar())) {
-                user.setAvatar(detail.getAvatar());
+                User user = userProvider.findUserById(member.getTargetId());
+                user.setNickName(detail.getContactName());
+                if (StringUtils.isEmpty(user.getAvatar())) {
+                    user.setAvatar(detail.getAvatar());
+                }
+                if (StringUtils.isEmpty(user.getAvatar())) {
+                    user.setAvatar(configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "user.avatar.undisclosured.url", ""));
+                }
+
+                userProvider.updateUser(user);
             }
-
-            if (StringUtils.isEmpty(user.getAvatar())) {
-                user.setAvatar(configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "user.avatar.undisclosured.url", ""));
-            }
-
-            userProvider.updateUser(user);
             return null;
         });
     }
@@ -9704,10 +9705,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             appName = namespace.getName();
         map.put("appName", appName);
         map.put("verifyUrl", verifyUrl);
-        String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
         String mailSubject = this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
                 VerifyMailTemplateCode.SUBJECT_CODE, RentalNotificationTemplateCode.locale, "加入企业验证邮件");
-        map.put("title", mailSubject);
+        map.put("title", mailSubject);        
+        String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
+ 
+//        LOGGER.debug("\n mailText = " + mailText);
 //		Email email = new EmailBuilder()
 //	    .from(appName,account)
 //	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail())
@@ -10900,7 +10903,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setGender(member.getGender());
             detail.setEmployeeType(member.getEmployeeType());
             detail.setEmployeeNo(member.getEmployeeNo() != null ? member.getEmployeeNo() : "");
-            detail.setCheckInTime(detail.getCheckInTime());
+            detail.setCheckInTime(member.getCheckInTime());
         }
         return detail;
     }
