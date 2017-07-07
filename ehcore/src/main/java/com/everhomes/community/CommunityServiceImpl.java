@@ -1459,6 +1459,8 @@ public class CommunityServiceImpl implements CommunityService {
                     String keyword = "%" + cmd.getUserInfoKeyword() + "%";
                     query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
                     query.addConditions(Tables.EH_USERS.NICK_NAME.like(keyword));
+                    query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+                    query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword));
                 }
                 if (StringUtils.isNotBlank(cmd.getCommunityKeyword())) {
                     String keyword = "%" + cmd.getCommunityKeyword() + "%";
