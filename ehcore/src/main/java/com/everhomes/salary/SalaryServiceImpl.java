@@ -968,13 +968,13 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public GetPeriodSalaryEmailContentResponse getPeriodSalaryEmailContent(GetPeriodSalaryEmailContentCommand cmd) {
 
-		SalaryGroup periodGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
-		List<SalaryGroupEntity> results = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(periodGroup.getOrganizationGroupId());
+		Organization salaryGroup = organizationProvider.findOrganizationById(cmd.getSalaryOrgId());
+		List<SalaryGroupEntity> results = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryGroup.getId());
 		List<SalaryGroupEntityDTO> entities = results.stream().map(r -> {
 			SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
 			return dto;
 		}).collect(Collectors.toList());
-		return new GetPeriodSalaryEmailContentResponse(periodGroup.getEmailContent(),entities);
+		return new GetPeriodSalaryEmailContentResponse(salaryGroup.getEmailContent(),entities);
 	}
 
     @Override
@@ -1008,11 +1008,12 @@ public class SalaryServiceImpl implements SalaryService {
 		//email content
 
 		if(cmd.getSalaryGroupId() == null){
-			salaryGroupProvider.updateSalaryGroupEmailContent(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEmailContent());
+			organizationProvider.updateSalaryGroupEmailContent(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEmailContent());
 		}else {
 			SalaryGroup periodGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
-			periodGroup.setEmailContent(cmd.getEmailContent());
-			salaryGroupProvider.updateSalaryGroup(periodGroup);
+            Organization salaryOrg = organizationProvider.findOrganizationById(periodGroup.getOrganizationGroupId());
+            salaryOrg.setEmailContent(cmd.getEmailContent());
+            organizationProvider.updateOrganization(salaryOrg);
 		}
 	}
 
@@ -1069,16 +1070,17 @@ public class SalaryServiceImpl implements SalaryService {
 		}
 	}
 	/**给某个批次某期发薪酬邮件*/
-	private void sendSalary(SalaryGroup salaryGroup) {
-		List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(salaryGroup.getId());
-		for (SalaryEmployee employee : employees) {
-			List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryGroup.getOrganizationGroupId());
+	private void sendSalary(SalaryGroup salaryPeriodGroup) {
+		List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(salaryPeriodGroup.getId());
+        Organization salaryOrg = organizationProvider.findOrganizationById(salaryPeriodGroup.getOrganizationGroupId());
+        for (SalaryEmployee employee : employees) {
+			List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryPeriodGroup.getOrganizationGroupId());
 			List<SalaryEmployeePeriodVal> employeeEntityVals = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(employee.getId());
 			String entityTable = processEntityTableString(groupEntities, employeeEntityVals);
 			//TODO: 人事档案给接口 发邮件
 			String toAddress = "";
 			String emailSubject = "";
-			sendSalaryEmail(salaryGroup.getNamespaceId(),toAddress, emailSubject,salaryGroup.getEmailContent(), entityTable);
+			sendSalaryEmail(salaryPeriodGroup.getNamespaceId(),toAddress, emailSubject,salaryOrg.getEmailContent(), entityTable);
 		}
 	}
 
@@ -1182,8 +1184,7 @@ public class SalaryServiceImpl implements SalaryService {
 			salaryGroup.setOwnerId(punchService.getTopEnterpriseId(salaryOrg.getDirectlyEnterpriseId()));
 			salaryGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
             SalaryGroup lastGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryOrg.getId(), lastPeriod);
-            if(null != lastGroup)
-                salaryGroup.setEmailContent(lastGroup.getEmailContent());
+            salaryGroup.setEmailContent(salaryOrg.getEmailContent());
             salaryGroupProvider.deleteSalaryGroup(salaryGroup.getOrganizationGroupId(), salaryGroup.getSalaryPeriod());
             salaryGroupProvider.createSalaryGroup(salaryGroup);
 			// 2.循环薪酬组取里面的人员

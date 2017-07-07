@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型:Organization</li>
  * <li>ownerId: 所属id</li>
- * <li>salaryPeriodGroupId: 某期薪酬批次id</li>
+ * <li>salaryOrgId:  批次id</li>
  * </ul>
  */
 public class GetPeriodSalaryEmailContentCommand {
@@ -17,17 +17,17 @@ public class GetPeriodSalaryEmailContentCommand {
 
 	private Long ownerId;
 
-	private Long salaryPeriodGroupId;
+	private Long salaryOrgId;
 
 	public GetPeriodSalaryEmailContentCommand() {
 
 	}
 
-	public GetPeriodSalaryEmailContentCommand(String ownerType, Long ownerId, Long salaryPeriodGroupId) {
+	public GetPeriodSalaryEmailContentCommand(String ownerType, Long ownerId, Long salaryOrgId) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
-		this.salaryPeriodGroupId = salaryPeriodGroupId;
+		this.salaryOrgId = salaryOrgId;
 	}
 
 	public String getOwnerType() {
@@ -46,17 +46,17 @@ public class GetPeriodSalaryEmailContentCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getSalaryPeriodGroupId() {
-		return salaryPeriodGroupId;
-	}
-
-	public void setSalaryPeriodGroupId(Long salaryPeriodGroupId) {
-		this.salaryPeriodGroupId = salaryPeriodGroupId;
-	}
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Long getSalaryOrgId() {
+		return salaryOrgId;
+	}
+
+	public void setSalaryOrgId(Long salaryOrgId) {
+		this.salaryOrgId = salaryOrgId;
+	}
 }

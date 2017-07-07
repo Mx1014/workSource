@@ -411,5 +411,7 @@ public interface OrganizationProvider {
 
 	//查询所有总公司
 	List<Organization> listHeadEnterprises();
+
+	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
 }
 
