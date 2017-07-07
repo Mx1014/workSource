@@ -4631,10 +4631,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		//added by wh 2016-10-13 把被拒绝的过滤掉
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(big_path);
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(big_path+"%");
 		if (small_path != null) {
 			for (String p : small_path) {
-				cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.notLike(p));
+				cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.notLike(p+"%"));
 			}
 		}
 		query.addConditions(cond);

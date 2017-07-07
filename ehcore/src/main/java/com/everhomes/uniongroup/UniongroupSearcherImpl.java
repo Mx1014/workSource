@@ -76,8 +76,8 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         for (Organization org : orgs) {
             this.syncUniongroupDetailsAtOrg(org, UniongroupType.SALARYGROUP.getCode());
         }
-/*        this.optimize(1);
-        this.refresh();*/
+//        this.optimize(1);
+        this.refresh();
     }
 
     @Override

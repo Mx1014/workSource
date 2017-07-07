@@ -105,9 +105,11 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.userOrganization.UserOrganizationProvider;
+import com.everhomes.userOrganization.UserOrganizationService;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
@@ -254,6 +256,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private UserOrganizationProvider userOrganizationProvider;
+
+    @Autowired
+    private UniongroupService uniongroupService;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -9089,6 +9094,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             //添加除公司之外的机构成员
             departments.addAll(repeatCreateOrganizationmembers(departmentIds,cmd.getContactToken(),enterpriseIds,organizationMember));
+
+            //给新增或修改的人员重新分配薪酬组
+            this.uniongroupService.reallocatedUnion(org.getId(), departmentIds, organizationMember);
+
             groups.addAll(repeatCreateOrganizationmembers(groupIds,cmd.getContactToken(),enterpriseIds,organizationMember));
             jobPositions.addAll(repeatCreateOrganizationmembers(jobPositionIds,cmd.getContactToken(),enterpriseIds,organizationMember));
             jobLevels.addAll(repeatCreateOrganizationmembers(jobLevelIds,cmd.getContactToken(),enterpriseIds,organizationMember));

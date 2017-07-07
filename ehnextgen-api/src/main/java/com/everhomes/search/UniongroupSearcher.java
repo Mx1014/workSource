@@ -21,4 +21,8 @@ public interface UniongroupSearcher {
     void syncUniongroupDetailsAtOrg(Organization org, String groupType);
 
     List query(SearchUniongroupDetailCommand cmd);
+
+    void deleteAll();
+
+    void refresh();
 }

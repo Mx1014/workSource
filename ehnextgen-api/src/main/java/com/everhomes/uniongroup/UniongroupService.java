@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.uniongroup;
 
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.uniongroup.*;
 
 import java.util.List;
@@ -29,13 +30,22 @@ public interface UniongroupService {
      **/
     public void deleteUniongroupConfigures(UniongroupConfigures uniongroupConfigure);
 
-    /**根据条件查询记录**/
+    /**
+     * 根据条件查询记录
+     **/
     public List listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd);
 
-    /**根据薪酬组id获取相关人数*/
+    /**
+     * 根据薪酬组id获取相关人数
+     */
     public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId);
 
     void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId);
 
     void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId);
+
+    /**
+     * 新增或修改人员重新分配薪酬组
+     **/
+    void reallocatedUnion(Long enterpriseId, List<Long> departmentIds, OrganizationMember organizationMember);
 }
