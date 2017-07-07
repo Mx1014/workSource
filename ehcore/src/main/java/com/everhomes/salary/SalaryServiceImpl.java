@@ -371,7 +371,6 @@ public class SalaryServiceImpl implements SalaryService {
         if (!StringUtils.isEmpty(results)) {
             response.setSalaryEmployeeDTO(results.stream().map(r -> {
                 SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
-                //// TODO: 2017/7/6 职位和部门
                 String department = "";
                 String jobPosition = "";
                 dto.setUserId(r.getTargetId());
@@ -830,7 +829,15 @@ public class SalaryServiceImpl implements SalaryService {
 		//查询异常员工人数
 		//异常员工判断1:未关联批次
 		//TODO: 组织架构提供未关联批次的
-		Integer unLinkNumber = 0;
+        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
+        //  获取公司总人数
+        Integer totalCount = this.organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
+
+        //  关联人数一次性获取
+        Integer relevantCount = 0;
+//        List<Object[]> relevantCounts = this.uniongroupService.listUniongroupMemberCount(org.getNamespaceId(), salaryGroupIds, cmd.getOwnerId());
+
+        Integer unLinkNumber = 0;
 		abnormalNumber += unLinkNumber;
 		//判断2:关联了批次,但是实发工资为"-"
 		//查询eh_salary_employee_period_vals 本期 的 实发工资(entity_id=98)数据为null的记录数
@@ -906,13 +913,13 @@ public class SalaryServiceImpl implements SalaryService {
 		dto.setPeriodEmployeeEntities(result.stream().map(r2 ->{
 			SalaryPeriodEmployeeEntityDTO dto2 = processSalaryPeriodEmployeeEntityDTO(r2);
 //			dto2.setIsFormula(NormalFlag.NO.getCode());
-			if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_GONGHAO)) {
+			if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_GONGHAO)) {
 				dto.setEmployeeNo(r2.getSalaryValue());
-			}else if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_NAME)) {
+			}else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_NAME)) {
 				dto.setContactName(r2.getSalaryValue());
-			}else if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_BUMEN)) {
+			}else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_BUMEN)) {
 				dto.setDepartments(r2.getSalaryValue());
-			}else if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_SHIFA)) {
+			}else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_SHIFA)) {
 				dto.setPaidMoney(new BigDecimal(r2.getSalaryValue()));
 			}
 
@@ -1113,9 +1120,8 @@ public class SalaryServiceImpl implements SalaryService {
             List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryPeriodGroup.getOrganizationGroupId(), NormalFlag.YES.getCode());
             List<SalaryEmployeePeriodVal> employeeEntityVals = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(employee.getId());
 			String entityTable = processEntityTableString(groupEntities, employeeEntityVals);
-			//TODO: 人事档案给接口 发邮件
             SalaryEmployeeDTO employeeDTO = getPersonnelInfoByUserIdForSalary(employee.getUserId());
-            String toAddress = "";
+            String toAddress = employeeDTO.getEmail();
 			String emailSubject = "薪酬发放";
 			sendSalaryEmail(salaryPeriodGroup.getNamespaceId(),toAddress, emailSubject,salaryOrg.getEmailContent(), entityTable);
 		}
