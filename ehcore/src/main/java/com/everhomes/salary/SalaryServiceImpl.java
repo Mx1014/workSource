@@ -832,7 +832,7 @@ public class SalaryServiceImpl implements SalaryService {
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
         //  获取公司总人数
         Integer totalCount = this.organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
-
+        uniongroupService.
         //  关联人数一次性获取
         Integer relevantCount = 0;
 //        List<Object[]> relevantCounts = this.uniongroupService.listUniongroupMemberCount(org.getNamespaceId(), salaryGroupIds, cmd.getOwnerId());
@@ -1410,6 +1410,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
 	public ListSalarySendHistoryResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd) {
+
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
 		List<Long> userIds = punchService.listDptUserIds(org, cmd.getOrganizationId(), cmd.getKeyWord(), NormalFlag.YES.getCode());
 		Calendar startClanedar = Calendar.getInstance();
