@@ -16,3 +16,4 @@ CREATE TABLE `eh_news_comment_rule` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE eh_news ADD COLUMN `visible_type` VARCHAR(32);
