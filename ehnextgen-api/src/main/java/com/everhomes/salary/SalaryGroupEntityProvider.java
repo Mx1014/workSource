@@ -20,4 +20,6 @@ public interface SalaryGroupEntityProvider {
 	void updateSalaryGroupEntityVisible(Long id, Byte visibleFlag);
 //	void deleteSalaryGroupEntity(SalaryGroupEntity entity);
 	void deleteSalaryGroupEntityByGroupId(Long groupId);
+
+	List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long organizationGroupId, Byte code);
 }
