@@ -55,9 +55,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -753,6 +751,48 @@ public class UserController extends ControllerBase {
 
         userService.resendVerficationCode(cmd, request);
         return new RestResponse("OK");
+    }
+
+	/**
+	 * <b>URL: /user/sendVerificationCodeByResetIdentifier</b>
+	 * <p>发送修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("sendVerificationCodeByResetIdentifier")
+	@RestReturn(String.class)
+	public RestResponse sendVerificationCodeByResetIdentifier(@Valid SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request){
+		userService.sendVerificationCodeByResetIdentifier(cmd, request);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/verifyResetIdentifierCode</b>
+	 * <p>核实修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("verifyResetIdentifierCode")
+	@RestReturn(String.class)
+	public RestResponse verifyResetIdentifierCode(@Valid VerifyResetIdentifierCodeCommand cmd){
+		userService.verifyResetIdentifierCode(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/createResetIdentifierAppeal</b>
+	 * <p>申诉修改手机号</p>
+	 */
+	@RequestMapping("createResetIdentifierAppeal")
+	@RestReturn(UserAppealLogDTO.class)
+	public RestResponse createResetIdentifierAppeal(@Valid CreateResetIdentifierAppealCommand cmd){
+        UserAppealLogDTO dto = userService.createResetIdentifierAppeal(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
 	/**
