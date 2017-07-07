@@ -433,7 +433,8 @@ public class SalaryServiceImpl implements SalaryService {
         if (!StringUtils.isEmpty(results)) {
             response.setSalaryEmployeeDTO(results.getMembers().stream().map(r -> {
                 SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
-                dto.setUserId(r.getDetailId());
+                dto.setUserId(r.getTargetId());
+                dto.setDetailId(r.getDetailId());
                 dto.setContactName(r.getContactName());
                 dto.setSalaryGroupId(r.getGroupId());
                 //  拼接薪酬组名称
