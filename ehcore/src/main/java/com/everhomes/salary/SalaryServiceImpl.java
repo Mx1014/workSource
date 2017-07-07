@@ -880,7 +880,7 @@ public class SalaryServiceImpl implements SalaryService {
 			return null;
 		dto.setPeriodEmployeeEntitys(result.stream().map(r2 ->{	
 			SalaryPeriodEmployeeEntityDTO dto2 = processSalaryPeriodEmployeeEntityDTO(r2);
-			dto2.setIsFormula(NormalFlag.NO.getCode());
+//			dto2.setIsFormula(NormalFlag.NO.getCode());
 			if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_GONGHAO)) {
 				dto.setEmployeeNo(r2.getSalaryValue());
 			}else if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_NAME)) {
@@ -904,12 +904,13 @@ public class SalaryServiceImpl implements SalaryService {
             LOGGER.error("group entity is null nameId is:"+ r.getGroupEntityName()+r.getGroupEntityId());
             return dto;
         }
-        if (null != entity.getNumberType() && entity.getNumberType().equals(NormalFlag.YES.getCode())) {
-            dto.setSalaryValue(entity.getDefaultValue());
-            dto.setIsFormula(NormalFlag.YES.getCode());
-        }
+//        if (null != entity.getNumberType() && entity.getNumberType().equals(NormalFlag.YES.getCode())) {
+//            dto.setSalaryValue(entity.getDefaultValue());
+//            dto.setIsFormula(NormalFlag.YES.getCode());
+//        }
         dto.setEntityType(entity.getType());
         dto.setDefaultOrder(entity.getDefaultOrder());
+        dto.setSalaryValue(r.getSalaryValue());
         dto.setEditableFlag(entity.getEditableFlag());
         dto.setNeedCheck(entity.getNeedCheck());
         dto.setNumberType(entity.getNumberType());
