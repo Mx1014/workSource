@@ -1404,7 +1404,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
 	public ListSalarySendHistoryResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd) {
-		Organization org = organizationProvider.findOrganizationById(punchService.getTopEnterpriseId(cmd.getOrganizationId()));
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
 		List<Long> userIds = punchService.listDptUserIds(org, cmd.getOrganizationId(), cmd.getKeyWord(), NormalFlag.YES.getCode());
 		Calendar startClanedar = Calendar.getInstance();
 		startClanedar.setTimeInMillis(cmd.getBeginTime());
