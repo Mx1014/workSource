@@ -145,8 +145,8 @@ CREATE TABLE `eh_uniongroup_configures` (
   `enterprise_id` BIGINT(20) DEFAULT 0,
   `group_type` VARCHAR(32) COMMENT 'SalaryGroup,PunchGroup',
   `group_id` BIGINT(20) NOT NULL COMMENT 'id of group',
-  `current_id` bigint(20) DEFAULT NULL COMMENT 'id of target, organization or memberDetail',
-  `current_type` varchar(32) COMMENT 'organziation,memberDetail',
+  `current_id` BIGINT(20) DEFAULT NULL COMMENT 'id of target, organization or memberDetail',
+  `current_type` VARCHAR(32) COMMENT 'organziation,memberDetail',
   `operator_uid` BIGINT(20),
   `update_time` DATETIME,
   PRIMARY KEY (`id`)
@@ -168,3 +168,5 @@ CREATE TABLE `eh_uniongroup_member_details` (
   `operator_uid` BIGINT(20),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE eh_organizations ADD COLUMN `email_content` TEXT COMMENT '工资条发送邮件内容';
