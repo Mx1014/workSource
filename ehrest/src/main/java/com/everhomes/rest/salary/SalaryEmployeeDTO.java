@@ -17,6 +17,7 @@ import java.util.List;
  * <li>salaryGroupName: 批次名称</li>
  * <li>idNumber: 身份证号</li>
  * <li>salaryCardNumber: 银行卡号</li>
+ * <li>email: 邮箱</li>
  * <li>isConfirmed: 工资明细:0-已设置 1-未设置</li>
  * </ul>
  */
@@ -41,6 +42,8 @@ public class SalaryEmployeeDTO {
     private String idNumber;
 
     private String salaryCardNumber;
+
+    private String email;
 
     private Byte isConfirmed;
 
@@ -125,6 +128,14 @@ public class SalaryEmployeeDTO {
 
     public void setSalaryCardNumber(String salaryCardNumber) {
         this.salaryCardNumber = salaryCardNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Byte getIsConfirmed() {

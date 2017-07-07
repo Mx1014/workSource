@@ -45,6 +45,8 @@ public interface UniongroupConfigureProvider {
 
     List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId);
 
+    public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId);
+
     List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId);
 
     void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId);

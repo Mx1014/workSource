@@ -3,7 +3,9 @@ package com.everhomes.rest.uniongroup;
 import com.everhomes.util.StringHelper;
 
 /**
- * Created by Administrator on 2017/6/29.
+ * <ul>
+ * <li>groupId: 薪酬组id</li>
+ * </ul>
  */
 public class GetUniongroupConfiguresCommand {
 

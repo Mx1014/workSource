@@ -312,6 +312,16 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     //  added by RN
     @Override
+    public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.select(DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))
+                .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .fetchOneInto(Integer.class);
+    }
+
+    @Override
     public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return   context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID, DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))

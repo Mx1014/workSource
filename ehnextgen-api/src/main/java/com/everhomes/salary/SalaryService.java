@@ -39,6 +39,9 @@ public interface SalaryService {
 	public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd);
 
 
+	public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd);
+
+
 	public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd);
 
 

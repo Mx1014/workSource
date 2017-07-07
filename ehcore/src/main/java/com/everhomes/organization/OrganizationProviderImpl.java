@@ -24,6 +24,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -4708,11 +4709,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 //		onvertHelper.convert(getReadOnlyDao().findById(id), SalaryGroupEntity.class)
-		return context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+		List<OrganizationMemberDetails> results =  context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
 				.where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId))
-				.fetchOneInto(OrganizationMemberDetails.class);
+				.fetchInto(OrganizationMemberDetails.class);
 //				.fetchInto(OrganizationMemberDetails.class);
 //		.fetchOne(OrganizationMemberDetails.class);
+		if(null == results || results.size() == 0)
+			return  null ;
+		return results.get(0);
 	}
 
 	@Override
@@ -4722,5 +4726,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
 		step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
 		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+	}
+
+	@Override
+		public void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.EMAIL_CONTENT, emailContent)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(UniongroupType.SALARYGROUP.getCode()))
+				.and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(ownerId)).execute();
 	}
 }

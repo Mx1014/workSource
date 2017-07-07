@@ -10172,7 +10172,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberInfoCommand cmd) {
-        LOGGER.info("Invoke GetOrganizationMemberInfoCommand.cmd.getDetailId={}", cmd.getDetailId());
+        LOGGER.info("Invoke GetOrganizationMemberInfoCommand.cmd.getUserDetailId={}", cmd.getDetailId());
         if (cmd.getDetailId() == null) {
             return null;
         }
@@ -10287,7 +10287,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         education.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
         this.organizationProvider.createOranizationMemberEducationInfo(education);
 
-//        this.addProfileLogs(education.getDetailId(),);
+//        this.addProfileLogs(education.getUserDetailId(),);
 //        LOGGER.debug("No organization community filter for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
         return ConvertHelper.convert(education, OrganizationMemberEducationsDTO.class);
     }
@@ -10619,7 +10619,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd) {
 /*        ListMemberProfileRecordsCommandResponse response = new ListMemberProfileRecordsCommandResponse();
-        List<OrganizationMemberProfileLogs> records = this.organizationProvider.listMemberRecordChanges(cmd.getDetailId());
+        List<OrganizationMemberProfileLogs> records = this.organizationProvider.listMemberRecordChanges(cmd.getUserDetailId());
         if(records != null){
             response.setMemberProfileRecords(records.stream().map(r -> {
                 MemberRecordChangesByProfileDTO dto = ConvertHelper.convert(r,MemberRecordChangesByProfileDTO.class);

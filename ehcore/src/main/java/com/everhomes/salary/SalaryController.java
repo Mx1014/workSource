@@ -5,8 +5,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.salary.*;
 import com.everhomes.rest.uniongroup.RefreshPeriodValsCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -153,8 +155,22 @@ public class SalaryController extends ControllerBase {
         return response;
     }
 
+	/**
+	 * <p>3-3.修改人员薪酬组(批次)</p>
+	 * <b>URL: /salary/updateSalaryEmployeesGroup</b>
+	 */
+	@RequestMapping("updateSalaryEmployeesGroup")
+	@RestReturn(value = String.class)
+	public RestResponse updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
+		this.salaryService.updateSalaryEmployeesGroup(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
     /**
-     * <p>3-3.编辑人员批次详情,有增加没有更新</p>
+     * <p>3-4.编辑人员批次详情,有增加没有更新</p>
      * <b>URL: /salary/updateSalaryEmployees</b>
      */
     @RequestMapping("updateSalaryEmployees")
@@ -167,9 +183,8 @@ public class SalaryController extends ControllerBase {
         return response;
     }
 
-
 	/**
-	 * <p>3-4.添加(关联)人员至组织架构的薪酬组</p>
+	 * <p>3-5.添加(关联)人员至组织架构的薪酬组</p>
 	 * <b>URL: /salary/addToOrganizationSalaryGroup</b>
 	 */
 	@RequestMapping("addToOrganizationSalaryGroup")
@@ -198,9 +213,8 @@ public class SalaryController extends ControllerBase {
 	@RestReturn(ImportFileTaskDTO.class)
 	public RestResponse importSalaryGroup(ImportSalaryGroupCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
         User user = UserContext.current().getUser();
-//        Long userId = manaUser.getId();
 /*        if (null == files || null == files[0]) {
-            LOGGER.error("files is null, userId=" + userId);
+            LOGGER.error("files is null, userId=" + user.getId());
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }*/

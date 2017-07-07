@@ -35,6 +35,7 @@ public interface UniongroupService {
      **/
     public List listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd);
 
+    public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId);
     /**
      * 根据薪酬组id获取相关人数
      */
