@@ -420,3 +420,22 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999973, 'sms.default.yzx', 53, 'zh_CN', '申诉-保集', '90076');
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- 更新banner和item图片   20170707  add by yanjun
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwa01XUXdNRGMwWldSaE0yVmhaakptTldWaE9UTmhNVFF3WkdWaU1UYzBOQQ' where id in (204075, 204076, 204077, 204078);
+
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNVlURXpPVGhqTnpFMll6TTRNVFEwTWprME16Vm1ObU5qWW1WalkyWmxOUQ' where id in (116460, 116472);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvM04yUXpNVGRqWldNM1ltVm1ZalU0TnpobFkyRTRNV1ZrT0RFMk9UQTJZdw' where id in (116461, 116473);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMU1EaGhNV1JrWVRsbFlqbGhNMk5sTkRRMk9UUTROalZoTkRFek5HWXpZZw' where id in (116457, 116469);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNU16QmlaR1JsWW1aaE16Z3dNek00Wm1Ka09EQTBOemcwWXpBM05UbGhZdw' where id in (116456, 116468);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk56aGxaV013WmpObFlqWTBaRGhrTmpobU9EbGxOVGc1TUdSa1pqWTNNdw' where id in (116455, 116467);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNU9UUXhPV015Wm1NM01qUmhNMk0xWkRCaVl6QTRORGMxWlRFd1l6QTRPQQ' where id in (116464, 116476);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE5XTTVOelZqT1dJMVpUVmpOek14WWpWaVlqUXhPR0ZsWkRNeVkySmpPQQ' where id in (116459, 116471);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE1XSXdZelZoTlRjek9UZGhOVFZtT1RoaE9UVXpOVGczTkdRNU5USTFNUQ' where id in (116462, 116474);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd05XSm1aRE14Tm1RMlptVXhPR05pT1dFNFl6WmxObVV3TVRFMVpXRTBOZw' where id in (116466, 116478);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwalpqRXhaR1V5T1dVNE1UVTBOekUxT0RKak5qTmtabU16T1RnMFlqazFaQQ' where id in (116458, 116470);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMllUYzRPVGswT0RBd01qQmlPRGxrTlRjMU56STFZelJoTlRReU5URTFZUQ' where id in (116465, 116477);
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk16STJZekU1TjJRME9URTBaakkwTnpRd01XRTNaREJqTkdFNFl6TmpaQQ' where id in (116463, 116475);
+
+
