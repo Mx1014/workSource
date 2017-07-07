@@ -976,17 +976,29 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 
     @Override
+    public ListPeriodSalaryEmailContentsResponse listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd) {
+        ListPeriodSalaryEmailContentsResponse response = new ListPeriodSalaryEmailContentsResponse();
+        // : 1.获取所有的薪酬组
+        List<Organization> salaryOrganizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+        if (null == salaryOrganizations) {
+            return response;
+        }
+        response.setSalaryGroupResps(new ArrayList<>());
+        for (Organization salaryOrg : salaryOrganizations) {
+            GetPeriodSalaryEmailContentCommand cmd1 = new GetPeriodSalaryEmailContentCommand(cmd.getOwnerType(), cmd.getOwnerId(), salaryOrg.getId());
+            GetPeriodSalaryEmailContentResponse resp1 = getPeriodSalaryEmailContent(cmd1);
+            response.getSalaryGroupResps().add(resp1);
+        }
+        return response;
+    }
+
+    @Override
     public void batchUpdateSalaryGroupEntitiesVisable(BatchUpdateSalaryGroupEntitiesVisableCommand cmd) {
         for (UpdateSalaryGroupEntitiesVisableCommand cmd1 : cmd.getSalaryGroupCmd()) {
             cmd1.setOwnerId(cmd.getOwnerId());
             cmd1.setOwnerType(cmd.getOwnerType());
             updateSalaryGroupEntitiesVisable(cmd1);
         }
-    }
-
-    @Override
-    public Object listPeriodSalaryEmailContents(ListPeriodSalaryEmailContentsCommand cmd) {
-        return null;
     }
 
     @Override
