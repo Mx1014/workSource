@@ -832,13 +832,7 @@ public class SalaryServiceImpl implements SalaryService {
 		//TODO: 组织架构提供未关联批次的
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
         //  获取公司总人数
-        Integer totalCount = this.organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
-        uniongroupService.
-        //  关联人数一次性获取
-        Integer relevantCount = 0;
-//        List<Object[]> relevantCounts = this.uniongroupService.listUniongroupMemberCount(org.getNamespaceId(), salaryGroupIds, cmd.getOwnerId());
-
-        Integer unLinkNumber = 0;
+        Integer unLinkNumber = uniongroupService.countUnionGroupMemberDetailsByOrgId(org.getNamespaceId(),org.getId());
 		abnormalNumber += unLinkNumber;
 		//判断2:关联了批次,但是实发工资为"-"
 		//查询eh_salary_employee_period_vals 本期 的 实发工资(entity_id=98)数据为null的记录数
