@@ -16,6 +16,15 @@ public class ListMessageSenderResponse {
 	@ItemType(MessageSenderDTO.class)
 	private List<MessageSenderDTO> messageSenderDTOs;
 
+	public ListMessageSenderResponse() {
+		super();
+	}
+
+	public ListMessageSenderResponse(List<MessageSenderDTO> messageSenderDTOs) {
+		super();
+		this.messageSenderDTOs = messageSenderDTOs;
+	}
+
 	public List<MessageSenderDTO> getMessageSenderDTOs() {
 		return messageSenderDTOs;
 	}

@@ -18,13 +18,21 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.general_approval.GeneralFormSourceType;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.talent.ClearTalentQueryHistoryCommand;
+import com.everhomes.rest.talent.CreateMessageSenderCommand;
 import com.everhomes.rest.talent.CreateOrUpdateRequestSettingCommand;
 import com.everhomes.rest.talent.CreateOrUpdateRequestSettingResponse;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
+import com.everhomes.rest.talent.DeleteMessageSenderCommand;
 import com.everhomes.rest.talent.DeleteTalentCategoryCommand;
 import com.everhomes.rest.talent.DeleteTalentCommand;
 import com.everhomes.rest.talent.DeleteTalentQueryHistoryCommand;
@@ -34,6 +42,8 @@ import com.everhomes.rest.talent.GetTalentDetailResponse;
 import com.everhomes.rest.talent.GetTalentRequestDetailCommand;
 import com.everhomes.rest.talent.GetTalentRequestDetailResponse;
 import com.everhomes.rest.talent.ImportTalentCommand;
+import com.everhomes.rest.talent.ListMessageSenderCommand;
+import com.everhomes.rest.talent.ListMessageSenderResponse;
 import com.everhomes.rest.talent.ListTalentCategoryCommand;
 import com.everhomes.rest.talent.ListTalentCategoryResponse;
 import com.everhomes.rest.talent.ListTalentCommand;
@@ -42,14 +52,19 @@ import com.everhomes.rest.talent.ListTalentQueryHistoryResponse;
 import com.everhomes.rest.talent.ListTalentRequestCommand;
 import com.everhomes.rest.talent.ListTalentRequestResponse;
 import com.everhomes.rest.talent.ListTalentResponse;
+import com.everhomes.rest.talent.MessageSenderDTO;
 import com.everhomes.rest.talent.TalentCategoryDTO;
 import com.everhomes.rest.talent.TalentDTO;
 import com.everhomes.rest.talent.TalentDegreeEnum;
 import com.everhomes.rest.talent.TalentQueryHistoryDTO;
+import com.everhomes.rest.talent.TalentRequestDTO;
 import com.everhomes.rest.talent.TopTalentCommand;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.ValidatorUtil;
@@ -82,6 +97,21 @@ public class TalentServiceImpl implements TalentService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private TalentMessageSenderProvider talentMessageSenderProvider;
+	
+	@Autowired
+	private TalentRequestProvider talentRequestProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
+	
+	@Autowired
+	private GeneralFormService generalFormService;
 	
 	@Override
 	public ListTalentCategoryResponse listTalentCategory(ListTalentCategoryCommand cmd) {
@@ -485,17 +515,85 @@ public class TalentServiceImpl implements TalentService {
 	private Integer namespaceId() {
 		return UserContext.getCurrentNamespaceId();
 	} 
-	
+
 	@Override
-	public ListTalentRequestResponse listTalentRequest(ListTalentRequestCommand cmd) {
-	
-		return new ListTalentRequestResponse();
+	public MessageSenderDTO createMessageSender(CreateMessageSenderCommand cmd) {
+		TalentMessageSender talentMessageSender = new TalentMessageSender();
+		talentMessageSender.setNamespaceId(namespaceId());
+		talentMessageSender.setOwnerType(cmd.getOwnerType());
+		talentMessageSender.setOwnerId(cmd.getOwnerId());
+		talentMessageSender.setOrganizationMemberId(cmd.getOrganizationMemberId());
+		talentMessageSender.setUserId(cmd.getUserId());
+		talentMessageSender.setStatus(CommonStatus.ACTIVE.getCode());
+		talentMessageSenderProvider.createTalentMessageSender(talentMessageSender);
+		return convert(talentMessageSender);
+	}
+
+	private MessageSenderDTO convert(TalentMessageSender talentMessageSender) {
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(talentMessageSender.getOrganizationMemberId());
+		if (organizationMember != null) {
+			return new MessageSenderDTO(talentMessageSender.getId(), organizationMember.getContactName(), organizationMember.getContactToken());
+		}
+		User user = userProvider.findUserById(talentMessageSender.getUserId());
+		if (user != null) {
+			List<UserIdentifier> userIdentifiers = userProvider.listUserIdentifiersOfUser(user.getId());
+			if (userIdentifiers != null && !userIdentifiers.isEmpty()) {
+				return new MessageSenderDTO(talentMessageSender.getId(), user.getNickName(), userIdentifiers.get(0).getIdentifierToken());
+			}
+		}
+		return null;
 	}
 
 	@Override
-	public GetTalentRequestDetailResponse getTalentRequestDetail(GetTalentRequestDetailCommand cmd) {
+	public void deleteMessageSender(DeleteMessageSenderCommand cmd) {
+		TalentMessageSender talentMessageSender = talentMessageSenderProvider.findTalentMessageSenderById(cmd.getId());
+		talentMessageSender.setStatus(CommonStatus.INACTIVE.getCode());
+		talentMessageSenderProvider.updateTalentMessageSender(talentMessageSender);
+	}
+
+	@Override
+	public ListMessageSenderResponse listMessageSender(ListMessageSenderCommand cmd) {
+		List<TalentMessageSender> talentMessageSenders = talentMessageSenderProvider.listTalentMessageSenderByOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		return new ListMessageSenderResponse(talentMessageSenders.stream().map(this::convert).collect(Collectors.toList()));
+	}
 	
-		return new GetTalentRequestDetailResponse();
+	@Override
+	public ListTalentRequestResponse listTalentRequest(ListTalentRequestCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		cmd.setPageSize(pageSize+1);
+		List<TalentRequest> talentRequests = talentRequestProvider.listTalentRequestByCondition(namespaceId(), cmd);
+		Long nextPageAnchor = null;
+		if (talentRequests.size() > pageSize) {
+			talentRequests.remove(talentRequests.size()-1);
+			nextPageAnchor = talentRequests.get(talentRequests.size()-1).getId();
+		}
+		
+		return new ListTalentRequestResponse(nextPageAnchor, talentRequests.stream().map(this::convertWithoutDetail).collect(Collectors.toList()));
+	}
+
+	private TalentRequestDTO convertWithoutDetail(TalentRequest talentRequest) {
+		TalentRequestDTO talentRequestDTO = new TalentRequestDTO();
+		talentRequestDTO.setRequestor(talentRequest.getRequestor());
+		talentRequestDTO.setPhone(talentRequest.getPhone());
+		talentRequestDTO.setOrganizationName(talentRequest.getOrganizationName());
+		talentRequestDTO.setCreateTime(talentRequest.getCreateTime().getTime());
+		talentRequestDTO.setTalentId(talentRequest.getTalentId());
+		Talent talent = talentProvider.findTalentById(talentRequest.getTalentId());
+		talentRequestDTO.setTalentName(talent.getName());
+		return talentRequestDTO;
+	}
+	
+	@Override
+	public GetTalentRequestDetailResponse getTalentRequestDetail(GetTalentRequestDetailCommand cmd) {
+		TalentRequest talentRequest = talentRequestProvider.findTalentRequestById(cmd.getId());
+		return new GetTalentRequestDetailResponse(convert(talentRequest));
+	}
+
+	private TalentRequestDTO convert(TalentRequest talentRequest) {
+		TalentRequestDTO talentRequestDTO = convertWithoutDetail(talentRequest);
+		List<PostApprovalFormItem> postApprovalFormItems = generalFormService.getGeneralFormValues(new GetGeneralFormValuesCommand(GeneralFormSourceType.TALENT.getCode(), talentRequest.getId(), null));
+		talentRequestDTO.setFormItems(postApprovalFormItems);
+		return talentRequestDTO;
 	}
 
 }

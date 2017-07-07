@@ -16,6 +16,17 @@ public class MessageSenderDTO{
 	private String name;
 	private String phone;
 
+	public MessageSenderDTO() {
+		super();
+	}
+
+	public MessageSenderDTO(Long id, String name, String phone) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.phone = phone;
+	}
+
 	public Long getId() {
 		return id;
 	}

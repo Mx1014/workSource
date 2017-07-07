@@ -212,7 +212,7 @@ public class TalentController extends ControllerBase {
 	@RequestMapping("createMessageSender")
 	@RestReturn(MessageSenderDTO.class)
 	public RestResponse createMessageSender(CreateMessageSenderCommand cmd){
-		return new RestResponse(talentService.findRequestSetting());
+		return new RestResponse(talentService.createMessageSender(cmd));
 	}
 	
 	/**
@@ -222,7 +222,8 @@ public class TalentController extends ControllerBase {
 	@RequestMapping("deleteMessageSender")
 	@RestReturn(String.class)
 	public RestResponse deleteMessageSender(DeleteMessageSenderCommand cmd){
-		return new RestResponse(talentService.findRequestSetting());
+		talentService.deleteMessageSender(cmd);
+		return new RestResponse();
 	}
 	
 	/**
@@ -232,7 +233,7 @@ public class TalentController extends ControllerBase {
 	@RequestMapping("listMessageSender")
 	@RestReturn(ListMessageSenderResponse.class)
 	public RestResponse listMessageSender(ListMessageSenderCommand cmd){
-		return new RestResponse(talentService.findRequestSetting());
+		return new RestResponse(talentService.listMessageSender(cmd));
 	}
 
 	/**
