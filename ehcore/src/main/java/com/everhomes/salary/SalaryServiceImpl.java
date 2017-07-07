@@ -903,7 +903,7 @@ public class SalaryServiceImpl implements SalaryService {
 		List<SalaryEmployeePeriodVal> result = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(r.getId());
 		if(null == result)
 			return null;
-		dto.setPeriodEmployeeEntitys(result.stream().map(r2 ->{	
+		dto.setPeriodEmployeeEntities(result.stream().map(r2 ->{
 			SalaryPeriodEmployeeEntityDTO dto2 = processSalaryPeriodEmployeeEntityDTO(r2);
 //			dto2.setIsFormula(NormalFlag.NO.getCode());
 			if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_GONGHAO)) {
