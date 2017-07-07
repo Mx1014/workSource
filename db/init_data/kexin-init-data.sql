@@ -1578,3 +1578,6 @@ update eh_service_alliance_categories SET `path`='园区办事/办事指南' WHE
 -- 物业报修，改投诉建议  by dengs,20170706
 update eh_service_alliance_jump_module SET module_name = '投诉建议',module_url='zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=投诉建议'
 where namespace_id='999983' AND module_name='物业报修';
+
+--【正中会】“海外电商”icon替换链接内容 bydengs,20170707
+update eh_launch_pad_items SET action_type = 13, action_data = '{"url":"https://core.zuolin.com/mobile/static/overseas_supplier/guide.html"}' WHERE `item_label` = '海外电商' and namespace_id=999983;
