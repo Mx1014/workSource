@@ -4776,4 +4776,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return false;
 	}
+
+    @Override
+    public List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds) {
+        List<OrganizationCommunityRequest> results = new ArrayList<OrganizationCommunityRequest>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
+        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.in(communityIds));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, OrganizationCommunityRequest.class));
+            return null;
+        });
+        return results;
+    }
 }
