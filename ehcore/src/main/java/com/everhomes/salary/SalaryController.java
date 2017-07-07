@@ -154,7 +154,7 @@ public class SalaryController extends ControllerBase {
     }
 
 	/**
-	 * <p>3-3.修改人员批次</p>
+	 * <p>3-3.修改人员薪酬组(批次)</p>
 	 * <b>URL: /salary/updateSalaryEmployeesGroup</b>
 	 */
 	@RequestMapping("updateSalaryEmployeesGroup")

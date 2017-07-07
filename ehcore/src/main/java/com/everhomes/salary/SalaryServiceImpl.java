@@ -16,6 +16,7 @@ import com.everhomes.rest.salary.*;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.uniongroup.UniongroupMemberDetail;
 import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -345,7 +346,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
-/*
+
         //  1.将前端信息传递给组织架构的接口获取相关信息
         ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
         command.setOwnerId(cmd.getOwnerId());
@@ -369,12 +370,12 @@ public class SalaryServiceImpl implements SalaryService {
 
         if (!StringUtils.isEmpty(results)) {
             response.setSalaryEmployeeDTO(results.stream().map(r -> {
-                salaryEmployeeDTO dto = new salaryEmployeeDTO();
+                SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
                 //// TODO: 2017/7/6 职位和部门
                 String department = "";
                 String jobPosition = "";
                 dto.setUserId(r.getTargetId());
-                dto.setUserDetailId(r.getUserDetailId());
+                dto.setDetailId(r.getDetailId());
                 dto.setContactName(r.getContactName());
                 dto.setSalaryGroupId(r.getGroupId());
                 if(!StringUtils.isEmpty(r.getEmployeeNo()))
@@ -410,7 +411,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 //        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();*/
 
-        //  1.将前端信息传递给组织架构的接口获取相关信息
+/*        //  1.将前端信息传递给组织架构的接口获取相关信息
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(cmd.getOwnerId());
 
@@ -438,7 +439,7 @@ public class SalaryServiceImpl implements SalaryService {
                 }
                 return dto;
             }).collect(Collectors.toList()));
-        }
+        }*/
         return response;
     }
 
@@ -486,9 +487,25 @@ public class SalaryServiceImpl implements SalaryService {
             return null;
     }
 
+    //  变更员工薪酬组
     @Override
     public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
+	    //  1.更新该员工在组织架构的关联及configure
+        AddToOrganizationSalaryGroupCommand command = new AddToOrganizationSalaryGroupCommand();
+        command.setOwnerId(cmd.getOwnerId());
+        command.setOwnerType(cmd.getOwnerType());
+        command.setSalaryGroupId(cmd.getSalaryGroupId());
+        List<Long> detailIds = new ArrayList<>();
+        detailIds.add(cmd.getDetailId());
+        command.setDetailIds(detailIds);
+        this.addToOrganizationSalaryGroup(command);
 
+        // 2.删除原有的薪酬设定
+        List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
+        if(!StringUtils.isEmpty(originVals)) {
+            this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(originVals.get(0).getGroupId(),
+                    originVals.get(0).getUserId(), cmd.getOwnerType(), cmd.getOwnerId());
+        }
     }
 
     @Override
@@ -1532,7 +1549,8 @@ public class SalaryServiceImpl implements SalaryService {
             result.setSalaryCardNumber(memberDetails.getSalaryCardNumber());
         if(!StringUtils.isEmpty(memberDetails.getIdNumber()))
             result.setIdNumber(memberDetails.getIdNumber());
-
+        if(!StringUtils.isEmpty(memberDetails.getEmail()))
+            result.setEmail(memberDetails.getEmail());
         return result;
     }
 }
