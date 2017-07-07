@@ -1057,6 +1057,7 @@ public class SalaryServiceImpl implements SalaryService {
                 LOGGER.error(" cmd error no entities cmd : "+ cmd);
                 return null;
             }
+            LOGGER.debug("cmd" + cmd);
             cmd.getSalaryGroupEntities().stream().map(r ->{
                 LOGGER.debug("UPDATE VISIBLE +"+r.getId()+"+"+r.getVisibleFlag());
                 salaryGroupEntityProvider.updateSalaryGroupEntityVisible(r.getId(),r.getVisibleFlag());
