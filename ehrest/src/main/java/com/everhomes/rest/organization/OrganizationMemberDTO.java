@@ -128,9 +128,6 @@ public class OrganizationMemberDTO {
     }
 
     public Byte getExecutiveFlag() {
-		return executiveFlag;
-	}
-    public Byte getExecutiveFlag() {
         return executiveFlag;
     }
 
@@ -320,14 +317,6 @@ public class OrganizationMemberDTO {
 
     public void setCreatorUid(Long creatorUid) {
         this.creatorUid = creatorUid;
-    }
-
-    public Long getEmployeeNo() {
-        return employeeNo;
-    }
-
-    public void setEmployeeNo(Long employeeNo) {
-        this.employeeNo = employeeNo;
     }
 
     public Byte getGender() {

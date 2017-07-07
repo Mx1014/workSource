@@ -5014,7 +5014,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}else{
 				member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 				member.setOperatorUid(operatorUid);
-                member.setApproveTime(System.currentTimeMillis());updateEnterpriseContactStatus(operator.getId(), member);
+                member.setApproveTime(System.currentTimeMillis());
+                updateEnterpriseContactStatus(operator.getId(), member);
 				DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
 				sendMessageForContactApproved(member);
 				//记录添加log
