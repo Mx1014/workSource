@@ -5374,10 +5374,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		response.setMembers(organizationMembers.stream().map((c) ->{
             OrganizationMemberDTO dto = ConvertHelper.convert(c, OrganizationMemberDTO.class);
-            User operator = userProvider.findUserById(c.getOperatorUid());
-            UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
-            dto.setOperatorName(operator.getNickName());
-            dto.setOperatorPhone(operatorIdentifier.getIdentifierToken());
+            if (c.getOperatorUid() != null) {
+                User operator = userProvider.findUserById(c.getOperatorUid());
+                UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
+                dto.setOperatorName(operator.getNickName());
+                dto.setOperatorPhone(operatorIdentifier.getIdentifierToken());
+            }
             return dto;
         }).collect(Collectors.toList()));
 
