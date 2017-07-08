@@ -1513,20 +1513,20 @@ public class SalaryServiceImpl implements SalaryService {
         XSSFWorkbook wb = new XSSFWorkbook();
         String sheetName ="Module";
         XSSFSheet sheet = wb.createSheet(sheetName);
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, 12));
-        XSSFCellStyle style = wb.createCellStyle();
-        Font font = wb.createFont();
-        font.setFontHeightInPoints((short) 20);
-        font.setFontName("Courier New");
+//        sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, 12));
+//        XSSFCellStyle style = wb.createCellStyle();
+//        Font font = wb.createFont();
+//        font.setFontHeightInPoints((short) 20);
+//        font.setFontName("Courier New");
 
-        style.setFont(font);
+//        style.setFont(font);
 
-        XSSFCellStyle titleStyle = wb.createCellStyle();
-        titleStyle.setFont(font);
-        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+//        XSSFCellStyle titleStyle = wb.createCellStyle();
+//        titleStyle.setFont(font);
+//        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
 
         //  创建标题
-        createXSSFSalaryHistoryHead(sheet, style);
+        createXSSFSalaryHistoryHead(sheet);
 
         createXSSFSalaryHistoryRows(sheet, salaryPeriodEmployees);
         return wb;
@@ -1549,11 +1549,11 @@ public class SalaryServiceImpl implements SalaryService {
         }
     }
 
-    private void createXSSFSalaryHistoryHead(XSSFSheet sheet,  XSSFCellStyle style) {
+    private void createXSSFSalaryHistoryHead(XSSFSheet sheet) {
         int rowNum = 0;
 
         XSSFRow row = sheet.createRow(rowNum++);
-        row.setRowStyle(style);
+//        row.setRowStyle(style);
         row.createCell(0).setCellValue("员工编号");
         row.createCell(1).setCellValue("姓名");
         row.createCell(2).setCellValue("部门");
