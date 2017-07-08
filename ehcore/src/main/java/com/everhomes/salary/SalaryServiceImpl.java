@@ -1536,7 +1536,10 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(dto.getDepartments());
             row.createCell(++i).setCellValue(dto.getSalaryPeriod());
             row.createCell(++i).setCellValue(dto.getSalaryGroupName());
-            row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
+            if(null != dto.getPaidMoney())
+                row.createCell(++i).setCellValue("");
+            else
+                row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
 
         }
     }
@@ -1568,7 +1571,13 @@ public class SalaryServiceImpl implements SalaryService {
 		coordinationProvider.getNamedLock(CoordinationLocks.SALARY_GROUP_LOCK.getCode()+cmd.getSalaryPeriodGroupId())
 				.enter(() -> {
 					SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
-					if (SalaryGroupStatus.WAIT_FOR_SEND.getCode().equals(salaryGroup.getStatus())){
+                    if (null == salaryGroup) {
+                        LOGGER.error("salaryGroup cannot found + "+cmd);
+
+                        throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,
+                                SalaryConstants.ERROR_SALARY_GROUP_STATUS,"salary  period group id wrong");
+                    }
+                    if (SalaryGroupStatus.WAIT_FOR_SEND.getCode().equals(salaryGroup.getStatus())){
 						salaryGroup.setSendTime(null);
 						salaryGroup.setStatus(SalaryGroupStatus.CHECKED.getCode());
 						salaryGroupProvider.updateSalaryGroup(salaryGroup);
