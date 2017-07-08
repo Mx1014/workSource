@@ -10,8 +10,8 @@ import java.sql.Timestamp;
  * <li>namespaceId: 域空间id</li>
  * <li>groupType: 组类型</li>
  * <li>groupId: 组id</li>
- * <li>targetId: 目标id</li>
- * <li>targetType: 目标类型</li>
+ * <li>currentId: 目标id</li>
+ * <li>currentType: 目标类型</li>
  * <li>operatorUid: 操作人员id</li>
  * <li>updateTime: 更新时间</li>
  * </ul>
@@ -21,8 +21,8 @@ public class UniongroupConfiguresDTO {
     private Integer namespaceId;
     private String groupType;
     private Long groupId;
-    private Long targetId;
-    private String targetType;
+    private Long currentId;
+    private String currentType;
     private Long operatorUid;
     private Timestamp updateTime;
 
@@ -58,20 +58,20 @@ public class UniongroupConfiguresDTO {
         this.groupId = groupId;
     }
 
-    public Long getTargetId() {
-        return targetId;
+    public Long getCurrentId() {
+        return currentId;
     }
 
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
+    public void setCurrentId(Long currentId) {
+        this.currentId = currentId;
     }
 
-    public String getTargetType() {
-        return targetType;
+    public String getCurrentType() {
+        return currentType;
     }
 
-    public void setTargetType(String targetType) {
-        this.targetType = targetType;
+    public void setCurrentType(String currentType) {
+        this.currentType = currentType;
     }
 
     public Long getOperatorUid() {
