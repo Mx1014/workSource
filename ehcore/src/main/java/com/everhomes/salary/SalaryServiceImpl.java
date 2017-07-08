@@ -226,7 +226,20 @@ public class SalaryServiceImpl implements SalaryService {
                     salaryGroupEntityProvider.createSalaryGroupEntity(newEntity);
                 }else {
                     //  查找到的时候则做修改
-                    entityDB = ConvertHelper.convert(dto,SalaryGroupEntity.class);
+                    entityDB.setGroupId(dto.getGroupId());
+                    entityDB.setOriginEntityId(dto.getOriginEntityId());
+                    entityDB.setDefaultFlag(dto.getDefaultFlag());
+                    entityDB.setType(dto.getType());
+                    entityDB.setCategoryId(dto.getCategoryId());
+                    entityDB.setCategoryName(dto.getCategoryName());
+                    entityDB.setName(dto.getName());
+                    entityDB.setEditableFlag(dto.getEditableFlag());
+                    entityDB.setNumberType(dto.getNumberType());
+                    entityDB.setDefaultValue(dto.getDefaultValue());
+                    entityDB.setNeedCheck(dto.getNeedCheck());
+                    entityDB.setDefaultOrder(dto.getDefaultOrder());
+                    entityDB.setVisibleFlag(dto.getVisibleFlag());
+                    entityDB.setTemplateName(dto.getTemplateName());
                     salaryGroupEntityProvider.updateSalaryGroupEntity(entityDB);
                 }
                 salaryGroupEntities.add(dto);
