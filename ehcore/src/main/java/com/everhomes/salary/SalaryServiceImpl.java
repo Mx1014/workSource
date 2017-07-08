@@ -1211,22 +1211,22 @@ public class SalaryServiceImpl implements SalaryService {
 		sb.append("<table>");
 		if(null != groupEntities){
 			sb.append("<tr>");
-			groupEntities.stream().map(r->{
-				sb.append("<th>");
-				sb.append(r.getName());
-				sb.append("</th>");
-				return null;
-			});
+            for (SalaryGroupEntity r : groupEntities) {
+                sb.append("<th>");
+                sb.append(r.getName());
+                sb.append("</th>");
+                return null;
+            }
 			sb.append("</tr>");
 			sb.append("<tr>");
-			groupEntities.stream().map(r->{
+            for (SalaryGroupEntity r : groupEntities) {
 				sb.append("<tr>");
 				SalaryEmployeePeriodVal val = getSalaryEmployeePeriodVal(r.getId(),employeeEntityVals);
 				if(null != val)
 					sb.append(val.getSalaryValue());
 				sb.append("</tr>");
 				return null;
-			});
+			}
 			sb.append("</tr>");
 		}
 		sb.append("</table>");
