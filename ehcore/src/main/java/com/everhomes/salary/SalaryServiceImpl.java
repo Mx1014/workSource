@@ -239,6 +239,23 @@ public class SalaryServiceImpl implements SalaryService {
 
             //  删除个人设定中与薪酬组相关的字段
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(cmd.getSalaryGroupId());
+
+            // 删除未发放的salaryGroup  employee 和vals
+            List<SalaryGroup> salaryGroups = salaryGroupProvider.listUnsendSalaryGroup(cmd.getSalaryGroupId());
+            if (null == salaryGroups) {
+                return;
+            }
+            for (SalaryGroup salaryGroup : salaryGroups) {
+                List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(salaryGroup.getId());
+                if (null == salaryEmployees) {
+                    continue;
+                }
+                for (SalaryEmployee employee : salaryEmployees) {
+                    salaryEmployeePeriodValProvider.deletePeriodVals(employee.getId());
+                    salaryEmployeeProvider.deleteSalaryEmployee(employee);
+                }
+                salaryGroupProvider.deleteSalaryGroup(salaryGroup);
+            }
         }
     }
 
@@ -1192,9 +1209,10 @@ public class SalaryServiceImpl implements SalaryService {
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("emailContent", emailContent);
 			map.put("entityTable", entityTable);
-			String Content = localeTemplateService.getLocaleTemplateString(SalaryConstants.SEND_MAIL_SCOPE,
+			String content = localeTemplateService.getLocaleTemplateString(SalaryConstants.SEND_MAIL_SCOPE,
 					SalaryConstants.SEND_MAIL_CODE, "zh-CN", map, "");
-			handler.sendMail(namespaceId, null,toAddress, emailSubject,Content);
+            LOGGER.debug("meailcontent \n "+emailContent+"\ntable"+entityTable+ "\n finalContent"+content);
+			handler.sendMail(namespaceId, null,toAddress, emailSubject,content);
 
 		}catch (Exception e){
 			LOGGER.debug("had a error in send message !!!!!++++++++++++++++++++++",e);
@@ -1206,22 +1224,22 @@ public class SalaryServiceImpl implements SalaryService {
 		sb.append("<table>");
 		if(null != groupEntities){
 			sb.append("<tr>");
-			groupEntities.stream().map(r->{
-				sb.append("<th>");
-				sb.append(r.getName());
-				sb.append("</th>");
-				return null;
-			});
+            for (SalaryGroupEntity r : groupEntities) {
+                sb.append("<th>");
+                sb.append(r.getName());
+                sb.append("</th>");
+                return null;
+            }
 			sb.append("</tr>");
 			sb.append("<tr>");
-			groupEntities.stream().map(r->{
+            for (SalaryGroupEntity r : groupEntities) {
 				sb.append("<tr>");
 				SalaryEmployeePeriodVal val = getSalaryEmployeePeriodVal(r.getId(),employeeEntityVals);
 				if(null != val)
 					sb.append(val.getSalaryValue());
 				sb.append("</tr>");
 				return null;
-			});
+			}
 			sb.append("</tr>");
 		}
 		sb.append("</table>");
@@ -1526,20 +1544,20 @@ public class SalaryServiceImpl implements SalaryService {
         XSSFWorkbook wb = new XSSFWorkbook();
         String sheetName ="Module";
         XSSFSheet sheet = wb.createSheet(sheetName);
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, 12));
-        XSSFCellStyle style = wb.createCellStyle();
-        Font font = wb.createFont();
-        font.setFontHeightInPoints((short) 20);
-        font.setFontName("Courier New");
+//        sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, 12));
+//        XSSFCellStyle style = wb.createCellStyle();
+//        Font font = wb.createFont();
+//        font.setFontHeightInPoints((short) 20);
+//        font.setFontName("Courier New");
 
-        style.setFont(font);
+//        style.setFont(font);
 
-        XSSFCellStyle titleStyle = wb.createCellStyle();
-        titleStyle.setFont(font);
-        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+//        XSSFCellStyle titleStyle = wb.createCellStyle();
+//        titleStyle.setFont(font);
+//        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
 
         //  创建标题
-        createXSSFSalaryHistoryHead(sheet, style);
+        createXSSFSalaryHistoryHead(sheet);
 
         createXSSFSalaryHistoryRows(sheet, salaryPeriodEmployees);
         return wb;
@@ -1562,11 +1580,11 @@ public class SalaryServiceImpl implements SalaryService {
         }
     }
 
-    private void createXSSFSalaryHistoryHead(XSSFSheet sheet,  XSSFCellStyle style) {
+    private void createXSSFSalaryHistoryHead(XSSFSheet sheet) {
         int rowNum = 0;
 
         XSSFRow row = sheet.createRow(rowNum++);
-        row.setRowStyle(style);
+//        row.setRowStyle(style);
         row.createCell(0).setCellValue("员工编号");
         row.createCell(1).setCellValue("姓名");
         row.createCell(2).setCellValue("部门");
