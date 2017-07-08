@@ -135,7 +135,7 @@ CREATE TABLE `eh_portal_item_categories` (
   `name` varchar(64) NOT NULL COMMENT 'item categry name',
   `icon_uri` varchar(1024) DEFAULT NULL COMMENT 'service categry icon uri',
   `default_order` int(11) DEFAULT NULL COMMENT 'order ',
-  `align` tinyint(4) DEFAULT '0' COMMENT '0: left, 1: center',
+  `align` varchar(64) DEFAULT NULL COMMENT 'left, center',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: inactive, 1: active',
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
