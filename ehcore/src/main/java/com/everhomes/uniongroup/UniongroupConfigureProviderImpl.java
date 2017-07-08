@@ -322,7 +322,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId) {
+    public List<Object[]> listUniongroupMemberDetailsCount(Integer namespaceId, List<Long> groupIds, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return   context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID, DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))
                 .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
@@ -330,6 +330,18 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.in(groupIds))
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
                 .groupBy(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID)
+                .fetchInto(Object[].class);
+    }
+
+    @Override
+    public List<Object[]> listUniongroupMemberDetailsInfo(Integer namespaceId, Long groupId, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.CONTACT_TOKEN,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.TARGET_ID, Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID)
+                .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
                 .fetchInto(Object[].class);
     }
 

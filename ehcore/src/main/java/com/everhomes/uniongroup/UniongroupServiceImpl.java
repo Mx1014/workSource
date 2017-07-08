@@ -41,8 +41,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
-//        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Integer namespaceId = 1000000;
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        Integer namespaceId = 1000000;
 
         //已存在（即已分配薪酬组的）的部门集合
         List<Long> old_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId());
@@ -296,7 +296,12 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId){
-        return this.uniongroupConfigureProvider.listUniongroupMemberCount(namespaceId,groupIds,ownerId);
+        return this.uniongroupConfigureProvider.listUniongroupMemberDetailsCount(namespaceId,groupIds,ownerId);
+    }
+
+    @Override
+    public List<Object[]> listUniongroupMemberDetailsInfo(Integer namespaceId, Long salaryGroupIds, Long ownerId){
+        return this.uniongroupConfigureProvider.listUniongroupMemberDetailsInfo(namespaceId,salaryGroupIds,ownerId);
     }
 
     @Override

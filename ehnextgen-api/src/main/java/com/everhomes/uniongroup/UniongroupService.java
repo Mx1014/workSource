@@ -41,6 +41,8 @@ public interface UniongroupService {
      */
     public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId);
 
+    public List<Object[]> listUniongroupMemberDetailsInfo(Integer namespaceId, Long salaryGroupIds, Long ownerId);
+
     void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId);
 
     void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId);
