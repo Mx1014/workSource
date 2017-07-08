@@ -1288,9 +1288,11 @@ public class SalaryServiceImpl implements SalaryService {
                 List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals = new ArrayList<>();
                 //3.循环每一个批次设置的字段项，给他做成本期的periodVal 如果entity不是计算公式就设置值，如果是公式就空
 				for (SalaryGroupEntity entity : salaryGroupEntities) {
+                    //生成 period Val
 					SalaryEmployeePeriodVal val = new SalaryEmployeePeriodVal();
                     val.setOwnerType(entity.getOwnerType());
 					val.setOwnerId(entity.getOwnerId());
+                    val.setOriginEntityId(entity.getOriginEntityId());
 					val.setGroupEntityId(entity.getId());
 					val.setSalaryEmployeeId(employee.getId());
                     val.setGroupEntityName(entity.getName());
