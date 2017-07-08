@@ -214,12 +214,16 @@ public class SalaryServiceImpl implements SalaryService {
             for( SalaryGroupEntityDTO dto: cmd.getSalaryGroupEntity()) {
                 entityIds.add(dto.getOriginEntityId());
                 SalaryGroupEntity entityDB = salaryGroupEntityProvider.findSalaryGroupEntityByGroupAndOriginId(dto.getGroupId(), dto.getOriginEntityId());
-                SalaryGroupEntity newEntity = ConvertHelper.convert(dto, SalaryGroupEntity.class);
-                if(null == entityDB){
+                if(StringUtils.isEmpty(entityDB)){
+                    SalaryGroupEntity newEntity = ConvertHelper.convert(dto, SalaryGroupEntity.class);
+                    newEntity.setOwnerType(cmd.getOwnerType());
+                    newEntity.setOwnerId(cmd.getOwnerId());
+                    newEntity.setGroupId(cmd.getSalaryGroupId());
                     salaryGroupEntityProvider.createSalaryGroupEntity(newEntity);
                 }else {
-                    newEntity.setId(entityDB.getId());
-                    salaryGroupEntityProvider.updateSalaryGroupEntity(newEntity);
+//                    newEntity.setId(entityDB.getId());
+                    entityDB = ConvertHelper.convert(dto,SalaryGroupEntity.class);
+                    salaryGroupEntityProvider.updateSalaryGroupEntity(entityDB);
                 }
             }
             salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
