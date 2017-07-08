@@ -1114,6 +1114,11 @@ public class SalaryServiceImpl implements SalaryService {
 					// this.groupProvider.updateGroup(group);
 
 			SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
+            if (null == salaryGroup) {
+                LOGGER.error("salaryGroup cannot found + "+cmd);
+                throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,
+                        SalaryConstants.ERROR_SALARY_GROUP_NOTFOUND,"salary  period group id wrong can not found ");
+            }
 			if(cmd.getSendTime() == null){
 				salaryGroup.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				salaryGroup.setStatus(SalaryGroupStatus.SENDED.getCode());
@@ -1575,7 +1580,7 @@ public class SalaryServiceImpl implements SalaryService {
                         LOGGER.error("salaryGroup cannot found + "+cmd);
 
                         throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,
-                                SalaryConstants.ERROR_SALARY_GROUP_STATUS,"salary  period group id wrong");
+                                SalaryConstants.ERROR_SALARY_GROUP_NOTFOUND,"salary  period group id wrong can not found ");
                     }
                     if (SalaryGroupStatus.WAIT_FOR_SEND.getCode().equals(salaryGroup.getStatus())){
 						salaryGroup.setSendTime(null);
