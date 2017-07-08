@@ -1245,11 +1245,11 @@ public class SalaryServiceImpl implements SalaryService {
 			sb.append("</tr>");
 			sb.append("<tr>");
             for (SalaryGroupEntity r : groupEntities) {
-				sb.append("<tr>");
+				sb.append("<td>");
 				SalaryEmployeePeriodVal val = getSalaryEmployeePeriodVal(r.getId(),employeeEntityVals);
 				if(null != val)
 					sb.append(val.getSalaryValue());
-				sb.append("</tr>");
+				sb.append("</td>");
 			}
 			sb.append("</tr>");
 		}
