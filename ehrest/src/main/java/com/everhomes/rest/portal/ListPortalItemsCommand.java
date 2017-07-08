@@ -12,6 +12,10 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPortalItemsCommand {
 
+	private Long pageAnchor;
+
+	private Integer pageSize;
+
 	private Long itemGroupId;
 
 	private String scopeType;
@@ -24,6 +28,22 @@ public class ListPortalItemsCommand {
 		super();
 		this.itemGroupId = itemGroupId;
 		this.scopeType = scopeType;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	public Long getItemGroupId() {

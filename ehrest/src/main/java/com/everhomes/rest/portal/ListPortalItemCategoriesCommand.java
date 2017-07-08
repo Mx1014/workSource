@@ -11,22 +11,22 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPortalItemCategoriesCommand {
 
-	private Long namespaceId;
+	private Integer namespaceId;
 
 	public ListPortalItemCategoriesCommand() {
 
 	}
 
-	public ListPortalItemCategoriesCommand(Long namespaceId) {
+	public ListPortalItemCategoriesCommand(Integer namespaceId) {
 		super();
 		this.namespaceId = namespaceId;
 	}
 
-	public Long getNamespaceId() {
+	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 
-	public void setNamespaceId(Long namespaceId) {
+	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
 

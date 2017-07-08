@@ -6,7 +6,8 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
- * <li>name: 门户导航栏名称</li>
+ * <li>namespaceId: 域空间</li>
+ * <li>label: 门户导航栏名称</li>
  * <li>description: 门户itemGroup描述</li>
  * <li>targetType: 对象类型</li>
  * <li>targetId: 对象id</li>
@@ -14,7 +15,9 @@ import com.everhomes.util.StringHelper;
  */
 public class CreatePortalNavigationBarCommand {
 
-	private String name;
+	private Integer namespaceId;
+
+	private String label;
 
 	private String description;
 
@@ -26,20 +29,28 @@ public class CreatePortalNavigationBarCommand {
 
 	}
 
-	public CreatePortalNavigationBarCommand(String name, String description, String targetType, Long targetId) {
+	public CreatePortalNavigationBarCommand(String label, String description, String targetType, Long targetId) {
 		super();
-		this.name = name;
+		this.label = label;
 		this.description = description;
 		this.targetType = targetType;
 		this.targetId = targetId;
 	}
 
-	public String getName() {
-		return name;
+	public Integer getNamespaceId() {
+		return namespaceId;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	public String getDescription() {

@@ -61,6 +61,8 @@ public enum EntityType {
     ORGANIZATION_FILE("EhOrganizationFiles"),
     PORTAL_ITEM(EhPortalItems.class.getSimpleName()),
     PORTAL_ITEM_CATEGORY(EhPortalItems.class.getSimpleName()),
+    PORTAL_LAYOUT(EhPortalLayouts.class.getSimpleName()),
+    SERVICE_MODULE_APP(EhServiceModuleApps.class.getSimpleName()),
     CHILD_PROJECT("child_project");
 
     private String code;

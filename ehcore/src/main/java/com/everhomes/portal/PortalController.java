@@ -33,10 +33,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/createServiceModuleApp</b>
 	 */
 	@RequestMapping("createServiceModuleApp")
-	@RestReturn(String.class)
+	@RestReturn(ServiceModuleAppDTO.class)
 	public RestResponse createServiceModuleApp(CreateServiceModuleAppCommand cmd){
-		portalService.createServiceModuleApp(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.createServiceModuleApp(cmd));
 	}
 
 	/**
@@ -44,10 +43,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/updateServiceModuleApp</b>
 	 */
 	@RequestMapping("updateServiceModuleApp")
-	@RestReturn(String.class)
+	@RestReturn(ServiceModuleAppDTO.class)
 	public RestResponse updateServiceModuleApp(UpdateServiceModuleAppCommand cmd){
-		portalService.updateServiceModuleApp(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.updateServiceModuleApp(cmd));
 	}
 
 	/**
@@ -62,7 +60,7 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
-	 * <p>门户layout模板列表</p>
+	 * <p>5.门户layout模板列表</p>
 	 * <b>URL: /portal/listPortalLayoutTemplates</b>
 	 */
 	@RequestMapping("listPortalLayoutTemplates")
@@ -86,7 +84,7 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/createPortalLayout</b>
 	 */
 	@RequestMapping("createPortalLayout")
-	@RestReturn(String.class)
+	@RestReturn(PortalLayoutDTO.class)
 	public RestResponse createPortalLayout(CreatePortalLayoutCommand cmd){
 		portalService.createPortalLayout(cmd);
 		return new RestResponse();
@@ -97,7 +95,7 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/updatePortalLayout</b>
 	 */
 	@RequestMapping("updatePortalLayout")
-	@RestReturn(String.class)
+	@RestReturn(PortalLayoutDTO.class)
 	public RestResponse updatePortalLayout(UpdatePortalLayoutCommand cmd){
 		portalService.updatePortalLayout(cmd);
 		return new RestResponse();
@@ -129,10 +127,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/createPortalItemGroup</b>
 	 */
 	@RequestMapping("createPortalItemGroup")
-	@RestReturn(String.class)
+	@RestReturn(PortalItemGroupDTO.class)
 	public RestResponse createPortalItemGroup(CreatePortalItemGroupCommand cmd){
-		portalService.createPortalItemGroup(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.createPortalItemGroup(cmd));
 	}
 
 	/**
@@ -140,10 +137,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/updatePortalItemGroup</b>
 	 */
 	@RequestMapping("updatePortalItemGroup")
-	@RestReturn(String.class)
+	@RestReturn(PortalItemGroupDTO.class)
 	public RestResponse updatePortalItemGroup(UpdatePortalItemGroupCommand cmd){
-		portalService.updatePortalItemGroup(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.updatePortalItemGroup(cmd));
 	}
 
 	/**
@@ -172,10 +168,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/createPortalItem</b>
 	 */
 	@RequestMapping("createPortalItem")
-	@RestReturn(String.class)
+	@RestReturn(PortalItemDTO.class)
 	public RestResponse createPortalItem(CreatePortalItemCommand cmd){
-		portalService.createPortalItem(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.createPortalItem(cmd));
 	}
 
 	/**
@@ -183,10 +178,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/updatePortalItem</b>
 	 */
 	@RequestMapping("updatePortalItem")
-	@RestReturn(String.class)
+	@RestReturn(PortalItemDTO.class)
 	public RestResponse updatePortalItem(UpdatePortalItemCommand cmd){
-		portalService.updatePortalItem(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.updatePortalItem(cmd));
 	}
 
 	/**
@@ -197,6 +191,39 @@ public class PortalController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse deletePortalItem(DeletePortalItemCommand cmd){
 		portalService.deletePortalItem(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>设置item的状态</p>
+	 * <b>URL: /portal/setPortalItemStatus</b>
+	 */
+	@RequestMapping("setPortalItemStatus")
+	@RestReturn(String.class)
+	public RestResponse setPortalItemStatus(SetPortalItemStatusCommand cmd){
+		portalService.setPortalItemStatus(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>设置item的instanceConfig</p>
+	 * <b>URL: /portal/setPortalItemActionData</b>
+	 */
+	@RequestMapping("setPortalItemActionData")
+	@RestReturn(String.class)
+	public RestResponse setPortalItemActionData(SetPortalItemActionDataCommand cmd){
+		portalService.setPortalItemActionData(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>设置item分类的默认样式</p>
+	 * <b>URL: /portal/setItemCategoryDefStyle</b>
+	 */
+	@RequestMapping("setItemCategoryDefStyle")
+	@RestReturn(String.class)
+	public RestResponse setItemCategoryDefStyle(SetItemCategoryDefStyleCommand cmd){
+		portalService.setItemCategoryDefStyle(cmd);
 		return new RestResponse();
 	}
 
@@ -247,10 +274,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/createPortalItemCategory</b>
 	 */
 	@RequestMapping("createPortalItemCategory")
-	@RestReturn(String.class)
+	@RestReturn(PortalItemCategoryDTO.class)
 	public RestResponse createPortalItemCategory(CreatePortalItemCategoryCommand cmd){
-		portalService.createPortalItemCategory(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.createPortalItemCategory(cmd));
 	}
 
 	/**
@@ -258,10 +284,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/updatePortalItemCategory</b>
 	 */
 	@RequestMapping("updatePortalItemCategory")
-	@RestReturn(String.class)
+	@RestReturn(PortalItemCategoryDTO.class)
 	public RestResponse updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd){
-		portalService.updatePortalItemCategory(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.updatePortalItemCategory(cmd));
 	}
 
 	/**
@@ -324,8 +349,7 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("createPortalNavigationBar")
 	@RestReturn(String.class)
 	public RestResponse createPortalNavigationBar(CreatePortalNavigationBarCommand cmd){
-		portalService.createPortalNavigationBar(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.createPortalNavigationBar(cmd));
 	}
 
 	/**
@@ -333,10 +357,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/updatePortalNavigationBar</b>
 	 */
 	@RequestMapping("updatePortalNavigationBar")
-	@RestReturn(String.class)
+	@RestReturn(PortalNavigationBarDTO.class)
 	public RestResponse updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd){
-		portalService.updatePortalNavigationBar(cmd);
-		return new RestResponse();
+		return new RestResponse(portalService.updatePortalNavigationBar(cmd));
 	}
 
 	/**
@@ -344,7 +367,7 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/deletePortalNavigationBar</b>
 	 */
 	@RequestMapping("deletePortalNavigationBar")
-	@RestReturn(String.class)
+	@RestReturn(PortalNavigationBarDTO.class)
 	public RestResponse deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd){
 		portalService.deletePortalNavigationBar(cmd);
 		return new RestResponse();

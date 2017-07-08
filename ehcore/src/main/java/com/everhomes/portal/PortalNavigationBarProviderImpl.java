@@ -4,6 +4,8 @@ package com.everhomes.portal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.portal.PortalNavigationBarStatus;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,9 +37,7 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalNavigationBars.class));
 		portalNavigationBar.setId(id);
 		portalNavigationBar.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalNavigationBar.setCreatorUid(UserContext.current().getUser().getId());
 		portalNavigationBar.setUpdateTime(portalNavigationBar.getCreateTime());
-		portalNavigationBar.setOperatorUid(portalNavigationBar.getCreatorUid());
 		getReadWriteDao().insert(portalNavigationBar);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalNavigationBars.class, null);
 	}
@@ -46,7 +46,6 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
 	public void updatePortalNavigationBar(PortalNavigationBar portalNavigationBar) {
 		assert (portalNavigationBar.getId() != null);
 		portalNavigationBar.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalNavigationBar.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(portalNavigationBar);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalNavigationBars.class, portalNavigationBar.getId());
 	}
@@ -58,8 +57,13 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
 	}
 	
 	@Override
-	public List<PortalNavigationBar> listPortalNavigationBar() {
+	public List<PortalNavigationBar> listPortalNavigationBar(Integer namespaceId) {
+		Condition cond = Tables.EH_PORTAL_NAVIGATION_BARS.STATUS.ne(PortalNavigationBarStatus.INACTIVE.getCode());
+		if(null != namespaceId){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.NAMESPACE_ID.eq(namespaceId));
+		}
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)
+				.where(cond)
 				.orderBy(Tables.EH_PORTAL_NAVIGATION_BARS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalNavigationBar.class));
 	}

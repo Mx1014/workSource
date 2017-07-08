@@ -2,9 +2,16 @@
 package com.everhomes.portal;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.jooq.DSLContext;
+import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.portal.PortalItemActionType;
+import com.everhomes.rest.portal.PortalItemStatus;
+import com.everhomes.server.schema.tables.records.EhPortalItemsRecord;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,12 +61,61 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalItem.class);
 	}
-	
+
 	@Override
-	public List<PortalItem> listPortalItem() {
+	public List<PortalItem> listPortalItem(Long itemCategoryId){
+		return listPortalItem(itemCategoryId, null, null);
+	}
+
+	@Override
+	public List<PortalItem> listPortalItem(Long itemCategoryId, Integer namespaceId, String actionType) {
+		Condition cond = Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode());
+		if(null != itemCategoryId){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.eq(itemCategoryId));
+		}
+		if(null != namespaceId){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.NAMESPACE_ID.eq(namespaceId));
+		}
+
+		if(null != PortalItemActionType.fromCode(actionType)){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.ACTION_TYPE.eq(actionType));
+		}
+
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
+				.where(Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode()))
+				.and(cond)
 				.orderBy(Tables.EH_PORTAL_ITEMS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
+	}
+
+
+	@Override
+	public List<PortalItem> listPortalItem(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
+		List<PortalItem> results = new ArrayList<>();
+		pageSize = pageSize + 1;
+		SelectQuery<Record> query = getReadOnlyContext().selectQuery();
+		query.addFrom(Tables.EH_PORTAL_CONTENT_SCOPES);
+		query.addJoin(Tables.EH_PORTAL_ITEMS, JoinType.LEFT_OUTER_JOIN, Tables.EH_PORTAL_CONTENT_SCOPES.CONTENT_TYPE.eq(EntityType.PORTAL_ITEM.getCode()).and(Tables.EH_PORTAL_CONTENT_SCOPES.CONTENT_ID.eq(Tables.EH_PORTAL_ITEMS.ID)));
+		if(null != queryBuilderCallback)
+			queryBuilderCallback.buildCondition(locator, query);
+		if(null != locator && null != locator.getAnchor())
+			query.addConditions(Tables.EH_PORTAL_ITEMS.ID.lt(locator.getAnchor()));
+		query.addConditions(Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode()));
+		query.addGroupBy(Tables.EH_PORTAL_ITEMS.ID);
+		query.addOrderBy(Tables.EH_PORTAL_ITEMS.ID.desc());
+		query.addLimit(pageSize);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, PortalItem.class));
+			return null;
+		});
+		if(null!= locator)
+			locator.setAnchor(null);
+
+		if(results.size() >= pageSize){
+			results.remove(results.size() - 1);
+			locator.setAnchor(results.get(results.size() - 1).getId());
+		}
+		return results;
 	}
 	
 	private EhPortalItemsDao getReadWriteDao() {
@@ -85,4 +141,6 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+
 }

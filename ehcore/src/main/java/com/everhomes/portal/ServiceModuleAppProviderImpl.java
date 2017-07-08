@@ -4,6 +4,7 @@ package com.everhomes.portal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,9 +36,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleApps.class));
 		serviceModuleApp.setId(id);
 		serviceModuleApp.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		serviceModuleApp.setCreatorUid(UserContext.current().getUser().getId());
 		serviceModuleApp.setUpdateTime(serviceModuleApp.getCreateTime());
-		serviceModuleApp.setOperatorUid(serviceModuleApp.getCreatorUid());
 		getReadWriteDao().insert(serviceModuleApp);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleApps.class, null);
 	}
@@ -46,7 +45,6 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	public void updateServiceModuleApp(ServiceModuleApp serviceModuleApp) {
 		assert (serviceModuleApp.getId() != null);
 		serviceModuleApp.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		serviceModuleApp.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(serviceModuleApp);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModuleApps.class, serviceModuleApp.getId());
 	}
@@ -58,8 +56,10 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 	
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp() {
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId) {
 		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
+				.where(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
 	}

@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  */
 public class CreatePortalItemCategoryCommand {
 
-	private Long namespaceId;
+	private Integer namespaceId;
 
 	private String name;
 
@@ -34,7 +34,7 @@ public class CreatePortalItemCategoryCommand {
 
 	}
 
-	public CreatePortalItemCategoryCommand(Long namespaceId, String name, String iconUri, List<Long> itemIds, List<PortalScope> scopes) {
+	public CreatePortalItemCategoryCommand(Integer namespaceId, String name, String iconUri, List<Long> itemIds, List<PortalScope> scopes) {
 		super();
 		this.namespaceId = namespaceId;
 		this.name = name;
@@ -43,11 +43,11 @@ public class CreatePortalItemCategoryCommand {
 		this.scopes = scopes;
 	}
 
-	public Long getNamespaceId() {
+	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 
-	public void setNamespaceId(Long namespaceId) {
+	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
 

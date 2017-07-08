@@ -11,7 +11,13 @@ public interface PortalContentScopeProvider {
 
 	PortalContentScope findPortalContentScopeById(Long id);
 
-	List<PortalContentScope> listPortalContentScope();
+	List<PortalContentScope> listPortalContentScope(String contentType, Long contentId);
 
 	void createPortalContentScopes(List<PortalContentScope> portalContentScopes);
+
+	void deletePortalContentScopes(String contentType, Long contentId);
+
+	void deletePortalContentScopeById(Long id);
+
+	void deletePortalContentScopeByIds(List<Long> ids);
 }

@@ -75,18 +75,42 @@ public class PortalContentScopeProviderImpl implements PortalContentScopeProvide
 	}
 
 	@Override
+	public void deletePortalContentScopeById(Long id) {
+		assert (id != null);
+		getReadWriteDao().deleteById(id);
+	}
+
+	@Override
+	public void deletePortalContentScopeByIds(List<Long> ids) {
+		assert (ids != null && ids.size() != 0);
+		getReadWriteDao().deleteById(ids);
+	}
+
+	@Override
 	public PortalContentScope findPortalContentScopeById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalContentScope.class);
 	}
 	
 	@Override
-	public List<PortalContentScope> listPortalContentScope() {
+	public List<PortalContentScope> listPortalContentScope(String contentType, Long contentId) {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_CONTENT_SCOPES)
+				.where(Tables.EH_PORTAL_CONTENT_SCOPES.CONTENT_TYPE.eq(contentType))
+				.and(Tables.EH_PORTAL_CONTENT_SCOPES.CONTENT_ID.eq(contentId))
 				.orderBy(Tables.EH_PORTAL_CONTENT_SCOPES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalContentScope.class));
 	}
-	
+
+	@Override
+	public void deletePortalContentScopes(String contentType, Long contentId) {
+		List<PortalContentScope> portalContentScopes = listPortalContentScope(contentType, contentId);
+		List<Long> ids = new ArrayList<>();
+		for (PortalContentScope portalContentScope: portalContentScopes) {
+			ids.add(portalContentScope.getId());
+		}
+		deletePortalContentScopeByIds(ids);
+	}
+
 	private EhPortalContentScopesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

@@ -17,6 +17,8 @@ public class ListPortalItemsResponse {
 	@ItemType(PortalItemDTO.class)
 	private List<PortalItemDTO> portalItems;
 
+	private Long nextPageAnchor;
+
 	public ListPortalItemsResponse() {
 
 	}
@@ -32,6 +34,14 @@ public class ListPortalItemsResponse {
 
 	public void setPortalItems(List<PortalItemDTO> portalItems) {
 		this.portalItems = portalItems;
+	}
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 	@Override

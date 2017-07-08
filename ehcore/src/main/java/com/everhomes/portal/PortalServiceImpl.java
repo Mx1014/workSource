@@ -1,17 +1,33 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.launchpad.ItemDisplayFlag;
 import com.everhomes.rest.portal.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +35,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -46,28 +64,101 @@ public class PortalServiceImpl implements PortalService {
 	@Autowired
 	private PortalLayoutTemplateProvider portalLayoutTemplateProvider;
 
+	@Autowired
+	private ServiceModuleProvider serviceModuleProvider;
+
+	@Autowired
+	private ServiceModuleAppProvider serviceModuleAppProvider;
+
+	@Autowired
+	private PortalItemCategoryProvider portalItemCategoryProvider;
+
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private CommunityProvider communityProvider;
+
+	@Autowired
+	private ContentServerService contentServerService;
+
+	@Autowired
+	private PortalNavigationBarProvider portalNavigationBarProvider;
+
+	@Autowired
+	private UserProvider userProvider;
+
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
-		return new ListServiceModuleAppsResponse();
+		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId());
+		return new ListServiceModuleAppsResponse(moduleApps.stream().map(r ->{
+			return processServiceModuleAppDTO(r);
+		}).collect(Collectors.toList()));
 	}
 
 	@Override
-	public void createServiceModuleApp(CreateServiceModuleAppCommand cmd) {
-	
-
+	public ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd) {
+		ServiceModule serviceModule = checkServiceModule(cmd.getModuleId());
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		ServiceModuleApp moduleApp = ConvertHelper.convert(cmd, ServiceModuleApp.class);
+		if(StringUtils.isEmpty(cmd.getInstanceConfig()) && null != serviceModule){
+			moduleApp.setInstanceConfig(serviceModule.getInstanceConfig());
+		}
+		moduleApp.setNamespaceId(namespaceId);
+		moduleApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
+		moduleApp.setCreatorUid(UserContext.current().getUser().getId());
+		moduleApp.setOperatorUid(moduleApp.getCreatorUid());
+		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
+		return processServiceModuleAppDTO(moduleApp);
 	}
 
 	@Override
-	public void updateServiceModuleApp(UpdateServiceModuleAppCommand cmd) {
-	
-
+	public ServiceModuleAppDTO updateServiceModuleApp(UpdateServiceModuleAppCommand cmd) {
+		ServiceModuleApp moduleApp = checkServiceModuleApp(cmd.getId());
+		moduleApp.setOperatorUid(UserContext.current().getUser().getId());
+		moduleApp.setName(cmd.getName());
+		moduleApp.setModuleId(cmd.getModuleId());
+		if(null != cmd.getModuleId()){
+			ServiceModule serviceModule = checkServiceModule(cmd.getModuleId());
+			if(StringUtils.isEmpty(cmd.getInstanceConfig()) && null != serviceModule){
+				cmd.setInstanceConfig(serviceModule.getInstanceConfig());
+			}
+		}
+		moduleApp.setInstanceConfig(cmd.getInstanceConfig());
+		serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
+		return processServiceModuleAppDTO(moduleApp);
 	}
 
 
 	@Override
 	public void deleteServiceModuleApp(DeleteServiceModuleAppCommand cmd) {
-	
+		ServiceModuleApp moduleApp = checkServiceModuleApp(cmd.getId());
+		moduleApp.setOperatorUid(UserContext.current().getUser().getId());
+		moduleApp.setStatus(ServiceModuleAppStatus.INACTIVE.getCode());
+		serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
+	}
 
+	private ServiceModuleApp checkServiceModuleApp(Long id){
+		ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(id);
+		if(null == serviceModuleApp){
+			LOGGER.error("Unable to find the serviceModuleApp.id = {}", id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the serviceModuleApp.");
+		}
+		return serviceModuleApp;
+	}
+
+	private ServiceModule checkServiceModule(Long id){
+		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(id);
+		if(null == serviceModule){
+			LOGGER.error("Unable to find the serviceModule.id = {}", id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the serviceModule.");
+		}
+		return serviceModule;
 	}
 
 	@Override
@@ -85,6 +176,11 @@ public class PortalServiceImpl implements PortalService {
 		return new ListPortalLayoutsResponse(portalLayouts.stream().map(r ->{
 			return processPortalLayoutDTO(r);
 		}).collect(Collectors.toList()));
+	}
+
+	private ServiceModuleAppDTO processServiceModuleAppDTO(ServiceModuleApp moduleApp){
+		ServiceModuleAppDTO dto = ConvertHelper.convert(moduleApp, ServiceModuleAppDTO.class);
+		return dto;
 	}
 
 	private PortalLayoutDTO processPortalLayoutDTO(PortalLayout portalLayout){
@@ -228,8 +324,26 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public ListPortalItemsResponse listPortalItems(ListPortalItemsCommand cmd) {
-	
-		return new ListPortalItemsResponse();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+		List<PortalItem> portalItems = portalItemProvider.listPortalItem(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(cmd.getItemGroupId()));
+				if(null != PortalScopeType.fromCode(cmd.getScopeType())){
+					query.addConditions(Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_TYPE.eq(cmd.getScopeType()));
+				}
+				return query;
+			}
+		});
+		ListPortalItemsResponse response = new ListPortalItemsResponse();
+		response.setNextPageAnchor(locator.getAnchor());
+		response.setPortalItems(portalItems.stream().map(r ->{
+			return processPortalItemDTO(r);
+		}).collect(Collectors.toList()));
+		return response;
 	}
 
 	@Override
@@ -261,17 +375,53 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		PortalItem portalItem = checkPortalItem(cmd.getId());
 		portalItem.setOperatorUid(user.getId());
+		portalItem.setName(cmd.getName());
+		portalItem.setStatus(cmd.getStatus());
+		portalItem.setActionType(cmd.getActionType());
+		portalItem.setActionData(cmd.getActionData());
+		portalItem.setDescription(cmd.getDescription());
+		portalItem.setIconUri(cmd.getIconUri());
+		this.dbProvider.execute((status) -> {
+			portalItemProvider.updatePortalItem(portalItem);
+			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
+				portalContentScopeProvider.deletePortalContentScopes(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
+				createContentScopes(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), cmd.getScopes());
+			}
+			return null;
+		});
 		return processPortalItemDTO(portalItem);
 	}
 
 	@Override
 	public void deletePortalItem(DeletePortalItemCommand cmd) {
-	
+		PortalItem portalItem = checkPortalItem(cmd.getId());
+		portalItem.setOperatorUid(UserContext.current().getUser().getId());
+		portalItem.setStatus(PortalItemGroupStatus.INACTIVE.getCode());
+		this.dbProvider.execute((status) -> {
+			portalItemProvider.updatePortalItem(portalItem);
+			portalContentScopeProvider.deletePortalContentScopes(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
+			return null;
+		});
+	}
 
+	@Override
+	public void setPortalItemStatus(SetPortalItemStatusCommand cmd) {
+		PortalItem portalItem = checkPortalItem(cmd.getId());
+		portalItem.setOperatorUid(UserContext.current().getUser().getId());
+		portalItem.setStatus(cmd.getStatus());
+		portalItemProvider.updatePortalItem(portalItem);
 	}
 
 	private PortalItemDTO processPortalItemDTO(PortalItem portalItem){
-		return ConvertHelper.convert(portalItem, PortalItemDTO.class);
+		PortalItemDTO dto = ConvertHelper.convert(portalItem, PortalItemDTO.class);
+		dto.setCreateTime(portalItem.getCreateTime().getTime());
+		dto.setUpdateTime(portalItem.getUpdateTime().getTime());
+
+		if(!StringUtils.isEmpty(portalItem.getIconUri())){
+			String url = contentServerService.parserUri(portalItem.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+			dto.setIconUrl(url);
+		}
+		return dto;
 	}
 
 	private PortalItem checkPortalItem(Long id){
@@ -303,89 +453,347 @@ public class PortalServiceImpl implements PortalService {
 		portalContentScopeProvider.createPortalContentScopes(scopes);
 	}
 
+	private List<PortalContentScopeDTO> processListPortalContentScopeDTO(List<PortalContentScope> portalContentScopes){
+		Map<String, List<PortalScopeDTO>> portalScopeMap = new HashMap<>();
+		for (PortalContentScope portalContentScope: portalContentScopes) {
+			if(null == portalScopeMap.get(portalContentScope.getScopeType())){
+				List<PortalScopeDTO> scopes = new ArrayList<>();
+				scopes.add(processPortalScopeDTO(portalContentScope));
+				portalScopeMap.put(portalContentScope.getScopeType(), scopes);
+			}else{
+				portalScopeMap.get(portalContentScope.getScopeType()).add(processPortalScopeDTO(portalContentScope));
+			}
+		}
 
-	@Override
+		List<PortalContentScopeDTO> dtos = new ArrayList<>();
+		for (Map.Entry<String, List<PortalScopeDTO>> entry : portalScopeMap.entrySet()) {
+			PortalContentScopeDTO dto = new PortalContentScopeDTO();
+			dto.setScopeType(entry.getKey());
+			dto.setScopes(entry.getValue());
+			dtos.add(dto);
+		}
+		return dtos;
+	}
+
+	private PortalScopeDTO processPortalScopeDTO(PortalContentScope portalContentScope){
+		PortalScopeDTO dto = ConvertHelper.convert(portalContentScope, PortalScopeDTO.class);
+		if(PortalScopeType.fromCode(portalContentScope.getScopeType()) == PortalScopeType.PM || PortalScopeType.fromCode(portalContentScope.getScopeType()) == PortalScopeType.ORGANIZATION){
+			Organization organization = organizationProvider.findOrganizationById(portalContentScope.getScopeId());
+			if(null != organization){
+				dto.setScopeName(organization.getName());
+			}
+		}else if(PortalScopeType.fromCode(portalContentScope.getScopeType()) == PortalScopeType.COMMERCIAL || PortalScopeType.fromCode(portalContentScope.getScopeType()) == PortalScopeType.RESIDENTIAL){
+			Community community = communityProvider.findCommunityById(portalContentScope.getScopeId());
+			if(null != community){
+				dto.setScopeName(community.getName());
+			}
+		}
+		return dto;
+	}
+
+		@Override
 	public void reorderPortalItem(ReorderPortalItemCommand cmd) {
-	
+		if(null == cmd.getReorders() && cmd.getReorders().size() == 0){
+			LOGGER.error("Params reorders is null.cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Params reorders is null.");
+		}
 
+		User user = UserContext.current().getUser();
+		this.dbProvider.execute((status) -> {
+			for (PortalItemReorder portalItemReorder : cmd.getReorders()) {
+				PortalItem portalItem = checkPortalItem(portalItemReorder.getItemId());
+				portalItem.setOperatorUid(user.getId());
+				portalItem.setDefaultOrder(portalItemReorder.getDefaultOrder());
+				portalItemProvider.updatePortalItem(portalItem);
+			}
+			return null;
+		});
 	}
 
 	@Override
 	public void reorderPortalItemGroup(ReorderPortalItemGroupCommand cmd) {
-	
+		if(null == cmd.getReorders() && cmd.getReorders().size() == 0){
+			LOGGER.error("Params reorders is null.cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Params reorders is null.");
+		}
 
+		User user = UserContext.current().getUser();
+		this.dbProvider.execute((status) -> {
+			for (PortalItemGroupReorder portalItemGroupReorder : cmd.getReorders()) {
+				PortalItemGroup portalItemGroup = checkPortalItemGroup(portalItemGroupReorder.getItemGroupId());
+				portalItemGroup.setOperatorUid(user.getId());
+				portalItemGroup.setDefaultOrder(portalItemGroupReorder.getDefaultOrder());
+				portalItemGroupProvider.updatePortalItemGroup(portalItemGroup);
+			}
+			return null;
+		});
 	}
 
 	@Override
-	public GetPortalItemByIdResponse getPortalItemById(GetPortalItemByIdCommand cmd) {
-	
-		return new GetPortalItemByIdResponse();
+	public PortalItemDTO getPortalItemById(GetPortalItemByIdCommand cmd) {
+		PortalItem portalItem = checkPortalItem(cmd.getId());
+		return processPortalItemDTO(portalItem);
 	}
 
 	@Override
 	public ListPortalItemCategoriesResponse listPortalItemCategories(ListPortalItemCategoriesCommand cmd) {
-	
-		return new ListPortalItemCategoriesResponse();
+		Integer namespaceId= UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		List<PortalItemCategory> portalItemCategorys = portalItemCategoryProvider.listPortalItemCategory(namespaceId);
+		List<PortalItemCategoryDTO> portalItemCategories = portalItemCategorys.stream().map(r ->{
+			PortalItemCategoryDTO dto = processPortalItemCategoryDTO(r);
+			List<PortalItem> portalItems = portalItemProvider.listPortalItem(r.getId());
+			dto.setItems(portalItems.stream().map(i ->{
+				return processPortalItemDTO(i);
+			}).collect(Collectors.toList()));
+
+			List<PortalContentScope> portalContentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM_CATEGORY.getCode(), r.getId());
+			dto.setScopes(processListPortalContentScopeDTO(portalContentScopes));
+			return dto;
+		}).collect(Collectors.toList());
+
+		return new ListPortalItemCategoriesResponse(portalItemCategories);
 	}
 
 	@Override
-	public void createPortalItemCategory(CreatePortalItemCategoryCommand cmd) {
-	
-
+	public PortalItemCategoryDTO createPortalItemCategory(CreatePortalItemCategoryCommand cmd) {
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		PortalItemCategory portalItemCategory = ConvertHelper.convert(cmd, PortalItemCategory.class);
+		portalItemCategory.setStatus(PortalItemCategoryStatus.ACTIVE.getCode());
+		portalItemCategory.setOperatorUid(user.getId());
+		portalItemCategory.setNamespaceId(namespaceId);
+		this.dbProvider.execute((status) -> {
+			portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
+			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
+				createContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId(), cmd.getScopes());
+			}
+			return null;
+		});
+		return processPortalItemCategoryDTO(portalItemCategory);
 	}
 
 	@Override
-	public void updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd) {
-	
+	public PortalItemCategoryDTO updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd) {
+		PortalItemCategory portalItemCategory = checkPortalItemCategory(cmd.getId());
+		portalItemCategory.setName(cmd.getName());
+		portalItemCategory.setOperatorUid(UserContext.current().getUser().getId());
+		portalItemCategory.setIconUri(cmd.getIconUri());
+		this.dbProvider.execute((status) -> {
+			portalItemCategoryProvider.updatePortalItemCategory(portalItemCategory);
+			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
+				portalContentScopeProvider.deletePortalContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId());
+				createContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId(), cmd.getScopes());
+			}
+			return null;
+		});
 
+		return processPortalItemCategoryDTO(portalItemCategory);
 	}
 
 	@Override
 	public void deletePortalItemCategory(DeletePortalItemCategoryCommand cmd) {
-	
+		PortalItemCategory portalItemCategory = checkPortalItemCategory(cmd.getId());
+		portalItemCategory.setOperatorUid(UserContext.current().getUser().getId());
+		portalItemCategory.setStatus(PortalItemCategoryStatus.INACTIVE.getCode());
+		this.dbProvider.execute((status) -> {
+			portalItemCategoryProvider.updatePortalItemCategory(portalItemCategory);
+			portalContentScopeProvider.deletePortalContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId());
+			return null;
+		});
 
+	}
+
+	private PortalItemCategoryDTO processPortalItemCategoryDTO(PortalItemCategory portalItemCategory){
+		PortalItemCategoryDTO dto = ConvertHelper.convert(portalItemCategory, PortalItemCategoryDTO.class);
+		PortalItem portalItem = getItemAllOrMore(portalItemCategory.getNamespaceId(), AllOrMoreType.ALL);
+		if(null != portalItem){
+			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
+			if(null == AlignType.fromCode(portalItemCategory.getAlign())){
+				dto.setAlign(actionData.getAlign());
+			}
+
+			if(StringUtils.isEmpty(portalItemCategory.getIconUri())){
+				portalItemCategory.setIconUri(actionData.getDefUri());
+			}
+		}
+
+		if(!StringUtils.isEmpty(portalItemCategory.getIconUri())){
+			String url = contentServerService.parserUri(portalItemCategory.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+			dto.setIconUrl(url);
+		}
+		return dto;
+	}
+
+	private PortalItem getItemAllOrMore(Integer namespaceId, AllOrMoreType type){
+		List<PortalItem> portalItems = portalItemProvider.listPortalItem(null, namespaceId, PortalItemActionType.ALLORMORE.getCode());
+		for (PortalItem portalItem: portalItems) {
+			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
+			if(null != actionData && AllOrMoreType.fromCode(actionData.getType()) == type){
+				return portalItem;
+			}
+		}
+		return null;
+	}
+
+	private PortalItemCategory checkPortalItemCategory(Long id){
+		PortalItemCategory portalItemCategory = portalItemCategoryProvider.findPortalItemCategoryById(id);
+		if(null == portalItemCategory){
+			LOGGER.error("Unable to find the portalItemCategory.id = {}", id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the portalItemCategory.");
+		}
+
+		return portalItemCategory;
 	}
 
 	@Override
 	public void reorderPortalItemCategory(ReorderPortalItemCategoryCommand cmd) {
-	
+		if(null == cmd.getReorders() && cmd.getReorders().size() == 0){
+			LOGGER.error("Params reorders is null.cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Params reorders is null.");
+		}
 
+		User user = UserContext.current().getUser();
+		this.dbProvider.execute((status) -> {
+			for (PortalItemCategoryReorder portalItemGroupReorder : cmd.getReorders()) {
+				PortalItemCategory portalItemCategory = portalItemCategoryProvider.findPortalItemCategoryById(portalItemGroupReorder.getItemCategoryId());
+				portalItemCategory.setOperatorUid(user.getId());
+				portalItemCategory.setDefaultOrder(portalItemGroupReorder.getDefaultOrder());
+				portalItemCategoryProvider.updatePortalItemCategory(portalItemCategory);
+			}
+			return null;
+		});
+
+	}
+
+	@Override
+	public void setPortalItemActionData(SetPortalItemActionDataCommand cmd) {
+		PortalItem portalItem = checkPortalItem(cmd.getId());
+		portalItem.setOperatorUid(UserContext.current().getUser().getId());
+		portalItem.setActionData(cmd.getInstanceConfig());
+		portalItemProvider.updatePortalItem(portalItem);
+	}
+
+	@Override
+	public void setItemCategoryDefStyle(SetItemCategoryDefStyleCommand cmd) {
+		PortalItem portalItem = checkPortalItem(cmd.getId());
+		portalItem.setOperatorUid(UserContext.current().getUser().getId());
+		AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
+		actionData.setAlign(cmd.getAlign());
+		actionData.setDefUri(cmd.getDefUri());
+		portalItem.setActionData(StringHelper.toJsonString(actionData));
+		portalItemProvider.updatePortalItem(portalItem);
 	}
 
 	@Override
 	public void rankPortalItemCategory(RankPortalItemCategoryCommand cmd) {
-	
+		if(null == cmd.getRanks() && cmd.getRanks().size() == 0){
+			LOGGER.error("Params ranks is null.cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Params ranks is null.");
+		}
+		User user = UserContext.current().getUser();
+		this.dbProvider.execute((status) -> {
+			for (PortalItemCategoryRank portalItemCategoryRank : cmd.getRanks()) {
+				PortalItemCategory portalItemCategory = portalItemCategoryProvider.findPortalItemCategoryById(portalItemCategoryRank.getItemCategoryId());
+				if(null != portalItemCategoryRank.getItemIds() && portalItemCategoryRank.getItemIds().size() != 0){
+					for (Long itemId: portalItemCategoryRank.getItemIds()) {
+						PortalItem portalItem = checkPortalItem(itemId);
+						portalItem.setOperatorUid(user.getId());
+						portalItem.setItemCategoryId(portalItemCategory.getId());
+						portalItemProvider.updatePortalItem(portalItem);
+					}
+				}
+			}
+			return null;
+		});
 
 	}
 
 	@Override
-	public GetPortalItemGroupByIdResponse getPortalItemGroupById(GetPortalItemGroupByIdCommand cmd) {
-	
-		return new GetPortalItemGroupByIdResponse();
+	public PortalItemGroupDTO getPortalItemGroupById(GetPortalItemGroupByIdCommand cmd) {
+		PortalItemGroup portalItemGroup = checkPortalItemGroup(cmd.getId());
+		return processPortalItemGroupDTO(portalItemGroup);
 	}
 
 	@Override
 	public ListPortalNavigationBarsResponse listPortalNavigationBars(ListPortalNavigationBarsCommand cmd) {
-	
-		return new ListPortalNavigationBarsResponse();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(namespaceId);
+		return new ListPortalNavigationBarsResponse(portalNavigationBars.stream().map(r ->{
+			return processPortalNavigationBarDTO(r);
+		}).collect(Collectors.toList()));
 	}
 
 	@Override
-	public void createPortalNavigationBar(CreatePortalNavigationBarCommand cmd) {
-	
-
+	public PortalNavigationBarDTO createPortalNavigationBar(CreatePortalNavigationBarCommand cmd) {
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		PortalNavigationBar portalNavigationBar = ConvertHelper.convert(cmd, PortalNavigationBar.class);
+		portalNavigationBar.setOperatorUid(user.getId());
+		portalNavigationBar.setCreatorUid(user.getId());
+		portalNavigationBar.setNamespaceId(namespaceId);
+		portalNavigationBar.setStatus(PortalNavigationBarStatus.ACTIVE.getCode());
+		portalNavigationBarProvider.createPortalNavigationBar(portalNavigationBar);
+		return processPortalNavigationBarDTO(portalNavigationBar);
 	}
 
 	@Override
-	public void updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd) {
-	
-
+	public PortalNavigationBarDTO updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd) {
+		PortalNavigationBar portalNavigationBar = checkPortalNavigationBar(cmd.getId());
+		portalNavigationBar.setLabel(cmd.getLabel());
+		portalNavigationBar.setDescription(cmd.getDescription());
+		portalNavigationBar.setTargetType(cmd.getTargetType());
+		portalNavigationBar.setTargetId(cmd.getTargetId());
+		portalNavigationBar.setOperatorUid(UserContext.current().getUser().getId());
+		portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+		return processPortalNavigationBarDTO(portalNavigationBar);
 	}
 
 	@Override
 	public void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd) {
-	
+		PortalNavigationBar portalNavigationBar = checkPortalNavigationBar(cmd.getId());
+		portalNavigationBar.setOperatorUid(UserContext.current().getUser().getId());
+		portalNavigationBar.setStatus(PortalNavigationBarStatus.INACTIVE.getCode());
+		portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
+	}
 
+	private PortalNavigationBar checkPortalNavigationBar(Long id){
+		PortalNavigationBar portalNavigationBar = portalNavigationBarProvider.findPortalNavigationBarById(id);
+		if(null == portalNavigationBar){
+			LOGGER.error("Unable to find the portalNavigationBar.id = {}", id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the portalNavigationBar.");
+		}
+
+		return portalNavigationBar;
+	}
+
+	private PortalNavigationBarDTO processPortalNavigationBarDTO(PortalNavigationBar portalNavigationBar){
+		PortalNavigationBarDTO dto = ConvertHelper.convert(portalNavigationBar, PortalNavigationBarDTO.class);
+		dto.setCreateTime(portalNavigationBar.getCreateTime().getTime());
+		dto.setUpdateTime(portalNavigationBar.getUpdateTime().getTime());
+		User operator = userProvider.findUserById(portalNavigationBar.getOperatorUid());
+		if(null != operator) dto.setOperatorUName(operator.getNickName());
+
+		if(EntityType.fromCode(portalNavigationBar.getTargetType()) == EntityType.PORTAL_LAYOUT){
+			PortalLayout portalLayout = portalLayoutProvider.findPortalLayoutById(portalNavigationBar.getTargetId());
+			if(null != portalLayout){
+				String layoutTitle = configurationProvider.getValue(ConfigConstants.PORTAL_LAYOUT_TITLE, "门户");
+				dto.setContentName(layoutTitle + "-" + portalLayout.getLabel());
+			}
+		}else if(EntityType.fromCode(portalNavigationBar.getTargetType()) == EntityType.SERVICE_MODULE_APP){
+			ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(portalNavigationBar.getTargetId());
+			if(null != serviceModuleApp){
+				String moduleAppTitle = configurationProvider.getValue(ConfigConstants.PORTAL_MODULE_APP_TITLE, "应用");
+				dto.setContentName(moduleAppTitle + "-" + serviceModuleApp.getName());
+			}
+		}
+
+		return dto;
 	}
 
 	@Override

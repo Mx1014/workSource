@@ -17,6 +17,8 @@ public class UpdateServiceModuleAppCommand {
 
 	private String name;
 
+	private Long moduleId;
+
 	private String instanceConfig;
 
 	public UpdateServiceModuleAppCommand() {
@@ -52,6 +54,14 @@ public class UpdateServiceModuleAppCommand {
 
 	public void setInstanceConfig(String instanceConfig) {
 		this.instanceConfig = instanceConfig;
+	}
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override

@@ -19,7 +19,7 @@ public class PortalItemCategoryDTO {
     private String name;
     private String iconUrl;
     private Integer defaultOrder;
-    private Byte align;
+    private String align;
 
     @ItemType(PortalItemDTO.class)
     private List<PortalItemDTO> items;
@@ -59,11 +59,11 @@ public class PortalItemCategoryDTO {
         this.defaultOrder = defaultOrder;
     }
 
-    public Byte getAlign() {
+    public String getAlign() {
         return align;
     }
 
-    public void setAlign(Byte align) {
+    public void setAlign(String align) {
         this.align = align;
     }
 

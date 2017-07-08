@@ -11,10 +11,10 @@ public interface PortalService {
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
 
 
-	public void createServiceModuleApp(CreateServiceModuleAppCommand cmd);
+	public ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd);
 
 
-	public void updateServiceModuleApp(UpdateServiceModuleAppCommand cmd);
+	public ServiceModuleAppDTO updateServiceModuleApp(UpdateServiceModuleAppCommand cmd);
 
 
 	public void deleteServiceModuleApp(DeleteServiceModuleAppCommand cmd);
@@ -55,6 +55,10 @@ public interface PortalService {
 
 	public void deletePortalItem(DeletePortalItemCommand cmd);
 
+	void setPortalItemStatus(SetPortalItemStatusCommand cmd);
+
+	void setPortalItemActionData(SetPortalItemActionDataCommand cmd);
+
 
 	public void reorderPortalItem(ReorderPortalItemCommand cmd);
 
@@ -62,16 +66,16 @@ public interface PortalService {
 	public void reorderPortalItemGroup(ReorderPortalItemGroupCommand cmd);
 
 
-	public GetPortalItemByIdResponse getPortalItemById(GetPortalItemByIdCommand cmd);
+	public PortalItemDTO getPortalItemById(GetPortalItemByIdCommand cmd);
 
 
 	public ListPortalItemCategoriesResponse listPortalItemCategories(ListPortalItemCategoriesCommand cmd);
 
 
-	public void createPortalItemCategory(CreatePortalItemCategoryCommand cmd);
+	public PortalItemCategoryDTO createPortalItemCategory(CreatePortalItemCategoryCommand cmd);
 
 
-	public void updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd);
+	public PortalItemCategoryDTO updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd);
 
 
 	public void deletePortalItemCategory(DeletePortalItemCategoryCommand cmd);
@@ -83,16 +87,16 @@ public interface PortalService {
 	public void rankPortalItemCategory(RankPortalItemCategoryCommand cmd);
 
 
-	public GetPortalItemGroupByIdResponse getPortalItemGroupById(GetPortalItemGroupByIdCommand cmd);
+	public PortalItemGroupDTO getPortalItemGroupById(GetPortalItemGroupByIdCommand cmd);
 
 
 	public ListPortalNavigationBarsResponse listPortalNavigationBars(ListPortalNavigationBarsCommand cmd);
 
 
-	public void createPortalNavigationBar(CreatePortalNavigationBarCommand cmd);
+	public PortalNavigationBarDTO createPortalNavigationBar(CreatePortalNavigationBarCommand cmd);
 
 
-	public void updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd);
+	public PortalNavigationBarDTO updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd);
 
 
 	public void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd);
@@ -101,5 +105,7 @@ public interface PortalService {
 	public void publish(PublishCommand cmd);
 
 	List<PortalLayoutTemplateDTO> listPortalLayoutTemplates();
+
+	void setItemCategoryDefStyle(SetItemCategoryDefStyleCommand cmd);
 
 }

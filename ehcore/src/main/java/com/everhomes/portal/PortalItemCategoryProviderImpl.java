@@ -6,6 +6,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.portal.PortalItemCategoryStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPortalItemCategoriesDao;
@@ -34,9 +35,7 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemCategories.class));
 		portalItemCategory.setId(id);
 		portalItemCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalItemCategory.setCreatorUid(UserContext.current().getUser().getId());
 		portalItemCategory.setUpdateTime(portalItemCategory.getCreateTime());
-		portalItemCategory.setOperatorUid(portalItemCategory.getCreatorUid());
 		getReadWriteDao().insert(portalItemCategory);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalItemCategories.class, null);
 	}
@@ -45,7 +44,6 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 	public void updatePortalItemCategory(PortalItemCategory portalItemCategory) {
 		assert (portalItemCategory.getId() != null);
 		portalItemCategory.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalItemCategory.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(portalItemCategory);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalItemCategories.class, portalItemCategory.getId());
 	}
@@ -57,8 +55,10 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 	}
 	
 	@Override
-	public List<PortalItemCategory> listPortalItemCategory() {
+	public List<PortalItemCategory> listPortalItemCategory(Integer namespaceId) {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_CATEGORIES)
+				.where(Tables.EH_PORTAL_ITEM_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_PORTAL_ITEM_CATEGORIES.STATUS.eq(PortalItemCategoryStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_PORTAL_ITEM_CATEGORIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItemCategory.class));
 	}

@@ -11,6 +11,6 @@ public interface PortalItemCategoryProvider {
 
 	PortalItemCategory findPortalItemCategoryById(Long id);
 
-	List<PortalItemCategory> listPortalItemCategory();
+	List<PortalItemCategory> listPortalItemCategory(Integer namespaceId);
 
 }

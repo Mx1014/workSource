@@ -11,6 +11,6 @@ public interface ServiceModuleAppProvider {
 
 	ServiceModuleApp findServiceModuleAppById(Long id);
 
-	List<ServiceModuleApp> listServiceModuleApp();
+	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId);
 
 }
