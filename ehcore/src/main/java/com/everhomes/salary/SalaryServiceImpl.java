@@ -206,14 +206,18 @@ public class SalaryServiceImpl implements SalaryService {
             this.organizationProvider.updateOrganization(organization);
 
             AddSalaryGroupResponse response = new AddSalaryGroupResponse();
-            //  先删除数据库里不在cmd的entity列表的-salary_group_entities salary_employees 表
+            List<SalaryGroupEntityDTO> salaryGroupEntities = new ArrayList<>();
+
             if (null == cmd.getSalaryGroupEntity()) {
                 return response;
             }
+            //  记录所有的id
             List<Long> entityIds = new ArrayList<>();
             for( SalaryGroupEntityDTO dto: cmd.getSalaryGroupEntity()) {
                 entityIds.add(dto.getOriginEntityId());
+                //  查找对应的字段
                 SalaryGroupEntity entityDB = salaryGroupEntityProvider.findSalaryGroupEntityByGroupAndOriginId(dto.getGroupId(), dto.getOriginEntityId());
+                //  没查找到的时候就创建新的字段
                 if(StringUtils.isEmpty(entityDB)){
                     SalaryGroupEntity newEntity = ConvertHelper.convert(dto, SalaryGroupEntity.class);
                     newEntity.setOwnerType(cmd.getOwnerType());
@@ -221,14 +225,17 @@ public class SalaryServiceImpl implements SalaryService {
                     newEntity.setGroupId(cmd.getSalaryGroupId());
                     salaryGroupEntityProvider.createSalaryGroupEntity(newEntity);
                 }else {
-//                    newEntity.setId(entityDB.getId());
+                    //  查找到的时候则做修改
                     entityDB = ConvertHelper.convert(dto,SalaryGroupEntity.class);
                     salaryGroupEntityProvider.updateSalaryGroupEntity(entityDB);
                 }
+                salaryGroupEntities.add(dto);
             }
+
+            //  最后删除多余的字段
             salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeValsByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
-
+            response.setSalaryGroupEntity(salaryGroupEntities);
             return response;
         }
 		return null;
