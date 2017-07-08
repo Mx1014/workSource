@@ -539,7 +539,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         // 2.删除原有的薪酬设定
         List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
-        if(!StringUtils.isEmpty(originVals)) {
+        if(!StringUtils.isEmpty(originVals) && originVals.size() > 0) {
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(originVals.get(0).getGroupId(),
                     originVals.get(0).getUserId(), cmd.getOwnerType(), cmd.getOwnerId());
         }
@@ -787,7 +787,8 @@ public class SalaryServiceImpl implements SalaryService {
 	    ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
         List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> errorDataLogs = new ArrayList<>();
 
-        //  一次读出 “有薪酬组的” 用户的手机号与id
+        //  读取薪酬组列表中所有的手机号以及对应的userId
+
 //        List<String> contactTokens = this.xxx
         List<Long[]> users = new ArrayList<>();
 
