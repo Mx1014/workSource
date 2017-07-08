@@ -598,17 +598,17 @@ public class SalaryServiceImpl implements SalaryService {
 
         User user = UserContext.current().getUser();
         if(!cmd.getEmployeeOriginVal().isEmpty()){
-            Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
+/*            Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
             Long detailId = cmd.getEmployeeOriginVal().get(0).getUserDetailId();
-            Long groupId = cmd.getEmployeeOriginVal().get(0).getSalaryGroupId();
+            Long groupId = cmd.getEmployeeOriginVal().get(0).getSalaryGroupId();*/
 
             //  添加到组织架构的薪酬组中，没有增加有则覆盖
             AddToOrganizationSalaryGroupCommand command = new AddToOrganizationSalaryGroupCommand();
             command.setOwnerId(cmd.getOwnerId());
             command.setOwnerType(cmd.getOwnerType());
-            command.setSalaryGroupId(groupId);
+            command.setSalaryGroupId(cmd.getSalaryGroupId());
             List<Long> detailIds = new ArrayList<>();
-            detailIds.add(detailId);
+            detailIds.add(cmd.getUserDetailId());
             command.setDetailIds(detailIds);
             this.addToOrganizationSalaryGroup(command);
 /*
@@ -624,13 +624,13 @@ public class SalaryServiceImpl implements SalaryService {
 */
 
             //  添加到薪酬组的个人设定中
-            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId,cmd.getOwnerType(),cmd.getOwnerId());
+            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
             if(originVals.isEmpty()){
                 cmd.getEmployeeOriginVal().stream().forEach(r -> {
                     this.createSalaryEmployeeOriginVal(r, cmd.getOwnerType(),cmd.getOwnerId());
                 });
             }else{
-                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(groupId,userId,cmd.getOwnerType(),cmd.getOwnerId());
+                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
                 cmd.getEmployeeOriginVal().stream().forEach(s ->{
                     this.createSalaryEmployeeOriginVal(s,cmd.getOwnerType(),cmd.getOwnerId());
                 });
