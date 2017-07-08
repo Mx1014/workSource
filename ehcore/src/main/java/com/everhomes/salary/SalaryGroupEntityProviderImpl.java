@@ -93,6 +93,24 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 
 		return query.fetchInto(SalaryGroupEntity.class);
 	}
+
+	@Override
+	public SalaryGroupEntity findSalaryGroupEntityByGroupAndOriginId(Long groupId, Long originEntityId) {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
+				.where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(groupId))
+				.and(Tables.EH_SALARY_GROUP_ENTITIES.ORIGIN_ENTITY_ID.eq(originEntityId))
+				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc())
+				.fetchOne().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
+	}
+
+	@Override
+	public void deleteSalaryGroupEntityByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds) {
+		getReadWriteContext().delete(Tables.EH_SALARY_GROUP_ENTITIES)
+				.where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryGroupId))
+				.and(Tables.EH_SALARY_GROUP_ENTITIES.ORIGIN_ENTITY_ID.notIn(entityIds)).execute();
+
+	}
+
 	//	按员工批次表导出规则查询
     @Override
     public List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryId) {

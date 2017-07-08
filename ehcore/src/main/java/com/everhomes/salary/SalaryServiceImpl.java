@@ -205,18 +205,26 @@ public class SalaryServiceImpl implements SalaryService {
             organization.setName(cmd.getSalaryGroupName());
             this.organizationProvider.updateOrganization(organization);
 
-            //  先删除原有字段后添加
-            this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-            AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
-            addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
-            addCommand.setSalaryGroupName(cmd.getSalaryGroupName());
-            addCommand.setOwnerType(cmd.getOwnerType());
-            addCommand.setOwnerId(cmd.getOwnerId());
-            addCommand.setSalaryGroupEntity(cmd.getSalaryGroupEntity().stream().map(r -> {
-                SalaryGroupEntityDTO dto = ConvertHelper.convert(r,SalaryGroupEntityDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
-            AddSalaryGroupResponse response = this.addSalaryGroup(addCommand);
+            AddSalaryGroupResponse response = new AddSalaryGroupResponse();
+            //  先删除数据库里不在cmd的entity列表的-salary_group_entities salary_employees 表
+            if (null == cmd.getSalaryGroupEntity()) {
+                return response;
+            }
+            List<Long> entityIds = new ArrayList<>();
+            for( SalaryGroupEntityDTO dto: cmd.getSalaryGroupEntity()) {
+                entityIds.add(dto.getOriginEntityId());
+                SalaryGroupEntity entityDB = salaryGroupEntityProvider.findSalaryGroupEntityByGroupAndOriginId(dto.getGroupId(), dto.getOriginEntityId());
+                SalaryGroupEntity newEntity = ConvertHelper.convert(dto, SalaryGroupEntity.class);
+                if(null == entityDB){
+                    salaryGroupEntityProvider.createSalaryGroupEntity(newEntity);
+                }else {
+                    newEntity.setId(entityDB.getId());
+                    salaryGroupEntityProvider.updateSalaryGroupEntity(newEntity);
+                }
+            }
+            salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
+            salaryEmployeeOriginValProvider.deleteSalaryEmployeeValsByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
+
             return response;
         }
 		return null;
