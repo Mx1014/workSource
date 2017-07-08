@@ -1114,6 +1114,11 @@ public class SalaryServiceImpl implements SalaryService {
 					// this.groupProvider.updateGroup(group);
 
 			SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
+            if (null == salaryGroup) {
+                LOGGER.error("salaryGroup cannot found + "+cmd);
+                throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,
+                        SalaryConstants.ERROR_SALARY_GROUP_NOTFOUND,"salary  period group id wrong can not found ");
+            }
 			if(cmd.getSendTime() == null){
 				salaryGroup.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				salaryGroup.setStatus(SalaryGroupStatus.SENDED.getCode());
@@ -1288,9 +1293,11 @@ public class SalaryServiceImpl implements SalaryService {
                 List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals = new ArrayList<>();
                 //3.循环每一个批次设置的字段项，给他做成本期的periodVal 如果entity不是计算公式就设置值，如果是公式就空
 				for (SalaryGroupEntity entity : salaryGroupEntities) {
+                    //生成 period Val
 					SalaryEmployeePeriodVal val = new SalaryEmployeePeriodVal();
                     val.setOwnerType(entity.getOwnerType());
 					val.setOwnerId(entity.getOwnerId());
+                    val.setOriginEntityId(entity.getOriginEntityId());
 					val.setGroupEntityId(entity.getId());
 					val.setSalaryEmployeeId(employee.getId());
                     val.setGroupEntityName(entity.getName());
@@ -1534,7 +1541,10 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(dto.getDepartments());
             row.createCell(++i).setCellValue(dto.getSalaryPeriod());
             row.createCell(++i).setCellValue(dto.getSalaryGroupName());
-            row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
+            if(null != dto.getPaidMoney())
+                row.createCell(++i).setCellValue("");
+            else
+                row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
 
         }
     }
@@ -1566,7 +1576,13 @@ public class SalaryServiceImpl implements SalaryService {
 		coordinationProvider.getNamedLock(CoordinationLocks.SALARY_GROUP_LOCK.getCode()+cmd.getSalaryPeriodGroupId())
 				.enter(() -> {
 					SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
-					if (SalaryGroupStatus.WAIT_FOR_SEND.getCode().equals(salaryGroup.getStatus())){
+                    if (null == salaryGroup) {
+                        LOGGER.error("salaryGroup cannot found + "+cmd);
+
+                        throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,
+                                SalaryConstants.ERROR_SALARY_GROUP_NOTFOUND,"salary  period group id wrong can not found ");
+                    }
+                    if (SalaryGroupStatus.WAIT_FOR_SEND.getCode().equals(salaryGroup.getStatus())){
 						salaryGroup.setSendTime(null);
 						salaryGroup.setStatus(SalaryGroupStatus.CHECKED.getCode());
 						salaryGroupProvider.updateSalaryGroup(salaryGroup);
