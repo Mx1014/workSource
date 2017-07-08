@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>emailContent: 邮件内容</li>
  * <li>salaryGroupId: 批次id</li>
  * <li>salaryGroupName: 批次名称</li>
- * <li>salaryGroupEntitys: 字段项列表 参考{@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
+ * <li>salaryGroupEntities: 字段项列表 参考{@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
  * </ul>
  */
 public class GetPeriodSalaryEmailContentResponse {
@@ -23,18 +23,18 @@ public class GetPeriodSalaryEmailContentResponse {
 
 
 	@ItemType(SalaryGroupEntityDTO.class)
-	private List<SalaryGroupEntityDTO> salaryGroupEntitys;
+	private List<SalaryGroupEntityDTO> salaryGroupEntities;
 
 	public GetPeriodSalaryEmailContentResponse() {
 
 	}
 
-	public GetPeriodSalaryEmailContentResponse(String emailContent, List<SalaryGroupEntityDTO> salaryGroupEntitys, String salaryGroupName,
+	public GetPeriodSalaryEmailContentResponse(String emailContent, List<SalaryGroupEntityDTO> salaryGroupEntities, String salaryGroupName,
 											   Long salaryGroupId) {
 		super();
 
 		this.emailContent = emailContent;
-		this.salaryGroupEntitys = salaryGroupEntitys;
+		this.salaryGroupEntities = salaryGroupEntities;
 		this.salaryGroupName = salaryGroupName;
 		this.salaryGroupId = salaryGroupId;
 	}
@@ -62,12 +62,12 @@ public class GetPeriodSalaryEmailContentResponse {
 		this.emailContent = emailContent;
 	}
 
-	public List<SalaryGroupEntityDTO> getSalaryGroupEntitys() {
-		return salaryGroupEntitys;
+	public List<SalaryGroupEntityDTO> getSalaryGroupEntities() {
+		return salaryGroupEntities;
 	}
 
-	public void setSalaryGroupEntitys(List<SalaryGroupEntityDTO> salaryGroupEntitys) {
-		this.salaryGroupEntitys = salaryGroupEntitys;
+	public void setSalaryGroupEntities(List<SalaryGroupEntityDTO> salaryGroupEntities) {
+		this.salaryGroupEntities = salaryGroupEntities;
 	}
 
 	@Override
