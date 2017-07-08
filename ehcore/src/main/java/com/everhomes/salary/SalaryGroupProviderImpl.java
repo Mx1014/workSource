@@ -135,4 +135,17 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 		return ConvertHelper.convert(result, SalaryGroup.class);
 	}
 
+	@Override
+	public List<SalaryGroup> listUnsendSalaryGroup(Long salaryGroupId) {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
+				.where(Tables.EH_SALARY_GROUPS.ORGANIZATION_GROUP_ID.eq(salaryGroupId))
+				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
+	}
+
+	@Override
+	public void deleteSalaryGroup(SalaryGroup salaryGroup) {
+		getReadWriteDao().delete(salaryGroup);
+	}
+
 }

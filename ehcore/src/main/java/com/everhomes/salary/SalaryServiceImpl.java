@@ -239,6 +239,23 @@ public class SalaryServiceImpl implements SalaryService {
 
             //  删除个人设定中与薪酬组相关的字段
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(cmd.getSalaryGroupId());
+
+            // 删除未发放的salaryGroup  employee 和vals
+            List<SalaryGroup> salaryGroups = salaryGroupProvider.listUnsendSalaryGroup(cmd.getSalaryGroupId());
+            if (null == salaryGroups) {
+                return;
+            }
+            for (SalaryGroup salaryGroup : salaryGroups) {
+                List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(salaryGroup.getId());
+                if (null == salaryEmployees) {
+                    continue;
+                }
+                for (SalaryEmployee employee : salaryEmployees) {
+                    salaryEmployeePeriodValProvider.deletePeriodVals(employee.getId());
+                    salaryEmployeeProvider.deleteSalaryEmployee(employee);
+                }
+                salaryGroupProvider.deleteSalaryGroup(salaryGroup);
+            }
         }
     }
 

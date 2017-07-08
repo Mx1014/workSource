@@ -24,4 +24,9 @@ public interface SalaryGroupProvider {
 	void deleteSalaryGroup(Long organizationGroupId, String salaryPeriod);
 
 	SalaryGroup findSalaryGroupByOrgId(Long id, String lastPeriod);
+
+
+	List<SalaryGroup>  listUnsendSalaryGroup(Long salaryGroupId);
+
+	void deleteSalaryGroup(SalaryGroup salaryGroup);
 }
