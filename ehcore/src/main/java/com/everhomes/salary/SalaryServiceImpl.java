@@ -1196,9 +1196,10 @@ public class SalaryServiceImpl implements SalaryService {
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("emailContent", emailContent);
 			map.put("entityTable", entityTable);
-			String Content = localeTemplateService.getLocaleTemplateString(SalaryConstants.SEND_MAIL_SCOPE,
+			String content = localeTemplateService.getLocaleTemplateString(SalaryConstants.SEND_MAIL_SCOPE,
 					SalaryConstants.SEND_MAIL_CODE, "zh-CN", map, "");
-			handler.sendMail(namespaceId, null,toAddress, emailSubject,Content);
+            LOGGER.debug("meailcontent \n "+emailContent+"\ntable"+entityTable+ "\n finalContent"+content);
+			handler.sendMail(namespaceId, null,toAddress, emailSubject,content);
 
 		}catch (Exception e){
 			LOGGER.debug("had a error in send message !!!!!++++++++++++++++++++++",e);

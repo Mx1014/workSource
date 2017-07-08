@@ -144,7 +144,7 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
 	}
-	
+
 	@Override
 	public void deleteSalaryGroup(SalaryGroup salaryGroup) {
 		getReadWriteDao().delete(salaryGroup);
