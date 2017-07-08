@@ -4,6 +4,7 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.salary.SalaryGroupStatus;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,10 +140,11 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 	public List<SalaryGroup> listUnsendSalaryGroup(Long salaryGroupId) {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
 				.where(Tables.EH_SALARY_GROUPS.ORGANIZATION_GROUP_ID.eq(salaryGroupId))
+				.and(Tables.EH_SALARY_GROUPS.STATUS.eq(SalaryGroupStatus.SENDED.getCode()))
 				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
 	}
-
+	
 	@Override
 	public void deleteSalaryGroup(SalaryGroup salaryGroup) {
 		getReadWriteDao().delete(salaryGroup);
