@@ -520,6 +520,11 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setSalaryGroupId(r.getGroupId());
                 dto.setUserId(cmd.getUserId());
                 dto.setUserDetailId(cmd.getDetailId());
+                dto.setType(r.getType());
+                if (!StringUtils.isEmpty(r.getEditableFlag()))
+                    dto.setEditableFlag(r.getEditableFlag());
+                if (!StringUtils.isEmpty(r.getNumberType()))
+                    dto.setNumberType(r.getNumberType());
                 dto.setGroupEntityId(r.getId());
                 dto.setOriginEntityId(r.getOriginEntityId());
                 dto.setGroupEntityName(r.getName());
