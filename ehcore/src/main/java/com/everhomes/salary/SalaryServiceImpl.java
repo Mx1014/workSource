@@ -1215,7 +1215,6 @@ public class SalaryServiceImpl implements SalaryService {
                 sb.append("<th>");
                 sb.append(r.getName());
                 sb.append("</th>");
-                return null;
             }
 			sb.append("</tr>");
 			sb.append("<tr>");
@@ -1225,7 +1224,6 @@ public class SalaryServiceImpl implements SalaryService {
 				if(null != val)
 					sb.append(val.getSalaryValue());
 				sb.append("</tr>");
-				return null;
 			}
 			sb.append("</tr>");
 		}
