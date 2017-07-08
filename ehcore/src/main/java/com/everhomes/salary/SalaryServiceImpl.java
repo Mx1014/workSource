@@ -519,18 +519,12 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {
 
-            List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
-        //   查询个人对应的批次
-             /*   Long salaryGroupId;
-        if(StringUtils.isEmpty(cmd.getSalaryGroupId()))
-            salaryGroupId = this.organizationService.getSalaryGroupId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
-        else
-            salaryGroupId = cmd.getSalaryGroupId();*/
+        List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
 
         //  获取对应批次的项目字段
         List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
         //  获取个人的项目字段
-        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
+        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(), cmd.getOwnerType(), cmd.getOwnerId());
 
         //  若没有关联批次则直接返回空
         if (!salaryGroupEntities.isEmpty()) {
@@ -784,9 +778,9 @@ public class SalaryServiceImpl implements SalaryService {
 	        List list, Long groupId, List<SalaryGroupEntity> salaryGroupEntities){
 
         List<ImportSalaryEmployeeOriginValDTO> datas = new ArrayList<>();
-/*
-        salaryGroupEntities.add(0,new SalaryGroupEntity("姓名"));
-    */    salaryGroupEntities.add(1,new SalaryGroupEntity("手机号"));
+
+        /*salaryGroupEntities.add(0,new SalaryGroupEntity("姓名"));
+       salaryGroupEntities.add(1,new SalaryGroupEntity("手机号"));*/
 
         for(int i=1; i<list.size(); i++){
             ImportSalaryEmployeeOriginValDTO data = new ImportSalaryEmployeeOriginValDTO();
@@ -826,7 +820,6 @@ public class SalaryServiceImpl implements SalaryService {
         //  读取薪酬组列表中所有的手机号以及对应的userId
         List<Object[]> users = this.uniongroupService.listUniongroupMemberDetailsInfo(
                 namespaceId,cmd.getSalaryGroupId(),cmd.getOwnerId());
-//        List<Long[]> users = new ArrayList<>();
 
         //  校验数据，成功则导入
         for ( ImportSalaryEmployeeOriginValDTO data : datas){

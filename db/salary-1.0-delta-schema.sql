@@ -14,6 +14,7 @@ CREATE TABLE `eh_salary_default_entities` (
   `editable_flag` TINYINT COMMENT '是否可编辑(对文本类):0-否   1-是',
   `template_name` VARCHAR(32) COMMENT '',
   `default_order` INT,
+  `origin_entity_id` BIGINT,
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
   `status` TINYINT ,
