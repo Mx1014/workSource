@@ -11,6 +11,7 @@ import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -111,7 +112,7 @@ public class OrganizationMemberDTO {
     private Integer profileIntegrity;
     private Date checkInTime;
 
-    private Long createTime;
+    private Timestamp createTime;
     private Long approveTime;
     private String operatorName;
     private String operatorPhone;
@@ -239,11 +240,11 @@ public class OrganizationMemberDTO {
         this.status = status;
     }
 
-    public Long getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Long createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
 
