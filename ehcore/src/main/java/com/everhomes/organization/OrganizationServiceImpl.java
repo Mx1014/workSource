@@ -9286,6 +9286,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (null == dtos || 0 == dtos.size()) {
             return ConvertHelper.convert(organization, OrganizationDTO.class);
         }
+        //检查是否有公司直属的记录
+        for (OrganizationDTO dto : dtos) {
+            if (dto.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())) {
+                //找到直属部门的上级公司
+                Organization enterprise = checkOrganization(dto.getParentId());
+                if(enterprise != null){
+                    OrganizationDTO enterpriseDTO = ConvertHelper.convert(checkOrganization(dto.getParentId()),OrganizationDTO.class);
+                    return enterpriseDTO;
+                }
+            }
+        }
+
+        //如果没有直属记录，则返回首位层级最高的部门
         OrganizationDTO topDepartment = null;
         Integer topDepartmentNum = 10000;
         for (OrganizationDTO dto : dtos) {

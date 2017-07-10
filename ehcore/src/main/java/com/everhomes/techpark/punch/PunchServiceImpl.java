@@ -3974,7 +3974,6 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			List<String> groupTypes = new ArrayList<String>();
 			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 			return this.organizationService.getMemberTopDepartment(groupTypes,
 					userIdentifier.getIdentifierToken(), organizationId);
 			}
