@@ -624,4 +624,35 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
     VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 巡检关联审批查看权限','0',NOW());
 
 
+delete from eh_service_module_privileges where remark = '品质核查 标准审批查看权限' and module_id = 20640;
+
+-- volgo域空间增加园区 add by sfyan 20170710
+SET @namespace_id=1;
+SET @community_forum_id = (SELECT MAX(id) FROM `eh_forums`) + 5;   -- 取eh_forums的ID最大值再加一定余量
+SET @feedback_forum_id = @community_forum_id + 1;   -- @community_forum_id+1
+SET @shi_id = (select id FROM `eh_regions` where name = '深圳市' and namespace_id = @namespace_id and status = 2);  -- 在@sheng_id上加1
+SET @qu_id = (select id FROM `eh_regions` where name = '南山区' and namespace_id = @namespace_id and status = 2);    -- 在@shi_id上加1
+SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
+SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
+SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; -- 需要取现网eh_communities的ID的最大值再加一定余量
+
+
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_id, UUID(), @namespace_id, 2, 'EhGroups', 0,'南山云谷论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_id, UUID(), @namespace_id, 2, 'EhGroups', 0,'南山云谷意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+
+
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@community_id, UUID(), @shi_id, '深圳市',  @qu_id, '南山区', '智慧园区', '智慧园区', '科发路', NULL, ' 左邻智慧园区，致力于通过移动互联网、智能互联、大数据等技术手段，为园区、写字楼以及物业等提供基于移动互联网的服务运营解决方案和线上服务联合运营，共营本地服务升级。',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 98, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 113.952532, 22.550182, 'uxbpcpuxcrfr');
+
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
+	
+-- 星商会 物业管理后台增加表单管理菜单 add by sfyan 20170710
+SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
+insert into `eh_web_menu_scopes` (`id`, `menu_id`,`owner_type`, `owner_id`,`apply_policy`) values ((@menu_scope_id := @menu_scope_id + 1),50900,'EhNamespaces',999981,2);
+
 

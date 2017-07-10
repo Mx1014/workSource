@@ -739,28 +739,27 @@ public class PunchServiceImpl implements PunchService {
 						.getRequestType());
 				punchExceptionDTO.setCreateTime(exceptionRequest
 						.getCreateTime().getTime());
+				Organization organization = organizationProvider.findOrganizationById(companyId);
 				if (exceptionRequest.getRequestType().equals(
 						PunchRquestType.REQUEST.getCode())) {
 					// 对于申请
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getDescription());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), companyId);
-
-					if (null == member) {
+					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+					if (null == members || members.size() == 0) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(member.getContactName());
+						punchExceptionDTO.setName(members.get(0).getContactName());
 					}
 				} else {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getOperatorUid(), companyId);
-
-					if (null == member) {
+					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+					if (null == members || members.size() == 0) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(member.getContactName());
+						punchExceptionDTO.setName(members.get(0).getContactName());
 					}
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
@@ -1180,27 +1179,27 @@ public class PunchServiceImpl implements PunchService {
 						.getRequestType());
 				punchExceptionDTO.setCreateTime(exceptionRequest
 						.getCreateTime().getTime());
+				Organization organization = organizationProvider.findOrganizationById(companyId);
 				if (exceptionRequest.getRequestType().equals(
 						PunchRquestType.REQUEST.getCode())) {
 					// 对于申请
-					
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), companyId);
-
-					if (null == member) {
+					punchExceptionDTO.setExceptionComment(exceptionRequest
+							.getDescription());
+					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+					if (null == members || members.size() == 0) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(member.getContactName());
+						punchExceptionDTO.setName(members.get(0).getContactName());
 					}
 				} else {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getOperatorUid(), companyId);
-
-					if (null == member) {
+					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+					if (null == members || members.size() == 0) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(member.getContactName());
+						punchExceptionDTO.setName(members.get(0).getContactName());
 					}
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
@@ -1786,6 +1785,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchExceptionRequestCommandResponse listExceptionRequests(
 			ListPunchExceptionRequestCommand cmd) {
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
+		Organization organization = organizationProvider.findOrganizationById(cmd.getEnterpriseId());
 		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 
@@ -1872,13 +1872,13 @@ public class PunchServiceImpl implements PunchService {
 					if (null != dto.getOperatorUid()
 							&& 0 != dto.getOperatorUid()) {
 
-						member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), cmd.getEnterpriseId());
+						List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
 
-						if (null == member) {
+						if (null == members || members.size() == 0) {
 							dto.setOperatorName("无此人");
 						} else {
-							dto.setOperatorName(member.getContactName());
-						}
+							dto.setOperatorName(members.get(0).getContactName());
+						} 
 					}
 					
 					PunchExceptionApproval  approval = punchProvider.getExceptionApproval(r.getUserId(), cmd.getEnterpriseId(),r.getPunchDate());
@@ -1947,10 +1947,11 @@ public class PunchServiceImpl implements PunchService {
 
 						member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), cmd.getEnterpriseId());
 						if (null == member) {
-							dto.setOperatorName("无此人");
+							dto.setOperatorName("");
 						} else {
 							dto.setOperatorName(member.getContactName());
 						}
+						
 					}
 					
 					if(null== approval){
@@ -3906,6 +3907,7 @@ public class PunchServiceImpl implements PunchService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setPunchRuleMaps(new ArrayList<PunchRuleMapDTO>()); 
 		 
+		Organization organization = checkOrganization(cmd.getOwnerId());
 		for(PunchRuleOwnerMap other:results)  {
 			PunchRuleMapDTO dto = ConvertHelper.convert(other, PunchRuleMapDTO.class);
 //			PunchRule pr = this.punchProvider.getPunchRuleById(other.getPunchRuleId());
@@ -3915,10 +3917,11 @@ public class PunchServiceImpl implements PunchService {
 //						"have no punch rule");
 //			dto.setPunchRuleName(pr.getName());
 			if(PunchOwnerType.User.getCode().equals(other.getTargetType())){
-				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
-				if(null== member)
+//				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
+		        List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+				if(null== members || members.size() == 0)
 					continue;
-				dto.setTargetName(member.getContactName());
+				dto.setTargetName(members.get(0).getContactName());
 				OrganizationDTO dept =  this.findUserDepartment(other.getTargetId(), other.getOwnerId());
 				if(null != dept)
 					dto.setTargetDept(dept.getName());
@@ -3942,9 +3945,11 @@ public class PunchServiceImpl implements PunchService {
 		else{
 			return Long.valueOf(organization.getPath().split("/")[1]);
 		}
-		
-		
 	}
+
+
+
+
 	/**找到用户的部门-多部门取最上级第一个*/
 	private OrganizationDTO findUserDepartment(Long userId, Long organizationId){
 //		// 多部门找顶级部门
@@ -3974,7 +3979,6 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			List<String> groupTypes = new ArrayList<String>();
 			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 			return this.organizationService.getMemberTopDepartment(groupTypes,
 					userIdentifier.getIdentifierToken(), organizationId);
 			}
@@ -4184,9 +4188,9 @@ public class PunchServiceImpl implements PunchService {
 //		});
 		
 		return response;
-	}
-
-	private List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
+	} 
+	
+	public List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
 		//找到所有子部门 下面的用户
 		 
 		List<String> groupTypeList = new ArrayList<String>();
@@ -5149,11 +5153,9 @@ public class PunchServiceImpl implements PunchService {
 		}
 		else{
 
-			LOGGER.error("owenr id and type not the same with database db=[" +
-					obj.getOwnerType()+obj.getOwnerId()+"],cmd=["
-					+cmd.getOwnerType()+ cmd.getOwnerId()+"]");
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-					"owenr id and type not the same with database");
+					"Invalid owner type or  Id parameter in the command");
 		}
 	
 
