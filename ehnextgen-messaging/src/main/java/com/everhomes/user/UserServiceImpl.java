@@ -99,6 +99,7 @@ import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
 import com.everhomes.util.*;
@@ -140,6 +141,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -1520,13 +1522,19 @@ public class UserServiceImpl implements UserService {
 				info.setHometownName(category.getName());
 		}
 		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(user.getId());
-		List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
-				.map((r) -> { return r.getIdentifierToken(); })
-				.collect(Collectors.toList());
+
+        Stream<UserIdentifier> identifierStream = identifiers.stream().filter((r) -> {
+            return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE;
+        });
+
+        List<String> phones = identifierStream.map(EhUserIdentifiers::getIdentifierToken).collect(Collectors.toList());
 		info.setPhones(phones);
 
+        List<Integer> regionCodes = identifierStream.map(EhUserIdentifiers::getRegionCode).collect(Collectors.toList());
+        info.setRegionCodes(regionCodes);
+
 		List<String> emails = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL; })
-				.map((r) -> { return r.getIdentifierToken(); })
+				.map(EhUserIdentifiers::getIdentifierToken)
 				.collect(Collectors.toList());
 		info.setEmails(emails);
 
