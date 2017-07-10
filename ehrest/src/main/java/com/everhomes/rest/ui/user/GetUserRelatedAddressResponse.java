@@ -12,7 +12,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>familyList: 家庭列表，{@link com.everhomes.rest.family.FamilyDTO}</li>
  *  <li>organizationList: 机构列表，{@link com.everhomes.rest.organization.OrganizationDTO}</li>
- *  <li>authSumbitType: 认证提交方式，参考 {@link com.everhomes.rest.ui.user.AuthSumbitType}</li>
  * </ul>
  */
 public class GetUserRelatedAddressResponse {
@@ -22,16 +21,6 @@ public class GetUserRelatedAddressResponse {
     @ItemType(OrganizationDetailDTO.class)
     private List<OrganizationDTO> organizationList;
     
-    private String authSumbitType;
-
-    public String getAuthSumbitType() {
-		return authSumbitType;
-	}
-
-	public void setAuthSumbitType(String authSumbitType) {
-		this.authSumbitType = authSumbitType;
-	}
-
 	public List<FamilyDTO> getFamilyList() {
         return familyList;
     }
