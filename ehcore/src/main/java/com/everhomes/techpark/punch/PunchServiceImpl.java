@@ -4188,8 +4188,8 @@ public class PunchServiceImpl implements PunchService {
 //		});
 		
 		return response;
-	}
-	@Override
+	} 
+	
 	public List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
 		//找到所有子部门 下面的用户
 		 
