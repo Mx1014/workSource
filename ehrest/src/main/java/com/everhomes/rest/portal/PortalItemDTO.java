@@ -6,6 +6,7 @@ package com.everhomes.rest.portal;
  * <li>id: 门户item的id</li>
  * <li>itemGroupId: 门户itemGroup的id</li>
  * <li>label: 门户item名称</li>
+ * <li>contentName: 配置内容名称</li>
  * <li>description: 门户item描述</li>
  * <li>itemWidth: 栏目占列比</li>
  * <li>iconUrl: icon图片的url</li>
@@ -27,6 +28,7 @@ public class PortalItemDTO {
     private Long id;
     private Long itemGroupId;
     private String label;
+    private String contentName;
     private String iconUrl;
     private Integer itemWidth;
     private Integer itemHeight;
@@ -71,12 +73,12 @@ public class PortalItemDTO {
         this.label = label;
     }
 
-    public String geticonUrl() {
-        return iconUrl;
+    public String getContentName() {
+        return contentName;
     }
 
-    public void seticonUrl(String iconUrl) {
-        this.iconUrl = iconUrl;
+    public void setContentName(String contentName) {
+        this.contentName = contentName;
     }
 
     public Integer getItemWidth() {

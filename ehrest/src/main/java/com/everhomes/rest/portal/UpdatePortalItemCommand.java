@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>id: 门户item的id</li>
- * <li>name: 门户itemGroup名称</li>
+ * <li>label: 门户itemGroup名称</li>
  * <li>description: 门户itemGroup描述</li>
  * <li>iconUri: icon图片的uri</li>
  * <li>status: 状态</li>
@@ -23,7 +23,7 @@ public class UpdatePortalItemCommand {
 
 	private Long id;
 
-	private String name;
+	private String label;
 
 	private String description;
 
@@ -42,10 +42,10 @@ public class UpdatePortalItemCommand {
 
 	}
 
-	public UpdatePortalItemCommand(Long id, String name, String description, String iconUri, Byte status, String actionType, String actionData, List<PortalScope> scopes) {
+	public UpdatePortalItemCommand(Long id, String label, String description, String iconUri, Byte status, String actionType, String actionData, List<PortalScope> scopes) {
 		super();
 		this.id = id;
-		this.name = name;
+		this.label = label;
 		this.description = description;
 		this.iconUri = iconUri;
 		this.status = status;
@@ -62,12 +62,12 @@ public class UpdatePortalItemCommand {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getLabel() {
+		return label;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	public String getDescription() {

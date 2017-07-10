@@ -41,7 +41,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	public void createPortalItem(PortalItem portalItem) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalItems.class));
 		portalItem.setId(id);
-		portalItem.setName(EhPortalItems.class.getName() + id);
+		portalItem.setName(EhPortalItems.class.getSimpleName() + id);
 		portalItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		portalItem.setUpdateTime(portalItem.getCreateTime());
 		getReadWriteDao().insert(portalItem);
@@ -105,7 +105,22 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		query.addOrderBy(Tables.EH_PORTAL_ITEMS.ID.desc());
 		query.addLimit(pageSize);
 		query.fetch().map((r) -> {
-			results.add(ConvertHelper.convert(r, PortalItem.class));
+			PortalItem item = new PortalItem();
+			item.setId(r.getValue(Tables.EH_PORTAL_ITEMS.ID));
+			item.setLabel(r.getValue(Tables.EH_PORTAL_ITEMS.LABEL));
+			item.setActionType(r.getValue(Tables.EH_PORTAL_ITEMS.ACTION_TYPE));
+			item.setActionData(r.getValue(Tables.EH_PORTAL_ITEMS.ACTION_DATA));
+			item.setStatus(r.getValue(Tables.EH_PORTAL_ITEMS.STATUS));
+			item.setOperatorUid(r.getValue(Tables.EH_PORTAL_ITEMS.OPERATOR_UID));
+			item.setCreatorUid(r.getValue(Tables.EH_PORTAL_ITEMS.CREATOR_UID));
+			item.setCreateTime(r.getValue(Tables.EH_PORTAL_ITEMS.CREATE_TIME));
+			item.setUpdateTime(r.getValue(Tables.EH_PORTAL_ITEMS.UPDATE_TIME));
+			item.setIconUri(r.getValue(Tables.EH_PORTAL_ITEMS.ICON_URI));
+			item.setDefaultOrder(r.getValue(Tables.EH_PORTAL_ITEMS.DEFAULT_ORDER));
+			item.setDescription(r.getValue(Tables.EH_PORTAL_ITEMS.DESCRIPTION));
+			item.setItemHeight(r.getValue(Tables.EH_PORTAL_ITEMS.ITEM_HEIGHT));
+			item.setItemWidth(r.getValue(Tables.EH_PORTAL_ITEMS.ITEM_WIDTH));
+			results.add(item);
 			return null;
 		});
 		if(null!= locator)
