@@ -4,6 +4,7 @@ package com.everhomes.uniongroup;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
 import java.util.Map;
 
 public class UniongroupMemberDetail extends EhUniongroupMemberDetails {
@@ -43,5 +44,14 @@ public class UniongroupMemberDetail extends EhUniongroupMemberDetails {
 
     public void setEmployeeNo(String employeeNo) {
         this.employeeNo = employeeNo;
+    }
+
+    public static Long getGroupIdByDetailId(List<UniongroupMemberDetail> uniongroupMemberDetails, Long detailId){
+        for(UniongroupMemberDetail ud: uniongroupMemberDetails){
+            if(ud.getDetailId().equals(detailId)){
+                return ud.getGroupId();
+            }
+        }
+        return null;
     }
 }
