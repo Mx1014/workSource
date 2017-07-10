@@ -82,6 +82,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                 uc.setGroupId(cmd.getGroupId());
                 uc.setCurrentType(UniongroupTargetType.fromCode(r.getType()).getCode());
                 uc.setCurrentId(r.getId());
+                uc.setCurrentName(r.getName());
                 configureList.add(uc);
                 return null;
             }).collect(Collectors.toList());
@@ -316,8 +317,9 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public void reallocatedUnion(Long enterpriseId, List<Long> departmentIds, OrganizationMember organizationMember) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //根据层级关系将departmentIds排序
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = 1000000;
+                //根据层级关系将departmentIds排序
         Organization organization = checkOrganization(enterpriseId);
         List<Organization> departments = this.organizationProvider.listOrganizationsByIds(departmentIds);
         //按层级退化
@@ -384,7 +386,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             uniongroupMemberDetails.setEnterpriseId(enterpriseId);
             uniongroupMemberDetails.setTargetType(organizationMember.getTargetType());
             uniongroupMemberDetails.setTargetId(organizationMember.getTargetId());
-            uniongroupMemberDetails.setNamespaceId(organizationMember.getNamespaceId());
+            uniongroupMemberDetails.setNamespaceId(namespaceId);
             uniongroupMemberDetails.setContactName(organizationMember.getContactName());
             uniongroupMemberDetails.setContactToken(organizationMember.getContactToken());
             dbProvider.execute((TransactionStatus status) -> {

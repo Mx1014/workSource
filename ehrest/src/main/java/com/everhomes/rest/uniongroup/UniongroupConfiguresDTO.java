@@ -12,6 +12,7 @@ import java.sql.Timestamp;
  * <li>groupId: 组id</li>
  * <li>currentId: 目标id</li>
  * <li>currentType: 目标类型</li>
+ * <li>currentName: 目标名称</li>
  * <li>operatorUid: 操作人员id</li>
  * <li>updateTime: 更新时间</li>
  * </ul>
@@ -23,6 +24,7 @@ public class UniongroupConfiguresDTO {
     private Long groupId;
     private Long currentId;
     private String currentType;
+    private String currentName;
     private Long operatorUid;
     private Timestamp updateTime;
 
@@ -90,8 +92,18 @@ public class UniongroupConfiguresDTO {
         this.updateTime = updateTime;
     }
 
+    public String getCurrentName() {
+        return currentName;
+    }
+
+    public void setCurrentName(String currentName) {
+        this.currentName = currentName;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
 }

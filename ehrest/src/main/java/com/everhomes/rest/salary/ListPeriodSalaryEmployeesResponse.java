@@ -9,13 +9,16 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
+ * <li>uncheckCount: 未核算人数</li>
+ * <li>checkedCount: 已核算人数</li>
  * <li>salaryGroupEntities: 字段项列表 参考{@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
  * <li>salaryPeriodEmployees: 某薪酬批次的员工核算列表参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeDTO}</li>
  * </ul>
  */
 public class ListPeriodSalaryEmployeesResponse {
 
-
+	private Integer uncheckCount;
+	private Integer checkedCount;
 	@ItemType(SalaryGroupEntityDTO.class)
 	private List<SalaryGroupEntityDTO> salaryGroupEntities;
 	
@@ -52,4 +55,19 @@ public class ListPeriodSalaryEmployeesResponse {
 		this.salaryGroupEntities = salaryGroupEntities;
 	}
 
+	public Integer getUncheckCount() {
+		return uncheckCount;
+	}
+
+	public void setUncheckCount(Integer uncheckCount) {
+		this.uncheckCount = uncheckCount;
+	}
+
+	public Integer getCheckedCount() {
+		return checkedCount;
+	}
+
+	public void setCheckedCount(Integer checkedCount) {
+		this.checkedCount = checkedCount;
+	}
 }

@@ -1100,7 +1100,11 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployees(cmd.getSalaryPeriodGroupId(),userIds,cmd.getCheckFlag());
 		if(null == result )
 			return response;
-        response.setSalaryPeriodEmployees(result.stream().map(r ->{	
+        Integer uncheckCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),userIds,SalaryGroupStatus.UNCHECK.getCode());
+        Integer toltalCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),userIds,null);
+        response.setCheckedCount(toltalCount - uncheckCount);
+        response.setUncheckCount(uncheckCount);
+        response.setSalaryPeriodEmployees(result.stream().map(r ->{
         	SalaryPeriodEmployeeDTO dto = processSalaryPeriodEmployeeDTO(r);
             return dto;
         }).collect(Collectors.toList()));
@@ -1153,6 +1157,7 @@ public class SalaryServiceImpl implements SalaryService {
 //            dto.setIsFormula(NormalFlag.YES.getCode());
 //        }
         dto.setEntityType(entity.getType());
+        dto.setOriginEntityId(entity.getOriginEntityId());
         dto.setDefaultOrder(entity.getDefaultOrder());
         dto.setSalaryValue(r.getSalaryValue());
         dto.setEditableFlag(entity.getEditableFlag());
