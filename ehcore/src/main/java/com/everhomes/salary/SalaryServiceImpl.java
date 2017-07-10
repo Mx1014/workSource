@@ -398,19 +398,19 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
 
-	    //  1.将前端信息传递给组织架构的接口获取相关信息
+        //  1.将前端信息传递给组织架构的接口获取相关信息
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(cmd.getOwnerId());
 
         //  2.查询所有人员
-        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
+        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command, false);
 
         //  3.查询所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
         List<Long> uniongroupDetailIds = new ArrayList<>();
 
-        if(cmd.getSalaryGroupId() != null){
+        if (cmd.getSalaryGroupId() != null) {
             //将前端信息传递给组织架构的接口获取相关信息
             ListUniongroupMemberDetailsWithConditionCommand uniongroup_command = new ListUniongroupMemberDetailsWithConditionCommand();
             if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
@@ -418,7 +418,7 @@ public class SalaryServiceImpl implements SalaryService {
             }
             if (!StringUtils.isEmpty(cmd.getKeywords()))
                 uniongroup_command.setKeywords(cmd.getKeywords());
-            if(!StringUtils.isEmpty(cmd.getDepartmentId()))
+            if (!StringUtils.isEmpty(cmd.getDepartmentId()))
                 uniongroup_command.setDepartmentId(cmd.getDepartmentId());
             uniongroup_command.setGroupType(UniongroupType.SALARYGROUP.getCode());
             uniongroup_command.setOwnerId(cmd.getOwnerId());
@@ -429,7 +429,9 @@ public class SalaryServiceImpl implements SalaryService {
             List<UniongroupMemberDetail> uniongroupMemberDetails = this.uniongroupService.listUniongroupMemberDetailsWithCondition(uniongroup_command);
 
             // 获取关联人员detailId的集合
-            uniongroupDetailIds.addAll(uniongroupMemberDetails.stream().map(r ->{return r.getDetailId();}).collect(Collectors.toList()));
+            uniongroupDetailIds.addAll(uniongroupMemberDetails.stream().map(r -> {
+                return r.getDetailId();
+            }).collect(Collectors.toList()));
         }
 
 
@@ -465,7 +467,11 @@ public class SalaryServiceImpl implements SalaryService {
         return response;
     }
 
-/*    private List<UniongroupMemberDetail> listEmployeesFromOrganization(ListSalaryEmployeesCommand cmd){
+/*    @Override
+    public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd){
+
+    }
+    private List<UniongroupMemberDetail> listEmployeesFromOrganization(ListSalaryEmployeesCommand cmd){
         //  1.将前端信息传递给组织架构的接口获取相关信息，从而查询所有人员
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(cmd.getOwnerId());
@@ -480,14 +486,17 @@ public class SalaryServiceImpl implements SalaryService {
         response.getMembers().forEach(r ->{
             UniongroupMemberDetail result = new UniongroupMemberDetail();
             result.setId(r.getId());
-            result.setGroupType(r.getGroupType());
-            result.setGroupId(r.getGroupId());
+            result.setEmployeeNo(r.getEmployeeNo());
+            result.setDetailId(r.getDetailId());
+            result.setTargetId(r.getTargetId());
+            result.setTargetType(r.getTargetType());
+            result.setContactName(r.getContactName());
 
         });
 
-    }*/
+    }
 
-    /*private ListSalaryEmployeesResponse listWithoutSalaryGroupId(ListSalaryEmployeesCommand cmd) {
+    private ListSalaryEmployeesResponse listWithoutSalaryGroupId(ListSalaryEmployeesCommand cmd) {
 
         //  1.将前端信息传递给组织架构的接口获取相关信息，从而查询所有人员
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
