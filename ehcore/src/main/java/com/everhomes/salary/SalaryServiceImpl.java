@@ -1068,8 +1068,8 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployees(cmd.getSalaryPeriodGroupId(),userIds,cmd.getCheckFlag());
 		if(null == result )
 			return response;
-        Integer uncheckCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),userIds,SalaryGroupStatus.UNCHECK.getCode());
-        Integer toltalCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),userIds,null);
+        Integer uncheckCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),SalaryGroupStatus.UNCHECK.getCode());
+        Integer toltalCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),null);
         response.setCheckedCount(toltalCount - uncheckCount);
         response.setUncheckCount(uncheckCount);
         response.setSalaryPeriodEmployees(result.stream().map(r ->{
@@ -1172,7 +1172,7 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public void checkPeriodSalary(CheckPeriodSalaryCommand cmd) {
 		//检验是否合算完成
-		if(salaryEmployeeProvider.countUnCheckEmployee(cmd.getSalaryPeriodGroupId())>0)
+		if(salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),SalaryGroupStatus.UNCHECK.getCode())>0)
 			throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE, SalaryConstants.ERROR_HAS_EMPLOYEE_UNCHECK,"there are some employee uncheck");
 		
 		//将本期group置为已核算
