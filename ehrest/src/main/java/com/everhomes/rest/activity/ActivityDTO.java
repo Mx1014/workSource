@@ -50,6 +50,7 @@ import com.everhomes.util.StringHelper;
  * <li>chargePrice: 收费价格</li>
  * <li>createTime: 创建时间</li>
  * <li>systemTime: 系统时间</li>
+ * <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -125,6 +126,8 @@ public class ActivityDTO {
     private Long createTime;
     
     private Long systemTime;
+
+    private Byte wechatSignup;
     
     public String getSignupEndTime() {
 		return signupEndTime;
@@ -604,7 +607,15 @@ public class ActivityDTO {
 		this.systemTime = systemTime;
 	}
 
-	public String toString() {
+    public Byte getWechatSignup() {
+        return wechatSignup;
+    }
+
+    public void setWechatSignup(Byte wechatSignup) {
+        this.wechatSignup = wechatSignup;
+    }
+
+    public String toString() {
         return StringHelper.toJsonString(this);
     }
 }

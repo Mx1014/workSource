@@ -133,3 +133,10 @@ CREATE TABLE `eh_siyin_print_emails` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+
+
+-- merge from activty-3.2.0  by yanjun 20170710 start
+-- 增加活动是否支持微信报名标识  add by yanjun 20170627
+ALTER TABLE `eh_roster_order_settings`  ADD COLUMN `wechat_signup` TINYINT(4) DEFAULT '0' NULL COMMENT 'is support wechat signup 0:no, 1:yes';
+ALTER TABLE `eh_activities` ADD COLUMN `wechat_signup` TINYINT(4) DEFAULT '0' NULL COMMENT 'is support wechat signup 0:no, 1:yes';
+-- merge from activty-3.2.0  by yanjun 20170710 end
