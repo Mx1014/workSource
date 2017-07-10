@@ -398,41 +398,40 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
 
-        //  1.将前端信息传递给组织架构的接口获取相关信息
+	    //  1.将前端信息传递给组织架构的接口获取相关信息
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(cmd.getOwnerId());
 
         //  2.查询所有人员
-        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command, false);
+        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
 
         //  3.查询所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
         List<Long> uniongroupDetailIds = new ArrayList<>();
 
-        if (cmd.getSalaryGroupId() != null) {
-            //将前端信息传递给组织架构的接口获取相关信息
-            ListUniongroupMemberDetailsWithConditionCommand uniongroup_command = new ListUniongroupMemberDetailsWithConditionCommand();
-            if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-                uniongroup_command.setGroupId(cmd.getSalaryGroupId());
-            }
-            if (!StringUtils.isEmpty(cmd.getKeywords()))
-                uniongroup_command.setKeywords(cmd.getKeywords());
-            if (!StringUtils.isEmpty(cmd.getDepartmentId()))
-                uniongroup_command.setDepartmentId(cmd.getDepartmentId());
-            uniongroup_command.setGroupType(UniongroupType.SALARYGROUP.getCode());
-            uniongroup_command.setOwnerId(cmd.getOwnerId());
-            uniongroup_command.setPageAnchor(Long.valueOf("0"));
-            uniongroup_command.setPageSize(cmd.getPageSize());
-
-            //  查询关联的人员
-            List<UniongroupMemberDetail> uniongroupMemberDetails = this.uniongroupService.listUniongroupMemberDetailsWithCondition(uniongroup_command);
-
-            // 获取关联人员detailId的集合
-            uniongroupDetailIds.addAll(uniongroupMemberDetails.stream().map(r -> {
-                return r.getDetailId();
-            }).collect(Collectors.toList()));
+        //将前端信息传递给组织架构的接口获取相关信息
+        ListUniongroupMemberDetailsWithConditionCommand uniongroup_command = new ListUniongroupMemberDetailsWithConditionCommand();
+        //如果传了groupId，默认查询规定薪酬组的信息，若果没传，则默认查询全部薪酬组的信息
+        if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
+            uniongroup_command.setGroupId(cmd.getSalaryGroupId());
         }
+        if (!StringUtils.isEmpty(cmd.getKeywords()))
+            uniongroup_command.setKeywords(cmd.getKeywords());
+        if (!StringUtils.isEmpty(cmd.getDepartmentId()))
+            uniongroup_command.setDepartmentId(cmd.getDepartmentId());
+        uniongroup_command.setGroupType(UniongroupType.SALARYGROUP.getCode());
+        uniongroup_command.setOwnerId(cmd.getOwnerId());
+        uniongroup_command.setPageAnchor(Long.valueOf("0"));
+        uniongroup_command.setPageSize(cmd.getPageSize());
+
+        //  查询关联的人员
+        List<UniongroupMemberDetail> uniongroupMemberDetails = this.uniongroupService.listUniongroupMemberDetailsWithCondition(uniongroup_command);
+
+        // 获取关联人员detailId的集合
+        uniongroupDetailIds.addAll(uniongroupMemberDetails.stream().map(r -> {
+            return r.getDetailId();
+        }).collect(Collectors.toList()));
 
 
         //过滤
@@ -440,7 +439,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         List<OrganizationMemberDTO> dtos = new ArrayList<>();
         if (!StringUtils.isEmpty(results)) {
-            if (uniongroupDetailIds.size() > 0) {
+            if(cmd.getSalaryGroupId() != null) {
                 dtos = results.getMembers().stream().filter(r -> {
                     return uniongroupDetailIds.contains(r.getDetailId());
                 }).collect(Collectors.toList());
@@ -453,7 +452,11 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setUserId(r.getTargetId());
                 dto.setDetailId(r.getDetailId());
                 dto.setContactName(r.getContactName());
-                dto.setSalaryGroupId(r.getGroupId());
+                Long _groupId = UniongroupMemberDetail.getGroupIdByDetailId(uniongroupMemberDetails, r.getDetailId());
+                if (_groupId != null){
+                    r.setSalaryGroupId(_groupId);
+                    dto.setSalaryGroupId(_groupId);
+                }
                 //  拼接薪酬组名称
                 if (!StringUtils.isEmpty(organizations)) {
                     organizations.forEach(s -> {

@@ -105,6 +105,8 @@ public class OrganizationMemberDTO {
     private Date employmentTime;
     private Integer profileIntegrity;
     private Date checkInTime;
+
+    private Long salaryGroupId;
 	 
 	public OrganizationMemberDTO() {
     }
@@ -431,5 +433,13 @@ public class OrganizationMemberDTO {
 
     public void setEmployeeNo(String employeeNo) {
         this.employeeNo = employeeNo;
+    }
+
+    public Long getSalaryGroupId() {
+        return salaryGroupId;
+    }
+
+    public void setSalaryGroupId(Long salaryGroupId) {
+        this.salaryGroupId = salaryGroupId;
     }
 }
