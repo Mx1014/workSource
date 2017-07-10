@@ -1112,8 +1112,8 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployees(cmd.getSalaryPeriodGroupId(),userIds,cmd.getCheckFlag());
 		if(null == result )
 			return response;
-        Integer uncheckCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),userIds,SalaryGroupStatus.UNCHECK.getCode());
-        Integer toltalCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),userIds,null);
+        Integer uncheckCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),SalaryGroupStatus.UNCHECK.getCode());
+        Integer toltalCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),null);
         response.setCheckedCount(toltalCount - uncheckCount);
         response.setUncheckCount(uncheckCount);
         response.setSalaryPeriodEmployees(result.stream().map(r ->{

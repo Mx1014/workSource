@@ -146,11 +146,10 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	}
 
 	@Override
-	public Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId, List<Long> userIds, Byte checkFlag) {
+	public Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId, Byte checkFlag) {
 
 		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.USER_ID.in(userIds));
-		step.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
+				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
 		if(null != checkFlag)
 			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
 		return step.fetchOne().value1();
