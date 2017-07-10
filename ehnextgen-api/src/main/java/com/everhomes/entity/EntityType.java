@@ -55,6 +55,7 @@ public enum EntityType {
     PM_TASK(EhPmTasks.class.getSimpleName()),
     LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
+    TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),
     ORGANIZATION_FILE("EhOrganizationFiles");
 
     private String code;
