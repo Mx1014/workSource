@@ -3906,6 +3906,7 @@ public class PunchServiceImpl implements PunchService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setPunchRuleMaps(new ArrayList<PunchRuleMapDTO>()); 
 		 
+		Organization organization = checkOrganization(cmd.getOwnerId());
 		for(PunchRuleOwnerMap other:results)  {
 			PunchRuleMapDTO dto = ConvertHelper.convert(other, PunchRuleMapDTO.class);
 //			PunchRule pr = this.punchProvider.getPunchRuleById(other.getPunchRuleId());
@@ -3915,10 +3916,11 @@ public class PunchServiceImpl implements PunchService {
 //						"have no punch rule");
 //			dto.setPunchRuleName(pr.getName());
 			if(PunchOwnerType.User.getCode().equals(other.getTargetType())){
-				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
-				if(null== member)
+//				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
+		        List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+				if(null== members || members.size() == 0)
 					continue;
-				dto.setTargetName(member.getContactName());
+				dto.setTargetName(members.get(0).getContactName());
 				OrganizationDTO dept =  this.findUserDepartment(other.getTargetId(), other.getOwnerId());
 				if(null != dept)
 					dto.setTargetDept(dept.getName());
@@ -3942,9 +3944,11 @@ public class PunchServiceImpl implements PunchService {
 		else{
 			return Long.valueOf(organization.getPath().split("/")[1]);
 		}
-		
-		
 	}
+
+
+
+
 	/**找到用户的部门-多部门取最上级第一个*/
 	private OrganizationDTO findUserDepartment(Long userId, Long organizationId){
 //		// 多部门找顶级部门
@@ -4185,8 +4189,8 @@ public class PunchServiceImpl implements PunchService {
 		
 		return response;
 	}
-
-	private List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
+	@Override
+	public List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
 		//找到所有子部门 下面的用户
 		 
 		List<String> groupTypeList = new ArrayList<String>();
@@ -5149,11 +5153,9 @@ public class PunchServiceImpl implements PunchService {
 		}
 		else{
 
-			LOGGER.error("owenr id and type not the same with database db=[" +
-					obj.getOwnerType()+obj.getOwnerId()+"],cmd=["
-					+cmd.getOwnerType()+ cmd.getOwnerId()+"]");
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-					"owenr id and type not the same with database");
+					"Invalid owner type or  Id parameter in the command");
 		}
 	
 
