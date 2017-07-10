@@ -12,6 +12,7 @@ import java.sql.Timestamp;
  * <li>groupId: 组id</li>
  * <li>currentId: 目标id</li>
  * <li>currentType: 目标类型</li>
+ * <li>currentName: 目标名称</li>
  * <li>operatorUid: 操作人员id</li>
  * <li>updateTime: 更新时间</li>
  * </ul>
