@@ -739,28 +739,27 @@ public class PunchServiceImpl implements PunchService {
 						.getRequestType());
 				punchExceptionDTO.setCreateTime(exceptionRequest
 						.getCreateTime().getTime());
+				Organization organization = organizationProvider.findOrganizationById(companyId);
 				if (exceptionRequest.getRequestType().equals(
 						PunchRquestType.REQUEST.getCode())) {
 					// 对于申请
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getDescription());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), companyId);
-
-					if (null == member) {
+					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+					if (null == members || members.size() == 0) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(member.getContactName());
+						punchExceptionDTO.setName(members.get(0).getContactName());
 					}
 				} else {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getOperatorUid(), companyId);
-
-					if (null == member) {
+					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+					if (null == members || members.size() == 0) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(member.getContactName());
+						punchExceptionDTO.setName(members.get(0).getContactName());
 					}
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
@@ -1180,27 +1179,27 @@ public class PunchServiceImpl implements PunchService {
 						.getRequestType());
 				punchExceptionDTO.setCreateTime(exceptionRequest
 						.getCreateTime().getTime());
+				Organization organization = organizationProvider.findOrganizationById(companyId);
 				if (exceptionRequest.getRequestType().equals(
 						PunchRquestType.REQUEST.getCode())) {
 					// 对于申请
-					
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), companyId);
-
-					if (null == member) {
+					punchExceptionDTO.setExceptionComment(exceptionRequest
+							.getDescription());
+					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+					if (null == members || members.size() == 0) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(member.getContactName());
+						punchExceptionDTO.setName(members.get(0).getContactName());
 					}
 				} else {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getOperatorUid(), companyId);
-
-					if (null == member) {
+					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+					if (null == members || members.size() == 0) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(member.getContactName());
+						punchExceptionDTO.setName(members.get(0).getContactName());
 					}
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
@@ -1786,6 +1785,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchExceptionRequestCommandResponse listExceptionRequests(
 			ListPunchExceptionRequestCommand cmd) {
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
+		Organization organization = organizationProvider.findOrganizationById(cmd.getEnterpriseId());
 		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 
@@ -1872,13 +1872,13 @@ public class PunchServiceImpl implements PunchService {
 					if (null != dto.getOperatorUid()
 							&& 0 != dto.getOperatorUid()) {
 
-						member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), cmd.getEnterpriseId());
+						List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
 
-						if (null == member) {
+						if (null == members || members.size() == 0) {
 							dto.setOperatorName("无此人");
 						} else {
-							dto.setOperatorName(member.getContactName());
-						}
+							dto.setOperatorName(members.get(0).getContactName());
+						} 
 					}
 					
 					PunchExceptionApproval  approval = punchProvider.getExceptionApproval(r.getUserId(), cmd.getEnterpriseId(),r.getPunchDate());
@@ -1947,10 +1947,11 @@ public class PunchServiceImpl implements PunchService {
 
 						member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), cmd.getEnterpriseId());
 						if (null == member) {
-							dto.setOperatorName("无此人");
+							dto.setOperatorName("");
 						} else {
 							dto.setOperatorName(member.getContactName());
 						}
+						
 					}
 					
 					if(null== approval){
