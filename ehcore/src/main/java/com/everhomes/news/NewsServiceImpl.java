@@ -501,7 +501,7 @@ public class NewsServiceImpl implements NewsService {
 		String jsonString = getSearchJson(communityId, userId, namespaceId,categoryId, keyword, pageAnchor, pageSize);
  
 		// 需要查询的字段
-		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds";
+		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds,visibleType";
 
 		// 从es查询
 		JSONArray result = searchProvider.query(SearchUtils.NEWS, jsonString, fields);
@@ -531,11 +531,14 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setTopFlag(o.getByte("topFlag"));
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
 			newsDTO.setCategoryId(o.getLong("categoryId"));
+			newsDTO.setVisibleType(o.getString("visibleType"));
 
 			newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
 			if (commentForbiddenFlag) {
 				newsDTO.setCommentFlag(NewsNormalFlag.DISABLED.getCode());
 			}
+
+			newsDTO.setProjectDTOS(setProjectDTOs(o.getLong("id")));
 
 			return newsDTO;
 		}).collect(Collectors.toList());
