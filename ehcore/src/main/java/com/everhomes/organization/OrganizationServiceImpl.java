@@ -5380,6 +5380,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 dto.setOperatorName(operator.getNickName());
                 dto.setOperatorPhone(operatorIdentifier.getIdentifierToken());
             }
+            if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
+                User user = userProvider.findUserById(c.getTargetId());
+                if (user != null) {
+                    dto.setNickName(user.getNickName());
+                }
+            }
             return dto;
         }).collect(Collectors.toList()));
 
