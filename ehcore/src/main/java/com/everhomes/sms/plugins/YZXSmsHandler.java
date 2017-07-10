@@ -1,16 +1,15 @@
 package com.everhomes.sms.plugins;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.sms.*;
-import javassist.expr.NewArray;
-
-import javax.annotation.PostConstruct;
-
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.google.gson.Gson;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -18,21 +17,18 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
-import com.google.gson.Gson;
 import org.springframework.transaction.TransactionStatus;
+
+import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * yzx sms provider
@@ -62,6 +58,9 @@ public class YZXSmsHandler implements SmsHandler {
 
     @Autowired
     private SmsLogProvider smsLogProvider;
+
+    @Autowired
+    private YzxSmsLogProvider yzxSmsLogProvider;
 
     @Autowired
     private DbProvider dbProvider;
@@ -137,7 +136,7 @@ public class YZXSmsHandler implements SmsHandler {
 //        createAndSend((String[]) ArrayUtils.subarray(phoneNumbers, index - MAX_LIMIT, phoneNumbers.length), text);
     }
 
-    private void createAndSend(String[] phoneNumbers, String text, String templateId) {
+    private String createAndSend(String[] phoneNumbers, String text, String templateId) {
         SmsChannel channel = SmsBuilder.create(false);
         String timestamp = DateUtil.dateToStr(new Date(),
                 DateUtil.DATE_TIME_NO_SLASH);// 时间戳
@@ -165,6 +164,7 @@ public class YZXSmsHandler implements SmsHandler {
         
         String result = channel.sendMessage(uri, SmsBuilder.HttpMethod.POST.val(), null, headers,entityJsonStr).getMessage();
         LOGGER.info("Send sms, result={}, uri={}, headers={}, phone={}, text={}", result, uri, headers, StringUtils.join(phoneNumbers, ","), text);
+        return result;
     }
 
     private String createUrl(String accountSid, String authToken,String timestamp) {
@@ -198,7 +198,6 @@ public class YZXSmsHandler implements SmsHandler {
     @Override
     public void doSend(String phoneNumber, String text, String templateId) {
         createAndSend(new String[] { phoneNumber }, text,templateId);
-        
     }
 
     @Override
@@ -253,24 +252,24 @@ public class YZXSmsHandler implements SmsHandler {
                 }
                 content = strBuilder.toString();
             }
-            
-            createAndSend(phoneNumbers, content, yzxTemplateId);
+
+            String result = createAndSend(phoneNumbers, content, yzxTemplateId);
 
             //add by sw 添加短信log
             addSmsLogs(namespaceId, phoneNumbers, templateScope, templateId, yzxTemplateId,
-                    templateLocale, content, "success");
+                    templateLocale, content, "success", result);
         } else {
             String log = "The yzx template id is empty, namespaceId=" + namespaceId + ", templateScope=" + templateScope
                     + ", templateId=" + templateId + ", templateLocale=" + templateLocale;
             LOGGER.error(log);
 
             addSmsLogs(namespaceId, phoneNumbers, templateScope, templateId, yzxTemplateId,
-                    templateLocale, "", log);
+                    templateLocale, "", log, "");
         }
     }
 
     private void addSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String yzxTemplateId,
-                            String templateLocale, String variables, String result) {
+                            String templateLocale, String variables, String result, String resp) {
 
         dbProvider.execute((TransactionStatus status) -> {
             for (String mobile: phoneNumbers) {
@@ -285,9 +284,32 @@ public class YZXSmsHandler implements SmsHandler {
                 log.setResult(result);
                 smsLogProvider.createSmsLog(log);
             }
-
             return null;
         });
 
+        // add by xq.tian 2017/07/11
+        if (StringUtils.isNotBlank(resp)) {
+            try {
+                YzxSmsResult res = (YzxSmsResult) StringHelper.fromJsonString(resp, YzxSmsResult.class);
+                for (String phoneNumber : phoneNumbers) {
+                    YzxSmsLog log = new YzxSmsLog();
+                    log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                    log.setNamespaceId(namespaceId);
+                    log.setScope(templateScope);
+                    log.setCode(templateId);
+                    log.setLocale(templateLocale);
+                    log.setMobile(phoneNumber);
+                    log.setText(yzxTemplateId);
+                    log.setVariables(variables);
+                    log.setSmsId(res.getResp().templateSMS.smsId);
+                    log.setRespCode(res.getResp().respCode);
+                    log.setFailure(res.getResp().failure);
+                    log.setCreateDate(String.valueOf(res.getResp().templateSMS.createDate));
+                    yzxSmsLogProvider.createYzxSmsLog(log);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
