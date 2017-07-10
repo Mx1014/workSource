@@ -3171,7 +3171,7 @@ SET @qu_id = (select id FROM `eh_regions` where name = '南山区' and namespace
 SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
 SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
 SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; -- 需要取现网eh_communities的ID的最大值再加一定余量
-
+SET @organization_id = 1023080;
 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 	VALUES(@community_forum_id, UUID(), @namespace_id, 2, 'EhGroups', 0,'南山云谷论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
