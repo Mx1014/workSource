@@ -47,6 +47,7 @@ public interface UniongroupService {
 
     void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId);
 
+    List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId);
     /**
      * 新增或修改人员重新分配薪酬组
      **/

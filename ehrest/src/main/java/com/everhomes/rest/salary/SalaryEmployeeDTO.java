@@ -19,7 +19,7 @@ import java.util.List;
  * <li>salaryCardNumber: 银行卡号</li>
  * <li>email: 邮箱</li>
  * <li>isConfirmed: 工资明细:0-已设置 1-未设置</li>
- * <li>isNormal: 是否为异常员工:0-不是异常 1-是异常</li>
+ * <li>isNormal: 是否为异常员工:0-正常员工 1-异常员工</li>
  * </ul>
  */
 public class SalaryEmployeeDTO {
@@ -46,7 +46,7 @@ public class SalaryEmployeeDTO {
 
     private String email;
 
-    private Byte isConfirmed;
+    private Byte isConfirmed = 1;
 
     private Byte isNormal = 0;
 

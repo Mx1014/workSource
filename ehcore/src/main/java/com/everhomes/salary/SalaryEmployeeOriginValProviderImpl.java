@@ -126,10 +126,12 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 
 	@Override
 	public List<Object[]> listSalaryEmployeeWagesDetails(){
-        return getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID,
+        List<Object[]> objects = getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID,
                 Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE)
+                .from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
                 .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORIGIN_ENTITY_ID.eq(Long.valueOf("98")))
                 .fetchInto(Object[].class);
+        return objects;
     }
 
 /*	@Override
