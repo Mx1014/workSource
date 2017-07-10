@@ -1204,7 +1204,7 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public void checkPeriodSalary(CheckPeriodSalaryCommand cmd) {
 		//检验是否合算完成
-		if(salaryEmployeeProvider.countUnCheckEmployee(cmd.getSalaryPeriodGroupId())>0)
+		if(salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),SalaryGroupStatus.UNCHECK.getCode())>0)
 			throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE, SalaryConstants.ERROR_HAS_EMPLOYEE_UNCHECK,"there are some employee uncheck");
 		
 		//将本期group置为已核算
