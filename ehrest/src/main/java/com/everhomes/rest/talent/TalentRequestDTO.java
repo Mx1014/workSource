@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>talentId: 企业人才id</li>
  * <li>talentName: 企业人才名称</li>
  * <li>createTime: 申请时间</li>
- * <li>formItems: 表单元素，参考{@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>flowCaseEntities: 表单元素，参考{@link com.everhomes.rest.flow.FlowCaseEntity}</li>
  * </ul>
  */
 public class TalentRequestDTO {
