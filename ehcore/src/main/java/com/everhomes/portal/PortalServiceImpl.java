@@ -35,10 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -341,9 +338,22 @@ public class PortalServiceImpl implements PortalService {
 		});
 		ListPortalItemsResponse response = new ListPortalItemsResponse();
 		response.setNextPageAnchor(locator.getAnchor());
-		response.setPortalItems(portalItems.stream().map(r ->{
+		List<PortalItemDTO> dtos = portalItems.stream().map(r ->{
 			return processPortalItemDTO(r);
-		}).collect(Collectors.toList()));
+		}).collect(Collectors.toList());
+
+		if(dtos.size() > 0){
+			//按order 排序
+			Collections.sort(dtos, new Comparator<PortalItemDTO>() {
+				@Override
+				public int compare(PortalItemDTO o1, PortalItemDTO o2) {
+					return o1.getDefaultOrder() - o2.getDefaultOrder();
+				}
+			});
+		}
+
+		response.setPortalItems(dtos);
+
 		return response;
 	}
 
@@ -397,6 +407,7 @@ public class PortalServiceImpl implements PortalService {
 			}
 			return null;
 		});
+
 		return processPortalItemDTO(portalItem);
 	}
 
@@ -457,6 +468,7 @@ public class PortalServiceImpl implements PortalService {
 			UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(portalItem.getActionData(), UrlActionData.class);
 			dto.setContentName(actionData.getUrl());
 		}
+
 		return dto;
 	}
 

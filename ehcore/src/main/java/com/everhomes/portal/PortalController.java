@@ -323,7 +323,7 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
-	 * <p>26.删除门户itemGroup</p>
+	 * <p>26.查询门户itemGroup</p>
 	 * <b>URL: /portal/getPortalItemGroupById</b>
 	 */
 	@RequestMapping("getPortalItemGroupById")
