@@ -2532,7 +2532,18 @@ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40850, '', 'EhNamespaces', 999986, 2);
 
-
+-- 新增“任务管理”icon，icon在svn Ops里面，配置任务管理功能；by dengs,20170707
+SET @launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
+	VALUES ((@launch_pad_items_id := @launch_pad_items_id+1), 999986, 0, 0, 0, '/home', 'Bizs', '任务管理', '任务管理', 'cs://1/image/aW1hZ2UvTVRveU16VTBNelF5WmpZNE5tTXpORGcyT1dRNU16WmpObVl5TVRBd05EWXdaQQ', 1, 1, 56, '', 10, 0, 1, 0, '', 0, NULL, NULL, NULL, 1, 'pm_admin', 1, NULL, NULL, 0, NULL);
+-- 2、web后台“物业服务”-“物业报修”-“设置”下，将“执行人员设置”删除，增加“工作流设置”；by dengs,20170707
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),20158,'', 'EhNamespaces', 999986,2);
+DELETE FROM eh_web_menu_scopes WHERE owner_id = 999986 AND menu_id = 20160;
+-- 3、将创源“物业服务”配置成最新版的物业服务。by dengs,20170707
+update eh_launch_pad_items SET action_type=60,action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修"}' WHERE
+item_label = '物业服务' and namespace_id=999986;
 
 
 

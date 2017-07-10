@@ -36,7 +36,7 @@ public interface OrganizationProvider {
     List<Organization> findOrganizationByCommunityId(Long communityId);
     List<Organization> findOrganizationByPath(String path);
     List<Organization> listOrganizations(String organizationType,String name, Integer pageOffset,Integer pageSize);
-    
+	List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize);
     void createOrganizationMember(OrganizationMember organizationMember);
     void updateOrganizationMember(OrganizationMember organizationMember);
     void deleteOrganizationMemberById(Long id);
@@ -329,7 +329,6 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listUsersOfEnterprise(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	
 	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
-
 	List<OrganizationMember> convertMemberListAsDetailList(List<OrganizationMember> old_list);
 	/**New**/
     List<Object[]> findContractEndTimeById(List<Long> detailIds);
@@ -392,9 +391,10 @@ public interface OrganizationProvider {
 	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType, Byte setAdminFlag,
 			CrossShardListingLocator locator, int pageSize);
 
-	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(
 			Long organizationId, Long buildId);
+
+	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
 			Byte operationType);
 
@@ -403,6 +403,8 @@ public interface OrganizationProvider {
 	Set<Long> listMemberDetailIdWithExclude(Integer namespaceId, String big_path, List<String> small_path);
 
 	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
+
+	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
 }
 

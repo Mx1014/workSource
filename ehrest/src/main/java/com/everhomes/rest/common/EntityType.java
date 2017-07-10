@@ -16,9 +16,12 @@ package com.everhomes.rest.common;
  * <li>FAMILY: 家庭</li>
  * <li>ORGANIZATIONS: 机构</li>
  * <li>BUILDING: 楼栋</li>
+ * <li>EhServiceModules: 业务模块</li>
+ * <li>EhZuolinAdmins: 左邻管理</li>
  * </ul>
  */
 public enum EntityType {
+    NAMESPACE("EhNamespaces"),
     USER("EhUsers"),
     GROUP("EhGroups"),
     FORUM("EhForums"),
@@ -30,7 +33,13 @@ public enum EntityType {
     FAMILY("EhFamilies"),
     TOPIC("EhTopics"),
     ORGANIZATIONS("EhOrganizations"),
-    BUILDING("EhBuildings");
+    BUILDING("EhBuildings"),
+    SERVICE_MODULE("EhServiceModules"),
+    ROLE("EhAclRoles"),
+    RESOURCE_CATEGORY("EhResourceCategories"),
+    ZUOLIN_ADMIN("EhZuolinAdmins"),
+    ALL("EhAll"),
+    CHILD_PROJECT("child_project");
 
     private String code;
     
@@ -45,31 +54,6 @@ public enum EntityType {
     public static EntityType fromCode(String code) {
         if(code == null)
             return null;
-        
-        if(code.equalsIgnoreCase(USER.getCode()))
-            return USER;
-        else if(code.equalsIgnoreCase(GROUP.getCode()))
-            return GROUP;
-        else if(code.equalsIgnoreCase(FORUM.getCode()))
-            return FORUM;
-        else if(code.equalsIgnoreCase(ADDRESS.getCode()))
-            return ADDRESS;
-        else if(code.equalsIgnoreCase(CATEGORY.getCode()))
-            return CATEGORY;
-        else if(code.equalsIgnoreCase(COMMUNITY.getCode()))
-            return COMMUNITY;
-        else if(code.equalsIgnoreCase(FAMILY.getCode()))
-            return FAMILY;
-        else if(code.equalsIgnoreCase(POST.getCode()))
-            return POST;
-        else if(code.equalsIgnoreCase(ORGANIZATIONS.getCode()))
-            return ORGANIZATIONS;
-        else if(code.equalsIgnoreCase("EhFamilies"))
-            return FAMILY;
-        else if(code.equalsIgnoreCase("EhTopics"))
-            return TOPIC;
-        else if(code.equalsIgnoreCase("EhBuildings"))
-        	return BUILDING;
         for (EntityType entityType : EntityType.values()) {
             if (entityType.getCode().equals(code)) {
                 return entityType;

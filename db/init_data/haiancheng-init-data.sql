@@ -2668,3 +2668,6 @@ VALUES ((@max_id := @max_id + 1), 6, 0, '综合维修', '任务/综合维修', 0
 
 UPDATE `eh_launch_pad_items` SET `action_type` = 60, `action_data` = CONCAT('{"url":"zl://propertyrepair/create?type=user&taskCategoryId=', @max_id, '&displayName=综合维修"}')
 WHERE `namespace_id`=999993 AND `item_label` = '综合维修';
+
+-- 【海岸馨服务】服务广场icon应不可删 12107任务, by dengs,20170706
+UPDATE eh_launch_pad_items SET delete_flag = 0 WHERE namespace_id = '999993' and item_label = '打卡考勤';

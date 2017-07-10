@@ -210,15 +210,23 @@ public class QualityProviderImpl implements QualityProvider {
 	@PostConstruct
 	public void init() {
 		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
-//		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
-//		if(taskServer.equals(equipmentIp)) {
+		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+		if(taskServer.equals(equipmentIp)) {
 			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).enter(()-> {
-				String qualityInspectionTriggerName = "QualityInspection";
+				String qualityInspectionTriggerName = "QualityInspection" + System.currentTimeMillis();
 				scheduleProvider.scheduleCronJob(qualityInspectionTriggerName, qualityInspectionTriggerName,
 						"0 0 0 * * ? ", QualityInspectionScheduleJob.class, null);
 				return null;
 			});
-//		}
+
+			String qualityInspectionStatTriggerName = "QualityInspectionStat " + System.currentTimeMillis();
+			String statCorn = configurationProvider.getValue(ConfigConstants.QUALITY_STAT_CORN, "0 0 0 * * ? ");
+			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_STAT.getCode()).enter(()-> {
+				scheduleProvider.scheduleCronJob(qualityInspectionStatTriggerName, qualityInspectionStatTriggerName,
+						statCorn, QualityInspectionStatScheduleJob.class, null);
+				return null;
+			});
+		}
 
 		//五分钟后启动通知
 		Long notifyTime = System.currentTimeMillis() + 300000;
@@ -228,14 +236,6 @@ public class QualityProviderImpl implements QualityProvider {
 		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
 				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
 
-
-		String qualityInspectionStatTriggerName = "QualityInspectionStat ";
-		String statCorn = configurationProvider.getValue(ConfigConstants.QUALITY_STAT_CORN, "0 0 0 * * ? ");
-		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_STAT.getCode()).enter(()-> {
-			scheduleProvider.scheduleCronJob(qualityInspectionStatTriggerName, qualityInspectionStatTriggerName,
-					statCorn, QualityInspectionStatScheduleJob.class, null);
-			return null;
-		});
 	}
 
 	@Override
@@ -337,7 +337,9 @@ public class QualityProviderImpl implements QualityProvider {
 						con3 = con3.or(con4);
 					}
 				}
-				con2 = con2.and(con3);
+				if(con3 != null) {
+					con2 = con2.and(con3);
+				}
 				con2 = con2.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskStatus.NONE.getCode()));
 				con = con.or(con2);
 			}
@@ -2539,7 +2541,7 @@ public class QualityProviderImpl implements QualityProvider {
 		QualityInspectionSampleScoreStat stat = context.select()
 				.from(Tables.EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT)
 				.where(Tables.EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT.SAMPLE_ID.eq(sampleId))
-				.fetchOneInto(QualityInspectionSampleScoreStat.class);
+				.fetchAnyInto(QualityInspectionSampleScoreStat.class);
 
 		return stat;
 	}

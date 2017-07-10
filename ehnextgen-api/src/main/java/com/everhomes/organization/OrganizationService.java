@@ -426,6 +426,8 @@ public interface OrganizationService {
 
     List<OrganizationMember> listOrganizationContactByJobPositionId(List<Long> organizationIds, Long jobPositionId);
 
+	List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId);
+
     List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd);
 	ContractDTO processContract(Contract contract, Integer namespaceId);
 	ContractDTO processContract(Contract contract);
@@ -502,6 +504,20 @@ public interface OrganizationService {
 	ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile multipartFile, Long userId);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
 	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
+
+	/**
+	 * 查询所有管理公司
+	 */
+	List<OrganizationDTO> listAllPmOrganizations();
+
+	List<Long> getIncludeOrganizationIdsByUserId(Long userId, Long organizationId);
+
+	/**
+	 * 最新 获取用户所包含的机构列表，如果用户是某个机构的管理员或者模块管理员或者细化的权限，就拥有这个机构，不一定用户非得在此机构的通讯录
+	 * @param cmd
+	 * @return
+     */
+	List<OrganizationSimpleDTO> listUserRelateOrganizations(ListUserRelatedOrganizationsCommand cmd);
 	List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path,
 			Long userId);
 	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
