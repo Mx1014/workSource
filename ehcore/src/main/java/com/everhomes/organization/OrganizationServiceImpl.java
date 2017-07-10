@@ -10062,7 +10062,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         return dtos;
     }
 
-    private List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId) {
+    @Override
+    public List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId) {
         return listOrganizationContactByJobPositionId(enterpriseId, null, jobPositionId);
     }
 
