@@ -438,4 +438,13 @@ update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwalpqRXhaR1V5
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMllUYzRPVGswT0RBd01qQmlPRGxrTlRjMU56STFZelJoTlRReU5URTFZUQ' where id in (116465, 116477) and namespace_id = 999973;
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk16STJZekU1TjJRME9URTBaakkwTnpRd01XRTNaREJqTkdFNFl6TmpaQQ' where id in (116463, 116475) and namespace_id = 999973;
 
+-- 更新服务广场，item显示问题 20170710 add by yanjun
+update eh_launch_pad_items set display_flag = '0' where id in (116464, 116465, 116466, 116476, 116477, 116478) and namespace_id = 999973;
+update eh_launch_pad_items set item_group = 'Bizs' where id in (116461, 116465, 116473, 116477) and namespace_id = 999973;
+
+-- 更新新闻显示问题，只显示月日，不显示时间  20170710 add by yanjun
+update eh_launch_pad_layouts set layout_json = '{"versionCode":"2017070401","versionName":"4.7.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Metro","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount": 2},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"date","categoryId":0,"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16}]}' where  id in (596, 597) and namespace_id = 999973;
+
+-- 更新短信模板 20170710 add by yanjun
+update  eh_locale_templates set text = 90043 where namespace_id = 999973 and scope = 'sms.default.yzx' and code = 1;
 
