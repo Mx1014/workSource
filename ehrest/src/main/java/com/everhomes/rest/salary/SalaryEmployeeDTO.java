@@ -19,6 +19,7 @@ import java.util.List;
  * <li>salaryCardNumber: 银行卡号</li>
  * <li>email: 邮箱</li>
  * <li>isConfirmed: 工资明细:0-已设置 1-未设置</li>
+ * <li>isNormal: 是否为异常员工:0-不是异常 1-是异常</li>
  * </ul>
  */
 public class SalaryEmployeeDTO {
@@ -46,6 +47,8 @@ public class SalaryEmployeeDTO {
     private String email;
 
     private Byte isConfirmed;
+
+    private Byte isNormal = 0;
 
     public SalaryEmployeeDTO() {
     }
@@ -144,6 +147,14 @@ public class SalaryEmployeeDTO {
 
     public void setIsConfirmed(Byte isConfirmed) {
         this.isConfirmed = isConfirmed;
+    }
+
+    public Byte getIsNormal() {
+        return isNormal;
+    }
+
+    public void setIsNormal(Byte isNormal) {
+        this.isNormal = isNormal;
     }
 
     @Override

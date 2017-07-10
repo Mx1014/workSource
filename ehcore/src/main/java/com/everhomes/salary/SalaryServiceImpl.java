@@ -398,107 +398,264 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
 
-        //  当没有选取薪酬组的时候，调用组织架构原有接口
-        if (StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-            //  1.将前端信息传递给组织架构的接口获取相关信息
-            ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-            command.setOrganizationId(cmd.getOwnerId());
-            if (!StringUtils.isEmpty(cmd.getDepartmentId()))
-                command.setOrganizationId(cmd.getDepartmentId());
-            if (!StringUtils.isEmpty(cmd.getKeywords()))
-                command.setKeywords(cmd.getKeywords());
-//            command.setPageAnchor(Long.valueOf("0"));
-            command.setPageSize(20);
-            //  2.查询所有人员
-            ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command, false);
+	    //  1.将前端信息传递给组织架构的接口获取相关信息
+        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        command.setOrganizationId(cmd.getOwnerId());
 
-            //  3.查询所有批次
-            List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+        //  2.查询所有人员
+        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
 
-            ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+        //  3.查询所有批次
+        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
-            if (!StringUtils.isEmpty(results)) {
-                response.setSalaryEmployeeDTO(results.getMembers().stream().map(r -> {
-                    SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
-                    dto.setUserId(r.getTargetId());
-                    dto.setDetailId(r.getDetailId());
-                    dto.setContactName(r.getContactName());
-                    dto.setSalaryGroupId(r.getGroupId());
-                    //  拼接薪酬组名称
-                    if (!StringUtils.isEmpty(organizations)) {
-                        organizations.forEach(s -> {
-                            if (s.getId().equals(r.getGroupId()))
-                                dto.setSalaryGroupName(s.getName());
-                        });
-                    }
-                    return dto;
-                }).collect(Collectors.toList()));
-            }
-            return response;
-        } else {
-            //  当选取了薪酬组的时候，则调用 lei.lv 新接口
-            //  1.将前端信息传递给组织架构的接口获取相关信息
-            ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
-            command.setOwnerId(cmd.getOwnerId());
-            if (!StringUtils.isEmpty(cmd.getDepartmentId()))
-                command.setDepartmentId(cmd.getDepartmentId());
+        List<Long> uniongroupDetailIds = new ArrayList<>();
+
+        if(cmd.getSalaryGroupId() != null){
+            //将前端信息传递给组织架构的接口获取相关信息
+            ListUniongroupMemberDetailsWithConditionCommand uniongroup_command = new ListUniongroupMemberDetailsWithConditionCommand();
             if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-                command.setGroupId(cmd.getSalaryGroupId());
-                command.setGroupType(UniongroupType.SALARYGROUP.getCode());
+                uniongroup_command.setGroupId(cmd.getSalaryGroupId());
             }
             if (!StringUtils.isEmpty(cmd.getKeywords()))
-                command.setKeywords(cmd.getKeywords());
-            command.setPageAnchor(Long.valueOf("0"));
-            command.setPageSize(20);
+                uniongroup_command.setKeywords(cmd.getKeywords());
+            if(!StringUtils.isEmpty(cmd.getDepartmentId()))
+                uniongroup_command.setDepartmentId(cmd.getDepartmentId());
+            uniongroup_command.setGroupType(UniongroupType.SALARYGROUP.getCode());
+            uniongroup_command.setOwnerId(cmd.getOwnerId());
+            uniongroup_command.setPageAnchor(Long.valueOf("0"));
+            uniongroup_command.setPageSize(cmd.getPageSize());
 
-            //  2.查询所有人员
-            List<UniongroupMemberDetail> results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
-            //  3.查询所有批次
-            List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+            //  查询关联的人员
+            List<UniongroupMemberDetail> uniongroupMemberDetails = this.uniongroupService.listUniongroupMemberDetailsWithCondition(uniongroup_command);
 
-            ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+            // 获取关联人员detailId的集合
+            uniongroupDetailIds.addAll(uniongroupMemberDetails.stream().map(r ->{return r.getDetailId();}).collect(Collectors.toList()));
+        }
 
-            if (!StringUtils.isEmpty(results)) {
-                response.setSalaryEmployeeDTO(results.stream().map(r -> {
-                    SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
-                    String department = "";
-                    String jobPosition = "";
-                    dto.setUserId(r.getTargetId());
-                    dto.setDetailId(r.getDetailId());
-                    dto.setContactName(r.getContactName());
-                    dto.setSalaryGroupId(r.getGroupId());
-                    if (!StringUtils.isEmpty(r.getEmployeeNo()))
-                        dto.setEmployeeNo(r.getEmployeeNo());
-                    if (!StringUtils.isEmpty(r.getDepartment())) {
-                        for (Long k : r.getDepartment().keySet()) {
-//                            department += r.getDepartment().get(k);
-                            department += (r.getDepartment().get(k) + ",");
-                        }
-                        department = department.substring(0,department.length()-1);
 
+        //过滤
+        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+
+        List<OrganizationMemberDTO> dtos = new ArrayList<>();
+        if (!StringUtils.isEmpty(results)) {
+            if (uniongroupDetailIds.size() > 0) {
+                dtos = results.getMembers().stream().filter(r -> {
+                    return uniongroupDetailIds.contains(r.getDetailId());
+                }).collect(Collectors.toList());
+            } else {
+                dtos = results.getMembers();
+            }
+
+            response.setSalaryEmployeeDTO(dtos.stream().map(r -> {
+                SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
+                dto.setUserId(r.getTargetId());
+                dto.setDetailId(r.getDetailId());
+                dto.setContactName(r.getContactName());
+                dto.setSalaryGroupId(r.getGroupId());
+                //  拼接薪酬组名称
+                if (!StringUtils.isEmpty(organizations)) {
+                    organizations.forEach(s -> {
+                        if (s.getId().equals(r.getGroupId()))
+                            dto.setSalaryGroupName(s.getName());
+                    });
+                }
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+        return response;
+    }
+
+/*    private List<UniongroupMemberDetail> listEmployeesFromOrganization(ListSalaryEmployeesCommand cmd){
+        //  1.将前端信息传递给组织架构的接口获取相关信息，从而查询所有人员
+        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        command.setOrganizationId(cmd.getOwnerId());
+        if (!StringUtils.isEmpty(cmd.getDepartmentId()))
+            command.setOrganizationId(cmd.getDepartmentId());
+        if (!StringUtils.isEmpty(cmd.getKeywords()))
+            command.setKeywords(cmd.getKeywords());
+        command.setPageSize(20);
+        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationPersonnels(command, false);
+
+        List<UniongroupMemberDetail> results = new ArrayList<>();
+        response.getMembers().forEach(r ->{
+            UniongroupMemberDetail result = new UniongroupMemberDetail();
+            result.setId(r.getId());
+            result.setGroupType(r.getGroupType());
+            result.setGroupId(r.getGroupId());
+
+        });
+
+    }*/
+
+    /*private ListSalaryEmployeesResponse listWithoutSalaryGroupId(ListSalaryEmployeesCommand cmd) {
+
+        //  1.将前端信息传递给组织架构的接口获取相关信息，从而查询所有人员
+        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        command.setOrganizationId(cmd.getOwnerId());
+        if (!StringUtils.isEmpty(cmd.getDepartmentId()))
+            command.setOrganizationId(cmd.getDepartmentId());
+        if (!StringUtils.isEmpty(cmd.getKeywords()))
+            command.setKeywords(cmd.getKeywords());
+        command.setPageSize(20);
+        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command, false);
+
+        //  2.查询所有批次
+        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+        //  3.查询所有员工工资明细情况
+        List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails();
+
+        //  4.拼接字段返回结果
+        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+        List<SalaryEmployeeDTO> dtos = new ArrayList<>();
+
+        if (!StringUtils.isEmpty(results)) {
+            for (int i = 0; i < results.getMembers().size(); i++) {
+                SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
+                String department = "";
+                String jobPosition = "";
+                dto.setUserId(results.getMembers().get(i).getTargetId());
+                dto.setDetailId(results.getMembers().get(i).getDetailId());
+                dto.setContactName(results.getMembers().get(i).getContactName());
+                dto.setSalaryGroupId(results.getMembers().get(i).getGroupId());
+                //  拼接部门
+                if (!StringUtils.isEmpty(results.getMembers().get(i).getDepartments())) {
+                    for (OrganizationDTO k : results.getMembers().get(i).getDepartments())) {
+                        department += (k.get+ ",");
                     }
-                    if (!StringUtils.isEmpty(r.getJobPosition())) {
-                        for (Long k : r.getJobPosition().keySet()) {
-//                            jobPosition += r.getJobPosition().get(k);
-                            jobPosition += (r.getJobPosition().get(k) + ",");
-                        }
-                        jobPosition = jobPosition.substring(0,jobPosition.length()-1);
+                    department = department.substring(0, department.length() - 1);
+
+                }
+                //  拼接岗位
+                if (!StringUtils.isEmpty(results.get(i).getJobPosition())) {
+                    for (Long k : results.get(i).getJobPosition().keySet()) {
+                        jobPosition += (results.get(i).getJobPosition().get(k) + ",");
                     }
-                    dto.setDepartment(department);
-                    dto.setJobPosition(jobPosition);
-                    //  拼接薪酬组名称
-                    for (int i = 0; i < organizations.size(); i++) {
-                        if (organizations.get(i).getId().equals(r.getGroupId())) {
-                            dto.setSalaryGroupName(organizations.get(i).getName());
+                    jobPosition = jobPosition.substring(0, jobPosition.length() - 1);
+                }
+
+                //  拼接薪酬组名称
+                if (!StringUtils.isEmpty(organizations)) {
+                    for (int j = 0; j < organizations.size(); j++) {
+                        if (organizations.get(j).getId().equals(results.getMembers().get(i).getGroupId())) {
+                            dto.setSalaryGroupName(organizations.get(j).getName());
                             break;
                         }
                     }
-                    return dto;
-                }).collect(Collectors.toList()));
+                }
+                //  拼接工资明细情况
+                if (!StringUtils.isEmpty(wages)) {
+                    for (int j = 0; j < wages.size(); j++) {
+                        if (wages.get(j)[0].equals(results.getMembers().get(i).getDetailId())) {
+                            if (org.apache.commons.lang.StringUtils.isNumeric((String) wages.get(j)[1])) {
+                                dto.setIsConfirmed(SalaryEmployeeConfirmedType.CONFIRMED.getCode());
+                                break;
+                            }
+                        }
+                    }
+                }
+                //  拼接是否异常员工
+                if (StringUtils.isEmpty(dto.getSalaryGroupName())
+                        || dto.getIsConfirmed().equals(SalaryEmployeeConfirmedType.CONFIRMED.getCode()))
+                    dto.setIsNormal(SalaryEmployeeNormalType.ABNORMAL.getCode());
+                if (cmd.getIsException().equals(SalaryEmployeeNormalType.ABNORMAL.getCode()) && dto.getIsNormal().equals(SalaryEmployeeNormalType.NORMAL.getCode()))
+                    break;
+                dtos.add(dto);
             }
-            return response;
         }
+        response.setSalaryEmployeeDTO(dtos);
+        return response;
     }
+
+    private ListSalaryEmployeesResponse listWithSalaryGroupId(ListSalaryEmployeesCommand cmd) {
+
+        //  1.将前端信息传递给组织架构的接口获取相关信息
+        ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
+        command.setOwnerId(cmd.getOwnerId());
+        if (!StringUtils.isEmpty(cmd.getDepartmentId()))
+            command.setDepartmentId(cmd.getDepartmentId());
+        if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
+            command.setGroupId(cmd.getSalaryGroupId());
+            command.setGroupType(UniongroupType.SALARYGROUP.getCode());
+        }
+        if (!StringUtils.isEmpty(cmd.getKeywords()))
+            command.setKeywords(cmd.getKeywords());
+        command.setPageAnchor(Long.valueOf("0"));
+        command.setPageSize(20);
+
+        //  2.查询所有人员
+        List<UniongroupMemberDetail> results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
+        //  3.查询所有批次
+        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+        //  3.查询所有员工工资明细情况
+        List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails();
+
+        //  4.拼接字段返回结果
+        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+        List<SalaryEmployeeDTO> dtos = new ArrayList<>();
+
+        if (!StringUtils.isEmpty(results)) {
+            for (int i = 0; i < results.size(); i++) {
+                SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
+                String department = "";
+                String jobPosition = "";
+                dto.setUserId(results.get(i).getTargetId());
+                dto.setDetailId(results.get(i).getDetailId());
+                dto.setContactName(results.get(i).getContactName());
+                dto.setSalaryGroupId(results.get(i).getGroupId());
+                if (!StringUtils.isEmpty(results.get(i).getEmployeeNo()))
+                    dto.setEmployeeNo(results.get(i).getEmployeeNo());
+
+                //  拼接部门
+                if (!StringUtils.isEmpty(results.get(i).getDepartment())) {
+                    for (Long k : results.get(i).getDepartment().keySet()) {
+                        department += (results.get(i).getDepartment().get(k) + ",");
+                    }
+                    department = department.substring(0, department.length() - 1);
+
+                }
+                //  拼接岗位
+                if (!StringUtils.isEmpty(results.get(i).getJobPosition())) {
+                    for (Long k : results.get(i).getJobPosition().keySet()) {
+                        jobPosition += (results.get(i).getJobPosition().get(k) + ",");
+                    }
+                    jobPosition = jobPosition.substring(0, jobPosition.length() - 1);
+                }
+                dto.setDepartment(department);
+                dto.setJobPosition(jobPosition);
+
+                //  拼接薪酬组名称
+                for (int j = 0; j < organizations.size(); j++) {
+                    if (organizations.get(j).getId().equals(results.get(i).getGroupId())) {
+                        dto.setSalaryGroupName(organizations.get(j).getName());
+                        break;
+                    }
+                }
+
+                //  拼接工资明细情况
+                if (!StringUtils.isEmpty(wages)) {
+                    for (int j = 0; j < wages.size(); j++) {
+                        if (wages.get(j)[0].equals(results.get(i).getDetailId())) {
+                            if (org.apache.commons.lang.StringUtils.isNumeric((String) wages.get(j)[1])) {
+                                dto.setIsConfirmed(SalaryEmployeeConfirmedType.CONFIRMED.getCode());
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                //  拼接是否异常员工
+                if (StringUtils.isEmpty(dto.getSalaryGroupName())
+                        || dto.getIsConfirmed().equals(SalaryEmployeeConfirmedType.CONFIRMED.getCode()))
+                    dto.setIsNormal(SalaryEmployeeNormalType.ABNORMAL.getCode());
+                if (cmd.getIsException().equals(SalaryEmployeeNormalType.ABNORMAL.getCode()) && dto.getIsNormal().equals(SalaryEmployeeNormalType.NORMAL.getCode()))
+                    break;
+                dtos.add(dto);
+            }
+
+        }
+        response.setSalaryEmployeeDTO(dtos);
+        return response;
+    }*/
 
     @Override
     public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {
