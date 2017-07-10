@@ -1018,6 +1018,7 @@ public class SalaryServiceImpl implements SalaryService {
 //            dto.setIsFormula(NormalFlag.YES.getCode());
 //        }
         dto.setEntityType(entity.getType());
+        dto.setOriginEntityId(entity.getOriginEntityId());
         dto.setDefaultOrder(entity.getDefaultOrder());
         dto.setSalaryValue(r.getSalaryValue());
         dto.setEditableFlag(entity.getEditableFlag());

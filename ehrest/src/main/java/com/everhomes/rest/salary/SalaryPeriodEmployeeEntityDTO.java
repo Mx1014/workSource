@@ -4,6 +4,7 @@ package com.everhomes.rest.salary;
  * <ul>参数:
  * <li>salaryEmployeeId: salaryEmployeeId 确定是哪个员工哪一期的数据</li>
  * <li>groupEntityId: 字段id</li>
+ * <li>originEntityId: 字段的origin id</li>
  * <li>groupEntityName: 字段项名称</li>
  * <li>salaryValue: 字段项值</li>
  * <li>isFormula: 是否为公式 0-否 1-是</li>
@@ -18,7 +19,8 @@ package com.everhomes.rest.salary;
 public class SalaryPeriodEmployeeEntityDTO {
 
     private Long salaryEmployeeId;
-    private Long groupEntityId;
+	private Long groupEntityId;
+	private Long originEntityId;
     private String groupEntityName;
     private String salaryValue;
 	private Byte isFormula;
@@ -118,5 +120,13 @@ public class SalaryPeriodEmployeeEntityDTO {
 
 	public void setEntityType(Byte entityType) {
 		this.entityType = entityType;
+	}
+
+	public Long getOriginEntityId() {
+		return originEntityId;
+	}
+
+	public void setOriginEntityId(Long originEntityId) {
+		this.originEntityId = originEntityId;
 	}
 }
