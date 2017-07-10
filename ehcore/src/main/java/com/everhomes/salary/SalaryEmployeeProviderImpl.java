@@ -138,4 +138,9 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 				.and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId)).execute();
 
 	}
+
+	@Override
+	public void deleteSalaryEmployee(SalaryEmployee employee) {
+		getReadWriteDao().delete(employee);
+	}
 }

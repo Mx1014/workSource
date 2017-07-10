@@ -20,4 +20,6 @@ public interface SalaryEmployeeOriginValProvider {
 
 	List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByUserId(String ownerType, Long ownerId, Long userId);
 	List<Object[]> getRelevantNumbersByGroupId(List<Long> salaryGroupIds);
+
+	void deleteSalaryEmployeeValsByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds);
 }

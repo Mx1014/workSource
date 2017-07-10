@@ -21,6 +21,7 @@ import com.everhomes.server.schema.tables.pojos.EhSalaryGroupEntities;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.springframework.util.StringUtils;
 
 @Component
 public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider {
@@ -93,6 +94,28 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 
 		return query.fetchInto(SalaryGroupEntity.class);
 	}
+
+	@Override
+	public SalaryGroupEntity findSalaryGroupEntityByGroupAndOriginId(Long groupId, Long originEntityId) {
+		  List<SalaryGroupEntity> results = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
+				.where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(groupId))
+				.and(Tables.EH_SALARY_GROUP_ENTITIES.ORIGIN_ENTITY_ID.eq(originEntityId))
+				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
+		  if(StringUtils.isEmpty(results) || results.size() ==0 )
+		      return null;
+		  else
+		      return results.get(0);
+	}
+
+	@Override
+	public void deleteSalaryGroupEntityByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds) {
+		getReadWriteContext().delete(Tables.EH_SALARY_GROUP_ENTITIES)
+				.where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryGroupId))
+				.and(Tables.EH_SALARY_GROUP_ENTITIES.ORIGIN_ENTITY_ID.notIn(entityIds)).execute();
+
+	}
+
 	//	按员工批次表导出规则查询
     @Override
     public List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryId) {

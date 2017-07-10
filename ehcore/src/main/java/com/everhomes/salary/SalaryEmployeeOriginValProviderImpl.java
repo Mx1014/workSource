@@ -116,6 +116,14 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
                 .fetchInto(Object[].class);
     }
 
+	@Override
+	public void deleteSalaryEmployeeValsByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds) {
+		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(salaryGroupId))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORIGIN_ENTITY_ID.notIn(entityIds))
+				.execute();
+	}
+
 /*	@Override
 	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByUserId(Long userId){
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)

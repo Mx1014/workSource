@@ -22,4 +22,8 @@ public interface SalaryGroupEntityProvider {
 	void deleteSalaryGroupEntityByGroupId(Long groupId);
 
 	List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long organizationGroupId, Byte code);
+
+	SalaryGroupEntity findSalaryGroupEntityByGroupAndOriginId(Long groupId, Long originEntityId);
+
+	void deleteSalaryGroupEntityByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds);
 }

@@ -143,20 +143,20 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             detail.setContactToken(m.get("contactToken").toString());
             if (m.get("department") != null){
                 List<Map> department = (List<Map>) m.get("department");
-                Map departmentMap = new HashMap<>();
+                Map<Long,String> departmentMap = new HashMap<>();
                 if(department.size() > 0){
                     department.forEach(r ->{
-                        departmentMap.put(r.get("department_id"), r.get("department_name"));
+                        departmentMap.put(Long.valueOf(r.get("department_id").toString()), r.get("department_name").toString());
                     });
                 }
                 detail.setDepartment(departmentMap);
             }
             if (m.get("job_position") != null){
                 List<Map> jobPosition = (List<Map>) m.get("job_position");
-                Map jobPositionMap = new HashMap<>();
+                Map<Long,String> jobPositionMap = new HashMap<>();
                 if(jobPosition.size() > 0){
                     jobPosition.forEach(r ->{
-                        jobPositionMap.put(r.get("job_position_id"), r.get("job_position_name"));
+                        jobPositionMap.put(Long.valueOf(r.get("job_position_id").toString()), r.get("job_position_name").toString());
                     });
                 }
                 detail.setDepartment(jobPositionMap);

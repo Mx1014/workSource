@@ -7,4 +7,7 @@ public class SalaryServiceErrorCode {
     public static final int ERROR_FILE_IS_EMPTY =  100001;   //   没有文件
 
     public static final int ERROR_CONTACTNAME_ISNULL =  100002;   //   姓名为空
+
+    public static final int ERROR_CONTACTTOKEN_ISNULL =  100003;   //   手机号码不存在
+
 }

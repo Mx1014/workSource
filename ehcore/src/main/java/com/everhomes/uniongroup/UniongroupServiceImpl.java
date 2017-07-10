@@ -316,8 +316,9 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public void reallocatedUnion(Long enterpriseId, List<Long> departmentIds, OrganizationMember organizationMember) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //根据层级关系将departmentIds排序
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = 1000000;
+                //根据层级关系将departmentIds排序
         Organization organization = checkOrganization(enterpriseId);
         List<Organization> departments = this.organizationProvider.listOrganizationsByIds(departmentIds);
         //按层级退化
@@ -332,7 +333,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 //        });
         Long groupId = 0L;
         /**判断departmentIds是否已经被分配薪酬组**/
-        for(int i = departmentIds.size()-1; i >= 0; i++){
+        for(int i = departmentIds.size()-1; i >= 0; i--){
             UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId , departmentIds.get(i));
             if(uniongroupConfigures != null){
                 groupId = uniongroupConfigures.getGroupId();
@@ -355,13 +356,13 @@ public class UniongroupServiceImpl implements UniongroupService {
 
             //2 从该集合最后一项开始找起，直到找到应有的薪酬组
             UniongroupConfigures unc = null;
-            for(int i = departs_one.size()-1; i >= 0; i++){
+            for(int i = departs_one.size()-1; i >= 0; i--){
                 Organization _org = departs_one.get(i);
                 while(unc == null){
                     //判断是否在配置表中
                     unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId , _org.getId());
-                    _org = this.organizationProvider.findOrganizationById(departs_one.get(i).getParentId());
-                    if(departs_one.get(i).getParentId() == 0 || unc != null){
+                    _org = this.organizationProvider.findOrganizationById(_org.getParentId());
+                    if(_org == null || unc != null){
                         break;
                     }
                 }
@@ -375,21 +376,26 @@ public class UniongroupServiceImpl implements UniongroupService {
             }
         }
 
-        EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
-        uniongroupMemberDetails.setGroupId(groupId);
-        uniongroupMemberDetails.setGroupType(UniongroupType.SALARYGROUP.getCode());
-        uniongroupMemberDetails.setDetailId(organizationMember.getDetailId());
-        uniongroupMemberDetails.setEnterpriseId(enterpriseId);
-        uniongroupMemberDetails.setTargetType(organizationMember.getTargetType());
-        uniongroupMemberDetails.setTargetId(organizationMember.getTargetId());
-        uniongroupMemberDetails.setNamespaceId(organizationMember.getNamespaceId());
-        uniongroupMemberDetails.setContactName(organizationMember.getContactName());
-        uniongroupMemberDetails.setContactToken(organizationMember.getContactToken());
-
-        //先删除
-        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(organizationMember.getDetailId()));
-        //后保存
-        this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(Collections.singletonList(uniongroupMemberDetails));
+        //找到可以使用的薪酬组id
+        if(groupId != 0){
+            EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
+            uniongroupMemberDetails.setGroupId(groupId);
+            uniongroupMemberDetails.setGroupType(UniongroupType.SALARYGROUP.getCode());
+            uniongroupMemberDetails.setDetailId(organizationMember.getDetailId());
+            uniongroupMemberDetails.setEnterpriseId(enterpriseId);
+            uniongroupMemberDetails.setTargetType(organizationMember.getTargetType());
+            uniongroupMemberDetails.setTargetId(organizationMember.getTargetId());
+            uniongroupMemberDetails.setNamespaceId(namespaceId);
+            uniongroupMemberDetails.setContactName(organizationMember.getContactName());
+            uniongroupMemberDetails.setContactToken(organizationMember.getContactToken());
+            dbProvider.execute((TransactionStatus status) -> {
+                //先删除
+                this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(organizationMember.getDetailId()));
+                //后保存
+                this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(Collections.singletonList(uniongroupMemberDetails));
+                return null;
+            });
+        }
     }
 
     /**校验path是否被pathList中的任意项包含**/

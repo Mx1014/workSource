@@ -205,18 +205,50 @@ public class SalaryServiceImpl implements SalaryService {
             organization.setName(cmd.getSalaryGroupName());
             this.organizationProvider.updateOrganization(organization);
 
-            //  先删除原有字段后添加
-            this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-            AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
-            addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
-            addCommand.setSalaryGroupName(cmd.getSalaryGroupName());
-            addCommand.setOwnerType(cmd.getOwnerType());
-            addCommand.setOwnerId(cmd.getOwnerId());
-            addCommand.setSalaryGroupEntity(cmd.getSalaryGroupEntity().stream().map(r -> {
-                SalaryGroupEntityDTO dto = ConvertHelper.convert(r,SalaryGroupEntityDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
-            AddSalaryGroupResponse response = this.addSalaryGroup(addCommand);
+            AddSalaryGroupResponse response = new AddSalaryGroupResponse();
+            List<SalaryGroupEntityDTO> salaryGroupEntities = new ArrayList<>();
+
+            if (null == cmd.getSalaryGroupEntity()) {
+                return response;
+            }
+            //  记录所有的id
+            List<Long> entityIds = new ArrayList<>();
+            for( SalaryGroupEntityDTO dto: cmd.getSalaryGroupEntity()) {
+                entityIds.add(dto.getOriginEntityId());
+                //  查找对应的字段
+                SalaryGroupEntity entityDB = salaryGroupEntityProvider.findSalaryGroupEntityByGroupAndOriginId(dto.getGroupId(), dto.getOriginEntityId());
+                //  没查找到的时候就创建新的字段
+                if(StringUtils.isEmpty(entityDB)){
+                    SalaryGroupEntity newEntity = ConvertHelper.convert(dto, SalaryGroupEntity.class);
+                    newEntity.setOwnerType(cmd.getOwnerType());
+                    newEntity.setOwnerId(cmd.getOwnerId());
+                    newEntity.setGroupId(cmd.getSalaryGroupId());
+                    salaryGroupEntityProvider.createSalaryGroupEntity(newEntity);
+                }else {
+                    //  查找到的时候则做修改
+                    entityDB.setGroupId(dto.getGroupId());
+                    entityDB.setOriginEntityId(dto.getOriginEntityId());
+                    entityDB.setDefaultFlag(dto.getDefaultFlag());
+                    entityDB.setType(dto.getType());
+                    entityDB.setCategoryId(dto.getCategoryId());
+                    entityDB.setCategoryName(dto.getCategoryName());
+                    entityDB.setName(dto.getName());
+                    entityDB.setEditableFlag(dto.getEditableFlag());
+                    entityDB.setNumberType(dto.getNumberType());
+                    entityDB.setDefaultValue(dto.getDefaultValue());
+                    entityDB.setNeedCheck(dto.getNeedCheck());
+                    entityDB.setDefaultOrder(dto.getDefaultOrder());
+                    entityDB.setVisibleFlag(dto.getVisibleFlag());
+                    entityDB.setTemplateName(dto.getTemplateName());
+                    salaryGroupEntityProvider.updateSalaryGroupEntity(entityDB);
+                }
+                salaryGroupEntities.add(dto);
+            }
+
+            //  最后删除多余的字段
+            salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
+            salaryEmployeeOriginValProvider.deleteSalaryEmployeeValsByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
+            response.setSalaryGroupEntity(salaryGroupEntities);
             return response;
         }
 		return null;
@@ -239,6 +271,23 @@ public class SalaryServiceImpl implements SalaryService {
 
             //  删除个人设定中与薪酬组相关的字段
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(cmd.getSalaryGroupId());
+
+            // 删除未发放的salaryGroup  employee 和vals
+            List<SalaryGroup> salaryGroups = salaryGroupProvider.listUnsendSalaryGroup(cmd.getSalaryGroupId());
+            if (null == salaryGroups) {
+                return;
+            }
+            for (SalaryGroup salaryGroup : salaryGroups) {
+                List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(salaryGroup.getId());
+                if (null == salaryEmployees) {
+                    continue;
+                }
+                for (SalaryEmployee employee : salaryEmployees) {
+                    salaryEmployeePeriodValProvider.deletePeriodVals(employee.getId());
+                    salaryEmployeeProvider.deleteSalaryEmployee(employee);
+                }
+                salaryGroupProvider.deleteSalaryGroup(salaryGroup);
+            }
         }
     }
 
@@ -349,152 +398,117 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
 
-        /*//  1.将前端信息传递给组织架构的接口获取相关信息
-        ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
-        command.setOwnerId(cmd.getOwnerId());
-        if(!StringUtils.isEmpty(cmd.getDepartmentId()))
-        command.setDepartmentId(cmd.getDepartmentId());
-        if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-            command.setGroupId(cmd.getSalaryGroupId());
-            command.setGroupType(UniongroupType.SALARYGROUP.getCode());
-        }
-        if(!StringUtils.isEmpty(cmd.getKeywords()))
-        command.setKeywords(cmd.getKeywords());
-        command.setPageAnchor(Long.valueOf("0"));
-        command.setPageSize(cmd.getPageSize());
+        //  当没有选取薪酬组的时候，调用组织架构原有接口
+        if (StringUtils.isEmpty(cmd.getSalaryGroupId())) {
+            //  1.将前端信息传递给组织架构的接口获取相关信息
+            ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+            command.setOrganizationId(cmd.getOwnerId());
+            if (!StringUtils.isEmpty(cmd.getDepartmentId()))
+                command.setOrganizationId(cmd.getDepartmentId());
+            if (!StringUtils.isEmpty(cmd.getKeywords()))
+                command.setKeywords(cmd.getKeywords());
+//            command.setPageAnchor(Long.valueOf("0"));
+            command.setPageSize(20);
+            //  2.查询所有人员
+            ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command, false);
 
-        //  2.查询所有人员
-        List<UniongroupMemberDetail> results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
-        //  3.查询所有批次
-        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
+            //  3.查询所有批次
+            List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
-        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+            ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
 
-        if (!StringUtils.isEmpty(results)) {
-            response.setSalaryEmployeeDTO(results.stream().map(r -> {
-                SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
-                String department = "";
-                String jobPosition = "";
-                dto.setUserId(r.getTargetId());
-                dto.setDetailId(r.getDetailId());
-                dto.setContactName(r.getContactName());
-                dto.setSalaryGroupId(r.getGroupId());
-                if(!StringUtils.isEmpty(r.getEmployeeNo()))
-                dto.setEmployeeNo(r.getEmployeeNo());
-                if (!StringUtils.isEmpty(r.getDepartment()))
-                    for (Long k : r.getDepartment().keySet()) {
-                        department += r.getDepartment().get(k);
+            if (!StringUtils.isEmpty(results)) {
+                response.setSalaryEmployeeDTO(results.getMembers().stream().map(r -> {
+                    SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
+                    dto.setUserId(r.getTargetId());
+                    dto.setDetailId(r.getDetailId());
+                    dto.setContactName(r.getContactName());
+                    dto.setSalaryGroupId(r.getGroupId());
+                    //  拼接薪酬组名称
+                    if (!StringUtils.isEmpty(organizations)) {
+                        organizations.forEach(s -> {
+                            if (s.getId().equals(r.getGroupId()))
+                                dto.setSalaryGroupName(s.getName());
+                        });
                     }
-                if (!StringUtils.isEmpty(r.getJobPosition()))
-                    for (Long k : r.getJobPosition().keySet()) {
-                        jobPosition += r.getJobPosition().get(k);
-                    }
-                dto.setDepartment(department);
-                dto.setJobPosition(jobPosition);
-                //  拼接薪酬组名称
-                for(int i=0; i<organizations.size(); i++){
-                    if (organizations.get(i).getId().equals(r.getGroupId())) {
-                        dto.setSalaryGroupName(organizations.get(i).getName());
-                        break;
-                    }
-                }
-                return dto;
-            }).collect(Collectors.toList()));
-        }*/
-
-/*        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-        command.setKeywords(cmd.getKeywords());
-        command.setOrganizationId(cmd.getOrganizationId());
-        command
-        List<OrganizationMember> members = this.organizationService.listOrganizationPersonnels()
-        //  2.通过对实发工资的判断来拼接字符串，反映是否设置了工资明细
-        //  一次性读取所有userid的实发工资值然后做拼接
-
-//        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();*/
-
-        //  1.将前端信息传递给组织架构的接口获取相关信息
-        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-        command.setOrganizationId(cmd.getOwnerId());
-
-        //  2.查询所有人员
-        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
-
-        //  3.查询所有批次
-        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
-
-        List<Long> uniongroupDetailIds = new ArrayList<>();
-
-        if(cmd.getSalaryGroupId() != null){
-            //将前端信息传递给组织架构的接口获取相关信息
-            ListUniongroupMemberDetailsWithConditionCommand uniongroup_command = new ListUniongroupMemberDetailsWithConditionCommand();
+                    return dto;
+                }).collect(Collectors.toList()));
+            }
+            return response;
+        } else {
+            //  当选取了薪酬组的时候，则调用 lei.lv 新接口
+            //  1.将前端信息传递给组织架构的接口获取相关信息
+            ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
+            command.setOwnerId(cmd.getOwnerId());
+            if (!StringUtils.isEmpty(cmd.getDepartmentId()))
+                command.setDepartmentId(cmd.getDepartmentId());
             if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-                uniongroup_command.setGroupId(cmd.getSalaryGroupId());
+                command.setGroupId(cmd.getSalaryGroupId());
+                command.setGroupType(UniongroupType.SALARYGROUP.getCode());
             }
             if (!StringUtils.isEmpty(cmd.getKeywords()))
-                uniongroup_command.setKeywords(cmd.getKeywords());
-            if(!StringUtils.isEmpty(cmd.getDepartmentId()))
-                uniongroup_command.setDepartmentId(cmd.getDepartmentId());
-            uniongroup_command.setGroupType(UniongroupType.SALARYGROUP.getCode());
-            uniongroup_command.setOwnerId(cmd.getOwnerId());
-            uniongroup_command.setPageAnchor(Long.valueOf("0"));
-            uniongroup_command.setPageSize(cmd.getPageSize());
+                command.setKeywords(cmd.getKeywords());
+            command.setPageAnchor(Long.valueOf("0"));
+            command.setPageSize(20);
 
-            //  查询关联的人员
-            List<UniongroupMemberDetail> uniongroupMemberDetails = this.uniongroupService.listUniongroupMemberDetailsWithCondition(uniongroup_command);
+            //  2.查询所有人员
+            List<UniongroupMemberDetail> results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
+            //  3.查询所有批次
+            List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
 
-            // 获取关联人员detailId的集合
-            uniongroupDetailIds.addAll(uniongroupMemberDetails.stream().map(r ->{return r.getDetailId();}).collect(Collectors.toList()));
-        }
+            ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
 
+            if (!StringUtils.isEmpty(results)) {
+                response.setSalaryEmployeeDTO(results.stream().map(r -> {
+                    SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
+                    String department = "";
+                    String jobPosition = "";
+                    dto.setUserId(r.getTargetId());
+                    dto.setDetailId(r.getDetailId());
+                    dto.setContactName(r.getContactName());
+                    dto.setSalaryGroupId(r.getGroupId());
+                    if (!StringUtils.isEmpty(r.getEmployeeNo()))
+                        dto.setEmployeeNo(r.getEmployeeNo());
+                    if (!StringUtils.isEmpty(r.getDepartment())) {
+                        for (Long k : r.getDepartment().keySet()) {
+//                            department += r.getDepartment().get(k);
+                            department += (r.getDepartment().get(k) + ",");
+                        }
+                        department = department.substring(0,department.length()-1);
 
-        //过滤
-        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
-
-        List<OrganizationMemberDTO> dtos = new ArrayList<>();
-        if (!StringUtils.isEmpty(results)) {
-            if (uniongroupDetailIds.size() > 0) {
-                dtos = results.getMembers().stream().filter(r -> {
-                    return uniongroupDetailIds.contains(r.getDetailId());
-                }).collect(Collectors.toList());
-            } else {
-                dtos = results.getMembers();
+                    }
+                    if (!StringUtils.isEmpty(r.getJobPosition())) {
+                        for (Long k : r.getJobPosition().keySet()) {
+//                            jobPosition += r.getJobPosition().get(k);
+                            jobPosition += (r.getJobPosition().get(k) + ",");
+                        }
+                        jobPosition = jobPosition.substring(0,jobPosition.length()-1);
+                    }
+                    dto.setDepartment(department);
+                    dto.setJobPosition(jobPosition);
+                    //  拼接薪酬组名称
+                    for (int i = 0; i < organizations.size(); i++) {
+                        if (organizations.get(i).getId().equals(r.getGroupId())) {
+                            dto.setSalaryGroupName(organizations.get(i).getName());
+                            break;
+                        }
+                    }
+                    return dto;
+                }).collect(Collectors.toList()));
             }
-
-            response.setSalaryEmployeeDTO(dtos.stream().map(r -> {
-                SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
-                dto.setUserId(r.getTargetId());
-                dto.setDetailId(r.getDetailId());
-                dto.setContactName(r.getContactName());
-                dto.setSalaryGroupId(r.getGroupId());
-                //  拼接薪酬组名称
-                if (!StringUtils.isEmpty(organizations)) {
-                    organizations.forEach(s -> {
-                        if (s.getId().equals(r.getGroupId()))
-                            dto.setSalaryGroupName(s.getName());
-                    });
-                }
-                return dto;
-            }).collect(Collectors.toList()));
+            return response;
         }
-
-        return response;
     }
 
     @Override
     public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {
 
-            List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
-        //   查询个人对应的批次
-             /*   Long salaryGroupId;
-        if(StringUtils.isEmpty(cmd.getSalaryGroupId()))
-            salaryGroupId = this.organizationService.getSalaryGroupId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
-        else
-            salaryGroupId = cmd.getSalaryGroupId();*/
+        List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
 
         //  获取对应批次的项目字段
         List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
         //  获取个人的项目字段
-        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
+        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(), cmd.getOwnerType(), cmd.getOwnerId());
 
         //  若没有关联批次则直接返回空
         if (!salaryGroupEntities.isEmpty()) {
@@ -503,6 +517,11 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setSalaryGroupId(r.getGroupId());
                 dto.setUserId(cmd.getUserId());
                 dto.setUserDetailId(cmd.getDetailId());
+                dto.setType(r.getType());
+                if (!StringUtils.isEmpty(r.getEditableFlag()))
+                    dto.setEditableFlag(r.getEditableFlag());
+                if (!StringUtils.isEmpty(r.getNumberType()))
+                    dto.setNumberType(r.getNumberType());
                 dto.setGroupEntityId(r.getId());
                 dto.setOriginEntityId(r.getOriginEntityId());
                 dto.setGroupEntityName(r.getName());
@@ -550,54 +569,43 @@ public class SalaryServiceImpl implements SalaryService {
 
         User user = UserContext.current().getUser();
         if(!cmd.getEmployeeOriginVal().isEmpty()){
-            Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
-            Long detailId = cmd.getEmployeeOriginVal().get(0).getUserDetailId();
-            Long groupId = cmd.getEmployeeOriginVal().get(0).getSalaryGroupId();
 
             //  添加到组织架构的薪酬组中，没有增加有则覆盖
             AddToOrganizationSalaryGroupCommand command = new AddToOrganizationSalaryGroupCommand();
             command.setOwnerId(cmd.getOwnerId());
             command.setOwnerType(cmd.getOwnerType());
-            command.setSalaryGroupId(groupId);
+            command.setSalaryGroupId(cmd.getSalaryGroupId());
             List<Long> detailIds = new ArrayList<>();
-            detailIds.add(detailId);
+            detailIds.add(cmd.getUserDetailId());
             command.setDetailIds(detailIds);
             this.addToOrganizationSalaryGroup(command);
-/*
-            SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
-            command.setEnterpriseId(cmd.getOwnerId());
-            command.setGroupType(UniongroupType.SALARYGROUP.getCode());
-            command.setGroupId(groupId);
-            List<UniongroupTarget> targets = new ArrayList<>();
-            UniongroupTarget target = new UniongroupTarget(userId,UniongroupTargetType.MEMBERDETAIL.getCode());
-            targets.add(target);
-            command.setTargets(targets);
-            this.uniongroupService.saveUniongroupConfigures(command);
-*/
 
             //  添加到薪酬组的个人设定中
-            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId,cmd.getOwnerType(),cmd.getOwnerId());
+            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
             if(originVals.isEmpty()){
                 cmd.getEmployeeOriginVal().stream().forEach(r -> {
-                    this.createSalaryEmployeeOriginVal(r, cmd.getOwnerType(),cmd.getOwnerId());
+                    this.createSalaryEmployeeOriginVal(r, cmd.getOwnerType(),cmd.getOwnerId(),
+                            cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getUserDetailId());
                 });
             }else{
-                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(groupId,userId,cmd.getOwnerType(),cmd.getOwnerId());
+                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
                 cmd.getEmployeeOriginVal().stream().forEach(s ->{
-                    this.createSalaryEmployeeOriginVal(s,cmd.getOwnerType(),cmd.getOwnerId());
+                    this.createSalaryEmployeeOriginVal(s, cmd.getOwnerType(),cmd.getOwnerId(),
+                            cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getUserDetailId());
                 });
             }
         }
     }
 
-    private void createSalaryEmployeeOriginVal(SalaryEmployeeOriginValDTO dto, String ownerType, Long ownerId) {
+    private void createSalaryEmployeeOriginVal(
+            SalaryEmployeeOriginValDTO dto, String ownerType, Long ownerId,
+            Long groupId, Long userId, Long userDetailId) {
         SalaryEmployeeOriginVal originVal = new SalaryEmployeeOriginVal();
-        originVal.setUserDetailId(dto.getUserDetailId());
         originVal.setOwnerType(ownerType);
         originVal.setOwnerId(ownerId);
-        originVal.setGroupId(dto.getSalaryGroupId());
-        originVal.setUserId(dto.getUserId());
-        originVal.setUserDetailId(dto.getUserDetailId());
+        originVal.setGroupId(groupId);
+        originVal.setUserId(userId);
+        originVal.setUserDetailId(userDetailId);
         originVal.setGroupEntityId(dto.getGroupEntityId());
         originVal.setGroupEntityName(dto.getGroupEntityName());
         originVal.setOriginEntityId(dto.getOriginEntityId());
@@ -644,11 +652,7 @@ public class SalaryServiceImpl implements SalaryService {
     public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
-/*            //  根据批次 id 查找批次具体内容
-            GetSalaryGroupCommand command = new GetSalaryGroupCommand();
-            command.setSalaryGroupId(cmd.getSalaryGroupId());
-            GetSalaryGroupResponse response = this.getSalaryGroup(command);*/
-
+            //  根据批次 id 查找批次具体内容
             List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(cmd.getSalaryGroupId());
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
 
@@ -659,11 +663,8 @@ public class SalaryServiceImpl implements SalaryService {
 
     }
 
+    //  创建 excel
     private XSSFWorkbook creatXSSFSalaryGroupFile( List<SalaryGroupEntity> results, String name){
-
-/*        List<SalaryGroupEntityDTO> entityDTOs = response.getSalaryGroupEntity();
-
-        List<SalaryGroupEntity>*/
 
         XSSFWorkbook wb = new XSSFWorkbook();
         String sheetName ="Module";
@@ -700,8 +701,9 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
 	@Override
-	public ImportFileTaskDTO importSalaryGroup(MultipartFile mfile,
-                                               Long userId, ImportSalaryGroupCommand cmd) {
+	public ImportFileTaskDTO importSalaryGroup(
+	        MultipartFile mfile, Long userId, ImportSalaryGroupCommand cmd) {
+
         ImportFileTask task = new ImportFileTask();
         try {
 
@@ -710,8 +712,8 @@ public class SalaryServiceImpl implements SalaryService {
 
             if(resultList.isEmpty()){
                 LOGGER.error("File content is empty");
-/*                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
-                        "File content is empty");*/
+                throw RuntimeErrorException.errorWith(SalaryServiceErrorCode.SCOPE, SalaryServiceErrorCode.ERROR_FILE_IS_EMPTY,
+                        "File content is empty");
             }
             task.setOwnerType(cmd.getOwnerType());
             task.setOwnerId(cmd.getOwnerId());
@@ -730,7 +732,8 @@ public class SalaryServiceImpl implements SalaryService {
                         response.setTitle(datas.get(0));
                         datas.remove(0);
                     }
-                    List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> results = importSalaryFiles(datas, salaryGroupEntities, userId, cmd);
+                    List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> results = importSalaryFiles(datas,
+                            salaryGroupEntities, userId, cmd, UserContext.getCurrentNamespaceId());
                     response.setTotalCount((long) datas.size());
                     response.setFailCount((long) results.size());
                     response.setLogs(results);
@@ -744,13 +747,14 @@ public class SalaryServiceImpl implements SalaryService {
         return null;
 	}
 
+	//  解析 excel 表格
 	private List<ImportSalaryEmployeeOriginValDTO> handleImportSalaryFiles(
 	        List list, Long groupId, List<SalaryGroupEntity> salaryGroupEntities){
 
         List<ImportSalaryEmployeeOriginValDTO> datas = new ArrayList<>();
 
-        salaryGroupEntities.add(0,new SalaryGroupEntity("姓名"));
-        salaryGroupEntities.add(1,new SalaryGroupEntity("手机号"));
+        /*salaryGroupEntities.add(0,new SalaryGroupEntity("姓名"));
+       salaryGroupEntities.add(1,new SalaryGroupEntity("手机号"));*/
 
         for(int i=1; i<list.size(); i++){
             ImportSalaryEmployeeOriginValDTO data = new ImportSalaryEmployeeOriginValDTO();
@@ -782,16 +786,16 @@ public class SalaryServiceImpl implements SalaryService {
 
     private List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> importSalaryFiles(
             List<ImportSalaryEmployeeOriginValDTO> datas, List<SalaryGroupEntity> salaryGroupEntities,
-            Long userId, ImportSalaryGroupCommand cmd) {
+            Long userId, ImportSalaryGroupCommand cmd, Integer namespaceId) {
 
 	    ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
         List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> errorDataLogs = new ArrayList<>();
 
         //  读取薪酬组列表中所有的手机号以及对应的userId
+        List<Object[]> users = this.uniongroupService.listUniongroupMemberDetailsInfo(
+                namespaceId,cmd.getSalaryGroupId(),cmd.getOwnerId());
 
-//        List<String> contactTokens = this.xxx
-        List<Long[]> users = new ArrayList<>();
-
+        //  校验数据，成功则导入
         for ( ImportSalaryEmployeeOriginValDTO data : datas){
 	        log = this.checkSalaryGroup(data,users);
             if (log != null) {
@@ -805,50 +809,67 @@ public class SalaryServiceImpl implements SalaryService {
 
     }
 
-    private ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> checkSalaryGroup(ImportSalaryEmployeeOriginValDTO data, List<Long[]> users){
+    private ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> checkSalaryGroup(
+            ImportSalaryEmployeeOriginValDTO data, List<Object[]> users){
 
         ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
-        if(StringUtils.isEmpty(data.getSalaryEmployeeVal().get(1))){
+
+        //  get(0)是姓名
+        if(StringUtils.isEmpty(data.getSalaryEmployeeVal().get(0))){
             LOGGER.warn("Organization member contactName is null. data = {}", data);
             log.setData(data);
             log.setErrorLog("Organization member contactName is null");
             log.setCode(SalaryServiceErrorCode.ERROR_CONTACTNAME_ISNULL);
             return log;
+        }
+
+        //  get(1)是手机号
+        if(StringUtils.isEmpty(data.getSalaryEmployeeVal().get(1))){
+            LOGGER.warn("Organization member contactToken is null. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member contactToken is null");
+            log.setCode(SalaryServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
+            return log;
         }else {
-            //  直接查与薪酬组相关的手机号列表中是否存在该号码，在导入的时候一次性把所有号码读出来
+            //  直接查与薪酬组相关的手机号列表中是否存在该号码
+            //  存在则将读取的 userId 与 detailId 存入data列表中，便于之后薪酬设定的操作
+            //  不存在则返回错误
             for(int i=0; i<users.size(); i++) {
                 if (data.getSalaryEmployeeVal().get(1).equals(users.get(i)[0])) {
-                    data.getSalaryEmployeeVal().add(1, String.valueOf(users.get(i)[1]));
+                    //  取 userId(targetId) 取代姓名
+                    data.getSalaryEmployeeVal().set(0, String.valueOf(users.get(i)[1]));
+                    //  取 detailId 取代手机号
+                    data.getSalaryEmployeeVal().set(1,String.valueOf(users.get(i)[2]));
                     return null;
                 }
             }
-
             //  未比对成功则失败
-            LOGGER.warn("Organization member contactName is null. data = {}", data);
+            LOGGER.warn("Organization member contactToken is null. data = {}", data);
             log.setData(data);
-            log.setErrorLog("Organization member contactName is null");
-            log.setCode(SalaryServiceErrorCode.ERROR_CONTACTNAME_ISNULL);
+            log.setErrorLog("Organization member contactToken is null");
+            log.setCode(SalaryServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
             return log;
         }
     }
 
     private void saveSalaryGroup(ImportSalaryEmployeeOriginValDTO data, List<SalaryGroupEntity> salaryGroupEntities,
                                  Long groupId, Long organizationId, String ownerType, Long ownerId) {
-        for(int i=0; i<data.getSalaryEmployeeVal().size();i++){
+        UpdateSalaryEmployeesCommand command = new UpdateSalaryEmployeesCommand();
+        command.setOwnerId(ownerId);
+        command.setOwnerType(ownerType);
+        List<SalaryEmployeeOriginValDTO> employeeOriginVals = new ArrayList<>(0);
+        for (int i = 0; i < salaryGroupEntities.size(); i++) {
             SalaryEmployeeOriginValDTO dto = new SalaryEmployeeOriginValDTO();
-            dto.setUserId(Long.valueOf(data.getSalaryEmployeeVal().get(1)));
-            dto.setGroupEntityName(salaryGroupEntities.get(i).getName());
-            dto.setSalaryGroupId(groupId);
-            dto.setGroupEntityId(salaryGroupEntities.get(i).getId());
+            dto.setSalaryGroupId(salaryGroupEntities.get(i).getGroupId());
+            dto.setUserId(Long.valueOf(data.getSalaryEmployeeVal().get(0)));
+            dto.setUserDetailId(Long.valueOf(data.getSalaryEmployeeVal().get(1)));
+            dto.setGroupEntityId(salaryGroupEntities.get(i).getCategoryId());
+            dto.setGroupEntityName(salaryGroupEntities.get(i).getCategoryName());
             dto.setOriginEntityId(salaryGroupEntities.get(i).getOriginEntityId());
-            dto.setSalaryValue(data.getSalaryEmployeeVal().get(i+2));
-            this.createSalaryEmployeeOriginVal(dto,ownerType,ownerId);
+            dto.setSalaryValue(data.getSalaryEmployeeVal().get(i + 2));
+            employeeOriginVals.add(dto);
         }
-/*        data.getSalaryEmployeeVal().forEach(r -> {
-            SalaryEmployeeOriginValDTO dto = new SalaryEmployeeOriginValDTO();
-            dto.setGroupEntityName();
-        });*/
-
+        command.setEmployeeOriginVal(employeeOriginVals);
     }
 
 	@Override
@@ -1114,6 +1135,11 @@ public class SalaryServiceImpl implements SalaryService {
 					// this.groupProvider.updateGroup(group);
 
 			SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
+            if (null == salaryGroup) {
+                LOGGER.error("salaryGroup cannot found + "+cmd);
+                throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,
+                        SalaryConstants.ERROR_SALARY_GROUP_NOTFOUND,"salary  period group id wrong can not found ");
+            }
 			if(cmd.getSendTime() == null){
 				salaryGroup.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				salaryGroup.setStatus(SalaryGroupStatus.SENDED.getCode());
@@ -1174,9 +1200,10 @@ public class SalaryServiceImpl implements SalaryService {
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("emailContent", emailContent);
 			map.put("entityTable", entityTable);
-			String Content = localeTemplateService.getLocaleTemplateString(SalaryConstants.SEND_MAIL_SCOPE,
-					SalaryConstants.SEND_MAIL_CODE, "zh-CN", map, "");
-			handler.sendMail(namespaceId, null,toAddress, emailSubject,Content);
+			String content = localeTemplateService.getLocaleTemplateString(SalaryConstants.SEND_MAIL_SCOPE,
+					SalaryConstants.SEND_MAIL_CODE, "zh_CN", map, "");
+            LOGGER.debug("meailcontent \n "+emailContent+"\ntable"+entityTable+ "\n finalContent"+content);
+			handler.sendMail(namespaceId, null,toAddress, emailSubject,content);
 
 		}catch (Exception e){
 			LOGGER.debug("had a error in send message !!!!!++++++++++++++++++++++",e);
@@ -1188,22 +1215,20 @@ public class SalaryServiceImpl implements SalaryService {
 		sb.append("<table>");
 		if(null != groupEntities){
 			sb.append("<tr>");
-			groupEntities.stream().map(r->{
-				sb.append("<th>");
-				sb.append(r.getName());
-				sb.append("</th>");
-				return null;
-			});
+            for (SalaryGroupEntity r : groupEntities) {
+                sb.append("<th>");
+                sb.append(r.getName());
+                sb.append("</th>");
+            }
 			sb.append("</tr>");
 			sb.append("<tr>");
-			groupEntities.stream().map(r->{
-				sb.append("<tr>");
+            for (SalaryGroupEntity r : groupEntities) {
+				sb.append("<td>");
 				SalaryEmployeePeriodVal val = getSalaryEmployeePeriodVal(r.getId(),employeeEntityVals);
 				if(null != val)
 					sb.append(val.getSalaryValue());
-				sb.append("</tr>");
-				return null;
-			});
+				sb.append("</td>");
+			}
 			sb.append("</tr>");
 		}
 		sb.append("</table>");
@@ -1288,9 +1313,11 @@ public class SalaryServiceImpl implements SalaryService {
                 List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals = new ArrayList<>();
                 //3.循环每一个批次设置的字段项，给他做成本期的periodVal 如果entity不是计算公式就设置值，如果是公式就空
 				for (SalaryGroupEntity entity : salaryGroupEntities) {
+                    //生成 period Val
 					SalaryEmployeePeriodVal val = new SalaryEmployeePeriodVal();
                     val.setOwnerType(entity.getOwnerType());
 					val.setOwnerId(entity.getOwnerId());
+                    val.setOriginEntityId(entity.getOriginEntityId());
 					val.setGroupEntityId(entity.getId());
 					val.setSalaryEmployeeId(employee.getId());
                     val.setGroupEntityName(entity.getName());
@@ -1506,20 +1533,20 @@ public class SalaryServiceImpl implements SalaryService {
         XSSFWorkbook wb = new XSSFWorkbook();
         String sheetName ="Module";
         XSSFSheet sheet = wb.createSheet(sheetName);
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, 12));
-        XSSFCellStyle style = wb.createCellStyle();
-        Font font = wb.createFont();
-        font.setFontHeightInPoints((short) 20);
-        font.setFontName("Courier New");
+//        sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, 12));
+//        XSSFCellStyle style = wb.createCellStyle();
+//        Font font = wb.createFont();
+//        font.setFontHeightInPoints((short) 20);
+//        font.setFontName("Courier New");
 
-        style.setFont(font);
+//        style.setFont(font);
 
-        XSSFCellStyle titleStyle = wb.createCellStyle();
-        titleStyle.setFont(font);
-        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+//        XSSFCellStyle titleStyle = wb.createCellStyle();
+//        titleStyle.setFont(font);
+//        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
 
         //  创建标题
-        createXSSFSalaryHistoryHead(sheet, style);
+        createXSSFSalaryHistoryHead(sheet);
 
         createXSSFSalaryHistoryRows(sheet, salaryPeriodEmployees);
         return wb;
@@ -1534,16 +1561,19 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(dto.getDepartments());
             row.createCell(++i).setCellValue(dto.getSalaryPeriod());
             row.createCell(++i).setCellValue(dto.getSalaryGroupName());
-            row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
+            if(null != dto.getPaidMoney())
+                row.createCell(++i).setCellValue("");
+            else
+                row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
 
         }
     }
 
-    private void createXSSFSalaryHistoryHead(XSSFSheet sheet,  XSSFCellStyle style) {
+    private void createXSSFSalaryHistoryHead(XSSFSheet sheet) {
         int rowNum = 0;
 
         XSSFRow row = sheet.createRow(rowNum++);
-        row.setRowStyle(style);
+//        row.setRowStyle(style);
         row.createCell(0).setCellValue("员工编号");
         row.createCell(1).setCellValue("姓名");
         row.createCell(2).setCellValue("部门");
@@ -1566,7 +1596,13 @@ public class SalaryServiceImpl implements SalaryService {
 		coordinationProvider.getNamedLock(CoordinationLocks.SALARY_GROUP_LOCK.getCode()+cmd.getSalaryPeriodGroupId())
 				.enter(() -> {
 					SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
-					if (SalaryGroupStatus.WAIT_FOR_SEND.getCode().equals(salaryGroup.getStatus())){
+                    if (null == salaryGroup) {
+                        LOGGER.error("salaryGroup cannot found + "+cmd);
+
+                        throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,
+                                SalaryConstants.ERROR_SALARY_GROUP_NOTFOUND,"salary  period group id wrong can not found ");
+                    }
+                    if (SalaryGroupStatus.WAIT_FOR_SEND.getCode().equals(salaryGroup.getStatus())){
 						salaryGroup.setSendTime(null);
 						salaryGroup.setStatus(SalaryGroupStatus.CHECKED.getCode());
 						salaryGroupProvider.updateSalaryGroup(salaryGroup);
