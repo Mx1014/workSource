@@ -179,7 +179,9 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 			
 			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 			if(member != null) {
-				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
+				code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
+				String notifyText = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+				sendMessageToUser(member.getTargetId(), notifyText);
 			}
 			
 			sendEmail(serviceOrg.getEmail(), title, notifyTextForOrg,stringAttementList);

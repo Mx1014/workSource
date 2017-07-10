@@ -23,6 +23,7 @@ import java.util.List;
  */
 public interface UserService {
     SignupToken signup(SignupCommand cmd, HttpServletRequest request);
+
     UserIdentifier findIdentifierByToken(Integer namespaceId, SignupToken signupToken);
     void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request);
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
@@ -165,4 +166,13 @@ public interface UserService {
      * @return
      */
     MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
+
+    SearchUsersResponse searchUsers(SearchUsersCommand cmd);
+
+    /**
+     * 检查短信黑名单
+     * @param smsAction     标识是从哪里发出的短信，目前没什么用
+     * @param identifierToken   手机号
+     */
+    void checkSmsBlackList(String smsAction, String identifierToken);
 }

@@ -2,13 +2,18 @@
 package com.everhomes.acl;
 
 import java.util.List;
+import java.util.Map;
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 
 
 public interface WebMenuPrivilegeProvider {
 	
 	List<WebMenu> listWebMenuByType(String type);
+
+	List<WebMenu> listWebMenuByType(String type, List<String> categories, String path, List<Long> moduleIds);
 	
 	List<WebMenuPrivilege> listWebMenuByPrivilegeIds(List<Long> privilegeIds,WebMenuPrivilegeShowFlag showFlag);
 	
@@ -23,5 +28,27 @@ public interface WebMenuPrivilegeProvider {
 	List<WebMenuScope> listWebMenuScopeByOwnerId(String ownerType, Long ownerId);
 
 	List<WebMenuPrivilege> listWebMenuPrivilegeByMenuId(Long menuId);
+
+	//add by Janson
+	Long createWebMenu(WebMenu obj);
+
+	//add by Janson
+	void updateWebMenu(WebMenu obj);
+
+	//add by Janson
+	void deleteWebMenu(WebMenu obj);
+
+	//add by Janson
+	WebMenu getWebMenuById(Long id);
+
+	//add by Janson
+	List<WebMenu> queryWebMenus(ListingLocator locator, int count,
+			ListingQueryBuilderCallback queryBuilderCallback);
+
+	Long nextId();
+
+	void createWebMenus(List<WebMenu> objs);
+
+	Map<Long, WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId);
 	
 }
