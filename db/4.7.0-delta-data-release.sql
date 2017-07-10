@@ -647,3 +647,8 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
+	
+-- 星商会 物业管理后台增加表单管理菜单 add by sfyan 20170710
+SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
+insert into `eh_web_menu_scopes` (`id`, `menu_id`,`owner_type`, `owner_id`,`apply_policy`) values ((@menu_scope_id := @menu_scope_id + 1),50900,'EhNamespaces',999981,2);
+
