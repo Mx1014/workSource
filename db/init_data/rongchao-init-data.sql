@@ -7963,3 +7963,184 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'HOT_LINE', '客服', 'cs://1/image/aW1hZ2UvTVRwaE5XUXhNakZqTm1VeFptVTNNMlF4TVdRNE5UQTJZMkptWVdSaVpEUTFPUQ', 1, 1, 45, '', 60, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'default', 0, NULL, NULL, 0, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'CONTACTS', '通讯录', 'cs://1/image/aW1hZ2UvTVRwak56SXhaRGd3WTJGbE0yVTJZams0TkRJNE1UWm1NRFZrT0dWaVpHTmtaUQ', 1, 1, 46, '', 70, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'default', 0, NULL, NULL, 0, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999975, 0, 0, 0, '/home', 'Bizs', 'MORE', '更多', 'cs://1/image/aW1hZ2UvTVRvM016VTVaRFprWXpabFlUWXpaV1kwTUdNeU1UVTNPRE16Tm1SaVpURXhPQQ', 1, 1, 1, '{"itemLocation":"/home","itemGroup":"Bizs"}', 100, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'default', 0, NULL, NULL, 0, NULL);
+
+
+-- start 荣超 by dengs,20170710
+-- 添加龙岗南山区
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
+	VALUES (14824, 18161, '南山区', 'NANSHANQU', 'NSQ', '/广东/深圳市/南山区', '3', '3', NULL, '0755', '2', '0', 999975);
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
+	VALUES (14825, 18161, '龙岗区', 'LONGGANGQU', 'NGQ', '/广东/深圳市/龙岗区', '3', '3', NULL, '0755', '2', '0', 999975);
+
+-- 1 add START 荣超商务中心
+SET @feedback_forum_1_id = 190703;   -- 小区意见反馈论坛
+SET @community_forum_1_id = 190704; -- 小区论坛
+set @eh_community_1_id = 240111044331050380; 
+-- 加论坛
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_1_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超商务中心论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_1_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超商务中心意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+-- 加园区
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@eh_community_1_id, UUID(), 18161, '深圳市',  18162, '福田区', '荣超商务中心', '荣超中心', '益田路6003号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_1_id, @feedback_forum_1_id, UTC_TIMESTAMP(), 999975);
+SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`); 
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@eh_community_geopoints_id := @eh_community_geopoints_id + 1), @eh_community_1_id, '', 114.06197, 22.548803, 'ws1078ckk991');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1023455, @eh_community_1_id);
+SET @eh_namespace_resources_id = (SELECT MAX(id) FROM `eh_namespace_resources`); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@eh_namespace_resources_id := @eh_namespace_resources_id + 1), 999975, 'COMMUNITY', @eh_community_1_id, UTC_TIMESTAMP());	
+-- 1 add END
+-- 2 add START 国际商会大厦
+SET @feedback_forum_2_id = 190705;   -- 小区意见反馈论坛
+SET @community_forum_2_id = 190706; -- 小区论坛
+set @eh_community_2_id = 240111044331050381; 
+-- 加论坛
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_2_id, UUID(), 999975, 2, 'EhGroups', 0,'国际商会大厦论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_2_id, UUID(), 999975, 2, 'EhGroups', 0,'国际商会大厦意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+-- 加园区
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@eh_community_2_id, UUID(), 18161, '深圳市',  18162, '福田区', '国际商会大厦', '', '福华一路138号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_2_id, @feedback_forum_2_id, UTC_TIMESTAMP(), 999975);
+SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`); 
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@eh_community_geopoints_id := @eh_community_geopoints_id + 1), @eh_community_2_id, '', 114.057334, 22.54277, 'ws1078ckk991');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1023455, @eh_community_2_id);
+SET @eh_namespace_resources_id = (SELECT MAX(id) FROM `eh_namespace_resources`); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@eh_namespace_resources_id := @eh_namespace_resources_id + 1), 999975, 'COMMUNITY', @eh_community_2_id, UTC_TIMESTAMP());	
+-- 2 add END
+-- 3 add START 高新区联合总部大厦
+SET @feedback_forum_3_id = 190707;   -- 小区意见反馈论坛
+SET @community_forum_3_id = 190708; -- 小区论坛
+set @eh_community_3_id = 240111044331050382; 
+-- 加论坛
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_3_id, UUID(), 999975, 2, 'EhGroups', 0,'高新区联合总部大厦论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_3_id, UUID(), 999975, 2, 'EhGroups', 0,'高新区联合总部大厦意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+-- 加园区
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@eh_community_3_id, UUID(), 18161, '深圳市',  14824, '南山区', '高新区联合总部大厦', '', '学府路63号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_3_id, @feedback_forum_3_id, UTC_TIMESTAMP(), 999975);
+SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`); 
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@eh_community_geopoints_id := @eh_community_geopoints_id + 1), @eh_community_3_id, '', 113.950012, 22.531477, 'ws1078ckk991');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1023455, @eh_community_3_id);
+SET @eh_namespace_resources_id = (SELECT MAX(id) FROM `eh_namespace_resources`); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@eh_namespace_resources_id := @eh_namespace_resources_id + 1), 999975, 'COMMUNITY', @eh_community_3_id, UTC_TIMESTAMP());	
+-- 3 add END
+
+-- 4 add START 荣超新成大厦
+SET @feedback_forum_4_id = 190709;   -- 小区意见反馈论坛
+SET @community_forum_4_id = 190710; -- 小区论坛
+set @eh_community_4_id = 240111044331050383; 
+-- 加论坛
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_4_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超新成大厦论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_4_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超新成大厦意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+-- 加园区
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@eh_community_4_id, UUID(), 18161, '深圳市',  14825, '龙岗区', '荣超新成大厦', '荣超金融大厦', '龙岗区如意路52号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_4_id, @feedback_forum_4_id, UTC_TIMESTAMP(), 999975);
+SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`); 
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@eh_community_geopoints_id := @eh_community_geopoints_id + 1), @eh_community_4_id, '', 113.950012, 22.531477, 'ws1078ckk991');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1023455, @eh_community_4_id);
+SET @eh_namespace_resources_id = (SELECT MAX(id) FROM `eh_namespace_resources`); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@eh_namespace_resources_id := @eh_namespace_resources_id + 1), 999975, 'COMMUNITY', @eh_community_4_id, UTC_TIMESTAMP());	
+-- 4 add END
+
+-- 5 add START 荣超英隆大厦
+SET @feedback_forum_5_id = 190711;   -- 小区意见反馈论坛
+SET @community_forum_5_id = 190712; -- 小区论坛
+set @eh_community_5_id = 240111044331050384; 
+-- 加论坛
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_5_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超英隆大厦论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_5_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超英隆大厦意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+-- 加园区
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@eh_community_5_id, UUID(), 18161, '深圳市',  14825, '龙岗区', '荣超英隆大厦', '', '中心城龙福路5号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_5_id, @feedback_forum_5_id, UTC_TIMESTAMP(), 999975);
+SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`); 
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@eh_community_geopoints_id := @eh_community_geopoints_id + 1), @eh_community_5_id, '', 113.950012, 22.531477, 'ws1078ckk991');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1023455, @eh_community_5_id);
+SET @eh_namespace_resources_id = (SELECT MAX(id) FROM `eh_namespace_resources`); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@eh_namespace_resources_id := @eh_namespace_resources_id + 1), 999975, 'COMMUNITY', @eh_community_5_id, UTC_TIMESTAMP());	
+-- 5 add END
+
+-- 6 add START 高新区联合总部大厦
+SET @feedback_forum_6_id = 190713;   -- 小区意见反馈论坛
+SET @community_forum_6_id = 190714; -- 小区论坛
+set @eh_community_6_id = 240111044331050385; 
+-- 加论坛
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_6_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超经贸中心论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_6_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超经贸中心意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+-- 加园区
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@eh_community_6_id, UUID(), 18161, '深圳市',  18162, '福田区', '荣超经贸中心', '', '金田路4028号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_6_id, @feedback_forum_6_id, UTC_TIMESTAMP(), 999975);
+SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`); 
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@eh_community_geopoints_id := @eh_community_geopoints_id + 1), @eh_community_6_id, '', 113.950012, 22.531477, 'ws1078ckk991');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1023455, @eh_community_6_id);
+SET @eh_namespace_resources_id = (SELECT MAX(id) FROM `eh_namespace_resources`); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@eh_namespace_resources_id := @eh_namespace_resources_id + 1), 999975, 'COMMUNITY', @eh_community_6_id, UTC_TIMESTAMP());	
+-- 6 add END
+
+-- 7 add START 高新区联合总部大厦
+SET @feedback_forum_7_id = 190715;   -- 小区意见反馈论坛
+SET @community_forum_7_id = 190716; -- 小区论坛
+set @eh_community_7_id = 240111044331050386; 
+-- 加论坛
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_7_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超花园论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_7_id, UUID(), 999975, 2, 'EhGroups', 0,'荣超花园意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+-- 加园区
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@eh_community_7_id, UUID(), 18161, '深圳市',  14825, '龙岗区', '荣超花园', '', '荣华路295', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_7_id, @feedback_forum_7_id, UTC_TIMESTAMP(), 999975);
+SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`); 
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@eh_community_geopoints_id := @eh_community_geopoints_id + 1), @eh_community_7_id, '', 113.950012, 22.531477, 'ws1078ckk991');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1023455, @eh_community_7_id);
+SET @eh_namespace_resources_id = (SELECT MAX(id) FROM `eh_namespace_resources`); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@eh_namespace_resources_id := @eh_namespace_resources_id + 1), 999975, 'COMMUNITY', @eh_community_7_id, UTC_TIMESTAMP());	
+-- 7 add END
+-- 8 add START 高新区联合总部大厦
+SET @feedback_forum_8_id = 190717;   -- 小区意见反馈论坛
+SET @community_forum_8_id = 190718; -- 小区论坛
+set @eh_community_8_id = 240111044331050387; 
+-- 加论坛
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_8_id, UUID(), 999975, 2, 'EhGroups', 0,'侨香诺园论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_8_id, UUID(), 999975, 2, 'EhGroups', 0,'侨香诺园意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+-- 加园区
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@eh_community_8_id, UUID(), 18161, '深圳市',  14824, '南山区', '侨香诺园', '', '香山西街10号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_8_id, @feedback_forum_8_id, UTC_TIMESTAMP(), 999975);
+SET @eh_community_geopoints_id = (SELECT MAX(id) FROM `eh_community_geopoints`); 
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@eh_community_geopoints_id := @eh_community_geopoints_id + 1), @eh_community_8_id, '', 113.950012, 22.531477, 'ws1078ckk991');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1023455, @eh_community_8_id);
+SET @eh_namespace_resources_id = (SELECT MAX(id) FROM `eh_namespace_resources`); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@eh_namespace_resources_id := @eh_namespace_resources_id + 1), 999975, 'COMMUNITY', @eh_community_8_id, UTC_TIMESTAMP());	
+-- 8 add END  by dengs,20170710
