@@ -5926,8 +5926,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if(_m.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && _m.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
                         createOrUpdateUserOrganization(_m);
                     }
+                    m = _m;
                 }
             }
+
 
             //刷新企业通讯录
             if (null != userIdentifier)
