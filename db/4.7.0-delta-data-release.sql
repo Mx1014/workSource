@@ -623,6 +623,9 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
     VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 巡检关联审批查看权限','0',NOW());
 
+
+delete from eh_service_module_privileges where remark = '品质核查 标准审批查看权限' and module_id = 20640;
+
 -- volgo域空间增加园区 add by sfyan 20170710
 SET @namespace_id=1;
 SET @community_forum_id = (SELECT MAX(id) FROM `eh_forums`) + 5;   -- 取eh_forums的ID最大值再加一定余量
@@ -651,4 +654,5 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 -- 星商会 物业管理后台增加表单管理菜单 add by sfyan 20170710
 SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
 insert into `eh_web_menu_scopes` (`id`, `menu_id`,`owner_type`, `owner_id`,`apply_policy`) values ((@menu_scope_id := @menu_scope_id + 1),50900,'EhNamespaces',999981,2);
+
 
