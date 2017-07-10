@@ -2,9 +2,6 @@ package com.everhomes.rest.salary;
 
 /**
  * <ul>
- * <li>salaryGroupId: 批次id</li>
- * <li>userId: 用户id</li>
- * <li>userDetailId: 用户档案id</li>
  * <li>type: 字段类型:0-文本类 1-数值类</li>
  * <li>editableFlag: 是否可编辑(对文本类):0-否   1-是</li>
  * <li>numberType: 数值类型:0-普通数值 1-计算公式</li>

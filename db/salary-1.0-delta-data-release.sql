@@ -109,3 +109,68 @@ INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `names
 -- 邮件模板
 SET @id = (SELECT MAX(id)FROM eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'salary.mail','1','zh_CN','邮件模板','<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>工资发放</title></head><body>${emailContent}<br><br>${entityTable}</body></html>',0); 
+
+
+
+
+
+
+-- 增加薪酬管理菜单
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+VALUES('51200','薪酬管理','50000',NULL,NULL,'0','2','/50000/51200','park','592','51200');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+VALUES('51210','批次设置','51200',NULL,'react:/salary-management/batch-setting','0','2','/50000/51200/51210','park','592','51200');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+VALUES('51220','员工工资','51200',NULL,'react:/salary-management/batch-salary','0','2','/50000/51200/51220','park','593','51200');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+VALUES('51230','工资发放','51200',NULL,'access_group/inside','0','2','/50000/51200/51230','park','594','51203');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+VALUES('51231','核算阶段','51230',NULL,'react:/salary-management/salary-check','0','2','/50000/51200/51230/51231','park','595','51200');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+VALUES('51232','发放阶段','51230',NULL,'react:/salary-management/salary-chec','0','2','/50000/51200/51230/51232','park','596','51200');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+VALUES('51240','发放历史','51200',NULL,'react:/salary-management/pay-history','0','2','/50000/51200/51240','park','597','51200');
+
+-- 给域空间加菜单 
+-- volgo
+SET @id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'51200','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'51210','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'51230','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'51231','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'51232','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'51240','','EhNamespaces','1','2');
+
+
+-- 加菜单权限
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) 
+VALUES('51200','薪酬管理','50000','/50000/51200','0','2','2','0','2017-07-10 11:50:20');
+
+SET @privileges_id = (SELECT MAX(id) FROM eh_acl_privileges)+1;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
+VALUES (@privileges_id, 0, '薪酬管理', '薪酬管理 全部权限', NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privileges_id, 51200, '薪酬管理', 1, 1, '薪酬管理  全部权限', 202); 
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privileges_id, 51210, '薪酬管理', 1, 1, '薪酬管理  批次设置', 202); 
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privileges_id, 51220, '薪酬管理', 1, 1, '薪酬管理  员工工资', 202); 
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privileges_id, 51230, '薪酬管理', 1, 1, '薪酬管理  工资发放', 202); 
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privileges_id, 51231, '薪酬管理', 1, 1, '薪酬管理  核算阶段', 202); 
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privileges_id, 51232, '薪酬管理', 1, 1, '薪酬管理  发放阶段', 202); 
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privileges_id, 51240, '薪酬管理', 1, 1, '薪酬管理  发放历史', 202); 
+
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privileges_id, 1005, 'EhAclRoles', 0, 1, NOW()); 
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privileges_id, 1001, 'EhAclRoles', 0, 1, NOW()); 
+
+

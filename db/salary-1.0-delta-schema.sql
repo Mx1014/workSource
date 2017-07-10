@@ -147,6 +147,7 @@ CREATE TABLE `eh_uniongroup_configures` (
   `group_id` BIGINT(20) NOT NULL COMMENT 'id of group',
   `current_id` BIGINT(20) DEFAULT NULL COMMENT 'id of target, organization or memberDetail',
   `current_type` VARCHAR(32) COMMENT 'organziation,memberDetail',
+  `current_name` VARCHAR(32) COMMENT 'name',
   `operator_uid` BIGINT(20),
   `update_time` DATETIME,
   PRIMARY KEY (`id`)

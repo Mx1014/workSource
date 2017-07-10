@@ -10,6 +10,9 @@ import java.util.List;
  * 
  * <ul>参数:
  * <li>employeeOriginVal: 个人批次设定,参考{@link com.everhomes.rest.salary.SalaryEmployeeOriginValDTO}</li>
+ * <li>salaryGroupId: 批次id</li>
+ * <li>userId: 用户id</li>
+ * <li>userDetailId: 用户档案id</li>
  * <li>ownerType: 'organization'</li>
  * <li>owernId: organizationId</li>
  * </ul>
@@ -19,6 +22,12 @@ public class UpdateSalaryEmployeesCommand {
     @ItemType(SalaryEmployeeOriginValDTO.class)
 	private List<SalaryEmployeeOriginValDTO> employeeOriginVal;
 
+    private Long salaryGroupId;
+
+    private Long userId;
+
+    private Long userDetailId;
+
     private String ownerType;
 
     private Long ownerId;
@@ -27,7 +36,31 @@ public class UpdateSalaryEmployeesCommand {
 
 	}
 
-	public String getOwnerType() {
+    public Long getSalaryGroupId() {
+        return salaryGroupId;
+    }
+
+    public void setSalaryGroupId(Long salaryGroupId) {
+        this.salaryGroupId = salaryGroupId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getUserDetailId() {
+        return userDetailId;
+    }
+
+    public void setUserDetailId(Long userDetailId) {
+        this.userDetailId = userDetailId;
+    }
+
+    public String getOwnerType() {
 		return ownerType;
 	}
 

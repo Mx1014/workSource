@@ -23,6 +23,7 @@ public class UniongroupConfiguresDTO {
     private Long groupId;
     private Long currentId;
     private String currentType;
+    private String currentName;
     private Long operatorUid;
     private Timestamp updateTime;
 
@@ -90,8 +91,18 @@ public class UniongroupConfiguresDTO {
         this.updateTime = updateTime;
     }
 
+    public String getCurrentName() {
+        return currentName;
+    }
+
+    public void setCurrentName(String currentName) {
+        this.currentName = currentName;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
 }

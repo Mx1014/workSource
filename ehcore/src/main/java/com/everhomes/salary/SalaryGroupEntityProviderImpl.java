@@ -21,6 +21,7 @@ import com.everhomes.server.schema.tables.pojos.EhSalaryGroupEntities;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.springframework.util.StringUtils;
 
 @Component
 public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider {
@@ -96,11 +97,15 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 
 	@Override
 	public SalaryGroupEntity findSalaryGroupEntityByGroupAndOriginId(Long groupId, Long originEntityId) {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
+		  List<SalaryGroupEntity> results = getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
 				.where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(groupId))
 				.and(Tables.EH_SALARY_GROUP_ENTITIES.ORIGIN_ENTITY_ID.eq(originEntityId))
 				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc())
-				.fetchOne().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
+		  if(StringUtils.isEmpty(results) || results.size() ==0 )
+		      return null;
+		  else
+		      return results.get(0);
 	}
 
 	@Override
