@@ -3187,5 +3187,6 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
 
-
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(@organization_id, @community_id);
 	
