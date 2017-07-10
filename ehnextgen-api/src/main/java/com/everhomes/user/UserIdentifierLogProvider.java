@@ -13,7 +13,7 @@ public interface UserIdentifierLogProvider {
 
 	List<UserIdentifierLog> listUserIdentifierLog();
 
-    UserIdentifierLog findByUserIdAndIdentifier(Long uid, String identifier);
+    UserIdentifierLog findByUserIdAndIdentifier(Long uid, Integer regionCode, String identifier);
 
     UserIdentifierLog findByUserId(Long uid);
 }

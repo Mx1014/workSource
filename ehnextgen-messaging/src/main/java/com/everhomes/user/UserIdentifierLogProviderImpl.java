@@ -58,9 +58,10 @@ public class UserIdentifierLogProviderImpl implements UserIdentifierLogProvider 
     }
 
     @Override
-    public UserIdentifierLog findByUserIdAndIdentifier(Long uid, String identifier) {
+    public UserIdentifierLog findByUserIdAndIdentifier(Long uid, Integer regionCode, String identifier) {
         return context().selectFrom(Tables.EH_USER_IDENTIFIER_LOGS)
                 .where(Tables.EH_USER_IDENTIFIER_LOGS.OWNER_UID.eq(uid))
+                .and(Tables.EH_USER_IDENTIFIER_LOGS.REGION_CODE.eq(regionCode))
                 .and(Tables.EH_USER_IDENTIFIER_LOGS.IDENTIFIER_TOKEN.eq(identifier))
                 .orderBy(Tables.EH_USER_IDENTIFIER_LOGS.CREATE_TIME.desc())
                 .fetchAnyInto(UserIdentifierLog.class);
