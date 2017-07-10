@@ -141,7 +141,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -1496,14 +1495,16 @@ public class UserServiceImpl implements UserService {
 		}
 		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(user.getId());
 
-        Stream<UserIdentifier> identifierStream = identifiers.stream().filter((r) -> {
-            return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE;
-        });
-
-        List<String> phones = identifierStream.map(EhUserIdentifiers::getIdentifierToken).collect(Collectors.toList());
+        List<String> phones = identifiers.stream()
+                .filter((r) -> {return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE;})
+                .map(EhUserIdentifiers::getIdentifierToken)
+                .collect(Collectors.toList());
 		info.setPhones(phones);
 
-        List<Integer> regionCodes = identifierStream.map(EhUserIdentifiers::getRegionCode).collect(Collectors.toList());
+        List<Integer> regionCodes = identifiers.stream()
+                .filter((r) -> {return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE;})
+                .map(EhUserIdentifiers::getRegionCode)
+                .collect(Collectors.toList());
         info.setRegionCodes(regionCodes);
 
 		List<String> emails = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL; })
@@ -3823,9 +3824,10 @@ public class UserServiceImpl implements UserService {
 
         final Long    halfAnHour = 30 * 60 * 1000L;
         final Long    currUserId = currUser.getId();
-        final Integer regionCode = cmd.getRegionCode();
+        final Integer newRegionCode = cmd.getRegionCode();
         final String  newIdentifier = cmd.getIdentifier();
         final String  oldIdentifier = userIdentifier.getIdentifierToken();
+        final Integer oldRegionCode = userIdentifier.getRegionCode();
         final Integer namespaceId = UserContext.getCurrentNamespaceId();
         final String  verificationCode = RandomGenerator.getRandomDigitalString(6);
 
@@ -3844,13 +3846,13 @@ public class UserServiceImpl implements UserService {
                 log.setClaimStatus(IdentifierClaimStatus.CLAIMING.getCode());
                 log.setVerificationCode(verificationCode);
                 log.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                log.setRegionCode(regionCode);
+                log.setRegionCode(oldRegionCode);
                 log.setNamespaceId(namespaceId);
                 log.setIdentifierToken(oldIdentifier);
                 log.setOwnerUid(currUserId);
                 userIdentifierLogProvider.createUserIdentifierLog(log);
             }
-            this.sendVerificationCodeSms(namespaceId, oldIdentifier, verificationCode);
+            this.sendVerificationCodeSms(namespaceId, getYzxRegionPhoneNumber(oldIdentifier, oldRegionCode), verificationCode);
         }
         // 给新手机号发送短信验证码
         else {
@@ -3864,6 +3866,7 @@ public class UserServiceImpl implements UserService {
                 log.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
                 log.setVerificationCode(verificationCode);
                 log.setIdentifierToken(newIdentifier);
+                log.setRegionCode(newRegionCode);
                 log.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 userIdentifierLogProvider.updateUserIdentifierLog(log);
             } else {
@@ -3873,7 +3876,7 @@ public class UserServiceImpl implements UserService {
                         "please try again to the first step");
             }
 
-            this.sendVerificationCodeSms(namespaceId, newIdentifier, verificationCode);
+            this.sendVerificationCodeSms(namespaceId, getYzxRegionPhoneNumber(newIdentifier, newRegionCode), verificationCode);
         }
     }
 
@@ -4041,7 +4044,7 @@ public class UserServiceImpl implements UserService {
                 List<Tuple<String, Object>> variables = smsProvider.toTupleList("newIdentifier", log.getNewIdentifier());
                 String templateScope = SmsTemplateCode.SCOPE;
                 int templateId = SmsTemplateCode.RESET_IDENTIFIER_APPEAL_SUCCESS_CODE;
-                smsProvider.sendSms(log.getNamespaceId(), log.getNewIdentifier(), templateScope, templateId, locale, variables);
+                smsProvider.sendSms(log.getNamespaceId(), getYzxRegionPhoneNumber(log.getNewIdentifier(), log.getNewRegionCode()), templateScope, templateId, locale, variables);
                 break;
             case INACTIVE:
                 String messageBody = localeStringService.getLocalizedString(UserLocalStringCode.SCOPE, UserLocalStringCode.REJECT_APPEAL_IDENTIFIER_CODE, locale, "");
