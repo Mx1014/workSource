@@ -4,6 +4,7 @@ package com.everhomes.rest.talent;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 
@@ -26,8 +27,8 @@ public class TalentRequestDTO {
 	private Long talentId;
 	private String talentName;
 	private Long createTime;
-	@ItemType(PostApprovalFormItem.class)
-	private List<PostApprovalFormItem> formItems;
+	@ItemType(FlowCaseEntity.class)
+	private List<FlowCaseEntity> flowCaseEntities;
 
 	public Long getTalentId() {
 		return talentId;
@@ -77,12 +78,12 @@ public class TalentRequestDTO {
 		this.createTime = createTime;
 	}
 
-	public List<PostApprovalFormItem> getFormItems() {
-		return formItems;
+	public List<FlowCaseEntity> getFlowCaseEntities() {
+		return flowCaseEntities;
 	}
 
-	public void setFormItems(List<PostApprovalFormItem> formItems) {
-		this.formItems = formItems;
+	public void setFlowCaseEntities(List<FlowCaseEntity> flowCaseEntities) {
+		this.flowCaseEntities = flowCaseEntities;
 	}
 
 	@Override

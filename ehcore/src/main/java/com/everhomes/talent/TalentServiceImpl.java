@@ -18,11 +18,13 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.GeneralFormSourceType;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
@@ -591,8 +593,11 @@ public class TalentServiceImpl implements TalentService {
 
 	private TalentRequestDTO convert(TalentRequest talentRequest) {
 		TalentRequestDTO talentRequestDTO = convertWithoutDetail(talentRequest);
-		List<PostApprovalFormItem> postApprovalFormItems = generalFormService.getGeneralFormValues(new GetGeneralFormValuesCommand(GeneralFormSourceType.TALENT.getCode(), talentRequest.getId(), null));
-		talentRequestDTO.setFormItems(postApprovalFormItems);
+		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
+        cmd.setSourceType(EntityType.TALENT_REQUEST.getCode());
+        cmd.setSourceId(talentRequest.getId());
+        List<FlowCaseEntity> flowCaseEntities = generalFormService.getGeneralFormFlowEntities(cmd);
+		talentRequestDTO.setFlowCaseEntities(flowCaseEntities);
 		return talentRequestDTO;
 	}
 
