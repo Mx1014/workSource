@@ -102,7 +102,7 @@ CREATE TABLE `eh_portal_items` (
   `more_order` int(11) NOT NULL DEFAULT '0',
   `target_type` varchar(32) DEFAULT NULL,
   `target_id` varchar(64) DEFAULT NULL COMMENT 'the entity id linked back to the orginal resource',
-  `item_category_id` bigint(20) NOT NULL,
+  `item_category_id` bigint(20),
   `description` varchar(1024),
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
@@ -110,6 +110,7 @@ CREATE TABLE `eh_portal_items` (
   `creator_uid` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 
 -- 门户模板表
