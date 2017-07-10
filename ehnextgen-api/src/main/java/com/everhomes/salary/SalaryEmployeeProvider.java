@@ -26,4 +26,6 @@ public interface SalaryEmployeeProvider {
 	void deleteSalaryEmployee(Long ownerId, Long userId, Long salaryGroupId);
 
 	void deleteSalaryEmployee(SalaryEmployee employee);
+
+	Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId, List<Long> userIds, Byte code);
 }

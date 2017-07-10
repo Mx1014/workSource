@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -142,5 +143,16 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	@Override
 	public void deleteSalaryEmployee(SalaryEmployee employee) {
 		getReadWriteDao().delete(employee);
+	}
+
+	@Override
+	public Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId, List<Long> userIds, Byte checkFlag) {
+
+		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.USER_ID.in(userIds));
+		step.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
+		if(null != checkFlag)
+			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
+		return step.fetchOne().value1();
 	}
 }
