@@ -3536,7 +3536,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(memberStatus));
 
         if (!StringUtils.isEmpty(userInfoKeyword)) {
-            Field<String> keyword = DSL.concat("%", userInfoKeyword, "%");
+            String keyword = "%" + userInfoKeyword + "%";
 
             Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(keyword);
 
@@ -3545,7 +3545,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
 
         if (!StringUtils.isEmpty(orgNameKeyword)) {
-            Field<String> keyword = DSL.concat("%", orgNameKeyword, "%");
+            String keyword = "%" + orgNameKeyword + "%";
             query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword));
         }
 
