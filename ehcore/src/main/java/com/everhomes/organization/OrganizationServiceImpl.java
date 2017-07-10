@@ -9096,7 +9096,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             departments.addAll(repeatCreateOrganizationmembers(departmentIds,cmd.getContactToken(),enterpriseIds,organizationMember));
 
             //给新增或修改的人员重新分配薪酬组
-//            this.uniongroupService.reallocatedUnion(org.getId(), departmentIds, organizationMember);
+            this.uniongroupService.reallocatedUnion(org.getId(), departmentIds, organizationMember);
 
             groups.addAll(repeatCreateOrganizationmembers(groupIds,cmd.getContactToken(),enterpriseIds,organizationMember));
             jobPositions.addAll(repeatCreateOrganizationmembers(jobPositionIds,cmd.getContactToken(),enterpriseIds,organizationMember));
