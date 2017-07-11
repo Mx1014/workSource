@@ -3,7 +3,7 @@ package com.everhomes.rest.portal;
 
 /**
  * <ul>范围
- * <li>PM("pm")：无</li>
+ * <li>PM("pm")：管理公司</li>
  * <li>ORGANIZATION("organization"): 普通机构</li>
  * <li>RESIDENTIAL("residential")：小区</li>
  * <li>COMMERCIAL("commercial")：园区</li>

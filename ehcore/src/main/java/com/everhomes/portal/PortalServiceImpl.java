@@ -258,9 +258,18 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public ListPortalItemGroupsResponse listPortalItemGroups(ListPortalItemGroupsCommand cmd) {
 		List<PortalItemGroup> portalItemGroups = portalItemGroupProvider.listPortalItemGroup(cmd.getLayoutId());
-		return new ListPortalItemGroupsResponse(portalItemGroups.stream().map(r ->{
+
+		List<PortalItemGroupDTO> dtos = portalItemGroups.stream().map(r ->{
 			return processPortalItemGroupDTO(r);
-		}).collect(Collectors.toList()));
+		}).collect(Collectors.toList());
+
+		Collections.sort(dtos, new Comparator<PortalItemGroupDTO>() {
+			@Override
+			public int compare(PortalItemGroupDTO o1, PortalItemGroupDTO o2) {
+				return o1.getDefaultorder() - o2.getDefaultorder();
+			}
+		});
+		return new ListPortalItemGroupsResponse();
 	}
 
 	@Override
