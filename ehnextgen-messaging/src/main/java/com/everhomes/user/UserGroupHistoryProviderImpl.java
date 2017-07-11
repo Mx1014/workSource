@@ -16,9 +16,12 @@ import com.everhomes.server.schema.tables.records.EhUserGroupHistoriesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.*;
-import org.jooq.impl.DSL;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -180,24 +183,29 @@ public class UserGroupHistoryProviderImpl implements UserGroupHistoryProvider {
 
 	@Override
 	public List<UserGroupHistory> queryUserGroupHistoryByGroupIds(String userInfoKeyword, String communityKeyword,
-                                                    List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
+                                                    List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
 		 
 		List<UserGroupHistory> objs = new ArrayList<UserGroupHistory>();
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), objs, (DSLContext context, Object reducingContext) -> {
 //			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
 	        
-	        SelectQuery<EhUserGroupHistoriesRecord> query = context.selectQuery(Tables.EH_USER_GROUP_HISTORIES);
-	         
-	        query.addConditions(Tables.EH_USER_GROUP_HISTORIES.GROUP_ID.in(groupIds));
+	        SelectQuery<Record> query = context.select(Tables.EH_USER_GROUP_HISTORIES.fields())
+                    .from(Tables.EH_USER_GROUP_HISTORIES).getQuery();
+
+	        query.addSelect(Tables.EH_USERS.NICK_NAME);
+            query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USER_GROUP_HISTORIES.OWNER_UID.eq(Tables.EH_USERS.ID));
+            query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+
+            query.addSelect(Tables.EH_COMMUNITIES.NAME);
+            query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_USER_GROUP_HISTORIES.COMMUNITY_ID.eq(Tables.EH_COMMUNITIES.ID));
+
+            query.addConditions(Tables.EH_USER_GROUP_HISTORIES.COMMUNITY_ID.in(communityIds));
             if (StringUtils.isNotBlank(userInfoKeyword)) {
-                Field<String> keyword = DSL.concat("%", userInfoKeyword, "%");
-                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USER_GROUP_HISTORIES.OWNER_UID.eq(Tables.EH_USERS.ID));
-                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+                String keyword = "%" + userInfoKeyword + "%";
                 query.addConditions(Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword)));
             }
             if (StringUtils.isNotBlank(communityKeyword)) {
-                Field<String> keyword = DSL.concat("%", communityKeyword, "%");
-                query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_USER_GROUP_HISTORIES.COMMUNITY_ID.eq(Tables.EH_COMMUNITIES.ID));
+                String keyword = "%" + communityKeyword + "%";
                 query.addConditions(Tables.EH_COMMUNITIES.NAME.like(keyword));
             }
 
@@ -208,8 +216,11 @@ public class UserGroupHistoryProviderImpl implements UserGroupHistoryProvider {
 	        query.addLimit(pageSize+1);
 	        query.addOrderBy(Tables.EH_USER_GROUP_HISTORIES.ID.desc());
 	        query.fetch().map((r) -> {
-	        	objs.add( ConvertHelper.convert(r, UserGroupHistory.class));
-	        	return null;
+                UserGroupHistory history = RecordHelper.convert(r, UserGroupHistory.class);
+                String communityName = r.getValue(Tables.EH_COMMUNITIES.NAME);
+                history.setCommunityName(communityName);
+                objs.add(history);
+                return null;
 	        });
 	        return true;
 		});

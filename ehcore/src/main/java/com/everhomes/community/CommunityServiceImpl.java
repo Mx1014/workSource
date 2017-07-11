@@ -2,40 +2,6 @@
 package com.everhomes.community;
 
 import com.everhomes.acl.*;
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.general_form.GeneralFormValProvider;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.module.ServiceModuleAssignment;
-import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.community.*;
-import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
-import com.everhomes.techpark.expansion.LeaseFormRequest;
-import com.everhomes.user.*;
-import com.everhomes.userOrganization.UserOrganizations;
-import com.everhomes.util.*;
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.Condition;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
@@ -58,6 +24,7 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
@@ -99,6 +66,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.user.*;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -111,6 +79,8 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1483,7 +1453,7 @@ public class CommunityServiceImpl implements CommunityService {
 		List<GroupMember> groupMembers = null;
 
         if (cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.REJECT.getCode())) {
-            groupMembers = listCommunityRejectUserAddress(cmd.getUserInfoKeyword(), cmd.getCommunityKeyword(), groupIds, locator, pageSize);
+            groupMembers = listCommunityRejectUserAddress(cmd.getUserInfoKeyword(), cmd.getCommunityKeyword(), communityIds, locator, pageSize);
         } else {
             groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator, pageSize, (loc, query) -> {
                 Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
@@ -1559,13 +1529,14 @@ public class CommunityServiceImpl implements CommunityService {
 		return res;
 	}
 	
-	private List<GroupMember> listCommunityRejectUserAddress(String userInfoKeyword, String communityKeyword, List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
-		List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByGroupIds(userInfoKeyword, communityKeyword, groupIds, locator, pageSize);
+	private List<GroupMember> listCommunityRejectUserAddress(String userInfoKeyword, String communityKeyword, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
+		List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByGroupIds(userInfoKeyword, communityKeyword, communityIds, locator, pageSize);
 		return histories.stream().map(r -> {
-            GroupMember dto = ConvertHelper.convert(r, GroupMember.class);
-            dto.setMemberId(r.getOwnerUid());
-            dto.setApproveTime(r.getCreateTime());
-            return dto;
+            GroupMember member = ConvertHelper.convert(r, GroupMember.class);
+            member.setMemberId(r.getOwnerUid());
+            member.setApproveTime(r.getCreateTime());
+            Address address = addressProvider.findAddressById(r.getAddressId());
+            return member;
         }).collect(Collectors.toList());
 	}
 

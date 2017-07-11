@@ -819,14 +819,14 @@ public class FamilyServiceImpl implements FamilyService {
 //            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
 //                    "User not in familly.");
         }
-        if(member.getMemberStatus().byteValue() == GroupMemberStatus.ACTIVE.getCode()){
+        if(member.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()){
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
                     "User has already join in family,fail to reject.");
         }
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
         
         UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(memberUid, group.getId());
-        if(userGroup == null){
+        if(userGroup == null) {
             LOGGER.error("User not in user group.userId=" + memberUid);
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User not in familly.");
