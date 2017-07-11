@@ -2,6 +2,7 @@
 package com.everhomes.rest.salary;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.uniongroup.UniongroupTarget;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -18,11 +19,11 @@ import java.util.List;
  */
 public class AddToOrganizationSalaryGroupCommand {
 
-	@ItemType(Long.class)
-	private List<Long> departmentIds;
+	@ItemType(UniongroupTarget.class)
+	private List<UniongroupTarget> departmentIds;
 
-	@ItemType(Long.class)
-	private List<Long> detailIds;
+	@ItemType(UniongroupTarget.class)
+	private List<UniongroupTarget> detailIds;
 
 	private Long salaryGroupId;
 
@@ -36,15 +37,23 @@ public class AddToOrganizationSalaryGroupCommand {
 
 	}
 
-	public List<Long> getDepartmentIds() {
-		return departmentIds;
-	}
+    public List<UniongroupTarget> getDepartmentIds() {
+        return departmentIds;
+    }
 
-	public void setDepartmentIds(List<Long> departmentIds) {
-		this.departmentIds = departmentIds;
-	}
+    public void setDepartmentIds(List<UniongroupTarget> departmentIds) {
+        this.departmentIds = departmentIds;
+    }
 
-	public Long getSalaryGroupId() {
+    public List<UniongroupTarget> getDetailIds() {
+        return detailIds;
+    }
+
+    public void setDetailIds(List<UniongroupTarget> detailIds) {
+        this.detailIds = detailIds;
+    }
+
+    public Long getSalaryGroupId() {
         return salaryGroupId;
     }
 
@@ -52,15 +61,7 @@ public class AddToOrganizationSalaryGroupCommand {
         this.salaryGroupId = salaryGroupId;
     }
 
-	public List<Long> getDetailIds() {
-		return detailIds;
-	}
-
-	public void setDetailIds(List<Long> detailIds) {
-		this.detailIds = detailIds;
-	}
-
-	public String getName() {
+    public String getName() {
 		return name;
 	}
 

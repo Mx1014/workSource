@@ -672,14 +672,17 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
 	    //  1.更新该员工在组织架构的关联及configure
-        AddToOrganizationSalaryGroupCommand command = new AddToOrganizationSalaryGroupCommand();
-        command.setOwnerId(cmd.getOwnerId());
-        command.setOwnerType(cmd.getOwnerType());
-        command.setSalaryGroupId(cmd.getSalaryGroupId());
-        List<Long> detailIds = new ArrayList<>();
-        detailIds.add(cmd.getDetailId());
-        command.setDetailIds(detailIds);
-        this.addToOrganizationSalaryGroup(command);
+        AddToOrganizationSalaryGroupCommand addCommand = new AddToOrganizationSalaryGroupCommand();
+        List<UniongroupTarget> detailIds = new ArrayList<>();
+        UniongroupTarget detaidId = new UniongroupTarget();
+        detaidId.setId(cmd.getDetailId());
+        detaidId.setName(cmd.getName());
+        detailIds.add(detaidId);
+        addCommand.setOwnerId(cmd.getOwnerId());
+        addCommand.setOwnerType(cmd.getOwnerType());
+        addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
+        addCommand.setDetailIds(detailIds);
+        this.addToOrganizationSalaryGroup(addCommand);
 
         // 2.删除原有的薪酬设定
         List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
@@ -696,14 +699,17 @@ public class SalaryServiceImpl implements SalaryService {
         if(!cmd.getEmployeeOriginVal().isEmpty()){
 
             //  添加到组织架构的薪酬组中，没有增加有则覆盖
-            AddToOrganizationSalaryGroupCommand command = new AddToOrganizationSalaryGroupCommand();
-            command.setOwnerId(cmd.getOwnerId());
-            command.setOwnerType(cmd.getOwnerType());
-            command.setSalaryGroupId(cmd.getSalaryGroupId());
-            List<Long> detailIds = new ArrayList<>();
-            detailIds.add(cmd.getUserDetailId());
-            command.setDetailIds(detailIds);
-            this.addToOrganizationSalaryGroup(command);
+            AddToOrganizationSalaryGroupCommand addCommand = new AddToOrganizationSalaryGroupCommand();
+            List<UniongroupTarget> detailIds = new ArrayList<>();
+            UniongroupTarget detaidId = new UniongroupTarget();
+            detaidId.setId(cmd.getUserDetailId());
+            detaidId.setName(cmd.getName());
+            detailIds.add(detaidId);
+            addCommand.setOwnerId(cmd.getOwnerId());
+            addCommand.setOwnerType(cmd.getOwnerType());
+            addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
+            addCommand.setDetailIds(detailIds);
+            this.addToOrganizationSalaryGroup(addCommand);
 
             //  添加到薪酬组的个人设定中
             List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
@@ -752,9 +758,9 @@ public class SalaryServiceImpl implements SalaryService {
         if(!StringUtils.isEmpty(cmd.getDepartmentIds())){
             cmd.getDepartmentIds().forEach(r ->{
                 UniongroupTarget target = new UniongroupTarget();
-                target.setId(r);
+                target.setId(r.getId());
                 target.setType(UniongroupTargetType.ORGANIZATION.getCode());
-                target.setName(cmd.getName());
+                target.setName(r.getName());
                 targets.add(target);
             });
         }
@@ -763,9 +769,9 @@ public class SalaryServiceImpl implements SalaryService {
         if(!StringUtils.isEmpty(cmd.getDetailIds())){
             cmd.getDetailIds().forEach(r ->{
                 UniongroupTarget target = new UniongroupTarget();
-                target.setId(r);
+                target.setId(r.getId());
                 target.setType(UniongroupTargetType.MEMBERDETAIL.getCode());
-                target.setName(cmd.getName());
+                target.setName(r.getName());
                 targets.add(target);
             });
         }
