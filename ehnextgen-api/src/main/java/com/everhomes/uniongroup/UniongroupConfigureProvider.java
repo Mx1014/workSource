@@ -54,4 +54,6 @@ public interface UniongroupConfigureProvider {
     void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId);
 
     void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId);
+
+    List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId);
 }

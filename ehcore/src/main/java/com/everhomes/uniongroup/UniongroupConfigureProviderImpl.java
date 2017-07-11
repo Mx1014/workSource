@@ -362,6 +362,16 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(organizationId))
                 .execute();
     }
+
+    @Override
+    public List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId){
+        return getReadOnlyContext().select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID)
+                .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                .fetchInto(Object[].class);
+    }
     /**
      * Configure
      **/

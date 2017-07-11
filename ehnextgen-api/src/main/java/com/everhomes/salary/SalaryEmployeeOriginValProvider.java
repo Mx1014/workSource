@@ -22,4 +22,5 @@ public interface SalaryEmployeeOriginValProvider {
 	List<Object[]> getRelevantNumbersByGroupId(List<Long> salaryGroupIds);
 
 	void deleteSalaryEmployeeValsByGroupIdNotInOriginIds(Long salaryGroupId, List<Long> entityIds);
+	List<Object[]> listSalaryEmployeeWagesDetails();
 }

@@ -316,6 +316,12 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
+    public List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId){
+        return this.uniongroupConfigureProvider.listUniongroupMemberGroupIds(namespaceId,ownerId);
+    }
+
+
+    @Override
     public void reallocatedUnion(Long enterpriseId, List<Long> departmentIds, OrganizationMember organizationMember) {
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         Integer namespaceId = 1000000;
