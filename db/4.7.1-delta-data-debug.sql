@@ -6,9 +6,9 @@ INSERT INTO `eh_launch_pad_items`
  `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
-VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Default', '云打印', '云打印', 
 '', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
- 1, 1, '', 0, NULL, NULL, NULL, 0,
+ 1, 1, 1, 0, NULL, NULL, NULL, 0,
  'default', 1, NULL, NULL, 0, NULL);
  
  INSERT INTO `eh_launch_pad_items` 
@@ -16,9 +16,9 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/
  `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
-VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Default', '云打印', '云打印', 
 '', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
- 1, 1, '', 0, NULL, NULL, NULL, 0,
+ 1, 1, 1, 0, NULL, NULL, NULL, 0,
  'park_tourist', 1, NULL, NULL, 0, NULL);
  
  INSERT INTO `eh_launch_pad_items` 
@@ -26,9 +26,9 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/
  `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
-VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Default', '云打印', '云打印', 
 '', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
- 1, 1, '', 0, NULL, NULL, NULL, 0,
+ 1, 1, 1, 0, NULL, NULL, NULL, 0,
  'pm_admin', 1, NULL, NULL, 0, NULL);
  -- 服务广场 -- 添加到左邻域 -- 在alpha，beta执行 -- end
  
