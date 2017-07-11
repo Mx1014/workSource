@@ -4323,46 +4323,48 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid owner type or  Id parameter in the command");
 		}
-		List<PunchDayDetailDTO> dtos = new ArrayList<PunchDayDetailDTO>();
-		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
-		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
-			//找到所有子部门 下面的用户
-			Organization org = this.checkOrganization(cmd.getOwnerId());
+//		List<PunchDayDetailDTO> dtos = new ArrayList<PunchDayDetailDTO>();
+//		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
+//		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
+//			//找到所有子部门 下面的用户
+//			Organization org = this.checkOrganization(cmd.getOwnerId());
+//
+//			List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+//			if (null == userIds)
+//				return response;
+//			//分页查询 由于用到多条件排序,所以使用pageOffset方式分页
+//			 
+//			String startDay=null;
+//			if(null!=cmd.getStartDay())
+//				startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
+//			String endDay=null;
+//			if(null!=cmd.getEndDay())
+//				endDay =  dateSF.get().format(new Date(cmd.getEndDay()));
+//			Long organizationId = org.getDirectlyEnterpriseId();
+//			if(organizationId.equals(0L))
+//				organizationId = org.getId();
+//			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
+//					organizationId,startDay,endDay , 
+//					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
+//					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
+//					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), null, null);
+//			
+//			if (null == results)
+//				return null;
+//			 
+//			for(PunchDayLog r : results){
+//				PunchDayDetailDTO dto =convertToPunchDayDetailDTO(r);
+//				dtos.add(dto);
+//			}
+//			
+//		}
+		cmd.setPageSize(Integer.MAX_VALUE-1);
+		ListPunchDetailsResponse resp = listPunchDetails(cmd);
 
-			List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
-			if (null == userIds)
-				return response;
-			//分页查询 由于用到多条件排序,所以使用pageOffset方式分页
-			 
-			String startDay=null;
-			if(null!=cmd.getStartDay())
-				startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
-			String endDay=null;
-			if(null!=cmd.getEndDay())
-				endDay =  dateSF.get().format(new Date(cmd.getEndDay()));
-			Long organizationId = org.getDirectlyEnterpriseId();
-			if(organizationId.equals(0L))
-				organizationId = org.getId();
-			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-					organizationId,startDay,endDay , 
-					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
-					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
-					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), null, null);
-			
-			if (null == results)
-				return null;
-			 
-			for(PunchDayLog r : results){
-				PunchDayDetailDTO dto =convertToPunchDayDetailDTO(r);
-				dtos.add(dto);
-			}
-			
-		}
-		
 		String filePath = "PunchDetails" + System.currentTimeMillis() + ".xlsx";
 		//新建了一个文件
 
-		Workbook wb = createPunchDetailsBook(dtos);
+		Workbook wb = createPunchDetailsBook(resp.getPunchDayDetails());
 		
 		return download(wb,filePath,response);
 	}
@@ -4614,6 +4616,17 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 	}
+	public static int getPageSize(ConfigurationProvider configProvider, Integer requestedPageSize) {
+		if(requestedPageSize == null) {
+			return configProvider.getIntValue("pagination.default.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+		}
+//
+//		int maxSize = configProvider.getIntValue("pagination.max.size", AppConstants.PAGINATION_MAX_SIZE);
+//		if(requestedPageSize.intValue() > maxSize)
+//			return maxSize;
+
+		return requestedPageSize.intValue();
+	}
 	/**
 	 * 打卡2.0 的考勤详情
 	 * */
@@ -4642,7 +4655,7 @@ public class PunchServiceImpl implements PunchService {
 			Integer pageOffset = 0; 
 			if (cmd.getPageAnchor() != null)
 				pageOffset = cmd.getPageAnchor().intValue();
-			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+			int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
 			String startDay=null;
 			if(null!=cmd.getStartDay())
 				startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
