@@ -231,7 +231,7 @@ public class SalaryController extends ControllerBase {
 	@RequestMapping("exportPeriodSalary")
 	@RestReturn(String.class)
 	public RestResponse exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpResponse){
-		salaryService.exportPeriodSalary(cmd);
+		salaryService.exportPeriodSalary(cmd, httpResponse);
 		return new RestResponse();
 	}
 

@@ -4,6 +4,9 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.salary.SalaryEditableFlag;
+import com.everhomes.rest.salary.SalaryEntityType;
+import com.everhomes.rest.salary.SalaryNeedCheckType;
 import com.everhomes.user.User;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,13 +121,35 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 
 	//	按员工批次表导出规则查询
     @Override
-    public List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryId) {
+    public List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryGroupId) {
         return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
-                .where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryId))
-                .and(Tables.EH_SALARY_GROUP_ENTITIES.EDITABLE_FLAG.eq(Byte.valueOf("1")))
+                .where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryGroupId))
+                .and(Tables.EH_SALARY_GROUP_ENTITIES.EDITABLE_FLAG.eq(SalaryEditableFlag.EDITABLE.getCode()))
                 .orderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
     }
+
+    //	按员工核算规则查询
+    @Override
+	public List<SalaryGroupEntity> listPeriodSalaryWithExportRegular(Long salaryGroupId){
+
+		SelectQuery<Record> query = getReadOnlyContext().select().getQuery();
+		Condition condition = Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryGroupId);
+		Condition soncondition1 = Tables.EH_SALARY_GROUP_ENTITIES.TYPE.eq(SalaryEntityType.TEXT.getCode())
+                .and(Tables.EH_SALARY_GROUP_ENTITIES.EDITABLE_FLAG.eq(SalaryEditableFlag.EDITABLE.getCode()));
+		Condition soncondition2 = Tables.EH_SALARY_GROUP_ENTITIES.TYPE.eq(SalaryEntityType.NUMBER.getCode())
+                .and(Tables.EH_SALARY_GROUP_ENTITIES.NEED_CHECK.eq(SalaryNeedCheckType.WANT.getCode()));
+		condition = condition.and(soncondition1.or(soncondition2));
+
+		query.addFrom(Tables.EH_SALARY_GROUP_ENTITIES);
+		query.addConditions(condition);
+/*		query.addConditions(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryGroupId));
+		query.addConditions(Tables.EH_SALARY_GROUP_ENTITIES.TYPE.eq(SalaryEntityType.TEXT.getCode())
+				.and(Tables.EH_SALARY_GROUP_ENTITIES.EDITABLE_FLAG.eq(SalaryEditableFlag.EDITABLE.getCode())));
+		query.addConditions(Tables.EH_SALARY_GROUP_ENTITIES.TYPE.eq(SalaryEntityType.NUMBER.getCode())
+				.and(Tables.EH_SALARY_GROUP_ENTITIES.NEED_CHECK.eq(SalaryNeedCheckType.WANT.getCode())));*/
+		return query.fetchInto(SalaryGroupEntity.class);
+	}
 
 	@Override
 	public List<SalaryGroupEntity> listSalaryGroupEntity() {

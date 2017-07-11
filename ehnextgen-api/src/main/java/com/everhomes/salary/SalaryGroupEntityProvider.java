@@ -13,7 +13,9 @@ public interface SalaryGroupEntityProvider {
 
 	List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long salaryGroupId);
 
-	List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryId);
+	List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryGroupId);
+
+	List<SalaryGroupEntity> listPeriodSalaryWithExportRegular(Long salaryGroupId);
 
 	List<SalaryGroupEntity> listSalaryGroupEntity();
 
