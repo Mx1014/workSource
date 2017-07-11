@@ -21,17 +21,17 @@ INSERT INTO `eh_siyin_print_printers` (`id`, `namespace_id`, `owner_type`, `owne
 -- by dengs,云打印菜单配置 20170626
 -- 添加菜单 -- 按照产品要求，添加菜单到左邻域
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41400, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', 41400);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41400, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41410, '打印记录', 41400, NULL, 'react:/cloud-print/record', '0', '2', '/40000/41400/41410', 'park', '500', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41410, '打印记录', 41400, NULL, 'react:/cloud-print/record', '0', '2', '/40000/41400/41410', 'park', '500', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41420, '打印统计', 41400, NULL, 'react:/cloud-print/count', '0', '2', '/40000/41400/41420', 'park', '501', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41420, '打印统计', 41400, NULL, 'react:/cloud-print/count', '0', '2', '/40000/41400/41420', 'park', '501', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41430, '打印价格', 41400, NULL, 'react:/cloud-print/setting', '0', '2', '/40000/41400/41430', 'park', '502', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41430, '打印价格', 41400, NULL, 'react:/cloud-print/setting', '0', '2', '/40000/41400/41430', 'park', '502', 41400, 'module');
 
 -- 添加权限云打印
 set @eh_acl_privileges_id = (select max(id) from eh_acl_privileges);
