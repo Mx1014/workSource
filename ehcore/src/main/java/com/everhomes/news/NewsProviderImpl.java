@@ -5,9 +5,12 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
+import com.everhomes.server.schema.tables.daos.EhNewsCommunitiesDao;
+import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
+import com.everhomes.server.schema.tables.records.EhNewsCommunitiesRecord;
+import com.everhomes.user.UserContext;
+import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -86,13 +89,34 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public List<News> listNews(Long categoryId,Integer namespaceId, Long from, Integer pageSize) {
-		SelectConditionStep<Record> step =  getReadOnlyContext().select().from(Tables.EH_NEWS).where(Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode())) ;
-		if(null != categoryId)
-			step.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
-		return step.orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
-				.limit(from.intValue(), pageSize.intValue()).fetch().map(r -> ConvertHelper.convert(r, News.class));
+	public List<News> listNews(Long communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize) {
+		SelectJoinStep<Record> step =  getReadOnlyContext().select().from(Tables.EH_NEWS);
+
+		Condition cond = Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()));
+		if(null != categoryId) {
+			cond = cond.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
+		}
+		if (communityId != null) {
+			step.join(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
+			cond = cond.and(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID.eq(communityId));
+		}
+
+		return step.where(cond).orderBy(Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
+				.limit(from.intValue(), pageSize).fetch().map(new DefaultRecordMapper(Tables.EH_NEWS.recordType(), News.class));
+	}
+
+	@Override
+	public Boolean getCommentForbiddenFlag(Long categoryId, Integer namespaceId) {
+		final Integer[] count = new Integer[1];
+		count[0] = getReadOnlyContext().selectCount().from(Tables.EH_NEWS_COMMENT_RULE)
+				.where(Tables.EH_NEWS_COMMENT_RULE.CATEGORY_ID.eq(categoryId)
+						.and(Tables.EH_NEWS_COMMENT_RULE.NAMESPACE_ID.eq(namespaceId))).fetchOneInto(Integer.class);
+
+		if(count[0] > 0) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -100,7 +124,35 @@ public class NewsProviderImpl implements NewsProvider {
 		return getReadOnlyContext().select(Tables.EH_NEWS.TOP_INDEX.max()).from(Tables.EH_NEWS).where(Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId))
 		.fetchOne().value1();
 	}
-	
+
+	@Override
+	public void createNewsCommunity(NewsCommunity newsCommunity) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewsCommunities.class));
+		newsCommunity.setId(id);
+		newsCommunity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		newsCommunity.setCreatorUid(UserContext.current().getUser().getId());
+
+		EhNewsCommunitiesDao dao = new EhNewsCommunitiesDao(getContext(AccessSpec.readWrite()).configuration());
+		dao.insert(newsCommunity);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNewsCommunities.class, null);
+	}
+
+	@Override
+	public List<Long> listNewsCommunities(Long newsId) {
+		SelectQuery<EhNewsCommunitiesRecord> query = getReadOnlyContext().selectQuery(Tables.EH_NEWS_COMMUNITIES);
+		query.addConditions(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(newsId));
+
+		return query.fetch(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID);
+	}
+
+	@Override
+	public void deleteNewsCommunity(Long newsId) {
+		DeleteQuery query = getContext(AccessSpec.readWrite()).deleteQuery(Tables.EH_NEWS_COMMUNITIES);
+		query.addConditions(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(newsId));
+
+		query.execute();
+	}
+
 	private EhNewsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

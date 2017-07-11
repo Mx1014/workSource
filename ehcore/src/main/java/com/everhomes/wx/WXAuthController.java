@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserLogin;
 import org.apache.http.Consts;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -45,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -174,7 +177,8 @@ public class WXAuthController {// extends ControllerBase
         
         LoginToken loginToken = userService.getLoginToken(request);
         // 没有登录，则请求微信授权
-        if(!userService.isValid(loginToken)) {
+        // 因为公众号有一对多的情况，需要增加检查域空间checkUserNamespaceId，当域空间不一致时用户登出，并且需要重新走授权登录流程。   add by yanjun 20170620
+        if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
             sendAuthRequestToWeixin(namespaceId, sessionId, params, response);
             return;
         }
@@ -225,10 +229,13 @@ public class WXAuthController {// extends ControllerBase
             redirectByWx(response, codeUrl);
         } else {
             LoginToken loginToken = userService.getLoginToken(request);
-            if(!userService.isValid(loginToken)) {
+
+            // 因为公众号有一对多的情况，需要增加检查域空间checkUserNamespaceId方法，当域空间不一致时用户登出。   add by yanjun 20170620
+            if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
                 // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
                 processUserInfo(namespaceId, request, response);
             }
+
             String sourceUrl = params.get(KEY_SOURCE_URL);
             redirectByWx(response, sourceUrl);
             
@@ -295,10 +302,11 @@ public class WXAuthController {// extends ControllerBase
         String callbackUrl =  configurationProvider.getValue(namespaceId, "home.url", "") + contextPath + wxAuthCallbackUrl;
         callbackUrl = appendParamToUrl(callbackUrl, params);
 
-        String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
+        String appId = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_APPID, "");
+
         String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
                 + "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
-                URLEncoder.encode(callbackUrl, "UTF-8"), sessionId); 
+                URLEncoder.encode(callbackUrl, "UTF-8"), sessionId);
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(send auth to weixin), authorizeUrl={}, callbackUrl={}", authorizeUri, callbackUrl);
@@ -368,8 +376,9 @@ public class WXAuthController {// extends ControllerBase
             LOGGER.info("Process weixin auth request(userinfo calculate), startTime={}", startTime);
         }
         
-        String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
-        String secret = configurationProvider.getValue(namespaceId, "wx.offical.account.secret", "");
+        String appId = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_APPID, "");
+        String secret = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_SECRET, "");
+
         // 微信提供的临时code
         String code = request.getParameter("code");
         
@@ -543,5 +552,30 @@ public class WXAuthController {// extends ControllerBase
                 }
             }
         }
+    }
+
+    //检出当前登录用户域空间和需要登录的域空间是否相同，不同则登出    add by yanjun 20170620
+    private boolean checkUserNamespaceId(Integer namespaceId){
+
+	    Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+        LOGGER.info("checkUserNamespaceId, namespaceId={}, currentNamespaceId={}", namespaceId, currentNamespaceId);
+        if(currentNamespaceId == null){
+            return false;
+        }
+
+        if(namespaceId == null || namespaceId.intValue() != currentNamespaceId.intValue()){
+            if(UserContext.current() != null){
+                UserLogin login = UserContext.current().getLogin();
+                if(login != null){
+                    userService.logoff(login);
+                    LOGGER.info("checkUserNamespaceId, userService.logoff");
+                }
+            }
+            return false;
+        }
+
+        return true;
+
+
     }
 }

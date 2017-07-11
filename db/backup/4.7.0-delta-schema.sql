@@ -255,12 +255,6 @@ ALTER TABLE `eh_service_module_assignments` ADD `all_module_flag` tinyint(4) COM
 ALTER TABLE `eh_service_module_assignments` ADD `include_child_flag` tinyint(4) COMMENT '0 not include, 1 include';
 ALTER TABLE `eh_service_module_assignments` ADD `relation_id` bigint(20) NOT NULL;
 
-ALTER TABLE `eh_acl_roles` ADD COLUMN `creator_uid` BIGINT DEFAULT 0 COMMENT 'creator uid' ;
-ALTER TABLE `eh_acl_roles` ADD COLUMN `create_time` DATETIME DEFAULT now() COMMENT 'record create time';
-
-ALTER TABLE `eh_acl_roles` ADD INDEX `i_eh_acl_role_creator_uid`(`creator_uid`);
-ALTER TABLE `eh_acl_roles` ADD INDEX `i_eh_acl_role_create_time`(`create_time`);
-
 
 -- 授权表，包括模块管理员角色管理员授权
 CREATE TABLE `eh_authorizations` (

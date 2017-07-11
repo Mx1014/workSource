@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>orderDays: 订单天数</li>
  * <li>orderHours: 订单小时数</li>
  * <li>orderTime: 订单时长</li>
+ * <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
  * </ul>
  */
 public class ActivityTimeResponse {
@@ -23,6 +24,7 @@ public class ActivityTimeResponse {
 	private Integer orderDays;
 	private Integer orderHours;
 	private Long orderTime;
+	private Byte wechatSignup;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -78,6 +80,14 @@ public class ActivityTimeResponse {
 
 	public void setOrderTime(Long orderTime) {
 		this.orderTime = orderTime;
+	}
+
+	public Byte getWechatSignup() {
+		return wechatSignup;
+	}
+
+	public void setWechatSignup(Byte wechatSignup) {
+		this.wechatSignup = wechatSignup;
 	}
 
 	@Override

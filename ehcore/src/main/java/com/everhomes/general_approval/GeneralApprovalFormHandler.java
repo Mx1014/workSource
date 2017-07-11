@@ -1,14 +1,11 @@
 package com.everhomes.general_approval;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +51,7 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
         PostApprovalFormCommand cmd2 = new PostApprovalFormCommand();
         cmd2.setApprovalId(cmd.getSourceId());
         cmd2.setValues(cmd.getValues());
+        cmd2.setOrganizationId(cmd.getCurrentOrganizationId());
 
         GetTemplateByApprovalIdResponse response = generalApprovalService.postApprovalForm(cmd2);
         PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
