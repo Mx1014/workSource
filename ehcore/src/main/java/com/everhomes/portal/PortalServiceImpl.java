@@ -266,7 +266,16 @@ public class PortalServiceImpl implements PortalService {
 		Collections.sort(dtos, new Comparator<PortalItemGroupDTO>() {
 			@Override
 			public int compare(PortalItemGroupDTO o1, PortalItemGroupDTO o2) {
-				return o1.getDefaultorder() - o2.getDefaultorder();
+				Integer order1 = 0;
+				if(null != o1.getDefaultorder()){
+					order1 = o1.getDefaultorder();
+				}
+
+				Integer order2 = 0;
+				if(null != o2.getDefaultorder()){
+					order2 = o2.getDefaultorder();
+				}
+				return order1 - order2;
 			}
 		});
 		return new ListPortalItemGroupsResponse();
@@ -357,7 +366,16 @@ public class PortalServiceImpl implements PortalService {
 			Collections.sort(dtos, new Comparator<PortalItemDTO>() {
 				@Override
 				public int compare(PortalItemDTO o1, PortalItemDTO o2) {
-					return o1.getDefaultOrder() - o2.getDefaultOrder();
+					Integer order1 = 0;
+					if(null != o1.getDefaultOrder()){
+						order1 = o1.getDefaultOrder();
+					}
+
+					Integer order2 = 0;
+					if(null != o2.getDefaultOrder()){
+						order2 = o2.getDefaultOrder();
+					}
+					return order1 - order2;
 				}
 			});
 		}
@@ -478,6 +496,9 @@ public class PortalServiceImpl implements PortalService {
 			UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(portalItem.getActionData(), UrlActionData.class);
 			dto.setContentName(actionData.getUrl());
 		}
+
+		List<PortalContentScope> portalContentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
+		dto.setScopes(processListPortalContentScopeDTO(portalContentScopes));
 
 		return dto;
 	}
@@ -605,15 +626,17 @@ public class PortalServiceImpl implements PortalService {
 			dto.setItems(portalItems.stream().map(i ->{
 				return processPortalItemDTO(i);
 			}).collect(Collectors.toList()));
-
-			List<PortalContentScope> portalContentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM_CATEGORY.getCode(), r.getId());
-			dto.setScopes(processListPortalContentScopeDTO(portalContentScopes));
 			return dto;
 		}).collect(Collectors.toList());
 		Collections.sort(portalItemCategories, new Comparator<PortalItemCategoryDTO>() {
 			@Override
 			public int compare(PortalItemCategoryDTO o1, PortalItemCategoryDTO o2) {
-				return o1.getDefaultOrder() - o2.getDefaultOrder();
+				Integer order1 = 0;
+				if(null != o1.getDefaultOrder()) order1 = o1.getDefaultOrder();
+
+				Integer order2 = 0;
+				if(null != o2.getDefaultOrder()) order2 = o2.getDefaultOrder();
+				return order1 - order2;
 			}
 		});
 		return new ListPortalItemCategoriesResponse(portalItemCategories);
@@ -687,6 +710,10 @@ public class PortalServiceImpl implements PortalService {
 			String url = contentServerService.parserUri(portalItemCategory.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 			dto.setIconUrl(url);
 		}
+
+		List<PortalContentScope> portalContentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId());
+		dto.setScopes(processListPortalContentScopeDTO(portalContentScopes));
+
 		return dto;
 	}
 

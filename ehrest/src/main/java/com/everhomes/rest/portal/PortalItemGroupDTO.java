@@ -31,7 +31,7 @@ public class PortalItemGroupDTO {
     private String widget;
     private String style;
     private String instanceConfig;
-    private Integer defaultorder;
+    private Integer defaultOrder;
     private Long createTime;
     private Long updateTime;
     private Long operatorUid;
@@ -104,12 +104,12 @@ public class PortalItemGroupDTO {
         this.instanceConfig = instanceConfig;
     }
 
-    public Integer getDefaultorder() {
-        return defaultorder;
+    public Integer getDefaultOrder() {
+        return defaultOrder;
     }
 
-    public void setDefaultorder(Integer defaultorder) {
-        this.defaultorder = defaultorder;
+    public void setDefaultOrder(Integer defaultOrder) {
+        this.defaultOrder = defaultOrder;
     }
 
     public Long getCreateTime() {

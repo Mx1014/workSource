@@ -1,6 +1,10 @@
 package com.everhomes.rest.portal;
 
 
+import com.everhomes.discover.ItemType;
+
+import java.util.List;
+
 /**
  * <ul>
  * <li>id: 门户item的id</li>
@@ -47,6 +51,9 @@ public class PortalItemDTO {
     private Long creatorUid;
     private String creatorUName;
     private String operatorUName;
+
+    @ItemType(PortalContentScopeDTO.class)
+    private List<PortalContentScopeDTO> scopes;
 
     public Long getId() {
         return id;
@@ -223,5 +230,13 @@ public class PortalItemDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<PortalContentScopeDTO> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<PortalContentScopeDTO> scopes) {
+        this.scopes = scopes;
     }
 }
