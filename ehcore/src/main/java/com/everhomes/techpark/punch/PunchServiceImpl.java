@@ -1,13 +1,6 @@
 package com.everhomes.techpark.punch;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Time;
@@ -2858,27 +2851,28 @@ public class PunchServiceImpl implements PunchService {
 			 
 	}
 	
-	public void createPunchStatisticsBook(String path,List<PunchStatistic> results) {
+	public Workbook createPunchStatisticsBook( List<PunchStatistic> results) {
 		if (null == results || results.size() == 0)
-			return;
+			return null;
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("punchStatistics");
 		
 		this.createPunchStatisticsBookSheetHead(sheet );
 		for (PunchStatistic statistic : results )
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
-		try {
-			
-			FileOutputStream out = new FileOutputStream(path);
-			wb.write(out);
-			wb.close();
-			out.close();
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
-					e.getLocalizedMessage());
-		}
+		return wb;
+//		try {
+//
+//			FileOutputStream out = new FileOutputStream(path);
+//			wb.write(out);
+//			wb.close();
+//			out.close();
+//		} catch (Exception e) {
+//			LOGGER.error(e.getMessage());
+//			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+//					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+//					e.getLocalizedMessage());
+//		}
 	}
 
 //	@Override
@@ -2960,36 +2954,24 @@ public class PunchServiceImpl implements PunchService {
 //		
 //		return download(filePath,response);
 //	}
-	public HttpServletResponse download(String path, HttpServletResponse response) {
+	public HttpServletResponse download(Workbook workbook, String fileName, HttpServletResponse response) {
         try {
-            // path是指欲下载的文件的路径。
-            File file = new File(path);
-            // 取得文件名。
-            String filename = file.getName();
-            // 取得文件的后缀名。
-//            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
-
-            // 以流的形式下载文件。
-            InputStream fis = new BufferedInputStream(new FileInputStream(path));
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            fis.close();
-            // 清空response
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			workbook.write(out);
             response.reset();
             // 设置response的Header
-            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
-            response.addHeader("Content-Length", "" + file.length());
-            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
-            response.setContentType("application/octet-stream");
-            toClient.write(buffer);
-            toClient.flush();
-            toClient.close();
-            
-            // 读取完成删除文件
-            if (file.isFile() && file.exists()) {  
-                file.delete();  
-            } 
-        } catch (IOException ex) { 
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes()));
+			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+			response.setContentType("application/msexcel");
+			toClient.write(out.toByteArray());
+			toClient.flush();
+			toClient.close();
+
+//            // 读取完成删除文件
+//            if (file.isFile() && file.exists()) {
+//                file.delete();
+//            }
+        } catch (IOException ex) {
  			LOGGER.error(ex.getMessage());
  			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
@@ -4377,40 +4359,24 @@ public class PunchServiceImpl implements PunchService {
 			
 		}
 		
-		URL rootPath = PunchServiceImpl.class.getResource("/");
-		String filePath =rootPath.getPath() + this.downloadDir ;
-		File file = new File(filePath);
-		if(!file.exists())
-			file.mkdirs();
-		filePath = filePath + "PunchDetails"+System.currentTimeMillis()+".xlsx";
+		String filePath = "PunchDetails" + System.currentTimeMillis() + ".xlsx";
 		//新建了一个文件
+
+		Workbook wb = createPunchDetailsBook(dtos);
 		
-		this.createPunchDetailsBook(filePath,dtos);
-		
-		return download(filePath,response);
+		return download(wb,filePath,response);
 	}
 
-    private void createPunchDetailsBook(String path, List<PunchDayDetailDTO> dtos) {
+    private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos) {
     	if (null == dtos || dtos.size() == 0)
-			return;
+			return null;
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("punchDetails");
 		
 		this.createPunchDetailsBookSheetHead(sheet );
 		for (PunchDayDetailDTO dto : dtos )
 			this.setNewPunchDetailsBookRow(sheet, dto);
-		try {
-			
-			FileOutputStream out = new FileOutputStream(path);
-			wb.write(out);
-			wb.close();
-			out.close();
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
-					e.getLocalizedMessage());
-		}
+		return wb;
 	}
     private String convertTimeLongToString(Long timeLong){
     	if(null == timeLong)
@@ -4803,18 +4769,18 @@ public class PunchServiceImpl implements PunchService {
 		if(null == results || results.isEmpty())
 			return response;
 		URL rootPath = PunchServiceImpl.class.getResource("/");
-		String filePath =rootPath.getPath() + this.downloadDir ;
-		File file = new File(filePath);
-		if(!file.exists())
-			file.mkdirs();
-		filePath = filePath + "PunchStatistics"+System.currentTimeMillis()+".xlsx";
+//		String filePath =rootPath.getPath() + this.downloadDir ;
+//		File file = new File(filePath);
+//		if(!file.exists())
+//			file.mkdirs();
+		String fileName =  "PunchStatistics"+System.currentTimeMillis()+".xlsx";
 		//新建了一个文件
+
+		Workbook wb = createPunchStatisticsBook(results);
 		
-		this.createPunchStatisticsBook(filePath,results);
-		
-		return download(filePath,response);
+		return download(wb,fileName,response);
 	}
-	
+
 	@Override
 	public void refreshMonthDayLogs(String month){
 
@@ -5719,29 +5685,28 @@ public class PunchServiceImpl implements PunchService {
 //		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
 		 
 		
-		URL rootPath = PunchServiceImpl.class.getResource("/");
-		String filePath =rootPath.getPath() + this.downloadDir ;
-		File file = new File(filePath);
-		if(!file.exists())
-			file.mkdirs();
+//		URL rootPath = PunchServiceImpl.class.getResource("/");
+//		String filePath =rootPath.getPath() + this.downloadDir ;
+//		File file = new File(filePath);
+//		if(!file.exists())
+//			file.mkdirs();
 
 		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
-		filePath = filePath +monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"排班表":scheduleLocaleString.getText())+".xlsx";
-		LOGGER.debug("filePath = "+ filePath);
+		String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"排班表":scheduleLocaleString.getText())+".xlsx";
 		//新建了一个文件
-		
-		createPunchSchedulingsBook(filePath,listPunchScheduling(cmd));
-		
-		return download(filePath,response);
+
+		Workbook wb = createPunchSchedulingsBook(listPunchScheduling(cmd));
+
+		return download(wb, filePath, response);
 		 
 	}
 	
-	 private void createPunchSchedulingsBook(String filePath,
+	 private Workbook createPunchSchedulingsBook(
 			ListPunchSchedulingMonthResponse listPunchScheduling) {
 		// TODO Auto-generated method stub
 			if (null == listPunchScheduling ||  listPunchScheduling.getSchedulings().size() == 0)
-				return;
+				return null;
 			Workbook wb = new XSSFWorkbook();
 			Sheet sheet = wb.createSheet("sheet1");
 			
@@ -5758,18 +5723,7 @@ public class PunchServiceImpl implements PunchService {
 			for (PunchSchedulingDTO statistic : listPunchScheduling.getSchedulings() )
 				setNewPunchSchedulingsBookRow(sheet, statistic,textlist);
 //			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
-			try {
-				
-				FileOutputStream out = new FileOutputStream(filePath);
-				wb.write(out);
-				wb.close();
-				out.close();
-			} catch (Exception e) {
-				LOGGER.error(e.getMessage());
-				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-						PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
-						e.getLocalizedMessage());
-			}
+		 	return wb;
 	}
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet) { 
 		Row row = sheet.createRow(sheet.getLastRowNum());
