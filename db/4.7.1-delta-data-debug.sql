@@ -1,8 +1,5 @@
--- 以下sql只在beta做测试使用
+-- 服务广场 -- 添加到左邻域 -- 在alpha，beta执行
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('beta.print.order.amount', 'true', '用于支付测试', '0', NULL);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.inform.url', 'http://printtest.zuolin.com/evh/siyinprint/informPrint?identifierToken=', '二维码url地址', '0', NULL);
-
--- 服务广场 -- 添加到左邻域
 SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` 
 (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`,
@@ -33,6 +30,7 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/
 '', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
  1, 1, '', 0, NULL, NULL, NULL, 0,
  'pm_admin', 1, NULL, NULL, 0, NULL);
+ -- 服务广场 -- 添加到左邻域 -- 在alpha，beta执行 -- end
  
 -- by dengs,司印服务器ip地址,二维码时间，默认打印价格，生成打印二维码的url 20170615
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.server.url', 'http://siyin.zuolin.com:8119', '司印服务器ip地址', '0', NULL);
