@@ -2,31 +2,29 @@
 package com.everhomes.rest.salary;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.uniongroup.UniongroupTarget;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
 /**
  * <ul>
- * <li>departmentIds: 部门id</li>
- * <li>detailIds: 用户DetailId</li>
+ * <li>departments: 部门信息{@link com.everhomes.rest.uniongroup.UniongroupTarget}</li>
+ * <li>users: 用户信息，参考{@link com.everhomes.rest.uniongroup.UniongroupTarget}</li>
  * <li>salaryGroupId: 薪酬组id</li>
- * <li>name: 部门或人员名称</li>
  * <li>ownerType: 'organization'</li>
  * <li>ownerId: organizationId</li>
  * </ul>
  */
 public class AddToOrganizationSalaryGroupCommand {
 
-	@ItemType(Long.class)
-	private List<Long> departmentIds;
+	@ItemType(UniongroupTarget.class)
+	private List<UniongroupTarget> departments;
 
-	@ItemType(Long.class)
-	private List<Long> detailIds;
+	@ItemType(UniongroupTarget.class)
+	private List<UniongroupTarget> users;
 
 	private Long salaryGroupId;
-
-	private String name;
 
 	private String ownerType;
 
@@ -36,15 +34,23 @@ public class AddToOrganizationSalaryGroupCommand {
 
 	}
 
-	public List<Long> getDepartmentIds() {
-		return departmentIds;
-	}
+    public List<UniongroupTarget> getDepartments() {
+        return departments;
+    }
 
-	public void setDepartmentIds(List<Long> departmentIds) {
-		this.departmentIds = departmentIds;
-	}
+    public void setDepartments(List<UniongroupTarget> departments) {
+        this.departments = departments;
+    }
 
-	public Long getSalaryGroupId() {
+    public List<UniongroupTarget> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<UniongroupTarget> users) {
+        this.users = users;
+    }
+
+    public Long getSalaryGroupId() {
         return salaryGroupId;
     }
 
@@ -52,39 +58,23 @@ public class AddToOrganizationSalaryGroupCommand {
         this.salaryGroupId = salaryGroupId;
     }
 
-	public List<Long> getDetailIds() {
-		return detailIds;
-	}
+    public String getOwnerType() {
+        return ownerType;
+    }
 
-	public void setDetailIds(List<Long> detailIds) {
-		this.detailIds = detailIds;
-	}
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public Long getOwnerId() {
+        return ownerId;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}

@@ -124,7 +124,7 @@ VALUES('51230','工资发放','51200',NULL,'access_group/inside','0','2','/50000
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
 VALUES('51231','核算阶段','51230',NULL,'react:/salary-management/salary-check','0','2','/50000/51200/51230/51231','park','595','51200');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES('51232','发放阶段','51230',NULL,'react:/salary-management/salary-chec','0','2','/50000/51200/51230/51232','park','596','51200');
+VALUES('51232','发放阶段','51230',NULL,'react:/salary-management/salary-pay','0','2','/50000/51200/51230/51232','park','596','51200');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
 VALUES('51240','发放历史','51200',NULL,'react:/salary-management/pay-history','0','2','/50000/51200/51240','park','597','51200');
 

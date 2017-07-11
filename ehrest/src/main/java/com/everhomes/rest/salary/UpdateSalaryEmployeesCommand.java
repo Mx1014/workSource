@@ -13,6 +13,7 @@ import java.util.List;
  * <li>salaryGroupId: 批次id</li>
  * <li>userId: 用户id</li>
  * <li>userDetailId: 用户档案id</li>
+ * <li>name: 用户名称</li>
  * <li>ownerType: 'organization'</li>
  * <li>owernId: organizationId</li>
  * </ul>
@@ -27,6 +28,8 @@ public class UpdateSalaryEmployeesCommand {
     private Long userId;
 
     private Long userDetailId;
+
+    private String name;
 
     private String ownerType;
 
@@ -58,6 +61,14 @@ public class UpdateSalaryEmployeesCommand {
 
     public void setUserDetailId(Long userDetailId) {
         this.userDetailId = userDetailId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getOwnerType() {

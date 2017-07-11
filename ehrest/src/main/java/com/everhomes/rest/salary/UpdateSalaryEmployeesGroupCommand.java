@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>userId: 用户id</li>
  * <li>detailId: 用户档案id</li>
+ * <li>name: 用户名称</li>
  * <li>salaryGroupId: 批次id</li>
  * <li>ownerType: 'organization'</li>
  * <li>owernId: organizationId</li>
@@ -18,6 +19,8 @@ public class UpdateSalaryEmployeesGroupCommand {
 	private Long userId;
 
 	private Long detailId;
+
+	private String name;
 
 	private Long salaryGroupId;
 
@@ -44,6 +47,14 @@ public class UpdateSalaryEmployeesGroupCommand {
 
 	public void setDetailId(Long detailId) {
 		this.detailId = detailId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public Long getSalaryGroupId() {
