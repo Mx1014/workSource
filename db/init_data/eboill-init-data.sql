@@ -420,3 +420,34 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999973, 'sms.default.yzx', 53, 'zh_CN', '申诉-保集', '90076');
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- 更新banner和item图片   20170707  add by yanjun
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwa01XUXdNRGMwWldSaE0yVmhaakptTldWaE9UTmhNVFF3WkdWaU1UYzBOQQ' where id in (204075, 204076, 204077, 204078) and namespace_id = 999973;
+
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNVlURXpPVGhqTnpFMll6TTRNVFEwTWprME16Vm1ObU5qWW1WalkyWmxOUQ' where id in (116460, 116472) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvM04yUXpNVGRqWldNM1ltVm1ZalU0TnpobFkyRTRNV1ZrT0RFMk9UQTJZdw' where id in (116461, 116473) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMU1EaGhNV1JrWVRsbFlqbGhNMk5sTkRRMk9UUTROalZoTkRFek5HWXpZZw' where id in (116457, 116469) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNU16QmlaR1JsWW1aaE16Z3dNek00Wm1Ka09EQTBOemcwWXpBM05UbGhZdw' where id in (116456, 116468) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk56aGxaV013WmpObFlqWTBaRGhrTmpobU9EbGxOVGc1TUdSa1pqWTNNdw' where id in (116455, 116467) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNU9UUXhPV015Wm1NM01qUmhNMk0xWkRCaVl6QTRORGMxWlRFd1l6QTRPQQ' where id in (116464, 116476) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE5XTTVOelZqT1dJMVpUVmpOek14WWpWaVlqUXhPR0ZsWkRNeVkySmpPQQ' where id in (116459, 116471) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE1XSXdZelZoTlRjek9UZGhOVFZtT1RoaE9UVXpOVGczTkdRNU5USTFNUQ' where id in (116462, 116474) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd05XSm1aRE14Tm1RMlptVXhPR05pT1dFNFl6WmxObVV3TVRFMVpXRTBOZw' where id in (116466, 116478) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwalpqRXhaR1V5T1dVNE1UVTBOekUxT0RKak5qTmtabU16T1RnMFlqazFaQQ' where id in (116458, 116470) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMllUYzRPVGswT0RBd01qQmlPRGxrTlRjMU56STFZelJoTlRReU5URTFZUQ' where id in (116465, 116477) and namespace_id = 999973;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk16STJZekU1TjJRME9URTBaakkwTnpRd01XRTNaREJqTkdFNFl6TmpaQQ' where id in (116463, 116475) and namespace_id = 999973;
+
+-- 更新服务广场，item显示问题 20170710 add by yanjun
+update eh_launch_pad_items set display_flag = '0' where id in (116464, 116465, 116466, 116476, 116477, 116478) and namespace_id = 999973;
+update eh_launch_pad_items set item_group = 'Bizs' where id in (116461, 116465, 116473, 116477) and namespace_id = 999973;
+
+-- 更新新闻显示问题，只显示月日，不显示时间  20170710 add by yanjun
+update eh_launch_pad_layouts set layout_json = '{"versionCode":"2017070401","versionName":"4.7.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Metro","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount": 2},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"date","categoryId":0,"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16}]}' where  id in (596, 597) and namespace_id = 999973;
+
+-- 更新短信模板 20170710 add by yanjun
+update  eh_locale_templates set text = 90043 where namespace_id = 999973 and scope = 'sms.default.yzx' and code = 1;
+
+-- 缺少数据导致 园区入驻、招租管理出错。20170710 add by yanjun
+SET @eh_lease_configs_id = (SELECT MAX(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES((@eh_lease_configs_id := @eh_lease_configs_id + 1),'999973','1','1','1','1','1','1');

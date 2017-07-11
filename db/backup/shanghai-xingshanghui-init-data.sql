@@ -497,3 +497,9 @@ INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, 
 INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@max_scope_id := @max_scope_id + 1), 60100, '', 'EhNamespaces', @namespace_id, 2);
 INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@max_scope_id := @max_scope_id + 1), 60200, '', 'EhNamespaces', @namespace_id, 2);
 INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@max_scope_id := @max_scope_id + 1), 40000, '', 'EhNamespaces', @namespace_id, 2);
+
+	
+-- 星商会 物业管理后台增加表单管理菜单 add by sfyan 20170710
+SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
+insert into `eh_web_menu_scopes` (`id`, `menu_id`,`owner_type`, `owner_id`,`apply_policy`) values ((@menu_scope_id := @menu_scope_id + 1),50900,'EhNamespaces',999981,2);
+

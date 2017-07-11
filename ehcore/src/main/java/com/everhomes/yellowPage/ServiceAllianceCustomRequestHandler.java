@@ -173,7 +173,6 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		}
 		notifyMap.put("title", title);
 		//modify by dengs,20170425  更换模板，发送html邮件
-//		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_ORG_ADMIN_IN_HTML;
 		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		
@@ -184,7 +183,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		if(serviceOrg != null) {
 			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 			if(member != null) {
-				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
+				code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
+				String notifyText = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+				sendMessageToUser(member.getTargetId(), notifyText);
 			}
 			sendEmail(serviceOrg.getEmail(), title, notifyTextForOrg,stringAttementList);
 		}

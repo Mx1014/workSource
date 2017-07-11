@@ -379,3 +379,12 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 	VALUES((@menu_scope_id := @menu_scope_id + 1),40541,'', 'EhNamespaces', 999974,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES((@menu_scope_id := @menu_scope_id + 1),40542,'', 'EhNamespaces', 999974,2);
+
+
+-- 新城智慧管家一键上网 by dengs,20170710
+SET @launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES 
+	((@launch_pad_items_id := @launch_pad_items_id+1), 999974, 0, 0, 0, '/home', 'Bizs', '一键上网', '一键上网', 'cs://1/image/aW1hZ2UvTVRvM05qUm1NMlJoTkRsall6Z3laak0xTURWbE1EY3dOMk0zTURka00yTm1OZw', 1, 1, 47, '', 1, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 1, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES 
+	((@launch_pad_items_id := @launch_pad_items_id+1), 999974, 0, 0, 0, '/home', 'Bizs', '一键上网', '一键上网', 'cs://1/image/aW1hZ2UvTVRvM05qUm1NMlJoTkRsall6Z3laak0xTURWbE1EY3dOMk0zTURka00yTm1OZw', 1, 1, 47, '', 1, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 1, NULL, NULL, 0, NULL);
+

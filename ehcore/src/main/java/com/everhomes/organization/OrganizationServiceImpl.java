@@ -61,7 +61,6 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -5926,8 +5925,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if(_m.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && _m.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
                         createOrUpdateUserOrganization(_m);
                     }
+                    m = _m;
                 }
             }
+
 
             //刷新企业通讯录
             if (null != userIdentifier)
@@ -7187,21 +7188,27 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public List<OrganizationManagerDTO> listOrganizationManagers(ListOrganizationManagersCommand cmd) {
         checkOrganization(cmd.getOrganizationId());
-        return this.getOrganizationManagers(cmd.getOrganizationId());
+        return this.getOrganizationManagers(Collections.singletonList(cmd.getOrganizationId()));
     }
 
     @Override
     public List<OrganizationManagerDTO> listOrganizationAllManagers(ListOrganizationManagersCommand cmd) {
-        checkOrganization(cmd.getOrganizationId());
+        Organization org = checkOrganization(cmd.getOrganizationId());
         List<String> types = new ArrayList<>();
-        types.add(OrganizationGroupType.GROUP.getCode());
-        types.add(OrganizationGroupType.DEPARTMENT.getCode());
-        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(cmd.getOrganizationId(), types);
-        List<Long> organizationIds = new ArrayList<>();
-        for (Organization organization : organizations) {
-            organizationIds.add(organization.getId());
-        }
-        return this.getOrganizationManagers(organizationIds);
+//        types.add(OrganizationGroupType.GROUP.getCode());
+//        types.add(OrganizationGroupType.DEPARTMENT.getCode());
+//        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(cmd.getOrganizationId(), types);
+//        List<Long> organizationIds = new ArrayList<>();
+//        for (Organization organization : organizations) {
+//            organizationIds.add(organization.getId());
+//        }
+//        return this.getOrganizationManagers(organizationIds);
+        types.add(OrganizationGroupType.MANAGER.getCode());
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMemberByPath(null, org.getPath(), types, null, new CrossShardListingLocator(), 1000000);
+        List<OrganizationManagerDTO> organizationManagerDTOs = organizationMembers.stream().map(r->{
+            return ConvertHelper.convert(r,OrganizationManagerDTO.class);
+        }).collect(Collectors.toList());
+        return organizationManagerDTOs;
     }
 
     @Override
@@ -7234,6 +7241,35 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     @Override
     public List<OrganizationManagerDTO> getOrganizationManagers(List<Long> organizationIds) {
+//        List<OrganizationManagerDTO> dtos = new ArrayList<>();
+//        //机构经理
+//        List<String> types = new ArrayList<>();
+//        types.add(OrganizationGroupType.MANAGER.getCode());
+//        List<Long> managerGroupIds = new ArrayList<>();
+//        for (Long organizationId : organizationIds) {
+//            List<Organization> managerGroups = organizationProvider.listOrganizationByGroupTypes(organizationId, types);
+//            if (0 < managerGroups.size()) {
+//                managerGroupIds.add(managerGroups.get(0).getId());
+//            }
+//        }
+//
+//        if (0 < managerGroupIds.size()) {
+//            List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(managerGroupIds, new ListingQueryBuilderCallback() {
+//                @Override
+//                public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+//                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+//                    query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+//                    return query;
+//                }
+//            });
+//            for (OrganizationMember member : members) {
+//                OrganizationManagerDTO managerDTO = ConvertHelper.convert(member, OrganizationManagerDTO.class);
+//                managerDTO.setMemberId(member.getId());
+//                dtos.add(managerDTO);
+//            }
+//        }
+//        return dtos;
+
         List<OrganizationManagerDTO> dtos = new ArrayList<>();
         //机构经理
         List<String> types = new ArrayList<>();
@@ -7242,7 +7278,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (Long organizationId : organizationIds) {
             List<Organization> managerGroups = organizationProvider.listOrganizationByGroupTypes(organizationId, types);
             if (0 < managerGroups.size()) {
-                managerGroupIds.add(managerGroups.get(0).getId());
+                managerGroups.forEach(r ->{
+                    managerGroupIds.add(r.getId());
+                });
             }
         }
 
@@ -9286,6 +9324,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (null == dtos || 0 == dtos.size()) {
             return ConvertHelper.convert(organization, OrganizationDTO.class);
         }
+        //检查是否有公司直属的记录
+        for (OrganizationDTO dto : dtos) {
+            if (dto.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())) {
+                //找到直属部门的上级公司
+                Organization enterprise = checkOrganization(dto.getParentId());
+                if(enterprise != null){
+                    OrganizationDTO enterpriseDTO = ConvertHelper.convert(checkOrganization(dto.getParentId()),OrganizationDTO.class);
+                    return enterpriseDTO;
+                }
+            }
+        }
+
+        //如果没有直属记录，则返回首位层级最高的部门
         OrganizationDTO topDepartment = null;
         Integer topDepartmentNum = 10000;
         for (OrganizationDTO dto : dtos) {
@@ -10049,7 +10100,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         return dtos;
     }
 
-    private List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId) {
+    @Override
+    public List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId) {
         return listOrganizationContactByJobPositionId(enterpriseId, null, jobPositionId);
     }
 
