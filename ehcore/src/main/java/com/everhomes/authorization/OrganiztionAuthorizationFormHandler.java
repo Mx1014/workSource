@@ -23,6 +23,7 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormSourceType;
 import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
@@ -36,6 +37,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryService;
 import com.everhomes.techpark.expansion.LeaseFormRequest;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -140,46 +142,24 @@ public class OrganiztionAuthorizationFormHandler implements GeneralFormModuleHan
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-
-        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
-
         GeneralFormDTO dto = new GeneralFormDTO();
-
-        if (null != request) {
-            GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
-            cmd2.setFormId(request.getSourceId());
-
-            dto = generalFormService.getTemplateByFormId(cmd2);
-            List<GeneralFormFieldDTO> temp = dto.getFormFields();
-
-            GeneralForm form = getDefaultGeneralForm(EntityType.BUILDING.getCode());
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-
-            fieldDTOs.addAll(temp);
-            dto.setFormFields(fieldDTOs);
-        } else {
-            //查询初始默认数据
-            GeneralForm form = getDefaultGeneralForm(EntityType.BUILDING.getCode());
-
-            dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-
-            dto.setFormFields(fieldDTOs);
-        }
-
-
+        //通过sourceType获取表单
+        GeneralForm form = getGeneralFormBySourceType(cmd.getSourceType());
+        dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+       //改namespace
+        dto.setOwnerType(EntityType.NAMESPACE.getCode());
+        dto.setOwnerId(Long.valueOf(UserContext.current().getNamespaceId()));
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        dto.setFormFields(fieldDTOs);
         return dto;
     }
 
-    GeneralForm getDefaultGeneralForm(String ownerType) {
+    GeneralForm getGeneralFormBySourceType(String ownerType) {
         List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
                 Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
                     @Override
                     public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                                                                         SelectQuery<? extends Record> query) {
-                        query.addConditions(Tables.EH_GENERAL_FORMS.NAMESPACE_ID.eq(0));
-                        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(0L));
                         query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
                         return query;
                     }

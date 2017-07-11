@@ -300,7 +300,7 @@ public class UserUiController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /ui/user/listAuthForms</b>
-	 * <p>获取张江高科的家庭认证和公司认证的sourceType,sourceId</p>
+	 * <p>获取家庭认证和公司认证的sourceType,sourceId</p>
 	 */
 	@RequestMapping("listAuthForms")
 	@RestReturn(value=ListAuthFormsResponse.class)
