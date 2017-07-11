@@ -11,6 +11,7 @@ import java.util.List;
  * <li>departmentIds: 部门id</li>
  * <li>detailIds: 用户DetailId</li>
  * <li>salaryGroupId: 薪酬组id</li>
+ * <li>name: 部门或人员名称</li>
  * <li>ownerType: 'organization'</li>
  * <li>ownerId: organizationId</li>
  * </ul>
@@ -24,6 +25,8 @@ public class AddToOrganizationSalaryGroupCommand {
 	private List<Long> detailIds;
 
 	private Long salaryGroupId;
+
+	private String name;
 
 	private String ownerType;
 
@@ -55,6 +58,14 @@ public class AddToOrganizationSalaryGroupCommand {
 
 	public void setDetailIds(List<Long> detailIds) {
 		this.detailIds = detailIds;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getOwnerType() {

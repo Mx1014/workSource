@@ -754,6 +754,7 @@ public class SalaryServiceImpl implements SalaryService {
                 UniongroupTarget target = new UniongroupTarget();
                 target.setId(r);
                 target.setType(UniongroupTargetType.ORGANIZATION.getCode());
+                target.setName(cmd.getName());
                 targets.add(target);
             });
         }
@@ -764,6 +765,7 @@ public class SalaryServiceImpl implements SalaryService {
                 UniongroupTarget target = new UniongroupTarget();
                 target.setId(r);
                 target.setType(UniongroupTargetType.MEMBERDETAIL.getCode());
+                target.setName(cmd.getName());
                 targets.add(target);
             });
         }
