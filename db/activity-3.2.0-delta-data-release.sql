@@ -8,4 +8,4 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- 生成公众号订单异常信息
 SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'activity','10026','zh_CN','生成公众号订单异常');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@eh_locale_strings_id := @eh_locale_strings_id + 1),'activity','10026','zh_CN','生成公众号订单异常');
