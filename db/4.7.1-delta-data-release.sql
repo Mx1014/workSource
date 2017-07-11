@@ -21,40 +21,41 @@ INSERT INTO `eh_siyin_print_printers` (`id`, `namespace_id`, `owner_type`, `owne
 -- by dengs,云打印菜单配置 20170626
 -- 添加菜单 -- 按照产品要求，添加菜单到左邻域
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41400, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', 41400);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41400, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41410, '打印记录', 41400, NULL, 'react:/cloud-print/record', '0', '2', '/40000/41400/41410', 'park', '500', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41410, '打印记录', 41400, NULL, 'react:/cloud-print/record', '0', '2', '/40000/41400/41410', 'park', '500', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41420, '打印统计', 41400, NULL, 'react:/cloud-print/count', '0', '2', '/40000/41400/41420', 'park', '501', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41420, '打印统计', 41400, NULL, 'react:/cloud-print/count', '0', '2', '/40000/41400/41420', 'park', '501', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41430, '打印价格', 41400, NULL, 'react:/cloud-print/setting', '0', '2', '/40000/41400/41430', 'park', '502', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41430, '打印价格', 41400, NULL, 'react:/cloud-print/setting', '0', '2', '/40000/41400/41430', 'park', '502', 41400, 'module');
 
 -- 添加权限云打印
+set @eh_acl_privileges_id = (select max(id) from eh_acl_privileges);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (30046, 0, '云打印', '云打印 全部权限', NULL);
+VALUES ((@eh_acl_privileges_id := @eh_acl_privileges_id+1), 0, '云打印', '云打印 全部权限', NULL);
 
 -- 菜单对应的权限
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 30046, 41400, '云打印', 1, 1, '云打印  全部权限', 499);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41400, '云打印', 1, 1, '云打印  全部权限', 499);
 
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 30046, 41410, '打印记录', 1, 1, '打印记录  全部权限', 500);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41410, '打印记录', 1, 1, '打印记录  全部权限', 500);
 
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 30046, 41420, '打印统计', 1, 1, '打印统计  全部权限', 501);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41420, '打印统计', 1, 1, '打印统计  全部权限', 501);
 
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 30046, 41430, '打印价格', 1, 1, '打印价格  全部权限', 502);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41430, '打印价格', 1, 1, '打印价格  全部权限', 502);
 
 -- 角色对应的菜单权限
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, 30046, 1001, 'EhAclRoles', 0, 1, NOW());
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @eh_acl_privileges_id, 1001, 'EhAclRoles', 0, 1, NOW());
 
 -- 菜单的范围 --0域不加scope
 -- SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
@@ -74,7 +75,7 @@ VALUES (41400, '云打印', 40000, '/40000/41400', 0, 2, 2, 0, UTC_TIMESTAMP());
 -- 模块权限
 SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), 41400, 1, 30046, NULL, '0', UTC_TIMESTAMP());
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), 41400, 1, @eh_acl_privileges_id, NULL, '0', UTC_TIMESTAMP());
 
 -- 模块权限范围
 SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
@@ -82,3 +83,30 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `modu
 VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 0, 41400, '云打印', NULL, NULL, NULL, 2);
 
 -- by dengs 添加菜单 end
+
+
+-- merge from activty-3.2.0  by yanjun 20170710 start
+
+
+-- 活动公众号报名使用新的页面，并且增加默认公众号。生成公众号支付的订单接口   add by yanjun 20170620
+UPDATE eh_configurations SET VALUE = '/share-activity/build/index.html#/detail' WHERE NAME = 'activity.share.url';
+SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'wx.offical.account.appid','wx5db5ebf00a251407','默认公众号开发者AppId-左邻平台','0',NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'wx.offical.account.secret','cc0a483e3f50a14ed795d7ebea947f4c','默认公众号开发者AppId-左邻平台','0',NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'pay.zuolin.wechatJs','POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder','生成公众号订单的api','0',NULL);
+
+-- 生成公众号订单异常信息
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@eh_locale_strings_id := @eh_locale_strings_id + 1),'activity','10026','zh_CN','生成公众号订单异常');
+
+-- merge from activty-3.2.0  by yanjun 20170710 end
+
+-- 园区入驻1.3 add by sw 20170711
+UPDATE eh_news set visible_type = 'ALL';
+SET @id = (SELECT MAX(id) FROM `eh_news_communities`);
+INSERT INTO `eh_news_communities` (`id`, `news_id`, `community_id`, `creator_uid`, `create_time`) 
+	SELECT (@id := @id + 1), eh_news.id, community_id, 1, NOW() from eh_organization_communities join eh_news on eh_news.owner_id = eh_organization_communities.organization_id;
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) 
+	VALUES ('news', '10009', 'zh_CN', '请选择范围');
+
+	

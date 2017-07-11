@@ -448,3 +448,6 @@ update eh_launch_pad_layouts set layout_json = '{"versionCode":"2017070401","ver
 -- 更新短信模板 20170710 add by yanjun
 update  eh_locale_templates set text = 90043 where namespace_id = 999973 and scope = 'sms.default.yzx' and code = 1;
 
+-- 缺少数据导致 园区入驻、招租管理出错。20170710 add by yanjun
+SET @eh_lease_configs_id = (SELECT MAX(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES((@eh_lease_configs_id := @eh_lease_configs_id + 1),'999973','1','1','1','1','1','1');
