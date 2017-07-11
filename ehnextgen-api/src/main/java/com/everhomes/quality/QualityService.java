@@ -3,7 +3,6 @@ package com.everhomes.quality;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.quality.*;
@@ -58,5 +57,18 @@ public interface QualityService {
 	void deleteUserQualityInspectionTaskTemplate(DeleteUserQualityInspectionTaskTemplateCommand cmd);
 	void sendTaskMsg(Long startTime, Long endTime);
 
+	SampleQualityInspectionDTO createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd);
+	SampleQualityInspectionDTO updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd);
+	SampleQualityInspectionDTO findSampleQualityInspection(FindSampleQualityInspectionCommand cmd);
+	void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd);
+	ListSampleQualityInspectionResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd);
+	ListQualityInspectionTasksResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd);
+
+	CountSampleTaskScoresResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd);
+	CountSampleTasksResponse countSampleTasks(CountSampleTasksCommand cmd);
+	CountScoresResponse countSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd);
+	CountSampleTaskSpecificationItemScoresResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd);
+
+	void updateSampleScoreStat();
 	QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd);
 }

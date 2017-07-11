@@ -1052,9 +1052,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 	 * Added by xiongying 20160518
 	 */
 	@Override
-	public List<CommunityDTO> listCommunitiesByType(List<Long> communityIds, Byte communityType,
+	public List<CommunityDTO> listCommunitiesByType(int namespaceId, List<Long> communityIds, Byte communityType,
 			ListingLocator locator, int pageSize) {
-		int namespaceId = UserContext.getCurrentNamespaceId();
+//		int namespaceId = UserContext.getCurrentNamespaceId();
 		final List<CommunityDTO> results = new ArrayList<>();
 		
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
@@ -1377,6 +1377,20 @@ public class CommunityProviderImpl implements CommunityProvider {
         query.fetch().map(r ->{
             communities.add(ConvertHelper.convert(r, Community.class));
            return null;
+        });
+        return communities;
+    }
+
+    @Override
+    public Map<Long, Community> listCommunitiesByIds(List<Long> ids) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        final Map<Long, Community> communities = new HashMap<>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+        query.addConditions(Tables.EH_COMMUNITIES.ID.in(ids));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.fetch().map(r ->{
+            communities.put(r.getId(), ConvertHelper.convert(r, Community.class));
+            return null;
         });
         return communities;
     }

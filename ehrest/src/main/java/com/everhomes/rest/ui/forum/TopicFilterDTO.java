@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionUrl: 点击触发的链接，与标准HTTP请求URL一致（需要补充上前面那段Host），如果值没有或没空则说明不能点击</li>
  * <li>defaultFlag: 默认触发该过滤器，{@link com.everhomes.rest.ui.forum.SelecterBooleanFlag}</li>
  * <li>leafFlag: 是否叶子节点，非叶子节点则可折叠，{@link com.everhomes.rest.ui.forum.SelecterBooleanFlag}</li>
+ * <li>forumId: 论坛Id，新建帖子的选择范围的时候可以参考这里的forumId初始化默认范围</li>
  * </ul>
  */
 public class TopicFilterDTO {
@@ -26,6 +27,7 @@ public class TopicFilterDTO {
     private String actionUrl;
     private Byte defaultFlag;
     private Byte leafFlag;
+    private Long forumId;
 
     public Long getId() {
         return id;
@@ -97,6 +99,14 @@ public class TopicFilterDTO {
 
     public void setLeafFlag(Byte leafFlag) {
         this.leafFlag = leafFlag;
+    }
+
+    public Long getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(Long forumId) {
+        this.forumId = forumId;
     }
 
     @Override

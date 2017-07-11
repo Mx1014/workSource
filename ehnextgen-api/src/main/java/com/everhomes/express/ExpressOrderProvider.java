@@ -10,8 +10,6 @@ public interface ExpressOrderProvider {
 	void createExpressOrder(ExpressOrder expressOrder);
 
 	void updateExpressOrder(ExpressOrder expressOrder);
-
-	Object query(String query);
 	
 	ExpressOrder findExpressOrderById(Long id);
 

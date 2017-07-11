@@ -218,6 +218,7 @@ import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
 import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
 import com.everhomes.rest.user.admin.UsersWithAddrResponse;
 import com.everhomes.settings.PaginationConfigHelper;
+<<<<<<< HEAD
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeaseFormRequest;
@@ -229,6 +230,44 @@ import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+=======
+import com.everhomes.sms.*;
+import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.geo.GeoHashUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+>>>>>>> master
 
 /**
  * 
@@ -371,6 +410,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
 
+    @Autowired
+    private SmsBlackListProvider smsBlackListProvider;
+
 	private static final String DEVICE_KEY = "device_login";
 
 	@PostConstruct
@@ -480,10 +522,12 @@ public class UserServiceImpl implements UserService {
      * 校验短信发送频率
      */
     private void verifySmsTimes(String smsAction, String identifierToken, String deviceId) {
-    	//added by janson 消息序列化不正确的根本原因在于这里 03-31
+        checkSmsBlackList(smsAction, identifierToken);
+
+    	// added by janson 消息序列化不正确的根本原因在于这里 03-31
         RedisTemplate template = bigCollectionProvider.getMapAccessor("sendSmsTimes", "").getTemplate(new StringRedisSerializer());
         // 设置value的序列化，要不然下面的increment方法会报错 
-//        template.setValueSerializer(new StringRedisSerializer()); 坚决不用这种写法，会导致消息模块报错！因为这个是设置全局的 template
+        // template.setValueSerializer(new StringRedisSerializer()); 坚决不用这种写法，会导致消息模块报错！因为这个是设置全局的 template
         ValueOperations op = template.opsForValue();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -494,7 +538,8 @@ public class UserServiceImpl implements UserService {
         Integer smsTimesPhoneForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForADay", "5"));
 
         // 老版本的客户端没有deviceId
-        boolean hasDeviceId = StringUtils.isNotBlank(deviceId);
+        // boolean hasDeviceId = StringUtils.isNotBlank(deviceId);
+        boolean hasDeviceId = false;// 客户端传来的deviceId有问题，先不校验这个
 
         // 每个手机号每天发送次数≤5
         String phoneDayKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.PHONE.name(), SmsVerify.Duration.DAY.name(), identifierToken);
@@ -508,7 +553,8 @@ public class UserServiceImpl implements UserService {
         } else {
             Integer t = Integer.valueOf((String) times);
             if (t >= smsTimesPhoneForADay) {
-                LOGGER.error("Verification code request is too frequent, please try again after 24 hours. phone={}, times={}", identifierToken, t);
+                createSmsBlackList(smsAction, identifierToken);
+                LOGGER.error("Verification code request is too frequent with phone, please try again after 24 hours. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
                         "Verification code request is too frequent, please try again after 24 hours");
             }
@@ -526,7 +572,7 @@ public class UserServiceImpl implements UserService {
             } else {
                 Integer t = Integer.valueOf((String) times);
                 if (t >= smsTimesDeviceForADay) {
-                    LOGGER.error("Verification code request is too frequent, please try again after 24 hours. deviceId={}, times={}", deviceId, t);
+                    LOGGER.error("Verification code request is too frequent with device, please try again after 24 hours. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
                     throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
                             "Verification code request is too frequent, please try again after 24 hours");
                 }
@@ -542,7 +588,7 @@ public class UserServiceImpl implements UserService {
         } else {
             Integer t = Integer.valueOf((String) times);
             if (t >= smsTimesPhoneForAnHour) {
-                LOGGER.error("Verification code request is too frequent, please 1 hour to try again. phone={}, times={}", identifierToken, t);
+                LOGGER.error("Verification code request is too frequent with phone, please 1 hour to try again. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
                         "Verification code request is too frequent, please 1 hour to try again");
             }
@@ -558,7 +604,7 @@ public class UserServiceImpl implements UserService {
             } else {
                 Integer t = Integer.valueOf((String) times);
                 if (t >= smsTimesDeviceForAnHour) {
-                    LOGGER.error("Verification code request is too frequent, please 1 hour to try again. deviceId={}, times={}", deviceId, t);
+                    LOGGER.error("Verification code request is too frequent with device, please 1 hour to try again. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
                     throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
                             "Verification code request is too frequent, please 1 hour to try again");
                 }
@@ -586,6 +632,26 @@ public class UserServiceImpl implements UserService {
         if (hasDeviceId) {
             op.increment(deviceHourKey, 1L);
             op.increment(deviceDayKey, 1L);
+        }
+    }
+
+    private void createSmsBlackList(String smsAction, String identifierToken) {
+        SmsBlackList blackList = new SmsBlackList();
+        blackList.setReason(smsAction);
+        blackList.setContactToken(identifierToken);
+        blackList.setStatus(SmsBlackListStatus.BLOCK.getCode());
+        blackList.setCreateType(SmsBlackListCreateType.SYSTEM.getCode());
+        blackList.setNamespaceId(UserContext.getCurrentNamespaceId());
+        smsBlackListProvider.createSmsBlackList(blackList);
+    }
+
+    @Override
+    public void checkSmsBlackList(String smsAction, String identifierToken) {
+        SmsBlackList blackList = smsBlackListProvider.findByContactToken(identifierToken);
+        if (blackList != null && Objects.equals(blackList.getStatus(), SmsBlackListStatus.BLOCK.getCode())) {
+            LOGGER.info("sms black list user try to send sms, smsAction = {}, contactToken = {}", smsAction, identifierToken);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_BLACK_LIST,
+                    "Hi guys, you are black list user.");
         }
     }
 
@@ -3953,6 +4019,25 @@ public class UserServiceImpl implements UserService {
 	    return resp;
 	}
 
+	@Override
+	public SearchUsersResponse searchUsers(SearchUsersCommand cmd) {
+		SearchUsersResponse resp = new SearchUsersResponse();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<User> users = this.userProvider.listUserByNamespace(cmd.getKeywords(), namespaceId, locator, pageSize);
+		resp.setNextPageAnchor(locator.getAnchor());
+		resp.setDtos(new ArrayList<>());
+		for(User u : users) {
+			UserDTO dto = ConvertHelper.convert(u, UserDTO.class);
+			dto.setName(dto.getNickName());
+			resp.getDtos().add(dto);
+		}
+		return resp;
+	}
+	
 	@Override
 	public ListAuthFormsResponse listAuthForms() {
 		int namespaceId = UserContext.current().getNamespaceId();

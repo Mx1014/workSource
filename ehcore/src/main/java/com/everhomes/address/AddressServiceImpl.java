@@ -1120,6 +1120,24 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return response;
     }
 
+    @Override
+    public ListApartmentByBuildingNameCommandResponse listCommunityApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd) {
+        if (cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid communityId, buildingName parameter");
+
+        int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size",
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, (long) pageSize);
+        ListApartmentByBuildingNameCommandResponse response = new ListApartmentByBuildingNameCommandResponse();
+
+        List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(),
+                cmd.getBuildingName(), offset, pageSize);
+        response.setApartmentList(list);
+        return response;
+    }
+
     private static void sortApartment(List<ApartmentDTO> results) {
         if (results == null || results.isEmpty())
             return;
@@ -2016,12 +2034,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(), cmd.getLongitude(), 5);
         List<Long> communityIds = getAllCommunityIds(pointList);
 
+        int namespaceId = UserContext.getCurrentNamespaceId();
+
         if (cmd.getCommunityType() == null) {
             if (cmd.getPageAnchor() != 0) {
                 Community anchorCommunity = this.communityProvider.findCommunityById(cmd.getPageAnchor());
                 if (anchorCommunity != null && anchorCommunity.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
                     //园区 Anchor
-                    List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds,
+                    List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(namespaceId, communityIds,
                             CommunityType.COMMERCIAL.getCode(), locator, pageSize + 1);
                     if (commercials != null) {
                         results.addAll(commercials);
@@ -2035,7 +2055,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         //小区  从0开始
                         ListingLocator residentialsLocator = new CrossShardListingLocator();
                         residentialsLocator.setAnchor(0L);
-                        List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds,
+                        List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(namespaceId, communityIds,
                                 CommunityType.RESIDENTIAL.getCode(), residentialsLocator, count + 1);
                         if (residentials != null) {
                             results.addAll(residentials);
@@ -2044,7 +2064,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
                 } else {
                     //小区 Anchor
-                    List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds,
+                    List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(namespaceId, communityIds,
                             CommunityType.RESIDENTIAL.getCode(), locator, pageSize + 1);
                     if (residentials != null) {
                         results.addAll(residentials);
@@ -2052,7 +2072,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 }
             } else {
                 //园区  从0开始
-                List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds,
+                List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(namespaceId, communityIds,
                         CommunityType.COMMERCIAL.getCode(), locator, pageSize + 1);
                 if (commercials != null) {
                     results.addAll(commercials);
@@ -2064,7 +2084,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         count = pageSize - commercials.size();
                     }
                     //小区  从0开始
-                    List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds,
+                    List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(namespaceId, communityIds,
                             CommunityType.RESIDENTIAL.getCode(), locator, count + 1);
                     if (residentials != null) {
                         results.addAll(residentials);
@@ -2072,13 +2092,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 }
             }
         } else if (cmd.getCommunityType() != null && cmd.getCommunityType().equals(CommunityType.COMMERCIAL.getCode())) {
-            List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds,
+            List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(namespaceId, communityIds,
                     CommunityType.COMMERCIAL.getCode(), locator, pageSize + 1);
             if (commercials != null) {
                 results.addAll(commercials);
             }
         } else if (cmd.getCommunityType() != null && cmd.getCommunityType().equals(CommunityType.RESIDENTIAL.getCode())) {
-            List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds,
+            List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(namespaceId, communityIds,
                     CommunityType.RESIDENTIAL.getCode(), locator, pageSize + 1);
             if (residentials != null) {
                 results.addAll(residentials);

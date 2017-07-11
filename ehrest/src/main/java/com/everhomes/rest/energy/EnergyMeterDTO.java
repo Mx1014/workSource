@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 /**
  * <ul>
  *     <li>id: id</li>
+ *     <li>communityId: 项目id</li>
  *     <li>name: 表记名称</li>
  *     <li>meterNumber: 表记号码</li>
  *     <li>meterType: 表记类型</li>
@@ -32,6 +33,7 @@ import java.sql.Timestamp;
 public class EnergyMeterDTO {
 
     private Long id;
+    private Long communityId;
     private String name;
     private String meterNumber;
     private String meterType;
@@ -60,6 +62,14 @@ public class EnergyMeterDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public String getName() {
