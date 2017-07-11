@@ -54,7 +54,7 @@ public interface SalaryService {
 	public ImportFileTaskDTO importSalaryGroup(MultipartFile mfile, Long userId, ImportSalaryGroupCommand cmd);
 
 
-	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd);
+	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpServletResponse);
 
 
 	public void importPeriodSalary(ImportPeriodSalaryCommand cmd);
