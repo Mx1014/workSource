@@ -298,6 +298,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItemGroup.setStyle(cmd.getStyle());
 		portalItemGroup.setInstanceConfig(cmd.getInstanceConfig());
 		portalItemGroup.setOperatorUid(user.getId());
+		portalItemGroup.setDescription(cmd.getDescription());
 		portalItemGroupProvider.updatePortalItemGroup(portalItemGroup);
 		return processPortalItemGroupDTO(portalItemGroup);
 	}
@@ -609,7 +610,12 @@ public class PortalServiceImpl implements PortalService {
 			dto.setScopes(processListPortalContentScopeDTO(portalContentScopes));
 			return dto;
 		}).collect(Collectors.toList());
-
+		Collections.sort(portalItemCategories, new Comparator<PortalItemCategoryDTO>() {
+			@Override
+			public int compare(PortalItemCategoryDTO o1, PortalItemCategoryDTO o2) {
+				return o1.getDefaultOrder() - o2.getDefaultOrder();
+			}
+		});
 		return new ListPortalItemCategoriesResponse(portalItemCategories);
 	}
 
@@ -620,6 +626,7 @@ public class PortalServiceImpl implements PortalService {
 		PortalItemCategory portalItemCategory = ConvertHelper.convert(cmd, PortalItemCategory.class);
 		portalItemCategory.setStatus(PortalItemCategoryStatus.ACTIVE.getCode());
 		portalItemCategory.setOperatorUid(user.getId());
+		portalItemCategory.setCreatorUid(user.getId());
 		portalItemCategory.setNamespaceId(namespaceId);
 		this.dbProvider.execute((status) -> {
 			portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);

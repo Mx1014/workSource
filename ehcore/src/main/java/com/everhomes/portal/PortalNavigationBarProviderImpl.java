@@ -60,7 +60,7 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
 	public List<PortalNavigationBar> listPortalNavigationBar(Integer namespaceId) {
 		Condition cond = Tables.EH_PORTAL_NAVIGATION_BARS.STATUS.ne(PortalNavigationBarStatus.INACTIVE.getCode());
 		if(null != namespaceId){
-			cond = cond.and(Tables.EH_PORTAL_ITEMS.NAMESPACE_ID.eq(namespaceId));
+			cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.NAMESPACE_ID.eq(namespaceId));
 		}
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)
 				.where(cond)
