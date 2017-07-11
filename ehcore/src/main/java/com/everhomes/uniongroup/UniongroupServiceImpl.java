@@ -117,19 +117,19 @@ public class UniongroupServiceImpl implements UniongroupService {
                     Set<Long> memberIds = this.organizationProvider.listMemberDetailIdWithExclude(namespaceId, org.getPath(), underOrgPaths);
                     if (memberIds == null) {
                         LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
-                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
-                                "memberIds is not found。");
+//                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
+//                                "memberIds is not found。");
                     }
                     //去掉配置表中单独勾选的人员id
                     memberIds.removeAll(old_detail_ids);
 
                     detailIds.addAll(memberIds);
-                } else {//如果不存在子部门
+                } else {//如果不存在子部门,则找到这个部门下的人
                     Set<Long> memberIds = this.organizationProvider.listMemberDetailIdWithExclude(namespaceId, org.getPath(), null);
                     if (memberIds == null) {
                         LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
-                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
-                                "memberIds is not found。");
+//                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
+//                                "memberIds is not found。");
                     }
                     //去掉配置表中单独勾选的人员id
                     memberIds.removeAll(old_detail_ids);
