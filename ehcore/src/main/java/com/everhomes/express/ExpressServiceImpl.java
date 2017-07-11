@@ -287,11 +287,6 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 
 	@Override
-	public Object query(String query) {
-		return expressOrderProvider.query(query);
-	}
-
-	@Override
 	public ListExpressOrderResponse listExpressOrder(ListExpressOrderCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		checkPrivilege(owner, cmd.getServiceAddressId(), cmd.getExpressCompanyId());

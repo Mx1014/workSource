@@ -33,7 +33,7 @@ public class EncryptUtil {
         SecretKey securekey = keyFactory.generateSecret(dks);
         cipher.init(Cipher.ENCRYPT_MODE, securekey, ivs);
         BASE64Encoder base64Encoder = new BASE64Encoder();
-        System.out.println(data.toJSONString());
+
         return base64Encoder.encode(cipher.doFinal(data.toJSONString().getBytes(CHARSET)));
 
     }

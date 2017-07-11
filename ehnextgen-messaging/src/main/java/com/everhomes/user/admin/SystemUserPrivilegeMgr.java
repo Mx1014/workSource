@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.acl.*;
+import com.everhomes.domain.Domain;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModulePrivilege;
 import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.module.ServiceModuleProvider;
@@ -12,8 +14,10 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
+import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.*;
 
@@ -66,27 +70,30 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     /**
      * 校验角色权限
-     * @param organizationId
+     * @param currentOrgId
      * @param privilegeId
      * @return
      */
     @Override
-    public boolean checkRoleAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
+    public boolean checkRoleAccess(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
 
-        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == organizationId){
+        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == currentOrgId){
             return false;
         }
 
-        List<RoleAssignment> roleAssignments = rolePrivilegeService.getUserAllOrgRoles(organizationId, userId);
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
-        for (RoleAssignment roleAssignment: roleAssignments) {
-            AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleAssignment.getRoleId());
-            descriptors.add(descriptor);
-        }
-        if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors)){
-            return true;
-        }else if(EntityType.fromCode(ownerType) == EntityType.ORGANIZATIONS || null == EntityType.fromCode(ownerType) || null == ownerId ){
-            return false;
+        List<RoleAssignment> roleAssignments = null;
+
+        if(null != currentOrgId){
+            roleAssignments = rolePrivilegeService.getUserAllOrgRoles(currentOrgId, userId);
+            for (RoleAssignment roleAssignment: roleAssignments) {
+                AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleAssignment.getRoleId());
+                descriptors.add(descriptor);
+            }
+
+            if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), currentOrgId, privilegeId, descriptors)){
+                return true;
+            }
         }
 
         roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(ownerType, ownerId, EntityType.USER.getCode(), userId);
@@ -99,41 +106,101 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     }
 
     @Override
-    public boolean checkModuleAdmin(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
+    public boolean checkModuleAdmin(Long userId, String ownerType, Long ownerId, Long privilegeId){
+
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
-        List<Long> moduleIds = new ArrayList<>();
-        for (ServiceModulePrivilege serviceModule: serviceModules) {
-            if(!moduleIds.contains(serviceModule.getModuleId()))
-                moduleIds.add(serviceModule.getModuleId());
+        if(0 < serviceModules.size()){
+            //校验是否拥有模块管理权限
+            ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
+            Long moduleId = module.getId();
+            if(module.getLevel() > 2){
+                moduleId = module.getParentId();
+            }
+            return checkModuleAdmin(ownerType, ownerId, userId, moduleId);
         }
-        if(0 < moduleIds.size()){
-            List<ServiceModulePrivilege> moduleAdmins = serviceModuleProvider.listServiceModulePrivileges(moduleIds, ServiceModulePrivilegeType.SUPER);
-            for (ServiceModulePrivilege moduleAdmin:moduleAdmins) {
-                if(checkAccess(userId, ownerType, ownerId, organizationId, moduleAdmin.getPrivilegeId())){
-                    return true;
-                }
+        //校验是否拥有全部模块的管理权限
+        List<AclRoleDescriptor> descriptors = new ArrayList<>();
+        descriptors.add(new AclRoleDescriptor(EntityType.USER.getCode(), userId));
+        return aclProvider.checkAccessEx(ownerType, ownerId, PrivilegeConstants.ALL_SERVICE_MODULE, descriptors);
+    }
+
+    @Override
+    public boolean checkModuleAdmin(String ownerType, Long ownerId, Long userId, Long moduleId){
+        if(checkModuleAccess(ownerType, ownerId, userId, moduleId, ServiceModulePrivilegeType.SUPER)){
+            return true;
+        }
+        return checkAllModuleAdmin(ownerType, ownerId,userId);
+    }
+
+    @Override
+    public boolean checkModuleAllPrivileges(String ownerType, Long ownerId, Long userId, Long privilegeId){
+        List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
+        if(0 < serviceModules.size()){
+            ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
+            return checkModuleAccess(ownerType, ownerId, userId, module.getParentId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkModuleAllPrivileges(String ownerType, Long ownerId, List<AclRoleDescriptor> descriptors, Long privilegeId){
+        List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
+        if(0 < serviceModules.size()){
+            ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
+            return checkModuleAccess(ownerType, ownerId, descriptors, module.getParentId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkAllModuleAdmin(String ownerType, Long ownerId, Long userId){
+        List<AclRoleDescriptor> descriptors = new ArrayList<>();
+        descriptors.add(new AclRoleDescriptor(EntityType.USER.getCode(), userId));
+        if(aclProvider.checkAccessEx(ownerType, ownerId, PrivilegeConstants.ALL_SERVICE_MODULE, descriptors)){
+            return true;
+        }
+        return false;
+    }
+
+
+    @Override
+    public boolean checkModuleAccess(String ownerType, Long ownerId, Long userId, Long moduleId, ServiceModulePrivilegeType type){
+        List<AclRoleDescriptor> descriptors = new ArrayList<>();
+        descriptors.add(new AclRoleDescriptor(EntityType.USER.getCode(), userId));
+        if(checkModuleAccess(ownerType, ownerId, descriptors, moduleId, type)){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkModuleAccess(String ownerType, Long ownerId, List<AclRoleDescriptor> descriptors, Long moduleId, ServiceModulePrivilegeType type){
+        List<ServiceModulePrivilege> moduleAdmins = serviceModuleProvider.listServiceModulePrivileges(moduleId, type);
+        for (ServiceModulePrivilege moduleAdmin:moduleAdmins) {
+            if(aclProvider.checkAccessEx(ownerType, ownerId, moduleAdmin.getPrivilegeId(), descriptors)){
+                return true;
             }
         }
         return false;
     }
 
     @Override
-    public boolean checkSuperAdmin(Long userId, Long organizationId){
-        if(null == organizationId){
+    public boolean checkSuperAdmin(Long userId, Long currentOrgId){
+        if(null == currentOrgId){
             return false;
         }
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
         descriptors.add(descriptor);
-        return aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, descriptors);
+        return aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), currentOrgId, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, descriptors);
     }
 
     @Override
-    public boolean checkOrganizationAdmin(Long userId, Long organizationId){
+    public boolean checkOrganizationAdmin(Long userId, Long currentOrgId){
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
         descriptors.add(descriptor);
-        return aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.ORGANIZATION_ADMIN, descriptors);
+        return aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), currentOrgId, PrivilegeConstants.ORGANIZATION_ADMIN, descriptors);
     }
 
 
@@ -141,72 +208,128 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * 校验权限
      * @param ownerType
      * @param ownerId
-     * @param organizationId
+     * @param currentOrgId
      * @param privilegeId
      * @return
      */
-    private boolean checkAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
-        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == organizationId){
-            return false;
-        }
+    private boolean checkAccess(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         descriptors.add(new AclRoleDescriptor(EntityType.USER.getCode(), userId));
-        if(null != organizationId){
-            List<String> groupTypes = new ArrayList<>();
-            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-            groupTypes.add(OrganizationGroupType.GROUP.getCode());
-            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-            List<OrganizationDTO> orgDTOs = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
-            LOGGER.debug("user organizations:{}", orgDTOs);
-            descriptors.add(new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), organizationId));
-            for (OrganizationDTO orgDTO: orgDTOs) {
-                descriptors.add(new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), orgDTO.getId()));
+        if(null != currentOrgId){
+            //获取用户所关联的机构id，包括所属机构的所有上级
+            List<Long> organizationIds =  organizationService.getIncludeOrganizationIdsByUserId(userId, currentOrgId);
+            LOGGER.debug("user organizationIds:{}", organizationIds);
+            for (Long id: organizationIds) {
+                descriptors.add(new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), id));
+            }
+//            if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors)){
+//                return true;
+//            }else if(EntityType.fromCode(ownerType) == EntityType.ORGANIZATIONS || null == EntityType.fromCode(ownerType) || null == ownerId){
+//                return false;
+//            }
+        }
+        if(null != EntityType.fromCode(ownerType) && null != ownerId){
+            //校验具体范围下是否拥有具体权限
+            if(aclProvider.checkAccessEx(ownerType, ownerId, privilegeId, descriptors)){
+                return true;
             }
 
-            if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors)){
+            //校验具体范围下是否拥有模块的全部权限
+            if(checkModuleAllPrivileges(ownerType, ownerId, descriptors, privilegeId)){
                 return true;
-            }else if(EntityType.fromCode(ownerType) == EntityType.ORGANIZATIONS || null == EntityType.fromCode(ownerType) || null == ownerId){
-                return false;
             }
+
         }
-        return aclProvider.checkAccessEx(ownerType, ownerId, privilegeId, descriptors);
+
+        //校验全部范围下是否拥有权限
+        if(aclProvider.checkAccessEx(EntityType.ALL.getCode(), 0L, privilegeId, descriptors)){
+            return true;
+        }
+
+        //校验全部范围下是否拥有模块的全部权限
+        return checkModuleAllPrivileges(EntityType.ALL.getCode(), 0L, descriptors, privilegeId);
     }
 
+
+
     @Override
-    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
-        if(checkSuperAdmin(userId, organizationId)){
-            LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
-            return true;
+    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
+
+        Domain domain = UserContext.current().getDomain();
+
+        if(null != currentOrgId){
+            if(null != currentOrgId){
+                Organization organization = organizationProvider.findOrganizationById(currentOrgId);
+                //子公司的时候 需要获取root 总公司的id
+                if(0L != organization.getParentId()){
+                    currentOrgId = Long.valueOf(organization.getPath().split("/")[1]);
+                }
+                if(null != organization){
+                    if(OrganizationType.PM == OrganizationType.fromCode(organization.getOrganizationType())){
+                        if(checkSuperAdmin(userId, currentOrgId)){
+                            LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
+                            return true;
+                        }
+                        if(checkModuleAdmin(userId, EntityType.ORGANIZATIONS.getCode(), currentOrgId, privilegeId)){
+                            LOGGER.debug("check module admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
+                            return true;
+                        }
+                    }else{
+                        if(checkOrganizationAdmin(userId, currentOrgId)){
+                            LOGGER.debug("check organization admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
+                            return true;
+                        }
+                    }
+                }else{
+                    LOGGER.error("Unable to find the organization.organizationId = {}",  currentOrgId);
+                }
+
+            }
+        }else if(null != domain && PortalType.fromCode(domain.getPortalType()) == PortalType.ZUOLIN){
+            if(checkRoleAccess(userId, ownerType, ownerId, null, privilegeId)){
+                LOGGER.debug("check role privilege success.userId={}, ownerType={}, ownerId={}, currentOrgId = {}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
+                return true;
+            }
         }
 
-        if(checkModuleAdmin(userId, ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("check module admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
+        if(checkAccess(userId, ownerType, ownerId, currentOrgId, privilegeId)){
+            LOGGER.debug("check privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
             return true;
         }
-
-        if(checkAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("check privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
-            return true;
-        }
-
-        if(checkRoleAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("check role privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
-            return true;
-        }
-
-        LOGGER.debug("check privilege error. userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
+        LOGGER.debug("check privilege error. userId={}, ownerType={}, ownerId={}, currentOrgId = {}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
         return false;
     }
 
     @Override
-    public void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
-        if(checkUserPrivilege(userId, ownerType, ownerId, organizationId, privilegeId)){
+    public void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
+
+
+        if(null == userId){
+            userId = UserContext.current().getUser().getId();
+        }
+
+        if(checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId)){
             LOGGER.debug("authority success...");
             return;
         }
-        LOGGER.error("Insufficient privilege, privilegeId={}, organizationId = {}", privilegeId, organizationId);
+        LOGGER.error("Insufficient privilege, privilegeId={}, currentOrgId = {}", privilegeId, currentOrgId);
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
+    }
+
+    @Override
+    public void checkCurrentUserAuthority(String ownerType, Long ownerId, Long privilegeId){
+        checkUserAuthority(null, ownerType, ownerId, null, privilegeId);
+    }
+
+    @Override
+    public void checkCurrentUserAuthority(Long currentOrgId, Long privilegeId){
+        checkUserAuthority(null, null, null, currentOrgId, privilegeId);
+    }
+
+    @Override
+    public void checkCurrentUserAuthority(String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
+        checkUserAuthority(null, ownerType, ownerId, currentOrgId, privilegeId);
     }
 
     @Override

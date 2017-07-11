@@ -1052,9 +1052,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 	 * Added by xiongying 20160518
 	 */
 	@Override
-	public List<CommunityDTO> listCommunitiesByType(List<Long> communityIds, Byte communityType,
+	public List<CommunityDTO> listCommunitiesByType(int namespaceId, List<Long> communityIds, Byte communityType,
 			ListingLocator locator, int pageSize) {
-		int namespaceId = UserContext.getCurrentNamespaceId();
+//		int namespaceId = UserContext.getCurrentNamespaceId();
 		final List<CommunityDTO> results = new ArrayList<>();
 		
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 

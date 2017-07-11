@@ -49,6 +49,7 @@ import com.everhomes.util.StringHelper;
  * <li>videoUrl: TODO 需要么？</li>
  * <li>maxQuantity: 限制人数</li>
  * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
+ * <li>tag: 帖子标签</li>
  * </ul>
  */
 public class NewTopicCommand {
@@ -113,6 +114,8 @@ public class NewTopicCommand {
     private Integer maxQuantity;
     
     private Byte status;
+
+    private String tag;
     
 	public Long getOldId() {
 		return oldId;
@@ -343,7 +346,15 @@ public class NewTopicCommand {
 		this.status = status;
 	}
 
-	@Override
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
