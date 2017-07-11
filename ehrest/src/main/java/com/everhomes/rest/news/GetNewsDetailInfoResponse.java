@@ -40,6 +40,24 @@ public class GetNewsDetailInfoResponse {
 	private Byte likeFlag;
 	private String newsUrl;
 	private String coverUri;
+	private Byte commentFlag;
+	private Integer namespaceId;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Byte getCommentFlag() {
+		return commentFlag;
+	}
+
+	public void setCommentFlag(Byte commentFlag) {
+		this.commentFlag = commentFlag;
+	}
 
 	public String getNewsToken() {
 		return newsToken;

@@ -167,6 +167,7 @@
         eh_authorizations | eh_authorization_relations | eh_service_module_assignment_relations | eh_domains |
         eh_user_notification_settings | eh_group_member_logs | 
         eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat |
+        eh_news_communities | eh_news_comment_rule |
 		eh_rentalv2_price_rules |
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
         eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
