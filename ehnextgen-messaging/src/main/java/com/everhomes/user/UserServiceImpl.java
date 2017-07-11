@@ -3858,11 +3858,7 @@ public class UserServiceImpl implements UserService {
         else {
             // this.verifySmsTimes("resetIdentifier", newIdentifier, request.getHeader(X_EVERHOMES_DEVICE));
 
-            // UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(currUserId, oldRegionCode, oldIdentifier);
             UserIdentifierLog log = userIdentifierLogProvider.findByUserId(currUserId);
-            // if (log == null) {
-            //     log = userIdentifierLogProvider.findByUserIdAndIdentifier(currUserId, newRegionCode, newIdentifier);
-            // }
             // 如果半个小时没有完成整个过程，需要从头开始执行整个流程
             if (log != null && log.notExpire(halfAnHour)
                     && (log.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()
