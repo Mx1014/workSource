@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>communityId: 园区id</li>
  *     <li>isSignedup: 是否左邻注册用户</li>
- *     <li>status: 状态:1-待认证 3-已同意 0-已拒绝</li>
+ *     <li>status: 状态:1-待认证 3-已同意 4-已拒绝</li>
  *     <li>pageOffset: pageOffset</li>
  *     <li>pageAnchor: 页码</li>
  *     <li>pageSize: 每页大小</li>

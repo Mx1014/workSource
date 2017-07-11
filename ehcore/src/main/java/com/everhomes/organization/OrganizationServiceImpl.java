@@ -4943,7 +4943,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setGender(cmd.getGender());
             member.setEmployeeNo(cmd.getEmployeeNo());
             member.setContactDescription(cmd.getContactDescription());
-            organizationProvider.createOrganizationMember(member);
+            // organizationProvider.createOrganizationMember(member);
 
             member.setCreatorUid(user.getId());
             member.setNickName(user.getNickName());

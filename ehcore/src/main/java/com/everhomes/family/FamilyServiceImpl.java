@@ -35,13 +35,13 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.QuestionMetaActionData;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.family.*;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
-import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorType;
@@ -143,6 +143,9 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Autowired
     private PropertyMgrService propertyMgrService;
+
+    @Autowired
+    private GroupMemberLogProvider groupMemberLogProvider;
     
     @Override
     public Family getOrCreatefamily(Address address, User u)      {
@@ -835,7 +838,7 @@ public class FamilyServiceImpl implements FamilyService {
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
-        addGroupMemberLog(member);
+        addGroupMemberLog(member, group);
         //Create reject history
         UserGroupHistory history = new UserGroupHistory();
         history.setGroupId(familyId);
@@ -850,16 +853,20 @@ public class FamilyServiceImpl implements FamilyService {
         else if(cmd.getOperatorRole() == Role.SystemAdmin)
             sendFamilyNotificationForMemberRejectFamilyByAdmin(address,group,member,userId);
     }
-    
-    private void addGroupMemberLog(GroupMember member) {
-    	GroupMemberLog groupMemberLog = new GroupMemberLog();
-    	groupMemberLog.setGroupMemberId(member.getId());
-    	groupMemberLog.setStatus(member.getMemberStatus());
-    	groupMemberLog.setCreatorUid(UserContext.current().getUser().getId());
-    	groupMemberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-    	groupMemberLog.setProcessMessage(member.toString());
-    	groupProvider.createGroupMemberLog(groupMemberLog);
-	}
+
+    private void addGroupMemberLog(GroupMember member, Group group) {
+        GroupMemberLog memberLog = ConvertHelper.convert(member, GroupMemberLog.class);
+        memberLog.setNamespaceId(UserContext.getCurrentNamespaceId());
+        memberLog.setMemberStatus(member.getMemberStatus());
+        memberLog.setOperatorUid(UserContext.currentUserId());
+        memberLog.setApproveTime(DateUtils.currentTimestamp());
+        memberLog.setGroupMemberId(member.getId());
+        memberLog.setCreatorUid(UserContext.currentUserId());
+        memberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        memberLog.setCommunityId(group.getFamilyCommunityId());
+        memberLog.setAddressId(group.getFamilyAddressId());
+        groupMemberLogProvider.createGroupMemberLog(memberLog);
+    }
     
     private void sendFamilyNotificationForMemberRejectFamilyByAdmin(Address address, Group group, GroupMember member,long operatorId) {
         // send notification to the applicant

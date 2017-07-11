@@ -87,6 +87,4 @@ public interface GroupProvider {
     List<GroupMember> listPublicGroupMembersByStatus(Long groupId, Byte status, Long from, int pageSize, boolean includeCreator, Long creatorId);
 
     List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize);
-	GroupMemberLog findGroupMemberLogByGroupMemberId(Long groupMemberId);
-	void createGroupMemberLog(GroupMemberLog groupMemberLog);
 }
