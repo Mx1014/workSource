@@ -147,4 +147,9 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 1000000, 0, 0,
 '', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
  1, 1, 1, 0, NULL, NULL, NULL, 0,
  'pm_admin', 1, NULL, NULL, 0, NULL);
+ 
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 1000000, 'EhOrganizations', NULL, 1, 30079, 1001, 'EhAclRoles', 0, 1, NOW());
+
  -- 服务广场 -- 添加到科技园域 -- 在alpha，beta执行 -- end
