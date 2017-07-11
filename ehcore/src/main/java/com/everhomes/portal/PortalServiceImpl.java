@@ -267,18 +267,18 @@ public class PortalServiceImpl implements PortalService {
 			@Override
 			public int compare(PortalItemGroupDTO o1, PortalItemGroupDTO o2) {
 				Integer order1 = 0;
-				if(null != o1.getDefaultorder()){
-					order1 = o1.getDefaultorder();
+				if(null != o1.getDefaultOrder()){
+					order1 = o1.getDefaultOrder();
 				}
 
 				Integer order2 = 0;
-				if(null != o2.getDefaultorder()){
-					order2 = o2.getDefaultorder();
+				if(null != o2.getDefaultOrder()){
+					order2 = o2.getDefaultOrder();
 				}
 				return order1 - order2;
 			}
 		});
-		return new ListPortalItemGroupsResponse();
+		return new ListPortalItemGroupsResponse(dtos);
 	}
 
 	@Override
@@ -619,8 +619,8 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public ListPortalItemCategoriesResponse listPortalItemCategories(ListPortalItemCategoriesCommand cmd) {
 		Integer namespaceId= UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<PortalItemCategory> portalItemCategorys = portalItemCategoryProvider.listPortalItemCategory(namespaceId);
-		List<PortalItemCategoryDTO> portalItemCategories = portalItemCategorys.stream().map(r ->{
+		List<PortalItemCategory> portalItemCategories = portalItemCategoryProvider.listPortalItemCategory(namespaceId);
+		List<PortalItemCategoryDTO> dtos = portalItemCategories.stream().map(r ->{
 			PortalItemCategoryDTO dto = processPortalItemCategoryDTO(r);
 			List<PortalItem> portalItems = portalItemProvider.listPortalItem(r.getId());
 			dto.setItems(portalItems.stream().map(i ->{
@@ -628,7 +628,7 @@ public class PortalServiceImpl implements PortalService {
 			}).collect(Collectors.toList()));
 			return dto;
 		}).collect(Collectors.toList());
-		Collections.sort(portalItemCategories, new Comparator<PortalItemCategoryDTO>() {
+		Collections.sort(dtos, new Comparator<PortalItemCategoryDTO>() {
 			@Override
 			public int compare(PortalItemCategoryDTO o1, PortalItemCategoryDTO o2) {
 				Integer order1 = 0;
@@ -639,7 +639,7 @@ public class PortalServiceImpl implements PortalService {
 				return order1 - order2;
 			}
 		});
-		return new ListPortalItemCategoriesResponse(portalItemCategories);
+		return new ListPortalItemCategoriesResponse(dtos);
 	}
 
 	@Override
