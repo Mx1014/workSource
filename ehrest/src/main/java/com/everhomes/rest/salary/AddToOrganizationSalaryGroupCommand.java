@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>departmentIds: 部门id</li>
- * <li>detailIds: 用户DetailId</li>
+ * <li>departments: 部门信息{@link com.everhomes.rest.uniongroup.UniongroupTarget}</li>
+ * <li>users: 用户信息，参考{@link com.everhomes.rest.uniongroup.UniongroupTarget}</li>
  * <li>salaryGroupId: 薪酬组id</li>
  * <li>name: 部门或人员名称</li>
  * <li>ownerType: 'organization'</li>
@@ -20,10 +20,10 @@ import java.util.List;
 public class AddToOrganizationSalaryGroupCommand {
 
 	@ItemType(UniongroupTarget.class)
-	private List<UniongroupTarget> departmentIds;
+	private List<UniongroupTarget> departments;
 
 	@ItemType(UniongroupTarget.class)
-	private List<UniongroupTarget> detailIds;
+	private List<UniongroupTarget> users;
 
 	private Long salaryGroupId;
 
@@ -37,20 +37,20 @@ public class AddToOrganizationSalaryGroupCommand {
 
 	}
 
-    public List<UniongroupTarget> getDepartmentIds() {
-        return departmentIds;
+    public List<UniongroupTarget> getDepartments() {
+        return departments;
     }
 
-    public void setDepartmentIds(List<UniongroupTarget> departmentIds) {
-        this.departmentIds = departmentIds;
+    public void setDepartments(List<UniongroupTarget> departments) {
+        this.departments = departments;
     }
 
-    public List<UniongroupTarget> getDetailIds() {
-        return detailIds;
+    public List<UniongroupTarget> getUsers() {
+        return users;
     }
 
-    public void setDetailIds(List<UniongroupTarget> detailIds) {
-        this.detailIds = detailIds;
+    public void setUsers(List<UniongroupTarget> users) {
+        this.users = users;
     }
 
     public Long getSalaryGroupId() {
@@ -62,30 +62,30 @@ public class AddToOrganizationSalaryGroupCommand {
     }
 
     public String getName() {
-		return name;
-	}
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getOwnerType() {
-		return ownerType;
-	}
+    public String getOwnerType() {
+        return ownerType;
+    }
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
-	public Long getOwnerId() {
-		return ownerId;
-	}
+    public Long getOwnerId() {
+        return ownerId;
+    }
 
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
-	@Override
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}

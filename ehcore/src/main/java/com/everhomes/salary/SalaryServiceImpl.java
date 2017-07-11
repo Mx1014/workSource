@@ -673,15 +673,15 @@ public class SalaryServiceImpl implements SalaryService {
     public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
 	    //  1.更新该员工在组织架构的关联及configure
         AddToOrganizationSalaryGroupCommand addCommand = new AddToOrganizationSalaryGroupCommand();
-        List<UniongroupTarget> detailIds = new ArrayList<>();
-        UniongroupTarget detaidId = new UniongroupTarget();
-        detaidId.setId(cmd.getDetailId());
-        detaidId.setName(cmd.getName());
-        detailIds.add(detaidId);
+        List<UniongroupTarget> targets = new ArrayList<>();
+        UniongroupTarget target = new UniongroupTarget();
+        target.setId(cmd.getDetailId());
+        target.setName(cmd.getName());
+        targets.add(target);
         addCommand.setOwnerId(cmd.getOwnerId());
         addCommand.setOwnerType(cmd.getOwnerType());
         addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
-        addCommand.setDetailIds(detailIds);
+        addCommand.setUsers(targets);
         this.addToOrganizationSalaryGroup(addCommand);
 
         // 2.删除原有的薪酬设定
@@ -700,15 +700,15 @@ public class SalaryServiceImpl implements SalaryService {
 
             //  添加到组织架构的薪酬组中，没有增加有则覆盖
             AddToOrganizationSalaryGroupCommand addCommand = new AddToOrganizationSalaryGroupCommand();
-            List<UniongroupTarget> detailIds = new ArrayList<>();
-            UniongroupTarget detaidId = new UniongroupTarget();
-            detaidId.setId(cmd.getUserDetailId());
-            detaidId.setName(cmd.getName());
-            detailIds.add(detaidId);
+            List<UniongroupTarget> targets = new ArrayList<>();
+            UniongroupTarget target = new UniongroupTarget();
+            target.setId(cmd.getUserDetailId());
+            target.setName(cmd.getName());
+            targets.add(target);
             addCommand.setOwnerId(cmd.getOwnerId());
             addCommand.setOwnerType(cmd.getOwnerType());
             addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
-            addCommand.setDetailIds(detailIds);
+            addCommand.setUsers(targets);
             this.addToOrganizationSalaryGroup(addCommand);
 
             //  添加到薪酬组的个人设定中
@@ -755,8 +755,8 @@ public class SalaryServiceImpl implements SalaryService {
         List<UniongroupTarget> targets = new ArrayList<>();
 
         //  1.将部门 id 传入targets
-        if(!StringUtils.isEmpty(cmd.getDepartmentIds())){
-            cmd.getDepartmentIds().forEach(r ->{
+        if(!StringUtils.isEmpty(cmd.getDepartments())){
+            cmd.getDepartments().forEach(r ->{
                 UniongroupTarget target = new UniongroupTarget();
                 target.setId(r.getId());
                 target.setType(UniongroupTargetType.ORGANIZATION.getCode());
@@ -766,8 +766,8 @@ public class SalaryServiceImpl implements SalaryService {
         }
 
         //  2.将选择的人员的 detailId 传入 targets
-        if(!StringUtils.isEmpty(cmd.getDetailIds())){
-            cmd.getDetailIds().forEach(r ->{
+        if(!StringUtils.isEmpty(cmd.getUsers())){
+            cmd.getUsers().forEach(r ->{
                 UniongroupTarget target = new UniongroupTarget();
                 target.setId(r.getId());
                 target.setType(UniongroupTargetType.MEMBERDETAIL.getCode());
