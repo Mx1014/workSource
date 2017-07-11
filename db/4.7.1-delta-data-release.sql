@@ -100,3 +100,13 @@ SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@eh_locale_strings_id := @eh_locale_strings_id + 1),'activity','10026','zh_CN','生成公众号订单异常');
 
 -- merge from activty-3.2.0  by yanjun 20170710 end
+
+-- 园区入驻1.3 add by sw 20170711
+UPDATE eh_news set visible_type = 'ALL';
+SET @id = (SELECT MAX(id) FROM `eh_news_communities`);
+INSERT INTO `eh_news_communities` (`id`, `news_id`, `community_id`, `creator_uid`, `create_time`) 
+	SELECT (@id := @id + 1), eh_news.id, community_id, 1, NOW() from eh_organization_communities join eh_news on eh_news.owner_id = eh_organization_communities.organization_id;
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) 
+	VALUES ('news', '10009', 'zh_CN', '请选择范围');
+
+	
