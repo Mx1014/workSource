@@ -658,7 +658,7 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
 insert into `eh_web_menu_scopes` (`id`, `menu_id`,`owner_type`, `owner_id`,`apply_policy`) values ((@menu_scope_id := @menu_scope_id + 1),50900,'EhNamespaces',999981,2);
 
--- 企业管理模块添加企业管理员的权限
+-- 企业管理模块添加企业管理员的权限 add by sfyan 20170711
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40013, '0', 'org.admin.list', '查看企业管理员', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40014, '0', 'org.admin.create', '创建企业管理员', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40015, '0', 'org.admin.update', '修改企业管理员', NULL);
