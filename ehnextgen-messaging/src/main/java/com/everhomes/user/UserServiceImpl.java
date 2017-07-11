@@ -18,13 +18,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.Convert;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -181,6 +181,8 @@ import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
 import com.everhomes.rest.user.SearchUserByNamespaceCommand;
 import com.everhomes.rest.user.SearchUserImpersonationCommand;
 import com.everhomes.rest.user.SearchUserImpersonationResponse;
+import com.everhomes.rest.user.SearchUsersCommand;
+import com.everhomes.rest.user.SearchUsersResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
 import com.everhomes.rest.user.SetUserAccountInfoCommand;
 import com.everhomes.rest.user.SetUserInfoCommand;
@@ -189,6 +191,7 @@ import com.everhomes.rest.user.SynThridUserCommand;
 import com.everhomes.rest.user.UpdateUserNotificationSettingCommand;
 import com.everhomes.rest.user.UserCurrentEntity;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserDTO;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserIdentifierDTO;
 import com.everhomes.rest.user.UserImperInfo;
@@ -218,7 +221,10 @@ import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
 import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
 import com.everhomes.rest.user.admin.UsersWithAddrResponse;
 import com.everhomes.settings.PaginationConfigHelper;
-<<<<<<< HEAD
+import com.everhomes.sms.SmsBlackList;
+import com.everhomes.sms.SmsBlackListCreateType;
+import com.everhomes.sms.SmsBlackListProvider;
+import com.everhomes.sms.SmsBlackListStatus;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeaseFormRequest;
@@ -230,44 +236,6 @@ import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
-=======
-import com.everhomes.sms.*;
-import com.everhomes.util.*;
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
->>>>>>> master
 
 /**
  * 
@@ -4020,6 +3988,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public ListAuthFormsResponse listAuthForms() {
+		int namespaceId = UserContext.current().getNamespaceId();
+		List<LeaseFormRequest> list = enterpriseApplyEntryProvider.listLeaseRequestForm(namespaceId, Long.valueOf(namespaceId), "EhNamespaces");
+		ListAuthFormsResponse response = new ListAuthFormsResponse();
+		response.setSourceDto(list.stream().map(r->ConvertHelper.convert(r, FormSourceDTO.class)).collect(Collectors.toList()));
+		return response;
+	}
+	@Override
 	public SearchUsersResponse searchUsers(SearchUsersCommand cmd) {
 		SearchUsersResponse resp = new SearchUsersResponse();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
@@ -4036,14 +4012,5 @@ public class UserServiceImpl implements UserService {
 			resp.getDtos().add(dto);
 		}
 		return resp;
-	}
-	
-	@Override
-	public ListAuthFormsResponse listAuthForms() {
-		int namespaceId = UserContext.current().getNamespaceId();
-		List<LeaseFormRequest> list = enterpriseApplyEntryProvider.listLeaseRequestForm(namespaceId, Long.valueOf(namespaceId), "EhNamespaces");
-		ListAuthFormsResponse response = new ListAuthFormsResponse();
-		response.setSourceDto(list.stream().map(r->ConvertHelper.convert(r, FormSourceDTO.class)).collect(Collectors.toList()));
-		return response;
 	}
 }
