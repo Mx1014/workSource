@@ -2826,7 +2826,7 @@ public class PunchServiceImpl implements PunchService {
 	   
 	}
 	
-	public void setNewPunchStatisticsBookRow(Sheet sheet ,PunchStatistic statistic){
+	public void setNewPunchStatisticsBookRow(Sheet sheet , PunchCountDTO statistic){
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1; 
 		row.createCell(++i).setCellValue(statistic.getUserName());
@@ -2851,14 +2851,14 @@ public class PunchServiceImpl implements PunchService {
 			 
 	}
 	
-	public Workbook createPunchStatisticsBook( List<PunchStatistic> results) {
+	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results) {
 		if (null == results || results.size() == 0)
 			return null;
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("punchStatistics");
 		
 		this.createPunchStatisticsBookSheetHead(sheet );
-		for (PunchStatistic statistic : results )
+		for (PunchCountDTO statistic : results )
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
 		return wb;
 //		try {
@@ -4066,7 +4066,7 @@ public class PunchServiceImpl implements PunchService {
 		//分页查询
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(0L);
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize =  getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 //		Long organizationId = org.getDirectlyEnterpriseId();
@@ -4768,20 +4768,20 @@ public class PunchServiceImpl implements PunchService {
 
 		//找到所有子部门 下面的用户
 		Organization org = this.checkOrganization(cmd.getOwnerId());
-		 
-
-		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
-		if (null == userIds)
-			return response;
-
-		Long organizationId = org.getDirectlyEnterpriseId();
-		if(organizationId.equals(0L))
-			organizationId = org.getId();
-		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),organizationId,cmd.getMonth(),cmd.getExceptionStatus()
-				,userIds, null, Integer.MAX_VALUE);
-		if(null == results || results.isEmpty())
-			return response;
-		URL rootPath = PunchServiceImpl.class.getResource("/");
+		cmd.setPageSize(Integer.MAX_VALUE-1);
+		ListPunchCountCommandResponse resp = listPunchCount(cmd);
+//		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+//		if (null == userIds)
+//			return response;
+//
+//		Long organizationId = org.getDirectlyEnterpriseId();
+//		if(organizationId.equals(0L))
+//			organizationId = org.getId();
+//		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),organizationId,cmd.getMonth(),cmd.getExceptionStatus()
+//				,userIds, null, Integer.MAX_VALUE);
+//		if(null == results || results.isEmpty())
+//			return response;
+//		URL rootPath = PunchServiceImpl.class.getResource("/");
 //		String filePath =rootPath.getPath() + this.downloadDir ;
 //		File file = new File(filePath);
 //		if(!file.exists())
@@ -4789,7 +4789,7 @@ public class PunchServiceImpl implements PunchService {
 		String fileName =  "PunchStatistics"+System.currentTimeMillis()+".xlsx";
 		//新建了一个文件
 
-		Workbook wb = createPunchStatisticsBook(results);
+		Workbook wb = createPunchStatisticsBook(resp.getPunchCountList());
 		
 		return download(wb,fileName,response);
 	}
