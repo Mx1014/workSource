@@ -34,27 +34,28 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 VALUES (41430, '打印价格', 41400, NULL, 'react:/cloud-print/setting', '0', '2', '/40000/41400/41430', 'park', '502', NULL);
 
 -- 添加权限云打印
+set @eh_acl_privileges_id = (select max(id) from eh_acl_privileges);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (30046, 0, '云打印', '云打印 全部权限', NULL);
+VALUES ((@eh_acl_privileges_id := @eh_acl_privileges_id+1), 0, '云打印', '云打印 全部权限', NULL);
 
 -- 菜单对应的权限
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 30046, 41400, '云打印', 1, 1, '云打印  全部权限', 499);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41400, '云打印', 1, 1, '云打印  全部权限', 499);
 
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 30046, 41410, '打印记录', 1, 1, '打印记录  全部权限', 500);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41410, '打印记录', 1, 1, '打印记录  全部权限', 500);
 
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 30046, 41420, '打印统计', 1, 1, '打印统计  全部权限', 501);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41420, '打印统计', 1, 1, '打印统计  全部权限', 501);
 
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 30046, 41430, '打印价格', 1, 1, '打印价格  全部权限', 502);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41430, '打印价格', 1, 1, '打印价格  全部权限', 502);
 
 -- 角色对应的菜单权限
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, 30046, 1001, 'EhAclRoles', 0, 1, NOW());
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @eh_acl_privileges_id, 1001, 'EhAclRoles', 0, 1, NOW());
 
 -- 菜单的范围 --0域不加scope
 -- SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
@@ -74,7 +75,7 @@ VALUES (41400, '云打印', 40000, '/40000/41400', 0, 2, 2, 0, UTC_TIMESTAMP());
 -- 模块权限
 SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), 41400, 1, 30046, NULL, '0', UTC_TIMESTAMP());
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), 41400, 1, @eh_acl_privileges_id, NULL, '0', UTC_TIMESTAMP());
 
 -- 模块权限范围
 SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
