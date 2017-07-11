@@ -152,4 +152,8 @@ SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 1000000, 'EhOrganizations', NULL, 1, 30079, 1001, 'EhAclRoles', 0, 1, NOW());
 
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 1000000, 41400, '云打印', NULL, NULL, NULL, 2);
+
  -- 服务广场 -- 添加到科技园域 -- 在alpha，beta执行 -- end
