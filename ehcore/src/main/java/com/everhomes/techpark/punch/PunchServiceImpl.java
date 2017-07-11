@@ -2841,7 +2841,7 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getSickCount()); 
 		row.createCell(++i).setCellValue(statistic.getExchangeCount()); 
 		row.createCell(++i).setCellValue(statistic.getOutworkCount()); 
-		if(statistic.getOverTimeSum().equals(0L)){
+		if(statistic.getOverTimeSum()==null || statistic.getOverTimeSum().equals(0L)){
 			row.createCell(++i).setCellValue(0);
 		}
 		else{
