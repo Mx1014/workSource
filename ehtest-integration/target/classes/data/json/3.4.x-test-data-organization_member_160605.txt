@@ -1,0 +1,99 @@
+{
+  "eh_organizations": [
+    {
+      "id": "1000750",
+      "parent_id": "0",
+      "organization_type": "PM",
+      "name": "深业集团（深圳）物业管理有限公司",
+      "address_id": "0",
+      "description": "",
+      "path": "/1000750",
+      "level": "1",
+      "status": "2",
+      "department_type": "",
+      "group_type": "ENTERPRISE",
+      "group_id": "122",
+      "directly_enterprise_id": "0"
+    },
+    {
+      "id": "1000760",
+      "parent_id": "0",
+      "organization_type": "ENTERPRISE",
+      "name": "深业",
+      "address_id": "0",
+      "description": "",
+      "path": "/1000760",
+      "level": "1",
+      "status": "2",
+      "department_type": "",
+      "group_type": "ENTERPRISE",
+      "group_id": "122",
+      "directly_enterprise_id": "0"
+    }
+  ],
+  "eh_organization_members": [
+    {
+      "id": "1",
+      "organization_id": "1000750",
+      "target_type": "user",
+      "target_id": "10001",
+      "contact_type": "0",
+      "contact_token": "12000000001",
+      "status": "3"
+    },
+    {
+      "id": "2",
+      "organization_id": "1000760",
+      "target_type": "user",
+      "target_id": "10020",
+      "contact_type": "0",
+      "contact_token": "12000000020",
+      "status": "3"
+    }
+  ],
+  "eh_user_profiles": [
+    {
+      "id": "1",
+      "app_id": "0",
+      "owner_id": "10010",
+      "item_name": "user-current-community",
+      "item_kind": "1",
+      "item_value": "24210090697425925",
+      "integral_tag2":"0"
+    }
+  ],
+   "eh_organization_community_requests": [
+    {
+      "id": "1",
+      "community_id": "24210090697425925",
+      "member_type": "organization",
+      "member_id": "1000750",
+      "member_status": "3"
+    },
+    {
+      "id": "2",
+      "community_id": "24210090697425925",
+      "member_type": "organization",
+      "member_id": "1000760",
+      "member_status": "3"
+    }
+  ],
+   "eh_organization_communities": [
+    {
+      "id": "1",
+      "community_id": "24210090697425925",
+      "organization_id": "1000750"
+    }
+  ],
+    "eh_organization_task_targets": [
+    {
+      "id": "1",
+      "owner_type": "EhCommunities",
+      "owner_id": "24210090697425925",
+      "target_type": "EhUsers",
+      "target_id": "10001",
+      "task_type": "REPAIRS",
+      "message_type": "push"
+    }
+  ]
+}

@@ -2025,6 +2025,30 @@ long id = sequenceProvider.getNextSequence(key);
 	}
 
 	@Override
+	public List<PunchRuleOwnerMap> queryPunchRuleOwnerMapList(String ownerType, Long ownerId, String targetType, Long targetId, List<Long>	userIds,
+															  CrossShardListingLocator locator, int i) {
+
+		List<PunchRuleOwnerMap> result = queryPunchRuleOwnerMaps(locator, i, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+																SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_ID.eq(ownerId));
+				query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_TYPE.eq(ownerType));
+				if(null!=targetId)
+					query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_ID.eq(targetId));
+				if (null != userIds) {
+					query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_ID.in(userIds));
+				}
+				if(StringUtils.isNotBlank(targetType))
+					query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_TYPE.eq(targetType));
+				return query;
+			}
+
+		});
+		return result;
+	}
+
+	@Override
 	public List<PunchRuleOwnerMap> queryPunchRuleOwnerMapList(String ownerType, Long ownerId, String targetType, Long targetId,
 			CrossShardListingLocator locator, int i) {
 

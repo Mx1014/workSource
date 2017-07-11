@@ -1,0 +1,13 @@
+{
+  "eh_rich_texts": [
+    {
+		"id":1,
+		"namespace_id":0,
+		"owner_type":"community",
+		"owner_id":240111044331048623,
+		"resource_type":"introduction",
+		"content_type":"richtext",
+		"content":"fdggewg"
+	}
+  ]
+}

@@ -274,7 +274,7 @@ public interface PunchProvider {
 	public PunchExceptionApproval findPunchExceptionApproval(Long creatorUid, Long ownerId, Date date);
 
 	public PunchDayLog findPunchDayLog(Long userId, Long enterpriseId, Date punchDate);
- 
- 
- 
+
+
+	List<PunchRuleOwnerMap> queryPunchRuleOwnerMapList(String ownerType, Long ownerId, String targetType, Long targetId, List<Long> userIds, CrossShardListingLocator locator, int i);
 }

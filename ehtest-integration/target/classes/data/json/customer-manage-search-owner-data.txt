@@ -1,0 +1,189 @@
+{
+    "eh_organization_owners": [
+        {
+          "id": 1,
+          "organization_id": 1000001,
+          "contact_name": "张三",
+          "contact_type": 0,
+          "contact_token": "13800138000",
+          "contact_description": null,
+          "address_id": 1,
+          "address": null,
+          "creator_uid": 1001,
+          "create_time": "2016-09-05 10:00:43",
+          "namespace_id": 0,
+          "community_id": 24206890946790405,
+          "registered_residence": "深圳",
+          "org_owner_type_id": 1,
+          "gender": 1,
+          "birthday": "2016-01-01",
+          "marital_status": "未婚",
+          "job": "程序猿",
+          "company": "zuolin",
+          "status": 1,
+          "id_card_number": "111222333444555",
+          "avatar": null
+        },
+        {
+          "id": 2,
+          "organization_id": 1000001,
+          "contact_name": "李四",
+          "contact_type": 0,
+          "contact_token": "12345678911",
+          "contact_description": null,
+          "address_id": 1,
+          "address": null,
+          "creator_uid": 1001,
+          "create_time": "2016-09-05 10:00:43",
+          "namespace_id": 0,
+          "community_id": 24206890946790405,
+          "registered_residence": "广东",
+          "org_owner_type_id": 1,
+          "gender": 2,
+          "birthday": "2016-01-01",
+          "marital_status": "已婚",
+          "job": "程序媛",
+          "status": 1,
+          "company": "tt",
+          "id_card_number": "456787654345678",
+          "avatar": null
+        },
+        {
+          "id": 3,
+          "organization_id": 1000001,
+          "contact_name": "王五",
+          "contact_type": 0,
+          "contact_token": "12345678911",
+          "contact_description": null,
+          "address_id": 1,
+          "address": null,
+          "creator_uid": 1001,
+          "create_time": "2016-09-05 10:00:43",
+          "namespace_id": 0,
+          "community_id": 24206890946790405,
+          "registered_residence": "中国",
+          "org_owner_type_id": 1,
+          "gender": 1,
+          "status": 1,
+          "birthday": "2016-01-01",
+          "marital_status": "其他",
+          "job": "销售",
+          "company": "Tencent",
+          "id_card_number": "0009988888",
+          "avatar": null
+        }
+      ],
+    "eh_communities": [
+        {
+          "id": 24206890946790405,
+          "uuid": "e8e1c688-65a8-11e5-801d-00163e0018d7",
+          "city_id": 10002,
+          "city_name": "北京市",
+          "area_id": 10007,
+          "area_name": "朝阳区",
+          "name": "点击未来沁居",
+          "alias_name": "",
+          "address": "朝阳区花家地西里八间房毗邻西门子公司",
+          "zipcode": "",
+          "description": "",
+          "detail_description": "",
+          "apt_segment1": "楼栋号",
+          "apt_segment2": "门牌号"
+        }
+    ],
+    "eh_organization_owner_type":[
+       {
+         "id": 1,
+         "namespace_id": 0,
+         "name": "owner",
+         "display_name": "业主",
+         "status": 1
+       },
+       {
+         "id": 2,
+         "namespace_id": 0,
+         "name": "tenement",
+         "display_name": "租客",
+         "status": 1
+       },
+       {
+         "id": 3,
+         "namespace_id": 0,
+         "name": "relative",
+         "display_name": "亲属",
+         "status": 1
+       },
+       {
+         "id": 4,
+         "namespace_id": 0,
+         "name": "friend",
+         "display_name": "朋友",
+         "status": 1
+       },
+       {
+         "id": 5,
+         "namespace_id": 0,
+         "name": "nurse",
+         "display_name": "保姆",
+         "status": 1
+       },
+       {
+         "id": 6,
+         "namespace_id": 0,
+         "name": "agency",
+         "display_name": "地产中介",
+         "status": 1
+       },
+       {
+         "id": 7,
+         "namespace_id": 0,
+         "name": "readyauth",
+         "display_name": "待审核",
+         "status": 1
+       },
+       {
+         "id": 8,
+         "namespace_id": 0,
+         "name": "other",
+         "display_name": "其他",
+         "status": 1
+       }
+    ],
+    "eh_locale_strings":[
+          {
+              "id": 206,
+              "scope": "user",
+              "code": "1",
+              "locale": "zh_CN",
+              "text": "男"
+          },
+          {
+            "id": 207,
+            "scope": "user",
+            "code": "2",
+            "locale": "zh_CN",
+            "text": "女"
+          },
+          {
+            "id": 208,
+            "scope": "pm",
+            "code": "15001",
+            "locale": "zh_CN",
+            "text": "导入失败"
+          },
+          {
+           "id": 204,
+           "scope": "orgOwnerAddressLivingStatus",
+           "code": "0",
+           "locale": "zh_CN",
+           "text": "否"
+         },
+         {
+           "id": 205,
+           "scope": "orgOwnerAddressLivingStatus",
+           "code": "1",
+           "locale": "zh_CN",
+           "text": "是"
+         }
+    ]
+}

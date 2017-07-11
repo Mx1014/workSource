@@ -1,0 +1,364 @@
+{
+    "eh_approval_categories": [
+        {
+            "id": 1,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "approval_type": 1,
+            "category_name": "公出",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-07 15:39:55"
+        },
+        {
+            "id": 2,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "approval_type": 1,
+            "category_name": "事假",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-07 15:39:55"
+        },
+        {
+            "id": 3,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "approval_type": 1,
+            "category_name": "病假",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-07 15:39:55"
+        },
+        {
+            "id": 4,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "approval_type": 1,
+            "category_name": "调休",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-07 15:39:55"
+        },
+        {
+            "id": 5,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "approval_type": 1,
+            "category_name": "年休",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-07 15:39:55"
+        }
+    ],
+    "eh_approval_flows": [
+        {
+            "id": 1,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "name": "小彤彤专属流程",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-07 17:06:24",
+            "update_time": "2016-09-07 17:06:24",
+            "operator_uid": 1
+        },
+        {
+            "id": 2,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "name": "小tt专属流程",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-07 17:06:24",
+            "update_time": "2016-09-07 17:06:24",
+            "operator_uid": 1
+        },
+        {
+            "id": 3,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "name": "小唐唐专属流程",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-07 17:06:24",
+            "update_time": "2016-09-07 17:06:24",
+            "operator_uid": 1
+        },
+        {
+            "id": 4,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "name": "小唐唐专属流程dd",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-07 17:06:24",
+            "update_time": "2016-09-07 17:06:24",
+            "operator_uid": 1
+        }
+    ],
+    "eh_approval_flow_levels": [
+        {
+            "id": 11,
+            "flow_id": 1,
+            "level": 1,
+            "target_type": 1,
+            "target_id": 11
+        },
+        {
+            "id": 13,
+            "flow_id": 1,
+            "level": 2,
+            "target_type": 1,
+            "target_id": 11
+        },
+        {
+            "id": 14,
+            "flow_id": 1,
+            "level": 2,
+            "target_type": 1,
+            "target_id": 3
+        },
+        {
+            "id": 15,
+            "flow_id": 2,
+            "level": 1,
+            "target_type": 1,
+            "target_id": 11
+        },
+        {
+            "id": 16,
+            "flow_id": 2,
+            "level": 1,
+            "target_type": 1,
+            "target_id": 2
+        },
+        {
+            "id": 17,
+            "flow_id": 2,
+            "level": 2,
+            "target_type": 1,
+            "target_id": 11
+        },
+        {
+            "id": 18,
+            "flow_id": 3,
+            "level": 1,
+            "target_type": 1,
+            "target_id": 1
+        },
+        {
+            "id": 19,
+            "flow_id": 3,
+            "level": 2,
+            "target_type": 1,
+            "target_id": 3
+        }
+    ],
+    "eh_approval_rules": [
+        {
+            "id": 11,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "name": "小彤彤1规则",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-08 10:01:19",
+            "update_time": "2016-09-08 10:01:19",
+            "operator_uid": 1
+        },
+        {
+            "id": 12,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "name": "小彤彤2规则",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-08 10:01:19",
+            "update_time": "2016-09-08 10:01:19",
+            "operator_uid": 1
+        },
+        {
+            "id": 13,
+            "namespace_id": 999995,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "name": "小彤彤3规则",
+            "status": 2,
+            "creator_uid": 1,
+            "create_time": "2016-09-08 10:01:19",
+            "update_time": "2016-09-08 10:01:19",
+            "operator_uid": 1
+        }
+    ],
+    "eh_approval_rule_flow_map": [
+        {
+            "id": 121,
+            "rule_id": 11,
+            "approval_type": 1,
+            "flow_id": 1,
+            "status": 2
+        },
+        {
+            "id": 122,
+            "rule_id": 11,
+            "approval_type": 2,
+            "flow_id": 2,
+            "status": 2
+        },
+        {
+            "id": 123,
+            "rule_id": 12,
+            "approval_type": 1,
+            "flow_id": 2,
+            "status": 2
+        },
+        {
+            "id": 124,
+            "rule_id": 12,
+            "approval_type": 2,
+            "flow_id": 2,
+            "status": 2
+        },
+        {
+            "id": 125,
+            "rule_id": 13,
+            "approval_type": 1,
+            "flow_id": 3,
+            "status": 2
+        },
+        {
+            "id": 126,
+            "rule_id": 13,
+            "approval_type": 2,
+            "flow_id": 2,
+            "status": 2
+        },
+        {
+            "id": 127,
+            "rule_id": 11,
+            "approval_type": 3,
+            "flow_id": 1,
+            "status": 2
+        },
+        {
+            "id": 128,
+            "rule_id": 12,
+            "approval_type": 3,
+            "flow_id": 2,
+            "status": 2
+        },
+        {
+            "id": 129,
+            "rule_id": 13,
+            "approval_type": 3,
+            "flow_id": 3,
+            "status": 2
+        }
+    ],
+    "eh_punch_rules": [
+        {
+            "id": 1,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "name": "测试规则",
+            "time_rule_id": 1,
+            "location_rule_id": 1,
+            "workday_rule_id": 1,
+            "creator_uid": 227296,
+            "create_time": "2016-08-30 11:22:52",
+            "operator_uid": 227296,
+            "operate_time": "2016-08-31 14:35:17"
+        },
+        {
+            "id": 2,
+            "owner_type": "organization",
+            "owner_id": 2,
+            "name": "测试规则2",
+            "time_rule_id": 1,
+            "location_rule_id": 1,
+            "workday_rule_id": 1,
+            "creator_uid": 227296,
+            "create_time": "2016-08-30 11:22:52",
+            "operator_uid": 227296,
+            "operate_time": "2016-08-31 14:35:17"
+        }
+    ],
+    "eh_punch_rule_owner_map": [
+        {
+            "id": 1,
+            "owner_type": "organization",
+            "owner_id": 1,
+            "target_type": "organization",
+            "target_id": 1,
+            "punch_rule_id": 1,
+            "review_rule_id": 11,
+            "creator_uid": 195506,
+            "create_time": "2015-12-09 15:56:45"
+        },
+        {
+            "id": 2,
+            "owner_type": "organization",
+            "owner_id": 2,
+            "target_type": "organization",
+            "target_id": 2,
+            "punch_rule_id": 2,
+            "review_rule_id": 12,
+            "creator_uid": 195506,
+            "create_time": "2015-12-09 15:56:45"
+        }
+    ],
+    "eh_user_identifiers":
+	[
+		{
+			"id": 1,
+			"owner_uid": 11,
+			"identifier_type": 0,
+			"identifier_token": "12000001192",
+			"claim_status": 3,
+			"create_time": "2015-05-11 11:31:52",
+			"namespace_id": 999995
+		}
+	],
+	"eh_punch_workday_rules":
+	[
+		{
+			"id": 1,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"name": "正常工作日",
+			"description": "周一到周五上班,周末放假",
+			"work_week_dates": "0111110",
+			"creator_uid": 195506,
+			"create_time": "2016-08-12 14:13:59"
+		}
+	],
+	"eh_punch_time_rules":
+	[
+		{
+			"id": 1,
+			"owner_type": "organization",
+			"owner_id": 1,
+			"name": "时间规则",
+			"start_early_time": "08:45:00",
+			"start_late_time": "09:45:00",
+			"work_time": "09:00:00",
+			"noon_leave_time": "12:00:00",
+			"afternoon_arrive_time": "14:00:00",
+			"punch_times_per_day": 2,
+			"creator_uid": 195506,
+			"create_time": "2015-12-09 15:56:45"
+		}
+	]
+}

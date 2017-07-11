@@ -515,10 +515,6 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	/***
-	 * @param punchLogs
-	 *            ： 当天的全部打卡记录通过punchProvider.listPunchLogsByDate()方法得到;
-	 * @param punchRule
-	 *            :打卡规则
 	 * @param logDay
 	 *            : 计算的打卡日期
 	 * @return PunchLogsDayList：计算好的当日打卡状态
@@ -3533,9 +3529,25 @@ public class PunchServiceImpl implements PunchService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		 
+		//找到所有子部门 下面的用户
+		List<Long> userIds = null;
+		if (cmd.getOrganizationId() != null) {
+
+			List<String> groupTypeList = new ArrayList<String>();
+			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+			List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+					(cmd.getOrganizationId(), groupTypeList, null) ;
+			if(null == organizationMembers)
+				return response;
+			userIds = new ArrayList<Long>();
+			for(OrganizationMemberDTO member : organizationMembers){
+				if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
+					userIds.add(member.getTargetId());
+			}
+		}
 		List<PunchRuleOwnerMap> results = this.punchProvider.queryPunchRuleOwnerMapList(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getTargetType(),
-				cmd.getTargetId(),locator, pageSize + 1 );
+				cmd.getTargetId(),userIds,locator, pageSize + 1 );
 		if (null == results)
 			return response;
 		Long nextPageAnchor = null;

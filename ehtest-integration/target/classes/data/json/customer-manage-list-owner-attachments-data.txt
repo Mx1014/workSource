@@ -1,0 +1,24 @@
+{
+    "eh_organization_owner_attachments": [
+          {
+            "id": 1,
+            "namespace_id": 0,
+            "owner_id": 1,
+            "attachment_name": "聘用协议书.docx",
+            "content_type": null,
+            "content_uri": "cs://1/image/aW1hZ2UvTVRvMk5EWTFZekJtTnpaa1lqSmpObVV6WlRObFpUVmhaVGN3TlRCaVkyTmpOQQ",
+            "creator_uid": 1,
+            "create_time": "2016-09-06 10:37:37"
+          },
+          {
+            "id": 2,
+            "namespace_id": 0,
+            "owner_id": 1,
+            "attachment_name": "证件照.jpg",
+            "content_type": null,
+            "content_uri": "cs://1/image/aW1hZ2UvTVRvMk5EWTFZekJtTnpaa1lqSmpObVV6WlRObFpUVmhaVGN3TlRCaVkyTmpOQQ",
+            "creator_uid": 1,
+            "create_time": "2016-09-06 10:37:37"
+          }
+        ]
+}
