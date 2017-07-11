@@ -12,7 +12,6 @@ import java.util.List;
  * <li>departments: 部门信息{@link com.everhomes.rest.uniongroup.UniongroupTarget}</li>
  * <li>users: 用户信息，参考{@link com.everhomes.rest.uniongroup.UniongroupTarget}</li>
  * <li>salaryGroupId: 薪酬组id</li>
- * <li>name: 部门或人员名称</li>
  * <li>ownerType: 'organization'</li>
  * <li>ownerId: organizationId</li>
  * </ul>
@@ -26,8 +25,6 @@ public class AddToOrganizationSalaryGroupCommand {
 	private List<UniongroupTarget> users;
 
 	private Long salaryGroupId;
-
-	private String name;
 
 	private String ownerType;
 
@@ -59,14 +56,6 @@ public class AddToOrganizationSalaryGroupCommand {
 
     public void setSalaryGroupId(Long salaryGroupId) {
         this.salaryGroupId = salaryGroupId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getOwnerType() {
