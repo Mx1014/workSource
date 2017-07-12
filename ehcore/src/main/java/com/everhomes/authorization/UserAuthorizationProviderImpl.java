@@ -1,16 +1,65 @@
 // @formatter:off
 package com.everhomes.authorization;
 
-public class UserAuthorizationProviderImpl {
+import java.sql.Timestamp;
+import java.util.List;
 
-//
-//	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintRecordProviderImpl.class);
-//
-//	@Autowired
-//	private DbProvider dbProvider;
-//
-//	@Autowired
-//	private SequenceProvider sequenceProvider;
+import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.daos.EhUserAuthorizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhUserAuthorizations;
+import com.everhomes.util.DateHelper;
+
+@Component
+public class UserAuthorizationProviderImpl implements UserAuthorizationProvider{
+	
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserAuthorizationProviderImpl.class);
+
+	@Autowired
+	private DbProvider dbProvider;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
+
+	@Override
+	public void createUserAuthorization(UserAuthorization userAuthorization) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserAuthorizations.class));
+		userAuthorization.setId(id);
+		userAuthorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		getReadWriteDao().insert(userAuthorization);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserAuthorizations.class, null);
+	}
+
+	@Override
+	public void updateUserAuthorization(UserAuthorization userAuthorization) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public UserAuthorization findUserAuthorizationById(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<UserAuthorization> listUserAuthorization() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 //
 //	@Override
 //	public void createSiyinPrintRecord(SiyinPrintRecord siyinPrintRecord) {
@@ -44,29 +93,29 @@ public class UserAuthorizationProviderImpl {
 //				.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintRecord.class));
 //	}
 //	
-//	private EhSiyinPrintRecordsDao getReadWriteDao() {
-//		return getDao(getReadWriteContext());
-//	}
-//
-//	private EhSiyinPrintRecordsDao getReadOnlyDao() {
-//		return getDao(getReadOnlyContext());
-//	}
-//
-//	private EhSiyinPrintRecordsDao getDao(DSLContext context) {
-//		return new EhSiyinPrintRecordsDao(context.configuration());
-//	}
-//
-//	private DSLContext getReadWriteContext() {
-//		return getContext(AccessSpec.readWrite());
-//	}
-//
-//	private DSLContext getReadOnlyContext() {
-//		return getContext(AccessSpec.readOnly());
-//	}
-//
-//	private DSLContext getContext(AccessSpec accessSpec) {
-//		return dbProvider.getDslContext(accessSpec);
-//	}
+	private EhUserAuthorizationsDao getReadWriteDao() {
+		return getDao(getReadWriteContext());
+	}
+
+	private EhUserAuthorizationsDao getReadOnlyDao() {
+		return getDao(getReadOnlyContext());
+	}
+
+	private EhUserAuthorizationsDao getDao(DSLContext context) {
+		return new EhUserAuthorizationsDao(context.configuration());
+	}
+
+	private DSLContext getReadWriteContext() {
+		return getContext(AccessSpec.readWrite());
+	}
+
+	private DSLContext getReadOnlyContext() {
+		return getContext(AccessSpec.readOnly());
+	}
+
+	private DSLContext getContext(AccessSpec accessSpec) {
+		return dbProvider.getDslContext(accessSpec);
+	}
 //
 //	@Override
 //	public SiyinPrintRecord findSiyinPrintRecordByJobId(String jobId) {

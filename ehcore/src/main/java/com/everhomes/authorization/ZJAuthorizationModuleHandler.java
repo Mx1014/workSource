@@ -1,13 +1,17 @@
 package com.everhomes.authorization;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.dev.ReSave;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -16,6 +20,7 @@ import com.everhomes.authorization.zjgk.ZjgkJsonEntity;
 import com.everhomes.authorization.zjgk.ZjgkResponse;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
@@ -50,6 +55,12 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	
     @Autowired
     private AddressService addressService;
+    
+    @Autowired
+    private DbProvider dbProvider;
+    
+    @Autowired
+    private UserAuthorizationProvider authorizationProvider;
 
 	@Override
 	public PostGeneralFormDTO personalAuthorization(PostGeneralFormCommand cmd) {
@@ -60,34 +71,75 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 			//请求成功，返回承租地址，那么创建家庭。
 			if(entity.isSuccess()){
-				createFamily(cmd,entity);
+				createFamily(cmd,entity,params,jsonStr,PERSONAL_AUTHORIZATION);
 			}
 			//创建工作流
-			createWorkFlow(cmd,entity);
+			createWorkFlow(cmd,entity,PERSONAL_AUTHORIZATION);
 		} catch (Exception e) {
 			LOGGER.error(""+e);
 		}
 		return null;
 	}
 	
-	private void createFamily(PostGeneralFormCommand cmd,ZjgkJsonEntity<List<ZjgkResponse>> entity) {
+	private void createFamily(PostGeneralFormCommand cmd,ZjgkJsonEntity<List<ZjgkResponse>> entity, Map<String, String> params, String resultJson, String authorizationType) {
 		List<ZjgkResponse> list = entity.getResponse();
+		List<UserAuthorization> authlist = new ArrayList<UserAuthorization>();
 		if(list!=null && list.size()>0){
 			for (ZjgkResponse zjgkResponse : list) {
-				String communityName = zjgkResponse.getCommunityName();
-				Community community = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), communityName);
-				ClaimAddressCommand claimcmd = new ClaimAddressCommand();
-				claimcmd.setCommunityId(community.getId());
-				claimcmd.setApartmentName(zjgkResponse.getApartmentName());
-				claimcmd.setBuildingName(zjgkResponse.getBuildingName());
+				zjgkResponse.setCommunityName("科技园"); // TODO
+				//生成加入家庭的command
+				ClaimAddressCommand claimcmd = generalClaimAddressCommand(cmd,zjgkResponse);
+				//加入家庭
 				ClaimedAddressInfo addressinfo = addressService.claimAddress(claimcmd);
+				// TODO 认证状态设置为通过
 				
+				//认证记录到list
+				authlist.add(generalUserAuthorization(cmd,params,addressinfo,authorizationType,entity.getErrorCode()),resultJson);
 			}
+			
+			// TODO 应该删除之前的认证，再在记录。认证成功，记录到表中
+			dbProvider.execute((TransactionStatus status) -> {
+				for (UserAuthorization userAuthorization : authlist) {
+					authorizationProvider.createUserAuthorization(userAuthorization);
+				}
+				return null;
+			});
 		}
 		
 	}
 
-	private FlowCase createWorkFlow(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity) {
+	//调用认证接口，需要生成认证的command
+	private ClaimAddressCommand generalClaimAddressCommand(PostGeneralFormCommand cmd, ZjgkResponse zjgkResponse) {
+		String communityName = zjgkResponse.getCommunityName();
+		Community community = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), communityName);
+		ClaimAddressCommand claimcmd = new ClaimAddressCommand();
+		claimcmd.setCommunityId(community.getId());
+		claimcmd.setApartmentName(zjgkResponse.getApartmentName());
+		claimcmd.setBuildingName(zjgkResponse.getBuildingName());
+		return claimcmd;
+	}
+
+	private UserAuthorization generalUserAuthorization(PostGeneralFormCommand cmd, Map<String, String> params,
+			ClaimedAddressInfo addressinfo, String authorizationType, int errorCode, String resultJson) {
+		UserAuthorization authorization = new UserAuthorization();
+		authorization.setNamespaceId(cmd.getNamespaceId());
+		authorization.setType(authorizationType);
+		authorization.setPhone(params.get("phone"));
+		authorization.setName(params.get("name"));
+		authorization.setCertificatetype(params.get("certificateType"));
+		authorization.setCertificateno(params.get("certificateNo"));
+		authorization.setOrganizationcode(params.get("organizationCode"));
+		authorization.setOrganizationcontact(params.get("organizationContact"));
+		authorization.setOrganizationphone(params.get("organizationPhone"));
+		authorization.setErrorcode(errorCode);
+		authorization.setAddressId(addressinfo.getAddressId());
+		authorization.setFullAddress(addressinfo.getFullAddress());
+		authorization.setUserCount(addressinfo.getUserCount());
+		authorization.setResultJson(resultJson);
+		return authorization;
+	}
+
+	private FlowCase createWorkFlow(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity, String personalAuthorization) {
 		
 		GeneralModuleInfo ga = new GeneralModuleInfo();
 
