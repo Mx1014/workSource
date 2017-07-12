@@ -47,7 +47,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		}
 		params.put("appKey", appKey);
 		params.put("timestamp", ""+System.currentTimeMillis());
-		params.put("nonce", ""+(long)(Math.random()*10000));
+		params.put("nonce", ""+(long)(Math.random()*100000));
 //		params.put("crypto", "");
 		params.put("type", "1");
 		String signature = computeSignature(params, secretKey);
@@ -57,13 +57,12 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			LOGGER.info(StringHelper.toJsonString(params));
 			LOGGER.info(jsonStr);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public static String computeSignature(Map<String, String> params, String secretKey) {
+	public String computeSignature(Map<String, String> params, String secretKey) {
 	    assert(params != null);
 	    assert(secretKey != null);
 	    
