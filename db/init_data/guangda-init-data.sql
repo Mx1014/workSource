@@ -2016,15 +2016,39 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 
+-- 光大we谷域空间增加园区 add by sfyan 20170712
+SET @namespace_id = 999979;
+SET @community_forum_id = (select default_forum_id from eh_communities where namespace_id = @namespace_id limit 1); 
+SET @feedback_forum_id = (select feedback_forum_id from eh_communities where namespace_id = @namespace_id limit 1); 
+SET @shi_id = (select id FROM `eh_regions` where name = '东莞市' and namespace_id = @namespace_id and status = 2);  
+SET @qu_id = (select id FROM `eh_regions` where name = '松山湖' and namespace_id = @namespace_id and status = 2); 
+SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
+SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
+SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; -- 需要取现网eh_communities的ID的最大值再加一定余量
+SET @organization_id = (select id from eh_organizations where namespace_id = @namespace_id and organization_type = 'PM' and parent_id = 0 limit 1);
+SET @building1_id = (SELECT MAX(id) FROM `eh_buildings`) + 5;
+
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@community_id, UUID(), @shi_id, '东莞市',  @qu_id, '松山湖', '点栈创业工场', '点栈创业工场', '总部二路2号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 98, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 113.900261, 22.964468, 'uxbrfxfpyzur');
+
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
+	
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(@organization_id, @community_id);
+	
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, default_order,`namespace_id`)VALUES(@building1_id, @community_id, 'A3栋', '光大We谷A3栋', 0, '0769-22992838', '东莞市松山湖总部二路2号', 5206.73, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @building1_id, @namespace_id);
 
 
+SET @namespace_id = 999979;
+SET @community_id = (select id from eh_communities where name = '点栈创业工场' and namespace_id = @namespace_id limit 1);
+SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);    
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@item_id:=@item_id+1, @namespace_id, 0, 1, @community_id, '/home', 'Bizs', '工位预订', '工位预订', 'cs://1/image/aW1hZ2UvTVRvNE5HSmlORE15TXpBME1EWmxaV1prWm1RMU5EUm1NbU5oWVdKak1tSmpaZw', 1, 1, 14, '{"url":"http://core.zuolin.com/station-booking/index.html?hideNavigationBar=1#/station_booking#sign_suffix"}', 0, 3, 1, 1, '', 1, NULL, NULL, NULL, 1, 'park_tourist', 0, 12, NULL, 17, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@item_id:=@item_id+1, @namespace_id, 0, 1, @community_id, '/home', 'Bizs', '门禁', '门禁', 'cs://1/image/aW1hZ2UvTVRvMVpqazVORFE1TnpFNE9UWTBNV0pqWm1GbU5HTXpaVEEzT1RNeE9XTTJOZw', 1, 1, 40, '{"isSupportQR":1,"isSupportSmart":0}', 0, 3, 1, 1, '', 0, NULL, NULL, NULL, 1, 'park_tourist', 0, 12, NULL, 18, NULL);
 
-
-
-
-
-
-
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@item_id:=@item_id+1, @namespace_id, 0, 1, @community_id, '/home', 'Bizs', '', '资源预订', 'cs://1/image/aW1hZ2UvTVRwaE5UZGtOR1EyTlRrek1XRXpPRGxsT0RFeE1tTmlabVl4TnpWak4yUmxaUQ', 1, 1, 60, '{"url":"zl://association/main?layoutName=RentalLayout&itemLocation=/rental&versionCode=2017070401&displayName=资源预订"}', 3, 3, 1, 1, '1', 0, NULL, NULL, NULL, 1, 'park_tourist', 0, 22, NULL, 16, NULL);
 
 
 

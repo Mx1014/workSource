@@ -44,6 +44,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.xml.XMLToJSON;
 
+import scala.math.BigInt;
 import sun.misc.BASE64Decoder;
 
 /**
@@ -119,6 +120,15 @@ public class SiyinJobValidateServiceImpl {
            //将记录合并到订单上,并更新到数据库
            mergeRecordToOrder(record,order);
            dbProvider.execute(r->{
+        	   //订单金额为0，那么设置成支付状态。
+        	   	if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
+        	   		//如果详情为空，并且价格为0，那么不做记录。
+        	   		if(record.getColorSurfaceCount() == 0 && record.getMonoSurfaceCount() == 0){
+        	   			return null;
+        	   		}
+        	   		order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+        	   		order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+        	   	}
 	   			if(order.getId() == null){
 	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
 	   			}else{
@@ -370,8 +380,10 @@ public class SiyinJobValidateServiceImpl {
 		String detail = "";
 		String surface = getLocalActivityString(PrintErrorCode.PRINT_SURFACE,"面");
 		if(jobType == PrintJobTypeType.SCAN){
-			detail += blackWhiteSurfaceCount+surface+"*"+ PrintColorType.BLACK_WHITE.getDesc()+"\n";
-			detail += colorSurfaceCount+surface+"*"+ PrintColorType.COLOR.getDesc()+"\n";
+			if(blackWhiteSurfaceCount!=0)
+				detail += blackWhiteSurfaceCount+surface+"*"+ PrintColorType.BLACK_WHITE.getDesc()+"\n";
+			if(colorSurfaceCount !=0)
+				detail += colorSurfaceCount+surface+"*"+ PrintColorType.COLOR.getDesc()+"\n";
 		}else{
 			for (int i = 0; i < PrintPaperSizeType.values().length; i++) {
 				PrintPaperSizeType paperSizeType = PrintPaperSizeType.values()[i];

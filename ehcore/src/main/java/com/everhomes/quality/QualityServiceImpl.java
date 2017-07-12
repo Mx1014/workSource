@@ -3767,12 +3767,12 @@ public class QualityServiceImpl implements QualityService {
 			Integer correctionCount = 0;
 			Integer correctionQualifiedCount = 0;
 			for(QualityInspectionTasks task : tasks) {
-				if(QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
-						|| QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
-						|| QualityInspectionTaskResult.CORRECT_DELAY.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
+				if(QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))
+						|| QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))
+						|| QualityInspectionTaskResult.CORRECT_DELAY.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))) {
 					correctionCount ++;
 				}
-				if(QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
+				if(QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))) {
 					correctionQualifiedCount ++;
 				}
 			}

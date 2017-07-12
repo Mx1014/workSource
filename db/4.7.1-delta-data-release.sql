@@ -21,17 +21,17 @@ INSERT INTO `eh_siyin_print_printers` (`id`, `namespace_id`, `owner_type`, `owne
 -- by dengs,云打印菜单配置 20170626
 -- 添加菜单 -- 按照产品要求，添加菜单到左邻域
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41400, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', 41400);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41400, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41410, '打印记录', 41400, NULL, 'react:/cloud-print/record', '0', '2', '/40000/41400/41410', 'park', '500', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41410, '打印记录', 41400, NULL, 'react:/cloud-print/record', '0', '2', '/40000/41400/41410', 'park', '500', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41420, '打印统计', 41400, NULL, 'react:/cloud-print/count', '0', '2', '/40000/41400/41420', 'park', '501', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41420, '打印统计', 41400, NULL, 'react:/cloud-print/count', '0', '2', '/40000/41400/41420', 'park', '501', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41430, '打印价格', 41400, NULL, 'react:/cloud-print/setting', '0', '2', '/40000/41400/41430', 'park', '502', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41430, '打印价格', 41400, NULL, 'react:/cloud-print/setting', '0', '2', '/40000/41400/41430', 'park', '502', 41400, 'module');
 
 -- 添加权限云打印
 set @eh_acl_privileges_id = (select max(id) from eh_acl_privileges);
@@ -100,3 +100,55 @@ SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@eh_locale_strings_id := @eh_locale_strings_id + 1),'activity','10026','zh_CN','生成公众号订单异常');
 
 -- merge from activty-3.2.0  by yanjun 20170710 end
+
+-- 园区入驻1.3 add by sw 20170711
+UPDATE eh_news set visible_type = 'ALL';
+SET @id = (SELECT MAX(id) FROM `eh_news_communities`);
+INSERT INTO `eh_news_communities` (`id`, `news_id`, `community_id`, `creator_uid`, `create_time`) 
+	SELECT (@id := @id + 1), eh_news.id, community_id, 1, NOW() from eh_organization_communities join eh_news on eh_news.owner_id = eh_organization_communities.organization_id;
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) 
+	VALUES ('news', '10009', 'zh_CN', '请选择范围');
+
+-- merge from pmtaskprivilege by xiongying 20170711
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20140,'任务列表',20100,'/20000/20100/20140','1','3','2','0',NOW());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20150,'服务录入',20100,'/20000/20100/20150','1','3','2','0',NOW());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20155,'设置',20100,'/20000/20100/20155','1','3','0','0',NOW());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20190,'统计',20100,'/20000/20100/20190','1','3','2','0',NOW());
+
+SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@module_privilege_id := @module_privilege_id + 1), '20100', '1', '10008', '物业报修管理权限', '0', NOW());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@module_privilege_id := @module_privilege_id + 1), '20100', '2', '10008', '物业报修全部权限', '0', NOW());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (30090, '0', '物业报修 任务查看权限', '物业报修 业务模块权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20140','0',30090,'物业报修 任务查看权限','0',NOW());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (30091, '0', '物业报修 服务录入代发权限', '物业报修 业务模块权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20150','0',30091,'物业报修 服务录入代发权限','0',NOW());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (30092, '0', '物业报修 新增服务类型权限', '物业报修 业务模块权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20155','0',30092,'物业报修 新增服务类型权限','0',NOW());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (30093, '0', '物业报修 删除服务类型权限', '物业报修 业务模块权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20155','0',30093,'物业报修 删除服务类型权限','0',NOW());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (30094, '0', '物业报修 新增分类权限', '物业报修 业务模块权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20155','0',30094,'物业报修 新增分类权限','0',NOW());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (30095, '0', '物业报修 删除分类权限', '物业报修 业务模块权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20155','0',30095,'物业报修 删除分类权限','0',NOW());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (30096, '0', '物业报修 服务统计查看权限', '物业报修 业务模块权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20190','0',30096,'物业报修 服务统计查看权限','0',NOW());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (30097, '0', '物业报修 查看全部项目报表权限', '物业报修 业务模块权限', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20190','0',30097,'物业报修 查看全部项目报表权限','0',NOW());    
+    
+    

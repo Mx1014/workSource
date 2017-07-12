@@ -1,17 +1,14 @@
--- 以下sql只在beta做测试使用
+-- 服务广场 -- 添加到左邻域 -- 在alpha，beta执行
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('beta.print.order.amount', 'true', '用于支付测试', '0', NULL);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.inform.url', 'http://printtest.zuolin.com/evh/siyinprint/informPrint?identifierToken=', '二维码url地址', '0', NULL);
-
--- 服务广场 -- 添加到左邻域
 SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` 
 (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`,
  `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
-VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Default', '云打印', '云打印', 
 '', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
- 1, 1, '', 0, NULL, NULL, NULL, 0,
+ 1, 1, 1, 0, NULL, NULL, NULL, 0,
  'default', 1, NULL, NULL, 0, NULL);
  
  INSERT INTO `eh_launch_pad_items` 
@@ -19,9 +16,9 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/
  `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
-VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Default', '云打印', '云打印', 
 '', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
- 1, 1, '', 0, NULL, NULL, NULL, 0,
+ 1, 1, 1, 0, NULL, NULL, NULL, 0,
  'park_tourist', 1, NULL, NULL, 0, NULL);
  
  INSERT INTO `eh_launch_pad_items` 
@@ -29,10 +26,11 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/
  `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
-VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Default', '云打印', '云打印', 
 '', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
- 1, 1, '', 0, NULL, NULL, NULL, 0,
+ 1, 1, 1, 0, NULL, NULL, NULL, 0,
  'pm_admin', 1, NULL, NULL, 0, NULL);
+ -- 服务广场 -- 添加到左邻域 -- 在alpha，beta执行 -- end
  
 -- by dengs,司印服务器ip地址,二维码时间，默认打印价格，生成打印二维码的url 20170615
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.server.url', 'http://siyin.zuolin.com:8119', '司印服务器ip地址', '0', NULL);
@@ -56,17 +54,17 @@ INSERT INTO `eh_siyin_print_printers` (`id`, `namespace_id`, `owner_type`, `owne
 -- by dengs,云打印菜单配置 20170626
 -- 添加菜单 -- 按照产品要求，添加菜单到左邻域
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41400, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', 41400);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41400, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41410, '打印记录', 41400, NULL, 'react:/cloud-print/record', '0', '2', '/40000/41400/41410', 'park', '500', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41410, '打印记录', 41400, NULL, 'react:/cloud-print/record', '0', '2', '/40000/41400/41410', 'park', '500', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41420, '打印统计', 41400, NULL, 'react:/cloud-print/count', '0', '2', '/40000/41400/41420', 'park', '501', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41420, '打印统计', 41400, NULL, 'react:/cloud-print/count', '0', '2', '/40000/41400/41420', 'park', '501', 41400, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES (41430, '打印价格', 41400, NULL, 'react:/cloud-print/setting', '0', '2', '/40000/41400/41430', 'park', '502', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) 
+VALUES (41430, '打印价格', 41400, NULL, 'react:/cloud-print/setting', '0', '2', '/40000/41400/41430', 'park', '502', 41400, 'module');
 
 -- 添加权限云打印
 set @eh_acl_privileges_id = (select max(id) from eh_acl_privileges);
@@ -92,17 +90,6 @@ SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @eh_acl_privileges_id, 1001, 'EhAclRoles', 0, 1, NOW());
 
--- 菜单的范围 --0域不加scope
--- SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
--- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), 41400, '', 'EhNamespaces', 0, 2);
--- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), 41410, '', 'EhNamespaces', 0, 2);
--- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), 41420, '', 'EhNamespaces', 0, 2);
--- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), 41430, '', 'EhNamespaces', 0, 2);
-
 -- 模块
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
 VALUES (41400, '云打印', 40000, '/40000/41400', 0, 2, 2, 0, UTC_TIMESTAMP());
@@ -118,3 +105,55 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `modu
 VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 0, 41400, '云打印', NULL, NULL, NULL, 2);
 
 -- by dengs 添加菜单 end
+
+-- 菜单的范围暂时加到科技园做测试 by dengs,20170711
+ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 41400, '', 'EhNamespaces', 1000000, 2);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 41410, '', 'EhNamespaces', 1000000, 2);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 41420, '', 'EhNamespaces', 1000000, 2);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 41430, '', 'EhNamespaces', 1000000, 2);
+ 
+ SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` 
+(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`,
+ `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
+`min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
+`scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 1000000, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+'', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
+ 1, 1, 1, 0, NULL, NULL, NULL, 0,
+ 'default', 1, NULL, NULL, 0, NULL);
+ 
+ INSERT INTO `eh_launch_pad_items` 
+(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`,
+ `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
+`min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
+`scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 1000000, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+'', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
+ 1, 1, 1, 0, NULL, NULL, NULL, 0,
+ 'park_tourist', 1, NULL, NULL, 0, NULL);
+ 
+ INSERT INTO `eh_launch_pad_items` 
+(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`,
+ `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
+`min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
+`scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 1000000, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+'', 1, 1, 14, '{"url":"http://printtest.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
+ 1, 1, 1, 0, NULL, NULL, NULL, 0,
+ 'pm_admin', 1, NULL, NULL, 0, NULL);
+ 
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 1000000, 'EhOrganizations', NULL, 1, 30079, 1001, 'EhAclRoles', 0, 1, NOW());
+
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 1000000, 41400, '云打印', NULL, NULL, NULL, 2);
+
+ -- 服务广场 -- 添加到科技园域 -- 在alpha，beta执行 -- end

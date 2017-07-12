@@ -9121,7 +9121,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             /**modify by lei.lv*/
             //总公司和分公司的ID集合
-            enterpriseIds.add(org.getId());
+//            enterpriseIds.add(org.getId());
 
             if (null != departmentIds) {
                 for (Long departmentId : departmentIds) {
@@ -10010,21 +10010,22 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
         //循环查找targetIdSet
-        List<OrganizationDTO> organizationDTOs = targetIdSet.stream().map(r -> {
+        List<OrganizationDTO> dtos = new ArrayList<>();
+        targetIdSet.stream().map(r -> {
             Organization organization = organizationProvider.findOrganizationById(r);
             if (null != organization && OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE) {
                 if (null == cmd.getGroupTypes() || cmd.getGroupTypes().size() == 0) {//未指定机构类型
-                    return ConvertHelper.convert(organization, OrganizationDTO.class);
+                    dtos.add(ConvertHelper.convert(organization, OrganizationDTO.class));
                 } else {
                     if (cmd.getGroupTypes().contains(organization.getGroupType())) {//符合指定机构类型
-                        return ConvertHelper.convert(organization, OrganizationDTO.class);
+                        dtos.add(ConvertHelper.convert(organization, OrganizationDTO.class));
                     }
                 }
             }
             return null;
         }).collect(Collectors.toList());
 
-        return organizationDTOs;
+        return dtos;
     }
 
     @Override

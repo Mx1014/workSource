@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -28,15 +29,13 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 
     @Override
     public List<Long> findUsersByJobPositionId(Long parentOrgId, Long jobPositionId, Long departmentId) {
-        // DepartmentId is also organizationId
-
-		/*ListOrganizationContactByJobPositionIdCommand cmd = new ListOrganizationContactByJobPositionIdCommand();
-        cmd.setJobPositionId(jobPositionId);
-		cmd.setOrganizationId(departmentId);*/
-
-        List<Long> organizationIds = Collections.singletonList(departmentId);
-        List<OrganizationMember> members = organizationService.listOrganizationContactByJobPositionId(organizationIds, jobPositionId);
-
+        List<OrganizationMember> members;
+        if (Objects.equals(parentOrgId, departmentId)) {
+            members = organizationService.listOrganizationContactByJobPositionId(parentOrgId, jobPositionId);
+        } else {
+            List<Long> organizationIds = Collections.singletonList(departmentId);
+            members = organizationService.listOrganizationContactByJobPositionId(organizationIds, jobPositionId);
+        }
         return toOrganizationMemberIds(members);
     }
 

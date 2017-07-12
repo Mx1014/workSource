@@ -40,12 +40,14 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.user.*;
 import com.everhomes.util.DownloadUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -102,19 +104,10 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
-import com.everhomes.rest.organization.OrgAddressDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -181,8 +174,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private ServiceModuleService serviceModuleService;
 
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
+
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
@@ -632,7 +630,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
-
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
 		//黑名单权限校验 by sfyan20161213
 		checkBlacklist(null, null);
 		String requestorPhone = cmd.getRequestorPhone();
@@ -664,6 +662,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public void deleteTaskCategory(DeleteTaskCategoryCommand cmd) {
+		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+		if(cmd.getParentId() == null || defaultId.equals(cmd.getParentId())) {
+			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_SERVICE_CATEGORY_DELETE);
+		} else {
+			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_DETAIL_CATEGORY_DELETE);
+		}
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
@@ -688,6 +692,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public CategoryDTO createTaskCategory(CreateTaskCategoryCommand cmd) {
+		if(cmd.getParentId() == null) {
+			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_SERVICE_CATEGORY_CREATE);
+		} else {
+			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_DETAIL_CATEGORY_CREATE);
+		}
 
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
@@ -889,6 +898,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTaskStatisticsResponse searchTaskStatistics(SearchTaskStatisticsCommand cmd) {
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 		SearchTaskStatisticsResponse response = new SearchTaskStatisticsResponse();
@@ -1015,6 +1025,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public GetStatisticsResponse getStatistics(GetStatisticsCommand cmd) {
+		if(cmd.getOwnerId() == null) {
+			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_ALL_TASK_STATISTICS_LIST);
+		} else {
+			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
+		}
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 		GetStatisticsResponse response = new GetStatisticsResponse();
@@ -1675,6 +1690,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd) {
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_TASK_STATISTICS_LIST);
 		SearchTaskCategoryStatisticsResponse response = new SearchTaskCategoryStatisticsResponse();
 
 		List<TaskCategoryStatisticsDTO> list = queryTaskCategoryStatistics(cmd);
@@ -1853,9 +1869,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 			User user = UserContext.current().getUser();
 			List<CommunityDTO> result = new ArrayList<>();
 			dtos.forEach(r -> {
-				if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
-					result.add(r);
-				}
+//				if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
+				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
+				result.add(r);
+//				}
 			});
 			response.setCommunities(result);
 
@@ -1888,52 +1905,63 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
 	    if(null != namespaceDetail) {
-	    	NamespaceCommunityType type = NamespaceCommunityType.fromCode(namespaceDetail.getResourceType());
-	    	if(type== NamespaceCommunityType.COMMUNITY_COMMERCIAL) {
-	    		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
-	    		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
-	    		List<OrgAddressDTO> addressDTOs = convertAddress(organizationList, communityId);
-
-	    		response.setOrganizationList(addressDTOs);
-	    	}else if(type== NamespaceCommunityType.COMMUNITY_RESIDENTIAL) {
+//	    	NamespaceCommunityType type = NamespaceCommunityType.fromCode(namespaceDetail.getResourceType());
+//	    	if(type== NamespaceCommunityType.COMMUNITY_COMMERCIAL) {
+//	    		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+//	    		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+//	    		List<OrgAddressDTO> addressDTOs = convertAddress(organizationList, communityId);
+//
+//	    		response.setOrganizationList(addressDTOs);
+//	    	}else if(type== NamespaceCommunityType.COMMUNITY_RESIDENTIAL) {
+//				//根据查到的userid查家庭 而不是当前登录用户来查 by xiongying20170524
+////	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
+//				List<FamilyDTO> familyList = familyProvider.getUserFamiliesByUserId(userId);
+//	    		List<FamilyDTO> families = new ArrayList<>();
+//				if(familyList != null && familyList.size() > 0) {
+//					familyList.forEach(f -> {
+//						if(GroupMemberStatus.ACTIVE.equals(f.getMembershipStatus())) {
+//							if(f.getCommunityId().equals(communityId))
+//								families.add(f);
+//						}
+//
+//					});
+//				}
+//
+//	    		response.setFamilyList(families);
+//	    	}else {
 				//根据查到的userid查家庭 而不是当前登录用户来查 by xiongying20170524
 //	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
-				List<FamilyDTO> familyList = familyProvider.getUserFamiliesByUserId(userId);
-	    		List<FamilyDTO> families = new ArrayList<>();
-				if(familyList != null && familyList.size() > 0) {
-					familyList.forEach(f -> {
-						if(GroupMemberStatus.ACTIVE.equals(f.getMembershipStatus())) {
-							if(f.getCommunityId().equals(communityId))
-								families.add(f);
-						}
+			List<FamilyDTO> familyList = familyProvider.getUserFamiliesByUserId(userId);
+			List<FamilyDTO> families = new ArrayList<>();
+			if(familyList != null && familyList.size() > 0) {
+				familyList.forEach(f -> {
+					if(GroupMemberStatus.ACTIVE.equals(f.getMembershipStatus())) {
+						if(f.getCommunityId().equals(communityId))
+							families.add(f);
+					}
 
-					});
-				}
-				
-	    		response.setFamilyList(families);
-	    	}else {
-				//根据查到的userid查家庭 而不是当前登录用户来查 by xiongying20170524
-//	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
-				List<FamilyDTO> familyList = familyProvider.getUserFamiliesByUserId(userId);
-	    		List<FamilyDTO> families = new ArrayList<>();
-				if(familyList != null && familyList.size() > 0) {
-					familyList.forEach(f -> {
-						if(GroupMemberStatus.ACTIVE.equals(f.getMembershipStatus())) {
-							if(f.getCommunityId().equals(communityId))
-								families.add(f);
-						}
+				});
+			}
 
-					});
-				}
+			response.setFamilyList(families);
 
-				response.setFamilyList(families);
-	    		
-	    		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
-	    		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
-				List<OrgAddressDTO> addressDTOs = convertAddress(organizationList, communityId);
+			OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+			List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+			List<OrganizationDTO> organizations = new ArrayList<>();
+			if(organizationList != null && organizationList.size() > 0) {
+				organizationList.forEach(f -> {
+					if(OrganizationMemberStatus.ACTIVE.equals(f.getMemberStatus())) {
+						if(f.getCommunityId().equals(communityId))
+							organizations.add(f);
+					}
 
-	    		response.setOrganizationList(addressDTOs);
-	    	}
+				});
+			}
+			List<OrgAddressDTO> addressDTOs = convertAddress(organizations, communityId);
+
+			response.setOrganizationList(addressDTOs);
+//	    	}
+			LOGGER.info("getUserRelatedAddressesByCommunity: familyList: {}, organizationList: {}", familyList, organizationList);
 	    }
 
 	    List<PmTaskHistoryAddress> addresses = pmTaskProvider.listTaskHistoryAddresses(namespaceId, PmTaskOwnerType.COMMUNITY.getCode(),

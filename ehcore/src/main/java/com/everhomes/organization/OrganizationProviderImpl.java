@@ -2256,6 +2256,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 
+
+
     @Override
     public void createOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationCommunityRequests.class));
@@ -4615,7 +4617,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					SelectQuery<Record> query = context.selectQuery();
 					query.addFrom(Tables.EH_USERS);
 					query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
-					query.addJoin(Tables.EH_USER_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+					query.addJoin(context.select().from(Tables.EH_USER_ORGANIZATIONS).where(Tables.EH_USER_ORGANIZATIONS.STATUS.notEqual(UserOrganizationStatus.INACTIVE.getCode()).and(Tables.EH_USER_ORGANIZATIONS.STATUS.notEqual(UserOrganizationStatus.REJECT.getCode()))).asTable(Tables.EH_USER_ORGANIZATIONS.getName()),
+							JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
 					query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
 					if(null != callback){
 						callback.buildCondition(locator, query);
