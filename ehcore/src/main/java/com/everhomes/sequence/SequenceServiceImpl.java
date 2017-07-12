@@ -1443,6 +1443,42 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhRentalv2PriceRules.class, Tables.EH_RENTALV2_PRICE_RULES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_RENTALV2_PRICE_RULES.ID.max()).from(Tables.EH_RENTALV2_PRICE_RULES).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhSalaryDefaultEntities.class, Tables.EH_SALARY_DEFAULT_ENTITIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SALARY_DEFAULT_ENTITIES.ID.max()).from(Tables.EH_SALARY_DEFAULT_ENTITIES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSalaryEntityCategories.class, Tables.EH_SALARY_ENTITY_CATEGORIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SALARY_ENTITY_CATEGORIES.ID.max()).from(Tables.EH_SALARY_ENTITY_CATEGORIES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSalaryGroupEntities.class, Tables.EH_SALARY_GROUP_ENTITIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SALARY_GROUP_ENTITIES.ID.max()).from(Tables.EH_SALARY_GROUP_ENTITIES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSalaryEmployeeOriginVals.class, Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ID.max()).from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSalaryGroups.class, Tables.EH_SALARY_GROUPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SALARY_GROUPS.ID.max()).from(Tables.EH_SALARY_GROUPS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSalaryEmployees.class, Tables.EH_SALARY_EMPLOYEES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SALARY_EMPLOYEES.ID.max()).from(Tables.EH_SALARY_EMPLOYEES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhSalaryEmployeePeriodVals.class, Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ID.max()).from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhUniongroupConfigures.class, Tables.EH_UNIONGROUP_CONFIGURES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_UNIONGROUP_CONFIGURES.ID.max()).from(Tables.EH_UNIONGROUP_CONFIGURES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhUniongroupMemberDetails.class, Tables.EH_UNIONGROUP_MEMBER_DETAILS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID.max()).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
