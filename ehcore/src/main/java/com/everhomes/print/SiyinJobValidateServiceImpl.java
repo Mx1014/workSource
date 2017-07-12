@@ -44,6 +44,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.xml.XMLToJSON;
 
+import scala.math.BigInt;
 import sun.misc.BASE64Decoder;
 
 /**
@@ -120,7 +121,7 @@ public class SiyinJobValidateServiceImpl {
            mergeRecordToOrder(record,order);
            dbProvider.execute(r->{
         	   //订单金额为0，那么设置成支付状态。
-        	   	if(order.getOrderTotalFee() == null || order.getOrderTotalFee().intValue() == 0){
+        	   	if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
         	   		//如果详情为空，并且价格为0，那么不做记录。
         	   		if(record.getColorSurfaceCount() == 0 && record.getMonoSurfaceCount() == 0){
         	   			return null;
