@@ -372,3 +372,10 @@ update eh_configurations set value = 'https://biz.zuolin.com/zl-ec/rest/service/
 -- by dengs,20170705 加短信
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
 	VALUES(999974, 'sms.default.yzx', 8, 'zh_CN', '门禁-嘉定', '90224');
+
+-- 【新城智慧管家】运营服务-服务联盟下增加审批列表和申请记录两项 by dengs,20170707
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),40541,'', 'EhNamespaces', 999974,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),40542,'', 'EhNamespaces', 999974,2);
