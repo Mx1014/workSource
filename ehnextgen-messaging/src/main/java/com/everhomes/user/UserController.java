@@ -727,6 +727,20 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /user/listResetIdentifierCode</b>
+	 * <p>获取修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("listResetIdentifierCode")
+	@RestReturn(value = UserIdentifierLogDTO.class)
+	public RestResponse listResetIdentifierCode(@Valid ListResetIdentifierCodeCommand cmd){
+		UserIdentifierLogDTO log = userService.listResetIdentifierCode(cmd);
+        RestResponse response = new RestResponse(log);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
 	 * <b>URL: /user/createResetIdentifierAppeal</b>
 	 * <p>申诉修改手机号</p>
 	 */

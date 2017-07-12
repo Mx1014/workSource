@@ -16,4 +16,6 @@ public interface UserIdentifierLogProvider {
     UserIdentifierLog findByUserIdAndIdentifier(Long uid, Integer regionCode, String identifier);
 
     UserIdentifierLog findByUserId(Long uid);
+
+    UserIdentifierLog findByIdentifier(String identifier);
 }

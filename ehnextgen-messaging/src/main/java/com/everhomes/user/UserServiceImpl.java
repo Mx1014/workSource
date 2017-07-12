@@ -4033,6 +4033,19 @@ public class UserServiceImpl implements UserService {
                 "update user appeal log failed");
     }
 
+    @Override
+    public UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd) {
+	    UserIdentifierLog log = userIdentifierLogProvider.findByIdentifier(cmd.getIdentifier());
+        if (log != null) {
+            return toUserIdentifierLogDTO(log);
+        }
+        return new UserIdentifierLogDTO();
+    }
+
+    private UserIdentifierLogDTO toUserIdentifierLogDTO(UserIdentifierLog log) {
+        return ConvertHelper.convert(log, UserIdentifierLogDTO.class);
+    }
+
     private void sendMessageOrSmsByResetIdentifier(UserAppealLogStatus status, UserAppealLog log) {
         User user = UserContext.current().getUser();
         String locale = Locale.SIMPLIFIED_CHINESE.toString();
