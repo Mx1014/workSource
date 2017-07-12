@@ -816,7 +816,6 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		return result.get(0);
 	}
-
 	@Caching(evict={@CacheEvict(value="listRecordsByOperatorId", key="#record.operatorId")})
 	@Override
 	public void createQualityInspectionTaskRecords(QualityInspectionTaskRecords record) {

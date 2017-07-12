@@ -658,4 +658,23 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
 insert into `eh_web_menu_scopes` (`id`, `menu_id`,`owner_type`, `owner_id`,`apply_policy`) values ((@menu_scope_id := @menu_scope_id + 1),50900,'EhNamespaces',999981,2);
 
+-- 企业管理模块添加企业管理员的权限 add by sfyan 20170711
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40013, '0', 'org.admin.list', '查看企业管理员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40014, '0', 'org.admin.create', '创建企业管理员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40015, '0', 'org.admin.update', '修改企业管理员', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40016, '0', 'org.admin.delete', '删除企业管理员', NULL);
 
+SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'33000','0',40013,'查看企业管理员','0',NOW());
+    INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'33000','0',40014,'创建企业管理员','0',NOW());
+    INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'33000','0',40015,'修改企业管理员','0',NOW());
+    INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'33000','0',40016,'删除企业管理员','0',NOW());
+	
+-- 服务联盟和资源预定的数据处理 add by sfyan 20180712
+update eh_rentalv2_resource_types set status = 2 where namespace_id = 999981;
+SET @jump_id = (SELECT MAX FROM `eh_service_alliance_jump_module`);
+insert into eh_service_alliance_jump_module (id, namespace_id, module_name, module_url, parent_id) values ((@jump_id := @jump_id + 1),999981,'审批','zl://approval/create?approvalId={}&sourceId={}', 0);

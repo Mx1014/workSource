@@ -1960,8 +1960,6 @@ public class CommunityServiceImpl implements CommunityService {
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
 				query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
-				query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-				query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
 
 				if(null != cmd.getOrganizationId()){
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
