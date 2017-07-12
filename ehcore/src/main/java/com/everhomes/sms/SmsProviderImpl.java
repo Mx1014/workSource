@@ -110,6 +110,9 @@ public class SmsProviderImpl implements SmsProvider {
 
     private void publishEvent(SmsCallback callback) {
         applicationEventPublisher.publishEvent(new SendSmsEvent(callback));
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("sms event publish success...");
+        // }
     }
 
     @Override
