@@ -1,9 +1,9 @@
 package com.everhomes.authorization.zjgk;
 
 public class ZjgkJsonEntity<T> {
-	public static final int ERRORCODE_SUCCESS  = 200;
-	public static final int ERRORCODE_MISMATCHING  = 201;
-	public static final int ERRORCODE_UNRENT  = 202;
+	public static final int ERRORCODE_SUCCESS  = 200; // 错误码，成功为200，失败则为具体的非200错误码
+	public static final int ERRORCODE_MISMATCHING  = 201; // 错误码201表示“提交信息不匹配”
+	public static final int ERRORCODE_UNRENT  = 202; // 错误码202表示“用户已退租”
 	
 	private String version;
 	private String errorScope;
