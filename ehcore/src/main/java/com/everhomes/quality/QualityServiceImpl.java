@@ -3763,6 +3763,7 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionTasks> tasks = qualityProvider.listQualityInspectionTasksBySample(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
 
 		if(tasks != null) {
+			LOGGER.info("calculateTasks tasks: {}", tasks);
 			scoreStat.setTaskCount(scoreStat.getTaskCount() + tasks.size());
 			Integer correctionCount = 0;
 			Integer correctionQualifiedCount = 0;
