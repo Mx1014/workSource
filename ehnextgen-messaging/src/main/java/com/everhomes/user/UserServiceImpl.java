@@ -873,22 +873,22 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserLogin logon(int namespaceId, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify) {
-		User user = null;
-		user = this.userProvider.findUserByAccountName(userIdentifierToken);
+	public UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify) {
+		User user = this.userProvider.findUserByAccountName(userIdentifierToken);
 		if(user == null) {
 			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
-			if(userIdentifier == null) {
-				LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}", 
-				        namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
-			} else {
-				user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
-				if(user == null) {
-					LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}", 
+			// 把regionCode的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
+			if(userIdentifier != null && Objects.equals(userIdentifier.getRegionCode(), regionCode)) {
+                user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
+                if(user == null) {
+                    LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
+                            namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
+                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+                }
+            } else {
+                LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                         namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
-				}
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
 			}
 		}
 

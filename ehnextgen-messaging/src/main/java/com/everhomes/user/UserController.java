@@ -366,10 +366,11 @@ public class UserController extends ControllerBase {
 	@RestReturn(LogonCommandResponse.class)
 	public RestResponse logon(@Valid LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
 	    long startTime = System.currentTimeMillis();
-	    
 	    long loginStartTime = System.currentTimeMillis();
-		UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
-				cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+
+        int regionCode = cmd.getRegionCode() != null ? cmd.getRegionCode() : 86;
+        UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
+                regionCode, cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
 		long loginEndTime = System.currentTimeMillis();
 		
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
@@ -1035,8 +1036,10 @@ public class UserController extends ControllerBase {
 	@RequireAuthentication(false)
 	@RestReturn(LogonCommandResponse.class)
 	public RestResponse adminLogon(@Valid LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
-		UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
-				cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+        int regionCode = cmd.getRegionCode() != null ? cmd.getRegionCode() : 86;
+        int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+        UserLogin login = this.userService.logon(namespaceId, regionCode, cmd.getUserIdentifier(),
+                cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
 
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserPrivilege(login.getUserId(), 0);
