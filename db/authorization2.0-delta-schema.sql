@@ -3,6 +3,8 @@
 CREATE TABLE `eh_user_authorizations` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
   `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
   `type` VARCHAR(128) COMMENT '1, personal authorization, 2, organization authorization',
   `phone` VARCHAR(128) COMMENT 'phone',
   `name` VARCHAR(128) COMMENT 'user name',
