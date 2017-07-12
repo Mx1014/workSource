@@ -3989,7 +3989,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public ListAuthFormsResponse listAuthForms() {
-		int namespaceId = UserContext.current().getNamespaceId();
+		int namespaceId = UserContext.getCurrentNamespaceId();
 		List<LeaseFormRequest> list = enterpriseApplyEntryProvider.listLeaseRequestForm(namespaceId, Long.valueOf(namespaceId), "EhNamespaces");
 		ListAuthFormsResponse response = new ListAuthFormsResponse();
 		response.setSourceDto(list.stream().map(r->ConvertHelper.convert(r, FormSourceDTO.class)).collect(Collectors.toList()));
