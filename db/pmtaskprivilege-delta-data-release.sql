@@ -1,7 +1,7 @@
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `operator_uid`, `creator_uid`, `create_time`) VALUES(20140,'任务列表',20100,'/20000/20100/20140','1','3','2','0',1,1,NOW());
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `operator_uid`, `creator_uid`, `create_time`) VALUES(20150,'服务录入',20100,'/20000/20100/20150','1','3','2','0',1,1,NOW());
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `operator_uid`, `creator_uid`, `create_time`) VALUES(20155,'设置',20100,'/20000/20100/20155','1','3','0','0',1,1,NOW());
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `operator_uid`, `creator_uid`, `create_time`) VALUES(20190,'统计',20100,'/20000/20100/20190','1','3','2','0',1,1,NOW());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20140,'任务列表',20100,'/20000/20100/20140','1','3','2','0',NOW());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20150,'服务录入',20100,'/20000/20100/20150','1','3','2','0',NOW());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20155,'设置',20100,'/20000/20100/20155','1','3','0','0',NOW());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20190,'统计',20100,'/20000/20100/20190','1','3','2','0',NOW());
 
 SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@module_privilege_id := @module_privilege_id + 1), '20100', '1', '10008', '物业报修管理权限', '0', NOW());
