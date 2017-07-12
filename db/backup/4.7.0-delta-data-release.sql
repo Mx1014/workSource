@@ -720,5 +720,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@item_id:=@item_id+1, @namespace_id, 0, 1, @community_id, '/home', 'Bizs', '', '资源预订', 'cs://1/image/aW1hZ2UvTVRwaE5UZGtOR1EyTlRrek1XRXpPRGxsT0RFeE1tTmlabVl4TnpWak4yUmxaUQ', 1, 1, 60, '{"url":"zl://association/main?layoutName=RentalLayout&itemLocation=/rental&versionCode=2017070401&displayName=资源预订"}', 3, 3, 1, 1, '1', 0, NULL, NULL, NULL, 1, 'park_tourist', 0, 22, NULL, 16, NULL);
 
+-- 服务联盟展示风格修改 add by sfyan 20170712
+update eh_launch_pad_items set action_data = replace(action_data, '"displayType": "list"', '"displayType": "grid"') where item_label = '服务联盟' and namespace_id=999981;
 
 
