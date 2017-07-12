@@ -1,6 +1,6 @@
 -- by dengs,你大爷的，搞成这样子。
--- DROP TABLE IF EXISTS `eh_user_authorization`;
-CREATE TABLE `eh_user_authorization` (
+-- DROP TABLE IF EXISTS `eh_user_authorizations`;
+CREATE TABLE `eh_user_authorizations` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
   `namespace_id` INTEGER,
   `type` VARCHAR(128) COMMENT '1, personal authorization, 2, organization authorization',

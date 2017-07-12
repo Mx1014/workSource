@@ -171,7 +171,7 @@
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
         eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
             eh_sms_black_lists |
-            eh_user_authorization |
+            eh_user_authorizations |
         </includes>
 
             <!-- All elements that are excluded from your schema
