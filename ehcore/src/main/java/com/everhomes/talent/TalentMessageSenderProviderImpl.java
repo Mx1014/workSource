@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,6 +58,19 @@ public class TalentMessageSenderProviderImpl implements TalentMessageSenderProvi
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), TalentMessageSender.class);
 	}
 	
+	@Override
+	public TalentMessageSender findTalentMessageSender(Integer namespaceId, String ownerType, Long ownerId,
+			Long organizationMemberId, Long userId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_TALENT_MESSAGE_SENDERS)
+				.where(Tables.EH_TALENT_MESSAGE_SENDERS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_TALENT_MESSAGE_SENDERS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_TALENT_MESSAGE_SENDERS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_TALENT_MESSAGE_SENDERS.ORGANIZATION_MEMBER_ID.eq(organizationMemberId))
+				.and(Tables.EH_TALENT_MESSAGE_SENDERS.USER_ID.eq(userId))
+				.fetchOne();
+		return record == null ? null : ConvertHelper.convert(record, TalentMessageSender.class);
+	}
+
 	@Override
 	public List<TalentMessageSender> listTalentMessageSender() {
 		return getReadOnlyContext().select().from(Tables.EH_TALENT_MESSAGE_SENDERS)

@@ -516,16 +516,26 @@ public class TalentServiceImpl implements TalentService {
 	} 
 
 	@Override
-	public MessageSenderDTO createMessageSender(CreateMessageSenderCommand cmd) {
-		TalentMessageSender talentMessageSender = new TalentMessageSender();
-		talentMessageSender.setNamespaceId(namespaceId());
-		talentMessageSender.setOwnerType(cmd.getOwnerType());
-		talentMessageSender.setOwnerId(cmd.getOwnerId());
-		talentMessageSender.setOrganizationMemberId(cmd.getOrganizationMemberId());
-		talentMessageSender.setUserId(cmd.getUserId());
-		talentMessageSender.setStatus(CommonStatus.ACTIVE.getCode());
-		talentMessageSenderProvider.createTalentMessageSender(talentMessageSender);
-		return convert(talentMessageSender);
+	public void createMessageSender(CreateMessageSenderCommand cmd) {
+		if (cmd.getSenders() == null || cmd.getSenders().isEmpty()) {
+			return;
+		}
+		cmd.getSenders().forEach(t->{
+			TalentMessageSender talentMessageSender = talentMessageSenderProvider.findTalentMessageSender(namespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), t.getOrganizationMemberId(), t.getUserId());
+			if (talentMessageSender == null) {
+				talentMessageSender = new TalentMessageSender();
+				talentMessageSender.setNamespaceId(namespaceId());
+				talentMessageSender.setOwnerType(cmd.getOwnerType());
+				talentMessageSender.setOwnerId(cmd.getOwnerId());
+				talentMessageSender.setStatus(CommonStatus.ACTIVE.getCode());
+				talentMessageSender.setOrganizationMemberId(t.getOrganizationMemberId());
+				talentMessageSender.setUserId(t.getUserId());
+				talentMessageSenderProvider.createTalentMessageSender(talentMessageSender);
+			}else {
+				talentMessageSender.setStatus(CommonStatus.ACTIVE.getCode());
+				talentMessageSenderProvider.updateTalentMessageSender(talentMessageSender);
+			}
+		});
 	}
 
 	private MessageSenderDTO convert(TalentMessageSender talentMessageSender) {

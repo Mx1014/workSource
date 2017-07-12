@@ -15,4 +15,7 @@ public interface TalentMessageSenderProvider {
 
 	List<TalentMessageSender> listTalentMessageSenderByOwner(String ownerType, Long ownerId);
 
+	TalentMessageSender findTalentMessageSender(Integer namespaceId, String ownerType, Long ownerId,
+			Long organizationMemberId, Long userId);
+
 }

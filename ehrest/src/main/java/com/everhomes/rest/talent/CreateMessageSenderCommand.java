@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.rest.talent;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,8 +15,6 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属者类型</li>
  * <li>ownerId: 所属者id</li>
  * <li>organizationId: 组织id</li>
- * <li>organizationMemberId: 组织成员id</li>
- * <li>userId: 用户id，对应于targetId</li>
  * </ul>
  */
 public class CreateMessageSenderCommand {	
@@ -24,10 +25,16 @@ public class CreateMessageSenderCommand {
 	private Long ownerId;
 	@NotNull
 	private Long organizationId;
-	@NotNull
-	private Long organizationMemberId;
-	@NotNull
-	private Long userId;
+	@ItemType(CreateMessageSenderDTO.class)
+	private List<CreateMessageSenderDTO> senders;
+
+	public List<CreateMessageSenderDTO> getSenders() {
+		return senders;
+	}
+
+	public void setSenders(List<CreateMessageSenderDTO> senders) {
+		this.senders = senders;
+	}
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -51,22 +58,6 @@ public class CreateMessageSenderCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
-	}
-
-	public Long getOrganizationMemberId() {
-		return organizationMemberId;
-	}
-
-	public void setOrganizationMemberId(Long organizationMemberId) {
-		this.organizationMemberId = organizationMemberId;
-	}
-
-	public Long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
 	}
 
 	@Override

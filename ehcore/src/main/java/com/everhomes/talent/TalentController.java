@@ -210,9 +210,10 @@ public class TalentController extends ControllerBase {
 	 * <b>URL: /talent/createMessageSender</b>
 	 */
 	@RequestMapping("createMessageSender")
-	@RestReturn(MessageSenderDTO.class)
+	@RestReturn(String.class)
 	public RestResponse createMessageSender(CreateMessageSenderCommand cmd){
-		return new RestResponse(talentService.createMessageSender(cmd));
+		talentService.createMessageSender(cmd);
+		return new RestResponse();
 	}
 	
 	/**

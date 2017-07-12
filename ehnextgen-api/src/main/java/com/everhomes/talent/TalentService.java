@@ -87,7 +87,7 @@ public interface TalentService {
 	public GetTalentRequestDetailResponse getTalentRequestDetail(GetTalentRequestDetailCommand cmd);
 
 
-	public MessageSenderDTO createMessageSender(CreateMessageSenderCommand cmd);
+	public void createMessageSender(CreateMessageSenderCommand cmd);
 
 
 	public void deleteMessageSender(DeleteMessageSenderCommand cmd);
