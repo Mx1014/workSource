@@ -154,4 +154,17 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
 		return step.fetchOne().value1();
 	}
+
+	@Override
+	public SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndUserId(Long salaryGroupId, Long userId) {
+		List<SalaryEmployee> result = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
+				.and(Tables.EH_SALARY_EMPLOYEES.USER_ID.eq(userId))
+				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+		if (null == result || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
 }
