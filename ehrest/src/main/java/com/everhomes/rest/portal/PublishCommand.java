@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class PublishCommand {
 
-	private Long namespaceId;
+	private Integer namespaceId;
 
 	private String contentType;
 
@@ -23,18 +23,18 @@ public class PublishCommand {
 
 	}
 
-	public PublishCommand(Long namespaceId, String contentType, Long contentId) {
+	public PublishCommand(Integer namespaceId, String contentType, Long contentId) {
 		super();
 		this.namespaceId = namespaceId;
 		this.contentType = contentType;
 		this.contentId = contentId;
 	}
 
-	public Long getNamespaceId() {
+	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 
-	public void setNamespaceId(Long namespaceId) {
+	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
 

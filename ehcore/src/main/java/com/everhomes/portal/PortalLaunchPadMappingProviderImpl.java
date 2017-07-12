@@ -4,6 +4,7 @@ package com.everhomes.portal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,8 +55,18 @@ public class PortalLaunchPadMappingProviderImpl implements PortalLaunchPadMappin
 	}
 	
 	@Override
-	public List<PortalLaunchPadMapping> listPortalLaunchPadMapping() {
+	public List<PortalLaunchPadMapping> listPortalLaunchPadMapping(String contentType, Long portalContentId, Long launchPadContentId) {
+
+		Condition condition = Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.ID.isNotNull();
+		if(null != contentType)
+			condition = condition.and(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.CONTENT_TYPE.eq(contentType));
+		if(null != portalContentId)
+			condition = condition.and(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.PORTAL_CONTENT_ID.eq(portalContentId));
+		if(null != launchPadContentId)
+			condition = condition.and(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.LAUNCH_PAD_CONTENT_ID.eq(launchPadContentId));
+
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS)
+				.where(condition)
 				.orderBy(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLaunchPadMapping.class));
 	}

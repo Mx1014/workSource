@@ -9,6 +9,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.launchpad.LaunchPadItem;
+import com.everhomes.launchpad.LaunchPadLayout;
+import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -17,7 +20,11 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.launchpad.ItemDisplayFlag;
+import com.everhomes.rest.launchpad.LaunchPadLayoutGroupDTO;
+import com.everhomes.rest.launchpad.LaunchPadLayoutJson;
+import com.everhomes.rest.launchpad.LaunchPadLayoutStatus;
 import com.everhomes.rest.portal.*;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -88,6 +95,12 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private UserProvider userProvider;
+
+	@Autowired
+	private LaunchPadProvider launchPadProvider;
+
+	@Autowired
+	private PortalLaunchPadMappingProvider portalLaunchPadMappingProvider;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -889,10 +902,71 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public void publish(PublishCommand cmd) {
-	
+		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId());
+		for (PortalLayout layout: layouts) {
+
+		}
 
 	}
 
+	private void publishLayout(PortalLayout layout){
+
+		List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.getCode(), layout.getId(), null);
+
+		Long versionCode = 0L;
+
+		LaunchPadLayoutJson layoutJson = new LaunchPadLayoutJson();
+		layoutJson.setVersionCode(versionCode.toString());
+		layoutJson.setDisplayName(layout.getLabel());
+		layoutJson.setLayoutName(layout.getName());
+		List<LaunchPadLayoutGroupDTO> groups = new ArrayList<>();
+		List<PortalItemGroup> itemGroups = portalItemGroupProvider.listPortalItemGroup(layout.getId());
+		for (PortalItemGroup itemGroup: itemGroups) {
+			LaunchPadLayoutGroupDTO group = ConvertHelper.convert(itemGroup, LaunchPadLayoutGroupDTO.class);
+			group.setGroupName(itemGroup.getName());
+			ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
+			group.setColumnCount(instanceConfig.getColumnCount());
+			if(TitleFlag.TRUE == TitleFlag.fromCode(instanceConfig.getTitleFlag())){
+				group.setTitle(instanceConfig.getTitle());
+			}
+		}
+
+		LaunchPadLayout launchPadLayout = new LaunchPadLayout();
+		if(portalLaunchPadMappings.size() > 0){
+			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
+				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
+				launchPadLayout.setVersionCode(versionCode);
+				launchPadProvider.updateLaunchPadLayout(launchPadLayout);
+			}
+		}else{
+			launchPadLayout.setNamespaceId(layout.getNamespaceId());
+			launchPadLayout.setName(layout.getName());
+			launchPadLayout.setVersionCode(versionCode);
+			launchPadLayout.setMinVersionCode(0L);
+			launchPadLayout.setStatus(LaunchPadLayoutStatus.ACTIVE.getCode());
+			launchPadLayout.setScopeCode((byte)0);
+			launchPadLayout.setApplyPolicy((byte)0);
+			launchPadLayout.setScopeId(0L);
+			for (SceneType sceneType: SceneType.values()) {
+				if(sceneType == SceneType.DEFAULT ||
+						sceneType == SceneType.PARK_TOURIST ||
+						sceneType == SceneType.PM_ADMIN){
+					launchPadLayout.setSceneType(sceneType.getCode());
+					launchPadProvider.createLaunchPadLayout(launchPadLayout);
+				}
+			}
+
+		}
+
+
+//		LaunchPadLayout launchPadLayout = new LaunchPadLayout();
+//		launchPadLayout.set
+//
+//		LaunchPadItem
+//
+//
+//		launchPadProvider.createLaunchPadItem();
+	}
 
 	public static void main(String[] args) {
 //		PortalItemGroupJson[] jsons = (PortalItemGroupJson[])StringHelper.fromJsonString("[{\"label\":\"应用\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Navigator\",\"style\":\"Metro\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"cs://\"},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"横幅广告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"公告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"运营模块\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"OPPush\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"titleFlag\":0,\"title\":\"标题\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"无时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News_Flash\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"timeWidgetStyle\":\"date\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"分页签\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Tabs\",\"style\":\"Pure_text\",\"defaultOrder\":0,\"description\":\"描述\"}]", PortalItemGroupJson[].class);
