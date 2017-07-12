@@ -20,6 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.everhomes.authorization.zjgk.ZjgkJsonEntity;
+import com.everhomes.authorization.zjgk.ZjgkResponse;
 import com.everhomes.banner.BannerProviderImpl;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
@@ -54,14 +58,22 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		params.put("signature", signature);
 		try {
 			String jsonStr = HttpUtils.post(url, params, 10, "UTF-8");
-			LOGGER.info(StringHelper.toJsonString(params));
-			LOGGER.info(jsonStr);
+			ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
+			//请求成功，返回承租地址，那么创建家庭。
+			if(entity.isSuccess()){
+				createFamily(entity);
+			}
+			//创建工作流
+			createWorkFlow();
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(""+e);
 		}
 		return null;
 	}
 	
+	/**
+	 * 加密参数算法
+	 */
 	public String computeSignature(Map<String, String> params, String secretKey) {
 	    assert(params != null);
 	    assert(secretKey != null);
