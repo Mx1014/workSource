@@ -10,4 +10,6 @@ public class SalaryServiceErrorCode {
 
     public static final int ERROR_CONTACTTOKEN_ISNULL =  100003;   //   手机号码不存在
 
+    public static final int ERROR_SHIFA_ISNULL =  100004;   //   手机号码不存在
+
 }

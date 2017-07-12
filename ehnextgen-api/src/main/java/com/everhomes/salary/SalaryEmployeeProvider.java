@@ -28,4 +28,6 @@ public interface SalaryEmployeeProvider {
 	void deleteSalaryEmployee(SalaryEmployee employee);
 
 	Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId,  Byte code);
+
+	SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndUserId(Long salaryGroupId, Long userId);
 }
