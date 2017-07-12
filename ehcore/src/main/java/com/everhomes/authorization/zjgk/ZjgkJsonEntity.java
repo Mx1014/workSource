@@ -44,4 +44,12 @@ public class ZjgkJsonEntity<T> {
 	public boolean isSuccess(){
 		return errorCode == ERRORCODE_SUCCESS;
 	}
+	
+	public boolean isMismatching(){
+		return errorCode == ERRORCODE_MISMATCHING;
+	}
+	
+	public boolean isUnrent(){
+		return errorCode == ERRORCODE_UNRENT;
+	}
 }

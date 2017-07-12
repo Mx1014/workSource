@@ -145,6 +145,7 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.FormSourceDTO;
+import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.ui.user.ListAuthFormsResponse;
@@ -4012,5 +4013,10 @@ public class UserServiceImpl implements UserService {
 			resp.getDtos().add(dto);
 		}
 		return resp;
+	}
+	
+	@Override
+	public GetFamilyButtonStatusResponse getFamilyButtonStatus(){
+		return null;
 	}
 }

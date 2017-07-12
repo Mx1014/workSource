@@ -177,4 +177,6 @@ public interface UserService {
     void checkSmsBlackList(String smsAction, String identifierToken);
 
     ListAuthFormsResponse listAuthForms();
+
+	GetFamilyButtonStatusResponse getFamilyButtonStatus();
 }

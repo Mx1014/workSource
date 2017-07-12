@@ -29,8 +29,10 @@ import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListAuthFormsResponse;
 import com.everhomes.rest.ui.user.ListContactBySceneRespose;
 import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
@@ -41,7 +43,6 @@ import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.ui.user.ListAuthFormsResponse;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
@@ -307,6 +308,20 @@ public class UserUiController extends ControllerBase {
 	public RestResponse listAuthForm() {
 		ListAuthFormsResponse listAuthFormResponse = userService.listAuthForms();
 		RestResponse response = new RestResponse(listAuthFormResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /ui/user/getFamilyButtonStatus</b>
+	 * <p>获取文案,和家庭下button的是否显示</p>
+	 */
+	@RequestMapping("getFamilyButtonStatus")
+	@RestReturn(value=GetFamilyButtonStatusResponse.class)
+	public RestResponse getFamilyButtonStatus() {
+		GetFamilyButtonStatusResponse getFamilyButtonStatusResponse = userService.getFamilyButtonStatus();
+		RestResponse response = new RestResponse(getFamilyButtonStatusResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
