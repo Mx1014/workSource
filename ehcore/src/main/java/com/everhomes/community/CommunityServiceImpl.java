@@ -2012,25 +2012,25 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
 			}
 
-			if(OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(r.getStatus())){
+			if(UserOrganizationStatus.ACTIVE == UserOrganizationStatus.fromCode(r.getStatus())){
 				dto.setIsAuth(AuthFlag.YES.getCode());
+				if(null != r.getOrganizationId()){
+					List<OrganizationMember> ms = new ArrayList<>();
+					List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
+					for (OrganizationMember member: members) {
+						if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE){
+							dto.setOrganizationMemberName(member.getContactName());
+							ms.add(member);
+						}
+					}
+					List<OrganizationDetailDTO> organizations = new ArrayList<>();
+					organizations.addAll(populateOrganizationDetails(ms));
+					dto.setOrganizations(organizations);
+				}
 			}else{
 				dto.setIsAuth(AuthFlag.NO.getCode());
 			}
 
-			if(null != r.getOrganizationId()){
-				List<OrganizationMember> ms = new ArrayList<>();
-				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
-				for (OrganizationMember member: members) {
-					if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE){
-						dto.setOrganizationMemberName(member.getContactName());
-						ms.add(member);
-					}
-				}
-				List<OrganizationDetailDTO> organizations = new ArrayList<>();
-				organizations.addAll(populateOrganizationDetails(ms));
-				dto.setOrganizations(organizations);
-			}
 			userCommunities.add(dto);
 		}
 		LOGGER.debug("Get user detail list time:{}", System.currentTimeMillis() - time);
