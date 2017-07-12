@@ -1999,6 +1999,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		LOGGER.debug("Get user organization list time:{}", System.currentTimeMillis() - time);
 		List<CommunityUserDto> userCommunities = new ArrayList<>();
+		LOGGER.debug("fanfanfanfanfnanfan:{}",users);
 		for(UserOrganizations r: users){
 			CommunityUserDto dto = ConvertHelper.convert(r, CommunityUserDto.class);
 			dto.setUserName(r.getNickName());
