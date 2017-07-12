@@ -673,3 +673,8 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
     VALUES((@module_privilege_id := @module_privilege_id + 1),'33000','0',40015,'修改企业管理员','0',NOW());
     INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
     VALUES((@module_privilege_id := @module_privilege_id + 1),'33000','0',40016,'删除企业管理员','0',NOW());
+	
+-- 服务联盟和资源预定的数据处理 add by sfyan 20180712
+update eh_rentalv2_resource_types set status = 2 where namespace_id = 999981;
+SET @jump_id = (SELECT MAX FROM `eh_service_alliance_jump_module`);
+insert into eh_service_alliance_jump_module (id, namespace_id, module_name, module_url, parent_id) values ((@jump_id := @jump_id + 1),999981,'审批','zl://approval/create?approvalId={}&sourceId={}', 0);
