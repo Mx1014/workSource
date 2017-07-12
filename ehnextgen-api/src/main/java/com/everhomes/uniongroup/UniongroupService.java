@@ -33,7 +33,7 @@ public interface UniongroupService {
     /**
      * 根据条件查询记录
      **/
-    public List listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd);
+    public ListUniongroupMemberDetailResponse listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd);
 
     public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId);
     /**

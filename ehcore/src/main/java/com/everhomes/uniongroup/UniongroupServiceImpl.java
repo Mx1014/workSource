@@ -235,7 +235,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public List listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd) {
+    public ListUniongroupMemberDetailResponse listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd) {
        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         SearchUniongroupDetailCommand search_cmd = new SearchUniongroupDetailCommand();
@@ -253,8 +253,13 @@ public class UniongroupServiceImpl implements UniongroupService {
         search_cmd.setPageSize(cmd.getPageSize());
         List<UniongroupMemberDetail> list = uniongroupSearcher.query(search_cmd);
 
+        ListUniongroupMemberDetailResponse listUniongroupMemberDetailResponse = new ListUniongroupMemberDetailResponse();
+
         if(list != null && list.size() > 0){
-            return list;
+            listUniongroupMemberDetailResponse.setPageAnchor(search_cmd.getPageAnchor());
+            listUniongroupMemberDetailResponse.setPageSize(search_cmd.getPageSize());
+            listUniongroupMemberDetailResponse.setUniongroupMemberDetailList(list);
+            return listUniongroupMemberDetailResponse;
         }
         return null;
     }
