@@ -49,6 +49,9 @@ public class TalentServiceAdvice {
 	@Before("execution(* com.everhomes.talent.TalentServiceImpl.*(..))")
 	public void check(JoinPoint joinPoint) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		// 检查通用参数，通过参数上的注解检查
+		if (joinPoint.getArgs() == null || joinPoint.getArgs().length == 0) {
+			return ;
+		}
 		Object cmd = joinPoint.getArgs()[0];
 		ValidatorUtil.validate(cmd);
 		
