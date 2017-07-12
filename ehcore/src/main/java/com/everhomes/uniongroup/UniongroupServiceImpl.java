@@ -169,21 +169,24 @@ public class UniongroupServiceImpl implements UniongroupService {
         }).collect(Collectors.toList());
 
         //4.保存
-        if (configureList.size() > 0 && unionDetailsList.size() > 0) {
-            dbProvider.execute((TransactionStatus status) -> {
-                //--------------------------1.保存配置表--------------------------
+        dbProvider.execute((TransactionStatus status) -> {
+            //--------------------------1.保存配置表--------------------------
+            if (configureList.size() > 0) {
                 configureList.stream().map(r -> {
                     this.uniongroupConfigureProvider.createUniongroupConfigures(r);
                     //2保存关系表
                     return null;
                 }).collect(Collectors.toList());
+            }
+            if (unionDetailsList.size() > 0) {
                 //--------------------------2.保存关系表--------------------------
                 this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(new ArrayList(detailIds));
                 //后保存
                 this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
-                return null;
-            });
-        }
+            }
+
+            return null;
+        });
 
         //5.同步搜索引擎
         this.uniongroupSearcher.deleteAll();
