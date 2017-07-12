@@ -901,7 +901,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private List<SiyinPrintSetting> checkPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO, String string, Long long1) {
 		// TODO Auto-generated method stub
 		if(paperSizePriceDTO == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
+			paperSizePriceDTO = new PrintSettingPaperSizePriceDTO();
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
 		}
 		paperSizePriceDTO.setAthreePrice(checkPrice(paperSizePriceDTO.getAthreePrice()));
 		paperSizePriceDTO.setAfourPrice(checkPrice(paperSizePriceDTO.getAfourPrice()));
