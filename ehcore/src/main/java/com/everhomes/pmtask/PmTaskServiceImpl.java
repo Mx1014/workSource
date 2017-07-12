@@ -1961,6 +1961,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 			response.setOrganizationList(addressDTOs);
 //	    	}
+			LOGGER.info("getUserRelatedAddressesByCommunity: familyList: {}, organizationList: {}", familyList, organizationList);
 	    }
 
 	    List<PmTaskHistoryAddress> addresses = pmTaskProvider.listTaskHistoryAddresses(namespaceId, PmTaskOwnerType.COMMUNITY.getCode(),
