@@ -51,13 +51,13 @@ public interface SalaryService {
 	public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse);
 
 
-	public ImportFileTaskDTO importSalaryGroup(MultipartFile mfile, Long userId, ImportSalaryGroupCommand cmd);
+	public ImportFileTaskDTO importSalaryGroup(MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryGroupCommand cmd);
 
 
 	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpServletResponse);
 
 
-	public void importPeriodSalary(ImportPeriodSalaryCommand cmd);
+	public ImportFileTaskDTO importPeriodSalary(MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryGroupCommand cmd);
 
 
 	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd);

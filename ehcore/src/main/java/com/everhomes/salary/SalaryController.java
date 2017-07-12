@@ -213,12 +213,7 @@ public class SalaryController extends ControllerBase {
 	@RestReturn(ImportFileTaskDTO.class)
 	public RestResponse importSalaryGroup(ImportSalaryGroupCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
         User user = UserContext.current().getUser();
-/*        if (null == files || null == files[0]) {
-            LOGGER.error("files is null, userId=" + user.getId());
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
-                    "files is null");
-        }*/
-        RestResponse response = new RestResponse(this.salaryService.importSalaryGroup(files[0], user.getId(),cmd));
+        RestResponse response = new RestResponse(this.salaryService.importSalaryGroup(files[0], user.getId(),user.getNamespaceId(),cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -241,9 +236,12 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("importPeriodSalary")
 	@RestReturn(String.class)
-	public RestResponse importPeriodSalary(ImportPeriodSalaryCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
-		salaryService.importPeriodSalary(cmd);
-		return new RestResponse();
+	public RestResponse importPeriodSalary(ImportSalaryGroupCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+		User user = UserContext.current().getUser();
+		RestResponse response = new RestResponse(this.salaryService.importPeriodSalary(files[0], user.getId(),user.getNamespaceId(),cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**

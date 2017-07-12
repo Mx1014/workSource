@@ -35,7 +35,6 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -784,6 +783,19 @@ public class SalaryServiceImpl implements SalaryService {
         this.uniongroupService.saveUniongroupConfigures(command);
     }
 
+    //  数字转换(1-A,2-B...)
+    private static String GetExcelLetter(int n) {
+        String s = "";
+        while (n > 0) {
+            int m = n % 26;
+            if (m == 0)
+                m = 26;
+            s = (char) (m + 64) + s;
+            n = (n - m) / 26;
+        }
+        return s;
+    }
+
     @Override
     public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
@@ -838,7 +850,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public ImportFileTaskDTO importSalaryGroup(
-	        MultipartFile mfile, Long userId, ImportSalaryGroupCommand cmd) {
+	        MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryGroupCommand cmd) {
 
         ImportFileTask task = new ImportFileTask();
         try {
@@ -858,30 +870,38 @@ public class SalaryServiceImpl implements SalaryService {
 
             //  提前获取批次的字段便于后面方法的调用
             List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(cmd.getSalaryGroupId());
-            task = this.importFileService.executeTask(new ExecuteImportTaskCallback() {
-                @Override
-                public ImportFileResponse importFile() {
-                    ImportFileResponse response = new ImportFileResponse();
-                    List<ImportSalaryEmployeeOriginValDTO> datas = handleImportSalaryFiles(resultList,cmd.getSalaryGroupId(),salaryGroupEntities);
-                    if (datas.size() > 0) {
-                        //设置导出报错的结果excel的标题
-                        response.setTitle(datas.get(0));
-                        datas.remove(0);
-                    }
-                    List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> results = importSalaryFiles(datas,
-                            salaryGroupEntities, userId, cmd, UserContext.getCurrentNamespaceId());
-                    response.setTotalCount((long) datas.size());
-                    response.setFailCount((long) results.size());
-                    response.setLogs(results);
-                    return response;
-
-                }
-            },task);
+            this.executeTask(task,resultList,cmd,userId,namespaceId,salaryGroupEntities,"origin");
         }catch (Exception e){
-
+            LOGGER.error("File can not be resolved...");
+            e.printStackTrace();
         }
-        return null;
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 	}
+
+	//  启用线程做 excel 的解析与导入
+    private void executeTask(
+            ImportFileTask task, List resultList, ImportSalaryGroupCommand cmd,
+            Long userId, Integer namespaceId, List<SalaryGroupEntity> salaryGroupEntities, String type){
+        this.importFileService.executeTask(new ExecuteImportTaskCallback() {
+            @Override
+            public ImportFileResponse importFile() {
+                ImportFileResponse response = new ImportFileResponse();
+                List<ImportSalaryEmployeeOriginValDTO> datas = handleImportSalaryFiles(resultList, cmd.getSalaryGroupId(), salaryGroupEntities);
+                if (datas.size() > 0) {
+                    //设置导出报错的结果excel的标题
+                    response.setTitle(datas.get(0));
+                    datas.remove(0);
+                }
+                List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> results = importSalaryFiles(datas,
+                        salaryGroupEntities, userId, cmd, namespaceId, type);
+                response.setTotalCount((long) datas.size());
+                response.setFailCount((long) results.size());
+                response.setLogs(results);
+                return response;
+
+            }
+        }, task);
+    }
 
 	//  解析 excel 表格
 	private List<ImportSalaryEmployeeOriginValDTO> handleImportSalaryFiles(
@@ -907,39 +927,28 @@ public class SalaryServiceImpl implements SalaryService {
         return datas;
     }
 
-    //  数字转换(1-A,2-B...)
-    private static String GetExcelLetter(int n) {
-        String s = "";
-        while (n > 0) {
-            int m = n % 26;
-            if (m == 0)
-                m = 26;
-            s = (char) (m + 64) + s;
-            n = (n - m) / 26;
-        }
-        return s;
-    }
-
     private List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> importSalaryFiles(
             List<ImportSalaryEmployeeOriginValDTO> datas, List<SalaryGroupEntity> salaryGroupEntities,
-            Long userId, ImportSalaryGroupCommand cmd, Integer namespaceId) {
+            Long userId, ImportSalaryGroupCommand cmd, Integer namespaceId, String type) {
 
-	    ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
+        ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
         List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> errorDataLogs = new ArrayList<>();
 
         //  读取薪酬组列表中所有的手机号以及对应的userId
         List<Object[]> users = this.uniongroupService.listUniongroupMemberDetailsInfo(
-                namespaceId,cmd.getSalaryGroupId(),cmd.getOwnerId());
+                namespaceId, cmd.getSalaryGroupId(), cmd.getOwnerId());
 
         //  校验数据，成功则导入
-        for ( ImportSalaryEmployeeOriginValDTO data : datas){
-	        log = this.checkSalaryGroup(data,users);
+        for (ImportSalaryEmployeeOriginValDTO data : datas) {
+            log = this.checkSalaryGroup(data, users);
             if (log != null) {
                 errorDataLogs.add(log);
                 continue;
             }
-
-            this.saveSalaryGroup(data,salaryGroupEntities,cmd.getSalaryGroupId(),cmd.getOrganizationId(),cmd.getOwnerType(),cmd.getOwnerId());
+            if (type.equals("origin"))
+                this.saveOriginSalaryGroup(data, salaryGroupEntities, cmd.getSalaryGroupId(), cmd.getOrganizationId(), cmd.getOwnerType(), cmd.getOwnerId());
+            else if (type.equals("period"))
+                this.savePeriodSalaryGroup(data, salaryGroupEntities, cmd.getSalaryGroupId(), cmd.getOrganizationId(), cmd.getOwnerType(), cmd.getOwnerId());
         }
         return errorDataLogs;
 
@@ -988,8 +997,8 @@ public class SalaryServiceImpl implements SalaryService {
         }
     }
 
-    private void saveSalaryGroup(ImportSalaryEmployeeOriginValDTO data, List<SalaryGroupEntity> salaryGroupEntities,
-                                 Long groupId, Long organizationId, String ownerType, Long ownerId) {
+    private void saveOriginSalaryGroup(ImportSalaryEmployeeOriginValDTO data, List<SalaryGroupEntity> salaryGroupEntities,
+                                       Long groupId, Long organizationId, String ownerType, Long ownerId) {
         UpdateSalaryEmployeesCommand command = new UpdateSalaryEmployeesCommand();
         command.setOwnerId(ownerId);
         command.setOwnerType(ownerType);
@@ -1024,11 +1033,41 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 
 	@Override
-	public void importPeriodSalary(ImportPeriodSalaryCommand cmd) {
-	
+	public ImportFileTaskDTO importPeriodSalary(
+	        MultipartFile mfile, Long userId,
+            Integer namespaceId, ImportSalaryGroupCommand cmd) {
 
-	}
+        ImportFileTask task = new ImportFileTask();
+        try {
 
+            // 解析excel
+            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+
+            if (resultList.isEmpty()) {
+                LOGGER.error("File content is empty");
+                throw RuntimeErrorException.errorWith(SalaryServiceErrorCode.SCOPE, SalaryServiceErrorCode.ERROR_FILE_IS_EMPTY,
+                        "File content is empty");
+            }
+            task.setOwnerType(cmd.getOwnerType());
+            task.setOwnerId(cmd.getOwnerId());
+            task.setType(ImportFileTaskType.SALARY_GROUP.getCode());
+            task.setCreatorUid(userId);
+
+            //  提前获取批次的字段便于后面方法的调用
+            List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listPeriodSalaryWithExportRegular(cmd.getSalaryGroupId());
+            this.executeTask(task,resultList,cmd,userId,namespaceId,salaryGroupEntities,"period");
+        }catch (Exception e){
+            LOGGER.error("File can not be resolved...");
+            e.printStackTrace();
+        }
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+    }
+
+    private void savePeriodSalaryGroup(ImportSalaryEmployeeOriginValDTO data, List<SalaryGroupEntity> salaryGroupEntities,
+                                 Long groupId, Long organizationId, String ownerType, Long ownerId) {
+        //TODO: 存入period数据
+
+    }
 	@Override
 	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd) {
 		Integer abnormalNumber = 0;
@@ -1102,7 +1141,7 @@ public class SalaryServiceImpl implements SalaryService {
 	private SalaryPeriodEmployeeDTO processSalaryPeriodEmployeeDTO(SalaryEmployee r) {
 		SalaryPeriodEmployeeDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeDTO.class);
 		//岗位 
-        // TODO: 2017/7/6 这里和荣男的实现重叠了,重构一下
+        // TODO: 2017/7/6 这里和荣楠的实现重叠了,重构一下
         SalaryEmployeeDTO detailDTO = getPersonnelInfoByUserIdForSalary(r.getUserId());
         dto.setJobPositions(detailDTO.getJobPosition());
         //批次名
