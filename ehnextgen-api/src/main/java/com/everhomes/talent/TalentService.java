@@ -78,7 +78,7 @@ public interface TalentService {
 	public CreateOrUpdateRequestSettingResponse createOrUpdateRequestSetting(CreateOrUpdateRequestSettingCommand cmd);
 
 
-	public CreateOrUpdateRequestSettingResponse findRequestSetting();
+	public CreateOrUpdateRequestSettingResponse findRequestSetting(CreateOrUpdateRequestSettingCommand cmd);
 
 
 	public ListTalentRequestResponse listTalentRequest(ListTalentRequestCommand cmd);

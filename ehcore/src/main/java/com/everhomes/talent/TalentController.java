@@ -201,8 +201,8 @@ public class TalentController extends ControllerBase {
 	 */
 	@RequestMapping("findRequestSetting")
 	@RestReturn(CreateOrUpdateRequestSettingResponse.class)
-	public RestResponse findRequestSetting(){
-		return new RestResponse(talentService.findRequestSetting());
+	public RestResponse findRequestSetting(CreateOrUpdateRequestSettingCommand cmd){
+		return new RestResponse(talentService.findRequestSetting(cmd));
 	}
 	
 	/**

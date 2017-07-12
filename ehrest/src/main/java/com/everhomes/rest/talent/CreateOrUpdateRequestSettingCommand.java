@@ -18,12 +18,8 @@ import com.everhomes.util.StringHelper;
 public class CreateOrUpdateRequestSettingCommand {
 	@NotNull
 	private Long organizationId;
-	@NotNull
 	private Byte enable;
-	@NotNull
-	@Size(min=1)
 	private String requestName;
-	@NotNull
 	private Long formId;
 
 	public Byte getEnable() {

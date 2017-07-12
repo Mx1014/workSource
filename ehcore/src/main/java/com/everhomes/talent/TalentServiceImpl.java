@@ -25,9 +25,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.general_approval.GeneralFormSourceType;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.talent.ClearTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.CreateMessageSenderCommand;
 import com.everhomes.rest.talent.CreateOrUpdateRequestSettingCommand;
@@ -488,7 +486,6 @@ public class TalentServiceImpl implements TalentService {
 		Integer namespaceId = namespaceId();
 		TrueOrFalseFlag enable = TrueOrFalseFlag.fromCode(cmd.getEnable());
 		if (enable == TrueOrFalseFlag.TRUE) {
-			ValidatorUtil.validate(cmd);
 			configurationProvider.setValue(namespaceId, TALENT_REQUEST_NAME, cmd.getRequestName());
 			configurationProvider.setLongValue(namespaceId, TALENT_FORM_ID, cmd.getFormId());
 		}else {
@@ -500,7 +497,7 @@ public class TalentServiceImpl implements TalentService {
 	}
 
 	@Override
-	public CreateOrUpdateRequestSettingResponse findRequestSetting() {
+	public CreateOrUpdateRequestSettingResponse findRequestSetting(CreateOrUpdateRequestSettingCommand cmd) {
 		Integer namespaceId = namespaceId();
 		String talentRequestName = configurationProvider.getValue(namespaceId, TALENT_REQUEST_NAME, "");
 		Long talentFormId = configurationProvider.getLongValue(namespaceId, TALENT_FORM_ID, 0L);
