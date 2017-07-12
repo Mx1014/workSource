@@ -109,4 +109,5 @@ public interface CommunityProvider {
     List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId, String resourceType, List<Long> resourceIds);
 
     Map<Long, Community> listCommunitiesByIds(List<Long> ids);
+	Community findCommunityByNamespaceIdAndName(Integer namespaceId, String communityName);
 }

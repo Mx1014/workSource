@@ -1,22 +1,9 @@
 package com.everhomes.authorization;
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,33 +11,25 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.address.AddressService;
 import com.everhomes.authorization.zjgk.ZjgkJsonEntity;
 import com.everhomes.authorization.zjgk.ZjgkResponse;
-import com.everhomes.banner.BannerProviderImpl;
-import com.everhomes.building.Building;
-import com.everhomes.community.ResourceCategoryAssignment;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.address.ClaimAddressCommand;
+import com.everhomes.rest.address.ClaimedAddressInfo;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostGeneralFormCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.StringHelper;
 
 @Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+1000000)
 public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler {
@@ -63,8 +42,14 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	
 	static final String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
 	
+    @Autowired
+    private CommunityProvider communityProvider;
+	
 	@Autowired
 	public FlowService flowService;
+	
+    @Autowired
+    private AddressService addressService;
 
 	@Override
 	public PostGeneralFormDTO personalAuthorization(PostGeneralFormCommand cmd) {
@@ -75,7 +60,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 			//请求成功，返回承租地址，那么创建家庭。
 			if(entity.isSuccess()){
-				createFamily(entity);
+				createFamily(cmd,entity);
 			}
 			//创建工作流
 			createWorkFlow(cmd,entity);
@@ -85,10 +70,17 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return null;
 	}
 	
-	private void createFamily(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
+	private void createFamily(PostGeneralFormCommand cmd,ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		List<ZjgkResponse> list = entity.getResponse();
 		if(list!=null && list.size()>0){
 			for (ZjgkResponse zjgkResponse : list) {
+				String communityName = zjgkResponse.getCommunityName();
+				Community community = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), communityName);
+				ClaimAddressCommand claimcmd = new ClaimAddressCommand();
+				claimcmd.setCommunityId(community.getId());
+				claimcmd.setApartmentName(zjgkResponse.getApartmentName());
+				claimcmd.setBuildingName(zjgkResponse.getBuildingName());
+				ClaimedAddressInfo addressinfo = addressService.claimAddress(claimcmd);
 				
 			}
 		}
