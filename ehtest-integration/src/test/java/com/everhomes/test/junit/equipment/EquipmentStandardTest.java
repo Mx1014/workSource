@@ -147,8 +147,8 @@ public class EquipmentStandardTest extends BaseLoginAuthTestCase {
 			EhEquipmentInspectionStandards standard = dbStandards.get(0);
 			assertTrue("status should be 0", standard.getStatus().byteValue() == EquipmentStandardStatus.INACTIVE.getCode());
 	
-			EquipmentsDTO dto = findEquipment(2L);
-			assertEquals(EquipmentReviewStatus.INACTIVE, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
+//			EquipmentsDTO dto = findEquipment(2L);
+//			assertEquals(EquipmentReviewStatus.INACTIVE, EquipmentReviewStatus.fromStatus(dto.getReviewStatus()));
 	}
 	
 	@Test

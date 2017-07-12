@@ -1,0 +1,61 @@
+package com.everhomes.rest.energy;
+
+import com.everhomes.rest.energy.util.EnumType;
+import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+
+/**
+ * <ul>
+ *     <li>ownerId: 组织id</li>
+ *     <li>ownerType: 组织类型</li>
+ *     <li>communityId: 园区</li>
+ *     <li>categoryType: 分类类型 {@link com.everhomes.rest.energy.EnergyCategoryType}</li>
+ * </ul>
+ */
+public class ListEnergyMeterCategoriesCommand {
+
+    @NotNull private Long ownerId;
+    @NotNull private String ownerType;
+    @NotNull private Long communityId;
+    @EnumType(value = EnergyCategoryType.class)
+    @NotNull private Byte categoryType;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Byte getCategoryType() {
+        return categoryType;
+    }
+
+    public void setCategoryType(Byte categoryType) {
+        this.categoryType = categoryType;
+    }
+
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

@@ -27,4 +27,6 @@ public interface RentalServiceErrorCode {
 	
 	
 	static final int ERROR_REFOUND_ERROR = 15000; // 退款失敗
+
+	static final int ERROR_TIME_STEP = 10050; // 开始时间不能大于等于结束时间！
 }

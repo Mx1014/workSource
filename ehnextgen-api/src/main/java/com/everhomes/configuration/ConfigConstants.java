@@ -66,6 +66,47 @@ public interface ConfigConstants {
     public static final String UPGRADE_URL = "upgrade.url"; 
     public static final String SCHEDULE_EQUIPMENT_TASK_TIME = "equipment.task.schedule.time";
 
-	public static final String NEWS_PAGE_URL = "news.url"; 
-     
+	public static final String NEWS_PAGE_URL = "news.url";
+	
+	public static final String SYNCH_USER_APP_KEY = "synch.user.app.key"; 
+	public static final String SYNCH_USER_SECRET_KEY = "synch.user.secret.key"; 
+	public static final String OAUTH_SERVER = "oauth.server";
+	public static final String PAY_SERVER = "pay.server";
+	
+	public static final String ACTIVITY_CONTENT_URL = "activity.content.url"; 
+	
+	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
+	
+	public static final String CLUB_SHARE_URL = "club.share.url";
+
+    String SERVICE_ALLIANCE_DETAIL_URL = "serviceAlliance.serviceDetail.url";
+
+    String RENTAL_RESOURCE_DETAIL_URL = "rental.resource.detail.url";
+
+    String KEXING_PMBILL_API_HOST = "kexing.pmbill.api.host";
+    String KEXING_PMBILL_API_BILLLIST = "kexing.pmbill.api.billlist";
+    String KEXING_PMBILL_API_BILLCOUNT = "kexing.pmbill.api.billcount";
+
+	public static final String JINDI_SYNC_NAMESPACE = "jindi.sync.namespace"; 
+	
+	public static final String ACTIVITY_DEFAULT_LIST_STYLE = "activity.default.list.style";
+
+    public static final String TASK_SERVER_ADDRESS = "task.server.address";
+
+    public static final String BIZ_BUSINESS_PROMOTION_API = "biz.business.promotion.api";
+    public static final String EQUIPMENT_TASK_NOTIFY_TIME = "equipment.task.notify.time";
+    public static final String EQUIPMENT_TASK_NOTIFY_FLAG = "equipment.task.notify.flag";
+    public static final String SHAKE_OPEN_DOOR = "shake.open.door";
+
+    String APPLY_ENTRY_DETAIL_URL = "apply.entry.detail.url";
+
+    String APPLY_ENTRY_BUILDING_DETAIL_URL = "apply.entry.building.detail.url";
+
+    String APP_ROUTE_BROWSER_OUTER_URI = "app.route.browser.outer.uri";
+
+    String APP_ROUTE_BROWSER_INNER_URI = "app.route.browser.inner.uri";
+    
+    public static final String BIZ_SEARCH_SHOPS_API = "biz.search.shops.api";
+    public static final String QUALITY_STAT_CORN = "quality.stat.corn";
+
 }

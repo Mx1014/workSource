@@ -250,7 +250,8 @@ public class GroupIterateTest extends LoginAuthTestCase {
         cmd.setTag(tag);
         cmd.setExplicitRegionDescriptorsJson(explicitRegionDescriptorsJson);
         
-        return groupService.createGroup(cmd);
+//        return groupService.createGroup(cmd);
+        return null;
     }
     
     private void cleanData() {

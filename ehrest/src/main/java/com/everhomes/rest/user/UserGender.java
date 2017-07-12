@@ -2,16 +2,22 @@
 package com.everhomes.rest.user;
 
 public enum UserGender {
-    UNDISCLOSURED((byte)0), MALE((byte)1), FEMALE((byte)2);
+    UNDISCLOSURED((byte)0, "未知"), MALE((byte)1, "男"), FEMALE((byte)2, "女");
     
     private byte code;
+    private String text;
     
-    private UserGender(byte code) {
+    private UserGender(byte code, String text) {
         this.code = code;
+        this.text = text;
     }
     
     public byte getCode() {
         return this.code;
+    }
+    
+    public String getText() {
+    	return text;
     }
     
     public static UserGender fromCode(Byte code) {

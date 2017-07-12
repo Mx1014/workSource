@@ -3,8 +3,8 @@ package com.everhomes.rest.user.admin;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-
-
+import com.everhomes.rest.organization.ImportEnterpriseDataDTO;
+import com.everhomes.rest.organization.ImportFileResultLog;
 
 
 /**
@@ -47,7 +47,4 @@ public class ImportDataResponse {
 	public void setLogs(List<String> logs) {
 		this.logs = logs;
 	}
-	
-	
-
 }

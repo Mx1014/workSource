@@ -7,6 +7,14 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>doorId: 门禁 ID</li>
+ * <li>outputs: 返回门禁消息列表</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class QueryDoorMessageResponse {
     @NotNull
     Long doorId;

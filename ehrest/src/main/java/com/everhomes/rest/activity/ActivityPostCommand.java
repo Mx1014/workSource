@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.activity;
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,11 +15,14 @@ import com.everhomes.util.StringHelper;
  *<ul>
  *<li>namespaceId:命名空间</li>
  *<li>subject:主题</li>
- *<li>description:描述</li>
+ *<li>description:描述（活动实际内容）</li>
+ *<li>contentType:内容类型，参考{@link com.everhomes.rest.forum.PostContentType}</li>
+ *<li>content:拼接的内容</li>
  *<li>location:位置</li>
  *<li>contactPerson:联系人</li>
  *<li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
+ *<li>signupEndTime:活动报名截止时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *<li>checkInFlag:签到标签，0-不需要签到、1-需要签到</li>
  *<li>confirmFlag:确认标签，0-不需要确认、1-需要确认</li>
  *<li>maxAttendeeCount:最大邀请人数</li>
@@ -30,17 +35,32 @@ import com.everhomes.util.StringHelper;
  *<li>guest:嘉宾</li>
  *<li>mediaUrl:活动url</li>
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
+ * <li>maxQuantity: 限制人数</li>
+ * <li>categoryId: 活动类型id（入口id)</li>
+ * <li>contentCategoryId: 主题分类id</li>
+ * <li>forumId: 论坛ID</li>
+ * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
+ * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
+ * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
+ * <li>visibleRegionId: 区域范围类型对应的ID</li>
+ * <li>chargeFlag: 是否收费：0-不收费， 1-收费  参考{@link com.everhomes.rest.activity.ActivityChargeFlag }</li>
+ * <li>chargePrice: 收费价格</li>
+ * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
  *</ul>
  */
 public class ActivityPostCommand{
     private Integer namespaceId;
     private String subject;
     private String description;
+    private String contentType;
+    private String content;
     private String location;
     private String contactPerson;
     private String contactNumber;
     private String startTime;
     private String endTime;
+    private Byte allDayFlag;
+    private String signupEndTime;
     private Byte checkinFlag;
     private Byte confirmFlag;
     private Integer maxAttendeeCount;
@@ -63,7 +83,71 @@ public class ActivityPostCommand{
     private String videoUrl;
     private Byte videoState;
     
-    public Byte getOfficialFlag() {
+    private Integer maxQuantity;
+    
+    //added by xiongying
+    private Long categoryId;
+    
+    //added by tt
+    private Long contentCategoryId;
+
+    private Long forumId;
+    
+    private String creatorTag;
+    
+    private String targetTag;
+    
+    private Byte visibleRegionType;
+    
+    private Long visibleRegionId;
+    
+    private Byte chargeFlag;
+
+    private BigDecimal chargePrice;
+    
+    private Byte status;
+
+	public String getSignupEndTime() {
+		return signupEndTime;
+	}
+
+	public void setSignupEndTime(String signupEndTime) {
+		this.signupEndTime = signupEndTime;
+	}
+
+	public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public Integer getMaxQuantity() {
+		return maxQuantity;
+	}
+
+	public void setMaxQuantity(Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
+	}
+
+	public Byte getOfficialFlag() {
 		return officialFlag;
 	}
 
@@ -138,7 +222,15 @@ public class ActivityPostCommand{
         this.endTime = endTime;
     }
 
-    public Byte getCheckinFlag() {
+    public Byte getAllDayFlag() {
+		return allDayFlag;
+	}
+
+	public void setAllDayFlag(Byte allDayFlag) {
+		this.allDayFlag = allDayFlag;
+	}
+
+	public Byte getCheckinFlag() {
         return checkinFlag;
     }
 
@@ -266,7 +358,79 @@ public class ActivityPostCommand{
         this.videoState = videoState;
     }
 
-    @Override
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Long getForumId() {
+		return forumId;
+	}
+
+	public void setForumId(Long forumId) {
+		this.forumId = forumId;
+	}
+
+	public String getCreatorTag() {
+		return creatorTag;
+	}
+
+	public void setCreatorTag(String creatorTag) {
+		this.creatorTag = creatorTag;
+	}
+
+	public String getTargetTag() {
+		return targetTag;
+	}
+
+	public void setTargetTag(String targetTag) {
+		this.targetTag = targetTag;
+	}
+
+	public Byte getVisibleRegionType() {
+		return visibleRegionType;
+	}
+
+	public void setVisibleRegionType(Byte visibleRegionType) {
+		this.visibleRegionType = visibleRegionType;
+	}
+
+	public Long getVisibleRegionId() {
+		return visibleRegionId;
+	}
+
+	public void setVisibleRegionId(Long visibleRegionId) {
+		this.visibleRegionId = visibleRegionId;
+	}
+
+	public Byte getChargeFlag() {
+		return chargeFlag;
+	}
+
+	public void setChargeFlag(Byte chargeFlag) {
+		this.chargeFlag = chargeFlag;
+	}
+
+	public BigDecimal getChargePrice() {
+		return chargePrice;
+	}
+
+	public void setChargePrice(BigDecimal chargePrice) {
+		this.chargePrice = chargePrice;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -6,18 +6,39 @@ import javax.validation.constraints.NotNull;
 
 /**
  *  <ul>
- *      <li>ownerId: 业主id</li>
+ *      <li>orgOwnerId: 业主id</li>
  *      <li>organizationId: 公司id</li>
  *      <li>contentUri: 附件URI</li>
  *      <li>attachmentName: 附件名称</li>
+ *      <li>ownerType: ownerType EhCommunities 权限校验时用的</li>
+ *      <li>ownerId: ownerId, communityId</li>
  *  </ul>
  */
 public class UploadOrganizationOwnerAttachmentCommand {
 
-    @NotNull private Long ownerId;
+    private Long orgOwnerId;
     @NotNull private Long organizationId;
     @NotNull private String contentUri;
     @NotNull private String attachmentName;
+
+    private String ownerType;
+    private Long ownerId;
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOrgOwnerId() {
+        return orgOwnerId;
+    }
+
+    public void setOrgOwnerId(Long orgOwnerId) {
+        this.orgOwnerId = orgOwnerId;
+    }
 
     public String getContentUri() {
         return contentUri;

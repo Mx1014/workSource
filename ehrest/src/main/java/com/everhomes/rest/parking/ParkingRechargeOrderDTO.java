@@ -28,13 +28,15 @@ import com.everhomes.util.StringHelper;
  * <li>monthCount: 充值月数，不一定每个厂商都有</li>
  * <li>price: 价格</li>
  * <li>status: 订单状态，{@link com.everhomes.rest.parking.ParkingRechargeOrderStatus}</li>
- * <li>rechargeStatus: 充值状态， {@link com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus}</li>
+ * <li>rechargeStatus: 充值状态</li>
  * <li>rechargeTime: 充值时间</li>
  * <li>createTime: 订单创建时间</li>
+ * <li>rechargeType: 订单类型， {@link com.everhomes.rest.parking.ParkingRechargeType}}</li>
  * </ul>
  */
 public class ParkingRechargeOrderDTO {
     private Long id;
+    private Long orderNo;
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
@@ -57,7 +59,88 @@ public class ParkingRechargeOrderDTO {
     private Byte rechargeStatus;
     private Timestamp rechargeTime;
     private Timestamp createTime;
-    
+    private Byte rechargeType;
+    private String parkingLotName;
+    private Timestamp startPeriod;
+    private Timestamp endPeriod;
+    private Integer parkingTime;
+    private String errorDescription;
+    private String contact;
+    private Timestamp refundTime;
+    private Integer delayTime;
+
+    public Integer getDelayTime() {
+        return delayTime;
+    }
+
+    public void setDelayTime(Integer delayTime) {
+        this.delayTime = delayTime;
+    }
+
+    public Long getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(Long orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    public Timestamp getRefundTime() {
+        return refundTime;
+    }
+
+    public void setRefundTime(Timestamp refundTime) {
+        this.refundTime = refundTime;
+    }
+
+    public String getContact() {
+        return contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    public Timestamp getStartPeriod() {
+        return startPeriod;
+    }
+
+    public void setStartPeriod(Timestamp startPeriod) {
+        this.startPeriod = startPeriod;
+    }
+
+    public Timestamp getEndPeriod() {
+        return endPeriod;
+    }
+
+    public void setEndPeriod(Timestamp endPeriod) {
+        this.endPeriod = endPeriod;
+    }
+
+    public Integer getParkingTime() {
+        return parkingTime;
+    }
+
+    public void setParkingTime(Integer parkingTime) {
+        this.parkingTime = parkingTime;
+    }
+
+    public String getErrorDescription() {
+        return errorDescription;
+    }
+
+    public void setErrorDescription(String errorDescription) {
+        this.errorDescription = errorDescription;
+    }
+
+    public String getParkingLotName() {
+        return parkingLotName;
+    }
+
+    public void setParkingLotName(String parkingLotName) {
+        this.parkingLotName = parkingLotName;
+    }
+
     public ParkingRechargeOrderDTO() {
     }
 
@@ -248,5 +331,13 @@ public class ParkingRechargeOrderDTO {
 
 	public void setPaidType(String paidType) {
 		this.paidType = paidType;
+	}
+
+	public Byte getRechargeType() {
+		return rechargeType;
+	}
+
+	public void setRechargeType(Byte rechargeType) {
+		this.rechargeType = rechargeType;
 	}
 }

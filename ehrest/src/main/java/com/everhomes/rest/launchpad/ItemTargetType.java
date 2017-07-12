@@ -8,7 +8,7 @@ package com.everhomes.rest.launchpad;
  * </ul>
  */
 public enum ItemTargetType {
-    DEFAULT("default"),BIZ("biz");
+    DEFAULT("default"),BIZ("biz"), ZUOLIN_SHOP("zuolin_shop");
     
     private String code;
        

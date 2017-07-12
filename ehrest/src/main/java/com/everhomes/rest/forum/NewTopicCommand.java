@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *                            所管理的片区ID（片区ID实际上为机构ID）；contentCategory选公告/报修/咨询与求助/投诉与建议，actionCategory不填；</li>
  * </ul>
  * <ul>字段：
+ * <li>oldId: 老ID，当暂存过后提交时要传来老的Id用于删除老数据</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
@@ -46,9 +47,20 @@ import com.everhomes.util.StringHelper;
  * <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  * <li>isVideoSupport: 为空则不开启，为 1 则开启直播 </li>
  * <li>videoUrl: TODO 需要么？</li>
+ * <li>maxQuantity: 限制人数</li>
+ * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
+ * <li>tag: 帖子标签</li>
  * </ul>
  */
 public class NewTopicCommand {
+	private Long oldId;
+	
+    private String ownerType;
+
+    private Long ownerId;
+
+    private Long currentOrgId;
+
     @NotNull
     private Long forumId;
     
@@ -99,7 +111,29 @@ public class NewTopicCommand {
     
     private Byte mediaDisplayFlag;
     
-    public Byte getMediaDisplayFlag() {
+    private Integer maxQuantity;
+    
+    private Byte status;
+
+    private String tag;
+    
+	public Long getOldId() {
+		return oldId;
+	}
+
+	public void setOldId(Long oldId) {
+		this.oldId = oldId;
+	}
+
+	public Integer getMaxQuantity() {
+		return maxQuantity;
+	}
+
+	public void setMaxQuantity(Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
+	}
+
+	public Byte getMediaDisplayFlag() {
 		return mediaDisplayFlag;
 	}
 
@@ -279,6 +313,46 @@ public class NewTopicCommand {
 	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Long getCurrentOrgId() {
+        return currentOrgId;
+    }
+
+    public void setCurrentOrgId(Long currentOrgId) {
+        this.currentOrgId = currentOrgId;
+    }
+
+    public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 
     @Override
     public String toString() {

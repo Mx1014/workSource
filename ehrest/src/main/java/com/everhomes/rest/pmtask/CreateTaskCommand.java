@@ -12,7 +12,15 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 子类型ID</li>
  * <li>address: 服务地点</li>
  * <li>content: 内容</li>
- * <li>attachments: 图片列表</li>
+ * <li>organizationId: 公司id</li>
+ * <li>taskCategoryId: 服务类型id</li>
+ * <li>addressId: 门牌id</li>
+ * <li>priority: 客户反映</li>
+ * <li>reserveTime: 预约时间</li>
+ * <li>sourceType: 报事来源</li>
+ * <li>requestorName: 联系人名称</li>
+ * <li>requestorPhone: 联系方式</li>
+ * <li>addressType: 地址类型   1:小区家庭门牌地址 2: 园区公司地址 {@link com.everhomes.rest.pmtask.PmTaskAddressType }</li>
  * </ul>
  */
 public class CreateTaskCommand {
@@ -21,12 +29,32 @@ public class CreateTaskCommand {
 	private Long categoryId;
 	private String address;
 	private String content;
-	private String nickName;
-	private String mobile;
 	private Long organizationId;
 	
+	private Long taskCategoryId;
+	private Long addressId;
+	private Byte priority;
+	private String sourceType;
+	private Long reserveTime;
+	private String requestorName;
+	private String requestorPhone;
+	
+	private Byte addressType;
+	private Long addressOrgId;
+	private String buildingName;
+	private Long flowOrganizationId;
+	private Integer namespaceId;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
+
+	public Long getFlowOrganizationId() {
+		return flowOrganizationId;
+	}
+
+	public void setFlowOrganizationId(Long flowOrganizationId) {
+		this.flowOrganizationId = flowOrganizationId;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -39,7 +67,6 @@ public class CreateTaskCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -64,21 +91,47 @@ public class CreateTaskCommand {
 	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
 	}
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
+	public Long getTaskCategoryId() {
+		return taskCategoryId;
 	}
-	public String getNickName() {
-		return nickName;
+	public void setTaskCategoryId(Long taskCategoryId) {
+		this.taskCategoryId = taskCategoryId;
 	}
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
+	public Long getAddressId() {
+		return addressId;
 	}
-	public String getMobile() {
-		return mobile;
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
 	}
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
+	public Long getReserveTime() {
+		return reserveTime;
+	}
+	public void setReserveTime(Long reserveTime) {
+		this.reserveTime = reserveTime;
+	}
+	public Byte getPriority() {
+		return priority;
+	}
+	public void setPriority(Byte priority) {
+		this.priority = priority;
+	}
+	public String getSourceType() {
+		return sourceType;
+	}
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+	public String getRequestorName() {
+		return requestorName;
+	}
+	public void setRequestorName(String requestorName) {
+		this.requestorName = requestorName;
+	}
+	public String getRequestorPhone() {
+		return requestorPhone;
+	}
+	public void setRequestorPhone(String requestorPhone) {
+		this.requestorPhone = requestorPhone;
 	}
 	public Long getOrganizationId() {
 		return organizationId;
@@ -86,5 +139,36 @@ public class CreateTaskCommand {
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
 	}
-	
+	public Byte getAddressType() {
+		return addressType;
+	}
+	public void setAddressType(Byte addressType) {
+		this.addressType = addressType;
+	}
+	public Long getAddressOrgId() {
+		return addressOrgId;
+	}
+	public void setAddressOrgId(Long addressOrgId) {
+		this.addressOrgId = addressOrgId;
+	}
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

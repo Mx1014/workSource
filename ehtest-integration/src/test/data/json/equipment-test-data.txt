@@ -285,11 +285,12 @@
   ],
   'eh_equipment_inspection_equipments': [
   	{
-	  	"id":2,
+	  	"id":147,
 		"owner_type":"PM",
 		"owner_id":1000750,
 		"target_type":"PM",
 		"target_id":1000753,
+		"custom_number":"ZBH483575KJ",
 		"name":"变压器",
 		"manufacturer":"放大后防护制造",
 		"equipment_model":"gfd-3676",
@@ -302,25 +303,14 @@
 		"qr_code_token":"6IkjO6bMwid616gNxWyeLnlAB2zlBh6kfcwPr7vVMks5uzGZcKa1qCBXKxaPb8BiYiW-gTwxkEj59R708PijdaxSal5PAivO_RthhKPzHSfL-GREuT6Ny5ocOG44_DjshfK1JCEJKdKNQaMT7sEJYxceRgGo29GAwCND-_o-utE",
 		"qr_code_flag":1,
 		"status":2,
-		"initial_asset_value":"121000",
+		"sequence_no":"QR-QP27-6",
+		"version_no":"D/0",
 		"manager":"大闸蟹",
 		"creator_uid":211307,
 		"create_time":"2016-7-29 13:51:23",
 		"operator_uid":211307,
 		"update_time":"2016-7-29 13:51:23",
-		"deleter_uid":0,
-		"standard_id":1,
-		"review_status":1,
-		"review_result":0,
-		"reviewer_uid":0
-  	}
-  ],
-  'eh_equipment_inspection_equipment_parameters': [
-  	{
-	  	"id":2,
-		"equipment_id":2,
-		"parameter_name":"温度",
-		"parameter_unit":"°C"
+		"deleter_uid":0
   	}
   ],
   'eh_equipment_inspection_accessories': [
@@ -383,6 +373,18 @@
 		"reviewer_id":0,
 		"review_result":0,
 		"create_time":"2016-7-30 14:58:38"
+	}
+  ],
+  'eh_equipment_inspection_templates': [
+  {
+		"id":1,
+		"owner_type":"PM",
+		"owner_id":1000750,
+		"name":"raganya",
+		"creator_uid":211304,
+		"create_time":"2016-10-26 16:48:54",
+		"status":1,
+		"delete_uid":0
 	}
   ]
 }

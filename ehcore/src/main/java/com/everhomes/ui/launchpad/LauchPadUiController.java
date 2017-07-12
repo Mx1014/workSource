@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,20 +20,10 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.launchpad.LaunchPadService;
+import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessesCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
-import com.everhomes.rest.launchpad.ItemDisplayFlag;
-import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
-import com.everhomes.rest.launchpad.UserLaunchPadItemDTO;
-import com.everhomes.rest.ui.launchpad.AddLaunchPadItemBySceneCommand;
-import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
-import com.everhomes.rest.ui.launchpad.DeleteLaunchPadItemBySceneCommand;
-import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
-import com.everhomes.rest.ui.launchpad.GetLaunchPadItemsBySceneCommand;
-import com.everhomes.rest.ui.launchpad.GetLaunchPadLayoutBySceneCommand;
-import com.everhomes.rest.ui.launchpad.ReorderLaunchPadItemBySceneCommand;
 import com.everhomes.util.EtagHelper;
 
 /**
@@ -53,6 +45,9 @@ public class LauchPadUiController extends ControllerBase {
     
     @Autowired
     private LaunchPadService launchPadService;
+
+    @Autowired
+    private MessagingKickoffService kickoffService;
     
     /**
      * <b>URL: /ui/launchpad/getLaunchPadItemsByScene</b>
@@ -62,7 +57,6 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     @RequireAuthentication(false)
     public RestResponse getLaunchPadItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItemsByScene(cmd, request);
         RestResponse resp =  new RestResponse(commandResponse);
 //        if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
@@ -87,7 +81,6 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=LaunchPadLayoutDTO.class)
     @RequireAuthentication(false)
     public RestResponse getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd, HttpServletRequest request,HttpServletResponse response) {
-        
         LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByScene(cmd);
         RestResponse resp =  new RestResponse();
         // 有域空间时，这样判断ETAG会导致有些域空间拿不到数据（同一个域空间不同场景切换也有问题），先暂时不使用ETAG by lqs 20160514
@@ -141,8 +134,22 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     @RequireAuthentication(false)
     public RestResponse getMoreItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-    	GetLaunchPadItemsCommandResponse commandResponse = this.launchPadService.getMoreItemsByScene(cmd, request);
+        GetLaunchPadItemsCommandResponse commandResponse = this.launchPadService.getMoreItemsByScene(cmd, request);
     	RestResponse resp =  new RestResponse(commandResponse);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /ui/launchpad/getAllCategryItemsByScene</b>
+     * <p>根据位置、layout组、指定场景和相应的实体对象以及类别获取全部的item</p>
+     */
+    @RequestMapping("getAllCategryItemsByScene")
+    @RestReturn(value=CategryItemDTO.class, collection = true)
+    @RequireAuthentication(false)
+    public RestResponse getAllCategryItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+        RestResponse resp =  new RestResponse(launchPadService.getAllCategryItemsByScene(cmd, request));
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
@@ -203,4 +210,19 @@ public class LauchPadUiController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /ui/launchpad/editLaunchPadItemByScene</b>
+     * <p>编辑服务广场的item，即最终点击完成时批量添加或者删除服务广场的item</p>
+     */
+    @RequestMapping("editLaunchPadItemByScene")
+    @RestReturn(value=String.class)
+    public RestResponse editLaunchPadItemByScene(EditLaunchPadItemBySceneCommand cmd) {
+        this.launchPadService.editLaunchPadItemByScene(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

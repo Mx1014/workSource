@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: 帖子或评论ID</li>
  * <li>uuid: 帖子或评论UUID</li>
+ * <li>namespaceId: 域空间ID</li>
  * <li>parentPostId: 帖子或评论的父亲ID</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorUid: 创建者ID</li>
@@ -20,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>creatorAvatarUrl: 创建者在圈内的头像URL</li>
  * <li>creatorAdminFlag: 创建者是否为圈的管理员</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
+ * <li>creatorCommunityName: 创建者小区名称</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>contentCategory: 内容类型ID，含类和子类</li>
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
@@ -53,12 +55,21 @@ import com.everhomes.util.StringHelper;
  * <li>endTime:结束时间</li>
  * <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>
  * <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
+ * <li>maxQuantity: 限制人数</li>
+ * <li>contentUrl: 内容链接</li>
+ * <li>groupId: 俱乐部id</li>
+ * <li>groupName: 俱乐部名称</li>
+ * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布  参考{@link com.everhomes.rest.forum.PostStatus}</li>
+ * <li>ownerToken: 当前帖子的token，当前字段在评论时使用<li/>
+ * <li>tag: tag</li>
  * </ul>
  */
 public class PostDTO {
 	private Long id;
 	
 	private String uuid;
+
+    private Integer namespaceId;
 	
 	private Long parentPostId;
 	
@@ -75,6 +86,8 @@ public class PostDTO {
     private Byte creatorAdminFlag;
     
     private String creatorTag;
+    
+    private String creatorCommunityName;
     
     private String targetTag;    
 
@@ -145,8 +158,53 @@ public class PostDTO {
     private Long endTime;
     
     private Byte mediaDisplayFlag;
+
+    private Integer maxQuantity;
     
-    public Byte getMediaDisplayFlag() {
+    private String contentUrl;
+    
+    private Long groupId;
+    
+    private String groupName;
+    
+    private Byte status;
+
+    private String ownerToken;
+
+	private String tag;
+    public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+	public String getContentUrl() {
+		return contentUrl;
+	}
+
+	public void setContentUrl(String contentUrl) {
+		this.contentUrl = contentUrl;
+	}
+
+	public Integer getMaxQuantity() {
+		return maxQuantity;
+	}
+
+	public void setMaxQuantity(Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
+	}
+
+	public Byte getMediaDisplayFlag() {
 		return mediaDisplayFlag;
 	}
 
@@ -168,6 +226,14 @@ public class PostDTO {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getParentPostId() {
@@ -233,8 +299,16 @@ public class PostDTO {
     public void setCreatorTag(String creatorTag) {
         this.creatorTag = creatorTag;
     }
+    
+    public String getCreatorCommunityName() {
+		return creatorCommunityName;
+	}
 
-    public String getTargetTag() {
+	public void setCreatorCommunityName(String creatorCommunityName) {
+		this.creatorCommunityName = creatorCommunityName;
+	}
+
+	public String getTargetTag() {
         return targetTag;
     }
 
@@ -282,7 +356,7 @@ public class PostDTO {
         this.communityId = communityId;
     }
 
-    public Double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 
@@ -497,7 +571,31 @@ public class PostDTO {
 		this.endTime = endTime;
 	}
 
-	@Override
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+    public String getOwnerToken() {
+        return ownerToken;
+    }
+
+    public void setOwnerToken(String ownerToken) {
+        this.ownerToken = ownerToken;
+    }
+
+	public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+	
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

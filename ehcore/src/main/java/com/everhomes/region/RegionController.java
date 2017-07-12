@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.region.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +22,6 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.region.ListActiveRegionCommand;
-import com.everhomes.rest.region.ListRegionByKeywordCommand;
-import com.everhomes.rest.region.ListRegionCommand;
-import com.everhomes.rest.region.RegionAdminStatus;
-import com.everhomes.rest.region.RegionDTO;
-import com.everhomes.rest.region.RegionScope;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.EtagHelper;
@@ -46,6 +42,9 @@ public class RegionController extends ControllerBase {
 
     @Autowired
     private RegionProvider regionProvider;
+
+    @Autowired
+    private RegionService regionService;
     
     /**
      * <b>URL: /region/list</b>
@@ -177,5 +176,49 @@ public class RegionController extends ControllerBase {
             }
         }
         return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /region/listRegionCodes</b>
+     * 查询地区区域的code
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listRegionCodes")
+    @RestReturn(value=RegionCodeDTO.class, collection=true)
+    public RestResponse listRegionCodes(@Valid ListRegionCodeCommand cmd) {
+        RestResponse res = new RestResponse(regionService.listRegionCodes());
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /region/createRegionCode</b>
+     * 创建地区区域的code
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("createRegionCode")
+    @RestReturn(value=String.class)
+    public RestResponse createRegionCode(@Valid CreateRegionCodeCommand cmd) {
+        regionService.createRegionCode(ConvertHelper.convert(cmd, RegionCodeDTO.class));
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /region/updateRegionCode</b>
+     * 修改地区区域的code
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("updateRegionCode")
+    @RestReturn(value=String.class)
+    public RestResponse updateRegionCode(@Valid CreateRegionCodeCommand cmd) {
+        regionService.updateRegionCode(ConvertHelper.convert(cmd, RegionCodeDTO.class));
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
 }

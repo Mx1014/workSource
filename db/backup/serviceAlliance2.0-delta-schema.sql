@@ -1,0 +1,1 @@
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `selected_logo_url` VARCHAR(1024) COMMENT 'the selected logo url of the category';

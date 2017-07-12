@@ -1,0 +1,138 @@
+{
+  "eh_acl_roles": [
+    {
+      "id": "1001",
+      "app_id": "32",
+      "name": "超级管理员",
+      "owner_type": "EhOrganizations"
+    },
+    {
+      "id": "1005",
+      "app_id": "32",
+      "name": "公司管理员",
+      "owner_type": "EhOrganizations"
+    }
+  ],
+  "eh_acl_role_assignments": [
+    {
+      "id": "100",
+      "target_type": "EhUsers",
+      "target_id": "10001",
+      "owner_type": "EhOrganizations",
+      "owner_id": "1000750",
+      "role_id": "1001",
+      "creator_uid": 0
+    },
+    {
+      "id": "102",
+      "target_type": "EhUsers",
+      "target_id": "10002",
+      "owner_type": "EhOrganizations",
+      "owner_id": "1000750",
+      "role_id": "1001",
+      "creator_uid": 0
+    },
+    {
+      "id": "103",
+      "target_type": "EhUsers",
+      "target_id": "10003",
+      "owner_type": "EhOrganizations",
+      "owner_id": "1000750",
+      "role_id": "1005",
+      "creator_uid": 0
+    }
+  ],
+  "eh_acls":[
+    {
+       "id": "100",
+       "namespace_id": "0",
+       "role_type": "EhOrganizations",
+       "role_id": "1000751",
+       "owner_type": "EhCommunities",
+       "owner_id": "24210090697425926",
+       "privilege_id": "1",
+       "order_seq": "1",
+       "grant_type": "1",
+       "create_time": "2016-11-06 00:00:00",
+       "creator_uid": 0
+    },
+    {
+       "id": "101",
+       "namespace_id": "0",
+       "role_type": "EhOrganizations",
+       "role_id": "1000751",
+       "owner_type": "EhCommunities",
+       "owner_id": "24210090697425926",
+       "privilege_id": "1",
+       "order_seq": "1",
+       "grant_type": "1",
+       "create_time": "2016-11-06 00:00:00",
+       "creator_uid": 0
+    },
+    {
+       "id": "102",
+       "namespace_id": "0",
+       "role_type": "EhOrganizations",
+       "role_id": "1000751",
+       "owner_type": "EhCommunities",
+       "owner_id": "24210090697425926",
+       "privilege_id": "1",
+       "order_seq": "1",
+       "grant_type": "1",
+       "create_time": "2016-11-06 00:00:00",
+       "creator_uid": 0
+    },
+    {
+       "id": "103",
+       "namespace_id": "0",
+       "role_type": "EhUsers",
+       "role_id": "10010",
+       "owner_type": "EhCommunities",
+       "owner_id": "24210090697425926",
+       "privilege_id": "1",
+       "order_seq": "1",
+       "grant_type": "1",
+       "create_time": "2016-11-06 00:00:00",
+       "creator_uid": 0
+    },
+    {
+       "id": "104",
+       "namespace_id": "0",
+       "role_type": "EhUsers",
+       "role_id": "10003",
+       "owner_type": "EhOrganizations",
+       "owner_id": "1000750",
+       "privilege_id": "15",
+       "order_seq": "1",
+       "grant_type": "1",
+       "create_time": "2016-11-06 00:00:00",
+       "creator_uid": 0
+    },
+    {
+       "id": "105",
+       "namespace_id": "0",
+       "role_type": "EhUsers",
+       "role_id": "10001",
+       "owner_type": "EhOrganizations",
+       "owner_id": "1000750",
+       "privilege_id": "10",
+       "order_seq": "1",
+       "grant_type": "1",
+       "create_time": "2016-11-06 00:00:00",
+       "creator_uid": 0
+    },
+    {
+       "id": "106",
+       "namespace_id": "0",
+       "role_type": "EhUsers",
+       "role_id": "10001",
+       "owner_type": "EhOrganizations",
+       "owner_id": "1000750",
+       "privilege_id": "1",
+       "order_seq": "1",
+       "grant_type": "1",
+       "create_time": "2016-11-06 00:00:00",
+       "creator_uid": 0
+    }
+  ]
+}

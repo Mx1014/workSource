@@ -34,8 +34,8 @@
         [jsonObject setObject: self.id forKey: @"id"];
     if(self.itemName)
         [jsonObject setObject: self.itemName forKey: @"itemName"];
-    if(self.itemLabel)
-        [jsonObject setObject: self.itemLabel forKey: @"itemLabel"];
+    if(self.itemName)
+        [jsonObject setObject: self.itemName forKey: @"itemName"];
     if(self.forumId)
         [jsonObject setObject: self.forumId forKey: @"forumId"];
     if(self.contentCategory)
@@ -55,9 +55,9 @@
         if(self.itemName && [self.itemName isEqual:[NSNull null]])
             self.itemName = nil;
 
-        self.itemLabel = [jsonObject objectForKey: @"itemLabel"];
-        if(self.itemLabel && [self.itemLabel isEqual:[NSNull null]])
-            self.itemLabel = nil;
+        self.itemName = [jsonObject objectForKey: @"itemName"];
+        if(self.itemName && [self.itemName isEqual:[NSNull null]])
+            self.itemName = nil;
 
         self.forumId = [jsonObject objectForKey: @"forumId"];
         if(self.forumId && [self.forumId isEqual:[NSNull null]])

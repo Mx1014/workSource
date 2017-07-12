@@ -1,15 +1,19 @@
 package com.everhomes.aclink;
 
-import java.util.List;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
+import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
+import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
+import com.everhomes.user.User;
+
+import java.util.List;
 
 public interface DoorAuthProvider {
 
     Long createDoorAuth(DoorAuth obj);
+
+    Long createDoorAuthLog(DoorAuthLog log);
 
     void updateDoorAuth(DoorAuth obj);
 
@@ -38,4 +42,24 @@ public interface DoorAuthProvider {
 
     List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, String driver, int count);
 
+    AuthVisitorStasticResponse authVistorStatistic(AuthVisitorStatisticCommand cmd);
+
+	void updateDoorAuth(List<DoorAuth> objs);
+
+	List<DoorAuth> queryValidDoorAuths(ListingLocator locator, Long userId,
+			Long ownerId, Byte ownerType, int count);
+
+    List<User> listDoorAuthByOrganizationId(Long organizationId, Byte isOpenAuth, Long doorId, CrossShardListingLocator locator, int pageSize);
+
+    List<User> listDoorAuthByIsAuth(Byte isAuth, Byte isOpenAuth, Long doorId, CrossShardListingLocator locator, int pageSize, Integer namespaceId);
+
+    List<DoorAuthLog> listDoorAuthLogsByUserId(CrossShardListingLocator locator, int pageSize, Long userId, Long doorId);
+
+    Long countDoorAuthUser(Byte isAuth, Byte isOpenAuth, Long doorId, Integer namespaceId, Byte rightType);
+
+	DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId, Byte isRemote);
+
+	Long getNextDoorAuth();
+
+    List<DoorAuth> searchVisitorDoorAuthByAdmin(Long doorId, String keyword, Byte status, int pageSize, Long startTime, Long endTime);
 }

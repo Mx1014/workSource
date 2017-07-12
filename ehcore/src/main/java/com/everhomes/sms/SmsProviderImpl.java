@@ -133,12 +133,17 @@ public class SmsProviderImpl implements SmsProvider {
     
     @Override
     public void sendSms(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
-        Future<?> f = taskQueue.submit(() -> {
-            getHandler(namespaceId).doSend(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, variables);
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.info("Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + StringUtils.join(phoneNumbers, ",")
-                    + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
-            }
+        taskQueue.submit(() -> {
+        	try{
+        		getHandler(namespaceId).doSend(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, variables);
+        		  if(LOGGER.isDebugEnabled()) {
+                      LOGGER.info("Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + StringUtils.join(phoneNumbers, ",")
+                          + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+                  }
+        	} catch(Exception ex) {
+        		LOGGER.error("send sms failed ex=", ex);
+        	}
+            
             return null;
         });
     }

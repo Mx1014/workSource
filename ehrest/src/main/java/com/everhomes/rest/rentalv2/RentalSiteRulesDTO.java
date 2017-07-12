@@ -1,6 +1,9 @@
 package com.everhomes.rest.rentalv2;
 
 import com.everhomes.util.StringHelper;
+
+import java.math.BigDecimal;
+
 /**
  * <ul>
  * <li>id：id</li>
@@ -23,7 +26,11 @@ import com.everhomes.util.StringHelper;
  * <li>	multiTimeInterval： 	是否允许预约多个时段 1是 0否	</li>
  * <li>ruleDate：规则日期</li>  
  * <li>Status： OPEN(0),CLOSE(1){@link com.everhomes.rest.rentalv2.SiteRuleStatus} </li> 
- * <li>siteNumber：场所编号：订单详情中用</li> 
+ * <li>siteNumber：场所编号：订单详情中用</li>
+ * <li>orgMemberOriginalPrice: 原价-如果打折则有(企业内部价)</li>
+ * <li>orgMemberPrice: 实际价格-打折则为折后价(企业内部价)</li>
+ * <li>approvingUserOriginalPrice: 原价-如果打折则有（外部客户价）</li>
+ * <li>approvingUserPrice: 实际价格-打折则为折后价（外部客户价）</li>
  * </ul>
  */
 public class RentalSiteRulesDTO {
@@ -48,14 +55,53 @@ public class RentalSiteRulesDTO {
 	private Long ruleDate; 
 	private Byte status;
 	private String siteNumber;
-	
-	
+
+	private BigDecimal orgMemberOriginalPrice;
+	private BigDecimal orgMemberPrice;
+
+	private BigDecimal approvingUserOriginalPrice;
+	private BigDecimal approvingUserPrice;
+	private BigDecimal halfOrgMemberOriginalPrice;
+	private BigDecimal halfOrgMemberPrice;
+	private BigDecimal halfApprovingUserOriginalPrice;
+	private BigDecimal halfApprovingUserPrice;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
+	public BigDecimal getHalfOrgMemberOriginalPrice() {
+		return halfOrgMemberOriginalPrice;
+	}
 
+	public void setHalfOrgMemberOriginalPrice(BigDecimal halfOrgMemberOriginalPrice) {
+		this.halfOrgMemberOriginalPrice = halfOrgMemberOriginalPrice;
+	}
+
+	public BigDecimal getHalfOrgMemberPrice() {
+		return halfOrgMemberPrice;
+	}
+
+	public void setHalfOrgMemberPrice(BigDecimal halfOrgMemberPrice) {
+		this.halfOrgMemberPrice = halfOrgMemberPrice;
+	}
+
+	public BigDecimal getHalfApprovingUserOriginalPrice() {
+		return halfApprovingUserOriginalPrice;
+	}
+
+	public void setHalfApprovingUserOriginalPrice(BigDecimal halfApprovingUserOriginalPrice) {
+		this.halfApprovingUserOriginalPrice = halfApprovingUserOriginalPrice;
+	}
+
+	public BigDecimal getHalfApprovingUserPrice() {
+		return halfApprovingUserPrice;
+	}
+
+	public void setHalfApprovingUserPrice(BigDecimal halfApprovingUserPrice) {
+		this.halfApprovingUserPrice = halfApprovingUserPrice;
+	}
 
 	public Long getRentalSiteId() {
 		return rentalSiteId;
@@ -309,5 +355,37 @@ public class RentalSiteRulesDTO {
 
 	public void setHalfsiteOriginalPrice(java.math.BigDecimal halfsiteOriginalPrice) {
 		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
+	}
+
+	public BigDecimal getOrgMemberOriginalPrice() {
+		return orgMemberOriginalPrice;
+	}
+
+	public void setOrgMemberOriginalPrice(BigDecimal orgMemberOriginalPrice) {
+		this.orgMemberOriginalPrice = orgMemberOriginalPrice;
+	}
+
+	public BigDecimal getOrgMemberPrice() {
+		return orgMemberPrice;
+	}
+
+	public void setOrgMemberPrice(BigDecimal orgMemberPrice) {
+		this.orgMemberPrice = orgMemberPrice;
+	}
+
+	public BigDecimal getApprovingUserOriginalPrice() {
+		return approvingUserOriginalPrice;
+	}
+
+	public void setApprovingUserOriginalPrice(BigDecimal approvingUserOriginalPrice) {
+		this.approvingUserOriginalPrice = approvingUserOriginalPrice;
+	}
+
+	public BigDecimal getApprovingUserPrice() {
+		return approvingUserPrice;
+	}
+
+	public void setApprovingUserPrice(BigDecimal approvingUserPrice) {
+		this.approvingUserPrice = approvingUserPrice;
 	}
 }

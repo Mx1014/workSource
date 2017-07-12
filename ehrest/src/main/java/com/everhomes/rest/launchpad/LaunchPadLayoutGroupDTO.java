@@ -17,6 +17,8 @@ import com.everhomes.util.StringHelper;
  * <li>separatorHeight: 组底部分隔条高度</li>
  * <li>columnCount: 组件一行显示的图标数，目前针对Navigator</li>
  * <li>editFlag: 0-不可编辑,1-可编辑 详情{@link com.everhomes.rest.launchpad.EditFlagType}</li>
+ * <li>title: 标题</li>
+ * <li>iconUrl: 标题图片</li>
  * </ul>
  */
 public class LaunchPadLayoutGroupDTO {
@@ -29,8 +31,11 @@ public class LaunchPadLayoutGroupDTO {
     private Double separatorHeight;
     private Integer columnCount;
     private Byte editFlag;
+    private String title;
+    private String iconUrl;
+    private String align;
 
-   
+
     public String getGroupName() {
         return groupName;
     }
@@ -103,7 +108,31 @@ public class LaunchPadLayoutGroupDTO {
 		this.editFlag = editFlag;
 	}
 
-	@Override
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getAlign() {
+        return align;
+    }
+
+    public void setAlign(String align) {
+        this.align = align;
+    }
+
+    @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }

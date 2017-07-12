@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jooq.Condition;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.activity.ActivityRoster;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -62,13 +64,6 @@ import com.everhomes.server.schema.tables.pojos.EhUserPosts;
 import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.records.EhRequestAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhRequestTemplatesNamespaceMappingRecord;
-import com.everhomes.server.schema.tables.records.EhRequestTemplatesRecord;
-import com.everhomes.server.schema.tables.records.EhSearchTypesRecord;
-import com.everhomes.server.schema.tables.records.EhStatActiveUsersRecord;
-import com.everhomes.server.schema.tables.records.EhUserInvitationsRecord;
-import com.everhomes.server.schema.tables.records.EhUserPostsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -375,6 +370,92 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         dao.insert(feedback);
     }
 
+    @Override
+	public List<Feedback> ListFeedbacks(CrossShardListingLocator locator, Integer namespaceId, Byte targetType,  Byte status, int pageSize) {
+    	final List<Feedback> feedbacks = new ArrayList<>();
+
+        if(locator.getShardIterator() == null) {
+		    AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUsers.class);
+		    ShardIterator shardIterator = new ShardIterator(accessSpec);
+		    locator.setShardIterator(shardIterator);
+        }
+
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+        	SelectQuery<EhFeedbacksRecord> query = context.selectQuery(Tables.EH_FEEDBACKS);
+        	Condition condition = Tables.EH_FEEDBACKS.NAMESPACE_ID.eq(namespaceId);
+        	if(targetType != null){
+        		condition = condition.and(Tables.EH_FEEDBACKS.TARGET_TYPE.eq(targetType));
+        	}
+        	if(status != null){
+        		condition = condition.and(Tables.EH_FEEDBACKS.STATUS.eq(status));
+        	}
+        	if(locator.getAnchor() != null){
+        		condition = condition.and(Tables.EH_FEEDBACKS.ID.lt(locator.getAnchor()));
+        	}
+        	query.addConditions(condition);
+        	query.addOrderBy(Tables.EH_FEEDBACKS.ID.desc());
+        	query.addLimit(pageSize);
+        	query.fetch().map((r) -> {
+        		feedbacks.add(ConvertHelper.convert(r, Feedback.class));
+        		return null;
+        	});
+        	if(feedbacks.size() >= pageSize) {
+        		locator.setAnchor(feedbacks.get(feedbacks.size() - 1).getId());
+        		return AfterAction.done;
+        	}
+        	return AfterAction.next;
+        });
+
+        return feedbacks;
+	}
+    
+    @Override
+	public void updateFeedback(Feedback feedback) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, feedback.getOwnerUid()));
+    	EhFeedbacksDao dao = new EhFeedbacksDao(context.configuration());
+    	dao.update(feedback);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFeedbacksDao.class, feedback.getId());
+	}
+    
+
+    @Override
+    public void updateOtherFeedback(Long targetId, Long feedbackId, Byte verifyType, Byte handleType) {
+    	AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUsers.class);
+    	ShardIterator shardIterator = new ShardIterator(accessSpec);
+
+    	this.dbProvider.iterationMapReduce(shardIterator, null, (DSLContext context, Object reducingContext) -> {
+    		context.update(Tables.EH_FEEDBACKS)
+    		.set(Tables.EH_FEEDBACKS.STATUS, (byte)1)
+    		.set(Tables.EH_FEEDBACKS.VERIFY_TYPE, verifyType)
+    		.set(Tables.EH_FEEDBACKS.HANDLE_TYPE, handleType)
+    		.where(Tables.EH_FEEDBACKS.TARGET_ID.eq(targetId).and(Tables.EH_FEEDBACKS.ID.ne(feedbackId)))
+    		.execute();
+    		return AfterAction.next;
+    	});
+    }
+    
+    @Override
+    public Feedback findFeedbackById(Long id) {
+    	List<Feedback> feedbackList = new ArrayList<Feedback>();
+    	dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), feedbackList, (DSLContext context, Object reducingContext) -> {
+    		List<Feedback> list = context.select().from(Tables.EH_FEEDBACKS)
+    				.where(Tables.EH_FEEDBACKS.ID.eq(id))
+    				.fetch().map((r) -> {
+    					return ConvertHelper.convert(r, Feedback.class);
+    				});
+
+    		if (list != null && !list.isEmpty()) {
+    			feedbackList.add(list.get(0));
+    		}
+    		return true;
+    	});
+
+    	if(feedbackList.size() > 0){
+    		return feedbackList.get(0);
+    	}
+    	return null;
+    }
+    
     @Override
     public List<UserFavoriteDTO> findFavorite(Long uid) {
         //TODO
@@ -685,7 +766,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 		query.addConditions(Tables.EH_SEARCH_TYPES.NAMESPACE_ID.eq(namespaceId));
 		
 		query.addConditions(Tables.EH_SEARCH_TYPES.STATUS.eq(SearchTypesStatus.ACTIVE.getCode()));
-		 
+		query.addOrderBy(Tables.EH_SEARCH_TYPES.ORDER.asc());
 		List<SearchTypes> result = new ArrayList<SearchTypes>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, SearchTypes.class));
@@ -927,5 +1008,47 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         dao.insert(stat);
 	}
 
+    @Override
+    public List<UserActivity> listUserActivetys(Condition cond, Integer pageSize, CrossShardListingLocator locator) {
+        pageSize = pageSize + 1;
+        List<UserActivity> results = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(Tables.EH_USER_ACTIVITIES);
+        if(null != cond){
+            query.addConditions(cond);
+        }
+        if(null != locator.getAnchor()){
+            query.addConditions(Tables.EH_USER_ACTIVITIES.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_USER_ACTIVITIES.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, UserActivity.class));
+            return null;
+        });
+        locator.setAnchor(null);
+        if(results.size() >= pageSize){
+            results.remove(results.size() - 1);
+            locator.setAnchor(results.get(results.size() - 1).getId());
+        }
+        return results;
+    }
 
+    @Override
+    public List<UserActivity> listUserActivetys(Long userId, Integer pageSize) {
+        List<UserActivity> results = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(Tables.EH_USER_ACTIVITIES);
+        query.addConditions(Tables.EH_USER_ACTIVITIES.UID.eq(userId));
+        query.addOrderBy(Tables.EH_USER_ACTIVITIES.CREATE_TIME.desc());
+
+        if (null != pageSize) {
+            query.addLimit(pageSize);
+        }
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, UserActivity.class));
+            return null;
+        });
+        return results;
+    }
 }

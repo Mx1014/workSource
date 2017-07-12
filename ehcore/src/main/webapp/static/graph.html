@@ -1,0 +1,349 @@
+<html>
+
+<head>
+<meta charset="utf-8" />
+<title>
+    FlowGraph
+</title>
+<script src="/evh/static/jquery-2.1.3.min.js"></script>
+<script src="/evh/static/jquery.cookie.js"></script>
+<style  type="text/css">
+    table {
+        border-collapse: collapse;
+    }
+
+    table, th, td {
+        border: 1px solid black;
+    }
+
+    .tbouter {
+
+    }
+
+</style>
+</head>
+
+<body>
+<form>
+<input type="button" name="show" id="btnShow" value="TestShow"/>
+<div id="content"></div>
+</form>
+<script type="application/javascript">
+if(!String.prototype.format) {
+	String.prototype.format = function() {
+		var str = this;
+		for (var i = 0; i < arguments.length; i++) {
+			var reg = new RegExp("\\{" + i + "\\}", "gm");
+			str = str.replace(reg, arguments[i]);
+		}
+		return str;
+	}
+}
+
+function paintMatrix(matrix, tbTxt, cls) {
+	var pained = {};
+   var table;
+   var tableTxt = "<table></table>";
+   if(tbTxt) {
+   	tableTxt = tbTxt;
+   }
+   
+   if(cls) {
+        table = $(tableTxt).addClass(cls);
+    } else {
+        table = $(tableTxt);
+    }
+    
+	for(var i = 0; i < matrix.rows; i++) {
+		row = $("<tr></tr>");
+		for(var j = 0; j < matrix.cols; j++) {
+			var key = "{0}:{1}".format(i, j);
+			if(!pained[key]) {
+				var o = matrix.get(i, j);
+				pained[key] = o;
+
+				var col;
+				if(typeof o === 'string') {
+					col = $("<td></td>").html(o);
+                } else if(o["rowSpan"] && o.rowSpan > 1 && o.colSpan && o.colSpan > 1) {
+                    col = $("<td></td>").attr("rowSpan", o.rowSpan).attr("colSpan", o.colSpan).html(o.html);
+                    for(var n = 0; n < o.rowSpan; n++) {
+                        for(var m = 0; m < o.colSpan; m++) {
+                            var key = "{0}:{1}".format((i+n), (j+m));
+                            pained[key] = o;
+                        }
+                    }
+				} else if(o["rowSpan"] && o.rowSpan > 1) {
+					col = $("<td></td>").attr("rowSpan", o.rowSpan).html(o.html);
+					for(var n = 1; n < o.rowSpan; n++) {
+						key = "{0}:{1}".format((i+n), j);
+						pained[key] = o;
+					}
+				} else if(o.colSpan && o.colSpan > 1) {
+                    col = $("<td></td>").attr("colSpan", o.colSpan).html(o.html);
+                    for (var n = 1; n < o.colSpan; n++) {
+                        key = "{0}:{1}".format(i, (j + n));
+                        pained[key] = o;
+                    }
+				} else {
+					col = $("<td></td>").html(o.html);
+				}
+				row.append(col);
+			}
+		}
+
+		table.append(row);
+	}
+
+	return table;
+}
+
+function Matrix(cols) {
+	this.rows = 0;
+	this.cols = cols;
+	this.matrix = [];
+}
+Matrix.prototype.newRow = function() {
+	var self = this;
+	var matrix = [];
+	for(var j = 0; j < self.cols; j++) {
+		matrix[j] = undefined;
+	}
+	self.matrix[self.rows] = matrix;
+	++self.rows;
+}
+Matrix.prototype.get = function(i, j) {
+	return this.matrix[i][j];
+}
+Matrix.prototype.set = function(i, j, o) {
+	var self = this;
+	if(i >= self.rows) {
+		for(var n = self.rows; n <= i; n++) {
+			self.newRow();
+		}
+	}
+
+	this.matrix[i][j] = o;
+}
+Matrix.prototype.append = function(matrix, posx, posy) {
+	var self = this;
+	var row = self.rows;
+    var col = self.cols;
+	var oldRow = matrix.rows;
+    var oldCol = matrix.cols;
+    if(!posx) {
+        posx = 0;
+    }
+    if(!posy) {
+        posy = 0;
+    }
+
+	for(var n = 0; n < (posx + oldRow-row); n++) {
+		self.newRow();
+	}
+
+	for(var i = 0; i < oldRow; i++) {
+		for(var j = 0; j < oldCol; j++) {
+			this.matrix[posx + i][posy + j] = matrix.get(i,j);
+		}
+	}
+}
+
+function showGraphTest(){
+//	var graph = {"childs": ["<h1>test1</h1>", "test2", "test3"]};
+	var matrix = new Matrix(3,3);
+	matrix.set(0, 0, {'html':'abc', 'rowSpan': 2});
+	matrix.set(0, 1, 'testa');
+	matrix.set(1, 1, 'testb');
+	matrix.set(0, 2, 'testc');
+	matrix.set(1, 2, 'testd');
+	matrix.set(2, 0, {'html':'teste', 'colSpan': 3});
+//	matrix.append(matrix);
+//	$("#content").append(paintMatrix(matrix));
+
+//  $("#content").append(paintMatrix(msgMatrix("")));
+//  $("#content").append(paintMatrix(actionMatrix("")));
+//  $("#content").append(paintMatrix(btnMatrix({"buttonName":"test"})));
+}
+
+function selectionsToText(sels) {
+    if(sels && sels.length > 0) {
+        var txt = "";
+        if(sels.length > 0) {
+            txt = sels[0].selectionName;
+        }
+        for(var i = 1; i < sels.length; i++) {
+            txt += "," + sels[i].selectionName;
+        }
+
+        return txt;
+    }
+    return "";
+}
+
+function btnMatrix(btn) {
+    var matrix = new Matrix(4);
+    matrix.set(0, 0, {"html": btn.buttonName, "rowSpan": 2});
+    var empty = {"renderText": ""};
+    var tmp = empty;
+    if(btn.pushMessage) {
+        tmp = btn.pushMessage;
+    }
+    matrix.append(msgMatrix2("消息推送", tmp), 0, 1);
+
+    tmp = empty;
+    if(btn.pushSms) {
+        tmp = btn.pushSms;
+    }
+    matrix.append(msgMatrix2("短信", tmp), 1, 1);
+    return matrix;
+}
+
+function msgMatrix(title, msg) {
+    var matrix = new Matrix(2);
+    matrix.set(0, 0, {"html": title, "rowSpan": 2});
+    matrix.set(0, 1, "发送时机：超过8小时未处理时 <br/>间隔：4小时");
+    matrix.set(1, 1, "发送给：" + selectionsToText(msg.processors) + "<br/> 内容：" + msg.renderText + "<br/>");
+    return matrix;
+}
+
+function msgMatrix2(title, msg) {
+    var matrix = new Matrix(3);
+    matrix.set(0, 0, {"html": title, "colSpan": 2});
+
+    var username = selectionsToText(msg.processors);
+    matrix.set(0, 2, "发送给：" + username + "<br/> 内容：" + msg.renderText + "<br/>");
+    return matrix;
+}
+
+function actionMatrix(action) {
+    var matrix = new Matrix(3);
+    matrix.set(0, 0, {"html": "进入节点时", "rowSpan": 4});
+    var empty = {"renderText": ""};
+    var tmp = empty;
+    if(action.messageAction) {
+        tmp = action.messageAction;
+    }
+    matrix.append(msgMatrix("消息推送", tmp), 0, 1);
+
+    tmp = empty;
+    if(action.smsAction) {
+        tmp = action.smsAction;
+    }
+    matrix.append(msgMatrix("短信", tmp), 2, 1);
+
+    tmp = empty;
+    if(action.tickMessageAction) {
+        tmp = action.tickMessageAction;
+    }
+    matrix.set(4, 0, {"html": "间隔提醒", "rowSpan": 4});
+    matrix.append(msgMatrix("消息推送", tmp), 4, 1);
+
+    tmp = empty;
+    if(action.tickSMSAction) {
+        tmp = action.tickSMSAction;
+    }
+    matrix.append(msgMatrix("短信", tmp), 6, 1);
+
+    return matrix;
+}
+
+function nodeMatrix(node) {
+    var matrix = new Matrix(4);
+
+    matrix.set(0, 0, "处理人员");
+    matrix.set(0, 1, {"html": selectionsToText(node.processors), "colSpan": 3});
+
+    matrix.set(1, 0, {"html": "消息提醒", "rowSpan": 8});
+    matrix.append(actionMatrix(node.reminder), 1, 1);
+
+    var start = matrix.rows;
+    for(var i = 0; i < node.processButtons.length; i++) {
+        matrix.append(btnMatrix(node.processButtons[i]), start, 0);
+        start += 2;
+    }
+
+    return matrix;
+}
+
+function showFlowGraph(json) {
+	var table = $("<table></table>").addClass("tbouter");
+	var thead = $("<thead></thead>");
+
+	var tr0 = $("<tr></tr>");
+	tr0.append($("<th></th>"));
+    var th = $("<th></th>");
+    th.html("督办");
+	tr0.append(th);
+	for(var i = 0; i < json.nodes.length; i++) {
+        th = $("<th></th>").attr("colSpan", 4);
+        th.html(json.nodes[i].nodeName);
+		tr0.append(th);
+	}
+	thead.append(tr0);
+	table.append(thead);
+
+    var nodesMatrix = [];
+    var mRow = 0;
+	for(var i = 0; i < json.nodes.length; i++) {
+        var nodem = nodeMatrix(json.nodes[i]);
+        nodesMatrix.push(nodem);
+        if(mRow < nodem.rows) {
+        	mRow = nodem.rows;
+        }
+	}
+	
+	var graphMatrix = new Matrix(2+nodesMatrix.length*4);
+	graphMatrix.set(0, 0, {"html":json.flowName, "rowSpan": mRow});
+	graphMatrix.set(0, 1, {"html":selectionsToText(json.supervisors), "rowSpan": mRow});
+	var start = 2;
+	for(var i = 0; i < nodesMatrix.length; i++) {
+		graphMatrix.append(nodesMatrix[i], 0, start);
+		if(mRow > nodesMatrix[i].rows) {
+			for(var j = 0; j < 4; j++) {
+				graphMatrix.set(j, start + j, {"html":"", "rowSpan": (mRow - nodesMatrix[i].rows)});
+			}
+		}
+		
+		start += 4; 
+	}
+	
+    table.append(paintMatrix(graphMatrix, "<tbody></tbody>"));
+    $("#content").append(table);
+}
+
+function graphRequest() {
+    $.ajax({
+        dataType: "json",
+        url: "/evh/admin/flow/getFlowGraphDetail",
+        data: {"flowId": 10},
+        success: function(json) {
+            showFlowGraph(json.response);
+        }
+    });
+}
+
+function logon() {
+	var url = "/evh/user/logon";
+
+	$.ajax({
+		type: "POST",
+		url: url,
+		data: {"userIdentifier":"root", "password":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"},
+		success: function(data)
+		{
+			alert(data); // show response from the php script.
+		}
+	});
+}
+
+$("#btnShow").click(function () {
+    logon();
+});
+$(document).ready(function() {
+    graphRequest();
+});
+
+</script>
+</body>
+</html>

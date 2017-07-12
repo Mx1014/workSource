@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.organization.*;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +27,6 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.family.ListNeighborUsersCommand;
 import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
 import com.everhomes.rest.family.ParamType;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserOpPromotionCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
@@ -104,21 +102,19 @@ public class UserUiController extends ControllerBase {
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd) throws Exception {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
- 	    
-// 	   sceneToken = new SceneTokenDTO();
-// 	   sceneToken.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
-// 	   sceneToken.setEntityId(1000001l);
-// 	   sceneToken.setScene(SceneType.PM_ADMIN.getCode());
-// 	   System.out.println(webToken.toWebToken(sceneToken));
- 	    
+
  	    List<SceneContactDTO> dtos = null;
 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-			command.setOrganizationId(sceneToken.getEntityId());
+			//兼容老版本的app by sfyan 20161020
+			if(null == cmd.getOrganizationId()){
+				cmd.setOrganizationId(sceneToken.getEntityId());
+			}
+			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(100000);
 			command.setIsSignedup(cmd.getIsSignedup());
-			ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(command, true);
-			List<OrganizationMemberDTO> members = res.getMembers();
+			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
+			List<OrganizationContactDTO> members = res.getMembers();
 			if(null != members){
 				dtos = members.stream().map(r->{
 					SceneContactDTO dto = new SceneContactDTO();
@@ -130,7 +126,6 @@ public class UserUiController extends ControllerBase {
 					dto.setInitial(r.getInitial());
 					dto.setFullInitial(r.getFullInitial());
 					dto.setFullPinyin(r.getFullPinyin());
-					dto.setDepartmentName(r.getGroupName());
 					return dto;
 				}).collect(Collectors.toList());
 			}

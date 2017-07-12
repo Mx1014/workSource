@@ -19,9 +19,7 @@ public interface EnterpriseApplyEntryProvider {
 	
 	List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion,
 			ListingLocator locator, int pageSize);
-	
-	List<EnterpriseAddress> listBuildingEnterprisesByBuildingName(String buildingName, ListingLocator locator, int pageSize);
-	
+
 	LeasePromotion createLeasePromotion(LeasePromotion leasePromotion);
 	
 	LeasePromotion getLeasePromotionById(Long id);
@@ -41,4 +39,30 @@ public interface EnterpriseApplyEntryProvider {
 	boolean deleteLeasePromotion(long id);
 	
 	boolean deleteApplyEntry(long id);
+
+	LeasePromotion getLeasePromotionByToken(Integer namespaceId, Long communityId, String namespaceType, String namespaceToken);
+ 
+
+	List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request, ListingLocator locator,
+			int pageSize, List<Long> idList);
+
+	void updateApplyEntry(EnterpriseOpRequest request);
+
+	List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId);
+
+	void deleteLeasePromotionByUidAndIssuerType(long id, String issuerType);
+
+	List<LeasePromotion> listLeasePromotionsByUidAndIssuerType(long id, String issuerType);
+
+	void deleteApplyEntrysByLeasePromotionIds(List<Long> idList);
+
+	void createLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	void updateLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	void deleteLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	LeaseFormRequest findLeaseRequestFormById(Long id);
+
+	LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType);
 }

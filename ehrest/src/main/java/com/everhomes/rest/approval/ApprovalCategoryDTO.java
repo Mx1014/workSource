@@ -21,7 +21,14 @@ public class ApprovalCategoryDTO {
 	private Long ownerId;
 	private Byte approvalType;
 	private String categoryName;
-
+	
+	public ApprovalCategoryDTO(){}
+	
+	public ApprovalCategoryDTO(Long id , Byte approvalType,String categoryName){
+		this.id = id;
+		this.approvalType = approvalType;
+		this.categoryName = categoryName;
+	}
 	public Byte getApprovalType() {
 		return approvalType;
 	}

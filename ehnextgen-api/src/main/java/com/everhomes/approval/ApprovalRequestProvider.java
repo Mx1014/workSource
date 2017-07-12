@@ -29,4 +29,12 @@ public interface ApprovalRequestProvider {
 			Byte approvalType, Long categoryId, Long fromDate, Long endDate,
 			List<ApprovalFlowLevel> approvalFlowLevelList, List<Long> userIdList, Long pageAnchor, int pageSize);
 
+	List<ApprovalRequest> listApprovalRequestByEffectiveDateAndCreateUid(Integer namespaceId, String ownerType, Long ownerId,
+			Byte approvalType, Date effectiveDate, Long createUid, List<Byte> approvalStatus);
+
+	void deleteApprovalRequest(ApprovalRequest aprpovalRequest);
+
+	Double countHourLengthByUserAndMonth(Long userId, String ownerType, Long ownerId,
+			String punchMonth);
+
 }

@@ -1,7 +1,21 @@
 package com.everhomes.rest.community.admin;
 
-import java.sql.Timestamp;
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
 
+import java.sql.Timestamp;
+import java.util.List;
+
+/**
+ * <ul>
+
+ * <li>executiveFlag：是否高管 0-否 1-是</li>
+ * <li>position：职位</li>
+ * <li>identityNumber：身份证号</li> 
+ * <li>gender：性别</li> 
+ * </ul>
+ */
 public class CommunityUserDto {
 
 	private Long     id;
@@ -11,6 +25,8 @@ public class CommunityUserDto {
 	private String     userName;
 	
 	private String     nikeName;
+
+	private String organizationMemberName;
 	
 	private Long     communityId;
 	
@@ -29,8 +45,49 @@ public class CommunityUserDto {
 	private Timestamp applyTime;
 	
 	private String phone;
-	
-	
+
+    private Byte executiveFlag;
+    private String position;
+    private String identityNumber;
+    private Byte gender;
+
+	private Long recentlyActiveTime;
+
+	@ItemType(OrganizationDetailDTO.class)
+	private List<OrganizationDetailDTO> organizations;
+
+	public List<OrganizationDetailDTO> getOrganizations() {
+		return organizations;
+	}
+
+	public void setOrganizations(List<OrganizationDetailDTO> organizations) {
+		this.organizations = organizations;
+	}
+
+	public Byte getExecutiveFlag() {
+		return executiveFlag;
+	}
+
+	public void setExecutiveFlag(Byte executiveFlag) {
+		this.executiveFlag = executiveFlag;
+	}
+
+	public String getPosition() {
+		return position;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public String getIdentityNumber() {
+		return identityNumber;
+	}
+
+	public void setIdentityNumber(String identityNumber) {
+		this.identityNumber = identityNumber;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -135,5 +192,27 @@ public class CommunityUserDto {
 		this.nikeName = nikeName;
 	}
 
-	
+	public Byte getGender() {
+		return gender;
+	}
+
+	public void setGender(Byte gender) {
+		this.gender = gender;
+	}
+
+	public Long getRecentlyActiveTime() {
+		return recentlyActiveTime;
+	}
+
+	public void setRecentlyActiveTime(Long recentlyActiveTime) {
+		this.recentlyActiveTime = recentlyActiveTime;
+	}
+
+	public String getOrganizationMemberName() {
+		return organizationMemberName;
+	}
+
+	public void setOrganizationMemberName(String organizationMemberName) {
+		this.organizationMemberName = organizationMemberName;
+	}
 }

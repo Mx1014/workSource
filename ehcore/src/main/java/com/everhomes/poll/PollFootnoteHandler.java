@@ -1,5 +1,8 @@
 package com.everhomes.poll;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+
 import org.springframework.stereotype.Component;
 
 import com.everhomes.forum.ForumFootnoteHandler;
@@ -16,12 +19,17 @@ public class PollFootnoteHandler implements ForumFootnoteHandler {
 	public String renderContentFootnote(ContentBriefDTO dto, PostDTO postDto) {
         
         PollFootnote fn = new PollFootnote();
-        fn.setCreateTime(postDto.getCreateTime().toString());
+        fn.setCreateTime(timeToStr(postDto.getCreateTime()));
         fn.setCreatorNickName(postDto.getCreatorNickName());
         
         dto.setFootnoteJson(StringHelper.toJsonString(fn));
 		
         return null;
+	}
+	
+	private String timeToStr(Timestamp time) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		return sdf.format(time);
 	}
 
 }

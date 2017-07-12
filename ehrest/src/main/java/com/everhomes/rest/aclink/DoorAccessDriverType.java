@@ -1,7 +1,17 @@
 package com.everhomes.rest.aclink;
 
+/**
+ * <ul>
+ * <li>zuolin: 左邻二维码</li>
+ * <li>lingling: 令令二维码</li>
+ * <li>phone_visit: 保安手机授权</li>
+ * <li>huarun_anguan: 华润安冠二维码</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum DoorAccessDriverType {
-    ZUOLIN("zuolin"), LINGLING("lingling");
+    ZUOLIN("zuolin"), LINGLING("lingling"), PHONE_VISIT("phone_visit"), ZUOLIN_V2("zuolin_v2"), HUARUN_ANGUAN("huarun_anguan");
     
     private String code;
     private DoorAccessDriverType(String code) {

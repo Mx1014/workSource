@@ -1,40 +1,15 @@
 package com.everhomes.launchpad;
 
-import java.util.List;
+import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.launchpad.admin.*;
+import com.everhomes.rest.ui.launchpad.*;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
-import com.everhomes.rest.common.ScopeType;
-import com.everhomes.rest.launchpad.DeleteLaunchPadByIdCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemByIdCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsByOrgCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
-import com.everhomes.rest.launchpad.GetLaunchPadLayoutByVersionCodeCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadLayoutCommand;
-import com.everhomes.rest.launchpad.ItemDisplayFlag;
-import com.everhomes.rest.launchpad.LaunchPadItemDTO;
-import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
-import com.everhomes.rest.launchpad.ListLaunchPadLayoutCommandResponse;
-import com.everhomes.rest.launchpad.UserDefinedLaunchPadCommand;
-import com.everhomes.rest.launchpad.UserLaunchPadItemDTO;
-import com.everhomes.rest.launchpad.admin.CreateLaunchPadItemAdminCommand;
-import com.everhomes.rest.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
-import com.everhomes.rest.launchpad.admin.DeleteLaunchPadItemAdminCommand;
-import com.everhomes.rest.launchpad.admin.DeleteLaunchPadLayoutAdminCommand;
-import com.everhomes.rest.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommand;
-import com.everhomes.rest.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommandResponse;
-import com.everhomes.rest.launchpad.admin.ListLaunchPadLayoutAdminCommand;
-import com.everhomes.rest.launchpad.admin.UpdateLaunchPadItemAdminCommand;
-import com.everhomes.rest.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
-import com.everhomes.rest.ui.launchpad.AddLaunchPadItemBySceneCommand;
-import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
-import com.everhomes.rest.ui.launchpad.DeleteLaunchPadItemBySceneCommand;
-import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
-import com.everhomes.rest.ui.launchpad.GetLaunchPadItemsBySceneCommand;
-import com.everhomes.rest.ui.launchpad.GetLaunchPadLayoutBySceneCommand;
-import com.everhomes.rest.ui.launchpad.ReorderLaunchPadItemBySceneCommand;
+import java.util.List;
 
 
 public interface LaunchPadService {
@@ -66,5 +41,43 @@ public interface LaunchPadService {
 	void reorderLaunchPadItemByScene(ReorderLaunchPadItemBySceneCommand cmd, ItemDisplayFlag itemDisplayFlag);
 	UserLaunchPadItemDTO deleteLaunchPadItemByScene(DeleteLaunchPadItemBySceneCommand cmd);
 	UserLaunchPadItemDTO addLaunchPadItemByScene(AddLaunchPadItemBySceneCommand cmd);
+
+    /**
+     * 获取全部类型的item
+     * @param cmd
+     * @param request
+     * @return
+     */
+    List<CategryItemDTO> getAllCategryItemsByScene(GetLaunchPadItemsBySceneCommand cmd, HttpServletRequest request);
+
+    /**
+     * 根据园区获取全部类型的item
+     * @param cmd
+     * @param request
+     * @return
+     */
+    List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request);
+
+    /**
+     * 根据机构获取全部类型的item
+     * @param cmd
+     * @param request
+     * @return
+     */
+    List<CategryItemDTO> getAllCategryItems(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request);
+
+    List<ItemServiceCategryDTO> listItemServiceCategries();
+
+    /**
+     * 编辑服务广场的item
+     * @param cmd
+     */
+    void editLaunchPadItemByScene(EditLaunchPadItemBySceneCommand cmd);
     
+    /**
+     * 查询应用
+     * @param cmd
+     * @return
+     */
+    SearchContentsBySceneReponse searchLaunchPadItemByScene(SearchContentsBySceneCommand cmd);
 }

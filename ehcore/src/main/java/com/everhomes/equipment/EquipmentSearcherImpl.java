@@ -4,6 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.techpark.punch.PunchTimeRule;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -56,6 +62,12 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -113,6 +125,8 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 
 	@Override
 	public SearchEquipmentsResponse queryEquipments(SearchEquipmentsCommand cmd) {
+        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_LIST, 0L);
+        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -130,8 +144,10 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStatus.INACTIVE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        //分公司和总公司的问题，改为用namespaceId来弄 by xiongying20170328
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
@@ -144,11 +160,8 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         
-        if(cmd.getReviewResult() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
-        
-        if(cmd.getReviewStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
+        if(cmd.getInspectionCategoryId() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -160,6 +173,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.info("EquipmentSearcherImpl query builder ："+builder);
         
         SearchResponse rsp = builder.execute().actionGet();
 
@@ -174,19 +190,19 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         List<EquipmentsDTO> dtos = new ArrayList<EquipmentsDTO>();
         for(Long id : ids) {
         	EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(id);
-        	EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
-        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-    		if(group != null)
-    			dto.setTargetName(group.getName());
+        	if(equipment != null) {
+	        	EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
+//	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+//	    		if(group != null)
+//	    			dto.setTargetName(group.getName());
+                Community community = communityProvider.findCommunityById(dto.getTargetId());
+                if(community != null)
+                    dto.setTargetName(community.getName());
 
-    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-            if(standard != null) {
-            	dto.setStandardName(standard.getName());
-            }
-            
-    		dtos.add(dto);
+	    		dtos.add(dto);
+        	}
         }
-        
+        LOGGER.info("query equipment: {}", dtos);
         response.setEquipment(dtos);
         return response;
 	}
@@ -211,8 +227,10 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
-    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        //分公司和总公司的问题，改为用namespaceId来弄
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+//    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
@@ -257,14 +275,14 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
     		dto.setEquipmentModel(equipment.getEquipmentModel());
     		dto.setQrCodeFlag(equipment.getQrCodeFlag());
     		dto.setStatus(equipment.getStatus());
-    		dto.setStandardId(equipment.getStandardId());
-    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-            if(standard != null) {
-            	dto.setStandardName(standard.getName());
-            }
-            
-            dto.setReviewResult(equipment.getReviewResult());
-            dto.setReviewStatus(equipment.getReviewStatus());
+//    		dto.setStandardId(equipment.getStandardId());
+//    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
+//            if(standard != null) {
+//            	dto.setStandardName(standard.getName());
+//            }
+//            
+//            dto.setReviewResult(equipment.getReviewResult());
+//            dto.setReviewStatus(equipment.getReviewStatus());
 
     		dtos.add(dto);
         }
@@ -281,23 +299,25 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 	private XContentBuilder createDoc(EquipmentInspectionEquipments equipment){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("ownerId", equipment.getOwnerId());
-            b.field("ownerType", equipment.getOwnerType());
+//            b.field("ownerId", equipment.getOwnerId());
+//            b.field("ownerType", equipment.getOwnerType());
+            b.field("namespaceId", equipment.getNamespaceId());
             b.field("targetId", equipment.getTargetId());
             b.field("targetType", equipment.getTargetType());
             b.field("status", equipment.getStatus());
             b.field("categoryId", equipment.getCategoryId());
             b.field("name", equipment.getName());
-            b.field("reviewResult", equipment.getReviewResult());
-            b.field("reviewStatus", equipment.getReviewStatus());
-            
-            
-            EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-            if(null != standard) {
-                b.field("standardName", standard.getName());
-            } else {
-                b.field("standardName", "");
-            }
+            b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
+//            b.field("reviewResult", equipment.getReviewResult());
+//            b.field("reviewStatus", equipment.getReviewStatus());
+//            
+//            
+//            EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
+//            if(null != standard) {
+//                b.field("standardName", standard.getName());
+//            } else {
+//                b.field("standardName", "");
+//            }
             
             b.endObject();
             return b;

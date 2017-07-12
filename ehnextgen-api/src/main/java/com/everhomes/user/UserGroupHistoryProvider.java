@@ -2,6 +2,7 @@ package com.everhomes.user;
 
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
@@ -21,5 +22,7 @@ public interface UserGroupHistoryProvider {
     List<UserGroupHistory> queryUserGroupHistoryByUserId(Long userId);
 
     UserGroupHistory queryUserGroupHistoryByAddressId(Long userId, Long addressId);
+
+	List<UserGroupHistory> queryUserGroupHistoryByGroupIds(List<Long> groupIds, CrossShardListingLocator locator, int pageSize);
 
 }

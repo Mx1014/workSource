@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
  * <li>plateNumber: 车牌号</li>
+ * <li>organizationId: 公司id</li>
  * </ul>
  */
 public class ListParkingCardsCommand {
@@ -23,6 +24,8 @@ public class ListParkingCardsCommand {
     private Long parkingLotId;
 	@NotNull
     private String plateNumber;
+	
+	private Long organizationId;
     
     public ListParkingCardsCommand() {
     }
@@ -63,4 +66,12 @@ public class ListParkingCardsCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 }

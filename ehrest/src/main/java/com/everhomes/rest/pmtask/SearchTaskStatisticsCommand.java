@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>namespaceId: 域空间</li>
- * <li>categoryId: 服务类型</li>
+ * <li>taskCategoryId: 服务类型</li>
  * <li>keyword: 关键字</li>
  * <li>dateStr: 日期</li>
  * <li>pageAnchor: 分页瞄</li>
@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class SearchTaskStatisticsCommand {
 	private Integer namespaceId;
-	private Long categoryId;
+	private Long taskCategoryId;
 	private String keyword;
 	private Long dateStr;
 	private Long pageAnchor;
@@ -26,12 +26,11 @@ public class SearchTaskStatisticsCommand {
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
-	
-	public Long getCategoryId() {
-		return categoryId;
+	public Long getTaskCategoryId() {
+		return taskCategoryId;
 	}
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setTaskCategoryId(Long taskCategoryId) {
+		this.taskCategoryId = taskCategoryId;
 	}
 	public String getKeyword() {
 		return keyword;

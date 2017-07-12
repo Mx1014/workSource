@@ -46,8 +46,8 @@
         [jsonObject setObject: self.itemGroup forKey: @"itemGroup"];
     if(self.itemName)
         [jsonObject setObject: self.itemName forKey: @"itemName"];
-    if(self.itemLabel)
-        [jsonObject setObject: self.itemLabel forKey: @"itemLabel"];
+    if(self.itemName)
+        [jsonObject setObject: self.itemName forKey: @"itemName"];
     if(self.iconUri)
         [jsonObject setObject: self.iconUri forKey: @"iconUri"];
     if(self.iconUrl)
@@ -109,9 +109,9 @@
         if(self.itemName && [self.itemName isEqual:[NSNull null]])
             self.itemName = nil;
 
-        self.itemLabel = [jsonObject objectForKey: @"itemLabel"];
-        if(self.itemLabel && [self.itemLabel isEqual:[NSNull null]])
-            self.itemLabel = nil;
+        self.itemName = [jsonObject objectForKey: @"itemName"];
+        if(self.itemName && [self.itemName isEqual:[NSNull null]])
+            self.itemName = nil;
 
         self.iconUri = [jsonObject objectForKey: @"iconUri"];
         if(self.iconUri && [self.iconUri isEqual:[NSNull null]])

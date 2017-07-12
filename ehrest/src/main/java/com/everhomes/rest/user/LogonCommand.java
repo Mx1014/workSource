@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *<li>deviceIdentifier:设备标识</li>
  *<li>namespaceId:名字空间，目前默认为0</li>
  *<li>partnerId: 园区合作商</li>
+ *<li>regionCode: 国家区号</li>
  *</ul>
  */
 public class LogonCommand {
@@ -27,6 +28,8 @@ public class LogonCommand {
     private Integer namespaceId;
     
     private String pusherIdentify;
+
+    private Integer regionCode;
     
     public LogonCommand() {
     }
@@ -70,6 +73,14 @@ public class LogonCommand {
 
     public void setPusherIdentify(String pusherIdentify) {
         this.pusherIdentify = pusherIdentify;
+    }
+
+    public Integer getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(Integer regionCode) {
+        this.regionCode = regionCode;
     }
 
     @Override

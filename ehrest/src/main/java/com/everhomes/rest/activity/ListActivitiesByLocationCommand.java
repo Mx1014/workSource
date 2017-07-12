@@ -1,9 +1,9 @@
 package com.everhomes.rest.activity;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <p>按经纬度位置列活动</p>
@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>officialFlag:是否是官方活动</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>categoryId: 活动类型id</li>
  * </ul>
  */
 public class ListActivitiesByLocationCommand {
@@ -32,8 +33,31 @@ public class ListActivitiesByLocationCommand {
     private Long pageAnchor;
     
     private Integer pageSize;
+    
+    private Long categoryId;
+    
+    private Long contentCategoryId;
 
-    public Integer getNamespaceId() {
+    @ItemType(Integer.class)
+    private List<Integer> activityStatusList;
+
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Integer getNamespaceId() {
         return namespaceId;
     }
 
@@ -87,7 +111,15 @@ public class ListActivitiesByLocationCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
-    }   
+    }
+
+    public List<Integer> getActivityStatusList() {
+        return activityStatusList;
+    }
+
+    public void setActivityStatusList(List<Integer> activityStatusList) {
+        this.activityStatusList = activityStatusList;
+    }
 
     @Override
     public String toString() {

@@ -12,11 +12,14 @@ package com.everhomes.rest.launchpad;
  * <li>PAYACTIONS(PayActions): 缴费</li>
  * <li>COUPONS(Coupons): 优惠劵</li>
  * <li>GAPOSTS(GaPosts): 分类查帖</li>
+ * <li>OPPUSHACTIVITY(OPPushActivity): 活动运营</li>
+ * <li>OPPUSHBIZ(OPPushBiz): 电商运营</li>
+ * <li>GALLERY("Gallery"): 项目大图列表（服务联盟等）</li>
  * </ul>
  */
 public enum ItemGroup {
     DEFAULT("Default"),GOVAGENCIES("GovAgencies"),BIZS("Bizs"),GAACTIONS("GaActions"),ACTIONBARS("ActionBars"),CALLPHONES("CallPhones"),
-    PAYACTIONS("PayActions"),COUPONS("Coupons"),GAPOSTS("GaPosts");
+    PAYACTIONS("PayActions"),COUPONS("Coupons"),GAPOSTS("GaPosts"), OPPUSHACTIVITY("OPPushActivity"), OPPUSHBIZ("OPPushBiz"), GALLERY("Gallery");
     
     private String code;
        

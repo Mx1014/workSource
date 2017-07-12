@@ -8,10 +8,11 @@ package com.everhomes.rest.forum;
  * <li>IMAGE("image"): 图片</li>
  * <li>AUDIO("audio"): 音频</li>
  * <li>VIDEO("video"): 视频</li>
+ * <li>RICH_TEXT("rich_text"): 视频</li>
  * </ul>
  */
 public enum PostContentType {
-    TEXT("text"), IMAGE("image"), AUDIO("audio"), VIDEO("video");
+    TEXT("text"), IMAGE("image"), AUDIO("audio"), VIDEO("video"), RICH_TEXT("rich_text");
     
     private String code;
     private PostContentType(String code) {
@@ -37,6 +38,9 @@ public enum PostContentType {
         }
         if(code.equalsIgnoreCase(VIDEO.getCode())) {
             return VIDEO;
+        }
+        if(code.equalsIgnoreCase(RICH_TEXT.getCode())) {
+        	return RICH_TEXT;
         }
         
         return null;

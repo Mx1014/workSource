@@ -1,0 +1,2 @@
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('quality', '10012', 'zh_CN', '任务模板不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('quality', '10013', 'zh_CN', '只能删除自己创建的模板');

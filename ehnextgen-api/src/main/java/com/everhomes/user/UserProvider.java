@@ -6,8 +6,8 @@ import java.util.List;
 import com.everhomes.aclink.AclinkUser;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
 
@@ -63,7 +63,8 @@ public interface UserProvider {
     void cleanupZombies();
     List<InvitationRoster> listInvitationRostor(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback);
-	List<User> listUserByKeyword(String keyword,Integer namespaceId, CrossShardListingLocator locator, int pageSize);
+	List<User> listUserByKeyword(String keyword, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
+	List<User> listUserByKeyword(Integer isAuth, Byte gender, Long organizationId, String keyword,Byte executiveFlag, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
 	User findUserByNamespace(Integer namespaceId, String namespaceUserToken);
 	void createUserCommunity(UserCommunity userCommunity);
 	UserCommunity findUserCommunityByOwnerAndCommunity(long ownerUid, long communityId);
@@ -96,4 +97,34 @@ public interface UserProvider {
      * @return
      */
     List<User> findThirdparkUserByTokenAndType(Integer namespaceId, String userType, String userToken);
+    List<User> listUserByNamespace(String keyword, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
+	List<User> listUserByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, Integer pageSize);
+	List<User> listUserByUpdateTime(Integer namespaceId, Long timestamp, Integer pageSize);
+	Organization findAnyUserRelatedOrganization(Long id, Integer namespaceId);
+
+    List<User> listUserByNickName(String keyword);
+    List<UserGroup> listUserActiveGroups(long uid, String groupDiscriminator);
+
+    /**
+     * 查询用户免打扰设置
+     * @param ownerType
+     * @param ownerId
+     * @param targetType
+     * @param targetId
+     * @return
+     */
+    UserNotificationSetting findUserNotificationSetting(String ownerType, Long ownerId, String targetType, Long targetId);
+
+    /**
+     * 修改免打扰设置
+     * @param setting
+     */
+    void updateUserNotificationSetting(UserNotificationSetting setting);
+
+    /**
+     * 创建免打扰记录
+     * @param setting
+     * @return  返回该记录的id
+     */
+    long createUserNotificationSetting(UserNotificationSetting setting);
 }

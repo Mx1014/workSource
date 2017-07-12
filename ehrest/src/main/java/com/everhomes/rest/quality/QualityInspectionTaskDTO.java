@@ -19,6 +19,9 @@ import com.everhomes.util.StringHelper;
  *  <li>childCount: 子任务数量</li>
  *  <li>ownerType: 任务所属机构类型 com.everhomes.rest.quality.OwnerType</li>
  *  <li>ownerId: 任务所属机构id</li>
+ *  <li>targetType: 任务所属项目类型 com.everhomes.rest.quality.OwnerType</li>
+ *  <li>targetId: 任务所属项目id</li>
+ *  <li>targetName: 任务所属项目名称</li>
  *  <li>taskName: 任务名称</li>
  *  <li>taskNumber: 任务编号</li>
  *  <li>groupName: 业务组名称</li>
@@ -38,11 +41,16 @@ import com.everhomes.util.StringHelper;
  *  <li>reviewResult: 审阅结果com.everhomes.rest.quality.QualityInspectionTaskReviewResult</li>
  *  <li>record: 操作记录列表 com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO</li>
  *  <li>executiveGroupId: 执行业务组id</li>
+ *  <li>executivePositionId: 通用岗位id</li>
+ *  <li>executiveGroupName: 业务组名称</li>
  *  <li>groupUsers: 参考com.everhomes.rest.quality.GroupUserDTO</li>
  *  <li>standardDescription: 标准内容</li>
  *  <li>categoryId: 类型id</li>
  *  <li>categoryDescription: 规范内容</li>
  *  <li>manualFlag : 是否手动添加 0：自动生成，1：手动添加</li>
+ *  <li>creatorUid : 创建者uid</li>
+ *  <li>creatorName : 创建者姓名</li>
+ *  <li>createTime : 创建时间</li>
  * </ul>
  */
 public class QualityInspectionTaskDTO {
@@ -59,15 +67,25 @@ public class QualityInspectionTaskDTO {
 	
 	private Long ownerId;
 	
+	private String targetType;
+	
+	private Long targetId;
+
+	private String targetName;
+	
 	private String taskName;
 	
 	private String taskNumber;
 	
+	private String executiveGroupName;
+
 	private String groupName;
-	
+
 	private String categoryName;
 	
 	private Long executiveGroupId;
+	
+	private Long executivePositionId;
 	
 	private Long executorId;
 	
@@ -107,9 +125,15 @@ public class QualityInspectionTaskDTO {
 	
 	private Long manualFlag;
 	
+	private Long creatorUid;
+	
+	private String creatorName;
+	
 	private String standardDescription;
 	
 	private String categoryDescription;
+	
+	private Timestamp createTime;
 
 	public Long getId() {
 		return id;
@@ -181,6 +205,30 @@ public class QualityInspectionTaskDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	public String getTaskName() {
@@ -311,6 +359,14 @@ public class QualityInspectionTaskDTO {
 		this.executiveGroupId = executiveGroupId;
 	}
 
+	public Long getExecutivePositionId() {
+		return executivePositionId;
+	}
+
+	public void setExecutivePositionId(Long executivePositionId) {
+		this.executivePositionId = executivePositionId;
+	}
+
 	public List<GroupUserDTO> getGroupUsers() {
 		return groupUsers;
 	}
@@ -357,6 +413,38 @@ public class QualityInspectionTaskDTO {
 
 	public void setCategoryDescription(String categoryDescription) {
 		this.categoryDescription = categoryDescription;
+	}
+
+	public Long getCreatorUid() {
+		return creatorUid;
+	}
+
+	public void setCreatorUid(Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public String getCreatorName() {
+		return creatorName;
+	}
+
+	public void setCreatorName(String creatorName) {
+		this.creatorName = creatorName;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getExecutiveGroupName() {
+		return executiveGroupName;
+	}
+
+	public void setExecutiveGroupName(String executiveGroupName) {
+		this.executiveGroupName = executiveGroupName;
 	}
 
 	@Override

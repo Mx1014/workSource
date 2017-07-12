@@ -11,13 +11,33 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateOrganizationAdminCommand {
+
+	private String ownerType;
+
+	private Long ownerId;
 	
 	private Long organizationId;
 	
 	private String contactToken;
 	
 	private String contactName;
-	
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
 	public Long getOrganizationId() {
 		return organizationId;
 	}

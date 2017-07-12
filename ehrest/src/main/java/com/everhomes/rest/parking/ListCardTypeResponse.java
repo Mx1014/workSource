@@ -6,14 +6,14 @@ import com.everhomes.discover.ItemType;
 
 public class ListCardTypeResponse {
 	
-	@ItemType(value = String.class)
-	private List<String> cardTypes;
+	@ItemType(value = ParkingCardType.class)
+	private List<ParkingCardType> cardTypes;
 
-	public List<String> getCardTypes() {
+	public List<ParkingCardType> getCardTypes() {
 		return cardTypes;
 	}
 
-	public void setCardTypes(List<String> cardTypes) {
+	public void setCardTypes(List<ParkingCardType> cardTypes) {
 		this.cardTypes = cardTypes;
 	}
  

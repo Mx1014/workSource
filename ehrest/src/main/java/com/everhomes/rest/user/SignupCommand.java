@@ -10,10 +10,11 @@ import com.everhomes.util.StringHelper;
  * @author elians
  *<ul>
  *<li>type:标识类型,email或者mobile</li>
- *<li>identifierToken:手机号或者邮箱</li>
+ *<li>token:手机号或者邮箱</li>
  *<li>ifExistsThenOverride:如果identifier已经存在是否进行覆盖</li>
  *<li>channel_id:渠道</li>
  *<li>namespaceId:名字空间ID</li>
+ * <li>regionCode:区号</li>
  *<ul>
  */
 public class SignupCommand {
@@ -25,8 +26,10 @@ public class SignupCommand {
     private String token;
     
     private Long channel_id;
-    
-    
+
+    @NotNull
+    private Integer regionCode;
+
     private Integer ifExistsThenOverride;
     
     private Integer namespaceId;
@@ -40,6 +43,14 @@ public class SignupCommand {
 	}
 
 	public SignupCommand() {
+    }
+
+    public Integer getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(Integer regionCode) {
+        this.regionCode = regionCode;
     }
 
     public String getType() {

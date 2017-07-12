@@ -86,6 +86,7 @@ func serveImageUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
 	obj := &ObjectInfo{ObjType: "image", Format: "jpeg", Meta: make(map[string]string)}
+	obj.Meta["X-Forwarded-Scheme"] = r.Header.Get("X-Forwarded-Scheme")
 	rsp, errcode, err := s.auth.Creating(s, r, obj)
 	if err != nil {
 		return errcode, err
@@ -107,6 +108,7 @@ func serveImageUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 		return 500, err
 	}
 
+	totalSize := len(data)
 	s.context.Logger.Info("serve image data:%d", len(data))
 
 	info, err := s.imageStorage.InfoImageFromData(data)
@@ -124,6 +126,7 @@ func serveImageUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 	//Now the field of Md5 is a key from image storage
 	obj.Md5 = md5
 	obj.Filename = header.Filename
+	obj.TotalSize = totalSize
 	rsp, errcode, err = s.auth.Created(s, obj)
 	if err != nil {
 		return errcode, err
@@ -307,6 +310,7 @@ func serveImageGet(s *ServerHttpd, writer http.ResponseWriter, r *http.Request) 
 	}
 
 	obj := &ObjectInfo{ObjType: "image", ObjId: id, Format: request.Format, Meta: make(map[string]string)}
+	obj.Meta["X-Forwarded-Scheme"] = r.Header.Get("X-Forwarded-Scheme")
 	rsp, errcode, err := s.auth.Lookup(s, r, obj)
 	if err != nil {
 		return errcode, err
@@ -426,6 +430,7 @@ func serveAudioUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 	}
 
 	obj := &ObjectInfo{ObjType: "audio", Format: format, Meta: make(map[string]string)}
+	obj.Meta["X-Forwarded-Scheme"] = r.Header.Get("X-Forwarded-Scheme")
 	rsp, errcode, err := s.auth.Creating(s, r, obj)
 	if err != nil {
 		return errcode, err
@@ -447,6 +452,7 @@ func serveAudioUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 		return 500, err
 	}
 
+	totalSize := len(data)
 	data_md5 := gen_md5_str(data)
 	md5, err := s.audioStorage.SaveAudio(data_md5, data, format)
 	if err != nil {
@@ -459,6 +465,7 @@ func serveAudioUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 	}
 
 	obj.Md5 = md5
+	obj.TotalSize = totalSize
 	rsp, errcode, err = s.auth.Created(s, obj)
 	if err != nil {
 		return errcode, err
@@ -484,6 +491,7 @@ func serveAudioGet(s *ServerHttpd, writer http.ResponseWriter, r *http.Request) 
 	}
 
 	obj := &ObjectInfo{ObjType: "audio", ObjId: id, Format: f, Meta: make(map[string]string)}
+	obj.Meta["X-Forwarded-Scheme"] = r.Header.Get("X-Forwarded-Scheme")
 	rsp, errcode, err := s.auth.Lookup(s, r, obj)
 	if err != nil {
 		return errcode, err
@@ -734,6 +742,7 @@ func serveFileUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (in
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
 	obj := &ObjectInfo{ObjType: "file", Format: "", Meta: make(map[string]string)}
+	obj.Meta["X-Forwarded-Scheme"] = r.Header.Get("X-Forwarded-Scheme")
 	rsp, errcode, err := s.auth.Creating(s, r, obj)
 	if err != nil {
 		return errcode, err
@@ -755,11 +764,15 @@ func serveFileUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (in
 		return 500, err
 	}
 
+	totalSize := len(data)
 	md5 := gen_md5_str(data)
 	meta := make(map[string]string)
 	meta["filename"] = header.Filename
+	meta["X-Forwarded-Scheme"] = r.Header.Get("X-Forwarded-Scheme")
+	obj.Filename = header.Filename
 	obj.Format = filepath.Ext(header.Filename)
 	obj.Md5, err = s.fileStorage.SaveFile(md5, data, len(data), len(data), meta)
+	obj.TotalSize = totalSize
 	if err != nil {
 		return http.StatusForbidden, err
 	}
@@ -782,6 +795,7 @@ func serveFileGet(s *ServerHttpd, writer http.ResponseWriter, r *http.Request) (
 	}
 
 	obj := &ObjectInfo{ObjType: "file", ObjId: id, Meta: make(map[string]string)}
+	obj.Meta["X-Forwarded-Scheme"] = r.Header.Get("X-Forwarded-Scheme")
 	rsp, errcode, err := s.auth.Lookup(s, r, obj)
 	if err != nil {
 		return errcode, err
@@ -884,6 +898,6 @@ func StartServer(c *ServerContext) {
 	//Now load image config
 	c.LoadImageConfig()
 
-	c.Logger.Info("server version: 3.8.2\n start run :  %s", addr)
+	c.Logger.Info("server version: 4.1.2\n start run :  %s", addr)
 	http.ListenAndServe(addr, router)
 }

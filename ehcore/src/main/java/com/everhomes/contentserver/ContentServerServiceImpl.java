@@ -1,19 +1,16 @@
 package com.everhomes.contentserver;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.contentserver.*;
+import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.messaging.ImageBody;
+import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.WebTokenGenerator;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -31,23 +28,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.entity.EntityType;
-import com.everhomes.rest.contentserver.AddConfigItemCommand;
-import com.everhomes.rest.contentserver.AddContentServerCommand;
-import com.everhomes.rest.contentserver.ContentServerDTO;
-import com.everhomes.rest.contentserver.ContentServerErrorCode;
-import com.everhomes.rest.contentserver.UpdateContentServerCommand;
-import com.everhomes.rest.contentserver.UploadCsFileResponse;
-import com.everhomes.rest.contentserver.WebSocketConstant;
-import com.everhomes.rest.messaging.ImageBody;
-import com.everhomes.rest.rpc.PduFrame;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
-import com.google.gson.Gson;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class ContentServerServiceImpl implements ContentServerService {
@@ -61,6 +49,9 @@ public class ContentServerServiceImpl implements ContentServerService {
     private ContentServerProvider contentServerProvider;
     
     private CloseableHttpClient httpClient;
+
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
     
     @PostConstruct
     protected void init() {
@@ -195,6 +186,17 @@ public class ContentServerServiceImpl implements ContentServerService {
             token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         return parserSingleUri(uri, cache, ownerType, ownerId, token);
     }
+    
+    @Override
+    public String parserUri(String uri) {
+    	if (uri != null && !uri.isEmpty()) {
+			try {
+				return parserUri(uri, null, null);
+			} catch (Exception e) {
+			}
+		}
+    	return null;
+    }
 
     private Map<Long, ContentServer> getServersHash() {
         List<ContentServer> servers = contentServerProvider.listContentServers();
@@ -210,10 +212,11 @@ public class ContentServerServiceImpl implements ContentServerService {
         if(StringUtils.isEmpty(uri)){
             return null;
         }
-        
+
+        //added by Janson if UserContext.current().getScheme() == null 
         // 如果uri本身已经是以http开头的完整链接，则不需要解释，直接返回（方便用一些测试链接）  by lqs 20160715
         uri = uri.trim();
-        if(uri.startsWith("http")) {
+        if(uri.startsWith(HTTP) || uri.startsWith(HTTPS)) {
             return uri;
         }
         
@@ -271,12 +274,18 @@ public class ContentServerServiceImpl implements ContentServerService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to parse the width and height of resources, owenerType=" + ownerType 
+            LOGGER.error("Failed to parse the width and height of resources, owenerType=" + ownerType
                 + ", ownerId=" + ownerId + ", metaData=" + metaData + ", uri=" + uri, e);
         }
-        
-        return String.format("http://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
-                cache.get(serverId).getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId,
+
+        // https 默认端口443 by sfyan 20161226
+        Integer port = cache.get(serverId).getPublicPort();
+        if(getScheme(port).equals(HTTPS)){
+            port = 443;
+        }
+
+        return String.format("%s://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
+                getScheme(port), cache.get(serverId).getPublicAddress(), port, uri, ownerType, ownerId,
                 token, width, height);
     }
 
@@ -341,12 +350,58 @@ public class ContentServerServiceImpl implements ContentServerService {
 		
 		return imageBody;
     }
-    
+
+    private String getScheme(){
+        return getScheme(null);
+    }
+
+    private String getScheme(Integer port){
+        //当后台执行任务的时候UserContext.current().getScheme() 为null，则需要根据数据库content server的配置来确定scheme  by sfyan 20170221
+        if(null == UserContext.current().getScheme()){
+            if(null == port){
+                try {
+                    ContentServer server = selectContentServer();
+                    port = server.getPublicPort();
+
+                } catch (Exception e) {
+                    LOGGER.error("Get scheme. Failed to find content server", e);
+                    return null;
+                }
+            }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("getScheme using port = {}", port);
+            }
+            if(80 == port || 443 == port){
+                return HTTPS;
+            }else{
+                return HTTP;
+            }
+        }else{
+            return UserContext.current().getScheme();
+        }
+    }
+
     @Override
     public String getContentServer(){
         try {
             ContentServer server = selectContentServer();
-            return String.format("%s:%d",server.getPublicAddress(),server.getPublicPort());
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("selectContentServer public address is: {}, public port is: {}", server.getPublicPort(), server.getPublicAddress());
+                LOGGER.debug("current scheme is: {}", UserContext.current().getScheme());
+            }
+
+            // https 默认端口443 by sfyan 20161226
+            Integer port = server.getPublicPort();
+
+            String scheme = getScheme(port);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("getContentServer getScheme schema = {}", scheme);
+            }
+            if(scheme.equals(HTTPS)){
+                port = 443;
+            }
+            return String.format("%s:%d",server.getPublicAddress(),port);
         } catch (Exception e) {
             LOGGER.error("Failed to find content server", e);
             return null;
@@ -375,6 +430,16 @@ public class ContentServerServiceImpl implements ContentServerService {
                 LOGGER.error("Failed to upload file, contentType={}, fileName={}, orgFileName={}", 
                     file.getContentType(), file.getName(), file.getOriginalFilename(), e);
             } finally {
+//                Long size = file.getSize();
+//                if(size < 1000) {
+//                    csFileResponse.setSize(size + "B");
+//                } else if(size > 1024 && size < 1024*1024) {
+//                    csFileResponse.setSize(size/1024.0 + "KB");
+//                } else if(size > 1024*1024 && size < 1024*1024*1024) {
+//                    csFileResponse.setSize(size/(1024.0*1024) + "MB");
+//                } else if(size > 1024*1024*1024) {
+//                    csFileResponse.setSize(size/(1024.0*1024*1024) + "GB");
+//                }
                 if(fileStream != null) {
                     try {
                         fileStream.close();
@@ -398,7 +463,9 @@ public class ContentServerServiceImpl implements ContentServerService {
         
         // 通过文件后缀确定Content server中定义的媒体类型
         String mediaType = ContentMediaHelper.getContentMediaType(fileSuffix);
-        String url = String.format("http://%s/upload/%s?token=%s", contentServerUri, mediaType, token);
+
+        // https 默认端口443 by sfyan 20161226
+        String url = String.format("%s://%s/upload/%s?token=%s",getScheme(), contentServerUri, mediaType, token);
         HttpPost httpPost = new HttpPost(url);
         
         CloseableHttpResponse response = null;

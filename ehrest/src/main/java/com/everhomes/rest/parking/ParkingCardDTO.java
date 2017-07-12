@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>cardNumber: 卡号</li>
  * <li>startTime: 开始时间</li>
  * <li>endTime: 到期时间</li>
+ * <li>freeAmount: 免费金额</li>
+ * <li>isSupportOnlinePaid: 是否支持线上支付</li>
  * </ul>
  */
 public class ParkingCardDTO {
@@ -25,12 +27,16 @@ public class ParkingCardDTO {
 	private String plateNumber;
 	private String plateOwnerName;
 	private String plateOwnerPhone;
+	private String cardTypeId;
 	private String cardType;
 	private String cardNumber;
 	private String cardName;
 	private Long startTime;
 	private Long endTime;
-	private boolean isValid;
+	private Boolean isValid;
+	
+    private String freeAmount;
+    private Byte isSupportOnlinePaid;
 	
 	public ParkingCardDTO() {
 	    
@@ -121,11 +127,11 @@ public class ParkingCardDTO {
         return StringHelper.toJsonString(this);
     }
 
-	public boolean getIsValid() {
+	public Boolean getIsValid() {
 		return isValid;
 	}
 
-	public void setIsValid(boolean isValid) {
+	public void setIsValid(Boolean isValid) {
 		this.isValid = isValid;
 	}
 
@@ -144,4 +150,29 @@ public class ParkingCardDTO {
 	public void setCardName(String cardName) {
 		this.cardName = cardName;
 	}
+
+	public String getCardTypeId() {
+		return cardTypeId;
+	}
+
+	public void setCardTypeId(String cardTypeId) {
+		this.cardTypeId = cardTypeId;
+	}
+
+	public String getFreeAmount() {
+		return freeAmount;
+	}
+
+	public void setFreeAmount(String freeAmount) {
+		this.freeAmount = freeAmount;
+	}
+
+	public Byte getIsSupportOnlinePaid() {
+		return isSupportOnlinePaid;
+	}
+
+	public void setIsSupportOnlinePaid(Byte isSupportOnlinePaid) {
+		this.isSupportOnlinePaid = isSupportOnlinePaid;
+	}
+
 }

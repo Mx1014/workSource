@@ -30,9 +30,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.ModelAndView;
+//import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+//import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
+import com.everhomes.activity.ActivityService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -51,6 +54,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.ItemType;
 import com.everhomes.discover.RestMethod;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.RestResponse;
@@ -91,6 +95,8 @@ import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+//import com.everhomes.util.ConsoleOutputFilter;
+//import com.everhomes.util.ConsoleOutputListener;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.FileHelper;
 import com.everhomes.util.ReflectionHelper;
@@ -140,6 +146,9 @@ public class AdminController extends ControllerBase {
     @Autowired
     private AppProvider appProvider;
     
+    @Autowired
+    private ActivityService activityService;
+    
     @Value("#{T(java.util.Arrays).asList('${source.jars}')}")
     private List<String> jars;
     
@@ -169,6 +178,9 @@ public class AdminController extends ControllerBase {
 
     @Value("${objc.response.base}")
     private String restResponseBase;    
+    
+    @Value("${javadoc.root}")
+    private String javadocRoot;
 
     @Autowired
     private UserProvider userProvider;
@@ -261,7 +273,7 @@ public class AdminController extends ControllerBase {
             });
     
             // generator controller API response objects
-            List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
+            List<RestMethod> apiMethods = ControllerBase.getRestMethodList(javadocRoot, "core");
             for(RestMethod restMethod: apiMethods)
                 generator.generateControllerPojos(restMethod, context);
             
@@ -281,7 +293,7 @@ public class AdminController extends ControllerBase {
             JavaGenerator generator = new JavaGenerator();
 
             // generator controller API response objects
-            List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
+            List<RestMethod> apiMethods = ControllerBase.getRestMethodList(javadocRoot, "core");
             for (RestMethod restMethod : apiMethods)
                 generator.generateControllerPojos(restMethod, context);
             
@@ -883,4 +895,50 @@ public class AdminController extends ControllerBase {
         
         return response;
     }
+    
+    @RequestMapping("warningActivity")
+    @RestReturn(String.class)
+    public RestResponse warningActivity(){
+    	activityService.activityWarningSchedule();
+    	return new RestResponse();
+    }
+    
+//    @RequestMapping(value="sseConsole")
+//    public ResponseBodyEmitter sseConsole() {
+//        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+//                UserContext.current().getUser().getId(), Privilege.Visible, null)) {
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+//        }
+//        
+//        SseEmitter emitter = new ConsoleOutputSseEmitter(Long.MAX_VALUE);
+//        return emitter;
+//    }
+    
+//    private static class ConsoleOutputSseEmitter extends SseEmitter implements ConsoleOutputListener {
+//        public ConsoleOutputSseEmitter(Long timeout) {
+//            super(timeout);
+//            ConsoleOutputFilter.subscribe(this);
+//        }
+//        
+//        @Override
+//        public void onConsoleOutput(String output) {
+//            try {
+//                send(SseEmitter.event().name("SSE.Console").data(output));
+//            } catch (Throwable e) {
+//                ConsoleOutputFilter.unsubscribe(this);
+//                complete();
+//            }
+//        }
+//    }
+    
+    @RequestMapping("testSendMail")
+    @RestReturn(String.class)
+    @RequireAuthentication(false)
+    public RestResponse testSendMail(@RequestParam("toMail") String toMail){
+    	String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+        handler.sendMail(0, null, toMail, "the mail subject", "the mail body");
+    	return new RestResponse();
+    }
+    
 }

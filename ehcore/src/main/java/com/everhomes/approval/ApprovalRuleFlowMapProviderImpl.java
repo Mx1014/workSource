@@ -143,4 +143,12 @@ public class ApprovalRuleFlowMapProviderImpl implements ApprovalRuleFlowMapProvi
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public List<ApprovalRuleFlowMap> listRuleFlowMapsByRuleId(Long ruleId) {
+		return getReadOnlyContext().select().from(Tables.EH_APPROVAL_RULE_FLOW_MAP)
+				.where(Tables.EH_APPROVAL_RULE_FLOW_MAP.RULE_ID.eq(ruleId))
+				.orderBy(Tables.EH_APPROVAL_RULE_FLOW_MAP.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ApprovalRuleFlowMap.class));
+	}
 }

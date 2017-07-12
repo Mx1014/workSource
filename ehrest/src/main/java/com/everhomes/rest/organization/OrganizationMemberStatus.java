@@ -2,7 +2,7 @@ package com.everhomes.rest.organization;
 
 
 public enum OrganizationMemberStatus {
-	INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), WAITING_FOR_ACCEPTANCE((byte)2),  ACTIVE((byte)3);
+	INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), WAITING_FOR_ACCEPTANCE((byte)2),  ACTIVE((byte)3), REJECT((byte)4);
     
     private byte code;
     private OrganizationMemberStatus(byte code) {

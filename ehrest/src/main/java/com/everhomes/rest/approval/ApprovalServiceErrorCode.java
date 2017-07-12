@@ -28,8 +28,11 @@ public interface ApprovalServiceErrorCode {
 	
 	int APPROVE_OR_REJECT_EMPTY_REASON = 10019;  //请输入驳回理由
 	int APPROVE_OR_REJECT_EMPTY_REQUEST = 10020;  //请选择需要审批的申请单
-	
+
 	int CATEGORY_NAME_LENGTH_GREATER_EIGHT = 10021;  //类型名称不能超过8字
 	
+	int EFFECTIVE_DATE_HAS_REQUEST = 10022;  //所选日期已提交过加班申请，请重新选择
+	
+	int APPROVAL_LEVEL_APPROVED = 10023;  //申请单已经被审批
 	
 }

@@ -2,6 +2,7 @@
 package com.everhomes.user;
 
 import com.everhomes.app.App;
+import com.everhomes.domain.Domain;
 import com.everhomes.namespace.Namespace;
 
 public class UserContext {
@@ -11,7 +12,11 @@ public class UserContext {
     private UserLogin login;
     private App callerApp;
     private Integer namespaceId;
-    
+    private String version;
+    private String versionRealm;
+    private String scheme;
+    private Domain domain;
+
     public UserContext() {
     }
     
@@ -60,19 +65,45 @@ public class UserContext {
 		this.namespaceId = namespaceId;
 	}
 	
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
 	public static Integer getCurrentNamespaceId() {
 	    return getCurrentNamespaceId(null);
 	}
 	
+	public static void setCurrentNamespaceId(Integer namespaceId) {
+		current().setNamespaceId(namespaceId);
+	}
+	
+	public static void setCurrentUser(User user) {
+		current().setUser(user);
+	}
+
+	public static Long currentUserId() {
+        User user = current().getUser();
+        return user != null ? user.getId() : null;
+    }
+
 	public static Integer getCurrentNamespaceId(Integer namespaceId){
 		UserContext context = s_userContexts.get();
 		
-		if(context == null || context.getUser() == null) {
+		if(context == null) {
 			return null == namespaceId ? Namespace.DEFAULT_NAMESPACE : namespaceId;
         }
 		
+		//added by janson 如果预先设置了域空间，则优先用 context 里面的域空间
 		if(null == namespaceId || Namespace.DEFAULT_NAMESPACE == namespaceId){
 			namespaceId = context.namespaceId;
+		}
+		
+		if(context.getUser() == null) {
+			return null == namespaceId ? Namespace.DEFAULT_NAMESPACE : namespaceId;
 		}
 		
 		if(null == namespaceId || Namespace.DEFAULT_NAMESPACE == namespaceId){
@@ -87,4 +118,27 @@ public class UserContext {
 		
 	}
 
+    public String getVersionRealm() {
+        return versionRealm;
+    }
+
+    public void setVersionRealm(String versionRealm) {
+        this.versionRealm = versionRealm;
+    }
+
+    public String getScheme() {
+        return scheme;
+    }
+
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
+    }
+
+    public Domain getDomain() {
+        return domain;
+    }
+
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
 }

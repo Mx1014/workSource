@@ -4,12 +4,14 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 
 /**
  * 
  * 楼栋信息
  * <ul>
  *  <li>id:楼栋id</li>
+ *  <li>namespaceId: 域空间id</li>
  *  <li>communityId:楼栋所属园区or小区id</li>
  *  <li>name:楼栋名</li>
  *  <li>aliasName:楼栋别名</li>
@@ -41,6 +43,8 @@ import com.everhomes.discover.ItemType;
 public class BuildingDTO {
 
 	private Long id; 
+
+    private Integer namespaceId;
 	
 	private Long communityId;
 	
@@ -51,9 +55,13 @@ public class BuildingDTO {
 	private String aliasName;
 	
 	private Long managerUid;
-	
+
+	private String managerName;
+
 	private String managerNickName;
     
+	private String managerContact;
+	
     private String managerAvatar;
     
     private String managerAvatarUrl;
@@ -93,10 +101,70 @@ public class BuildingDTO {
 	
 	private Timestamp createTime;
 	
-	
+	private String detailUrl;
+
+	private String floorCount;
+	private String trafficDescription;
+	private String liftDescription;
+	private String pmDescription;
+	private String parkingLotDescription;
+	private String environmentalDescription;
+	private String powerDescription;
+	private String telecommunicationDescription;
+	private String airConditionDescription;
+	private String securityDescription;
+	private String fireControlDescription;
 	
 	@ItemType(BuildingAttachmentDTO.class)
 	private List<BuildingAttachmentDTO> attachments;
+
+	@ItemType(PostApprovalFormItem.class)
+	private List<PostApprovalFormItem> formValues;
+
+	private Long generalFormId;
+	private Byte customFormFlag;
+
+	private Long requestFormId;
+
+	public Long getRequestFormId() {
+		return requestFormId;
+	}
+
+	public void setRequestFormId(Long requestFormId) {
+		this.requestFormId = requestFormId;
+	}
+
+	public Long getGeneralFormId() {
+		return generalFormId;
+	}
+
+	public void setGeneralFormId(Long generalFormId) {
+		this.generalFormId = generalFormId;
+	}
+
+	public Byte getCustomFormFlag() {
+		return customFormFlag;
+	}
+
+	public void setCustomFormFlag(Byte customFormFlag) {
+		this.customFormFlag = customFormFlag;
+	}
+
+	public List<PostApprovalFormItem> getFormValues() {
+		return formValues;
+	}
+
+	public void setFormValues(List<PostApprovalFormItem> formValues) {
+		this.formValues = formValues;
+	}
+
+	public String getDetailUrl() {
+		return detailUrl;
+	}
+
+	public void setDetailUrl(String detailUrl) {
+		this.detailUrl = detailUrl;
+	}
 
 	public String getOperateNickName() {
 		return operateNickName;
@@ -130,7 +198,15 @@ public class BuildingDTO {
 		this.id = id;
 	}
 
-	public Long getCommunityId() {
+	public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
 		return communityId;
 	}
 
@@ -145,8 +221,6 @@ public class BuildingDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	
 	
 	public String getBuildingName() {
 		return buildingName;
@@ -323,6 +397,108 @@ public class BuildingDTO {
 	public void setPosterUrl(String posterUrl) {
 		this.posterUrl = posterUrl;
 	}
-	
-	
+
+	public String getManagerContact() {
+		return managerContact;
+	}
+
+	public void setManagerContact(String managerContact) {
+		this.managerContact = managerContact;
+	}
+
+	public String getTrafficDescription() {
+		return trafficDescription;
+	}
+
+	public void setTrafficDescription(String trafficDescription) {
+		this.trafficDescription = trafficDescription;
+	}
+
+	public String getLiftDescription() {
+		return liftDescription;
+	}
+
+	public void setLiftDescription(String liftDescription) {
+		this.liftDescription = liftDescription;
+	}
+
+	public String getPmDescription() {
+		return pmDescription;
+	}
+
+	public void setPmDescription(String pmDescription) {
+		this.pmDescription = pmDescription;
+	}
+
+	public String getParkingLotDescription() {
+		return parkingLotDescription;
+	}
+
+	public void setParkingLotDescription(String parkingLotDescription) {
+		this.parkingLotDescription = parkingLotDescription;
+	}
+
+	public String getEnvironmentalDescription() {
+		return environmentalDescription;
+	}
+
+	public void setEnvironmentalDescription(String environmentalDescription) {
+		this.environmentalDescription = environmentalDescription;
+	}
+
+	public String getPowerDescription() {
+		return powerDescription;
+	}
+
+	public void setPowerDescription(String powerDescription) {
+		this.powerDescription = powerDescription;
+	}
+
+	public String getTelecommunicationDescription() {
+		return telecommunicationDescription;
+	}
+
+	public void setTelecommunicationDescription(String telecommunicationDescription) {
+		this.telecommunicationDescription = telecommunicationDescription;
+	}
+
+	public String getAirConditionDescription() {
+		return airConditionDescription;
+	}
+
+	public void setAirConditionDescription(String airConditionDescription) {
+		this.airConditionDescription = airConditionDescription;
+	}
+
+	public String getSecurityDescription() {
+		return securityDescription;
+	}
+
+	public void setSecurityDescription(String securityDescription) {
+		this.securityDescription = securityDescription;
+	}
+
+	public String getFireControlDescription() {
+		return fireControlDescription;
+	}
+
+	public void setFireControlDescription(String fireControlDescription) {
+		this.fireControlDescription = fireControlDescription;
+	}
+
+	public String getFloorCount() {
+		return floorCount;
+	}
+
+	public void setFloorCount(String floorCount) {
+		this.floorCount = floorCount;
+	}
+
+	public String getManagerName() {
+		return managerName;
+	}
+
+	public void setManagerName(String managerName) {
+		this.managerName = managerName;
+	}
 }

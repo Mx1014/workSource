@@ -117,6 +117,10 @@ public class UserLogin implements Serializable {
         return this.status;
     }
     
+    /**
+     * 注意这个函数会导致 loginInstanceNumber
+     * @param status
+     */
     public void setStatus(UserLoginStatus status) {
         this.status = status;
         

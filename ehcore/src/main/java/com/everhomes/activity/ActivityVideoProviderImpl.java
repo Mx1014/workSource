@@ -141,6 +141,29 @@ public class ActivityVideoProviderImpl implements ActivityVideoProvider {
         return null;
     }
 
+    @Override
+    public ActivityVideo getActivityVideoByVid(String vid) {
+        ListingLocator locator = new ListingLocator();
+        List<ActivityVideo> videos = this.queryActivityVideos(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ACTIVITY_VIDEO.VIDEO_SID.eq(vid));
+                query.addConditions(Tables.EH_ACTIVITY_VIDEO.VIDEO_STATE.ne(VideoState.INVALID.getCode()));
+                query.addOrderBy(Tables.EH_ACTIVITY_VIDEO.ID.desc());
+                return query;
+            }
+
+        });
+
+        if(videos != null && videos.size() > 0) {
+            return videos.get(0);
+        }
+
+        return null;
+    }
+
     private void prepareObj(ActivityVideo obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));

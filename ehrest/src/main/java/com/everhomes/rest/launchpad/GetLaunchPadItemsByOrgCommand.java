@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>siteUri: 链接</li>
  * 	<li>namespaceId: 域空间</li>
  * 	<li>sceneType: 场景类型，{@link com.everhomes.rest.ui.user.SceneType}</li>
+ * 	<li>categryId: item类别</li>
  * </ul>
  */
 public class GetLaunchPadItemsByOrgCommand {
@@ -29,6 +30,8 @@ public class GetLaunchPadItemsByOrgCommand {
     private Integer namespaceId;
     
     private String sceneType;
+
+    private Long categryId;
 
     public GetLaunchPadItemsByOrgCommand() {
     }
@@ -75,6 +78,14 @@ public class GetLaunchPadItemsByOrgCommand {
     
     public String getCurrentSceneType() {
         return (sceneType == null) ? SceneType.DEFAULT.getCode() : sceneType;
+    }
+
+    public Long getCategryId() {
+        return categryId;
+    }
+
+    public void setCategryId(Long categryId) {
+        this.categryId = categryId;
     }
 
     @Override

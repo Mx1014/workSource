@@ -1,6 +1,7 @@
 package com.everhomes.launchpad;
 
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
@@ -20,6 +21,7 @@ public interface LaunchPadProvider {
     void updateLaunchPadLayout(LaunchPadLayout launchPadLayout);
     LaunchPadLayout findLaunchPadLayoutById(long id);
     List<LaunchPadItem> getLaunchPadItemsByKeyword(String keyword, int offset, int pageSize);
+    List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, Map<Byte, Long> scopeMap, String keyword, int offset, int pageSize);
 	List<LaunchPadLayoutDTO> listLaunchPadLayoutByKeyword(int pageSize, long offset, String keyword);
     List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,Byte scopeCode, long scopeId, Integer namesapceId);
     void deleteLaunchPadItemByTargetTypeAndTargetId(String targetType, long targetId);
@@ -31,4 +33,6 @@ public interface LaunchPadProvider {
 	UserLaunchPadItem getUserLaunchPadItemByOwner(Long userId, String sceneType, String ownerType, Long ownerId, Long itemId);
 	void updateUserLaunchPadItemById(UserLaunchPadItem userItem);
 	LaunchPadItem findLaunchPadItemByTargetAndScopeAndSence(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId, SceneType sceneType);
+    List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String sceneType);
+    void createItemServiceCategry(ItemServiceCategry itemServiceCategry);
 }

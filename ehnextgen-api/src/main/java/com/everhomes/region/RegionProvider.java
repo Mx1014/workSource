@@ -32,4 +32,8 @@ public interface RegionProvider {
 	Region findRegionByPath(String path);
 	Region findRegionByPath(Integer namespaceId, String path);
 	List<Region> listRegionByParentId(Integer namespaceId, Long parentId, RegionScope scope, RegionAdminStatus status);
+    void createRegionCode(RegionCodes regionCode);
+    void updateRegionCode(RegionCodes regionCode);
+    List<RegionCodes> listRegionCodes(String name, Integer code);
+    RegionCodes findRegionCodeById(Long id);
 }

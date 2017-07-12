@@ -31,8 +31,8 @@ public class ListOrganizationOwnerByCarTest extends BaseLoginAuthTestCase {
         assertTrue("The orgOwnerAddressDTOList size should be 1", response.getResponse().size() == 1);
 
         assertEquals("张三", response.getResponse().get(0).getContactName());
-        assertEquals("否", response.getResponse().get(0).getPrimaryFlag());
-        assertEquals("13800138000", response.getResponse().get(0).getContactToken());
+        assertEquals("是", response.getResponse().get(0).getPrimaryFlag());
+        assertEquals("12345678910", response.getResponse().get(0).getContactToken());
         assertEquals("业主", response.getResponse().get(0).getOrgOwnerType());
     }
 
@@ -48,10 +48,15 @@ public class ListOrganizationOwnerByCarTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-list-owner-car-data.txt";
+
+        /*userInfoFilePath = "data/json/customer-manage-list-owner-car-data.txt";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
         userInfoFilePath = "data/json/customer-manage-owner-type-data.txt";
+        filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
+        dbProvider.loadJsonFileToDatabase(filePath, false);*/
+
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

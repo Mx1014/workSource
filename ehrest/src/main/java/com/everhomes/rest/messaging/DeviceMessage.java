@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * 设备推送消息
@@ -32,6 +33,7 @@ public class DeviceMessage {
     private String action;
     private Long appId;
     private Integer badge;
+    private int priorigy;
     
     @ItemType(String.class)
     private Map<String, String> extra;
@@ -106,5 +108,16 @@ public class DeviceMessage {
     public void setBadge(Integer badge) {
         this.badge = badge;
     }
-    
+
+    public int getPriorigy() {
+        return priorigy;
+    }
+
+    public void setPriorigy(int priorigy) {
+        this.priorigy = priorigy;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

@@ -18,7 +18,7 @@ public class CmdUtil {
     private final static int SINGLE_PACKAGE_DATA_LENGTH = 18;
     private final static int MULTI_PACKAGE_HEAD_DATA_LENGTH = 16;
     private final static int MULTI_PACKAGE_OTHER_DATA_LENGTH = 19;
-    private final static int EXPIRE_TIME = 3600;
+    private final static int EXPIRE_TIME = (2*30*24*3600);//2 months
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdUtil.class);
 
@@ -100,6 +100,8 @@ public class CmdUtil {
             byte[] encryptData = RSAUtil.encryptByRawPublicKey(resultArray, pubKey);
             byte[] headArr = {cmd, ver};
             resultArray = DataUtil.mergeArray(headArr, encryptData);
+            
+            LOGGER.info(StringHelper.toHexString(resultArray));
 
             return resultArray;
         } catch (Exception e) {
@@ -156,7 +158,7 @@ public class CmdUtil {
     public static byte[] updateTime(byte[] curServerKey, byte ver) {
         byte cmd = 0x5;
         int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
-        int expireTime = curTime + EXPIRE_TIME;
+        int expireTime = curTime + 50*6*EXPIRE_TIME;//50 years
         byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
         byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
         byte[] dataArr = new byte[extTimeBytes.length + curTimeBytes.length];
@@ -173,6 +175,7 @@ public class CmdUtil {
             resultArr[1] = ver;
             System.arraycopy(aeskeyEncryptResult, 0, resultArr, 2, aeskeyEncryptResult.length);
             return resultArr;
+//            return aeskeyEncryptResult;
         } catch (Exception e) {
         }
         return null;
@@ -329,6 +332,23 @@ public class CmdUtil {
             return resultArr;
         } catch (Exception e) {
             LOGGER.error("wifiCmd()...", e);
+        }
+        return null;
+    }
+    
+    public static byte[] setServerKeyCmd(byte oldVer, byte[] oldServerKey, byte[] newServerKey) {
+        if (null != oldServerKey && null != newServerKey) {
+            byte cmd = 0x3;
+            try {
+                byte[] serverkeyEncryptPaddingResult = AESUtil.encrypt(newServerKey, oldServerKey);
+                byte[] resultArr = new byte[2 + serverkeyEncryptPaddingResult.length];
+                resultArr[0] = cmd;
+                resultArr[1] = oldVer;
+                System.arraycopy(serverkeyEncryptPaddingResult, 0, resultArr, 2, serverkeyEncryptPaddingResult.length);
+                return resultArr;
+            } catch (Exception e) {
+                LOGGER.error("setServerKeyCmd()..." + e.toString());
+            }
         }
         return null;
     }

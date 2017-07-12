@@ -75,7 +75,7 @@ public class PmsyController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /pmsy/listPmBills
+	 * <b>URL: /pmsy/listPmKeXingBills
 	 * <p>根据条件查询物业缴费单
 	 */
 	@RequestMapping(value="listPmBills",method = RequestMethod.POST)

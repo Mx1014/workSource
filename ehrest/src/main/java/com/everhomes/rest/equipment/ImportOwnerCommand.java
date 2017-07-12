@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
  *  <li>targetId: 所属管理处id</li>
  *  <li>targetType: 所属管理处类型</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
  * </ul>
  */
 public class ImportOwnerCommand {
@@ -22,6 +23,16 @@ public class ImportOwnerCommand {
 	private Long targetId;
 	
 	private String targetType;
+	
+	private Long inspectionCategoryId;
+	
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
+	}
 	
 	public Long getOwnerId() {
 		return ownerId;

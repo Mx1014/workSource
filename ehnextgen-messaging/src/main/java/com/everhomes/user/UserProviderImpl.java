@@ -1,37 +1,6 @@
 // @formatter:off
 package com.everhomes.user;
 
-import static com.everhomes.server.schema.Tables.EH_USERS;
-import static com.everhomes.server.schema.Tables.EH_USER_COMMUNITIES;
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectOffsetStep;
-import org.jooq.SelectOnConditionStep;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import com.everhomes.aclink.AclinkUser;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheProvider;
@@ -44,54 +13,45 @@ import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhUserCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhUserGroupsDao;
-import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
-import com.everhomes.server.schema.tables.daos.EhUserInvitationRosterDao;
-import com.everhomes.server.schema.tables.daos.EhUserInvitationsDao;
-import com.everhomes.server.schema.tables.daos.EhUserLikesDao;
-import com.everhomes.server.schema.tables.daos.EhUsersDao;
-import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
-import com.everhomes.server.schema.tables.pojos.EhUserGroups;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
-import com.everhomes.server.schema.tables.pojos.EhUserLikes;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
-import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import com.everhomes.util.MapReduceCallback;
+import com.everhomes.util.RecordHelper;
+import org.apache.commons.collections.CollectionUtils;
+import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.sql.Timestamp;
+import java.util.*;
 
 import static com.everhomes.server.schema.Tables.*;
 
@@ -159,6 +119,7 @@ public class UserProviderImpl implements UserProvider {
         if(user.getUuid() == null)
             user.setUuid(UUID.randomUUID().toString());
         user.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        user.setUpdateTime(user.getCreateTime());
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, id));
         EhUsersDao dao = new EhUsersDao(context.configuration());
@@ -175,6 +136,7 @@ public class UserProviderImpl implements UserProvider {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId().longValue()));
         EhUsersDao dao = new EhUsersDao(context.configuration());
+        user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(user);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
@@ -839,7 +801,13 @@ public class UserProviderImpl implements UserProvider {
 	@Override
 	public List<User> listUserByKeyword(String keyword, Integer namespaceId,
 			CrossShardListingLocator locator, int pageSize) {
-		
+		return listUserByKeyword(null, null, null, keyword, null, namespaceId, locator, pageSize);
+	}
+	
+	@Override
+	public List<User> listUserByKeyword(Integer isAuth, Byte gender, Long organizationId, String keyword, Byte executiveFlag,
+			Integer namespaceId, CrossShardListingLocator locator, int pageSize) {
+
 		List<User> list = new ArrayList<User>();
 		
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
@@ -849,13 +817,55 @@ public class UserProviderImpl implements UserProvider {
 				 cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like("%"+keyword+"%"));
 				 cond = cond.and(cond1);
 			}
+			if(executiveFlag != null){ 
+				cond = cond.and(Tables.EH_USERS.EXECUTIVE_TAG.eq(executiveFlag));
+			}
+
+            if(gender != null){
+                cond = cond.and(Tables.EH_USERS.GENDER.eq(gender));
+            }
 			 
 			if(locator.getAnchor() != null ) {
 				cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
 		    }
-            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
-            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
-            .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+
+            SelectOnConditionStep query = context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+
+            SelectQuery orgQuery = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+            byte orgQueryFlag = 0;
+
+            //查询认证用户，用左连接
+            if (null != isAuth && 0 != isAuth) {
+                if (1 == isAuth) {
+                    orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+                }else if (2 == isAuth){
+                    orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode())
+                            .or(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode())));
+
+                }
+                orgQueryFlag = 1;
+            }
+
+            //公司，用自然连接
+            if (null != organizationId) {
+
+                orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+                orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+                orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+                orgQueryFlag = 2;
+
+		    }
+
+            if (1 == orgQueryFlag) {
+                query.leftOuterJoin(orgQuery.asTable(Tables.EH_ORGANIZATION_MEMBERS.getName())).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+            }
+		    if (2 == orgQueryFlag) {
+                query.join(orgQuery.asTable(Tables.EH_ORGANIZATION_MEMBERS.getName())).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+
+            }
+
+            query.where(cond).groupBy(Tables.EH_USERS.ID).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
             .limit(pageSize)
             .fetch().map(r -> {
             	User user = ConvertHelper.convert(r,User.class);
@@ -866,6 +876,9 @@ public class UserProviderImpl implements UserProvider {
             	user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
             	user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
             	user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+            	user.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
+            	user.setPositionTag(r.getValue(Tables.EH_USERS.POSITION_TAG));
+            	user.setIdentityNumberTag(r.getValue(Tables.EH_USERS.IDENTITY_NUMBER_TAG));
             	list.add(user);
             	return null;
             });
@@ -880,6 +893,52 @@ public class UserProviderImpl implements UserProvider {
 		
 		return list;
 	}
+	
+	
+	   @Override
+	    public List<User> listUserByNamespace(String keyword, Integer namespaceId,
+	            CrossShardListingLocator locator, int pageSize) {
+	        
+	        List<User> list = new ArrayList<User>();
+	        
+	        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+	            Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
+	            if(!StringUtils.isEmpty(keyword)){
+	                 Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword);
+                    cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like(keyword + "%"));
+	                 cond = cond.and(cond1);
+	            }
+	             
+	            if(locator.getAnchor() != null ) {
+	                cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+	            }
+	            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+	            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
+	            .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+	            .limit(pageSize)
+	            .fetch().map(r -> {
+	                User user = ConvertHelper.convert(r,User.class);
+	                user.setNamespaceId(r.getValue(Tables.EH_USERS.NAMESPACE_ID));
+	                user.setId(r.getValue(Tables.EH_USERS.ID));
+	                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+	                user.setIdentifierToken(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+	                user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+	                user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
+	                user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+	                list.add(user);
+	                return null;
+	            });
+	            return true;
+	        });
+	        
+	        if(list.size() == pageSize) {
+	            locator.setAnchor(list.get(pageSize-1).getCreateTime().getTime());
+	        } else {
+	            locator.setAnchor(null);
+	        }
+	        
+	        return list;
+	    }
 	
 	/**
 	 * added by Janson
@@ -919,13 +978,18 @@ public class UserProviderImpl implements UserProvider {
                 if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() > 0) {
                         onQuery = onQuery.join(Tables.EH_DOOR_AUTH).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID));
                         cond = cond.and(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
-                                .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())));
+                                .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))
+                                .and(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorId()))
+                                .and(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte)1))
+                                );
                     }
                 
                 if(cmd.getIsOpenAuth() != null && cmd.getIsOpenAuth() <= 0) {
                     SelectQuery<Record1<Long>> subQuery = context.select(Tables.EH_USERS.ID).from(Tables.EH_DOOR_AUTH).join(Tables.EH_USERS).on(Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID))
                     .where(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
-                            .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))).getQuery();
+                            .and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()))
+                            .and(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte)1))
+                            ).getQuery();
                     
                     cond = cond.and(Tables.EH_USERS.ID.notIn(subQuery));
                 }
@@ -1285,5 +1349,150 @@ public class UserProviderImpl implements UserProvider {
         });
         
         return list;
+    }
+
+    /**
+     * 金地取数据使用
+     */
+	@Override
+	public List<User> listUserByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, Integer pageSize) {
+		//暂不考虑分库分表的问题，因为是按更新时间来取，比较麻烦
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+		Result<Record> result = context.select().from(Tables.EH_USERS)
+			.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_USERS.ID.gt(pageAnchor))
+			.and(Tables.EH_USERS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_USERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, User.class));
+		}
+		return new ArrayList<User>();
+	}
+
+    /**
+     * 金地取数据使用
+     */
+	@Override
+	public List<User> listUserByUpdateTime(Integer namespaceId, Long timestamp, Integer pageSize) {
+		//暂不考虑分库分表的问题，因为是按更新时间来取，比较麻烦
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+		Result<Record> result = context.select().from(Tables.EH_USERS)
+			.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_USERS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_USERS.UPDATE_TIME.asc(), Tables.EH_USERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, User.class));
+		}
+		return new ArrayList<User>();
+	}
+
+    /**
+     * 金地取数据使用
+     * 随便找一个用户所在的组织
+     */
+	@Override
+	public Organization findAnyUserRelatedOrganization(Long userId, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select(Tables.EH_ORGANIZATIONS.fields()).from(Tables.EH_ORGANIZATIONS)
+			.join(Tables.EH_ORGANIZATION_MEMBERS)
+			.on(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID))
+			.where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+			.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+			.and(Tables.EH_ORGANIZATIONS.LEVEL.eq(1))
+			.fetchAny();
+		
+		if (record != null) {
+			return RecordHelper.convert(record, Organization.class);
+		}
+		
+		return null;
+	}
+
+    @Override
+    public List<User> listUserByNickName(String keyword) {
+        long startTime = System.currentTimeMillis();
+        List<User> list = new ArrayList<User>();
+        if(keyword == null)
+            return null;
+
+        String str = "%"+keyword+"%";
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            context.select().from(Tables.EH_USERS)
+                    .where(Tables.EH_USERS.NICK_NAME.like(str))
+                    .fetch().map(r -> {
+                User user = ConvertHelper.convert(r,User.class);
+                user.setId(r.getValue(Tables.EH_USERS.ID));
+                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+                list.add(user);
+                return null;
+            });
+            return true;
+        });
+        long endTime = System.currentTimeMillis();
+        LOGGER.debug("listUserByNickName size = " + list.size() + ", elapse=" + (endTime - startTime));
+        return list;
+    }
+
+    @Override
+    public List<UserGroup> listUserActiveGroups(long uid, String groupDiscriminator) {
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+
+        if(groupDiscriminator != null) {
+            return context.select().from(Tables.EH_USER_GROUPS)
+                    .where(Tables.EH_USER_GROUPS.OWNER_UID.eq(uid))
+                    .and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(groupDiscriminator))
+                    .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq((GroupMemberStatus.ACTIVE.getCode())))
+                    .fetch().map((r)-> {
+                        return ConvertHelper.convert(r, UserGroup.class);
+                    });
+        } else {
+            return context.select().from(Tables.EH_USER_GROUPS)
+                    .where(Tables.EH_USER_GROUPS.OWNER_UID.eq(uid))
+                    .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq((GroupMemberStatus.ACTIVE.getCode())))
+                    .fetch().map((r)-> {
+                        return ConvertHelper.convert(r, UserGroup.class);
+                    });
+        }
+
+    }
+
+    @Override
+    public UserNotificationSetting findUserNotificationSetting(String ownerType, Long ownerId, String targetType, Long targetId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_USER_NOTIFICATION_SETTINGS)
+                .where(Tables.EH_USER_NOTIFICATION_SETTINGS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_USER_NOTIFICATION_SETTINGS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_USER_NOTIFICATION_SETTINGS.TARGET_TYPE.eq(targetType))
+                .and(Tables.EH_USER_NOTIFICATION_SETTINGS.TARGET_ID.eq(targetId))
+                .fetchAnyInto(UserNotificationSetting.class);
+    }
+
+    @Override
+    public void updateUserNotificationSetting(UserNotificationSetting setting) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserNotificationSettingsDao dao = new EhUserNotificationSettingsDao(context.configuration());
+        dao.update(setting);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserNotificationSettings.class, setting.getId());
+    }
+
+    @Override
+    public long createUserNotificationSetting(UserNotificationSetting setting) {
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserNotificationSettings.class));
+        setting.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserNotificationSettingsDao dao = new EhUserNotificationSettingsDao(context.configuration());
+        dao.insert(setting);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserNotificationSettings.class, id);
+        return id;
     }
 }

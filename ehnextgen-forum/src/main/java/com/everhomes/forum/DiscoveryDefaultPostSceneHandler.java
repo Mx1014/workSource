@@ -115,6 +115,7 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_nearby", "");
             filterDto.setAvatar(avatarUri);
             filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+            filterDto.setForumId(community.getDefaultForumId());
             filterList.add(filterDto);
 
             // 菜单：本小区

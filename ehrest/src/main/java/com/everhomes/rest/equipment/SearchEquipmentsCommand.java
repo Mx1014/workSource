@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
  * </ul>
  */
 public class SearchEquipmentsCommand {
@@ -43,6 +44,16 @@ public class SearchEquipmentsCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+	
+	private Long inspectionCategoryId;
+	
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
+	}
 
 	public Long getOwnerId() {
 		return ownerId;

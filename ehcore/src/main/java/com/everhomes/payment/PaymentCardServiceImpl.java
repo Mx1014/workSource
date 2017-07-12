@@ -804,10 +804,19 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     
     private Long createOrderNo() {
-		String bill = String.valueOf(System.currentTimeMillis()) + (int) (Math.random()*1000);
+		String bill = String.valueOf(System.currentTimeMillis()) + generateRandomNumber(3);
 		return Long.valueOf(bill);
 	}
-    
+
+	/**
+	 *
+	 * @param n 创建n位随机数
+	 * @return
+	 */
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
+	}
+
     private PaymentCard checkPaymentCard(Long cardId){
     	if(cardId == null){
     		LOGGER.error("card id can not be null.");

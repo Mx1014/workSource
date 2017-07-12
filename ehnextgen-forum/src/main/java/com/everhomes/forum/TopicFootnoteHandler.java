@@ -1,5 +1,8 @@
 package com.everhomes.forum;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.forum.PostDTO;
@@ -15,11 +18,18 @@ public class TopicFootnoteHandler implements ForumFootnoteHandler {
 	public String renderContentFootnote(ContentBriefDTO dto, PostDTO postDto) {
 
 		TopicFootnote fn = new TopicFootnote();
-		fn.setCreateTime(postDto.getCreateTime().toString());
-		fn.setCreatorNickName(postDto.getCreatorNickName());
+		if(postDto != null && postDto.getCreateTime() != null) {
+			fn.setCreateTime(timeToStr(postDto.getCreateTime()));
+			fn.setCreatorNickName(postDto.getCreatorNickName());
+		}
 		
 		dto.setFootnoteJson(StringHelper.toJsonString(fn));
 		return null;
+	}
+	
+	private String timeToStr(Timestamp time) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		return sdf.format(time);
 	}
 
 }

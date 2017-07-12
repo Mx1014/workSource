@@ -1,56 +1,10 @@
 package com.everhomes.aclink;
 
-import java.util.List;
-
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.aclink.AclinkConnectingCommand;
-import com.everhomes.rest.aclink.AclinkCreateDoorAuthListCommand;
-import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
-import com.everhomes.rest.aclink.AclinkFirmwareDTO;
-import com.everhomes.rest.aclink.AclinkLogCreateCommand;
-import com.everhomes.rest.aclink.AclinkLogDTO;
-import com.everhomes.rest.aclink.AclinkLogListResponse;
-import com.everhomes.rest.aclink.AclinkMgmtCommand;
-import com.everhomes.rest.aclink.AclinkQueryLogCommand;
-import com.everhomes.rest.aclink.AclinkQueryLogResponse;
-import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
-import com.everhomes.rest.aclink.AclinkUpgradeCommand;
-import com.everhomes.rest.aclink.AclinkUpgradeResponse;
-import com.everhomes.rest.aclink.AclinkUserResponse;
-import com.everhomes.rest.aclink.AclinkWebSocketMessage;
-import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
-import com.everhomes.rest.aclink.CreateDoorAccessGroup;
-import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
-import com.everhomes.rest.aclink.CreateDoorAuthByUser;
-import com.everhomes.rest.aclink.CreateDoorAuthCommand;
-import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
-import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
-import com.everhomes.rest.aclink.DoorAccessActivedCommand;
-import com.everhomes.rest.aclink.DoorAccessActivingCommand;
-import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
-import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
-import com.everhomes.rest.aclink.DoorAccessDTO;
-import com.everhomes.rest.aclink.DoorAccessOwnerType;
-import com.everhomes.rest.aclink.DoorAuthDTO;
-import com.everhomes.rest.aclink.DoorMessage;
-import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
-import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
-import com.everhomes.rest.aclink.GetShortMessageCommand;
-import com.everhomes.rest.aclink.GetShortMessageResponse;
-import com.everhomes.rest.aclink.GetVisitorCommand;
-import com.everhomes.rest.aclink.GetVisitorResponse;
-import com.everhomes.rest.aclink.ListAclinkUserCommand;
-import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
-import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
-import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
-import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
-import com.everhomes.rest.aclink.ListDoorAccessResponse;
-import com.everhomes.rest.aclink.ListDoorAuthCommand;
-import com.everhomes.rest.aclink.ListDoorAuthResponse;
-import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
-import com.everhomes.rest.aclink.QueryDoorMessageCommand;
-import com.everhomes.rest.aclink.QueryDoorMessageResponse;
-import com.everhomes.rest.aclink.SearchDoorAuthCommand;
+import com.everhomes.rest.aclink.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface DoorAccessService {
     public void onDoorMessageTimeout(Long cmdId);
@@ -139,4 +93,40 @@ public interface DoorAccessService {
     AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmd);
 
     AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd);
+
+    void test();
+
+    DoorAuth getLinglingDoorAuthByUuid(String uuid);
+
+    GetVisitorResponse getVisitorPhone(GetVisitorCommand cmd);
+
+    GetVisitorResponse checkVisitor(GetVisitorCommand cmd);
+
+    DoorUserPermissionDTO createQRUserPermission(CreateQRUserPermissionCommand cmd);
+
+    DoorUserPermissionDTO deleteQRUserPermission(DeleteQRUserPermissionCommand cmd);
+
+    ListQRUserPermissionResponse listQRUserPermissions(ListQRUserPermissionCommand cmd);
+
+	void deleteAuthWhenLeaveFromOrg(Integer namespaceId, Long orgId, Long userId);
+
+    ListDoorAuthResponse createAllDoorAuthList(AclinkCreateAllDoorAuthListCommand cmd);
+
+    ListDoorAuthLogResponse listDoorAuthLogs(ListDoorAuthLogCommand cmd);
+
+    DoorAuthStatisticsDTO qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd);
+
+    void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
+
+    String checkAllDoorAuthList();
+
+	public void remoteOpenDoor(String hardwareId);
+
+	AclinkGetServerKeyResponse getServerKey(AclinkGetServerKeyCommand cmd);
+
+	public QueryDoorMessageResponse syncTimerMessage(AclinkSyncTimerCommand cmd);
+
+	void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId);
+
+    void exportVisitorDoorAuth(ExportDoorAuthCommand cmd, HttpServletResponse httpResponse);
 }

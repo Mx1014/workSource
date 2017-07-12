@@ -1,10 +1,10 @@
 package com.everhomes.rest.yellowPage;
 
-import java.sql.Timestamp;
+import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 
-import com.everhomes.util.StringHelper;
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -21,6 +21,9 @@ import com.everhomes.util.StringHelper;
  * <li>deleteTime: 删除时间</li>
  * <li>namespaceId: 域空间id</li>
  * <li>logoUrl: 类型logo的url地址</li>
+ * <li> selectedLogoUrl: 类型logo被选中时的url地址</li>
+ * <li>displayMode: 显示类型</li>
+ * <li>displayModeName: 显示类型名称</li>
  * </ul>
  */
 public class ServiceAllianceCategoryDTO {
@@ -50,6 +53,11 @@ public class ServiceAllianceCategoryDTO {
 	private Integer namespaceId;
 	
 	private String logoUrl;
+	
+	private String selectedLogoUrl;
+
+	private Byte displayMode;
+	private String displayModeName;
 
 	public Long getId() {
 		return id;
@@ -75,7 +83,23 @@ public class ServiceAllianceCategoryDTO {
 		this.ownerId = ownerId;
 	}
 
-	public Long getParentId() {
+    public Byte getDisplayMode() {
+        return displayMode;
+    }
+
+    public void setDisplayMode(Byte displayMode) {
+        this.displayMode = displayMode;
+    }
+
+    public String getDisplayModeName() {
+        return displayModeName;
+    }
+
+    public void setDisplayModeName(String displayModeName) {
+        this.displayModeName = displayModeName;
+    }
+
+    public Long getParentId() {
 		return parentId;
 	}
 
@@ -153,6 +177,14 @@ public class ServiceAllianceCategoryDTO {
 
 	public void setLogoUrl(String logoUrl) {
 		this.logoUrl = logoUrl;
+	}
+
+	public String getSelectedLogoUrl() {
+		return selectedLogoUrl;
+	}
+
+	public void setSelectedLogoUrl(String selectedLogoUrl) {
+		this.selectedLogoUrl = selectedLogoUrl;
 	}
 
 	@Override

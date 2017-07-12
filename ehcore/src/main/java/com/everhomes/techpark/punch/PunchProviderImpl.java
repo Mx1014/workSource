@@ -2,7 +2,6 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Date;
 import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +15,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record3;
 import org.jooq.Record5;
+import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectHavingStep;
 import org.jooq.SelectJoinStep;
@@ -35,9 +35,9 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.ExceptionRequestType;
+import com.everhomes.rest.approval.ListTargetType;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
@@ -83,6 +83,7 @@ import com.everhomes.server.schema.tables.records.EhPunchLocationRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
+import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchStatisticsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchTimeRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifiRulesRecord;
@@ -391,16 +392,21 @@ long id = sequenceProvider.getNextSequence(NameMapper
 	}
 
 	@Override
-	public List<PunchTimeRule> queryPunchTimeRules(String ownerType,Long ownerId,String name) {
+	public List<PunchTimeRule> queryPunchTimeRules(String ownerType,Long ownerId,String targetType , Long targetId,String name) {
 	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
 		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectQuery<EhPunchTimeRulesRecord> query = context
 				.selectQuery(Tables.EH_PUNCH_TIME_RULES);
-		query.addConditions(Tables.EH_PUNCH_TIME_RULES.NAME.eq(name));
+		if(null != name)
+			query.addConditions(Tables.EH_PUNCH_TIME_RULES.NAME.eq(name));
 		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.eq(ownerType));
+		if(null != targetType)
+			query.addConditions(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.eq(targetType));
+		if(null != targetId)
+			query.addConditions(Tables.EH_PUNCH_TIME_RULES.TARGET_ID.eq(targetId));
 		
 		List<PunchTimeRule> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -1040,9 +1046,9 @@ long id = sequenceProvider.getNextSequence(key);
 			Date endDate = Date.valueOf(endDay);
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
 		}
-		  
+		  // modify by wh 2017-4-25 order by punch date asc
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
-				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.asc()).fetch()
  				.map((r) -> {
  		            return ConvertHelper.convert(r, EhPunchDayLogsRecord.class);
  		        });
@@ -1050,6 +1056,33 @@ long id = sequenceProvider.getNextSequence(key);
 		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
             return ConvertHelper.convert(r, PunchDayLog.class);
         }).collect(Collectors.toList());
+		return result;
+	}
+
+	@Override
+	public List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long userId,
+														   Long companyId, String startDay, String endDay) {
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
+		condition= condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.greaterOrEqual(startDate));
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.lt(endDate));
+		}
+		// modify by wh 2017-4-25 order by punch date asc
+		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, EhPunchDayLogsRecord.class);
+				});
+
+		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchDayLog.class);
+		}).collect(Collectors.toList());
 		return result;
 	}
 
@@ -1251,9 +1284,9 @@ long id = sequenceProvider.getNextSequence(key);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_GEOPOINTS);
-		Condition condition = Tables.EH_PUNCH_GEOPOINTS.LOCATION_RULE_ID.equal(ruleId)
-				.and( Tables.EH_PUNCH_GEOPOINTS.OWNER_ID.eq(ownerId))
-				.and( Tables.EH_PUNCH_GEOPOINTS.OWNER_TYPE.eq(ownerType));
+		Condition condition = Tables.EH_PUNCH_GEOPOINTS.LOCATION_RULE_ID.equal(ruleId);
+//				.and( Tables.EH_PUNCH_GEOPOINTS.OWNER_ID.eq(ownerId))
+//				.and( Tables.EH_PUNCH_GEOPOINTS.OWNER_TYPE.eq(ownerType));
 		step.where(condition);
 		List<PunchGeopoint> result = step
 				.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.desc()).fetch()
@@ -1292,6 +1325,57 @@ long id = sequenceProvider.getNextSequence(key);
 		return null;
 	}
 	
+
+	@Override
+	public List<PunchTimeRule> queryPunchTimeRuleList(  Long startTimeLong, Long endTimeLong ) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchTimeRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_TIME_RULES);
+		 
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.ID.ne(-1L); 
+		condition = condition.and(Tables.EH_PUNCH_TIME_RULES.START_LATE_TIME_LONG.between(startTimeLong, endTimeLong) );
+		query.addConditions(condition); 
+		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
+		List<PunchTimeRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchTimeRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+	@Override
+	public List<PunchTimeRule> queryPunchTimeRuleList(String ownerType, Long ownerId, String targetType, Long targetId,CrossShardListingLocator locator, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchTimeRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_TIME_RULES);
+		 
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.ID.ne(-1L);
+		if(null != ownerType)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.eq(ownerType));
+		if(null != ownerId)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.eq(ownerId)); 
+		if(null != targetType)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.eq(targetType));
+		if(null != targetId)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.TARGET_ID.eq(targetId)); 
+		if (null != locator && locator != null && locator.getAnchor() != null)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.ID.gt(locator.getAnchor()));
+		query.addConditions(condition);
+		query.addLimit(pageSize);
+		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
+		List<PunchTimeRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchTimeRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
 
     @Override
     public Long createPunchLocationRule(PunchLocationRule obj) {
@@ -1741,12 +1825,14 @@ long id = sequenceProvider.getNextSequence(key);
     @Override
     public PunchRuleOwnerMap getPunchRuleOwnerMapByOwnerAndTarget(String ownerType , Long ownerId,String targetType , Long targetId) {
         try {
+			//TODO
         PunchRuleOwnerMap[] result = new PunchRuleOwnerMap[1];
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 
         result[0] = context.select().from(Tables.EH_PUNCH_RULE_OWNER_MAP)
             .where(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_ID.eq(targetId))
             .and(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_TYPE.eq(targetType))
+
             .and(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_ID.eq(ownerId))
             .and(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_TYPE.eq(ownerType))
             .fetchAny().map((r) -> {
@@ -1759,7 +1845,26 @@ long id = sequenceProvider.getNextSequence(key);
             return null;
         }
     }
+    @Override
+    public PunchRuleOwnerMap getPunchRuleOwnerMapByTarget(String targetType , Long targetId) {
+        try {
+        PunchRuleOwnerMap[] result = new PunchRuleOwnerMap[1];
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 
+        result[0] = context.select().from(Tables.EH_PUNCH_RULE_OWNER_MAP)
+            .where(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_ID.eq(targetId))
+            .and(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_TYPE.eq(targetType))
+            .orderBy(Tables.EH_PUNCH_RULE_OWNER_MAP.ID.desc())
+            .fetchAny().map((r) -> {
+                return ConvertHelper.convert(r, PunchRuleOwnerMap.class);
+            });
+
+        return result[0];
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+    }
     @Override
     public List<PunchRuleOwnerMap> queryPunchRuleOwnerMaps(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -1787,7 +1892,31 @@ long id = sequenceProvider.getNextSequence(key);
         	return null;
         return objs;
     }
+    @Override
+    public List<PunchRuleOwnerMap> queryPunchRuleOwnerMaps(String ownerType,Long ownerId,String listType) { 
+    	// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+    			DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
+    			SelectQuery<EhPunchRuleOwnerMapRecord> query = context
+    					.selectQuery(Tables.EH_PUNCH_RULE_OWNER_MAP); 
+    			query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_ID.eq(ownerId));
+    			query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_TYPE.eq(ownerType));
+    			if(ListTargetType.APPROVAL.getCode().equals(listType)){
+    				query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.REVIEW_RULE_ID.isNotNull());
+    			} 
+    			if(ListTargetType.PUNCH.getCode().equals(listType)){
+    				query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.PUNCH_RULE_ID.isNotNull());
+    			} 
+    			List<PunchRuleOwnerMap> result = new ArrayList<>();
+    			query.fetch().map((r) -> {
+    				result.add(ConvertHelper.convert(r, PunchRuleOwnerMap.class));
+    				return null;
+    			});
+    			if (null != result && result.size() > 0)
+    				return result;
+    			return null;
+    }
+    
     private void prepareObj(PunchRuleOwnerMap obj) {
     }
 
@@ -2197,13 +2326,13 @@ long id = sequenceProvider.getNextSequence(key);
 	}
 
 	@Override
-	public void deletePunchStatisticByUser(String ownerType, Long ownerId, String punchMonth, Long userId) {
+	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		DeleteWhereStep<EhPunchStatisticsRecord> step = context
 				.delete(Tables.EH_PUNCH_STATISTICS);
 		Condition condition = Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.equal(punchMonth)
 				.and(Tables.EH_PUNCH_STATISTICS.USER_ID.equal(userId))
-				.and(Tables.EH_PUNCH_STATISTICS.OWNER_ID.equal(ownerId))
+				.and(Tables.EH_PUNCH_STATISTICS.OWNER_ID.in(ownerId))
 				.and(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.equal(ownerType)) ; 
 		step.where(condition);
 		step.execute();
@@ -2368,6 +2497,36 @@ long id = sequenceProvider.getNextSequence(key);
 			return ConvertHelper.convert(record, PunchDayLog.class);
 		}
 		return null;
+	}
+
+	@Override
+	public Integer countPunchLogDevice(Long userId, Long companyId,
+			Date beginDate, Date endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record1<String>> records = context.selectDistinct(Tables.EH_PUNCH_LOGS.IDENTIFICATION).from(Tables.EH_PUNCH_LOGS)
+				.where(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId))
+				.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(companyId))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(beginDate, endDate))
+				.fetch();
+		
+		if (records != null) {
+			return records.size();
+		}
+		return 0;
+	}
+
+	@Override
+	public void deletePunchTimeRulesByOwnerAndTarget(String ownerType, Long ownerId,
+			String targetType, Long targetId) {
+
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.TARGET_ID.equal(targetId)
+				.and(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.equal(targetType))
+				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
+				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)) ; 
+		step.where(condition);
+		step.execute();
 	}
 	
 	

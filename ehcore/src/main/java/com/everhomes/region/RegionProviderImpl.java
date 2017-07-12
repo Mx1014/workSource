@@ -4,14 +4,14 @@ package com.everhomes.region;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.region.RegionCodeStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.daos.EhRegionCodesDao;
+import com.everhomes.server.schema.tables.pojos.EhRegionCodes;
+import com.everhomes.server.schema.tables.records.EhRegionCodesRecord;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.ResultQuery;
-import org.jooq.SelectJoinStep;
+import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +52,9 @@ public class RegionProviderImpl implements RegionProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 	@Caching(evict = { @CacheEvict(value="listRegion"),
 			@CacheEvict(value="listChildRegion"),
@@ -485,5 +488,54 @@ public class RegionProviderImpl implements RegionProvider {
 		return result;
 	}
 
+	@Override
+	@Caching(evict = { @CacheEvict(value="listRegionCodes") })
+	public void createRegionCode(RegionCodes regionCode) {
+		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRegionCodes.class));
+		regionCode.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRegionCodesDao dao = new EhRegionCodesDao(context.configuration());
+		dao.insert(regionCode);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRegionCodes.class, id);
+	}
 
+	@Override
+	@Caching(evict = { @CacheEvict(value="listRegionCodes"),
+			@CacheEvict(value="regionCode", key="#regionCode.id")
+	})
+	public void updateRegionCode(RegionCodes regionCode) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRegionCodesDao dao = new EhRegionCodesDao(context.configuration());
+		dao.update(regionCode);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegionCodes.class, regionCode.getId());
+	}
+
+	@Override
+	@Cacheable(value = "listRegionCodes")
+	public List<RegionCodes> listRegionCodes(String name, Integer code) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRegionCodesRecord> query = context.selectQuery(Tables.EH_REGION_CODES);
+		query.addConditions(Tables.EH_REGION_CODES.STATUS.eq(RegionCodeStatus.ACTIVE.getCode()));
+		if(!StringUtils.isEmpty(name)){
+			query.addConditions(Tables.EH_REGION_CODES.NAME.eq(name));
+		}
+
+		if(null != code){
+			query.addConditions(Tables.EH_REGION_CODES.CODE.eq(code));
+		}
+
+		query.addOrderBy(Tables.EH_REGION_CODES.FIRST_LETTER.asc());
+
+		return query.fetch().map(r -> {
+			return ConvertHelper.convert(r,RegionCodes.class);
+		});
+	}
+
+	@Override
+	@Cacheable(value="regionCode", key="#id")
+	public RegionCodes findRegionCodeById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRegionCodesDao dao = new EhRegionCodesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), RegionCodes.class);
+	}
 }

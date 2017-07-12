@@ -60,7 +60,9 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 
@@ -128,6 +130,25 @@ public class FamilyProviderImpl implements FamilyProvider {
 		return result[0];
 	}
 	
+	@Override
+	public Map<Long, Family> mapFamilyByAddressIds(List<Long> aptIdList) {
+		 Map<Long, Family> result = new HashMap<>();
+		dbProvider.mapReduce(AccessSpec.readWriteWith(EhGroups.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					context.select().from(Tables.EH_GROUPS)
+						.where(Tables.EH_GROUPS.INTEGRAL_TAG1.in(aptIdList))
+						.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+						.fetch().map((r) -> {
+							Family family = ConvertHelper.convert(r, Family.class);
+							result.put(family.getAddressId(), family);
+							return null;
+						});
+					return true;
+				});
+
+		return result;
+	}
+
 	//@Caching(evict = { @CacheEvict(value="Family", key="#group.integralTag1")} )
     @Override
     public void updateFamily(Group group) {
@@ -519,12 +540,15 @@ public class FamilyProviderImpl implements FamilyProvider {
 		final Integer[] count = new Integer[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
 				null, (DSLContext context, Object reducingContext) -> {
-					Integer c = context.selectCount().from(Tables.EH_USER_GROUPS)
-							.where(Tables.EH_USER_GROUPS.REGION_SCOPE_ID.eq(communityId))
-							.and(Tables.EH_USER_GROUPS.REGION_SCOPE.eq(RegionScope.COMMUNITY.getCode()))
-							.and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
-							.and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
-							.fetchOne(0,Integer.class);
+                    SelectQuery<Record1<Long>> query = context.select(Tables.EH_USER_GROUPS.OWNER_UID)
+                            .from(Tables.EH_USER_GROUPS)
+                            .where(Tables.EH_USER_GROUPS.REGION_SCOPE_ID.eq(communityId))
+                            .and(Tables.EH_USER_GROUPS.REGION_SCOPE.eq(RegionScope.COMMUNITY.getCode()))
+                            .and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+                            .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
+                            .groupBy(Tables.EH_USER_GROUPS.OWNER_UID).getQuery();
+
+                    Integer c = context.selectCount().from(query).fetchOneInto(Integer.class);
 					count[0] = c;
 					return true;
 				});
@@ -539,6 +563,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 					Integer c = context.selectCount().from(Tables.EH_GROUPS)
 							.where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
 							.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+							.and(Tables.EH_GROUPS.MEMBER_COUNT.gt(0L))
 							.and(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()))
 							.fetchOne(0,Integer.class);
 					count[0] = c;

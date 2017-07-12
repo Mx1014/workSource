@@ -7,22 +7,22 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  * <li>carId: 车辆id</li>
- * <li>ownerId: 业主id</li>
+ * <li>orgOwnerId: 业主id</li>
  * <li>organizationId: 公司id</li>
  * </ul>
  */
 public class AddOrganizationOwnerCarUserCommand {
 
     @NotNull private Long carId;
-    @NotNull private Long ownerId;
+    @NotNull private Long orgOwnerId;
     @NotNull private Long organizationId;
 
-    public Long getOwnerId() {
-        return ownerId;
+    public Long getOrgOwnerId() {
+        return orgOwnerId;
     }
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
+    public void setOrgOwnerId(Long orgOwnerId) {
+        this.orgOwnerId = orgOwnerId;
     }
 
     public Long getOrganizationId() {

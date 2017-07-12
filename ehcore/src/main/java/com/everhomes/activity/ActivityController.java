@@ -1,16 +1,22 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.activity.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.category.Category;
@@ -18,36 +24,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.activity.ActivityCancelSignupCommand;
-import com.everhomes.rest.activity.ActivityCheckinCommand;
-import com.everhomes.rest.activity.ActivityConfirmCommand;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityListCommand;
-import com.everhomes.rest.activity.ActivityListResponse;
-import com.everhomes.rest.activity.ActivityRejectCommand;
-import com.everhomes.rest.activity.ActivityShareDetailResponse;
-import com.everhomes.rest.activity.ActivitySignupCommand;
-import com.everhomes.rest.activity.ActivityTokenDTO;
-import com.everhomes.rest.activity.ActivityVideoDTO;
-import com.everhomes.rest.activity.GetActivityShareDetailCommand;
-import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.GetVideoCapabilityCommand;
-import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
-import com.everhomes.rest.activity.ListActivitiesByTagCommand;
-import com.everhomes.rest.activity.ListActivitiesCommand;
-import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.activity.ListActivityCategories;
-import com.everhomes.rest.activity.ListActivityCategoriesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
-import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
-import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
-import com.everhomes.rest.activity.VideoCapabilityResponse;
-import com.everhomes.rest.activity.VideoSupportType;
-import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
+import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
@@ -75,6 +55,7 @@ public class ActivityController extends ControllerBase {
 //    }
     /**
      * 报名
+     * <b>URL: /activity/signup</b>
      * @return {@link ActivityDTO}
      */
     @RequestMapping("signup")
@@ -86,6 +67,129 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         response.setResponseObject(result);
         return response;
+    }
+    
+    /**
+     * <b>URL: /activity/createSignupOrder</b>
+     * <p>创建活动报名收费订单</p>
+     */
+    @RequestMapping("createSignupOrder")
+    @RestReturn(value=CommonOrderDTO.class)
+    public RestResponse createSignupOrder(@Valid CreateSignupOrderCommand cmd) {
+    	CommonOrderDTO dto = activityService.createSignupOrder(cmd);
+    	RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <p>后台手动添加活动报名</p>
+     * <b>URL: /activity/manualSignup</b>
+     */
+    @RequestMapping("manualSignup")
+    @RestReturn(value=SignupInfoDTO.class)
+    public RestResponse manualSignup(@Valid ManualSignupCommand cmd) {
+    	SignupInfoDTO result = activityService.manualSignup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        response.setResponseObject(result);
+        return response;
+    }
+    
+    /**
+     * 
+     * <p>修改活动报名</p>
+     * <b>URL: /activity/updateSignupInfo</b>
+     */
+    @RequestMapping("updateSignupInfo")
+    @RestReturn(value=SignupInfoDTO.class)
+    public RestResponse updateSignupInfo(@Valid UpdateSignupInfoCommand cmd) {
+    	SignupInfoDTO result = activityService.updateSignupInfo(cmd);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	response.setResponseObject(result);
+    	return response;
+    }
+    
+    /**
+     * 
+     * <p>导入活动报名</p>
+     * <b>URL: /activity/importSignupInfo</b>
+     */
+    @RequestMapping("importSignupInfo")
+    @RestReturn(value=String.class)
+    public RestResponse importSignupInfo(@Valid ImportSignupInfoCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
+    	activityService.importSignupInfo(cmd, files);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    /**
+     * 
+     * <p>列出活动报名信息</p>
+     * <b>URL: /activity/listSignupInfo</b>
+     */
+    @RequestMapping("listSignupInfo")
+    @RestReturn(value=ListSignupInfoResponse.class)
+    public RestResponse listSignupInfo(@Valid ListSignupInfoCommand cmd) {
+    	ListSignupInfoResponse result = activityService.listSignupInfo(cmd);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	response.setResponseObject(result);
+    	return response;
+    }
+    
+    /**
+     * 
+     * <p>导出活动报名信息</p>
+     * <b>URL: /activity/exportSignupInfo</b>
+     */
+    @RequestMapping("exportSignupInfo")
+    @RestReturn(value=String.class)
+    public RestResponse exportSignupInfo(@Valid ExportSignupInfoCommand cmd, HttpServletResponse response) {
+    	activityService.exportSignupInfo(cmd, response);
+    	RestResponse restResponse = new RestResponse();
+    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
+    	restResponse.setErrorDescription("OK");
+    	return restResponse;
+    }
+    
+    /**
+     * 
+     * <p>删除活动报名信息</p>
+     * <b>URL: /activity/deleteSignupInfo</b>
+     */
+    @RequestMapping("deleteSignupInfo")
+    @RestReturn(value=String.class)
+    public RestResponse deleteSignupInfo(@Valid DeleteSignupInfoCommand cmd) {
+    	activityService.deleteSignupInfo(cmd);
+    	RestResponse restResponse = new RestResponse();
+    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
+    	restResponse.setErrorDescription("OK");
+    	return restResponse;
+    }
+    
+    /**
+     * 
+     * <p>检查手机号</p>
+     * <b>URL: /activity/vertifyPersonByPhone</b>
+     */
+    @RequestMapping("vertifyPersonByPhone")
+    @RestReturn(value=SignupInfoDTO.class)
+    public RestResponse vertifyPersonByPhone(@Valid VertifyPersonByPhoneCommand cmd) {
+    	SignupInfoDTO signupInfoDTO = activityService.vertifyPersonByPhone(cmd);
+    	RestResponse restResponse = new RestResponse();
+    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
+    	restResponse.setErrorDescription("OK");
+    	restResponse.setResponseObject(signupInfoDTO);
+    	return restResponse;
     }
     
     /**
@@ -300,6 +404,21 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /activity/videoCallback</b>
+     * <p>直播回调</p>
+     */
+    @RequestMapping("videoCallback")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse videoCallback(@Valid VideoCallbackCommand cmd) {
+        activityService.videoCallback(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /activity/devicechange</b>
@@ -339,4 +458,330 @@ public class ActivityController extends ControllerBase {
     public RestResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd) {
     	return new RestResponse(activityService.listOfficialActivityByNamespace(cmd));
     }
+
+    /**
+     * <b>URL: /activity/getActivityDetailById</b>
+     * <p>查询活动详情里面的内容</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getActivityDetailById")
+    @RestReturn(value=GetActivityDetailByIdResponse.class)
+    public RestResponse getActivityDetailById(GetActivityDetailByIdCommand cmd){
+    	return new RestResponse(activityService.getActivityDetailById(cmd));
+    }
+
+    /**
+     * <b>URL: /activity/setActivityWarning</b>
+     * <p>设置活动提醒</p>
+     */
+    @RequestMapping("setActivityWarning")
+    @RestReturn(value=ActivityWarningResponse.class)
+    public RestResponse setActivityWarning(SetActivityWarningCommand cmd){
+    	return new RestResponse(activityService.setActivityWarning(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/getActivityWarning</b>
+     * <p>查询活动提醒</p>
+     */
+    @RequestMapping("getActivityWarning")
+    @RestReturn(value=ActivityWarningResponse.class)
+    public RestResponse getActivityWarning(GetActivityWarningCommand cmd){
+    	return new RestResponse(activityService.queryActivityWarning(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/setRosterOrderSetting</b>
+     * <p>设置订单支付有效期</p>
+     */
+    @RequestMapping("setRosterOrderSetting")
+    @RestReturn(value=RosterOrderSettingDTO.class)
+    public RestResponse setRosterOrderSetting(SetRosterOrderSettingCommand cmd){
+    	return new RestResponse(activityService.setRosterOrderSetting(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/getRosterOrderSetting</b>
+     * <p>查询订单支付有效期</p>
+     */
+    @RequestMapping("getRosterOrderSetting")
+    @RestReturn(value=RosterOrderSettingDTO.class)
+    public RestResponse getRosterOrderSetting(GetRosterOrderSettingCommand cmd){
+    	return new RestResponse(activityService.getRosterOrderSetting(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/setActivityTime</b>
+     * <p>设置活动提醒、订单有效期</p>
+     */
+    @RequestMapping("setActivityTime")
+    @RestReturn(value=ActivityTimeResponse.class)
+    public RestResponse setActivityTime(SetActivityTimeCommand cmd){
+    	return new RestResponse(activityService.setActivityTime(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/getActivityTime</b>
+     * <p>查询活动提醒、订单有效期</p>
+     */
+    @RequestMapping("getActivityTime")
+    @RestReturn(value=ActivityTimeResponse.class)
+    public RestResponse getActivityTime(GetActivityTimeCommand cmd){
+    	return new RestResponse(activityService.getActivityTime(cmd));
+    }
+    
+    
+    /**
+	 * <b>URL: /activity/listActivityEntryCategories</b>
+	 * <p> 列出活动类型 </p>
+	 */
+    @RequireAuthentication(false)
+	@RequestMapping("listActivityEntryCategories")
+	@RestReturn(value = ActivityCategoryDTO.class, collection = true)
+	public RestResponse listActivityEntryCategories(ListActivityEntryCategoriesCommand cmd) {
+		return new RestResponse(activityService.listActivityEntryCategories(cmd));
+	}
+
+    /**
+     * <b>URL: /activity/setActivityAchievement</b>
+     * <p> 设置活动成果 </p>
+     */
+    @RequestMapping("setActivityAchievement")
+    @RestReturn(value = String.class)
+    public RestResponse setActivityAchievement(SetActivityAchievementCommand cmd) {
+        activityService.setActivityAchievement(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/getActivityAchievement</b>
+     * <p> 查询活动成果 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getActivityAchievement")
+    @RestReturn(value = GetActivityAchievementResponse.class)
+    public RestResponse getActivityAchievement(GetActivityAchievementCommand cmd) {
+        GetActivityAchievementResponse achievement = activityService.getActivityAchievement(cmd);
+
+        RestResponse response = new RestResponse(achievement);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/createActivityAttachment</b>
+     * <p> 添加活动附件 </p>
+     */
+    @RequestMapping("createActivityAttachment")
+    @RestReturn(value = String.class)
+    public RestResponse createActivityAttachment(CreateActivityAttachmentCommand cmd) {
+        activityService.createActivityAttachment(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/deleteActivityAttachment</b>
+     * <p> 删除活动附件 </p>
+     */
+    @RequestMapping("deleteActivityAttachment")
+    @RestReturn(value = String.class)
+    public RestResponse deleteActivityAttachment(DeleteActivityAttachmentCommand cmd) {
+        activityService.deleteActivityAttachment(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/listActivityAttachments</b>
+     * <p> 查询活动附件列表 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listActivityAttachments")
+    @RestReturn(value = ListActivityAttachmentsResponse.class)
+    public RestResponse listActivityAttachments(ListActivityAttachmentsCommand cmd) {
+        ListActivityAttachmentsResponse achievement = activityService.listActivityAttachments(cmd);
+
+        RestResponse response = new RestResponse(achievement);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/downloadActivityAttachment</b>
+     * <p> 下载活动附件 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("downloadActivityAttachment")
+    @RestReturn(value = String.class)
+    public RestResponse downloadActivityAttachment(DownloadActivityAttachmentCommand cmd) {
+        activityService.downloadActivityAttachment(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/createActivityGoods</b>
+     * <p> 添加活动物资 </p>
+     */
+    @RequestMapping("createActivityGoods")
+    @RestReturn(value = String.class)
+    public RestResponse createActivityGoods(CreateActivityGoodsCommand cmd) {
+        activityService.createActivityGoods(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/updateActivityGoods</b>
+     * <p> 修改活动物资 </p>
+     */
+    @RequestMapping("updateActivityGoods")
+    @RestReturn(value = String.class)
+    public RestResponse updateActivityGoods(UpdateActivityGoodsCommand cmd) {
+        activityService.updateActivityGoods(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/deleteActivityGoods</b>
+     * <p> 删除活动物资 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("deleteActivityGoods")
+    @RestReturn(value = String.class)
+    public RestResponse deleteActivityGoods(DeleteActivityGoodsCommand cmd) {
+        activityService.deleteActivityGoods(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/listActivityGoods</b>
+     * <p> 查询活动物资列表 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listActivityGoods")
+    @RestReturn(value = ListActivityGoodsResponse.class)
+    public RestResponse listActivityGoods(ListActivityGoodsCommand cmd) {
+        ListActivityGoodsResponse goods = activityService.listActivityGoods(cmd);
+
+        RestResponse response = new RestResponse(goods);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/getActivityGoods</b>
+     * <p> 查询活动物资 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getActivityGoods")
+    @RestReturn(value = ActivityGoodsDTO.class)
+    public RestResponse getActivityGoods(GetActivityGoodsCommand cmd) {
+        ActivityGoodsDTO goods = activityService.getActivityGoods(cmd);
+
+        RestResponse response = new RestResponse(goods);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /activity/listActivityCategory</b>
+     * <p>列出活动分类</p>
+     */
+    @RequestMapping("listActivityCategory")
+    @RestReturn(value=ListActivityCategoryReponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listActivityCategory(ListActivityCategoryCommand cmd){
+        RestResponse response = new RestResponse(activityService.listActivityCategory(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsSummary</b>
+     * <p>统计总览</p>
+     */
+    @RequestMapping("statisticsSummary")
+    @RestReturn(value=StatisticsSummaryResponse.class)
+    public RestResponse statisticsSummary(StatisticsSummaryCommand cmd){
+    	StatisticsSummaryResponse result = activityService.statisticsSummary(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsActivity</b>
+     * <p>统计活动</p>
+     */
+    @RequestMapping("statisticsActivity")
+    @RestReturn(value=StatisticsActivityResponse.class)
+    public RestResponse statisticsActivity(StatisticsActivityCommand cmd){
+    	StatisticsActivityResponse result = activityService.statisticsActivity(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsOrganization</b>
+     * <p>统计企业</p>
+     */
+    @RequestMapping("statisticsOrganization")
+    @RestReturn(value=StatisticsOrganizationResponse.class)
+    public RestResponse statisticsOrganization(StatisticsOrganizationCommand cmd){
+    	StatisticsOrganizationResponse result = activityService.statisticsOrganization(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsTag</b>
+     * <p>统计标签</p>
+     */
+    @RequestMapping("statisticsTag")
+    @RestReturn(value=StatisticsTagResponse.class)
+    public RestResponse statisticsTag(StatisticsTagCommand cmd){
+    	StatisticsTagResponse result = activityService.statisticsTag(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    
 }

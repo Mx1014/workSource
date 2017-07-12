@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
 * <ul>  
-* <li>companyId：企业Id</li>
+* <li>enterpriseId：企业Id</li>
 * <li>latitude: 坐标纬度</li>
 * <li>longitude： 坐标经度</li>
 * <li>wifiMac： wifiMac地址信息</li>

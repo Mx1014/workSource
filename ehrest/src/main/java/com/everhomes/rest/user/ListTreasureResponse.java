@@ -18,6 +18,9 @@ import com.everhomes.util.StringHelper;
  *<li>orderCount:待发货订单数量</li>
  *<li>businessUrl:电商链接</li>
  *<li>businessRealm:电商realm</li>
+ *<li>activityDefaultListStyle:活动列表默认样式</li>
+ *<li>shakeOpenDoorUser:当前用户是否开启摇一摇</li>
+ *<li>shakeOpenDoorNamespace:当前域空间是否开启</li>
  *</ul>
  */
 public class ListTreasureResponse {
@@ -34,8 +37,18 @@ public class ListTreasureResponse {
     private Integer orderCount;
     private String businessUrl;
     private String businessRealm;
-    
+    private Byte activityDefaultListStyle;
+    private Byte shakeOpenDoorUser;
+    private Byte shakeOpenDoorNamespace;
 	
+	public Byte getActivityDefaultListStyle() {
+		return activityDefaultListStyle;
+	}
+
+	public void setActivityDefaultListStyle(Byte activityDefaultListStyle) {
+		this.activityDefaultListStyle = activityDefaultListStyle;
+	}
+
 	public String getMyOrderUrl() {
 		return myOrderUrl;
 	}
@@ -144,6 +157,22 @@ public class ListTreasureResponse {
 
 	public void setBusinessRealm(String businessRealm) {
 		this.businessRealm = businessRealm;
+	}
+
+	public Byte getShakeOpenDoorUser() {
+		return shakeOpenDoorUser;
+	}
+
+	public void setShakeOpenDoorUser(Byte shakeOpenDoorUser) {
+		this.shakeOpenDoorUser = shakeOpenDoorUser;
+	}
+
+	public Byte getShakeOpenDoorNamespace() {
+		return shakeOpenDoorNamespace;
+	}
+
+	public void setShakeOpenDoorNamespace(Byte shakeOpenDoorNamespace) {
+		this.shakeOpenDoorNamespace = shakeOpenDoorNamespace;
 	}
 
 }

@@ -9,16 +9,16 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
  * <li>plateNumber: 车牌号</li>
- * <li>plateOwnerName: 车主名称</li>
- * <li>plateOwnerPhone: 车主手机号</li>
- * <li>payerName: 付款人名称</li>
+ * <li>plateOwnerName: 车主</li>
  * <li>payerPhone: 付款人手机号</li>
- * <li>paidType: 支付方式  com.everhomes.rest.organization.VendorType  支付宝 : 10001  微信 : 10002</li>
- * <li>rechargeStatus: 充值状态  0:无效 1：未充值 2:已充值   com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus</li>
+ * <li>paidType: 支付类型 {@link com.everhomes.rest.organization.VendorType}</li>
+ * <li>status: 状态值</li>
  * <li>startDate: 开始充值时间</li>
  * <li>endDate: 结束充值时间</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>rechargeType: 充值类型 {@link ParkingRechargeType}</li>
+ * <li>cardNumber: 卡号</li>
  * </ul>
  */
 public class SearchParkingRechargeOrdersCommand {
@@ -27,16 +27,32 @@ public class SearchParkingRechargeOrdersCommand {
     private Long parkingLotId;
     private String plateNumber;
     private String plateOwnerName;
-    private String plateOwnerPhone;
-    private String payerName;
     private String payerPhone;
     private String paidType;
-    private Byte rechargeStatus;
+    private Byte status;
     private Long startDate;
     private Long endDate;
     private Long pageAnchor;
     private Integer pageSize;
-    
+    private Byte rechargeType;
+    private String cardNumber;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
     public SearchParkingRechargeOrdersCommand() {
     }
 
@@ -89,30 +105,14 @@ public class SearchParkingRechargeOrdersCommand {
     }
 
     public String getPlateOwnerName() {
-        return plateOwnerName;
-    }
+		return plateOwnerName;
+	}
 
-    public void setPlateOwnerName(String plateOwnerName) {
-        this.plateOwnerName = plateOwnerName;
-    }
+	public void setPlateOwnerName(String plateOwnerName) {
+		this.plateOwnerName = plateOwnerName;
+	}
 
-    public String getPlateOwnerPhone() {
-        return plateOwnerPhone;
-    }
-
-    public void setPlateOwnerPhone(String plateOwnerPhone) {
-        this.plateOwnerPhone = plateOwnerPhone;
-    }
-
-    public String getPayerName() {
-        return payerName;
-    }
-
-    public void setPayerName(String payerName) {
-        this.payerName = payerName;
-    }
-
-    public String getPayerPhone() {
+	public String getPayerPhone() {
         return payerPhone;
     }
 
@@ -136,18 +136,18 @@ public class SearchParkingRechargeOrdersCommand {
         this.pageSize = pageSize;
     }
 
-    public Byte getRechargeStatus() {
-		return rechargeStatus;
-	}
-
-	public void setRechargeStatus(Byte rechargeStatus) {
-		this.rechargeStatus = rechargeStatus;
-	}
-
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Byte getRechargeType() {
+		return rechargeType;
+	}
+
+	public void setRechargeType(Byte rechargeType) {
+		this.rechargeType = rechargeType;
+	}
 
 	public String getPaidType() {
 		return paidType;

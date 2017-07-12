@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.db.DbProvider;
+import com.everhomes.sms.*;
 import javassist.expr.NewArray;
 
 import javax.annotation.PostConstruct;
@@ -27,15 +29,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.sms.DateUtil;
-import com.everhomes.sms.EncryptUtil;
-import com.everhomes.sms.SmsBuilder;
-import com.everhomes.sms.SmsChannel;
-import com.everhomes.sms.SmsHandler;
-import com.everhomes.sms.TemplateSMS;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
+import org.springframework.transaction.TransactionStatus;
 
 /**
  * yzx sms provider
@@ -62,6 +59,13 @@ public class YZXSmsHandler implements SmsHandler {
     
     @Autowired
     private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private SmsLogProvider smsLogProvider;
+
+    @Autowired
+    private DbProvider dbProvider;
+
     private String accountSid;
     private String token;
     private String appId;
@@ -251,9 +255,39 @@ public class YZXSmsHandler implements SmsHandler {
             }
             
             createAndSend(phoneNumbers, content, yzxTemplateId);
+
+            //add by sw 添加短信log
+            addSmsLogs(namespaceId, phoneNumbers, templateScope, templateId, yzxTemplateId,
+                    templateLocale, content, "success");
         } else {
-            LOGGER.error("The yzx template id is empty, namespaceId=" + namespaceId + ", templateScope=" + templateScope 
-                + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+            String log = "The yzx template id is empty, namespaceId=" + namespaceId + ", templateScope=" + templateScope
+                    + ", templateId=" + templateId + ", templateLocale=" + templateLocale;
+            LOGGER.error(log);
+
+            addSmsLogs(namespaceId, phoneNumbers, templateScope, templateId, yzxTemplateId,
+                    templateLocale, "", log);
         }
+    }
+
+    private void addSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String yzxTemplateId,
+                            String templateLocale, String variables, String result) {
+
+        dbProvider.execute((TransactionStatus status) -> {
+            for (String mobile: phoneNumbers) {
+                SmsLog log = new SmsLog();
+                log.setNamespaceId(namespaceId);
+                log.setScope(templateScope);
+                log.setCode(templateId);
+                log.setLocale(templateLocale);
+                log.setMobile(mobile);
+                log.setText(yzxTemplateId);
+                log.setVariables(variables);
+                log.setResult(result);
+                smsLogProvider.createSmsLog(log);
+            }
+
+            return null;
+        });
+
     }
 }

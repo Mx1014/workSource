@@ -3,9 +3,12 @@ package com.everhomes.ui.forum;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.forum.ForumService;
+import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostDTO;
@@ -28,7 +32,11 @@ import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.TopicFilterDTO;
 import com.everhomes.rest.ui.forum.TopicScopeDTO;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 
 /**
@@ -51,6 +59,9 @@ public class ForumUiController extends ControllerBase {
     
     @Autowired
     private PostSearcher postSearcher;
+
+    @Autowired
+    private MessagingKickoffService kickoffService;
         
     /**
      * <b>URL: /ui/forum/getTopicQueryFilters</b>
@@ -59,7 +70,7 @@ public class ForumUiController extends ControllerBase {
     @RequestMapping("getTopicQueryFilters")
     @RestReturn(value=TopicFilterDTO.class, collection=true)
     @RequireAuthentication(false)
-    public RestResponse getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
+    public RestResponse getTopicQueryFilters(HttpServletRequest request, GetTopicQueryFilterCommand cmd) {
         List<TopicFilterDTO> filterDtoList = forumService.getTopicQueryFilters(cmd);
         
         RestResponse response = new RestResponse(filterDtoList);

@@ -2,33 +2,11 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.pmtask.AssignTaskCommand;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.CloseTaskCommand;
-import com.everhomes.rest.pmtask.GetPrivilegesCommand;
-import com.everhomes.rest.pmtask.GetPrivilegesDTO;
-import com.everhomes.rest.pmtask.GetTaskLogCommand;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
-import com.everhomes.rest.pmtask.DeleteTaskCategoryCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetStatisticsCommand;
-import com.everhomes.rest.pmtask.GetStatisticsResponse;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.PmTaskLogDTO;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.rest.pmtask.CompleteTaskCommand;
+import com.everhomes.rest.pmtask.*;
 
 public interface PmTaskService {
 	SearchTasksResponse searchTasks(SearchTasksCommand cmd);
@@ -40,14 +18,14 @@ public interface PmTaskService {
 	void completeTask(CompleteTaskCommand cmd);
 	
 	void closeTask(CloseTaskCommand cmd);
-	
+
 	void assignTask(AssignTaskCommand cmd);
 	
 	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
 	
-	PmTaskDTO createTaskByAdmin(CreateTaskCommand cmd);
+	PmTaskDTO createTaskByOrg(CreateTaskCommand cmd);
 	
 	void deleteTaskCategory(DeleteTaskCategoryCommand cmd);
 	
@@ -55,7 +33,9 @@ public interface PmTaskService {
 	
 	ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd);
 	
-	void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp);
+	List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd);
+	
+	void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp, HttpServletRequest req);
 	
 	SearchTaskStatisticsResponse searchTaskStatistics(SearchTaskStatisticsCommand cmd);
 	
@@ -72,4 +52,38 @@ public interface PmTaskService {
 	void exportListStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
 	
 	void createStatistics();
+	
+	ListOperatePersonnelsResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd);
+	
+	void revisit(RevisitCommand cmd);
+	
+	void createTaskOperatePerson(CreateTaskOperatePersonCommand cmd);
+	
+	void deleteTaskOperatePerson(DeleteTaskOperatePersonCommand cmd);
+	
+	SearchTaskCategoryStatisticsResponse searchTaskCategoryStatistics(SearchTaskStatisticsCommand cmd);
+	
+	void exportTaskCategoryStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
+	
+	TaskCategoryStatisticsDTO getTaskCategoryStatistics(SearchTaskStatisticsCommand cmd);
+	
+	void updateTaskByOrg(UpdateTaskCommand cmd);
+	
+	ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
+	
+	GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd);
+	
+	SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd);
+	
+	void exportTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd, HttpServletResponse resp);
+	
+	void createTaskTargetStatistics();
+	
+	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
+
+	void synchronizedData(SearchTasksCommand cmd);
+
+	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);
+
+	PmTaskHistoryAddressDTO createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd);
 }

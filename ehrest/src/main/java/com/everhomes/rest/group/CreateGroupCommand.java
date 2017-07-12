@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>explicitRegionDescriptorsJson：暂不使用</li>
  * <li>visibleRegionType：用户创建圈时所在的范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}，添加于3.1.0版本 20151104</li>
  * <li>visibleRegionId：用户创建圈时所在的范围ID，如园区/小区ID、片区ID（即机构ID），添加于3.1.0版本 20151104</li>
+ * <li>joinPolicy: 加入策略，参考{@link com.everhomes.rest.group.GroupJoinPolicy}</li>
  * </ul>
  */
 public class CreateGroupCommand {
@@ -38,11 +39,20 @@ public class CreateGroupCommand {
     // json of List<RegionDescriptor>
     private String explicitRegionDescriptorsJson;
     private Integer namespaceId;
+    private Integer joinPolicy;
     
     public CreateGroupCommand() {
     }
 
-    public String getName() {
+    public Integer getJoinPolicy() {
+		return joinPolicy;
+	}
+
+	public void setJoinPolicy(Integer joinPolicy) {
+		this.joinPolicy = joinPolicy;
+	}
+
+	public String getName() {
         return name;
     }
 

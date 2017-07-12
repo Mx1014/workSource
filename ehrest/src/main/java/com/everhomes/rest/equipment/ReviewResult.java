@@ -8,10 +8,11 @@ import com.everhomes.util.StringHelper;
  *  <li>1: qualified</li>
  *  <li>2: unqualified</li>
  *  <li>3: inactive</li>
+ *  <li>4: REVIEW_DELAY</li>
  * </ul>
  */
 public enum ReviewResult {
-	NONE((byte)0), QUALIFIED((byte)1), UNQUALIFIED((byte)2), INACTIVE((byte)3);
+	NONE((byte)0), QUALIFIED((byte)1), UNQUALIFIED((byte)2), INACTIVE((byte)3), REVIEW_DELAY((byte)4);
 	
 	private byte code;
 	

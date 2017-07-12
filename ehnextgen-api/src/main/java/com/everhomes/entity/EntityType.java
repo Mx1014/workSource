@@ -1,22 +1,10 @@
 // @formatter:off
 package com.everhomes.entity;
 
+import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.pojos.EhAppUrls;
-import com.everhomes.server.schema.tables.pojos.EhBuildings;
-import com.everhomes.server.schema.tables.pojos.EhCategories;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
-import com.everhomes.server.schema.tables.pojos.EhForums;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhNews;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.pojos.EhRegions;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
-import com.everhomes.server.schema.tables.pojos.EhUserImpersonations;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.techpark.expansion.LeasePromotion;
 
 /**
  * <p>实体类型:</p>
@@ -36,6 +24,7 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
  * <li>BUILDING: 楼栋</li>
  * <li>APPURLS: app 信息</li>
  * <li>NEWS: 新闻</li>
+ * <li>EhZuolinAdmins: 左邻管理</li>
  * </ul>
  */
 public enum EntityType {
@@ -57,7 +46,23 @@ public enum EntityType {
     APPURLS(EhAppUrls.class.getSimpleName()),
     NEWS(EhNews.class.getSimpleName()),
     IMPERSONATION(EhUserImpersonations.class.getSimpleName()),
-    SACATEGORY(EhServiceAllianceCategories.class.getSimpleName());
+    SACATEGORY(EhServiceAllianceCategories.class.getSimpleName()),
+    ROLE(EhAclRoles.class.getSimpleName()),
+    RESOURCE_CATEGORY(EhResourceCategories.class.getSimpleName()),
+    PARKING_CARD_REQUEST(EhParkingCardRequests.class.getSimpleName()),
+    PARKING_LOT(EhParkingLots.class.getSimpleName()),
+    PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
+    ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
+    PM_TASK(EhPmTasks.class.getSimpleName()),
+    SERVICE_MODULE(EhServiceModules.class.getSimpleName()),
+    AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
+    ZUOLIN_ADMIN("EhZuolinAdmins"),
+    ALL("EhAll"),
+    LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
+    WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
+    ORGANIZATION_FILE("EhOrganizationFiles"),
+    CHILD_PROJECT("child_project");
+
     private String code;
     
     private EntityType(String code) {
@@ -90,6 +95,10 @@ public enum EntityType {
             return FAMILY;
         else if(code.equalsIgnoreCase(POST.getCode()))
             return POST;
+        else if(code.equalsIgnoreCase(ORGANIZATIONS.getCode()))
+            return ORGANIZATIONS;
+        else if(code.equalsIgnoreCase(ROLE.getCode()))
+            return ROLE;
         else if(code.equalsIgnoreCase("EhFamilies"))
             return FAMILY;
         else if(code.equalsIgnoreCase("EhFleaMarkets"))
@@ -101,7 +110,11 @@ public enum EntityType {
         else if(code.equalsIgnoreCase(IMPERSONATION.getCode())) {
             return IMPERSONATION;
         }
-        
+        for (EntityType entityType : EntityType.values()) {
+            if (entityType.getCode().equals(code)) {
+                return entityType;
+            }
+        }
         return null;
     }
 }

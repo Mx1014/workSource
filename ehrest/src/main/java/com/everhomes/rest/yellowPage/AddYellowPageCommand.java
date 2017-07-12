@@ -5,14 +5,14 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /***
- * 
+ * <ul>
  * <li> id: ID       </li>
 *<li> parentId:父节点ID  </li>
 *<li> ownerType: 拥有者类型：现在是comunity</li>
 *<li> ownerId: 拥有者ID</li>
 *<li> name:名字</li>
 *<li> nickName:别名  </li>
-*<li> type: 类型 MAKERZONE((byte)1),SERVICEALLIANCE((byte)2),PARKENTERPRISE((byte)3)参考{@link com.everhomes.rest.yellowPage.YellowPageType} </li> 
+*<li> type: 类型 MAKERZONE((byte)1),SERVICEALLIANCE((byte)2),PARKENTERPRISE((byte)3)，参考{@link com.everhomes.rest.yellowPage.YellowPageType} </li> 
 *<li> address: 地址  </li>
 *<li> contact: 咨询电话 </li>
 *<li> description: 详情介绍</li>
@@ -27,7 +27,7 @@ import com.everhomes.util.StringHelper;
 *<li> contactMobile:  联系人电话</li>
 *<li> serviceType: 服务联盟的子类别</li>
 *<li> attachments: 附件列表</li>
-
+*</ul>
  * */
 public class AddYellowPageCommand {
 	private java.lang.Long     id;

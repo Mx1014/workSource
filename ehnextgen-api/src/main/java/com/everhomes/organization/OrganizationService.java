@@ -3,8 +3,13 @@ package com.everhomes.organization;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
+
+import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.*;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,15 +17,20 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchRejectContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
@@ -33,98 +43,16 @@ import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
-import com.everhomes.rest.organization.AddOrgAddressCommand;
-import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
-import com.everhomes.rest.organization.AddPersonnelsToGroup;
-import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
-import com.everhomes.rest.organization.AssginOrgTopicCommand;
-import com.everhomes.rest.organization.CheckOfficalPrivilegeBySceneCommand;
-import com.everhomes.rest.organization.CheckOfficalPrivilegeCommand;
-import com.everhomes.rest.organization.CheckOfficalPrivilegeResponse;
-import com.everhomes.rest.organization.CreateDepartmentCommand;
-import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
-import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
-import com.everhomes.rest.organization.CreateOrganizationContactCommand;
-import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
-import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.organization.DeleteOrganizationPersonnelByContactTokenCommand;
-import com.everhomes.rest.organization.ExcelOrganizationPersonnelCommand;
-import com.everhomes.rest.organization.GetOrgDetailCommand;
-import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
-import com.everhomes.rest.organization.ImportOwnerDataCommand;
-import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
-import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
-import com.everhomes.rest.organization.ListDepartmentsCommand;
-import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
-import com.everhomes.rest.organization.ListEnterprisesCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationMemberCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
-import com.everhomes.rest.organization.ListOrganizationsByNameCommand;
-import com.everhomes.rest.organization.ListOrganizationsByNameResponse;
-import com.everhomes.rest.organization.ListOrganizationsCommand;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.ListPersonnelNotJoinGroupCommand;
-import com.everhomes.rest.organization.ListPmManagementComunitesCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommandResponse;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.ListUserTaskCommand;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberCommand;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMenuResponse;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.organization.PmManagementCommunityDTO;
-import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
-import com.everhomes.rest.organization.RejectOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
-import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
-import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
-import com.everhomes.rest.organization.SendOrganizationMessageCommand;
-import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
-import com.everhomes.rest.organization.SetCurrentOrganizationCommand;
-import com.everhomes.rest.organization.SetOrgTopicStatusCommand;
-import com.everhomes.rest.organization.UpdateOrganizationContactCommand;
-import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
-import com.everhomes.rest.organization.UpdateOrganizationsCommand;
-import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
-import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
-import com.everhomes.rest.organization.UserExitOrganizationCommand;
-import com.everhomes.rest.organization.UserJoinOrganizationCommand;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
-import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
-import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
-import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
-import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
-import com.everhomes.rest.organization.pm.PmBuildingDTO;
-import com.everhomes.rest.organization.pm.PmManagementsResponse;
-import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
-import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
-
 
 
 public interface OrganizationService {
@@ -227,9 +155,11 @@ public interface OrganizationService {
 	
 	ListOrganizationsCommandResponse listAllChildrenOrganizations(Long id,
 			List<String> groupTypes);
-	
+
+	ListOrganizationsCommandResponse listChildrenOrganizations(Long id, List<String> groupTypes);
+
 	ListOrganizationsCommandResponse listChildrenOrganizations(Long id,
-			List<String> groupTypes);
+			List<String> groupTypes, String keywords);
 	
 	
 	ListEnterprisesCommandResponse listEnterprises(ListEnterprisesCommand cmd);
@@ -253,24 +183,29 @@ public interface OrganizationService {
 	void updatePersonnelsToDepartment(UpdatePersonnelsToDepartment cmd);
 	void addPersonnelsToGroup(AddPersonnelsToGroup cmd);
 	void rejectForEnterpriseContact(RejectContactCommand cmd);
-	OrganizationMemberDTO createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
+	OrganizationMember createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
 	ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd);
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);
-	void createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);
-	OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
+	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);
+
+    OrganizationMemberDTO processUserForMemberWithoutMessage(UserIdentifier identifier);
+
+    OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
 	List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd);
 	List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
 	List<Organization> getSyncDatas(CrossShardListingLocator locator);
 	List<AclRoleAssignmentsDTO> listAclRoleByUserId(ListAclRoleByUserIdCommand cmd);
-	ImportDataResponse importEnterpriseData(MultipartFile mfile,
-			Long userId, ImportEnterpriseDataCommand cmd);
-	ImportDataResponse importOrganizationPersonnelData(MultipartFile mfile,
+	ImportFileResponse<ImportEnterpriseDataDTO> importEnterpriseData(MultipartFile mfile,
+																	 Long userId, ImportEnterpriseDataCommand cmd);
+	ImportFileTaskDTO importOrganizationPersonnelData(MultipartFile mfile,
 			Long userId, ImportOrganizationPersonnelDataCommand cmd);
 	
 	ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd);
-	
-	PostDTO acceptTask(ProcessOrganizationTaskCommand cmd);
+
+    List<OrganizationManagerDTO> getOrganizationManagers(List<Long> organizationIds);
+
+    PostDTO acceptTask(ProcessOrganizationTaskCommand cmd);
 	
 	PostDTO refuseTask(ProcessOrganizationTaskCommand cmd);
 	
@@ -367,15 +302,15 @@ public interface OrganizationService {
 	 * @param cmd
 	 */
 	OrganizationMemberDTO addOrganizationPersonnel(AddOrganizationPersonnelCommand cmd);
-	
+
 	/**
 	 * 获取最顶级部门
 	 * @param organizationGroupType
 	 * @param token
-	 * @param orgPath
-	 * @return
-	 */
-	OrganizationDTO getMemberTopDepartment(OrganizationGroupType organizationGroupType, String token, Long organizationId);
+	 * @param organizationId
+     * @return
+     */
+	OrganizationDTO getMemberTopDepartment(List<String> groupTypes, String token, Long organizationId);
 	
 	/**
 	 * 获取机构下面所有人员
@@ -386,4 +321,205 @@ public interface OrganizationService {
 	 */
 	List<OrganizationMemberDTO> listAllChildOrganizationPersonnel(Long organizationId, List<String> groupTypes,String userName);
 	Long getTopOrganizationId(Long organizationId);
+
+	/**
+	 * 隐藏显示通讯录
+	 * @param cmd
+     */
+	void updateOrganizationContactVisibleFlag(UpdateOrganizationContactVisibleFlagCommand cmd);
+
+	/**
+	 * 批量隐藏显示通讯录
+	 * @param cmd
+     */
+	void batchUpdateOrganizationContactVisibleFlag(BatchUpdateOrganizationContactVisibleFlagCommand cmd);
+
+	/**
+	 * 树状机构列表
+	 * @param cmd
+	 * @return
+     */
+	OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd);
+
+	/**
+	 * 简单的通讯录
+	 * @param cmd
+     * @return
+     */
+	ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd);
+	void batchApproveForEnterpriseContact(BatchApproveContactCommand cmd);
+	void batchRejectForEnterpriseContact(BatchRejectContactCommand cmd);
+
+	/**
+	 * 获取用户的最高部门
+	 * @param cmd
+	 * @return
+     */
+	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
+ 
+	List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd);
+	void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd); 
+	String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
+  
+	
+	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
+
+	void createChildrenOrganizationJobPosition(CreateOrganizationCommand cmd);
+	
+	void createOrganizationJobPosition(CreateOrganizationJobPositionCommand cmd);
+	
+	void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd);
+	
+	void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	
+	ListOrganizationJobPositionResponse listOrganizationJobPositions(ListOrganizationJobPositionCommand cmd);
+	
+	void updateChildrenOrganizationJobPosition(UpdateOrganizationsCommand cmd);
+	
+	void deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	
+	void createChildrenOrganizationJobLevel(CreateOrganizationCommand cmd);
+	
+	void updateChildrenOrganizationJobLevel(UpdateOrganizationsCommand cmd);
+
+	void deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd);
+	
+	ListChildrenOrganizationJobLevelResponse listChildrenOrganizationJobLevels(ListAllChildrenOrganizationsCommand cmd);
+	
+	ListChildrenOrganizationJobPositionResponse listChildrenOrganizationJobPositions(ListAllChildrenOrganizationsCommand cmd);
+	List<OrganizationMemberDTO> listOrganizationMemberDTOs(Long orgId,
+			List<Long> memberUids);
+
+	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, Long userId, Long organizationId);
+
+    CommunityOrganizationTreeResponse listCommunityOrganizationTree(ListCommunityOrganizationTreeCommand cmd); 
+	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId,
+			Integer namespaceId);
+	List<OrganizationContactDTO> getAdmins(Long organizationId);
+	OrganizationServiceUser getServiceUser(Long organizationId, Long serviceUserId);
+	List<String> getBusinessContactPhone(Long organizationId);
+	Set<String> getOrganizationContactPhone(Long organizationId);
+	List<String> getAdminPhone(Long organizationId);
+	OrganizationServiceUser getServiceUser(Long organizationId);
+
+	List<OrganizationDTO> listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd);
+
+	List<OrganizationContactDTO> listOrganizationsContactByModuleId(ListOrganizationByModuleIdCommand cmd);
+
+	List<OrganizationManagerDTO> listOrganizationManagers(ListOrganizationManagersCommand cmd);
+
+	List<OrganizationManagerDTO> listOrganizationAllManagers(ListOrganizationManagersCommand cmd);
+
+	List<OrganizationManagerDTO> listModuleOrganizationManagers(ListOrganizationByModuleIdCommand cmd);
+
+
+	List<OrganizationContactDTO> listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd);
+
+	List<OrganizationContactDTO> listModuleOrganizationContactByJobPositionId(ListModuleOrganizationContactByJobPositionIdCommand cmd);
+
+	List<OrganizationSimpleDTO> listUserRelateOrgs(
+			ListUserRelatedOrganizationsCommand cmd, User user);
+
+	List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, String token, String orgPath);
+
+	List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, Long userId, Long organizationId);
+
+    List<OrganizationMember> listOrganizationContactByJobPositionId(List<Long> organizationIds, Long jobPositionId);
+
+	List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId);
+
+    List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd);
+	ContractDTO processContract(Contract contract, Integer namespaceId);
+	ContractDTO processContract(Contract contract);
+
+	ImportFileResponse<ImportOrganizationContactDataDTO> getImportFileResult(GetImportFileResultCommand cmd);
+
+	void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
+	
+	/**
+	 * 查询企业下的用户
+	 * @param cmd
+	 * @return ListOrganizationContactCommandResponse
+	 */
+	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
+
+    /****** new interface ******/
+
+    ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
+
+    PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd);
+
+	OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd);
+
+    OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberInfoCommand cmd);
+
+    void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd);
+
+    OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd);
+
+    List<OrganizationMemberEducationsDTO> listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd);
+
+    void deleteOrganizationMemberEducations(DeleteOrganizationMemberEducationsCommand cmd);
+
+    void updateOrganizationMemberEducations(UpdateOrganizationMemberEducationsCommand cmd);
+
+    OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd);
+
+    List<OrganizationMemberWorkExperiencesDTO> listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd);
+
+    void deleteOrganizationMemberWorkExperiences(DeleteOrganizationMemberWorkExperiencesCommand cmd);
+
+    void updateOrganizationMemberWorkExperiences(UpdateOrganizationMemberWorkExperiencesCommand cmd);
+
+    OrganizationMemberInsurancesDTO addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd);
+
+    List<OrganizationMemberInsurancesDTO> listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd);
+
+    void updateOrganizationMemberInsurances(UpdateOrganizationMemberInsurancesCommand cmd);
+
+    void deleteOrganizationMemberInsurances(DeleteOrganizationMemberInsurancesCommand cmd);
+
+    OrganizationMemberContractsDTO addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd);
+
+    List<OrganizationMemberContractsDTO> listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd);
+
+    void updateOrganizationMemberContracts (UpdateOrganizationMemberContractsCommand cmd);
+
+    void deleteOrganizationMemberContracts(DeleteOrganizationMemberContractsCommand cmd);
+
+    void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd);
+
+    List<MemberRecordChangesByJobDTO> listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd);
+
+    ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd);
+
+    OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
+
+	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
+													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
+    List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId);
+
+    void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
+
+	ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile multipartFile, Long userId);
+	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
+	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
+
+	/**
+	 * 查询所有管理公司
+	 */
+	List<OrganizationDTO> listAllPmOrganizations();
+
+	List<Long> getIncludeOrganizationIdsByUserId(Long userId, Long organizationId);
+
+	/**
+	 * 最新 获取用户所包含的机构列表，如果用户是某个机构的管理员或者模块管理员或者细化的权限，就拥有这个机构，不一定用户非得在此机构的通讯录
+	 * @param cmd
+	 * @return
+     */
+	List<OrganizationSimpleDTO> listUserRelateOrganizations(ListUserRelatedOrganizationsCommand cmd);
+	List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path,
+			Long userId);
+	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
+
 }

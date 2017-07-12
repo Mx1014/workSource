@@ -26,7 +26,7 @@ public class SetOrganizationOwnerAsCarPrimaryTest extends BaseLoginAuthTestCase 
         String api = "/pm/setOrganizationOwnerAsCarPrimary";
         SetOrganizationOwnerAsCarPrimaryCommand cmd = new SetOrganizationOwnerAsCarPrimaryCommand();
         cmd.setOrganizationId(1000001L);
-        cmd.setOwnerId(1L);
+        cmd.setOrgOwnerId(1L);
         cmd.setCarId(1L);
 
         RestResponseBase response = httpClientService.restPost(api, cmd, RestResponseBase.class);
@@ -61,7 +61,8 @@ public class SetOrganizationOwnerAsCarPrimaryTest extends BaseLoginAuthTestCase 
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-set-owner-car-primary-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-set-owner-car-primary-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

@@ -3,7 +3,11 @@
 /atomikos
 /logs
 /statistics
-
+ehborder/target/
+ehnextgen-api/target/
+ehnextgen-forum/target/
+ehnextgen-messaging/target/
+ehtest-integration/target/
 *.gitignore
 *.classpath
 *.settings
@@ -53,3 +57,5 @@ ehtest-integration/pom.xml
 oauth2-client/pom.xml
 pom.properties
 
+*.xml.bak
+*rebel.xml

@@ -244,6 +244,27 @@
             "approval_type": 2,
             "flow_id": 2,
             "status": 2
+        },
+        {
+            "id": 127,
+            "rule_id": 11,
+            "approval_type": 3,
+            "flow_id": 1,
+            "status": 2
+        },
+        {
+            "id": 128,
+            "rule_id": 12,
+            "approval_type": 3,
+            "flow_id": 2,
+            "status": 2
+        },
+        {
+            "id": 129,
+            "rule_id": 13,
+            "approval_type": 3,
+            "flow_id": 3,
+            "status": 2
         }
     ],
     "eh_punch_rules": [

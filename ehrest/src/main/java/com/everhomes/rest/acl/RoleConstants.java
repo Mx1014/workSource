@@ -39,7 +39,13 @@ public interface RoleConstants {
     /** 设备巡检：设备及其配件的操作 */
     public static final long EQUIPMENT_MANAGER = 1010L;
     
-    
+    /** 任务管理：执行人员 */
+    public static final long PM_TASK_EXECUTOR = 1017L;
+    /** 任务管理：维修人员 */
+    public static final long PM_TASK_REPAIRMEN = 1018L;
+
+    /** 黑名单角色 */
+    public static final long BLACKLIST = 2000L;
     
     /** 平台定义的物业角色 */
     public static final List<Long> PLATFORM_PM_ROLES = Arrays.asList(

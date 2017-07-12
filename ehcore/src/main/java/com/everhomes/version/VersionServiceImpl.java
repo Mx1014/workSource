@@ -268,6 +268,7 @@ public class VersionServiceImpl implements VersionService {
 			url.setNamespaceId(realm.getNamespaceId());
 			url.setAppName(cmd.getAppName());
 			url.setPublishTime(new Timestamp(cmd.getPublishTime()!=null?cmd.getPublishTime():DateHelper.currentGMTTime().getTime()));
+			url.setIconUrl(cmd.getIconUrl());
 			versionProvider.createVersionUrl(url);
 
 			versionInfoDTO.setRealm(realm.getRealm());
@@ -276,6 +277,7 @@ public class VersionServiceImpl implements VersionService {
 			versionInfoDTO.setUrlId(url.getId());
 			versionInfoDTO.setDownloadUrl(url.getDownloadUrl());
 			versionInfoDTO.setPublishTime(url.getPublishTime());
+			versionInfoDTO.setIconUrl(url.getIconUrl());
 			
 			return true;
 		});
@@ -329,6 +331,7 @@ public class VersionServiceImpl implements VersionService {
 				innerUrl.setNamespaceId(realm.getNamespaceId());
 				innerUrl.setAppName(cmd.getAppName());
 				innerUrl.setPublishTime(new Timestamp(cmd.getPublishTime()!=null?cmd.getPublishTime():DateHelper.currentGMTTime().getTime()));
+				innerUrl.setIconUrl(cmd.getIconUrl());
 				versionProvider.updateVersionUrl(innerUrl);
 			}else {
 				innerUrl = new VersionUrl();
@@ -339,6 +342,7 @@ public class VersionServiceImpl implements VersionService {
 				innerUrl.setNamespaceId(realm.getNamespaceId());
 				innerUrl.setAppName(cmd.getAppName());
 				innerUrl.setPublishTime(new Timestamp(cmd.getPublishTime()!=null?cmd.getPublishTime():DateHelper.currentGMTTime().getTime()));
+				innerUrl.setIconUrl(cmd.getIconUrl());
 				versionProvider.createVersionUrl(innerUrl);
 			}
 			
@@ -346,6 +350,7 @@ public class VersionServiceImpl implements VersionService {
 			versionInfoDTO.setDescription(realm.getDescription());
 			versionInfoDTO.setDownloadUrl(innerUrl.getDownloadUrl());
 			versionInfoDTO.setPublishTime(innerUrl.getPublishTime());
+			versionInfoDTO.setIconUrl(innerUrl.getIconUrl());
 			
 			return true;
 		});
@@ -387,6 +392,9 @@ public class VersionServiceImpl implements VersionService {
 	}
 
 	private String processUrl(String url){
+		if (StringUtils.isBlank(url)) {
+			return "";
+		}
 		if (url.startsWith("http:") || url.startsWith("${")) {
 			return url;
 		}
@@ -408,4 +416,30 @@ public class VersionServiceImpl implements VersionService {
 	private String getUpgradeUrl(){
 		return configurationProvider.getValue(ConfigConstants.UPGRADE_URL, "");
 	}
+	
+	// 返回简短的版本信息，主要包含appName, downloadUrl, iconUrl等，用于俱乐部的分享页面使用
+	@Override
+	public VersionInfoDTO getVersionInfo(String realm) {
+		if (StringUtils.isBlank(realm)) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters: realm="+realm);
+		}
+		VersionRealm versionRealm= versionProvider.findVersionRealmByName(realm);
+		if (versionRealm == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist realm: realm="+realm);
+		}
+		String appName = versionProvider.findAppNameByRealm(versionRealm.getId());
+		String downloadUrl = versionProvider.findDownloadUrlByRealm(versionRealm.getId());
+		String iconUrl = versionProvider.findIconUrlByRealm(versionRealm.getId());
+		
+		VersionInfoDTO versionInfoDTO = new VersionInfoDTO();
+		versionInfoDTO.setAppName(appName);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("homeurl", this.configurationProvider.getValue(ConfigConstants.HOME_URL, ""));
+		versionInfoDTO.setIconUrl(StringHelper.interpolate(iconUrl, params));
+		versionInfoDTO.setDownloadUrl(StringHelper.interpolate(downloadUrl, params));
+		
+		return versionInfoDTO;
+	} 
 }

@@ -82,13 +82,13 @@ public class AclinkUtils {
     //DoorMessage is just for debug!!!, and should be removed later.
     public static String packInitServerKey(String rsaAclinkPub, String aesKey, String aesIv, String devName, Long time, String uuid, DoorMessage doorMessage) {
         String pub = StringHelper.toHexString(Base64.decodeBase64(rsaAclinkPub));
-        byte[] result = CmdUtil.initServerKeyCmd((byte)0, pub, devName, (int)(time.longValue()/1000), uuid.getBytes(), Base64.decodeBase64(aesKey), Base64.decodeBase64(aesIv), doorMessage);
+        byte[] result = CmdUtil.initServerKeyCmd((byte)0, pub, (devName+"\0\0\0\0\0\0").substring(0, 6), (int)(time.longValue()/1000), uuid.getBytes(), Base64.decodeBase64(aesKey), Base64.decodeBase64(aesIv), doorMessage);
         return Base64.encodeBase64String(result);
     }
     
     public static String packUpdateDeviceName(Byte ver, String aesKey, String aesIv, String devName) {
         byte[] key = Base64.decodeBase64(aesKey);
-        byte[] binaryData = CmdUtil.updateDevName(key, ver.byteValue(), (devName+"            ").substring(0, 12));
+        byte[] binaryData = CmdUtil.updateDevName(key, ver.byteValue(), (devName+"\0\0\0\0\0\0\0\0\0\0\0\0").substring(0, 12));
         return Base64.encodeBase64String(binaryData);
     }
     
@@ -146,5 +146,11 @@ public class AclinkUtils {
         }
         
         return false;
+    }
+    
+    public static String packSetServerKeyCmd(Byte ver, String oldKey, String newKey) {
+    	byte[] key0 = Base64.decodeBase64(oldKey);
+    	byte[] key1 = Base64.decodeBase64(newKey);
+    	return Base64.encodeBase64String(CmdUtil.setServerKeyCmd(ver, key0, key1));
     }
 }

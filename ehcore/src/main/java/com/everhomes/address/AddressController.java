@@ -18,8 +18,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.GetApartmentByBuildingApartmentNameCommand;
 import com.everhomes.rest.address.ClaimAddressCommand;
 import com.everhomes.rest.address.ClaimedAddressInfo;
 import com.everhomes.rest.address.CommunityDTO;
@@ -260,6 +262,20 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/getApartmentByBuildingApartmentName</b>
+     * <p>查询门牌</p>
+     */
+    @RequestMapping("getApartmentByBuildingApartmentName")
+    @RestReturn(value=String.class)
+    public RestResponse getApartmentByBuildingApartmentName(GetApartmentByBuildingApartmentNameCommand cmd) {
+    	AddressDTO dto = addressService.getApartmentByBuildingApartmentName(cmd);
+        RestResponse resp = new RestResponse(dto);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+    
+    /**
      * <b>URL: /address/createServiceAddress</b>
      * <p>创建服务地址</p>
      */
@@ -321,6 +337,24 @@ public class AddressController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /address/listCommunityApartmentsByBuildingName</b>
+     * <p>根据小区Id、楼栋号查询门牌列表(因为listApartmentsByBuildingName里面check了用户权限所以要在提供一个)</p>
+     */
+    @RequestMapping("listCommunityApartmentsByBuildingName")
+    @RestReturn(value=ListApartmentByBuildingNameCommandResponse.class)
+    public RestResponse listCommunityApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+        ListApartmentByBuildingNameCommandResponse result = this.addressService.listCommunityApartmentsByBuildingName(cmd);
+        RestResponse resp = new RestResponse();
+        if(EtagHelper.checkHeaderEtagOnly(30,result.hashCode()+"", request, response)) {
+            resp.setResponseObject(result);
+        }
+
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
 
 }

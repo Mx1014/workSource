@@ -1,7 +1,12 @@
 package com.everhomes.rest.techpark.expansion;
 
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -20,6 +25,8 @@ import com.everhomes.util.StringHelper;
  * <li>description： </li> 
  * <li>createTime： </li> 
  * <li>sourceName： </li>  
+ * <li>buildings： 楼栋列表 {@link com.everhomes.rest.community.BuildingDTO}</li>  
+ * <li>contract： 合同 {@link com.everhomes.rest.contract.ContractDTO}</li>  
  * </ul>
  */
 public class EnterpriseApplyEntryDTO {
@@ -53,7 +60,77 @@ public class EnterpriseApplyEntryDTO {
 	private Timestamp createTime;
 
 	private String sourceName;
+	
+	@ItemType(BuildingDTO.class)
+	private List<BuildingDTO> buildings;
 
+	private ContractDTO contract;
+
+	private String issuerType;
+	private Long buildingId;
+	private String buildingName;
+	private Long addressId;
+	private String apartmentName;
+	private Long flowcaseId;
+
+	@ItemType(PostApprovalFormItem.class)
+	private List<PostApprovalFormItem> formValues;
+
+	public List<PostApprovalFormItem> getFormValues() {
+		return formValues;
+	}
+
+	public void setFormValues(List<PostApprovalFormItem> formValues) {
+		this.formValues = formValues;
+	}
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public Long getFlowcaseId() {
+		return flowcaseId;
+	}
+
+	public void setFlowcaseId(Long flowcaseId) {
+		this.flowcaseId = flowcaseId;
+	}
 
 	public Long getId() {
 		return id;
@@ -269,5 +346,33 @@ public class EnterpriseApplyEntryDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+ 
+
+
+	public List<BuildingDTO> getBuildings() {
+		return buildings;
+	}
+
+
+
+
+	public void setBuildings(List<BuildingDTO> buildings) {
+		this.buildings = buildings;
+	}
+
+
+
+
+	public ContractDTO getContract() {
+		return contract;
+	}
+
+
+
+
+	public void setContract(ContractDTO contract) {
+		this.contract = contract;
+	}
 
 }

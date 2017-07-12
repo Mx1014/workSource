@@ -3,6 +3,7 @@ package com.everhomes.rest.aclink;
 import com.everhomes.util.StringHelper;
 
 public class GetVisitorCommand {
+    Integer namespaceId;
     String id;
 
     public String getId() {
@@ -11,6 +12,14 @@ public class GetVisitorCommand {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

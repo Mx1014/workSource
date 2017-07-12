@@ -1,0 +1,40 @@
+{
+  "eh_communities": [
+    {
+      "area_name": "龙岗区",
+      "apt_segment2": "门牌号",
+      "apt_segment1": "楼栋号",
+      "apt_segment3": "0",
+      "description": "",
+      "area_id": "13910",
+      "uuid": "641325b8-65a9-11e5-801d-00163e0018d7",
+      "city_name": "深圳市",
+      "detail_description": "",
+      "feedback_forum_id": "2",
+      "id": "24210090697425925",
+      "address": "龙岗布吉镇坂雪岗工业区，梅观高速与机荷高速交汇处",
+      "create_time": "2014-07-30 09:14:53",
+      "default_forum_id": "1",
+      "alias_name": "",
+      "zipcode": "",
+      "namespace_id": "0",
+      "apt_seg1_sample": "",
+      "apt_seg2_sample": "",
+      "name": "万科城",
+      "apt_seg3_sample": "",
+      "community_type": "0",
+      "apt_count": "4018",
+      "city_id": "13905",
+      "status": "2"
+    }
+  ],
+  "eh_namespace_resources" : [
+  	{
+      "id": "1",
+      "namespace_id": 0,
+      "resource_type": "COMMUNITY",
+      "resource_id": "24210090697425925",
+      "create_time": "2016-07-14 13:57:01"
+    }
+  ]
+}

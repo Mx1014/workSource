@@ -1,6 +1,7 @@
 package com.everhomes.rest.equipment;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
@@ -27,6 +28,9 @@ import com.everhomes.util.StringHelper;
  *  <li>updateTime: 更新该标准的时间</li>
  *  <li>deleterUid: 删除该标准的用户id</li>
  *  <li>deleteTime: 删除该标准的时间</li>
+ *  <li>templateId: 巡检项模板id</li>
+ *  <li>templateName: 巡检项模板名称</li>
+ *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
  * </ul>
  */
 public class EquipmentStandardsDTO {
@@ -69,6 +73,18 @@ public class EquipmentStandardsDTO {
 	private Long deleterUid;
 	
 	private Timestamp deleteTime;
+
+	private Long templateId;
+	
+	private String templateName;
+	
+	private Integer reviewExpiredDays;
+	
+	@ItemType(StandardGroupDTO.class)
+	private List<StandardGroupDTO> executiveGroup;
+
+	@ItemType(StandardGroupDTO.class)
+	private List<StandardGroupDTO> reviewGroup;
 	
 	public Long getId() {
 		return id;
@@ -220,6 +236,46 @@ public class EquipmentStandardsDTO {
 
 	public void setDeleteTime(Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getTemplateName() {
+		return templateName;
+	}
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
+
+	public Integer getReviewExpiredDays() {
+		return reviewExpiredDays;
+	}
+
+	public void setReviewExpiredDays(Integer reviewExpiredDays) {
+		this.reviewExpiredDays = reviewExpiredDays;
+	}
+
+	public List<StandardGroupDTO> getExecutiveGroup() {
+		return executiveGroup;
+	}
+
+	public void setExecutiveGroup(List<StandardGroupDTO> executiveGroup) {
+		this.executiveGroup = executiveGroup;
+	}
+
+	public List<StandardGroupDTO> getReviewGroup() {
+		return reviewGroup;
+	}
+
+	public void setReviewGroup(List<StandardGroupDTO> reviewGroup) {
+		this.reviewGroup = reviewGroup;
 	}
 
 	@Override

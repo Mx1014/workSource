@@ -105,7 +105,7 @@ public class QualityTest extends BaseLoginAuthTestCase {
     	CreatQualityStandardCommand command = new CreatQualityStandardCommand();
     	command.setOwnerId(ownerId);
     	command.setOwnerType(ownerType);
-    	command.setCategoryId(1L);
+//    	command.setCategoryId(1L);
     	command.setDescription("feferfre");
     	command.setName("test");
     	command.setStandardNumber("test-001");
@@ -175,7 +175,7 @@ public class QualityTest extends BaseLoginAuthTestCase {
     	cmd.setOwnerId(ownerId);
     	cmd.setOwnerType(ownerType);
     	cmd.setName("任务");
-    	cmd.setCategoryId(1L);
+//    	cmd.setCategoryId(1L);
     	cmd.setGroup(group);
     	cmd.setExecutiveExpireTime(1469504822000L);
     	

@@ -1,15 +1,5 @@
 package com.everhomes.launchpad;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -17,16 +7,17 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.common.ScopeType;
-import com.everhomes.rest.launchpad.DeleteLaunchPadByIdCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemByIdCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
-import com.everhomes.rest.launchpad.GetLaunchPadLayoutByVersionCodeCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadLayoutCommand;
-import com.everhomes.rest.launchpad.LaunchPadItemDTO;
-import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
-import com.everhomes.rest.launchpad.UserDefinedLaunchPadCommand;
+import com.everhomes.rest.launchpad.*;
 import com.everhomes.util.EtagHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RestDoc(value="LaunchPad controller", site="core")
 @RestController
@@ -140,6 +131,19 @@ public class LaunchPadController extends ControllerBase {
         
         this.launchPadService.deleteLaunchPadById(cmd);
         RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /launchpad/listItemServiceCategries</b>
+     * <p>item服务类别</p>
+     */
+    @RequestMapping("listItemServiceCategries")
+    @RestReturn(value=ItemServiceCategryDTO.class, collection = true)
+    public RestResponse listItemServiceCategries() {
+        RestResponse response =  new RestResponse(launchPadService.listItemServiceCategries());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

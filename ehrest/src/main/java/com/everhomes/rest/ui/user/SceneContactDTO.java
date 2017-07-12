@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>fullPinyin: 名字全拼</li>
  * <li>fullInitial: 名字全首字母</li>
  * <li>initial: 首字母</li>
+ * <li>organizationPath: 机构path 路径，含层次关系，如/父亲id/第一层孩子id/第二层孩子id/...</li>
  * </ul>
  */
 public class SceneContactDTO {
@@ -150,10 +151,8 @@ public class SceneContactDTO {
 	public void setDepartmentName(String departmentName) {
 		this.departmentName = departmentName;
 	}
-	
-	
-	
-	public Byte getNeighborhoodRelation() {
+
+    public Byte getNeighborhoodRelation() {
 		return neighborhoodRelation;
 	}
 

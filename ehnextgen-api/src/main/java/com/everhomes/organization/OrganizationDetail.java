@@ -51,6 +51,14 @@ public class OrganizationDetail extends EhOrganizationDetails {
 	}
 
 
+    public String getEmailDomain() {
+        return OrganizationCustomField.EMAIL_DOMAIN.getStringValue(this);
+    }
+    
+    public void setEmailDomain(String emailDomain) {
+    	OrganizationCustomField.EMAIL_DOMAIN.setStringValue(this, emailDomain);
+    }
+    
 
 	@Override
     public String toString() {

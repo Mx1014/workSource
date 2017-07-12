@@ -1,22 +1,6 @@
 // @formatter:off
 package com.everhomes.banner;
 
-import static com.everhomes.rest.banner.BannerStatus.ACTIVE;
-import static com.everhomes.rest.banner.BannerStatus.CLOSE;
-
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogOperator;
 import com.everhomes.auditlog.AuditLogProvider;
@@ -31,33 +15,13 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.banner.BannerClickDTO;
-import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.banner.*;
 import com.everhomes.rest.banner.BannerOrder;
-import com.everhomes.rest.banner.BannerOwnerType;
-import com.everhomes.rest.banner.BannerScope;
-import com.everhomes.rest.banner.BannerServiceErrorCode;
-import com.everhomes.rest.banner.BannerStatus;
-import com.everhomes.rest.banner.CreateBannerByOwnerCommand;
-import com.everhomes.rest.banner.CreateBannerClickCommand;
-import com.everhomes.rest.banner.DeleteBannerByOwnerCommand;
-import com.everhomes.rest.banner.GetBannerByIdCommand;
-import com.everhomes.rest.banner.GetBannersByOrgCommand;
-import com.everhomes.rest.banner.GetBannersCommand;
-import com.everhomes.rest.banner.ListBannersByOwnerCommand;
-import com.everhomes.rest.banner.ListBannersByOwnerCommandResponse;
-import com.everhomes.rest.banner.ReorderBannerByOwnerCommand;
-import com.everhomes.rest.banner.UpdateBannerByOwnerCommand;
-import com.everhomes.rest.banner.admin.CreateBannerAdminCommand;
-import com.everhomes.rest.banner.admin.DeleteBannerAdminCommand;
-import com.everhomes.rest.banner.admin.ListBannersAdminCommand;
-import com.everhomes.rest.banner.admin.ListBannersAdminCommandResponse;
-import com.everhomes.rest.banner.admin.UpdateBannerAdminCommand;
+import com.everhomes.rest.banner.admin.*;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -79,6 +43,20 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.everhomes.rest.banner.BannerStatus.ACTIVE;
+import static com.everhomes.rest.banner.BannerStatus.CLOSE;
 
 @Component
 public class BannerServiceImpl implements BannerService {
@@ -148,6 +126,11 @@ public class BannerServiceImpl implements BannerService {
         }
         
         List<Banner> allBanners = new ArrayList<Banner>();
+
+        // 看是否有自定义banner        add by xq.tian  2016/11/01
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, ScopeType.COMMUNITY.getCode(), communityId, sceneType);
+
         List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.COMMUNITY.getCode(), communityId);
         List<Banner> customizedBanners = new ArrayList<Banner>();
         
@@ -156,8 +139,8 @@ public class BannerServiceImpl implements BannerService {
 				customizedBanners.add(banner);
 			}
 		}
-        
-        if(customizedBanners.size() > 0){
+
+        if(customizedBanner != null || customizedBanners.size() > 0){
         	allBanners = customizedBanners;
         }else{
         	//String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
@@ -245,8 +228,11 @@ public class BannerServiceImpl implements BannerService {
 				customizedBanners.add(banner);
 			}
 		}
-        
-        if(customizedBanners.size() > 0){
+        // 看是否有自定义banner        add by xq.tian  2016/11/01
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, ScopeType.COMMUNITY.getCode(), communityId, sceneTypeStr);
+
+        if(customizedBanner != null || customizedBanners.size() > 0){
         	allBanners = customizedBanners;
         }else{
         	//String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
@@ -778,27 +764,33 @@ public class BannerServiceImpl implements BannerService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
 		}
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() 
+
+        Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize()
 				: this.configurationProvider.getIntValue("pagination.page.size", AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
-		List<BannerDTO> result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
-				pageSize + 1, ApplyPolicy.CUSTOMIZED);
-        if(result == null || result.isEmpty()) {
-        	result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
-        			pageSize + 1, ApplyPolicy.DEFAULT);
+
+        // 看是否有自定义banner
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, cmd.getScope().getScopeCode(), cmd.getScope().getScopeId(), cmd.getSceneType());
+        List<BannerDTO> bannerList;
+        if (customizedBanner != null) {
+            bannerList = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
+                    pageSize + 1, ApplyPolicy.CUSTOMIZED);
+        } else {
+            bannerList = bannerProvider.listBannersByOwner(namespaceId, null, cmd.getSceneType(), cmd.getPageAnchor(), pageSize + 1,
+                    ApplyPolicy.DEFAULT);
         }
-        
-        for(BannerDTO dto : result) {
+
+        for(BannerDTO dto : bannerList) {
         	dto.setPosterUrl(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
         }
         
-		bannerDTOSort(result);
+		bannerDTOSort(bannerList);
 		
 		ListBannersByOwnerCommandResponse resp = new ListBannersByOwnerCommandResponse();
-		resp.setBanners(result);
-		if(result.size() > pageSize) {
-			resp.setNextPageAnchor(result.get(result.size() - 1).getId());
-			result.remove(result.size() - 1);
+		resp.setBanners(bannerList);
+		if(bannerList.size() > pageSize) {
+			resp.setNextPageAnchor(bannerList.get(bannerList.size() - 1).getCreateTime().getTime());
+			bannerList.remove(bannerList.size() - 1);
 		}
 		return resp;
 	}
@@ -1002,6 +994,11 @@ public class BannerServiceImpl implements BannerService {
                  banner.setScopeCode(cmd.getScope().getScopeCode());
                  banner.setScopeId(cmd.getScope().getScopeId());
                  banner.setOrder(cmd.getDefaultOrder());
+                 // 设置最大的order值
+                 List<BannerDTO> bannerDTOList = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                         cmd.getScope(), sceneStr, null, null, ApplyPolicy.CUSTOMIZED);
+                 bannerDTOList.stream().mapToInt(BannerDTO::getOrder).distinct().reduce(Math::max).ifPresent(r -> banner.setOrder(r + 1));
+
                  banner.setApplyPolicy(ApplyPolicy.CUSTOMIZED.getCode());
                  banner.setSceneType(sceneType.getCode());
                  
@@ -1038,7 +1035,7 @@ public class BannerServiceImpl implements BannerService {
 		
 		if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id parameter.");
         }
 		if(cmd.getScope() == null || cmd.getScope().getScopeCode() == null || cmd.getScope().getScopeId() == null) {
          	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -1075,7 +1072,7 @@ public class BannerServiceImpl implements BannerService {
         	setUpdateDataToBanner(cmd, banner);
             bannerProvider.updateBanner(banner);
         }
-	}
+    }
 
 	private void setUpdateDataToBanner(UpdateBannerByOwnerCommand cmd, Banner banner) {
 		if(cmd.getActionType() != null)
@@ -1094,6 +1091,12 @@ public class BannerServiceImpl implements BannerService {
         	banner.setScopeCode(cmd.getScope().getScopeCode());
         if(cmd.getName() != null)
         	banner.setName(cmd.getName());
+        if (cmd.getStatus() == BannerStatus.ACTIVE.getCode()) {
+            // 设置最大的order值
+            List<BannerDTO> bannerDTOList = bannerProvider.listBannersByOwner(UserContext.getCurrentNamespaceId(),
+                    cmd.getScope(), banner.getSceneType(), null, null, ApplyPolicy.CUSTOMIZED);
+            bannerDTOList.stream().mapToInt(BannerDTO::getOrder).distinct().reduce(Math::max).ifPresent(r -> banner.setOrder(r + 1));
+        }
 	}
 
 	private void checkUserNotInOrg(String ownerType, Long ownerId) {
@@ -1106,12 +1109,12 @@ public class BannerServiceImpl implements BannerService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid ownerType parameter.");
 		}
-		User user = UserContext.current().getUser();
+		/*User user = UserContext.current().getUser();
 		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), ownerId);
 		if(member == null){
 			LOGGER.error("User {} is not in the organization {}.", user.getId(), ownerId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"User is not in the organization.");
-		}
+		}*/
 	}
 }

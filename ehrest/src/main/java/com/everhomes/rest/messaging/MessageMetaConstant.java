@@ -9,4 +9,7 @@ public interface MessageMetaConstant {
     public static final String EXCLUDE = "exclude";
     public static final String SENDER_NAME = "sender-name";
     public static final String POPUP_FLAG = "popup-flag";
+    public static final String VOICE_REMIND = "voice-remind";
+    public static final String MESSAGE_SUBJECT = "message-subject";// 通知消息会有消息标题
+    // public static final String MESSAGE_TYPE = "message-type";// 区分通知和会话消息
 }

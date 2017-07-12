@@ -4,10 +4,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.elasticsearch.common.util.concurrent.ThreadFactoryBuilder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,10 +21,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskQueue {
     private ExecutorService service;
-
+    private ThreadFactory namedThreadFactory;
+    
     @PostConstruct
     public void init() {
-        service = Executors.newFixedThreadPool(2);
+    	//added by Janson
+    	namedThreadFactory = new ThreadFactoryBuilder()
+        .setNameFormat("sms-thr-%d").build();
+    	service = Executors.newFixedThreadPool(2, namedThreadFactory);
     }
 
     @PreDestroy

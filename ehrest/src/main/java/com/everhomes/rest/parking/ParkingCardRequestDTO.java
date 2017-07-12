@@ -2,7 +2,12 @@
 package com.everhomes.rest.parking;
 
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.flow.FlowButtonDTO;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowNodeLogDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -23,6 +28,10 @@ import com.everhomes.util.StringHelper;
  * <li>issueFlag: 充值状态， {@link com.everhomes.rest.parking.ParkingCardIssueFlag}</li>
  * <li>issueTime: 领卡时间</li>
  * <li>createTime: 订单创建时间</li>
+ * <li>carBrand: 车品牌</li>
+ * <li>carSerieName: 车系列</li>
+ * <li>carColor: 车颜色</li>
+ * <li>attachments: 申请资料</li>
  * </ul>
  */
 public class ParkingCardRequestDTO {
@@ -39,10 +48,29 @@ public class ParkingCardRequestDTO {
     private String plateOwnerPhone;
     private Integer ranking;
     private Byte status;
-    private Byte issueFlag;
+
     private Timestamp issueTime;
     private Timestamp createTime;
     
+    private Long flowId;
+	private Integer flowVersion;
+	private Long flowCaseId;
+    
+    private String carBrand;
+    private String carSerieName;
+    private String carColor;
+    @ItemType(ParkingAttachmentDTO.class)
+    private List<ParkingAttachmentDTO> attachments;
+    
+    private Timestamp auditSucceedTime;
+	private Timestamp processSucceedTime;
+	private Timestamp openCardTime;
+	private Timestamp cancelTime;
+    
+    //工作流
+	@ItemType(FlowButtonDTO.class)
+	private List<FlowButtonDTO> buttons;
+	
     public ParkingCardRequestDTO() {
     }
 
@@ -150,14 +178,6 @@ public class ParkingCardRequestDTO {
         this.status = status;
     }
 
-    public Byte getIssueFlag() {
-        return issueFlag;
-    }
-
-    public void setIssueFlag(Byte issueFlag) {
-        this.issueFlag = issueFlag;
-    }
-
     public Timestamp getIssueTime() {
         return issueTime;
     }
@@ -174,7 +194,103 @@ public class ParkingCardRequestDTO {
         this.createTime = createTime;
     }
 
-    @Override
+    public String getCarBrand() {
+		return carBrand;
+	}
+
+	public void setCarBrand(String carBrand) {
+		this.carBrand = carBrand;
+	}
+
+	public String getCarSerieName() {
+		return carSerieName;
+	}
+
+	public void setCarSerieName(String carSerieName) {
+		this.carSerieName = carSerieName;
+	}
+
+	public String getCarColor() {
+		return carColor;
+	}
+
+	public void setCarColor(String carColor) {
+		this.carColor = carColor;
+	}
+
+	public List<ParkingAttachmentDTO> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<ParkingAttachmentDTO> attachments) {
+		this.attachments = attachments;
+	}
+
+	public Long getFlowId() {
+		return flowId;
+	}
+
+	public void setFlowId(Long flowId) {
+		this.flowId = flowId;
+	}
+
+	public Integer getFlowVersion() {
+		return flowVersion;
+	}
+
+	public void setFlowVersion(Integer flowVersion) {
+		this.flowVersion = flowVersion;
+	}
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+
+	public List<FlowButtonDTO> getButtons() {
+		return buttons;
+	}
+
+	public void setButtons(List<FlowButtonDTO> buttons) {
+		this.buttons = buttons;
+	}
+
+	public Timestamp getAuditSucceedTime() {
+		return auditSucceedTime;
+	}
+
+	public void setAuditSucceedTime(Timestamp auditSucceedTime) {
+		this.auditSucceedTime = auditSucceedTime;
+	}
+
+	public Timestamp getProcessSucceedTime() {
+		return processSucceedTime;
+	}
+
+	public void setProcessSucceedTime(Timestamp processSucceedTime) {
+		this.processSucceedTime = processSucceedTime;
+	}
+
+	public Timestamp getOpenCardTime() {
+		return openCardTime;
+	}
+
+	public void setOpenCardTime(Timestamp openCardTime) {
+		this.openCardTime = openCardTime;
+	}
+
+	public Timestamp getCancelTime() {
+		return cancelTime;
+	}
+
+	public void setCancelTime(Timestamp cancelTime) {
+		this.cancelTime = cancelTime;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

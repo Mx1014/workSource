@@ -7,3 +7,5 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'punch
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'punch', '10006', 'zh_CN', '没有获取到您的WIFI，请检测您是否连上WIFI');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'punch', '10007', 'zh_CN', '您没有连上指定的WIFI');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'punch', '10008', 'zh_CN', '您没有连上指定WIFI，也不在打卡范围，打卡失败');
+
+--test

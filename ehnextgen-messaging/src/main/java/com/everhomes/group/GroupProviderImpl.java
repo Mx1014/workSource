@@ -1,24 +1,6 @@
 // @formatter:off
 package com.everhomes.group;
 
-import java.security.InvalidParameterException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.tools.ant.taskdefs.condition.And;
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.db.AccessSpec;
@@ -36,14 +18,8 @@ import com.everhomes.rest.group.GroupOpRequestStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhGroupMembersDao;
-import com.everhomes.server.schema.tables.daos.EhGroupOpRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhGroupVisibleScopesDao;
-import com.everhomes.server.schema.tables.daos.EhGroupsDao;
-import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
-import com.everhomes.server.schema.tables.pojos.EhGroupOpRequests;
-import com.everhomes.server.schema.tables.pojos.EhGroupVisibleScopes;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhGroupsRecord;
@@ -52,8 +28,24 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import org.jooq.*;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
 
-import static com.everhomes.server.schema.Tables.*;
+import java.security.InvalidParameterException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static com.everhomes.server.schema.Tables.EH_GROUP_MEMBERS;
 
 @Component
 public class GroupProviderImpl implements GroupProvider {
@@ -70,7 +62,8 @@ public class GroupProviderImpl implements GroupProvider {
     
     @Autowired
     private SequenceProvider sequenceProvider;
-    
+
+    @Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
     @Override
     public void createGroup(Group group) {
         long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
@@ -88,6 +81,7 @@ public class GroupProviderImpl implements GroupProvider {
 
     @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
             @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
     public void updateGroup(Group group) {
@@ -103,6 +97,7 @@ public class GroupProviderImpl implements GroupProvider {
 
     @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
         @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+        @CacheEvict(value="listGroupMessageMembers", allEntries=true),
         @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
     public void deleteGroup(Group group) {
@@ -290,6 +285,7 @@ public class GroupProviderImpl implements GroupProvider {
     }
     
     @Caching(evict={ @CacheEvict(value="GroupMemberByInfo", key="{#groupMember.groupId, #groupMember.memberType, #groupMember.memberId}"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupMemberByGroupId", key="#groupMember.groupId")})
     public void createGroupMember(final GroupMember groupMember) {
         assert(groupMember.getGroupId() != null);
@@ -331,9 +327,10 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhGroupMembers.class, null);
     }
     
-    @Caching(evict={ @CacheEvict(value="GroupMember", key="#id"),
+    @Caching(evict={ @CacheEvict(value="GroupMember", key="#groupMember.id"),
             @CacheEvict(value="GroupMemberByInfo", key="{#groupMember.groupId, #groupMember.memberType, #groupMember.memberId}"),
             @CacheEvict(value="GroupMemberByGroupId", key="#groupMember.groupId"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupMemberByUuid", key="#groupMember.uuid")})
     public void updateGroupMember(GroupMember groupMember) {
         assert(groupMember.getId() != null);
@@ -346,9 +343,10 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGroupMembers.class, groupMember.getId());
     }
     
-    @Caching(evict={ @CacheEvict(value="GroupMember", key="#id"),
+    @Caching(evict={ @CacheEvict(value="GroupMember", key="#groupMember.id"),
             @CacheEvict(value="GroupMemberByInfo", key="{#groupMember.groupId, #groupMember.memberType, #groupMember.memberId}"),
             @CacheEvict(value="GroupMemberByGroupId", key="#groupMember.groupId"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupMemberByUuid", key="#groupMember.uuid")})
     public void deleteGroupMember(final GroupMember groupMember) {
         assert(groupMember.getId() != null);
@@ -629,6 +627,7 @@ public class GroupProviderImpl implements GroupProvider {
     }
 
     @Caching(evict = { @CacheEvict(value="findGroupOpRequestById", key="#request.id"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="findGroupOpRequestByRequestor", key="{#request.groupId, #request.requestorUid}")})
     @Override
     public void updateGroupOpRequest(GroupOpRequest request) {
@@ -645,6 +644,7 @@ public class GroupProviderImpl implements GroupProvider {
     }
 
     @Caching(evict = { @CacheEvict(value="findGroupOpRequestById", key="#request.id"),
+            @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="findGroupOpRequestByRequestor", key="{#request.groupId, #request.requestorUid}")})
     @Override
     public void deleteGroupOpRequest(GroupOpRequest request) {
@@ -831,7 +831,7 @@ public class GroupProviderImpl implements GroupProvider {
 	    			.where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
 		    		.and(EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
 		    		.and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode()))
-		    		.orderBy(EH_GROUP_MEMBERS.ID.asc())
+		    		.orderBy(EH_GROUP_MEMBERS.MEMBER_ROLE.asc(), EH_GROUP_MEMBERS.ID.asc())  //按角色、id排序，角色：创建者4、管理员5、普通成员7，这样可取出第一个管理员
 		    		.limit(1)
 		    		.fetchOne()
 		    		.map(r->ConvertHelper.convert(r, GroupMember.class));
@@ -839,4 +839,89 @@ public class GroupProviderImpl implements GroupProvider {
     		return null;
     	}
     }
+    
+    @Cacheable(value="listGroupMessageMembers", key="{#namespaceId, #locator, #pageSize}", unless="#result.getSize() == 0")
+    @Override
+    public GroupMemberCaches listGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize) {
+        List<GroupMember> members = listGroupMembers(locator, pageSize);
+//        List<GroupMember> members = new ArrayList<GroupMember>();
+//        members.add(new GroupMember());
+        
+        GroupMemberCaches caches = new GroupMemberCaches();
+        caches.setMembers(members);
+        caches.setTick(System.currentTimeMillis());
+        
+        return caches;
+    }
+    
+    @Caching(evict={@CacheEvict(value="listGroupMessageMembers", key="{#namespaceId, #locator, #pageSize}")})
+    @Override
+    public void evictGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize) {
+    }
+
+	@Override
+	public List<GroupMember> listPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize,
+			boolean includeCreator, Long creatorId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, groupId));
+		SelectConditionStep<Record> step = context
+				.select()
+				.from(EH_GROUP_MEMBERS)
+				.where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId));
+				
+		if (status != null) {
+			step = step.and(EH_GROUP_MEMBERS.MEMBER_STATUS.eq(status));
+		}
+        if (keyword != null) {
+            step = step.and(EH_GROUP_MEMBERS.MEMBER_NICK_NAME.like(DSL.concat("%", keyword, "%")));
+        }
+		if (!includeCreator) {
+			step = step.and(EH_GROUP_MEMBERS.MEMBER_ID.ne(creatorId));
+		}
+		
+		Result<Record> result =step.orderBy(EH_GROUP_MEMBERS.MEMBER_ROLE.asc(), EH_GROUP_MEMBERS.ID.desc())
+			.limit(from.intValue(), pageSize)
+			.fetch();
+		
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, GroupMember.class));
+		}
+		return new ArrayList<>();
+	}
+
+    @Override
+    public List<GroupMember> listPublicGroupMembersByStatus(Long groupId, Byte status, Long from, int pageSize,
+                                                            boolean includeCreator, Long creatorId) {
+        return listPublicGroupMembersByStatus(groupId, null, status, from, pageSize, includeCreator, creatorId);
+    }
+
+	@Override
+	public List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize) {
+		return listPublicGroupMembersByStatus(groupId, keyword, status, from, pageSize, true, 0L);
+	}
+
+	@Override
+	public GroupMemberLog findGroupMemberLogByGroupMemberId(Long groupMemberId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_GROUP_MEMBER_LOGS)
+			.where(Tables.EH_GROUP_MEMBER_LOGS.GROUP_MEMBER_ID.eq(groupMemberId))
+			.orderBy(Tables.EH_GROUP_MEMBER_LOGS.ID.desc())
+			.limit(1)
+			.fetch();
+		if (records != null && records.size() > 0) {
+			return ConvertHelper.convert(records.get(0), GroupMemberLog.class);
+		}
+		return null;
+	}
+
+	@Override
+	public void createGroupMemberLog(GroupMemberLog groupMemberLog) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGroupMemberLogs.class));
+		groupMemberLog.setId(id);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMemberLogs.class, groupMemberLog.getId()));
+        EhGroupMemberLogsDao dao = new EhGroupMemberLogsDao(context.configuration());
+        dao.insert(groupMemberLog);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhGroupMemberLogs.class, null);
+	}
+	
+	
 }

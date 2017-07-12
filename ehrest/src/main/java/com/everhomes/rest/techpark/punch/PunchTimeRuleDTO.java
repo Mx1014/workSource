@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType：organization/user</li>
  * <li>ownerId：id</li>
  * <li>name：名称</li>
+ * <li>description：描述</li>
  * <li>startEarlyTime：最早上班时间</li>
  * <li>startLateTime：最晚上班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
  * <li>endEarlyTime：最早下班班时间</li>
@@ -25,6 +26,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime：创建时间</li>
  * <li>updateUid：更新人id</li>
  * <li>updateTime：更新时间</li>
+ * <li>punchTimesPerDay：每天打卡次数，2次或者4次)</li>
  * <li>daySplitTime：前一天与后一天的分界点</li>
  * </ul>
  */
@@ -52,6 +54,7 @@ public class PunchTimeRuleDTO {
 
 	private Long daySplitTime;
 	
+	private String description;
 	 
 	 
 	public Long getId() {
@@ -166,5 +169,17 @@ public class PunchTimeRuleDTO {
 
 	public void setDaySplitTime(Long daySplitTime) {
 		this.daySplitTime = daySplitTime;
+	}
+
+
+
+	public String getDescription() {
+		return description;
+	}
+
+
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

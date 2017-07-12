@@ -4,8 +4,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>categoryId: 类型ID</li>
- * <li>categoryName: 类型名称</li>
+ * <li>taskCategoryId: 类型ID</li>
+ * <li>taskCategoryName: 类型名称</li>
  * <li>totalCount: 总量</li>
  * <li>unprocesseCount: 未处理数量</li>
  * <li>processingCount: 处理中数量</li>
@@ -14,25 +14,26 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CategoryTaskStatisticsDTO {
-	private Long categoryId;
-	private String categoryName;
+	
+	private Long taskCategoryId;
+	private String taskCategoryName;
 	private Integer totalCount;
 	private Integer unprocesseCount;
 	private Integer processingCount;
 	private Integer processedCount;
 	private Integer closeCount;
-	
-	public Long getCategoryId() {
-		return categoryId;
+
+	public Long getTaskCategoryId() {
+		return taskCategoryId;
 	}
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setTaskCategoryId(Long taskCategoryId) {
+		this.taskCategoryId = taskCategoryId;
 	}
-	public String getCategoryName() {
-		return categoryName;
+	public String getTaskCategoryName() {
+		return taskCategoryName;
 	}
-	public void setCategoryName(String categoryName) {
-		this.categoryName = categoryName;
+	public void setTaskCategoryName(String taskCategoryName) {
+		this.taskCategoryName = taskCategoryName;
 	}
 	public Integer getTotalCount() {
 		return totalCount;

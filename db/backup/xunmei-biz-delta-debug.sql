@@ -1,0 +1,5 @@
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES ('synch.user.app.key', 'be036712-7f46-4d09-818e-b520d88e33e1', 'xun mei synch user app key', 999999);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES ('synch.user.secret.key', 'udBfVaXJYdI7SvKYJJ6vqc3EaIfUNbb+VbzYioi9iZTjKwR+YUUJwXXJ6E+MCF0SNpmDucqGyV+vFOIvnuprXA==', 'xun mei synch user secret key', 999999);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES ('oauth.server', 'https://beta.zuolin.com', 'oauth server', 999999);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`) VALUES ('pay.server', 'https://pay-beta.zuolin.com', 'pay server', 999999);
+insert into `eh_apps` (`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`) values ('147248','be036712-7f46-4d09-818e-b520d88e33e1','udBfVaXJYdI7SvKYJJ6vqc3EaIfUNbb+VbzYioi9iZTjKwR+YUUJwXXJ6E+MCF0SNpmDucqGyV+vFOIvnuprXA==','xunmei.initUserInfo.app','xunmei init user info app',1,now());

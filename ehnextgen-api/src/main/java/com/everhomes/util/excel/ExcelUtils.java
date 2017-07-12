@@ -1,5 +1,6 @@
 package com.everhomes.util.excel;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -104,20 +105,25 @@ public class ExcelUtils {
     /**
      * 写excel.
      *
-     * @param titleColumn 对应bean的属性名
+     * @param propertyNames 对应bean的属性名
      * @param titleName   列名
-     * @param titleSize   列宽
+     * @param columnSizes   列宽
      * @param dataList    数据
      */
-    public void writeExcel(String[] titleColumn, String[] titleName, int[] titleSize, List<?> dataList) {
+    public void writeExcel(String[] propertyNames, String[] titleName, int[] columnSizes, List<?> dataList) {
         try (OutputStream out = getOutputStream();) {
-            ByteArrayOutputStream excelStream = buildExcel(titleColumn, titleName, titleSize, dataList);
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleName, columnSizes, dataList);
             out.write(excelStream.toByteArray());
             out.flush();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
+
+	public void writeExcel(List<String> propertyNames, List<String> titleName, List<Integer> columnSizes,
+			List<?> dataList) {
+		writeExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
+	}
 
     private OutputStream getOutputStream() throws IOException {
         if (fileDir != null) {
@@ -133,7 +139,7 @@ public class ExcelUtils {
     private void buildResponse() throws UnsupportedEncodingException {
         fileName = fileName + ".xlsx";
         response.setContentType("application/msexcel");
-        response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8"));
+        response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
     }
 
     private ByteArrayOutputStream buildExcel(String[] propertyNames, String[] titleNames, int[] titleSize, List<?> dataList) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {

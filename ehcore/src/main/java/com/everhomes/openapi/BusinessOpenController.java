@@ -1,5 +1,7 @@
 package com.everhomes.openapi;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -7,6 +9,18 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowService;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.reserver.CreateReserverOrderCommand;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +36,13 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
@@ -40,6 +57,7 @@ import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
 import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
 import com.everhomes.rest.business.UserFavoriteCommand;
+import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
@@ -48,14 +66,22 @@ import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.openapi.BizMessageType;
 import com.everhomes.rest.openapi.BusinessMessageCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
+import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
 import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.openapi.ValidateUserPassCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
@@ -71,18 +97,6 @@ import com.everhomes.rest.user.ListUserCommand;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserDtoForBiz;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.SignupToken;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.EtagHelper;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
 
 @RestDoc(value="Business open Constroller", site="core")
 @RestController
@@ -107,6 +121,12 @@ public class BusinessOpenController extends ControllerBase {
 
 	@Autowired
 	MessagingService messagingService;
+
+	@Autowired
+	private FlowService flowService;
+	
+	@Autowired
+	private OrganizationService organizationService;
 
 	/**
 	 * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -269,6 +289,9 @@ public class BusinessOpenController extends ControllerBase {
 	@RequestMapping("sendMessageToUser")
 	@RestReturn(value=String.class)
 	public RestResponse sendMessageToUser(BusinessMessageCommand cmd) {
+		if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
+			cmd.getMeta().put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
+		}
 		sendMessageToUser(cmd.getUserId(), cmd.getContent(), cmd.getMeta());
 
 		RestResponse response =  new RestResponse();
@@ -538,6 +561,20 @@ public class BusinessOpenController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /openapi/listApartmentFloor</b>
+     * <p>根据小区Id、楼栋号和关键字查询楼层</p>
+     */
+    @RequestMapping("listApartmentFloor")
+    @RestReturn(value=ApartmentFloorDTO.class, collection=true)
+    public RestResponse listApartmentFloor(@Valid ListApartmentFloorCommand cmd) {
+        Tuple<Integer, List<ApartmentFloorDTO>> data = this.businessService.listApartmentFloor(cmd);
+        RestResponse response = new RestResponse(data.second());
+        response.setErrorCode(data.first());
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /openapi/listApartmentsByKeyword</b>
      * <p>根据小区Id、楼栋号和关键字查询门牌</p>
      */
@@ -681,6 +718,90 @@ public class BusinessOpenController extends ControllerBase {
     	RestResponse response = new RestResponse(user);
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
+    	return response;
+    }
+
+	/**
+	 * 
+	 * <p>创建电商拼单group</p>
+	 * <b>URL: /openapi/createBusinessGroup</b>
+	 */
+    @RequestMapping("createBusinessGroup")
+    @RestReturn(value=CreateBusinessGroupResponse.class)
+    public RestResponse createBusinessGroup(CreateBusinessGroupCommand cmd){
+    	return new RestResponse(businessService.createBusinessGroup(cmd));
+    }
+    
+	/**
+	 * 
+	 * <p>加入电商拼单group</p>
+	 * <b>URL: /openapi/joinBusinessGroup</b>
+	 */
+    @RequestMapping("joinBusinessGroup")
+    @RestReturn(value=String.class)
+    public RestResponse joinBusinessGroup(JoinBusinessGroupCommand cmd){
+    	businessService.joinBusinessGroup(cmd);
+    	return new RestResponse();
+    }
+
+	/**
+	 * <b>URL: /openapi/createReserverOrder</b>
+	 * <p>新建位置预订</p>
+	 */
+	@RequestMapping("createReserverOrder")
+	@RestReturn(value=String.class)
+	public RestResponse createReserverOrder(CreateReserverOrderCommand cmd) {
+
+		//新建flowcase
+
+		UserContext context = UserContext.current();
+		User user = userProvider.findUserById(cmd.getId());
+		context.setUser(user);
+
+		Integer namespaceId = user.getNamespaceId();
+		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.RESERVER_PLACE,
+				FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.RESERVER_PLACE.getCode());
+		if(null == flow) {
+			LOGGER.error("Enable reserver flow not found, moduleId={}", FlowConstants.RESERVER_PLACE);
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+					"Enable reserver flow not found.");
+		}
+		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+		createFlowCaseCommand.setApplyUserId(user.getId());
+		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+		createFlowCaseCommand.setReferId(Long.valueOf(cmd.getOrderId()));
+		createFlowCaseCommand.setReferType(FlowOwnerType.RESERVER_PLACE.getCode());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		StringBuilder sb = new StringBuilder("");
+		sb.append("就餐时间：").append(sdf.format(new Date(cmd.getReserverTime()))).append("\n");
+		sb.append("就餐人数：").append(cmd.getReserverNum()).append("人").append("\n");
+		sb.append("备注说明：").append(cmd.getRemark()).append("\n");
+		sb.append("申请人：").append(cmd.getRequestorName()).append("\n");
+		sb.append("店铺名称：").append(cmd.getShopName());
+		createFlowCaseCommand.setContent(sb.toString());
+//        createFlowCaseCommand.setProjectId(task.getOwnerId());
+//        createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+
+		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+    /**
+     * <b>URL: /openapi/listUsersOfEnterprise</b> 
+     */
+    @RequestMapping("listUsersOfEnterprise")
+    @RestReturn(value=OrganizationContactDTO.class)
+    @RequireAuthentication(false)
+    public RestResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd) {
+    	ListOrganizationContactCommandResponse memberResponse = this.organizationService.listUsersOfEnterprise(cmd);
+		RestResponse response =  new RestResponse(memberResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
     	return response;
     }
 }

@@ -3,6 +3,7 @@ package com.everhomes.rentalv2.admin;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.rentalv2.admin.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,30 +27,6 @@ import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.CloseResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.CreateResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.DeleteResourceCommand;
-import com.everhomes.rest.rentalv2.admin.DeleteResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListResponse;
-import com.everhomes.rest.rentalv2.admin.GetRefundUrlCommand;
-import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminResponse;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
-import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
-import com.everhomes.rest.rentalv2.admin.RefundOrderDTO;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
 
 /**
  * <ul>
@@ -205,7 +182,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	
 	/**
-	 * 
+	 *
 	 * <b>URL: /rental/admin/queryDefaultRule<b>
 	 * <p>
 	 * 查询默认规则
@@ -215,6 +192,23 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RestReturn(QueryDefaultRuleAdminResponse.class)
 	public RestResponse queryDefaultRule(@Valid QueryDefaultRuleAdminCommand cmd) {
 		QueryDefaultRuleAdminResponse queryDefaultRuleAdminResponse = this.rentalService.queryDefaultRule(cmd);
+		RestResponse response = new RestResponse(queryDefaultRuleAdminResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/getResourceRule<b>
+	 * <p>
+	 * 查询资源的规则
+	 * </p>
+	 */
+	@RequestMapping("getResourceRule")
+	@RestReturn(QueryDefaultRuleAdminResponse.class)
+	public RestResponse getResourceRule(@Valid GetResourceRuleAdminCommand cmd) {
+		QueryDefaultRuleAdminResponse queryDefaultRuleAdminResponse = this.rentalService.getResourceRule(cmd);
 		RestResponse response = new RestResponse(queryDefaultRuleAdminResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -237,7 +231,38 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+	/**
+	 * 
+	 * <b>URL: /rental/admin/updateDefaultDateRule<b>
+	 * <p>
+	 * 修改默认规则时间
+	 * </p>
+	 */
+	@RequestMapping("updateDefaultDateRule")
+	@RestReturn(String.class)
+	public RestResponse updateDefaultDateRule(@Valid UpdateDefaultDateRuleAdminCommand cmd) {
+		this.rentalService.updateDefaultDateRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * 
+	 * <b>URL: /rental/admin/updateDefaultAttachmentRule<b>
+	 * <p>
+	 * 修改默认规则提示文字
+	 * </p>
+	 */
+	@RequestMapping("updateDefaultAttachmentRule")
+	@RestReturn(String.class)
+	public RestResponse updateDefaultAttachmentRule(@Valid UpdateDefaultAttachmentRuleAdminCommand cmd) {
+		this.rentalService.updateDefaultAttachmentRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	/**
 	 * 
 	 * <b>URL: /rental/admin/getResourceList<b>
@@ -283,6 +308,23 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse updateResource(@Valid UpdateResourceAdminCommand cmd){
 		this.rentalService.updateResource(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourceOrder<b>
+	 * <p>
+	 * 更新资源顺序
+	 * </p>
+	 */
+	@RequestMapping("updateResourceOrder")
+	@RestReturn(String.class)
+	public RestResponse updateResourceOrder(@Valid UpdateResourceOrderAdminCommand cmd){
+		this.rentalService.updateResourceOrder(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -390,6 +432,42 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
+	/**
+	 * <b>URL: /rental/admin/updateResourceAttachment</b>
+	 * <p>
+	 * 添加修改资源的提交信息
+	 * </p>
+	 */
+
+	@RequestMapping("updateResourceAttachment")
+	@RestReturn(value = String.class)
+	public RestResponse updateResourceAttachment(@Valid UpdateResourceAttachmentCommand cmd) {
+		rentalService.updateResourceAttachment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateRentalDate</b>
+	 * <p>
+	 * 添加修改资源的开放时间
+	 * </p>
+	 */
+
+	@RequestMapping("updateRentalDate")
+	@RestReturn(value = String.class)
+	public RestResponse updateRentalDate(@Valid UpdateRentalDateCommand cmd) {
+		rentalService.updateRentalDate(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <b>URL: /rental/admin/updateRentalSiteRules</b>
 	 * <p>
@@ -558,7 +636,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	
 	
 	/**
-	 * <b>URL: /rental/admin/getRefundUrl</b>
+	 * <b>URL: /re	ntal/admin/getRefundUrl</b>
 	 * <p>
 	 * 拿到退款URL
 	 * </p>
@@ -572,4 +650,38 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+
+	/**
+	 * <b>URL: /rental/admin/addCheckOperator</b>
+	 * <p>
+	 * 新增签到的管理员
+	 * </p>
+	 */
+	@RequestMapping("addCheckOperator")
+	@RestReturn(value = String.class)
+	public RestResponse addCheckOperator(@Valid AddCheckOperatorCommand cmd) {
+		rentalService.addCheckOperator(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /rental/admin/deleteCheckOperator</b>
+	 * <p>
+	 * 删除签到的管理员
+	 * </p>
+	 */
+	@RequestMapping("deleteCheckOperator")
+	@RestReturn(value = String.class)
+	public RestResponse deleteCheckOperator(@Valid AddCheckOperatorCommand cmd) {
+		rentalService.deleteCheckOperator(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

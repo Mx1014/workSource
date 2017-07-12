@@ -1,69 +1,24 @@
 // @formatter:off
 package com.everhomes.group;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.group.AcceptJoinGroupInvitation;
-import com.everhomes.rest.group.ApproveAdminRoleCommand;
-import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
-import com.everhomes.rest.group.CommandResult;
-import com.everhomes.rest.group.CreateGroupCommand;
-import com.everhomes.rest.group.DeleteGroupByIdCommand;
-import com.everhomes.rest.group.GetAdminRoleStatusCommand;
-import com.everhomes.rest.group.GetGroupCommand;
-import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
-import com.everhomes.rest.group.GroupDTO;
-import com.everhomes.rest.group.GroupMemberDTO;
-import com.everhomes.rest.group.GroupMemberSnapshotDTO;
-import com.everhomes.rest.group.InviteToBeAdminCommand;
-import com.everhomes.rest.group.InviteToJoinGroupByFamilyCommand;
-import com.everhomes.rest.group.InviteToJoinGroupByPhoneCommand;
-import com.everhomes.rest.group.InviteToJoinGroupCommand;
-import com.everhomes.rest.group.LeaveGroupCommand;
-import com.everhomes.rest.group.ListAdminOpRequestCommand;
-import com.everhomes.rest.group.ListAdminOpRequestCommandResponse;
-import com.everhomes.rest.group.ListGroupByTagCommand;
-import com.everhomes.rest.group.ListGroupCommandResponse;
-import com.everhomes.rest.group.ListGroupWaitingApprovalsCommand;
-import com.everhomes.rest.group.ListGroupWaitingApprovalsCommandResponse;
-import com.everhomes.rest.group.ListGroupsByNamespaceIdCommand;
-import com.everhomes.rest.group.ListMemberCommandResponse;
-import com.everhomes.rest.group.ListMemberInRoleCommand;
-import com.everhomes.rest.group.ListMemberInStatusCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
-import com.everhomes.rest.group.ListPublicGroupCommand;
-import com.everhomes.rest.group.QuitAndTransferPrivilegeCommand;
-import com.everhomes.rest.group.RejectAdminRoleCommand;
-import com.everhomes.rest.group.RejectJoinGroupInvitation;
-import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
-import com.everhomes.rest.group.RequestAdminRoleCommand;
-import com.everhomes.rest.group.RequestToJoinGroupCommand;
-import com.everhomes.rest.group.ResignAdminRoleCommand;
-import com.everhomes.rest.group.RevokeAdminRoleCommand;
-import com.everhomes.rest.group.RevokeGroupMemberCommand;
-import com.everhomes.rest.group.SearchGroupCommand;
-import com.everhomes.rest.group.UpdateGroupCommand;
-import com.everhomes.rest.group.UpdateGroupMemberCommand;
-import com.everhomes.util.EtagHelper;
+import com.everhomes.rest.group.*;
+import com.everhomes.util.RequireAuthentication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 /**
  * <ul>圈管理：
@@ -105,12 +60,7 @@ public class GroupController extends ControllerBase {
     @RequestMapping("create")
     @RestReturn(value=GroupDTO.class)
     public RestResponse create(@Valid CreateGroupCommand cmd) {
-        GroupDTO groupDto = this.groupService.createGroup(cmd);
-        
-        RestResponse response = new RestResponse(groupDto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        return groupService.createAGroup(cmd);
     }
     
 //    @RequestMapping("test")
@@ -144,8 +94,9 @@ public class GroupController extends ControllerBase {
      * <p>获取指定ID对应的group信息</p>
      */
     @RequestMapping("get")
+    @RequireAuthentication(false)
     @RestReturn(value=GroupDTO.class)
-    public RestResponse get(@Valid GetGroupCommand cmd, HttpServletRequest request, HttpServletResponse paramResponse) {
+    public RestResponse get(@Valid GetGroupCommand cmd) {
         GroupDTO groupDto = this.groupService.getGroup(cmd);
         RestResponse response = new RestResponse();
         // 由于涉及到订阅人数和是否已经订阅该圈的变化，不宜做Etag
@@ -193,6 +144,7 @@ public class GroupController extends ControllerBase {
      * <p>获取全部的group</p>
      */
     @RequestMapping("listGroupsByNamespaceId")
+    @RequireAuthentication(false)
     @RestReturn(value=ListGroupCommandResponse.class)
     public RestResponse listGroupsByNamespaceId(ListGroupsByNamespaceIdCommand cmd){
     	RestResponse response = new RestResponse(groupService.listGroupsByNamespaceId(cmd));
@@ -685,7 +637,7 @@ public class GroupController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     //Add by Janson
     @RequestMapping("deleteById")
     @RestReturn(value=String.class)
@@ -712,4 +664,204 @@ public class GroupController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    
+	/**
+	 * <p>1.查询我加入的俱乐部发的贴子</p>
+	 * <b>URL: /group/listUserGroupPost</b>
+	 */
+	@RequestMapping("listUserGroupPost")
+	@RestReturn(ListUserGroupPostResponse.class)
+	public RestResponse listUserGroupPost(ListUserGroupPostCommand cmd){
+		return new RestResponse(groupService.listUserGroupPost(cmd));
+	}
+
+	/**
+	 * <p>2.转移创建者权限</p>
+	 * <b>URL: /group/transferCreatorPrivilege</b>
+	 */
+	@RequestMapping("transferCreatorPrivilege")
+	@RestReturn(String.class)
+	public RestResponse transferCreatorPrivilege(TransferCreatorPrivilegeCommand cmd){
+		groupService.transferCreatorPrivilege(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>3.创建广播消息</p>
+	 * <b>URL: /group/createBroadcast</b>
+	 */
+	@RequestMapping("createBroadcast")
+	@RestReturn(CreateBroadcastResponse.class)
+	public RestResponse createBroadcast(CreateBroadcastCommand cmd){
+		return new RestResponse(groupService.createBroadcast(cmd));
+	}
+
+    /**
+     * <p>删除广播</p>
+     * <b>URL: /group/deleteBroadcastByToken</b>
+     */
+    @RequestMapping("deleteBroadcastByToken")
+    @RestReturn(String.class)
+    public RestResponse deleteBroadcastByToken(DeleteBroadcastByTokenCommand cmd){
+        groupService.deleteBroadcastByToken(cmd);
+        return new RestResponse();
+    }
+
+	/**
+	 * <p>4.获取广播详情</p>
+	 * <b>URL: /group/getBroadcastByToken</b>
+	 */
+	@RequireAuthentication(false)
+	@RequestMapping("getBroadcastByToken")
+	@RestReturn(GetBroadcastByTokenResponse.class)
+	public RestResponse getBroadcastByToken(GetBroadcastByTokenCommand cmd){
+		return new RestResponse(groupService.getBroadcastByToken(cmd));
+	}
+
+	/**
+	 * <p>5.列出广播消息</p>
+	 * <b>URL: /group/listBroadcasts</b>
+	 */
+	@RequestMapping("listBroadcasts")
+    @RequireAuthentication(false)
+	@RestReturn(ListBroadcastsResponse.class)
+	public RestResponse listBroadcasts(ListBroadcastsCommand cmd){
+		return new RestResponse(groupService.listBroadcasts(cmd));
+	}
+
+	/**
+	 * <p>6.设置俱乐部参数</p>
+	 * <b>URL: /group/setGroupParameters</b>
+	 */
+	@RequestMapping("setGroupParameters")
+	@RestReturn(GroupParametersResponse.class)
+	public RestResponse setGroupParameters(SetGroupParametersCommand cmd){
+		return new RestResponse(groupService.setGroupParameters(cmd));
+	}
+
+	/**
+	 * <p>7.获取俱乐部参数</p>
+	 * <b>URL: /group/getGroupParameters</b>
+	 */
+	@RequestMapping("getGroupParameters")
+	@RestReturn(GroupParametersResponse.class)
+	public RestResponse getGroupParameters(GetGroupParametersCommand cmd){
+		return new RestResponse(groupService.getGroupParameters(cmd));
+	}
+
+	/**
+	 * <p>8.按审核状态查询圈</p>
+	 * <b>URL: /group/listGroupsByApprovalStatus</b>
+	 */
+	@RequestMapping("listGroupsByApprovalStatus")
+	@RestReturn(ListGroupsByApprovalStatusResponse.class)
+	public RestResponse listGroupsByApprovalStatus(ListGroupsByApprovalStatusCommand cmd){
+		return new RestResponse(groupService.listGroupsByApprovalStatus(cmd));
+	}
+
+	/**
+	 * <p>9.审核通过俱乐部申请</p>
+	 * <b>URL: /group/approvalGroupRequest</b>
+	 */
+	@RequestMapping("approvalGroupRequest")
+	@RestReturn(String.class)
+	public RestResponse approvalGroupRequest(ApprovalGroupRequestCommand cmd){
+		groupService.approvalGroupRequest(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>10.拒绝俱乐部申请</p>
+	 * <b>URL: /group/rejectGroupRequest</b>
+	 */
+	@RequestMapping("rejectGroupRequest")
+	@RestReturn(String.class)
+	public RestResponse rejectGroupRequest(RejectGroupRequestCommand cmd){
+		groupService.rejectGroupRequest(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>11.创建圈分类</p>
+	 * <b>URL: /group/createGroupCategory</b>
+	 */
+	@RequestMapping("createGroupCategory")
+	@RestReturn(CreateGroupCategoryResponse.class)
+	public RestResponse createGroupCategory(CreateGroupCategoryCommand cmd){
+		return new RestResponse(groupService.createGroupCategory(cmd));
+	}
+
+	/**
+	 * <p>12.更新圈分类</p>
+	 * <b>URL: /group/updateGroupCategory</b>
+	 */
+	@RequestMapping("updateGroupCategory")
+	@RestReturn(UpdateGroupCategoryResponse.class)
+	public RestResponse updateGroupCategory(UpdateGroupCategoryCommand cmd){
+		return new RestResponse(groupService.updateGroupCategory(cmd));
+	}
+
+	/**
+	 * <p>13.删除圈分类</p>
+	 * <b>URL: /group/deleteGroupCategory</b>
+	 */
+	@RequestMapping("deleteGroupCategory")
+	@RestReturn(String.class)
+	public RestResponse deleteGroupCategory(DeleteGroupCategoryCommand cmd){
+		groupService.deleteGroupCategory(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>14.列出圈分类</p>
+	 * <b>URL: /group/listGroupCategories</b>
+	 */
+	@RequestMapping("listGroupCategories")
+	@RestReturn(ListGroupCategoriesResponse.class)
+	public RestResponse listGroupCategories(ListGroupCategoriesCommand cmd){
+		return new RestResponse(groupService.listGroupCategories(cmd));
+	}
+
+	/**
+	 * <p>15.获取$俱乐部$占位符的名称</p>
+	 * <b>URL: /group/getClubPlaceholderName</b>
+	 */
+	@RequestMapping("getClubPlaceholderName")
+	@RestReturn(GetClubPlaceholderNameResponse.class)
+	public RestResponse getClubPlaceholderName(GetClubPlaceholderNameCommand cmd){
+		return new RestResponse(groupService.getClubPlaceholderName(cmd));
+	}
+	
+	/**
+	 * <p>16.剩余可发广播数</p>
+	 * <b>URL: /group/getRemainBroadcastCount</b>
+	 */
+	@RequestMapping("getRemainBroadcastCount")
+	@RestReturn(GetRemainBroadcastCountResponse.class)
+	public RestResponse getRemainBroadcastCount(GetRemainBroadcastCountCommand cmd){
+		return new RestResponse(groupService.getRemainBroadcastCount(cmd));
+	}
+	
+	/**
+	 * <p>17.获取分享信息</p>
+	 * <b>URL: /group/getShareInfo</b>
+	 */
+	@RequireAuthentication(false)
+	@RequestMapping("getShareInfo")
+	@RestReturn(GetShareInfoResponse.class)
+	public RestResponse getShareInfo(GetShareInfoCommand cmd){
+		return new RestResponse(groupService.getShareInfo(cmd));
+	}
+
+	/**
+	 * <p>18.取消俱乐部申请</p>
+	 * <b>URL: /group/cancelGroupRequest</b>
+	 */
+	@RequestMapping("cancelGroupRequest")
+	@RestReturn(String.class)
+	public RestResponse cancelGroupRequest(CancelGroupRequestCommand cmd){
+		groupService.cancelGroupRequest(cmd);
+		return new RestResponse();
+	}
 }

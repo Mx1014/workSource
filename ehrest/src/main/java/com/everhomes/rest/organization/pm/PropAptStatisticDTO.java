@@ -10,8 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>userCount: 小区入住的总用户总数</li>
  * <li>liveCount: 业主自住总数</li>
  * <li>rentCount: 出租总数</li>
- * <li>freeCount: 空闲总数</li>
- * <li>decorateCount: 装修总数</li>
+ * <li>freeCount: 待租总数</li>
+ * <li>saledCount: 已售总数</li>
  * <li>unsaleCount: 待售总数</li>
  * <li>defaultCount: 其他未知总数</li>
  * </ul>
@@ -23,11 +23,25 @@ public class PropAptStatisticDTO {
 	private Integer liveCount;
 	private Integer rentCount;
 	private Integer freeCount;
-	private Integer decorateCount;
+	private Integer saledCount;
 	private Integer unsaleCount;
 	private Integer defaultCount;
+	private Integer hasOwnerCount;
+	private Integer noOwnerCount;
     
-    public PropAptStatisticDTO() {
+    public Integer getHasOwnerCount() {
+		return hasOwnerCount;
+	}
+	public void setHasOwnerCount(Integer hasOwnerCount) {
+		this.hasOwnerCount = hasOwnerCount;
+	}
+	public Integer getNoOwnerCount() {
+		return noOwnerCount;
+	}
+	public void setNoOwnerCount(Integer noOwnerCount) {
+		this.noOwnerCount = noOwnerCount;
+	}
+	public PropAptStatisticDTO() {
     }
 	public Integer getAptCount() {
 		return aptCount;
@@ -65,11 +79,11 @@ public class PropAptStatisticDTO {
 	public void setFreeCount(Integer freeCount) {
 		this.freeCount = freeCount;
 	}
-	public Integer getDecorateCount() {
-		return decorateCount;
+	public Integer getSaledCount() {
+		return saledCount;
 	}
-	public void setDecorateCount(Integer decorateCount) {
-		this.decorateCount = decorateCount;
+	public void setSaledCount(Integer saledCount) {
+		this.saledCount = saledCount;
 	}
 	public Integer getUnsaleCount() {
 		return unsaleCount;

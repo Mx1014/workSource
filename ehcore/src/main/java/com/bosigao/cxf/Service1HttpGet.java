@@ -23,23 +23,23 @@ public interface Service1HttpGet {
      */
     @WebMethod(operationName = "CardPayMoney")
     @WebResult(name = "string", targetNamespace = "http://tempuri.org/", partName = "Body")
-    public java.lang.String cardPayMoney(
-        @WebParam(partName = "cardCode", name = "cardCode", targetNamespace = "http://tempuri.org/")
-        java.lang.String cardCode,
-        @WebParam(partName = "carNumber", name = "carNumber", targetNamespace = "http://tempuri.org/")
-        java.lang.String carNumber,
-        @WebParam(partName = "flag", name = "flag", targetNamespace = "http://tempuri.org/")
-        java.lang.String flag,
-        @WebParam(partName = "cost", name = "cost", targetNamespace = "http://tempuri.org/")
-        java.lang.String cost,
-        @WebParam(partName = "validStart", name = "validStart", targetNamespace = "http://tempuri.org/")
-        java.lang.String validStart,
-        @WebParam(partName = "validEnd", name = "validEnd", targetNamespace = "http://tempuri.org/")
-        java.lang.String validEnd,
-        @WebParam(partName = "payTime", name = "payTime", targetNamespace = "http://tempuri.org/")
-        java.lang.String payTime,
-        @WebParam(partName = "sign", name = "sign", targetNamespace = "http://tempuri.org/")
-        java.lang.String sign
+    public String cardPayMoney(
+            @WebParam(partName = "cardCode", name = "cardCode", targetNamespace = "http://tempuri.org/")
+                    String cardCode,
+            @WebParam(partName = "carNumber", name = "carNumber", targetNamespace = "http://tempuri.org/")
+                    String carNumber,
+            @WebParam(partName = "flag", name = "flag", targetNamespace = "http://tempuri.org/")
+                    String flag,
+            @WebParam(partName = "cost", name = "cost", targetNamespace = "http://tempuri.org/")
+                    String cost,
+            @WebParam(partName = "validStart", name = "validStart", targetNamespace = "http://tempuri.org/")
+                    String validStart,
+            @WebParam(partName = "validEnd", name = "validEnd", targetNamespace = "http://tempuri.org/")
+                    String validEnd,
+            @WebParam(partName = "payTime", name = "payTime", targetNamespace = "http://tempuri.org/")
+                    String payTime,
+            @WebParam(partName = "sign", name = "sign", targetNamespace = "http://tempuri.org/")
+                    String sign
     );
 
     /**
@@ -47,21 +47,21 @@ public interface Service1HttpGet {
      */
     @WebMethod(operationName = "GetAllCardDescript")
     @WebResult(name = "string", targetNamespace = "http://tempuri.org/", partName = "Body")
-    public java.lang.String getAllCardDescript();
+    public String getAllCardDescript();
 
     /**
      * 月卡用户信息查询
      */
     @WebMethod(operationName = "GetCardInfo")
     @WebResult(name = "string", targetNamespace = "http://tempuri.org/", partName = "Body")
-    public java.lang.String getCardInfo(
-        @WebParam(partName = "cardCode", name = "cardCode", targetNamespace = "http://tempuri.org/")
-        java.lang.String cardCode,
-        @WebParam(partName = "carNumber", name = "carNumber", targetNamespace = "http://tempuri.org/")
-        java.lang.String carNumber,
-        @WebParam(partName = "flag", name = "flag", targetNamespace = "http://tempuri.org/")
-        java.lang.String flag,
-        @WebParam(partName = "sign", name = "sign", targetNamespace = "http://tempuri.org/")
-        java.lang.String sign
+    public String getCardInfo(
+            @WebParam(partName = "cardCode", name = "cardCode", targetNamespace = "http://tempuri.org/")
+                    String cardCode,
+            @WebParam(partName = "carNumber", name = "carNumber", targetNamespace = "http://tempuri.org/")
+                    String carNumber,
+            @WebParam(partName = "flag", name = "flag", targetNamespace = "http://tempuri.org/")
+                    String flag,
+            @WebParam(partName = "sign", name = "sign", targetNamespace = "http://tempuri.org/")
+                    String sign
     );
 }

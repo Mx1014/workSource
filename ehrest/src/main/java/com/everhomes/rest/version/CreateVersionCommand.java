@@ -29,6 +29,15 @@ public class CreateVersionCommand {
 	private Long publishTime;
 	private String downloadUrl;
 	private String upgradeDescription;
+	private String iconUrl;
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
+	}
 
 	public String getAppName() {
 		return appName;

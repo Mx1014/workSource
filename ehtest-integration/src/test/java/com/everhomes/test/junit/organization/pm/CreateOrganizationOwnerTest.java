@@ -30,7 +30,7 @@ public class CreateOrganizationOwnerTest extends BaseLoginAuthTestCase {
         String api = "/pm/createOrganizationOwner";
         CreateOrganizationOwnerCommand cmd = new CreateOrganizationOwnerCommand();
 
-        String contactToken = "13245678911";
+        String contactToken = "12345678910";
         String contactName = "zuolin";
         Long birthday = Date.valueOf("2016-01-01").getTime();
 
@@ -38,17 +38,17 @@ public class CreateOrganizationOwnerTest extends BaseLoginAuthTestCase {
         cmd.setContactName(contactName);
         cmd.setOrgOwnerTypeId(1L);
         cmd.setBirthday(birthday);
-        cmd.setCommunityId(111L);
+        cmd.setCommunityId(24206890946790405L);
         cmd.setOrganizationId(1000001L);
 
         OrganizationOwnerAddressCommand addressCommand = new OrganizationOwnerAddressCommand();
-        addressCommand.setAddressId(122L);
+        addressCommand.setAddressId(24206890946797812L);
         addressCommand.setLivingStatus((byte)0);
         cmd.setAddresses(Collections.singletonList(addressCommand));
 
         CreateOrganizationOwnerRestResponse response = httpClientService.restPost(api, cmd, CreateOrganizationOwnerRestResponse.class);
 
-        assertEquals("OrganizationOwner are already exist.", response.getErrorDescription());
+        assertEquals("OrganizationOwner are already exist, contactToken = 12345678910.", response.getErrorDescription());
 
         EhOrganizationOwnersRecord record = dbProvider.getDslContext().selectFrom(Tables.EH_ORGANIZATION_OWNERS)
                 .where(Tables.EH_ORGANIZATION_OWNERS.CONTACT_NAME.eq(contactName))
@@ -70,7 +70,8 @@ public class CreateOrganizationOwnerTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-create-owner-data-2.txt";
+        // userInfoFilePath = "data/json/customer-manage-create-owner-data-2.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

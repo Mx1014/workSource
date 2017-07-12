@@ -13,6 +13,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,8 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.forum.ForumLocalStringCode;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.organization.OfficialFlag;
@@ -66,6 +70,7 @@ import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -313,6 +318,7 @@ public class ForumProviderImpl implements ForumProvider {
         }
         
         EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
+        post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(post);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
@@ -666,7 +672,10 @@ public class ForumProviderImpl implements ForumProvider {
         }
             
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
+        	//后台发布活动：开放时间选择可早于当前时间（包括开始、结束及报名截止时间，同时刷新活动发布时间为活动开始时间前24小时） (活动2.6.0的)
+        	//此时ID和CREATE_TIME的顺序不一致，此处改用创建时间排序 ，  add by yanjun 20170522
+        	//query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
+            query.addConditions(Tables.EH_FORUM_POSTS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
         }
         
         query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
@@ -683,7 +692,9 @@ public class ForumProviderImpl implements ForumProvider {
         }).collect(Collectors.toList());
         
         if(posts.size() > 0) {
-            locator.setAnchor(posts.get(posts.size() -1).getId());
+        	//后台发布活动：开放时间选择可早于当前时间（包括开始、结束及报名截止时间，同时刷新活动发布时间为活动开始时间前24小时） (活动2.6.0的)
+        	//此时ID和CREATE_TIME的顺序不一致，此处改用创建时间排序 ，  add by yanjun 20170522
+            locator.setAnchor(posts.get(posts.size() -1).getCreateTime().getTime());
         }
         
         long endTime = System.currentTimeMillis();
@@ -933,4 +944,94 @@ public class ForumProviderImpl implements ForumProvider {
 			}
 		}
 	}
+
+	/**
+	 * 金地抓取数据使用
+	 */
+	@Override
+	public List<Post> listForumPostByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_FORUM_POSTS.fields()).from(Tables.EH_FORUM_POSTS)
+			.join(Tables.EH_USERS).on(Tables.EH_FORUM_POSTS.CREATOR_UID.eq(Tables.EH_USERS.ID)).and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L))
+			.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
+			.and(Tables.EH_FORUM_POSTS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_FORUM_POSTS.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_FORUM_POSTS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, Post.class));
+		}
+		return new ArrayList<Post>();
+	}
+
+	/**
+	 * 金地抓取数据使用
+	 */
+	@Override
+	public List<Post> listForumPostByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_FORUM_POSTS.fields()).from(Tables.EH_FORUM_POSTS)
+			.join(Tables.EH_USERS).on(Tables.EH_FORUM_POSTS.CREATOR_UID.eq(Tables.EH_USERS.ID)).and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L))
+			.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
+			.and(Tables.EH_FORUM_POSTS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_FORUM_POSTS.UPDATE_TIME.asc(), Tables.EH_FORUM_POSTS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, Post.class));
+		}
+		return new ArrayList<Post>();
+	}
+
+	@Override
+	public List<Post> listForumCommentByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhForumPosts t1 = Tables.EH_FORUM_POSTS.as("t1");
+		com.everhomes.server.schema.tables.EhUsers t2 = Tables.EH_USERS.as("t2");
+		com.everhomes.server.schema.tables.EhForumPosts t3 = Tables.EH_FORUM_POSTS.as("t3");
+		Result<Record> result = context.select(t1.fields()).from(t1)
+			.join(t2).on(t1.CREATOR_UID.eq(t2.ID)).and(t2.NAMESPACE_ID.eq(namespaceId))
+			.join(t3).on(t1.PARENT_POST_ID.eq(t3.ID)).and(t3.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
+			.and(t1.PARENT_POST_ID.ne(0L))
+			.and(t1.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(t1.ID.gt(pageAnchor))
+			.orderBy(t1.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, Post.class));
+		}
+		return new ArrayList<Post>();
+	}
+
+	@Override
+	public List<Post> listForumCommentByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhForumPosts t1 = Tables.EH_FORUM_POSTS.as("t1");
+		com.everhomes.server.schema.tables.EhUsers t2 = Tables.EH_USERS.as("t2");
+		com.everhomes.server.schema.tables.EhForumPosts t3 = Tables.EH_FORUM_POSTS.as("t3");
+		Result<Record> result = context.select(t1.fields()).from(t1)
+			.join(t2).on(t1.CREATOR_UID.eq(t2.ID)).and(t2.NAMESPACE_ID.eq(namespaceId))
+			.join(t3).on(t1.PARENT_POST_ID.eq(t3.ID)).and(t3.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
+			.and(t1.PARENT_POST_ID.ne(0L))
+			.and(t1.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(t1.UPDATE_TIME.asc(), t1.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, Post.class));
+		}
+		return new ArrayList<Post>();
+	}
+	
+	
  }

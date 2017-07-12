@@ -127,42 +127,45 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                     avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
                     filterDto.setAvatar(avatarUri);
                     filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+                    filterDto.setForumId(group.getOwningForumId());
                     tmpFilterList.add(filterDto);
                 }
             } else {
                 LOGGER.warn("The group id of organization is null, sceneToken=" + sceneToken);
             }
 
-            // 子公司
-            List<String> groupTypes = new ArrayList<String>();
-            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-            List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
-            if(subOrgList != null && subOrgList.size() > 0) {
-                for(Organization subOrg : subOrgList) {
-                    if(subOrg.getGroupId() != null) {
-                        if(subOrg.getGroupId() != null) {
-                            group = groupProvider.findGroupById(subOrg.getGroupId());
-                        }
-                        if(group != null) {
-                            filterDto = new TopicFilterDTO();
-                            filterDto.setId(menuId++);
-                            filterDto.setParentId(group1Id);
-                            filterDto.setName(subOrg.getName());
-                            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
-                            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-                            actionUrl = String.format("%s%s?forumId=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath, 
-                                "/forum/listTopics", group.getOwningForumId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
-                            filterDto.setActionUrl(actionUrl);
-                            avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
-                            filterDto.setAvatar(avatarUri);
-                            filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
-                            tmpFilterList.add(filterDto);
-                        }
-                    } else {
-                        LOGGER.warn("The group id of suborganization is null, subOrgId=" + subOrg.getId() + ", sceneToken=" + sceneToken);
-                    }
-                }
-            }
+
+            //和产品沟通，论坛模块不显示子公司   forum-2.0分支  edit by yanjun  20170616
+//            // 子公司
+//            List<String> groupTypes = new ArrayList<String>();
+//            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+//            List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+//            if(subOrgList != null && subOrgList.size() > 0) {
+//                for(Organization subOrg : subOrgList) {
+//                    if(subOrg.getGroupId() != null) {
+//                        if(subOrg.getGroupId() != null) {
+//                            group = groupProvider.findGroupById(subOrg.getGroupId());
+//                        }
+//                        if(group != null) {
+//                            filterDto = new TopicFilterDTO();
+//                            filterDto.setId(menuId++);
+//                            filterDto.setParentId(group1Id);
+//                            filterDto.setName(subOrg.getName());
+//                            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
+//                            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
+//                            actionUrl = String.format("%s%s?forumId=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath,
+//                                "/forum/listTopics", group.getOwningForumId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
+//                            filterDto.setActionUrl(actionUrl);
+//                            avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
+//                            filterDto.setAvatar(avatarUri);
+//                            filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+//                            tmpFilterList.add(filterDto);
+//                        }
+//                    } else {
+//                        LOGGER.warn("The group id of suborganization is null, subOrgId=" + subOrg.getId() + ", sceneToken=" + sceneToken);
+//                    }
+//                }
+//            }
             
             // 当公司和子公司都没有论坛的时候，此时不显示公司圈组 by lqs 20160426
             if(tmpFilterList.size() > 0) {
@@ -219,6 +222,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
                 filterDto.setAvatar(avatarUri);
                 filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+                filterDto.setForumId(community.getDefaultForumId());
                 tmpFilterList.add(filterDto);
             }
             
@@ -227,7 +231,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 TopicFilterDTO cmntyGroupFilterDto = new TopicFilterDTO();
                 cmntyGroupFilterDto.setId(group2Id);
                 cmntyGroupFilterDto.setParentId(0L);
-                code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+                code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_GROUP);
                 menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
                 cmntyGroupFilterDto.setName(menuName);
                 cmntyGroupFilterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
@@ -344,7 +348,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 sentScopeDto = new TopicScopeDTO();
                 sentScopeDto.setId(group2Id);
                 sentScopeDto.setParentId(0L);
-                code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+                code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_GROUP);
                 menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
                 sentScopeDto.setName(menuName);
                 sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
@@ -404,34 +408,35 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 tmpSentScopeList.add(sentScopeDto);
             }
 
-            // 子公司
-            List<String> groupTypes = new ArrayList<String>();
-            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-            List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
-            if(subOrgList != null && subOrgList.size() > 0) {
-                for(Organization subOrg : subOrgList) {
-                    groupDto = null;
-                    if(subOrg.getGroupId() != null) {
-                        groupDto = groupProvider.findGroupById(subOrg.getGroupId());
-                    }
-                    if(groupDto != null) {
-                        sentScopeDto = new TopicScopeDTO();
-                        sentScopeDto.setId(menuId++);
-                        sentScopeDto.setParentId(group1Id);
-                        sentScopeDto.setName(subOrg.getName());
-                        sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
-                        sentScopeDto.setForumId(groupDto.getOwningForumId());
-                        sentScopeDto.setSceneToken(sceneToken);
-                        sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
-                        avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
-                        sentScopeDto.setAvatar(avatarUri);
-                        sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
-                        sentScopeDto.setVisibleRegionType(VisibleRegionType.REGION.getCode());
-                        sentScopeDto.setVisibleRegionId(organization.getId());
-                        tmpSentScopeList.add(sentScopeDto);
-                    }
-                }
-            }
+            //和产品沟通，论坛模块不显示子公司   forum-2.0分支  edit by yanjun  20170616
+//            // 子公司
+//            List<String> groupTypes = new ArrayList<String>();
+//            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+//            List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+//            if(subOrgList != null && subOrgList.size() > 0) {
+//                for(Organization subOrg : subOrgList) {
+//                    groupDto = null;
+//                    if(subOrg.getGroupId() != null) {
+//                        groupDto = groupProvider.findGroupById(subOrg.getGroupId());
+//                    }
+//                    if(groupDto != null) {
+//                        sentScopeDto = new TopicScopeDTO();
+//                        sentScopeDto.setId(menuId++);
+//                        sentScopeDto.setParentId(group1Id);
+//                        sentScopeDto.setName(subOrg.getName());
+//                        sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
+//                        sentScopeDto.setForumId(groupDto.getOwningForumId());
+//                        sentScopeDto.setSceneToken(sceneToken);
+//                        sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+//                        avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
+//                        sentScopeDto.setAvatar(avatarUri);
+//                        sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+//                        sentScopeDto.setVisibleRegionType(VisibleRegionType.REGION.getCode());
+//                        sentScopeDto.setVisibleRegionId(organization.getId());
+//                        tmpSentScopeList.add(sentScopeDto);
+//                    }
+//                }
+//            }
             
             if(tmpSentScopeList.size() > 0) {
                 // 菜单：公司圈

@@ -23,6 +23,8 @@ import com.everhomes.util.StringHelper;
  * <li>afternoonApprovalStatus：下午考勤状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>exceptionStatus：状态{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
  * <li>punchTimesPerDay：打卡状态</li> 
+ * <li>deviceChangeFlag：设备改变  0-没变 1-改变标红</li> 
+ * <li>statuString：状态文字</li> 
  * </ul>
  */
 public class PunchDayDetailDTO {
@@ -45,6 +47,8 @@ public class PunchDayDetailDTO {
 	private java.lang.Byte viewFlag;
 	private java.lang.Byte punchTimesPerDay;
     private Byte exceptionStatus ;
+    private Byte deviceChangeFlag;
+    private String statuString;
 	public java.lang.Byte getMorningApprovalStatus() {
 		return morningApprovalStatus;
 	}
@@ -202,6 +206,22 @@ public class PunchDayDetailDTO {
 
 	public void setExceptionStatus(Byte exceptionStatus) {
 		this.exceptionStatus = exceptionStatus;
+	}
+
+	public Byte getDeviceChangeFlag() {
+		return deviceChangeFlag;
+	}
+
+	public void setDeviceChangeFlag(Byte deviceChangeFlag) {
+		this.deviceChangeFlag = deviceChangeFlag;
+	}
+
+	public String getStatuString() {
+		return statuString;
+	}
+
+	public void setStatuString(String statuString) {
+		this.statuString = statuString;
 	}
  
 

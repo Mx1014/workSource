@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -50,6 +52,9 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	
 	@Autowired
 	private RepeatService repeatService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -108,6 +113,8 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	@Override
 	public SearchEquipmentStandardsResponse query(
 			SearchEquipmentStandardsCommand cmd) {
+        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_LIST, 0L);
+        userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -125,14 +132,20 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStandardStatus.INACTIVE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
-    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+
+        // 改用namespaceId by xiongying20170328
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+//    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getStandardType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));
         
         if(cmd.getStatus() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
         
+        if(cmd.getInspectionCategoryId() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
+        	
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -157,13 +170,16 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<EquipmentStandardsDTO>();
         for(Long id : ids) {
         	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
-        	processRepeatSetting(standard);
-    		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
-    		if(null != standard.getRepeat()) {
-	    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-	    		dto.setRepeat(rs);
-    		}
-    		eqStandards.add(dto);
+        	if(standard != null) {
+        		processRepeatSetting(standard);
+        		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+        		if(null != standard.getRepeat()) {
+    	    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+    	    		dto.setRepeat(rs);
+        		}
+        		eqStandards.add(dto);
+        	}
+        	
         }
         
         return new SearchEquipmentStandardsResponse(nextPageAnchor, eqStandards);
@@ -189,7 +205,9 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             b.field("ownerId", standard.getOwnerId());
             b.field("ownerType", standard.getOwnerType());
             b.field("standardType", standard.getStandardType());
+            b.field("inspectionCategoryId", standard.getInspectionCategoryId());
             b.field("status", standard.getStatus());
+            b.field("namespaceId", standard.getNamespaceId());
 
             b.endObject();
             return b;

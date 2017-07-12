@@ -6,6 +6,8 @@ import java.util.List;
 import com.everhomes.address.Address;
 import com.everhomes.group.GroupMember;
 import com.everhomes.rest.family.ApproveMemberCommand;
+import com.everhomes.rest.family.BatchApproveMemberCommand;
+import com.everhomes.rest.family.BatchRejectMemberCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberDTO;
 import com.everhomes.rest.family.FindFamilyByAddressIdCommand;
@@ -81,5 +83,9 @@ public interface FamilyService {
     void adminApproveMember(ApproveMemberCommand cmd);
 
     void deleteHistoryById(Long id);
+
+	void adminBatchApproveMember(BatchApproveMemberCommand cmd);
+
+	void batchRejectMember(BatchRejectMemberCommand cmd);
 
 }

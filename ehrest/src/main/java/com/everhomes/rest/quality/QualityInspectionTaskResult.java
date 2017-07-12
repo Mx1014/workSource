@@ -5,21 +5,16 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 	<li>NONE : 0</li>
- *	<li>INSPECT_OK : 1</li>
- *	<li>INSPECT_CLOSE : 2</li>
- *	<li>RECTIFIED_OK : 3</li>
- *	<li>RECTIFY_CLOSED : 4</li>
- *	<li>INSPECT_DELAY : 5</li>
- *	<li>RECTIFY_DELAY : 6</li>
- *	<li>CORRECT_DELAY : 7</li>
- *	<li>RECTIFIED_OK_AND_WAITING_APPROVAL : 11</li>
- *	<li>RECTIFY_CLOSED_AND_WAITING_APPROVAL : 12</li>
+ *	<li>CORRECT : 1</li>
+ *	<li>INSPECT_COMPLETE : 2</li>
+ *	<li>CORRECT_COMPLETE : 3</li>
+ *	<li>INSPECT_DELAY : 4</li>
+ *	<li>CORRECT_DELAY : 5</li>
  * </ul>
  */
 public enum QualityInspectionTaskResult {
-	NONE((byte)0), INSPECT_OK((byte)1), INSPECT_CLOSE((byte)2), RECTIFIED_OK((byte)3),
-	RECTIFY_CLOSED((byte)4), INSPECT_DELAY((byte)5), RECTIFY_DELAY((byte)6),  CORRECT_DELAY((byte)7), 
-	RECTIFIED_OK_AND_WAITING_APPROVAL((byte)11), RECTIFY_CLOSED_AND_WAITING_APPROVAL((byte)12);
+	NONE((byte)0), CORRECT((byte)1), INSPECT_COMPLETE((byte)2), CORRECT_COMPLETE((byte)3),
+	INSPECT_DELAY((byte)4), CORRECT_DELAY((byte)5);
 	
 	private byte code;
 	

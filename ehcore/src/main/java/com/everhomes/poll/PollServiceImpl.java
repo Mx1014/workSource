@@ -92,6 +92,10 @@ public class PollServiceImpl implements PollService {
             }
             poll.setStatus(PollStatus.Published.getCode());
             poll.setId(cmd.getId());
+
+            // 添加tag标签   add by yanjun 20170613
+            poll.setTag(cmd.getTag());
+
             pollProvider.createPoll(poll);
             List<PollItem> pollItems = cmd.getItemList().stream().map(r->{
                 PollItem item=ConvertHelper.convert(r, PollItem.class);
@@ -147,9 +151,17 @@ public class PollServiceImpl implements PollService {
                 pollVote.setVoterUid(user.getId());
                 votes.add(pollVote);
                 //if addresses is not empty
-                if(user.getAddressId()!=null)
-                        //ensure all address is ok
-                    pollVote.setVoterFamilyId(familyProvider.findFamilyByAddressId(user.getAddressId()).getId());
+                if(user.getAddressId()!=null) {
+                	//ensure all address is ok
+                	Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
+                
+                	//family要存在
+                	if(family != null) {
+                		pollVote.setVoterFamilyId(family.getId());
+                	}
+                    
+                }
+                        
                 pollProvider.createPollVote(pollVote);
                 item.setVoteCount(item.getVoteCount()+1);
                 //update poll item
@@ -304,8 +316,12 @@ public class PollServiceImpl implements PollService {
         }
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
-        dto.setStartTime(poll.getStartTime().toString());
-        dto.setStopTime(poll.getEndTime().toString());
+        if(poll.getStartTime() != null)
+        	dto.setStartTime(poll.getStartTime().toString());
+        
+        if(poll.getEndTime() != null)
+        	dto.setStopTime(poll.getEndTime().toString());
+        
         dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
         dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());

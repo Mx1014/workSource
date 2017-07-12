@@ -5,15 +5,26 @@ import javax.validation.constraints.NotNull;
 /**
  *  <ul>
  *      <li>carId: 车辆id</li>
- *      <li>ownerId: 业主id</li>
+ *      <li>orgOwnerId: 业主id</li>
  *      <li>organizationId: 公司id</li>
  *  </ul>
  */
 public class DeleteRelationOfOrganizationOwnerAndCarCommand {
 
     @NotNull private Long carId;
-    @NotNull private Long ownerId;
+    @NotNull private Long orgOwnerId;
     @NotNull private Long organizationId;
+
+    private String ownerType;
+    private Long ownerId;
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
     public Long getOwnerId() {
         return ownerId;
@@ -21,6 +32,14 @@ public class DeleteRelationOfOrganizationOwnerAndCarCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Long getOrgOwnerId() {
+        return orgOwnerId;
+    }
+
+    public void setOrgOwnerId(Long orgOwnerId) {
+        this.orgOwnerId = orgOwnerId;
     }
 
     public Long getCarId() {

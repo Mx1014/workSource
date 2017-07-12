@@ -18,7 +18,8 @@ import com.everhomes.util.StringHelper;
  *  <li>processResult: 操作结果</li>
  *  <li>processMessage: 操作内容</li>
  *  <li>createTime: 创建时间</li>
- *  <li>attachments: 附件， 参考com.everhomes.rest.quality.QualityInspectionTaskAttachmentDTO</li>
+ *  <li>attachments: 附件， 参考{@link com.everhomes.rest.quality.QualityInspectionTaskAttachmentDTO}</li>
+ *  <li>itemResults: 规范事项记录， 参考{@link com.everhomes.rest.quality.QualityInspectionSpecificationItemResultsDTO}</li>
  * </ul>
  */
 public class QualityInspectionTaskRecordsDTO {
@@ -37,6 +38,8 @@ public class QualityInspectionTaskRecordsDTO {
 	@ItemType(QualityInspectionTaskAttachmentDTO.class)
     private List<QualityInspectionTaskAttachmentDTO> attachments;
 
+	@ItemType(QualityInspectionSpecificationItemResultsDTO.class)
+	private List<QualityInspectionSpecificationItemResultsDTO> itemResults;
 	public Long getId() {
 		return id;
 	}
@@ -125,6 +128,15 @@ public class QualityInspectionTaskRecordsDTO {
 		this.attachments = attachments;
 	}
 	
+	public List<QualityInspectionSpecificationItemResultsDTO> getItemResults() {
+		return itemResults;
+	}
+
+	public void setItemResults(
+			List<QualityInspectionSpecificationItemResultsDTO> itemResults) {
+		this.itemResults = itemResults;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

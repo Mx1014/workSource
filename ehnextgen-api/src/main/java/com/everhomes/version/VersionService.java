@@ -28,6 +28,7 @@ public interface VersionService {
 	VersionInfoDTO updateVersion(UpdateVersionCommand cmd);
 	void deleteVersionById(DeleteVersionCommand cmd);
 	GetUpgradeContentResponse getUpgradeContent(GetUpgradeContentCommand cmd);
+	VersionInfoDTO getVersionInfo(String realm);
     
     
 }

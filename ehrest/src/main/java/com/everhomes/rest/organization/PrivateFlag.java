@@ -15,6 +15,15 @@ public enum PrivateFlag {
 		return code;
 	}
 	
-	
+	public static PrivateFlag fromCode(Byte code) {
+		if (code != null) {
+			for (PrivateFlag privateFlag : PrivateFlag.values()) {
+				if (code.byteValue() == privateFlag.getCode()) {
+					return privateFlag;
+				}
+			}
+		}
+		return null;
+	}
 
 }

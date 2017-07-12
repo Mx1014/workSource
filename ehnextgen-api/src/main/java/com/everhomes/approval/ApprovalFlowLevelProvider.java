@@ -25,6 +25,8 @@ public interface ApprovalFlowLevelProvider {
 
 	List<ApprovalFlowLevel> listApprovalFlowLevelByTarget(Integer namespaceId, String ownerType, Long ownerId, byte targetType, Long targetId);
 
+	void deleteApprovalLevels(List<Long> flowIds);
+
 
 //	void createApprovalFlowLevelList(List<ApprovalFlowLevel> approvalFlowLevelList);
 

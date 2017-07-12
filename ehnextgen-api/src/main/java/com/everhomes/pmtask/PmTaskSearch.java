@@ -8,8 +8,8 @@ public interface PmTaskSearch {
 	void deleteById(Long id);
 	void bulkUpdate(List<PmTask> tasks);
 	void feedDoc(PmTask task);
-	void syncFromDb();
+	void syncPmTask();
 	
-	List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, Long endDate,
-    		Long pageAnchor, Integer pageSize);
+	List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, 
+			Long endDate, Long addressId, String buildingName, Long pageAnchor, Integer pageSize);
 }

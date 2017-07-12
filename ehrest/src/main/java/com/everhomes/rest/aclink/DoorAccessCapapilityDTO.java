@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>isSupportSmart: 是否支持智能门禁</li>
  * <li>qrDriver: QR 门禁类型 参考 {@link com.everhomes.rest.aclink.DoorAccessDriverType}</li>
  * <li>smartDriver: 智能门禁设备类型 {@link com.everhomes.rest.aclink.DoorAccessDriverType} </li>
+ * <li>qrDriverExt: 二维码访客授权的拓展，比如保安用手机授权 {@link com.everhomes.rest.aclink.DoorAccessDriverType} </li>
  * </ul>
  * @author janson
  *
@@ -16,6 +17,7 @@ public class DoorAccessCapapilityDTO {
     private Byte isSupportQR;
     private Byte isSupportSmart;
     private String qrDriver;
+    private String qrDriverExt;
     private String smartDriver;
     
     public Byte getIsSupportQR() {
@@ -42,7 +44,13 @@ public class DoorAccessCapapilityDTO {
     public void setSmartDriver(String smartDriver) {
         this.smartDriver = smartDriver;
     }
-    
+
+    public String getQrDriverExt() {
+        return qrDriverExt;
+    }
+    public void setQrDriverExt(String qrDriverExt) {
+        this.qrDriverExt = qrDriverExt;
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

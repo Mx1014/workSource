@@ -15,6 +15,12 @@ import com.everhomes.util.StringHelper;
 public class ListOrganizationContactCommandResponse {
 	
 	private Integer nextPageOffset;
+
+	private Long nextPageAnchor;
+	
+	private Integer totalCount;
+
+	private Integer namespaceId;
 	
 	@ItemType(OrganizationContactDTO.class)
     private List<OrganizationContactDTO> members;
@@ -37,6 +43,30 @@ public class ListOrganizationContactCommandResponse {
 		this.members = members;
 	}
 
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
+
+	public Integer getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

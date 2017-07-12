@@ -30,4 +30,6 @@ public interface PropertyServiceErrorCode {
 
     int ERROR_OWNER_ADDRESS_EXIST = 17001;// 用户已经在楼栋门牌中
     int ERROR_OWNER_ADDRESS_ALREADY_IS_THIS_STATUS = 17002;// 用户楼栋门牌已经处于某种状态
+
+    int ERROR_OWNER_ADDRESS_ALREADY_INACTIVE = 18001;// 该记录已经处于未认证状态
 }

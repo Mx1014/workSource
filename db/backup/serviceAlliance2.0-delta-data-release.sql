@@ -1,0 +1,1 @@
+update eh_service_alliance_categories set selected_logo_url = logo_url;

@@ -7,6 +7,8 @@ package com.everhomes.rest.search;
  * <li>POLL("poll"): </li>
  * <li>TOPIC("topic"): </li>
  * <li>NEWS("news"): </li>
+ * <li>LAUNCHPADITEM("launchpaditem"): </li>
+ * <li>SHOP("shop"): </li>
  * <li>ALL("all"): </li>
  * </ul>
  */
@@ -15,6 +17,8 @@ public enum SearchContentType {
     POLL("poll"), 
     TOPIC("topic"), 
     NEWS("news"),
+    LAUNCHPADITEM("launchpaditem"), 
+    SHOP("shop"),
 	ALL("all");
     
     private String code;

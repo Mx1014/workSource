@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
@@ -25,6 +26,26 @@ public class ParkingLotDTO {
     private Integer cardReserveDays;
     private Timestamp createTime;
     
+    private Byte tempfeeFlag;
+    private Byte rateFlag;
+    
+    private Byte isSupportRecharge;
+    private Integer rechargeMonthCount;
+    private Byte rechargeType;
+    
+    private Integer flowMode;
+
+    private Byte lockCarFlag;
+    private String contact;
+
+    public String getContact() {
+        return contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
     public ParkingLotDTO() {
     }
 
@@ -84,8 +105,64 @@ public class ParkingLotDTO {
         this.createTime = createTime;
     }
 
-    @Override
+	public Byte getTempfeeFlag() {
+		return tempfeeFlag;
+	}
+
+	public void setTempfeeFlag(Byte tempfeeFlag) {
+		this.tempfeeFlag = tempfeeFlag;
+	}
+
+	public Byte getRateFlag() {
+		return rateFlag;
+	}
+
+	public void setRateFlag(Byte rateFlag) {
+		this.rateFlag = rateFlag;
+	}
+	
+	public Integer getRechargeMonthCount() {
+		return rechargeMonthCount;
+	}
+
+	public void setRechargeMonthCount(Integer rechargeMonthCount) {
+		this.rechargeMonthCount = rechargeMonthCount;
+	}
+
+	public Byte getRechargeType() {
+		return rechargeType;
+	}
+
+	public void setRechargeType(Byte rechargeType) {
+		this.rechargeType = rechargeType;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+	public Byte getIsSupportRecharge() {
+		return isSupportRecharge;
+	}
+
+	public void setIsSupportRecharge(Byte isSupportRecharge) {
+		this.isSupportRecharge = isSupportRecharge;
+	}
+
+	public Integer getFlowMode() {
+		return flowMode;
+	}
+
+	public void setFlowMode(Integer flowMode) {
+		this.flowMode = flowMode;
+	}
+
+    public Byte getLockCarFlag() {
+        return lockCarFlag;
+    }
+
+    public void setLockCarFlag(Byte lockCarFlag) {
+        this.lockCarFlag = lockCarFlag;
     }
 }

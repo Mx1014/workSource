@@ -1,17 +1,15 @@
 // @formatter:off
 package com.everhomes.rest.messaging;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.math.NumberUtils;
+
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.validation.constraints.NotNull;
-
-import org.apache.commons.lang.math.NumberUtils;
-
-import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -21,7 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>contextToken:上下文件token</li>
  * <li><p>channels:通道列表。参考{@link com.everhomes.rest.messaging.MessageChannel}</p></li>
  * <li><p>meta:额外要添加的信息</p></li>
- * <li><p>bodyType:消息模块的发送相关的类型</p></li>
+ * <li><p>bodyType:消息模块的发送相关的类型 {@link }</p></li>
  * <li><p>body:消息内容</p></li>
  * <li><p>senderTag:发送者标签</p></li>
  * <li><p>storeSequence:消息体的位置游标</p></li>
@@ -46,7 +44,7 @@ public class MessageDTO implements Cloneable {
     private Map<String, String> meta = new HashMap<String, String>();
     
     private String bodyType;
-    
+
     private String body;
 
     // used for sender to tag on a message
@@ -56,7 +54,7 @@ public class MessageDTO implements Cloneable {
     private Long storeSequence;
     
     private Long createTime;
-     
+
     public MessageDTO() {
     }
 
@@ -197,7 +195,7 @@ public class MessageDTO implements Cloneable {
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
     }
-    
+
     public void setMetaAppId(Long metaAppId) {
         if(null == this.meta) {
             this.meta = new HashMap<String, String>();
@@ -227,5 +225,10 @@ public class MessageDTO implements Cloneable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

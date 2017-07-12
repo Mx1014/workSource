@@ -5,17 +5,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 	<li>NONE : 0</li>
- *	<li>WAITING_FOR_EXECUTING : 1</li>
- *	<li>RECTIFING : 2</li>
- *	<li>RECTIFIED_AND_WAITING_APPROVAL : 3</li>
- *	<li>RECTIFY_CLOSED_AND_WAITING_APPROVAL : 4</li>
- *	<li>CLOSED : 5</li>
+ *	<li>待执行WAITING_FOR_EXECUTING : 1</li>
+ *	<li>已执行EXECUTED : 2</li>
+ *	<li>已延误DELAY : 3</li>
  * </ul>
  */
 public enum QualityInspectionTaskStatus {
 
-	NONE((byte)0), WAITING_FOR_EXECUTING((byte)1), RECTIFING((byte)2), RECTIFIED_AND_WAITING_APPROVAL((byte)3),
-	RECTIFY_CLOSED_AND_WAITING_APPROVAL((byte)4), CLOSED((byte)5);
+	NONE((byte)0), WAITING_FOR_EXECUTING((byte)1), EXECUTED((byte)2), DELAY((byte)3);
 	
 	private byte code;
 	

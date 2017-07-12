@@ -34,7 +34,12 @@ public class User extends EhUsers {
     public User() {
     }
     
-    public String getLocale() {
+    public User(Long id) {
+		super();
+		setId(id);
+	}
+
+	public String getLocale() {
         String locale = super.getLocale();
         if(locale == null || locale.trim().length() == 0) {
             locale = Locale.SIMPLIFIED_CHINESE.toString();

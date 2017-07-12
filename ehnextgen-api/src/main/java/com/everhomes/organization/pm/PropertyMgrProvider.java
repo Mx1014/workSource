@@ -2,16 +2,19 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
 import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
+import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public interface PropertyMgrProvider {
@@ -89,7 +92,7 @@ public interface PropertyMgrProvider {
 	public List<String> listPropBillDateStr(Long communityId);
 	
 	public int countCommunityPmMembers(long communityId, String contactToken);
-	public int countCommunityAddressMappings(long communityId,Byte livingStatus);
+	public int countCommunityAddressMappings(Long organizationId, Long communityId, Byte livingStatus);
 	public int countCommunityPmBills(long communityId, String dateStr, String address);
 	public int countCommunityPmOwners(long communityId, String address, String contactToken);
 	public int countCommunityPmTasks(Long communityId, Long entityId, String entityType, 
@@ -287,7 +290,7 @@ public interface PropertyMgrProvider {
      */
     void updateOrganizationOwnerCar(OrganizationOwnerCar car);
 
-    List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, Long pageAnchor, int pageSize);
+    List<CommunityPmOwner> listOrganizationOwners(Integer namespaceId, Long communityId, Long orgOwnerTypeId, String keyword, Long pageAnchor, Integer pageSize);
 
     /**
      * 创建车辆附件记录
@@ -464,4 +467,28 @@ public interface PropertyMgrProvider {
      * @return
      */
     CommunityPmOwner findOrganizationOwnerByCommunityIdAndContactToken(Integer namespaceId, Long communityId, String contactToken);
+
+    /**
+     * 停车类型列表
+     * @return
+     */
+    List<EhParkingCardCategories> listParkingCardCategories();
+
+    /**
+     * 根据多个addressId查询业主与地址的关联记录
+     * @param namespaceId
+     * @param addressIds
+     * @return
+     */
+    List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressIds(Integer namespaceId, List<Long> addressIds);
+
+    ParkingCardCategory findParkingCardCategory(Byte cardType);
+
+	public Map<Long, Integer> mapOrganizationOwnerCountByAddressIds(Integer namespaceId, List<Long> addressIds);
+
+	public Map<Long, CommunityAddressMapping> mapAddressMappingByAddressIds(List<Long> addressIds);
+
+	public Map<Long, CommunityPmBill> mapNewestBillByAddressIds(List<Long> addressIds);
+
+	public OrganizationOwner findOrganizationOwnerById(Long organizationOwnerId);
 }

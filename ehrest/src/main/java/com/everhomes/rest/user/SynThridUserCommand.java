@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>key : 公钥</li>
  * 	<li>userName : 用户名</li>
  * 	<li>deviceIdentifier : 设备标识</li>
+ * 	<li>pusherIdentify : </li>
  * <ul>
  * 
  */

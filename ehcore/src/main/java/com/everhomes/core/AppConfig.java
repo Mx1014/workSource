@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
@@ -59,4 +60,13 @@ public class AppConfig {
         filter.setForceEncoding(true);
         return filter;
     }
+    
+//    @Bean
+//    public SchedulerFactoryBean quartz() {
+//        SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();
+//        factoryBean.setAutoStartup(true);
+//        factoryBean.setApplicationContextSchedulerContextKey("applicationContext");
+//        return factoryBean;
+//    }
+    
 }

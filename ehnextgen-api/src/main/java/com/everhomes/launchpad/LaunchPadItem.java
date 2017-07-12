@@ -7,7 +7,12 @@ public class LaunchPadItem extends EhLaunchPadItems {
     private static final long serialVersionUID = -2604861679439407866L;
 
     private String jsonObj;
-    
+
+    public void setTargetId(Long targetId){
+        if(null != targetId)
+            setTargetId(targetId.toString());
+    }
+
     public LaunchPadItem() {
     }
     

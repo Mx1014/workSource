@@ -1,52 +1,35 @@
 package com.everhomes.activity;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
-import com.everhomes.rest.activity.ActivityCancelSignupCommand;
-import com.everhomes.rest.activity.ActivityCheckinCommand;
-import com.everhomes.rest.activity.ActivityConfirmCommand;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityListCommand;
-import com.everhomes.rest.activity.ActivityListResponse;
-import com.everhomes.rest.activity.ActivityPostCommand;
-import com.everhomes.rest.activity.ActivityRejectCommand;
-import com.everhomes.rest.activity.ActivityShareDetailResponse;
-import com.everhomes.rest.activity.ActivitySignupCommand;
-import com.everhomes.rest.activity.ActivityTokenDTO;
-import com.everhomes.rest.activity.ActivityVideoDTO;
-import com.everhomes.rest.activity.GetActivityShareDetailCommand;
-import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.GetVideoCapabilityCommand;
-import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
-import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
-import com.everhomes.rest.activity.ListActivitiesByTagCommand;
-import com.everhomes.rest.activity.ListActivitiesCommand;
-import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.activity.ListActivityCategoriesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
-import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
-import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.VideoCapabilityResponse;
-import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
+import com.everhomes.rest.activity.*;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
+import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
+import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
+import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.util.Tuple;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.multipart.MultipartFile;
+
 public interface ActivityService {
 
     void createPost(ActivityPostCommand cmd, Long postId);
 
     ActivityDTO signup(ActivitySignupCommand cmd);
-
+    
+    CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd);
+    
     ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd);
 
     ActivityDTO checkin(ActivityCheckinCommand cmd);
@@ -104,6 +87,8 @@ public interface ActivityService {
 
     ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd);
 
+    void videoCallback(VideoCallbackCommand cmd);
+
     ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd);
 
 	ListOfficialActivityByNamespaceResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd);
@@ -116,4 +101,98 @@ public interface ActivityService {
 
     VideoCapabilityResponse getVideoCapability(GetVideoCapabilityCommand cmd);
 
+	GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd);
+
+	ActivityWarningResponse setActivityWarning(SetActivityWarningCommand cmd);
+
+	ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd);
+	
+	ActivityTimeResponse setActivityTime(SetActivityTimeCommand cmd);
+
+	ActivityTimeResponse getActivityTime(GetActivityTimeCommand cmd);
+	
+	RosterOrderSettingDTO setRosterOrderSetting(SetRosterOrderSettingCommand cmd);
+
+	RosterOrderSettingDTO getRosterOrderSetting(GetRosterOrderSettingCommand cmd);
+
+	void activityWarningSchedule();
+	
+	ListActivitiesReponse listOfficialActivities(QueryOrganizationTopicCommand cmd);
+	
+	List<ActivityCategoryDTO> listActivityEntryCategories(ListActivityEntryCategoriesCommand cmd);
+
+    /**
+     * 根据场景获取活动运营数据
+     */
+    ListActivityPromotionEntitiesBySceneReponse listActivityPromotionEntitiesByScene(ListActivityPromotionEntitiesBySceneCommand cmd);
+
+    void setActivityAchievement(SetActivityAchievementCommand cmd);
+
+    GetActivityAchievementResponse getActivityAchievement(GetActivityAchievementCommand cmd);
+
+    void createActivityAttachment(CreateActivityAttachmentCommand cmd);
+
+    void deleteActivityAttachment(DeleteActivityAttachmentCommand cmd);
+
+    ListActivityAttachmentsResponse listActivityAttachments(ListActivityAttachmentsCommand cmd);
+
+    void downloadActivityAttachment(DownloadActivityAttachmentCommand cmd);
+
+    void createActivityGoods(CreateActivityGoodsCommand cmd);
+
+    void updateActivityGoods(UpdateActivityGoodsCommand cmd);
+
+    void deleteActivityGoods(DeleteActivityGoodsCommand cmd);
+
+    ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd);
+
+    ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd);
+
+	SignupInfoDTO manualSignup(ManualSignupCommand cmd);
+
+	SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd);
+
+	void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
+
+	ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd);
+
+	void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response);
+
+	void deleteSignupInfo(DeleteSignupInfoCommand cmd);
+
+	ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd);
+
+	SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd);
+	
+	/**
+	 * 统计总览
+	 * @return
+	 */
+	StatisticsSummaryResponse statisticsSummary(StatisticsSummaryCommand cmd);
+	/**
+	 * 按活动统计
+	 * @param cmd
+	 * @return
+	 */
+	StatisticsActivityResponse statisticsActivity(StatisticsActivityCommand cmd);
+	/**
+	 * 按企业统计
+	 * @param cmd
+	 * @return
+	 */
+	StatisticsOrganizationResponse statisticsOrganization(StatisticsOrganizationCommand cmd);
+	/**
+	 * 按标签统计
+	 * @param cmd
+	 * @return
+	 */
+	StatisticsTagResponse statisticsTag(StatisticsTagCommand cmd);
+	
+	void signupOrderRefund(Activity activity, Long userId);
+	
+	/**
+	 * 同步报名人数
+	 */
+	void syncActivitySignupAttendeeCount();
 }
+

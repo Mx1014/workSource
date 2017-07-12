@@ -42,4 +42,24 @@ public interface GroupNotificationTemplateCode {
     
     static final int GROUP_MEMBER_DELETED_CLUB_ADMIN = 34;  
     static final int GROUP_MEMBER_DELETED_CLUB_OPERATOR = 35;
+    
+    
+    static final int GROUP_MEMBER_TRANSFER_CREATOR_TO_OTHERS = 36;  //${newCreator}已成为“${groupName}”的创建者
+    static final int GROUP_MEMBER_TRANSFER_CREATOR_TO_NEW_CREATOR = 37;  //你已成为“${groupName}”的创建者
+    static final int GROUP_MEMBER_TO_CREATOR_WHEN_APPROVAL = 38;  //你创建“俱乐部A”的申请已通过
+    static final int GROUP_MEMBER_TO_CREATOR_WHEN_NO_APPROVAL = 39;  //你已成功创建“${groupName}”
+    static final int GROUP_MEMBER_TO_CREATOR_WHEN_NEED_APPROVAL = 40;  //你提交了创建“${groupName}”的申请，需要人工审核，请耐心等候
+    static final int GROUP_MEMBER_TO_CREATOR_WHEN_REJECTED = 41;  //你创建“${groupName}”的申请被拒绝
+    static final int GROUP_MEMBER_TO_ALL_WHEN_DELETE = 42;  //你加入的“${groupName}”已解散
+    static final int GROUP_NOT_ALLOW_TO_CREATE_GROUP = 43;  //不允许创建${clubPlaceholderName}
+    static final int GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN = 44;  //${userName}申请加入“${groupName}”，理由：${reason}
+    static final int GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN = 45;  //你加入“${groupName}”的申请已通过
+    static final int GROUP_MEMBER_REJECT_REQUEST_TO_JOIN = 46;  //你加入“${groupName}”的申请被拒绝
+
+
+
+
+    
+    
+    
 }

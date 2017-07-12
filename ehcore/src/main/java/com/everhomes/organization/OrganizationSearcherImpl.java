@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -12,11 +14,14 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.ToXContent.Params;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -52,6 +59,9 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     private OrganizationService organizationService;
     
     @Autowired
+    private OrganizationProvider organizationProvider;
+    
+    @Autowired
     private ConfigurationProvider  configProvider;
 	
 	@Autowired
@@ -62,15 +72,29 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 	
 	@Autowired
     private RolePrivilegeService rolePrivilegeService;
+	
+	@Autowired
+	private AddressProvider addressProvider;
 
     @Override
     public String getIndexType() {
         return SearchUtils.ENTERPRISEINDEXTYPE;
     }
     
+    private static Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+    
+    public static boolean isContainChinese(String str) {
+        Matcher m = p.matcher(str);
+        if (m.find()) {
+            return true;
+        }
+        return false;
+    }
+    
     private XContentBuilder createDoc(Organization organization){
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("id", organization.getId());
             b.field("namespaceId", organization.getNamespaceId());
             Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
             b.field("communityId", communityId);
@@ -79,6 +103,20 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             b.field("organizationType", organization.getOrganizationType());
             b.field("description", organization.getDescription());
             b.field("createTime", organization.getCreateTime());
+            b.field("setAdminFlag", organization.getSetAdminFlag());
+            List<OrganizationAddress> organizationAddresses = organizationProvider.listOrganizationAddressByOrganizationId(organization.getId());
+            List<String> addresses = new ArrayList<>();
+            if (organizationAddresses != null && !organizationAddresses.isEmpty()) {
+            	for (OrganizationAddress organizationAddress : organizationAddresses) {
+            		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+            		if (address != null) {
+            			addresses.add(getAddress(address));
+					}
+            	}
+            	if (!addresses.isEmpty()) {
+            		b.field("addresses", String.join(",", addresses));
+				}
+			}
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -87,7 +125,18 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         }
     }
     
-    @Override
+    private String getAddress(Address address) {
+    	if (address.getApartmentName() != null && address.getBuildingName() != null) {
+			if (address.getApartmentName().contains(address.getBuildingName())) {
+				return address.getApartmentName();
+			}else {
+				return address.getBuildingName()+"-"+address.getApartmentName();
+			}
+		}
+		return address.getAddress();
+	}
+
+	@Override
     public void deleteById(Long id) {
         deleteById(id.toString());
         
@@ -156,15 +205,40 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 
        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
-        QueryBuilder qb;
+        QueryBuilder qb = null;
         
         if(StringUtils.isEmpty(cmd.getKeyword())) {
-            qb = QueryBuilders.matchAllQuery();
-        } else {
-        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 5.0f)
-                    .field("name.pinyin_prefix", 2.0f)
-                    .field("name.pinyin_gram", 1.0f);      
+        	if (StringUtils.isEmpty(cmd.getBuildingName())) {
+        		qb = QueryBuilders.matchAllQuery();
+			}else {
+				qb = QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses");
+//				qb = QueryBuilders.multiMatchQuery(cmd.getBuildingName())
+//	                    .field("addresses", 5.0f);
+			}
+//        }else if(isContainChinese(cmd.getKeyword())){//增加中文名称的权重 by xiongying20170524 中文就字符匹配，英文就加上拼音匹配， by dengs 20170524
+        }else {
+        	// es中超过10个字无法搜索出来结果，这里把关键词截断处理
+        	if (cmd.getKeyword().length() > 10) {
+				cmd.setKeyword(cmd.getKeyword().substring(cmd.getKeyword().length() - 10));
+			}
+        	if (StringUtils.isEmpty(cmd.getBuildingName())) {
+//        		qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+//                        .field("name", 5.0f)
+//                        .field("name.pinyin_prefix", 2.0f)
+//                        .field("name.pinyin_gram", 1.0f)
+//                        .field("addresses", 5.0f);
+        		qb = QueryBuilders.queryString("*"+cmd.getKeyword()+"*").field("addresses").field("name");
+			}else {
+//				qb = QueryBuilders.multiMatchQuery(cmd.getKeyword() + " " + cmd.getBuildingName())
+//                        .field("name", 5.0f)
+//                        .field("name.pinyin_prefix", 2.0f)
+//                        .field("name.pinyin_gram", 1.0f)
+//                        .field("addresses", 5.0f);
+				qb = QueryBuilders.boolQuery()
+						.must(QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses"))
+						.must(QueryBuilders.queryString("*"+cmd.getKeyword()+"*").field("addresses").field("name"));
+			}
+        	
         }
         
 //        FilterBuilder fb = null;
@@ -181,28 +255,43 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
       //namespaceId by xiongying 20160613
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        List<FilterBuilder> fbList = new ArrayList<>();
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+        fbList.add(fb);
         
         // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
         if(cmd.getCommunityId() != null) {
             FilterBuilder cmntyFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
-            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+//            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+            fbList.add(cmntyFilter);
         }
         
         // 用于一些场景下只能搜索出普通公司 by sfyan 20160523
         //empty判断 by xiongying 20160613
         if(!StringUtils.isEmpty(cmd.getOrganizationType())) {
         	//转小写查 by xiongying 20160524
-            FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
-            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+            FilterBuilder orgTypeFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
+//            fb = FilterBuilders.andFilter(fb, orgTypeFilter);
+            fbList.add(orgTypeFilter);
         }
+        
+        if (cmd.getSetAdminFlag() != null) {
+        	FilterBuilder adminFlagFilter = FilterBuilders.termFilter("setAdminFlag", cmd.getSetAdminFlag());
+//            fb = FilterBuilders.andFilter(fb, adminFlagFilter);
+        	fbList.add(adminFlagFilter);
+		}
+        fb = FilterBuilders.andFilter(fbList.toArray(new FilterBuilder[fbList.size()]));
+        
         qb = QueryBuilders.filteredQuery(qb, fb);
        
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
-        builder.setFrom(pageNum * pageSize).setSize(pageSize+1);
+        builder.setFrom(pageNum * pageSize).setSize(pageSize + 1);
         
         builder.setQuery(qb);
+        
+        
+        builder.addSort("id", SortOrder.DESC);
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Query organization, cmd={}, builder={}", cmd, builder);
@@ -210,15 +299,23 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         SearchResponse rsp = builder.execute().actionGet();
         
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("result from elasticsearch {}", rsp);
+        }
+        
         List<Long> ids = getIds(rsp);
         GroupQueryResult result = new GroupQueryResult();
-        if(ids.size() > filter.getPageSize()) {
-            result.setPageAnchor(new Long(filter.getPageNumber() + 1));
+//        if(ids.size() > filter.getPageSize()) {
+//            result.setPageAnchor(new Long(filter.getPageNumber() + 1));
+//            ids.remove(ids.size() - 1);
+//         } else {
+//            result.setPageAnchor(null);
+//            }
+
+        if(ids.size() > pageSize){
+            result.setPageAnchor(Long.valueOf(pageNum + 1));
             ids.remove(ids.size() - 1);
-         } else {
-            result.setPageAnchor(null);    
-            }
-        
+        }
         result.setIds(ids);
         
         return result;

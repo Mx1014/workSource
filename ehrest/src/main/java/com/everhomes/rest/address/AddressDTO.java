@@ -2,6 +2,22 @@ package com.everhomes.rest.address;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>uuid: uuid</li>
+ *     <li>communityId: 小区id</li>
+ *     <li>cityId: 城市id</li>
+ *     <li>address: 地址</li>
+ *     <li>longitude: 经度</li>
+ *     <li>latitude: 纬度</li>
+ *     <li>addressAlias: 地址别名</li>
+ *     <li>buildingName: 楼栋名称</li>
+ *     <li>buildingAliasName: 楼栋别名</li>
+ *     <li>apartmentName: 门牌名称</li>
+ *     <li>apartmentFloor: 楼层</li>
+ * </ul>
+ */
 public class AddressDTO {
     private java.lang.Long     id;
     private java.lang.String   uuid;
@@ -22,6 +38,15 @@ public class AddressDTO {
     private java.sql.Timestamp createTime;
     private java.sql.Timestamp deleteTime;
     private Byte memberStatus;
+    private Double areaSize;
+
+    public Double getAreaSize() {
+        return areaSize;
+    }
+
+    public void setAreaSize(Double areaSize) {
+        this.areaSize = areaSize;
+    }
 
     public AddressDTO() {
     }
@@ -179,7 +204,7 @@ public class AddressDTO {
 		this.memberStatus = memberStatus;
 	}
 
-	@Override
+    @Override
     public String toString(){
         return StringHelper.toJsonString(this);
         

@@ -1,11 +1,13 @@
 package com.everhomes.activity;
 
 public enum CheckInStatus {
-    CHECKIN((byte) 1), UN_CHECKIN((byte) 0);
+    CHECKIN((byte) 1, "是"), UN_CHECKIN((byte) 0, "否");
     private byte code;
+    private String text;
 
-    CheckInStatus(byte code) {
+    CheckInStatus(byte code, String text) {
         this.code = code;
+        this.text = text;
     }
 
     public Byte getCode() {
@@ -24,5 +26,9 @@ public enum CheckInStatus {
         }
         return null;
     }
+
+	public String getText() {
+		return text;
+	}
 
 }

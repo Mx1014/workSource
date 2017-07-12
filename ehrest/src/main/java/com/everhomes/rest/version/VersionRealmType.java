@@ -39,6 +39,18 @@ package com.everhomes.rest.version;
  * <li>IOS_SZBAY("iOS_SZbay"): 深圳湾 iOS版APP</li>
  * <li>ANDROID_INNOSPRING("Android_Innospring"): innospring Android版APP</li>
  * <li>IOS_INNOSPRING("iOS_Innospring"): innospring iOS版APP</li>
+ * <li>ANDROID_HUARUN("Android_Huarun"): 华润 Android版APP</li>
+ * <li>IOS_HUARUN("iOS_Huarun"): 华润 iOS版APP</li>
+ * <li>ANDROID_KEXIN("Android_Kexin"): 科兴 Android版APP</li>
+ * <li>IOS_KEXIN("iOS_Kexin"): 科兴 iOS版APP</li>
+ * <li>ANDROID_QUANZHI("Android_Quanzhi"): 全至100 Android版APP</li>
+ * <li>IOS_QUANZHI("iOS_Quanzhi"): 全至100 iOS版APP</li>
+ * <li>ANDROID_YUNGU("Android_YunGu"): 南山云谷 Android版APP</li>
+ * <li>IOS_YUNGU("iOS_YunGu"): 南山云谷 iOS版APP</li>
+ * <li>ANDROID_RONGCHAO("Android_Rongchao"): 荣超股份 Android版APP</li>
+ * <li>IOS_RONGCHAO("iOS_Rongchao"): 荣超股份 iOS版APP</li>
+ * <li>ANDROID_TEEC("Android_TEEC"): 嘉定新城 Android版APP</li>
+ * <li>IOS_TEEC("iOS_TEEC"): 嘉定新城 iOS版APP</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -79,7 +91,31 @@ public enum VersionRealmType {
     ANDROID_SZBAY("Android_SZbay"),
     IOS_SZBAY("iOS_SZbay"),
     ANDROID_INNOSPRING("Android_Innospring"),
-    IOS_INNOSPRING("iOS_Innospring");
+    IOS_INNOSPRING("iOS_Innospring"),
+    ANDROID_HUARUN("Android_Huarun"),
+    IOS_HUARUN("iOS_Huarun"),
+    WEB_ZUOLIN("Web_Zuolin"),
+    WEB_PARK("Web_Park"),
+    ANDROID_QINGHUA("Android_Qinghua"),
+    IOS_QINGHUA("iOS_Qinghua"),
+    ANDROID_TSPACE("Android_Tspace"),
+    IOS_TSPACE("iOS_Tspace"),
+    ANDROID_KEXIN("Android_Kexin"),
+    IOS_KEXIN("iOS_Kexin"),
+    ANDROID_QUANZHI("Android_Quanzhi"),
+    IOS_QUANZHI("iOS_Quanzhi"),
+    ANDROID_GUANGDA("Android_Guangda"),
+    IOS_GUANGDA("iOS_Guangda"),
+    ANDROID_KANGLI("Android_Kangli"),
+    IOS_KANGLI("iOS_Kangli"),
+    ANDROID_SSIPPM("Android_Ssippm"),
+    IOS_SSIPPM("iOS_Ssippm"),
+    ANDROID_YUNGU("Android_YunGu"),
+    IOS_YUNGU("iOS_YunGu"),
+    ANDROID_RONGCHAO("Android_Rongchao"),
+    IOS_RONGCHAO("iOS_Rongchao"),
+    ANDROID_TEEC("Android_TEEC"),
+    IOS_TEEC("iOS_TEEC");
     
     private String code;
     private VersionRealmType(String code) {

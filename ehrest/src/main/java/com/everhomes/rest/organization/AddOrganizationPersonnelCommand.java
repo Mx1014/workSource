@@ -18,7 +18,13 @@ import com.everhomes.util.StringHelper;
  * <li>gender：性别</li>
  * <li>employeeNo：工号</li>
  * <li>contactDescription：描述</li>
- * <li>childOrganizationIds：添加到多部门或者多群组</li>
+ * <li>employeeNo: 工号</li>
+ * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 参考{@link com.everhomes.rest.organization.EmployeeType}</li>
+ * <li>employeeStatus: 员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
+ * <li>employmentTime: 转正时间</li>
+ * <li>checkInTime: 入职时间</li>
+ * <li>departmentIds：添加到多部门</li>
+ * <li>jobPositionIds：添加到多群组</li>
  * </ul>
  */
 public class AddOrganizationPersonnelCommand {
@@ -35,12 +41,31 @@ public class AddOrganizationPersonnelCommand {
 	private String contactToken;
 	
 	private Byte gender;
-	
+
 	private String employeeNo;
+
+	private Byte employeeType;
+
+	private Byte employeeStatus;
+
+	private String employmentTime;
+
+	private String checkInTime;
 	
 	@ItemType(Long.class)
-	private List<Long> childOrganizationIds;
+	private List<Long> departmentIds;
+
+	@ItemType(Long.class)
+	private List<Long> groupIds;
+
+	@ItemType(Long.class)
+	private List<Long> jobPositionIds;
 	
+	@ItemType(Long.class)
+	private List<Long> jobLevelIds;
+
+	public AddOrganizationPersonnelCommand() {
+	}
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -110,19 +135,74 @@ public class AddOrganizationPersonnelCommand {
 		this.employeeNo = employeeNo;
 	}
 
-
-	public List<Long> getChildOrganizationIds() {
-		return childOrganizationIds;
+	public List<Long> getDepartmentIds() {
+		return departmentIds;
 	}
 
-
-	public void setChildOrganizationIds(List<Long> childOrganizationIds) {
-		this.childOrganizationIds = childOrganizationIds;
+	public void setDepartmentIds(List<Long> departmentIds) {
+		this.departmentIds = departmentIds;
 	}
 
+	public List<Long> getJobPositionIds() {
+		return jobPositionIds;
+	}
+
+	public void setJobPositionIds(List<Long> jobPositionIds) {
+		this.jobPositionIds = jobPositionIds;
+	}
+
+	public List<Long> getGroupIds() {
+		return groupIds;
+	}
+
+	public void setGroupIds(List<Long> groupIds) {
+		this.groupIds = groupIds;
+	}
+
+	public List<Long> getJobLevelIds() {
+		return jobLevelIds;
+	}
+
+	public void setJobLevelIds(List<Long> jobLevelIds) {
+		this.jobLevelIds = jobLevelIds;
+	}
+
+	public Byte getEmployeeType() {
+		return employeeType;
+	}
+
+	public void setEmployeeType(Byte employeeType) {
+		this.employeeType = employeeType;
+	}
+
+	public Byte getEmployeeStatus() {
+		return employeeStatus;
+	}
+
+	public void setEmployeeStatus(Byte employeeStatus) {
+		this.employeeStatus = employeeStatus;
+	}
+
+	public String getEmploymentTime() {
+		return employmentTime;
+	}
+
+	public void setEmploymentTime(String employmentTime) {
+		this.employmentTime = employmentTime;
+	}
+
+	public String getCheckInTime() {
+		return checkInTime;
+	}
+
+	public void setCheckInTime(String checkInTime) {
+		this.checkInTime = checkInTime;
+	}
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
 }

@@ -2,24 +2,7 @@
 package com.everhomes.business;
 
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.apache.lucene.spatial.DistanceUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
 import ch.hsr.geohash.GeoHash;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.address.Address;
@@ -31,6 +14,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -39,118 +23,61 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.oauth2.Clients;
+import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.address.AddressType;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.business.BaiduGeocoderResponse;
-import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
-import com.everhomes.rest.business.BusinessAssignedNamespaceVisibleFlagType;
-import com.everhomes.rest.business.BusinessAssignedScopeDTO;
-import com.everhomes.rest.business.BusinessCommand;
-import com.everhomes.rest.business.BusinessDTO;
-import com.everhomes.rest.business.BusinessFavoriteStatus;
-import com.everhomes.rest.business.BusinessRecommendStatus;
-import com.everhomes.rest.business.BusinessScope;
-import com.everhomes.rest.business.BusinessServiceErrorCode;
-import com.everhomes.rest.business.BusinessTargetType;
-import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
-import com.everhomes.rest.business.DeleteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessDTO;
-import com.everhomes.rest.business.FavoriteBusinessesCommand;
-import com.everhomes.rest.business.FavoriteFlagType;
-import com.everhomes.rest.business.FindBusinessByIdCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
-import com.everhomes.rest.business.GetBusinessesByScopeCommand;
-import com.everhomes.rest.business.GetReceivedCouponCountCommand;
-import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
-import com.everhomes.rest.business.ListBusinessByKeywordCommand;
-import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
-import com.everhomes.rest.business.ListUserByIdentifierCommand;
-import com.everhomes.rest.business.ListUserByKeywordCommand;
-import com.everhomes.rest.business.ReSyncBusinessCommand;
-import com.everhomes.rest.business.SyncBusinessCommand;
-import com.everhomes.rest.business.SyncDeleteBusinessCommand;
-import com.everhomes.rest.business.UpdateBusinessCommand;
-import com.everhomes.rest.business.UpdateBusinessDistanceCommand;
-import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
-import com.everhomes.rest.business.UserFavoriteCommand;
-import com.everhomes.rest.business.admin.BusinessAdminDTO;
-import com.everhomes.rest.business.admin.BusinessPromoteScopeDTO;
-import com.everhomes.rest.business.admin.CreateBusinessAdminCommand;
-import com.everhomes.rest.business.admin.DeletePromoteBusinessAdminCommand;
-import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommand;
-import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommandResponse;
-import com.everhomes.rest.business.admin.PromoteBusinessAdminCommand;
-import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
+import com.everhomes.rest.business.*;
+import com.everhomes.rest.business.admin.*;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
-import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.launchpad.ApplyPolicy;
-import com.everhomes.rest.launchpad.DeleteFlagType;
-import com.everhomes.rest.launchpad.ItemDisplayFlag;
-import com.everhomes.rest.launchpad.ItemGroup;
-import com.everhomes.rest.launchpad.ItemTargetType;
-import com.everhomes.rest.launchpad.ScaleType;
-import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
-import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
-import com.everhomes.rest.openapi.UserCouponsCommand;
-import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.openapi.ValidateUserPassCommand;
-import com.everhomes.rest.region.ListRegionByKeywordCommand;
-import com.everhomes.rest.region.ListRegionCommand;
-import com.everhomes.rest.region.RegionAdminStatus;
-import com.everhomes.rest.region.RegionDTO;
-import com.everhomes.rest.region.RegionScope;
+import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.openapi.*;
+import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoType;
+import com.everhomes.rest.region.*;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.ui.user.UserProfileDTO;
-import com.everhomes.rest.user.GetUserDefaultAddressCommand;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.ListUserCommand;
-import com.everhomes.rest.user.UserDtoForBiz;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.ValidatePassCommand;
+import com.everhomes.rest.user.*;
+import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.SignupToken;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProfileContstant;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.user.UserServiceAddress;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import com.google.gson.annotations.SerializedName;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.lucene.spatial.DistanceUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class BusinessServiceImpl implements BusinessService {
@@ -202,6 +129,15 @@ public class BusinessServiceImpl implements BusinessService {
 	
 	@Autowired
 	private NamespaceProvider namespaceProvider;
+	
+	@Autowired
+	private GroupService groupService;
+
+    @Autowired
+    private BusinessPromotionProvider businessPromotionProvider;
+
+    @Autowired
+    private BizHttpRestCallProvider bizHttpRestCallProvider;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
@@ -960,25 +896,25 @@ public class BusinessServiceImpl implements BusinessService {
 				.filter(r ->{
 					if(r.getDisplayFlag().byteValue() == ItemDisplayFlag.DISPLAY.getCode())
 						return true;
-					removeIds.add(r.getTargetId());
+					removeIds.add(Long.valueOf(r.getTargetId()));
 					return false;
-				}).map(r ->r.getTargetId()).collect(Collectors.toList());
+				}).map(r ->Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 
 		List<Long> cmmtyBizIds = null;
 		if(cmmtyId!=0){
 			cmmtyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 					0, ScopeType.COMMUNITY.getCode(), cmmtyId,namesapceId).stream()
-					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+					.filter(r -> !removeIds.contains(r.getTargetId())).map(r -> Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 		}
 		List<Long> cityBizIds = null;
 		if(cityId!=0){
 			cityBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 					0, ScopeType.CITY.getCode(), cityId,namesapceId).stream()
-					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 		}
 		List<Long> countyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 				0, ScopeType.ALL.getCode(), 0,namesapceId).stream()
-				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 
 		List<Long> favoriteBizIds = new ArrayList<Long>();
 		if(userBizIds != null && !userBizIds.isEmpty())
@@ -1955,7 +1891,7 @@ public class BusinessServiceImpl implements BusinessService {
 		subcmd.setNamespaceId(cmd.getNamespaceId());
 		for(Long r:cmd.getCommunityIds()){
 			subcmd.setCommunityId(r);
-			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeyword(subcmd);
+			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeywordForBusiness(subcmd);
 			if(result.second()!=null&&!result.second().isEmpty()){
 				List<BuildingDTO> tmpList = result.second().stream().map((r2) -> {
 					r2.setCommunityId(r);
@@ -1970,7 +1906,7 @@ public class BusinessServiceImpl implements BusinessService {
 	@Override
 	public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(
 			ListPropApartmentsByKeywordCommand cmd) {
-		return addressService.listApartmentsByKeyword(cmd);
+		return addressService.listApartmentsByKeywordForBusiness(cmd);
 	}
 
 	@Override
@@ -2156,4 +2092,317 @@ public class BusinessServiceImpl implements BusinessService {
 					"password is null");
 		}
 	}
+
+	@Override
+	public CreateBusinessGroupResponse createBusinessGroup(CreateBusinessGroupCommand cmd) {
+		if (cmd.getUserId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"userId cannot be null");
+		}
+		
+		User user = userProvider.findUserById(cmd.getUserId());
+		if (user == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist user");
+		}
+		
+		UserContext userContext = UserContext.current();
+		userContext.setUser(user);
+		userContext.setNamespaceId(user.getNamespaceId());
+		
+		String groupName = cmd.getGroupName();
+		if (StringUtils.isBlank(groupName)) {
+			groupName = "group-"+UUID.randomUUID().toString();
+		}
+		
+		return new CreateBusinessGroupResponse(groupService.createBusinessGroup(groupName));
+	}
+
+	@Override
+	public void joinBusinessGroup(JoinBusinessGroupCommand cmd) {
+		if (cmd.getUserId() == null || cmd.getGroupId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"userId or groupId cannot be null");
+		}
+		
+		User user = userProvider.findUserById(cmd.getUserId());
+		if (user == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist user");
+		}
+		
+		UserContext userContext = UserContext.current();
+		userContext.setUser(user);
+		userContext.setNamespaceId(user.getNamespaceId());
+		
+		groupService.joinBusinessGroup(cmd.getGroupId());
+	}
+
+	@Override
+	public Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(
+			ListApartmentFloorCommand cmd) {
+		return addressService.listApartmentFloorForBusiness(cmd);
+	}
+
+	private String source = "biz";// 电商运营数据获取来源 biz：从电商那里获取数据， db: 从数据库获取数据
+
+    @Override
+    public ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd) {
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("list business promotion namespaceId={}", namespaceId);
+
+        if ("biz".equals(source)) {// 从电商服务器获取数据
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize);
+        }
+        // 从数据库获取数据
+        else {
+            ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
+
+            List<BusinessPromotion> promotions = businessPromotionProvider.listBusinessPromotion(
+                    namespaceId, pageSize, cmd.getPageAnchor());
+
+            List<ModulePromotionEntityDTO> entities =
+                    promotions.stream().map(this::toModulePromotionEntityDTO).collect(Collectors.toList());
+
+            reponse.setEntities(entities);
+            return reponse;
+        }
+    }
+
+    // 商品对象
+    private static class Commodity {
+        private String id;// 商品id
+        private String commoNo;// 商品编号
+        private String commoName;// 商品名称
+        private String defaultPic;// 商品图片
+        private BigDecimal price;// 商品价格
+        private String shopNo;// 店铺编号
+        private String uri;// 商品详情链接
+
+        @Override
+        public String toString() {
+            return StringHelper.toJsonString(this);
+        }
+    }
+
+    // 电商服务器响应对象
+    private static class Resp {
+        private String version;
+        private Integer errorCode;
+        @SerializedName("responseObject")
+        private List<Commodity> commodities = new ArrayList<>();
+
+        @Override
+        public String toString() {
+            return StringHelper.toJsonString(this);
+        }
+    }
+
+
+    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
+        String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml");
+
+        String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
+
+        // bizApi = "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml";
+        // bizServer = "https://biz-beta.zuolin.com";
+
+        if (StringUtils.isEmpty(bizApi)) {
+            LOGGER.error("biz promotion api config are empty");
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BIZ_API_NOT_EXIST,
+                    "biz promotion api config are empty");
+        }
+
+        Map<String, String> param = new HashMap<>();
+        param.put("namespaceId", String.valueOf(namespaceId));
+        param.put("pageSize", String.valueOf(pageSize));
+
+        ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
+        try {
+            String jsonStr = HttpUtils.post((bizServer + bizApi), param, 10, "UTF-8");
+
+            Resp resp = (Resp) StringHelper.fromJsonString(jsonStr, Resp.class);
+
+            if (resp != null) {
+                List<ModulePromotionEntityDTO> dtoList = new ArrayList<>();
+                for (Commodity commodity : resp.commodities) {
+                    ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+                    // dto.setId(commodity.id);
+                    dto.setSubject(commodity.commoName);
+                    dto.setPosterUrl(commodity.defaultPic);
+                    ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO(ModulePromotionInfoType.TEXT.getCode(), null, "¥" + commodity.price);
+                    dto.setInfoList(Collections.singletonList(infoDTO));
+
+                    dto.setMetadata(String.format("{\"url\":\"%s\"}", commodity.uri));
+
+                    dtoList.add(dto);
+                }
+                reponse.setEntities(dtoList);
+            }
+            return reponse;
+        } catch (Exception e) {
+            // e.printStackTrace();
+            LOGGER.error("biz server response error", e);
+        }
+        return reponse;
+    }
+
+    @Override
+    public void createBusinessPromotion(CreateBusinessPromotionCommand cmd) {
+        if (cmd.getId() != null) {
+            BusinessPromotion promotion = businessPromotionProvider.findById(cmd.getId());
+            if (cmd.getPrice() != null) {
+                promotion.setPrice(cmd.getPrice());
+            }
+            if (cmd.getCommodityUrl() != null) {
+                promotion.setCommodityUrl(cmd.getCommodityUrl());
+            }
+            if (cmd.getDefaultOrder() != null) {
+                promotion.setDefaultOrder(cmd.getDefaultOrder());
+            }
+            if (cmd.getSubject() != null) {
+                promotion.setSubject(cmd.getSubject());
+            }
+            if (cmd.getDescription() != null) {
+                promotion.setDescription(cmd.getDescription());
+            }
+            if (cmd.getPosterUri() != null) {
+                promotion.setPosterUri(cmd.getPosterUri());
+            }
+            businessPromotionProvider.updateBusinessPromotion(promotion);
+        } else {
+            BusinessPromotion promotion = ConvertHelper.convert(cmd, BusinessPromotion.class);
+            promotion.setNamespaceId(UserContext.getCurrentNamespaceId());
+            businessPromotionProvider.createBusinessPromotion(promotion);
+        }
+    }
+
+    @Override
+    public void testTransaction() {
+        dbProvider.execute(s -> test());
+    }
+
+    private List<String> test() {
+        for (int i = 0; i < 10; i++) {
+            BusinessPromotion promotion = new BusinessPromotion();
+            Integer namespaceId = UserContext.getCurrentNamespaceId();
+            promotion.setNamespaceId(namespaceId);
+            promotion.setSubject("comm:" + i);
+            businessPromotionProvider.createBusinessPromotion(promotion);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("create business promotion {} {} {}", i, namespaceId, promotion);
+            // try {
+            //     Thread.sleep(5000);
+            // } catch (InterruptedException e) {
+            //     e.printStackTrace();
+            // }
+            if (i == 9) {
+                throw RuntimeErrorException.errorWith("err", i, "error");
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void switchBusinessPromotionDataSource(SwitchBusinessPromotionDataSourceCommand cmd) {
+        if (cmd.getSource() != null) {
+            this.source = cmd.getSource();
+        }
+    }
+
+    private ModulePromotionEntityDTO toModulePromotionEntityDTO(BusinessPromotion promotion) {
+        ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+        dto.setId(promotion.getId());
+        dto.setSubject(promotion.getSubject());
+        dto.setDescription(promotion.getDescription());
+        dto.setPosterUrl(parserUri(promotion.getPosterUri(), EhBusinessPromotions.class.getSimpleName(), promotion.getId()));
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("url", promotion.getCommodityUrl());
+
+        dto.setMetadata(StringHelper.toJsonString(metadata));
+
+        ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO();
+        infoDTO.setContent("¥" + promotion.getPrice().toString());
+        infoDTO.setInfoType(ModulePromotionInfoType.TEXT.getCode());
+        dto.setInfoList(Collections.singletonList(infoDTO));
+        return dto;
+    }
+
+	@Override
+	public SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd) {
+		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		Integer namespaceId = sceneTokenDto.getNamespaceId();;
+		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
+		
+		String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_SEARCH_SHOPS_API, "");
+
+        String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
+
+//        bizApi = "/zl-ec/rest/openapi/shop/listByKeyword";
+//        bizServer = "https://biz-beta.zuolin.com";
+
+        if (StringUtils.isEmpty(bizApi)) {
+            LOGGER.error("biz promotion api config are empty");
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BIZ_API_NOT_EXIST,
+                    "biz promotion api config are empty");
+        }
+    	
+        Map<String, Object> param = new HashMap<>();
+        param.put("namespaceId", namespaceId);
+        param.put("keyword", String.valueOf(cmd.getKeyword()));
+//        param.put("shopNo", String.valueOf(searchShopsCommand.getShopNo()));
+//        param.put("shopName", String.valueOf(searchShopsCommand.getShopName()));
+        Integer pageNo = cmd.getPageAnchor() == null ? 1 : cmd.getPageAnchor().intValue();
+        Integer pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+				AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        param.put("pageNo", pageNo);
+        param.put("pageSize", pageSize);
+        SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+        try {
+            String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 1000, "UTF-8");
+
+            SearchShopsResponse searchShopsResponse = (SearchShopsResponse) StringHelper.fromJsonString(jsonStr, SearchShopsResponse.class);
+
+            if(searchShopsResponse != null && searchShopsResponse.getResult() && searchShopsResponse.getBody() != null){
+            	searchShopsResponse.getBody().getRows().forEach(r ->{
+            		r.setSearchTypeId(searchType.getId());
+        			r.setSearchTypeName(searchType.getName());
+        			r.setContentType(searchType.getContentType());
+            	});
+            	response.setShopDTOs(searchShopsResponse.getBody().getRows());
+            	
+            	if(searchShopsResponse.getBody().getHasNext())
+            	response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+            }
+//            if (resp != null) {
+//                List<ModulePromotionEntityDTO> dtoList = new ArrayList<>();
+//                for (Commodity commodity : resp.commodities) {
+//                    ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+//                    // dto.setId(commodity.id);
+//                    dto.setSubject(commodity.commoName);
+//                    dto.setPosterUrl(commodity.defaultPic);
+//                    ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO(ModulePromotionInfoType.TEXT.getCode(), null, "¥" + commodity.price);
+//                    dto.setInfoList(Collections.singletonList(infoDTO));
+//
+//                    dto.setMetadata(String.format("{\"url\":\"%s\"}", commodity.uri));
+//
+//                    dtoList.add(dto);
+//                }
+//                reponse.setEntities(dtoList);
+//            }
+            
+            
+            return response;
+        } catch (Exception e) {
+            // e.printStackTrace();
+            LOGGER.error("biz server response error", e);
+        }
+        return response;
+	}
+    
 }

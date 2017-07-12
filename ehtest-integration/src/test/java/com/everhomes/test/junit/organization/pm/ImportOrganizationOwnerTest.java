@@ -41,15 +41,15 @@ public class ImportOrganizationOwnerTest extends BaseLoginAuthTestCase {
         DSLContext context = dbProvider.getDslContext();
         List<EhOrganizationOwners> owners = context.selectFrom(Tables.EH_ORGANIZATION_OWNERS)
                 .fetchInto(EhOrganizationOwners.class);
-        assertTrue("The owners list size should be 5.", owners.size() == 5);
+        assertTrue("The owners list size should be 6. actual is "+owners.size(), owners.size() == 6);
 
         List<EhOrganizationOwnerBehaviors> behaviorsList = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS)
                 .fetchInto(EhOrganizationOwnerBehaviors.class);
-        assertTrue("The owner behavior list size should be 2.", behaviorsList.size() == 2);
+        assertTrue("The owner behavior list size should be 5. actual is "+behaviorsList.size(), behaviorsList.size() == 5);
 
         List<EhOrganizationOwnerAddress> addressList = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
                 .fetchInto(EhOrganizationOwnerAddress.class);
-        assertTrue("The owner address size should be 4.", addressList.size() == 4);
+        assertTrue("The owner address size should be 8. actual is "+addressList.size(), addressList.size() == 8);
     }
 
     private void logon() {
@@ -64,7 +64,8 @@ public class ImportOrganizationOwnerTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-import-owner-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-import-owner-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

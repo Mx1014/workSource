@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -40,6 +41,9 @@ public class DeviceMessages {
     public void setAnchor(Long anchor) {
         this.anchor = anchor;
     }
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }    
     
 }

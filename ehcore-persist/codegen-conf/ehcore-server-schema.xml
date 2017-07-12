@@ -110,8 +110,69 @@
 		eh_approval_flows | eh_approval_flow_levels | eh_approval_rules | eh_approval_rule_flow_map | eh_approval_categories | eh_approval_requests | eh_approval_attachments | eh_approval_time_ranges | eh_approval_day_actual_time | eh_approval_op_requests |
 		eh_news_categories |
         eh_request_templates | eh_request_templates_namespace_mapping | eh_request_attachments | eh_service_alliance_requests | eh_service_alliance_notify_targets | eh_settle_requests |
-		eh_region_codes | eh_stat_active_users |
+		eh_region_codes | eh_stat_active_users | eh_warning_settings | eh_service_alliance_reservation_requests |
+        eh_quality_inspection_standard_specification_map | eh_quality_inspection_specifications | eh_quality_inspection_specification_item_results |
+		eh_region_codes | eh_stat_active_users | eh_item_service_categries |
+		eh_pm_task_targets | eh_parking_card_categories |
+		eh_warning_settings | eh_service_alliance_reservation_requests | eh_door_user_permission |
+		eh_resource_categories | eh_resource_category_assignments | eh_organization_job_positions | eh_service_modules | eh_service_module_scopes | eh_service_module_privileges | eh_service_module_assignments | eh_organization_job_position_maps |
+		eh_group_settings | eh_broadcasts |
+        eh_equipment_inspection_equipment_standard_map | eh_equipment_inspection_templates | eh_equipment_inspection_template_item_map | eh_equipment_inspection_items | eh_equipment_inspection_item_results |
+        eh_organization_member_logs |
+		eh_contracts | eh_contract_building_mappings | eh_app_namespace_mappings |
+        eh_activity_categories |
+        eh_energy_meters | eh_energy_meter_reading_logs | eh_energy_meter_change_logs | eh_energy_meter_categories | eh_energy_meter_setting_logs | eh_energy_meter_default_settings | eh_energy_meter_formulas | eh_energy_meter_formula_variables |
+        eh_energy_date_statistics | eh_energy_month_statistics | eh_energy_count_statistics | eh_energy_yoy_statistics |
+		eh_terminal_app_version_cumulatives | eh_terminal_app_version_actives | eh_terminal_day_statistics | eh_terminal_hour_statistics | eh_terminal_app_version_statistics | eh_app_version | eh_terminal_statistics_tasks |
+        eh_pm_task_target_statistics |
+        eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule |
+		eh_user_blacklists |
+        eh_service_alliance_invest_requests | eh_service_alliance_jump_module |
+        eh_parking_clearance_operators | eh_parking_clearance_logs |
+        eh_parking_flow | eh_parking_statistics | eh_parking_car_series | eh_parking_attachments |
+        eh_activity_attachments | eh_activity_goods |
+		eh_flows | eh_flow_stats | eh_flow_nodes | eh_flow_buttons | eh_flow_forms | eh_flow_actions | eh_flow_user_selections | eh_flow_cases | eh_flow_event_logs | eh_flow_variables | eh_flow_evaluates | eh_flow_scripts | eh_flow_attachments | eh_flow_subjects | eh_flow_timeouts | eh_flow_evaluate_items |
+        eh_service_hotlines | eh_service_configurations |
+        eh_launch_advertisements |
+		eh_techpark_syncdata_backup | eh_business_promotions |
+        eh_quality_inspection_task_templates |   
+        eh_general_forms | eh_general_approvals | eh_general_approval_vals  |
+		eh_door_auth_logs | 
+        eh_asset_bills | eh_asset_bill_template_fields | eh_asset_bill_notify_records |
+		eh_door_auth_logs |
+		eh_enterprise_op_request_buildings | 
+        eh_equipment_inspection_categories | eh_equipment_inspection_standard_group_map |  
+		eh_questionnaires | eh_questionnaire_questions | eh_questionnaire_options | eh_questionnaire_answers |
+        eh_os_objects | eh_os_object_download_logs |
+        eh_docking_mappings | 
+		eh_punch_schedulings | eh_approval_range_statistics | 
+        eh_lease_issuers | eh_lease_configs | eh_lease_issuer_addresses |
+        eh_service_alliance_golf_requests | eh_service_alliance_gym_requests | eh_service_alliance_server_requests |
+        eh_oauth2_client_tokens | eh_oauth2_servers |
+        eh_sms_logs |
+		eh_previews |
+        eh_energy_meter_price_config | eh_asset_vendor |
+		eh_import_file_tasks |
+        eh_pm_task_history_addresses |
+		eh_authorizations | eh_service_module_assignment_relations | eh_authorization_relations |
+        eh_energy_meter_price_config |
+        eh_user_notification_settings | eh_group_member_logs | eh_domains |
+		eh_express_service_addresses | eh_express_companies | eh_express_users | eh_express_addresses | 
+		eh_express_orders | eh_express_query_histories | eh_express_order_logs |
+		eh_roster_order_settings |
+        eh_energy_meter_price_config |
+        eh_general_form_vals | eh_lease_configs2 | eh_lease_form_requests | eh_general_form_mappings |
+        eh_warehouses | eh_warehouse_materials | eh_warehouse_material_categories | eh_warehouse_stocks | eh_warehouse_stock_logs | eh_warehouse_requests | eh_warehouse_request_materials | eh_warehouse_units | 
+        eh_talents | eh_talent_categories | eh_talent_query_histories |
+        eh_authorizations | eh_authorization_relations | eh_service_module_assignment_relations | eh_domains |
+        eh_user_notification_settings | eh_group_member_logs | 
+        eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat |
+		eh_rentalv2_price_rules |
+        eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
+        eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
+            eh_sms_black_lists |
         </includes>
+
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
             Excludes match before includes -->

@@ -776,7 +776,7 @@ public class NewsTest extends BaseLoginAuthTestCase {
 				cmd.setCategoryId(categoryId);
 			
 			File file;
-			file = new File(new File("").getCanonicalPath() + "\\src\\test\\data\\excel\\news_template.xlsx");
+			file = new File(new File("").getCanonicalPath() + "/src/test/data/excel/news_template.xlsx");
 			RestResponseBase response = httpClientService.postFile(uri, cmd, file, RestResponseBase.class);
 			assertNotNull(response);
 			assertTrue("response= " + StringHelper.toJsonString(response),

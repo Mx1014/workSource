@@ -140,4 +140,11 @@ public class ApprovalFlowProviderImpl implements ApprovalFlowProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public void deleteApprovalFlows(List<Long> flowIds) {
+		getReadWriteContext().delete(Tables.EH_APPROVAL_FLOWS)
+		.where(Tables.EH_APPROVAL_FLOWS.ID.in(flowIds)) 
+		.execute();
+	}
 }

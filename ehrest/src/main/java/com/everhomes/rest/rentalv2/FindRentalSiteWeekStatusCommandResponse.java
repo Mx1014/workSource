@@ -33,6 +33,7 @@ import com.everhomes.util.StringHelper;
  * <li>attachments：List<AttachmentDTO> 附件列表 </li> 
  * <li>siteItems：List<SiteItemDTO> 商品列表</li> 
  * <li>dayTimes：Long数组,按小时预订的时候把纵坐标轴的所有时间戳填入</li> 
+ * <li>confirmationPrompt: 确认提示(非必填)</li>
  * </ul>
  */
 public class FindRentalSiteWeekStatusCommandResponse {
@@ -67,6 +68,7 @@ public class FindRentalSiteWeekStatusCommandResponse {
 	private List<SiteItemDTO> siteItems;
 	@ItemType(Long.class)
 	private List<Long> dayTimes;
+	private String confirmationPrompt;
 	
 	@Override
     public String toString() {

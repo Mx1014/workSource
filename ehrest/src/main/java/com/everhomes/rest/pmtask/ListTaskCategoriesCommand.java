@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId: 域空间</li>
  * <li>parentId: 父类型Id</li>
+ * <li>taskCategoryId: 服务类型Id</li>
  * <li>keyword: 分类名称</li>
  * <li>pageAnchor: 分页瞄</li>
  * <li>pageSize: 每页条数</li>
@@ -14,6 +15,7 @@ import com.everhomes.util.StringHelper;
 public class ListTaskCategoriesCommand {
 	private Integer namespaceId;
 	private Long parentId;
+	private Long taskCategoryId;
 	private String keyword;
 	private Long pageAnchor;
 	private Integer pageSize;
@@ -61,6 +63,14 @@ public class ListTaskCategoriesCommand {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public Long getTaskCategoryId() {
+		return taskCategoryId;
+	}
+
+	public void setTaskCategoryId(Long taskCategoryId) {
+		this.taskCategoryId = taskCategoryId;
 	}
 
 

@@ -20,6 +20,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.namespace.Namespace;
 import org.apache.http.protocol.HTTP;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -261,12 +262,16 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				results.addAll(shopSettlementResults);
 				
 				//乱数据全部统计在临时店铺下面
-				Condition eqCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.eq("-1"));
-				StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(eqCond, sStartDate, sEndDate);
-				result.setServiceType(serviceType);
-				result.setResourceType(SettlementResourceType.SHOP.getCode());
-				result.setResourceId("-1");
-				results.add(result);
+				//只有0域或者查询全部的时候 才把没有来源的数据查出 add by sfyan 20170309
+				if(StringUtils.isEmpty(cmd.getNamespaceId()) || cmd.getNamespaceId() == Namespace.DEFAULT_NAMESPACE){
+					Condition eqCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.eq("-1"));
+					StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(eqCond, sStartDate, sEndDate);
+					result.setServiceType(serviceType);
+					result.setResourceType(SettlementResourceType.SHOP.getCode());
+					result.setResourceId("-1");
+					results.add(result);
+				}
+
 			}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.OTHER_SHOP){
 				List<StatServiceSettlementResult> shopSettlementResults = statTransactionProvider.listStatServiceSettlementResult(serviceCond, sStartDate, sEndDate);
 				results.addAll(shopSettlementResults);
@@ -804,7 +809,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			List<StatWareDTO> statWareDTOs =  new ArrayList<StatWareDTO>();
 			
 			if(!StringUtils.isEmpty(wareJson)){
-				List<Ware> wares = (List<Ware>)StringHelper.fromJsonString(wareJson, List.class);
+				Ware[] wares = (Ware[])StringHelper.fromJsonString(wareJson, Ware[].class);
 				if(null != wares){
 					for (Ware ware : wares) {
 						StatWareDTO wareDTO = this.getWareInfo(ware.getWareId());
@@ -1234,7 +1239,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					order.setNamespaceId(user.getNamespaceId());
 				}
 			}else{
-				order.setNamespaceId(1000000);
+				order.setNamespaceId(0);
 			}
 			order.setShopType(bizPaidOrder.getShopCreateType());
 			order.setResourceType(SettlementResourceType.SHOP.getCode());
@@ -1275,7 +1280,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					order.setNamespaceId(user.getNamespaceId());
 				}
 			}else{
-				order.setNamespaceId(1000000);
+				order.setNamespaceId(0);
 			}
 			order.setShopType(bizRefundOrder.getShopCreateType());
 			order.setResourceType(SettlementResourceType.SHOP.getCode());
@@ -1332,7 +1337,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statOrder.setNamespaceId(user.getNamespaceId());
 				statOrder.setOrderAmount(parkingRechargeOrder.getPrice());
 				statOrder.setOrderDate(date);
-				statOrder.setOrderNo(parkingRechargeOrder.getOrderNo().toString());
+				statOrder.setOrderNo(parkingRechargeOrder.getId().toString());
 				statOrder.setOrderTime(parkingRechargeOrder.getRechargeTime());
 				statOrder.setOrderType(SettlementOrderType.TRANSACTION.getCode());
 				statOrder.setPayerUid(parkingRechargeOrder.getPayerUid());
@@ -1535,7 +1540,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statTransaction.setWareJson(statOrder.getWareJson());
 			}else{
 				statTransaction.setCommunityId(0L);
-				statTransaction.setNamespaceId(1000000);
+				statTransaction.setNamespaceId(0);
 				statTransaction.setResourceId("-1");
 				statTransaction.setPayerUid(0L);
 			}
@@ -1762,7 +1767,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statRefund.setWareJson(statOrder.getWareJson());
 			}else{
 				statRefund.setCommunityId(0L);
-				statRefund.setNamespaceId(1000000);
+				statRefund.setNamespaceId(0);
 				statRefund.setResourceId("-1");
 				statRefund.setPayerUid(0L);
 			}
@@ -1849,7 +1854,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 		List<StatServiceSettlementResult> alipaySettlementResults = statTransactionProvider.countStatServiceSettlementResult(PaidChannel.ALIPAY.getCode(), date);
 		List<StatServiceSettlementResult> wechatSettlementResults = statTransactionProvider.countStatServiceSettlementResult(PaidChannel.WECHAT.getCode(), date);
 		List<StatServiceSettlementResult> paymentSettlementResults = statTransactionProvider.countStatServiceSettlementResult(PaidChannel.PAYMENT.getCode(), date);
-		
+
 		if(LOGGER.isDebugEnabled()){
 			LOGGER.debug("generate alipay settlement data size = {}, date = {}", alipaySettlementResults.size(), date);
 			LOGGER.debug("generate wechat settlement data size = {}, date = {}", wechatSettlementResults.size(), date);
@@ -1859,9 +1864,11 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			for (StatServiceSettlementResult statServiceSettlementResult : alipaySettlementResults) {
 				statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getAlipayPaidAmount());
 				statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getAlipayRefundAmount());
+				statServiceSettlementResult.setTotalPaidCount(statServiceSettlementResult.getAlipayPaidCount());
+				statServiceSettlementResult.setTotalRefundCount(statServiceSettlementResult.getAlipayRefundCount());
 				statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
 			}
-			
+
 			for (StatServiceSettlementResult statServiceSettlementResult : wechatSettlementResults) {
 				Condition cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(statServiceSettlementResult.getNamespaceId());
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(statServiceSettlementResult.getCommunityId()));
@@ -1872,16 +1879,22 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null == settlementResult){
 					statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getWechatPaidAmount());
 					statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getWechatRefundAmount());
+					statServiceSettlementResult.setTotalPaidCount(statServiceSettlementResult.getWechatPaidCount());
+					statServiceSettlementResult.setTotalRefundCount(statServiceSettlementResult.getWechatRefundCount());
 					statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
 				}else{
 					settlementResult.setWechatPaidAmount(statServiceSettlementResult.getWechatPaidAmount());
 					settlementResult.setWechatRefundAmount(statServiceSettlementResult.getWechatRefundAmount());
+					settlementResult.setWechatPaidCount(statServiceSettlementResult.getWechatPaidCount());
+					settlementResult.setWechatRefundCount(statServiceSettlementResult.getWechatRefundCount());
 					settlementResult.setTotalPaidAmount(settlementResult.getAlipayPaidAmount().add(settlementResult.getWechatPaidAmount()));
 					settlementResult.setTotalRefundAmount(settlementResult.getAlipayRefundAmount().add(settlementResult.getWechatRefundAmount()));
+					settlementResult.setTotalPaidCount(settlementResult.getAlipayPaidCount() + settlementResult.getWechatPaidCount());
+					settlementResult.setTotalRefundCount(settlementResult.getAlipayRefundCount() + settlementResult.getWechatRefundCount());
 					statTransactionProvider.updateStatServiceSettlementResult(settlementResult);
 				}
 			}
-			
+
 			for (StatServiceSettlementResult statServiceSettlementResult : paymentSettlementResults) {
 				Condition cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(statServiceSettlementResult.getNamespaceId());
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(statServiceSettlementResult.getCommunityId()));
@@ -1892,12 +1905,18 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null == settlementResult){
 					statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
 					statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
+					statServiceSettlementResult.setTotalPaidCount(statServiceSettlementResult.getPaymentCardPaidCount());
+					statServiceSettlementResult.setTotalRefundCount(statServiceSettlementResult.getPaymentCardRefundCount());
 					statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
 				}else{
 					settlementResult.setPaymentCardPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
 					settlementResult.setPaymentCardRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
+					settlementResult.setPaymentCardPaidCount(statServiceSettlementResult.getPaymentCardPaidCount());
+					settlementResult.setPaymentCardRefundCount(statServiceSettlementResult.getPaymentCardRefundCount());
 					settlementResult.setTotalPaidAmount(settlementResult.getAlipayPaidAmount().add(settlementResult.getWechatPaidAmount()).add(settlementResult.getPaymentCardPaidAmount()));
 					settlementResult.setTotalRefundAmount(settlementResult.getAlipayRefundAmount().add(settlementResult.getWechatRefundAmount()).add(settlementResult.getPaymentCardRefundAmount()));
+					settlementResult.setTotalPaidCount(settlementResult.getAlipayPaidCount() + settlementResult.getWechatPaidCount() + settlementResult.getPaymentCardPaidCount());
+					settlementResult.setTotalRefundCount(settlementResult.getAlipayRefundCount() + settlementResult.getWechatRefundCount() + settlementResult.getPaymentCardRefundCount());
 					statTransactionProvider.updateStatServiceSettlementResult(settlementResult);
 				}
 			}
@@ -1905,9 +1924,11 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			for (StatServiceSettlementResult statServiceSettlementResult : wechatSettlementResults) {
 				statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getWechatPaidAmount());
 				statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getWechatRefundAmount());
+				statServiceSettlementResult.setTotalPaidCount(statServiceSettlementResult.getWechatPaidCount());
+				statServiceSettlementResult.setTotalRefundCount(statServiceSettlementResult.getWechatRefundCount());
 				statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
 			}
-			
+
 			for (StatServiceSettlementResult statServiceSettlementResult : paymentSettlementResults) {
 				Condition cond = Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.NAMESPACE_ID.eq(statServiceSettlementResult.getNamespaceId());
 				cond = cond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.COMMUNITY_ID.eq(statServiceSettlementResult.getCommunityId()));
@@ -1918,12 +1939,18 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				if(null == settlementResult){
 					statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
 					statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
+					statServiceSettlementResult.setTotalPaidCount(statServiceSettlementResult.getPaymentCardPaidCount());
+					statServiceSettlementResult.setTotalRefundCount(statServiceSettlementResult.getPaymentCardRefundCount());
 					statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
 				}else{
 					settlementResult.setPaymentCardPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
 					settlementResult.setPaymentCardRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
+					settlementResult.setPaymentCardPaidCount(statServiceSettlementResult.getPaymentCardPaidCount());
+					settlementResult.setPaymentCardRefundCount(statServiceSettlementResult.getPaymentCardRefundCount());
 					settlementResult.setTotalPaidAmount(settlementResult.getWechatPaidAmount().add(settlementResult.getPaymentCardPaidAmount()));
 					settlementResult.setTotalRefundAmount(settlementResult.getWechatRefundAmount().add(settlementResult.getPaymentCardRefundAmount()));
+					settlementResult.setTotalPaidCount(settlementResult.getWechatPaidCount() + settlementResult.getPaymentCardPaidCount());
+					settlementResult.setTotalRefundCount(settlementResult.getWechatRefundCount() + settlementResult.getPaymentCardRefundCount());
 					statTransactionProvider.updateStatServiceSettlementResult(settlementResult);
 				}
 			}
@@ -1931,6 +1958,8 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			for (StatServiceSettlementResult statServiceSettlementResult : paymentSettlementResults) {
 				statServiceSettlementResult.setTotalPaidAmount(statServiceSettlementResult.getPaymentCardPaidAmount());
 				statServiceSettlementResult.setTotalRefundAmount(statServiceSettlementResult.getPaymentCardRefundAmount());
+				statServiceSettlementResult.setTotalPaidCount(statServiceSettlementResult.getPaymentCardPaidCount());
+				statServiceSettlementResult.setTotalRefundCount(statServiceSettlementResult.getPaymentCardRefundCount());
 				statTransactionProvider.createStatServiceSettlementResult(statServiceSettlementResult);
 			}
 		}

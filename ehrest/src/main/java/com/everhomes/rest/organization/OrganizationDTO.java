@@ -1,11 +1,11 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>公司已经和机构合并(201604)，故在概念上它们是一个；公司分为物业公司、政府相关的公司（工作站、公安等），以及普通公司；
@@ -38,10 +38,11 @@ import com.everhomes.util.StringHelper;
  * <li>showFlag：控制是否在导航菜单中，{@link com.everhomes.rest.organization.OrganizationNaviFlag}</li>
  * <li>childrens：子集参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>roles：机构/部门/群组拥有的角色</li>
- *  <li>enterpriseContactor: 企业联系人</li>
- *  <li>mobile: 手机号</li>
+ * <li>enterpriseContactor: 企业联系人</li>
+ * <li>mobile: 手机号</li>
  * <li>doorplateAddress：门牌地址</li>
- * <li>
+ * <li>managers：经理列表 {@link com.everhomes.rest.organization.OrganizationManagerDTO}</li>
+ * <li>emailDomain: 邮箱域名 </li>
  * </ul>
  */
 public class OrganizationDTO {
@@ -88,6 +89,13 @@ public class OrganizationDTO {
 	private String enterpriseContactor;
 	
 	private String mobile;
+
+	@ItemType(OrganizationManagerDTO.class)
+	private List<OrganizationManagerDTO> managers;
+
+	private String pathName;
+
+    private String emailDomain;
 	
 	public String getEnterpriseContactor() {
 		return enterpriseContactor;
@@ -340,8 +348,32 @@ public class OrganizationDTO {
         this.feedbackForumId = feedbackForumId;
     }
 
+	public List<OrganizationManagerDTO> getManagers() {
+		return managers;
+	}
+
+	public void setManagers(List<OrganizationManagerDTO> managers) {
+		this.managers = managers;
+	}
+
+	public String getPathName() {
+		return pathName;
+	}
+
+	public void setPathName(String pathName) {
+		this.pathName = pathName;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getEmailDomain() {
+		return emailDomain;
+	}
+
+	public void setEmailDomain(String emailDomain) {
+		this.emailDomain = emailDomain;
+	}
 }

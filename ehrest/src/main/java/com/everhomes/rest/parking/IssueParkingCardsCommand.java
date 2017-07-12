@@ -22,7 +22,11 @@ public class IssueParkingCardsCommand {
     private Long parkingLotId;
 	@NotNull
     private Integer count;
-    
+	
+	private Long flowId;
+	
+	private Byte status;
+	
     public IssueParkingCardsCommand() {
     }
     
@@ -62,4 +66,20 @@ public class IssueParkingCardsCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getFlowId() {
+		return flowId;
+	}
+
+	public void setFlowId(Long flowId) {
+		this.flowId = flowId;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
 }

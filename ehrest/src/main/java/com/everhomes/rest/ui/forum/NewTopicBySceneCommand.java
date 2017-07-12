@@ -45,6 +45,8 @@ import com.everhomes.util.StringHelper;
  * <li>attachments: 图片、语音、视频等附件信息，参考{@link com.everhomes.rest.forum.AttachmentDescriptor}</li>
  * <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>
  * <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
+ * <li>maxQuantity: 限制人数</li>
+ * <li>tag: 帖子标签</li>
  * </ul>
  */
 public class NewTopicBySceneCommand {
@@ -92,7 +94,19 @@ public class NewTopicBySceneCommand {
     
     private Byte mediaDisplayFlag;
     
-    public Byte getMediaDisplayFlag() {
+    private Integer maxQuantity;
+
+    private String tag;
+
+	public Integer getMaxQuantity() {
+		return maxQuantity;
+	}
+
+	public void setMaxQuantity(Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
+	}
+
+	public Byte getMediaDisplayFlag() {
 		return mediaDisplayFlag;
 	}
 
@@ -249,7 +263,15 @@ public class NewTopicBySceneCommand {
 		this.visibleRegionType = visibleRegionType;
 	}
 
-	@Override
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

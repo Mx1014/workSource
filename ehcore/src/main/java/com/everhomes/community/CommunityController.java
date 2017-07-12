@@ -9,13 +9,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.community.*;
+import com.everhomes.rest.community.admin.*;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -24,23 +27,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.GetBuildingCommand;
-import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
-import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
-import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.community.ListBuildingCommand;
-import com.everhomes.rest.community.ListBuildingCommandResponse;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
-import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
-import com.everhomes.rest.community.admin.CommunityUserDto;
-import com.everhomes.rest.community.admin.CommunityUserResponse;
-import com.everhomes.rest.community.admin.CountCommunityUserResponse;
-import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
-import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
-import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.EtagHelper;
 
 /**
@@ -162,6 +148,7 @@ public class CommunityController extends ControllerBase {
 	 */
 	@RequestMapping("getBuilding")
     @RestReturn(value=BuildingDTO.class)
+    @RequireAuthentication(false)
 	public RestResponse getBuilding(GetBuildingCommand cmd) {
 		BuildingDTO dto = communityService.getBuilding(cmd);
 		RestResponse response =  new RestResponse(dto);
@@ -184,8 +171,17 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
 	}
-	
 
+    /**
+     * <b>URL: /community/exportCommunityUsers</b>
+     * <p>导出园区用户列表</p>
+     */
+    @RequestMapping("exportCommunityUsers")
+    public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+        communityService.exportCommunityUsers(cmd, response);
+
+
+    }
 	
 	/**
 	 * <b>URL: /community/countCommunityUsers</b>
@@ -218,4 +214,215 @@ public class CommunityController extends ControllerBase {
     	
     }
 
+    /**
+     * <b>URL: /community/createResourceCategory</b>
+     * <p>创建资源分类</p>
+     */
+    @RequestMapping("createResourceCategory")
+    @RestReturn(value=String.class)
+    public RestResponse createResourceCategory(CreateResourceCategoryCommand cmd) {
+        RestResponse response =  new RestResponse();
+        communityService.createResourceCategory(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/updateResourceCategory</b>
+     * <p>修改资源分类</p>
+     */
+    @RequestMapping("updateResourceCategory")
+    @RestReturn(value=String.class)
+    public RestResponse updateResourceCategory(UpdateResourceCategoryCommand cmd) {
+        RestResponse response =  new RestResponse();
+        communityService.updateResourceCategory(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/deleteResourceCategory</b>
+     * <p>删除资源分类</p>
+     */
+    @RequestMapping("deleteResourceCategory")
+    @RestReturn(value=String.class)
+    public RestResponse deleteResourceCategory(DeleteResourceCategoryCommand cmd) {
+        RestResponse response =  new RestResponse();
+        communityService.deleteResourceCategory(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/createResourceCategoryAssignment</b>
+     * <p>给资源分配类型</p>
+     */
+    @RequestMapping("createResourceCategoryAssignment")
+    @RestReturn(value=String.class)
+    public RestResponse createResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd) {
+        RestResponse response =  new RestResponse();
+        communityService.createResourceCategoryAssignment(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/deleteResourceCategoryAssignment</b>
+     * <p>删除资源分配类型</p>
+     */
+    @RequestMapping("deleteResourceCategoryAssignment")
+    @RestReturn(value=String.class)
+    public RestResponse deleteResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd) {
+        RestResponse response =  new RestResponse();
+        communityService.deleteResourceCategoryAssignment(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/listResourceCategories</b>
+     * <p>分类列表</p>
+     */
+    @RequestMapping("listResourceCategories")
+    @RestReturn(value=ResourceCategoryDTO.class, collection = true)
+    public RestResponse listResourceCategories(ListResourceCategoryCommand cmd) {
+    	List<ResourceCategoryDTO> list = communityService.listResourceCategories(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/listTreeResourceCategories</b>
+     * <p>分类列表</p>
+     */
+    @RequestMapping("listTreeResourceCategories")
+    @RestReturn(value=ResourceCategoryDTO.class, collection = true)
+    public RestResponse listTreeResourceCategories(ListResourceCategoryCommand cmd) {
+    	List<ResourceCategoryDTO> list = communityService.listTreeResourceCategories(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/listTreeResourceCategoryAssignments</b>
+     * <p>分配了资源的分类树状列表</p>
+     */
+    @RequestMapping("listTreeResourceCategoryAssignments")
+    @RestReturn(value=ResourceCategoryDTO.class, collection = true)
+    public RestResponse listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd) {
+    	List<ResourceCategoryDTO> list = communityService.listTreeResourceCategoryAssignments(cmd);
+
+        RestResponse response =  new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/listCommunitiesByCategory</b>
+     * <p>根据域,城市，区县，分类，关键字查询小区</p>
+     */
+    @RequestMapping("listCommunitiesByCategory")
+    @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
+    public RestResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
+    	ListCommunitiesByKeywordCommandResponse resp = communityService.listCommunitiesByCategory(cmd);
+        RestResponse response =  new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+
+    /**
+     * <b>URL: /community/updateCommunity</b>
+     * <p>更新小区信息</p>
+     */
+    @RequestMapping("updateCommunity")
+    @RestReturn(value=String.class)
+    public RestResponse updateCommunity(@Valid UpdateCommunityAdminCommand cmd) {
+        this.communityService.updateCommunity(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /community/listChildProjects</b>
+     * <p>查询小区的子项目</p>
+     */
+    @RequestMapping("listChildProjects")
+    @RestReturn(value=ProjectDTO.class, collection = true)
+    public RestResponse listChildProjects(ListChildProjectCommand cmd) {
+        RestResponse response =  new RestResponse(communityService.listChildProjects(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/createChildProject</b>
+     * <p>创建小区的子项目</p>
+     */
+    @RequestMapping("createChildProject")
+    @RestReturn(value=String.class)
+    public RestResponse createChildProject(CreateChildProjectCommand cmd) {
+        communityService.createChildProject(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/updateChildProject</b>
+     * <p>修改小区的子项目</p>
+     */
+    @RequestMapping("updateChildProject")
+    @RestReturn(value=String.class)
+    public RestResponse updateChildProject(UpdateChildProjectCommand cmd) {
+        communityService.updateChildProject(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/deleteChildProject</b>
+     * <p>删除小区的子项目</p>
+     */
+    @RequestMapping("deleteChildProject")
+    @RestReturn(value=String.class)
+    public RestResponse deleteChildProject(DeleteChildProjectCommand cmd) {
+        communityService.deleteChildProject(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/getTreeProjectCategories</b>
+     * <p>项目分类树状列表</p>
+     */
+    @RequestMapping("getTreeProjectCategories")
+    @RestReturn(value=String.class)
+    public RestResponse getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd) {
+        RestResponse response =  new RestResponse(communityService.getTreeProjectCategories(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

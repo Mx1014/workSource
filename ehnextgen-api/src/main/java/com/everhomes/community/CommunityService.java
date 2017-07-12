@@ -3,22 +3,11 @@ package com.everhomes.community;
 
 import java.util.List;
 
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.community.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.GetBuildingCommand;
-import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
-import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
-import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.community.GetCommunityByUuidCommand;
-import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
-import com.everhomes.rest.community.ListBuildingCommand;
-import com.everhomes.rest.community.ListBuildingCommandResponse;
-import com.everhomes.rest.community.ListCommunitesByStatusCommand;
-import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
-import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
@@ -33,8 +22,11 @@ import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
 import com.everhomes.rest.community.admin.CreateCommunityCommand;
 import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
+import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsCommand;
+import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsResponse;
 import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
 import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
@@ -44,12 +36,18 @@ import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
+import com.everhomes.rest.community.admin.UpdateResourceCategoryCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 
 public interface CommunityService {
@@ -97,6 +95,8 @@ public interface CommunityService {
 	ImportDataResponse importBuildingData(MultipartFile mfile, Long userId);
 	
 	CommunityUserResponse listUserCommunities(ListCommunityUsersCommand cmd);
+
+	void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response);
 	
 	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
 	
@@ -123,4 +123,40 @@ public interface CommunityService {
 	void communityImportBaseConfig(CommunityImportBaseConfigCommand cmd);
 
 	void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd);
+
+	ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd);
+
+	void updateCommunityUser(UpdateCommunityUserCommand cmd);
+	
+	/*--------添加修改资源分类 ------*/
+	void createResourceCategory(CreateResourceCategoryCommand cmd);
+	
+	void updateResourceCategory(UpdateResourceCategoryCommand cmd);
+	
+	void deleteResourceCategory(DeleteResourceCategoryCommand cmd);
+	
+	void createResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd);
+	
+	void deleteResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd);
+	
+	ListCommunitiesByKeywordCommandResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd);
+	
+	List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd);
+	
+	List<ResourceCategoryDTO> listTreeResourceCategories(ListResourceCategoryCommand cmd);
+	
+	List<ResourceCategoryDTO> listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd);
+
+	List<ProjectDTO> listChildProjects(ListChildProjectCommand cmd);
+
+	void createChildProject(CreateChildProjectCommand cmd);
+
+	void updateChildProject(UpdateChildProjectCommand cmd);
+
+	void deleteChildProject(DeleteChildProjectCommand cmd);
+
+	List<ProjectDTO> getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd);
+
+	void updateBuildingOrder(@Valid UpdateBuildingOrderCommand cmd);
+	ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file);
 }

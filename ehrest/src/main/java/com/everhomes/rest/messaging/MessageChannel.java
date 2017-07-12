@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.messaging;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>channelType: 通道类型，目前支持 user/group</li>
@@ -34,5 +36,9 @@ public class MessageChannel {
     
     public void setChannelToken(String channelToken) {
         this.channelToken = channelToken;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -1,12 +1,12 @@
 package com.everhomes.banner;
 
-import java.util.List;
-import java.util.Map;
-
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerStatus;
 import com.everhomes.rest.launchpad.ApplyPolicy;
+
+import java.util.List;
+import java.util.Map;
 
 
 public interface BannerProvider {
@@ -55,5 +55,9 @@ public interface BannerProvider {
 	 * @return 返回场景和数量对应的map结构
 	 */
 	Map<String, Integer> selectCountGroupBySceneType(Integer namespaceId, BannerScope scope, BannerStatus status);
-	
+
+    /**
+     * 查看该场景下是否有自定义的banner
+     */
+    Banner findAnyCustomizedBanner(Integer namespaceId, Byte scopeCode, Long scopeId, String sceneType);
 }

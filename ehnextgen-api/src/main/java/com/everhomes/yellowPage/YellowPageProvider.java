@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.yellowPage.JumpModuleDTO;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
@@ -24,6 +25,11 @@ public interface YellowPageProvider {
 	List<ServiceAlliances> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
 			String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords);
 
+	/**
+	 * add by dengs,20170428 不仅查小区，也查询物业公司下的 服务联盟机构
+	 */
+	List<ServiceAlliances> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
+			String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords,Long organizationId,String organizationType);
 
 	void createYellowPage(YellowPage yellowPage);
 
@@ -59,7 +65,7 @@ public interface YellowPageProvider {
 	ServiceAlliances findServiceAllianceById(Long id, String ownerType, Long ownerId);
 	void populateServiceAlliancesAttachment(ServiceAlliances sa);
 	
-	List<ServiceAllianceCategories> listChildCategories(Integer namespaceId, Long parentId, CategoryAdminStatus status);
+	List<ServiceAllianceCategories> listChildCategories(String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination);
  
 	void createNotifyTarget(ServiceAllianceNotifyTargets target);
 	void updateNotifyTarget(ServiceAllianceNotifyTargets target);
@@ -76,5 +82,54 @@ public interface YellowPageProvider {
 	void createSettleRequests(SettleRequests request);
 	SettleRequests findSettleRequests(Long id);
 	List<SettleRequests> listSettleRequests(CrossShardListingLocator locator, int pageSize);
+	
+	void createReservationRequests(ReservationRequests request);
+	ReservationRequests findReservationRequests(Long id);
+	List<ReservationRequests> listReservationRequests(CrossShardListingLocator locator, int pageSize);
+	
+	void createApartmentRequests(ServiceAllianceApartmentRequests request);
+	ServiceAllianceApartmentRequests findApartmentRequests(Long id);
+	List<ServiceAllianceApartmentRequests> listApartmentRequests(CrossShardListingLocator locator, int pageSize);
+	
+	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId);
+
+	void createInvestRequests(ServiceAllianceInvestRequests request);
+	ServiceAllianceInvestRequests findInvestRequests(Long id);
+	List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize);
+
+
+	List<JumpModuleDTO> jumpModules(Integer namespaceId);
+	
+	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
+
+	void createGolfRequest(ServiceAllianceGolfRequest request);
+
+	void createGymRequest(ServiceAllianceGymRequest request);
+
+	void createServerRequest(ServiceAllianceServerRequest request);
+
+	ServiceAllianceServerRequest findServerRequest(Long id);
+
+	ServiceAllianceGymRequest findGymRequest(Long id);
+
+	ServiceAllianceGolfRequest findGolfRequest(Long id);
+
+
+	/**
+	 * 获取顺序
+	 */
+	List<ServiceAlliances> listServiceAllianceSortOrders(List<Long> idList);
+
+
+	/**
+	 * 更新顺序
+	 */
+	void updateOrderServiceAllianceDefaultOrder(List<ServiceAlliances> ServiceAllianceList);
+
+
+	/**
+	 * 更新是否在app显示的字段 
+	 */
+	void updateServiceAlliancesDisplayFlag(Long id, Byte showFlag);
 
 }

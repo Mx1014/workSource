@@ -47,4 +47,7 @@ public interface ContentServerService {
      * @return 如果上传成功则返回
      */
     UploadCsFileResponse uploadFileToContentServer(InputStream fileStream, String fileName, String token);
+
+	String parserUri(String uri);
+
 }

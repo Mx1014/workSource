@@ -32,6 +32,7 @@ import com.everhomes.rest.forum.MakeTopCommand;
 import com.everhomes.rest.forum.NewCommentCommand;
 import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PublishTopicCommand;
 import com.everhomes.rest.forum.QueryTopicByCategoryCommand;
 import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
 import com.everhomes.rest.forum.SearchTopicCommand;
@@ -94,7 +95,7 @@ public class ForumController extends ControllerBase {
     
     /**
      * <b>URL: /forum/listTopics</b>
-     * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
+     * <p>查询指定论坛的帖子列表</p>
      */
     @RequestMapping("listTopics")
     @RestReturn(value=ListPostCommandResponse.class)
@@ -208,7 +209,7 @@ public class ForumController extends ControllerBase {
     @RequestMapping("deleteTopic")
     @RestReturn(value=String.class)
     public RestResponse deleteTopic(DeleteTopicCommand cmd) {
-        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId());
+        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -303,7 +304,7 @@ public class ForumController extends ControllerBase {
     @RequestMapping("deleteComment")
     @RestReturn(value=String.class)
     public RestResponse deleteComment(DeleteCommentCommand cmd) {
-        this.forumService.deletePost(cmd.getForumId(), cmd.getCommentId());
+        this.forumService.deletePost(cmd.getForumId(), cmd.getCommentId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -386,6 +387,21 @@ public class ForumController extends ControllerBase {
     public RestResponse increasePostViewCount(IncreasePostViewCountCommand cmd) {
 //        PostDTO postDto = this.forumService.getTopic(cmd);
         
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/publishTopic</b>
+     * <p>发布活动，将后台暂存的活动发布</p>
+     * @return 删除结果
+     */
+    @RequestMapping("publishTopic")
+    @RestReturn(value=String.class)
+    public RestResponse publisTopic(PublishTopicCommand cmd) {
+        this.forumService.publisTopic(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

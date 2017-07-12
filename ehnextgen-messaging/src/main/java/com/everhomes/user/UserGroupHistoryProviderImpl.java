@@ -16,6 +16,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.Group;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
@@ -180,4 +181,38 @@ public class UserGroupHistoryProviderImpl implements UserGroupHistoryProvider {
         });
         return objs;
     }
+
+	@Override
+	public List<UserGroupHistory> queryUserGroupHistoryByGroupIds(List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
+		 
+		List<UserGroupHistory> objs = new ArrayList<UserGroupHistory>();
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), objs, (DSLContext context, Object reducingContext) -> {
+//			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
+	        
+	        SelectQuery<EhUserGroupHistoriesRecord> query = context.selectQuery(Tables.EH_USER_GROUP_HISTORIES);
+	         
+	        query.addConditions(Tables.EH_USER_GROUP_HISTORIES.GROUP_ID.in(groupIds));
+	        if(locator.getAnchor() != null) {
+	            query.addConditions(Tables.EH_USER_GROUP_HISTORIES.ID.gt(locator.getAnchor()));
+	            }
+	        
+	        query.addLimit(pageSize+1);
+	        query.addOrderBy(Tables.EH_USER_GROUP_HISTORIES.ID.desc());
+	        query.fetch().map((r) -> {
+	        	objs.add( ConvertHelper.convert(r, UserGroupHistory.class));
+	        	return null;
+	        });
+	        return true;
+		});
+        
+        if(objs.size() > pageSize) {
+            objs.remove(objs.size()-1);
+            locator.setAnchor(objs.get(objs.size()-1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return objs;
+	}
+     
 }

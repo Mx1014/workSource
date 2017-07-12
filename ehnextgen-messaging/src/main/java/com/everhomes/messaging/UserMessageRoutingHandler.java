@@ -1,19 +1,12 @@
 // @formatter:off
 package com.everhomes.messaging;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
+import com.everhomes.rest.common.EntityType;
+import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
@@ -22,13 +15,19 @@ import com.everhomes.rest.rpc.client.RealtimeMessageIndicationPdu;
 import com.everhomes.rest.rpc.client.StoredMessageIndicationPdu;
 import com.everhomes.rest.rpc.server.ClientForwardPdu;
 import com.everhomes.rest.user.DeviceIdentifierType;
-import com.everhomes.rest.user.UserLoginStatus;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserService;
+import com.everhomes.rest.user.UserMuteNotificationFlag;
+import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Name;
 import com.everhomes.util.WebTokenGenerator;
-import com.everhomes.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 
@@ -44,6 +43,9 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserProvider userProvider;
     
     @Autowired
     private MessageBoxProvider messageBoxProvider;
@@ -78,14 +80,16 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         
         // reflect back message to sender
         if((deliveryOption & MessagingConstants.MSG_FLAG_REFLECT_BACK.getCode()) != 0) {
-            logins.stream().filter((UserLogin login) -> {
+            routeMessageTo(senderLogin, appId, senderLogin, dstChannelType, dstChannelToken, message, deliveryOption);
+
+            /*logins.stream().filter((UserLogin login) -> {
                 if ((login.getStatus() == UserLoginStatus.LOGGED_IN) && login.getUserId() == senderLogin.getUserId() && login.getLoginId() == senderLogin.getLoginId()) {
                     return true;
-                    }
+                }
                 return context.checkAndAdd(login.getUserId(), login.getLoginId());
             }).forEach((UserLogin login) -> {
                 routeMessageTo(senderLogin, appId, login, dstChannelType, dstChannelToken, message, deliveryOption);
-            });
+            });*/
         }
 
         MessageDTO shadowClone = message;
@@ -144,9 +148,19 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     private void routeStoredMessage(UserLogin senderLogin, long appId, 
         UserLogin destLogin, String destChannelType, String destChannelToken,
         MessageDTO message, int deliveryOption) {
-    
+
         MessageChannel mainChannel = message.getChannels().get(0);
-        
+
+        // 免打扰, 不推送     add by xq.tian  2017/04/18
+        // 这里只检查用户给用户发消息的免打扰状态，群组的消息在群组handler里检查过了
+        if (ChannelType.USER.getCode().equals(mainChannel.getChannelType())) {
+            UserNotificationSetting notificationSetting = userProvider.findUserNotificationSetting(
+                    EntityType.USER.getCode(), destLogin.getUserId(), EntityType.USER.getCode(), senderLogin.getUserId());
+            if (notificationSetting != null && notificationSetting.getMuteFlag() == UserMuteNotificationFlag.MUTE.getCode()) {
+                deliveryOption &= ~MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode();
+            }
+        }
+
         // stored message should be stored first
         Message msg = new Message();
         //update by Janson.
@@ -162,13 +176,13 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         msg.setSenderTag(message.getSenderTag());
         msg.setMetaAppId(message.getMetaAppId());
         msg.setMeta(message.getMeta());
-        
+
         if(message.getBodyType() != null && !message.getBodyType().isEmpty()) {
             if(null == message.getMeta()) {
-                message.setMeta(new HashMap<String, String>());
-                }
-            message.getMeta().put("bodyType", message.getBodyType());    
+                message.setMeta(new HashMap<>());
             }
+            message.getMeta().put("bodyType", message.getBodyType());    
+        }
 
         long msgId = this.messageBoxProvider.createMessage(msg);
         
@@ -183,7 +197,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         boolean onlineDelivered = false;
         //If not push only, send it by border server
         if((MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode() != deliveryOption) && (destLogin.getLoginBorderId() != null)) {
-            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId().intValue());
+            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId());
             if(borderConnection != null) {
                 StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
                 ClientForwardPdu forwardPdu = buildForwardPdu(destLogin, appId, clientPdu);
@@ -213,7 +227,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         
         // push notification is not available in realtime message
         if(destLogin.getLoginBorderId() != null) {
-            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId().intValue());
+            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId());
             if(borderConnection != null) {
                 RealtimeMessageIndicationPdu clientPdu = new RealtimeMessageIndicationPdu();
                 clientPdu.setAppId(appId);

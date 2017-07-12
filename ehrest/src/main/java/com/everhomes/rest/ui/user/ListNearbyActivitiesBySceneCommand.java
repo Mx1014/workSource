@@ -1,6 +1,10 @@
 package com.everhomes.rest.ui.user;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
 /**
  * 
  *<ul>
@@ -9,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>scope: 范围，{@link com.everhomes.rest.ui.user.ActivityLocationScope}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>categoryId: 活动类型id</li>
+ * <li>contentCategoryId: 主题分类id</li>
  *</ul>
  */
 public class ListNearbyActivitiesBySceneCommand {
@@ -21,8 +27,31 @@ public class ListNearbyActivitiesBySceneCommand {
     private Long pageAnchor;
     
     private Integer pageSize;
+    
+    private Long categoryId;
+    
+    private Long contentCategoryId;
 
-    public String getSceneToken() {
+    @ItemType(Integer.class)
+    private List<Integer> activityStatusList;
+
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public String getSceneToken() {
         return sceneToken;
     }
 
@@ -60,6 +89,14 @@ public class ListNearbyActivitiesBySceneCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public List<Integer> getActivityStatusList() {
+        return activityStatusList;
+    }
+
+    public void setActivityStatusList(List<Integer> activityStatusList) {
+        this.activityStatusList = activityStatusList;
     }
 
     @Override

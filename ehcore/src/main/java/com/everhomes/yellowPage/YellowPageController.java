@@ -1,58 +1,25 @@
 package com.everhomes.yellowPage;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.yellowPage.*;
+import com.everhomes.search.ApartmentRequestInfoSearcher;
+import com.everhomes.search.ReserveRequestInfoSearcher;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.search.SettleRequestInfoSearcher;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
-import com.everhomes.rest.yellowPage.AddYellowPageCommand;
-import com.everhomes.rest.yellowPage.DeleteNotifyTargetCommand;
-import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
-import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
-import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
-import com.everhomes.rest.yellowPage.GetServiceAllianceCommand;
-import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseDetailCommand;
-import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
-import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
-import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
-import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
-import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
-import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
-import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
-import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
-import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
-import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
-import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
-import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
-import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
-import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
-import com.everhomes.rest.yellowPage.YellowPageDTO;
-import com.everhomes.rest.yellowPage.YellowPageListResponse;
-import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
-import com.everhomes.search.SettleRequestInfoSearcher;
-import com.everhomes.user.CustomRequestConstants;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.Tuple;
- 
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/yellowPage")
@@ -72,8 +39,14 @@ public class YellowPageController  extends ControllerBase {
 	
 	@Autowired
 	private SettleRequestInfoSearcher settleRequestInfoSearcher;
-    
-    @RequireAuthentication(false)
+
+    @Autowired
+	private ApartmentRequestInfoSearcher apartmentRequestInfoSearcher;
+
+    @Autowired
+    private ReserveRequestInfoSearcher reserveRequestInfoSearcher;
+
+	@RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
     @RestReturn(value=YellowPageDTO.class)
     public RestResponse getYellowPageDetail(@Valid GetYellowPageDetailCommand cmd) {
@@ -84,6 +57,10 @@ public class YellowPageController  extends ControllerBase {
          return response;
     }
 
+    /**
+	 * <b>URL: /yellowPage/getYellowPageTopic</b>
+	 * <p>获取黄页topic-创客空间,服务联盟等 </p>
+	 */
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageTopic")
     @RestReturn(value=YellowPageDTO.class)
@@ -127,6 +104,10 @@ public class YellowPageController  extends ControllerBase {
          return response;
     }
 
+    /**
+	 * <b>URL: /yellowPage/updateYellowPage</b>
+	 * <p>更新黄页 </p>
+	 */
     
     @RequestMapping("updateYellowPage")
     @RestReturn(value=String.class)
@@ -177,18 +158,20 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("listServiceAllianceCategories")
 	@RestReturn(value = ServiceAllianceCategoryDTO.class, collection = true)
 	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
-
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId, 
-				cmd.getParentId(), CategoryAdminStatus.ACTIVE);
-
-		List<ServiceAllianceCategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
-			return ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
-		}).collect(Collectors.toList());
-
-		return new RestResponse(dtoResultList);
+		return new RestResponse(yellowPageService.listServiceAllianceCategories(cmd));
 	}
-    
+
+    /**
+	 * <b>URL: /yellowPage/getServiceAllianceDisplayMode</b>
+	 * <p>获取服务联盟机构的展示类型</p>
+	 */
+    @RequireAuthentication(false)
+	@RequestMapping("getServiceAllianceDisplayMode")
+	@RestReturn(value = ServiceAllianceDisplayModeDTO.class)
+	public RestResponse getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd) {
+		return new RestResponse(yellowPageService.getServiceAllianceDisplayMode(cmd));
+	}
+
     /**
    	 * <b>URL: /yellowPage/getServiceAllianceEnterpriseDetail</b>
    	 * <p> 服务联盟企业详情 </p>
@@ -281,6 +264,33 @@ public class YellowPageController  extends ControllerBase {
     }
     
     /**
+   	 * <b>URL: /yellowPage/updateServiceAllianceEnterpriseDefaultOrder</b>
+   	 * <p> 更新服务联盟企业顺序 </p>
+   	 */
+    @RequestMapping("updateServiceAllianceEnterpriseDefaultOrder")
+    @RestReturn(value=ServiceAllianceListResponse.class)
+    public RestResponse updateServiceAllianceEnterpriseDefaultOrder(@Valid UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd) {
+    	 RestResponse response = new RestResponse(this.yellowPageService.updateServiceAllianceEnterpriseDefaultOrder(cmd));
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/updateServiceAllianceEnterpriseDisplayFlag</b>
+   	 * <p> 更新服务联盟企业是否显示在app端  </p>
+   	 */
+    @RequestMapping("updateServiceAllianceEnterpriseDisplayFlag")
+    @RestReturn(value=String.class)
+    public RestResponse updateServiceAllianceEnterpriseDisplayFlag(@Valid UpdateServiceAllianceEnterpriseDisplayFlagCommand cmd) {
+    	 this.yellowPageService.updateServiceAllianceEnterpriseDisplayFlag(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
 	 * <b>URL: /yellowPage/addNotifyTarget</b>
 	 * <p> 增加推送接收管理员</p>
 	 */
@@ -343,6 +353,22 @@ public class YellowPageController  extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
+
+    /**
+     * <b>URL: /yellowPage/listJumpModules</b>
+     * <p> 获取跳转模块列表</p>
+     */
+    @RequestMapping("listJumpModules")
+    @RestReturn(value = JumpModuleDTO.class, collection = true)
+    public RestResponse listJumpModules() {
+
+        List<JumpModuleDTO> resp = this.yellowPageService.listJumpModules();
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
 	 * <b>URL: /yellowPage/verifyNotifyTarget</b>
@@ -359,30 +385,82 @@ public class YellowPageController  extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
-    
+
     /**
-	 * <b>URL: /yellowPage/searchRequestInfo</b>
-	 * <p> 搜索申请信息</p>
-	 */
+     * <b>URL: /yellowPage/searchRequestInfo</b>
+     * <p> 搜索申请信息</p>
+     */
     @RequestMapping("searchRequestInfo")
     @RestReturn(value = SearchRequestInfoResponse.class)
     public RestResponse searchRequestInfo(@Valid SearchRequestInfoCommand cmd) {
-    	
-    	SearchRequestInfoResponse resp = new SearchRequestInfoResponse();
-    	if(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM.equals(cmd.getTemplateType())) {
-    		resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
-    	}
-    	
-    	if(CustomRequestConstants.SETTLE_REQUEST_CUSTOM.equals(cmd.getTemplateType())) {
-    		resp = this.settleRequestInfoSearcher.searchRequestInfo(cmd);
-    	}
-    	 
-    	RestResponse response = new RestResponse(resp);
-    	response.setErrorCode(ErrorCodes.SUCCESS);
-    	response.setErrorDescription("OK");
-    	return response;
+        SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
+    /**
+     * <b>URL: /yellowPage/exportRequestInfo</b>
+     * <p>导出申请信息/p>
+     */
+    @RequestMapping("exportRequestInfo")
+    @RestReturn(value=String.class)
+    public RestResponse exportRequestInfo(@Valid SearchRequestInfoCommand cmd, HttpServletResponse resp) {
+        this.saRequestInfoSearcher.exportRequestInfo(cmd, resp);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /yellowPage/searchOneselfRequestInfo</b>
+     * <p> 搜索自己的申请信息-app</p>
+     */
+    @RequestMapping("searchOneselfRequestInfo")
+    @RestReturn(value = SearchRequestInfoResponse.class)
+    public RestResponse searchOneselfRequestInfo(@Valid SearchOneselfRequestInfoCommand cmd) {
+        SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchOneselfRequestInfo(cmd);
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /yellowPage/searchOrgRequestInfo</b>
+     * <p> 搜索企业申请信息</p>
+     */
+    @RequestMapping("searchOrgRequestInfo")
+    @RestReturn(value = SearchRequestInfoResponse.class)
+    public RestResponse searchOrgRequestInfo(@Valid SearchOrgRequestInfoCommand cmd) {
+        SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchOrgRequestInfo(cmd);
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /yellowPage/listAttachments</b>
+     * <p> 查询服务机构附件列表 </p>
+     */
+    @RequestMapping("listAttachments")
+    @RestReturn(value = ListAttachmentsResponse.class)
+    public RestResponse listAttachments(ListAttachmentsCommand cmd) {
+    	ListAttachmentsResponse resp = this.yellowPageService.listAttachments(cmd);
+    	
+    	RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
    	 * <b>URL: /yellowPage/syncSARequestInfo</b>
    	 * <p> 同步申请信息</p>
@@ -398,22 +476,5 @@ public class YellowPageController  extends ControllerBase {
        	response.setErrorDescription("OK");
        	return response;
        }
-       
-       /**
-      	 * <b>URL: /yellowPage/syncSettleRequestInfo</b>
-      	 * <p> 同步申请信息</p>
-      	 */
-          @RequestMapping("syncSettleRequestInfo")
-          @RestReturn(value = String.class)
-          public RestResponse syncSettleRequestInfo() {
-          	
-          	this.settleRequestInfoSearcher.syncFromDb();
-          	 
-          	RestResponse response = new RestResponse();
-          	response.setErrorCode(ErrorCodes.SUCCESS);
-          	response.setErrorDescription("OK");
-          	return response;
-          }
-       
-       
+
 }

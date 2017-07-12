@@ -68,17 +68,12 @@ public class EquipmentTaskTest extends BaseLoginAuthTestCase {
 	    			StringHelper.toJsonString(paras), httpClientService.isReponseSuccess(paras));
 	    	assertNotNull(paras.getResponse());
 	    	
-	    	List<EquipmentParameterDTO> dtos = paras.getResponse();
-	    	for(EquipmentParameterDTO dto : dtos) {
-	    		dto.setParameterValue("55");
-	    	}
 	    	
 	    	ReportEquipmentTaskCommand cmd = new ReportEquipmentTaskCommand();
 	    	cmd.setOwnerId(ownerId);
 	    	cmd.setOwnerType(ownerType);
 	    	cmd.setMessage("dggttrbn");
 	    	cmd.setTaskId(1L);
-	    	cmd.setEqParameters(dtos);
 	    	cmd.setVerificationResult(EquipmentTaskResult.COMPLETE_OK.getCode());
 	    	
 	    	ReportEquipmentTaskRestResponse response = httpClientService.restGet(REPORT_EQUIPMENT_TASK_URI, cmd, 

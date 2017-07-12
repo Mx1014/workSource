@@ -14,6 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,12 +145,19 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private UserActivityProvider userActivityProvider;
 
+	@Autowired
+	private ConfigurationProvider configProvider;
+
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 
 		// 检查参数等信息
 		checkNewsParameter(userId, cmd);
+
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
+
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
@@ -158,6 +168,14 @@ public class NewsServiceImpl implements NewsService {
 		CreateNewsResponse response = ConvertHelper.convert(news, CreateNewsResponse.class);
 		response.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news.getId()));
 		return response;
+	}
+
+	private void checkBlacklist(String ownerType, Long ownerId){
+		ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
+		ownerId = null == ownerId ? 0L : ownerId;
+		Long userId = UserContext.current().getUser().getId();
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_NEWS);
 	}
 
 	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
@@ -651,6 +669,9 @@ public class NewsServiceImpl implements NewsService {
 		// 检查参数
 		checkCommentParameter(userId, cmd);
 
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
+
 		final List<Comment> comments = new ArrayList<>();
 		final List<Attachment> attachments = new ArrayList<>();
 
@@ -746,6 +767,9 @@ public class NewsServiceImpl implements NewsService {
 		List<Comment> comments = commentProvider.listCommentByOwnerIdWithPage(EhNewsComment.class, newsId, pageAnchor,
 				pageSize + 1);
 		ListNewsCommentResponse response = new ListNewsCommentResponse();
+		News news = newsProvider.findNewsById(newsId);
+		response.setCommentCount(news.getChildCount());
+
 		if (comments != null && comments.size() > 0) {
 			if (comments.size() > pageSize) {
 				comments.remove(comments.size() - 1);
@@ -893,6 +917,8 @@ public class NewsServiceImpl implements NewsService {
 		// 检查参数
 		checkCommentParameter(userId, cmd);
 
+		//黑名单权限校验 by sfyan20160213
+		checkBlacklist(null, null);
 		final List<Comment> comments = new ArrayList<>();
 		final List<Attachment> attachments = new ArrayList<>();
 
@@ -923,7 +949,38 @@ public class NewsServiceImpl implements NewsService {
 		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
 				.collect(Collectors.toList()));
 
+
+		//填充创建者信息   add by yanjun 20170606
+		populatePostUserInfo(userId, commentDTO);
 		return commentDTO;
+	}
+
+	/**
+	 * 填充创建者信息
+	 * @param userId
+	 * @param commentDTO
+	 */
+	private void populatePostUserInfo(Long userId, AddNewsCommentBySceneResponse commentDTO){
+		if(userId == null || commentDTO == null){
+			return;
+		}
+		User creator = userProvider.findUserById(userId);
+		if(creator != null) {
+			commentDTO.setCreatorNickName(creator.getNickName());
+
+			String creatorAvatar = creator.getAvatar();
+			commentDTO.setCreatorAvatar(creatorAvatar);
+
+			if(StringUtils.isEmpty(creatorAvatar)) {
+				creatorAvatar = configProvider.getValue(creator.getNamespaceId(), "user.avatar.default.url", "");
+			}
+
+			if(creatorAvatar != null && creatorAvatar.length() > 0){
+				String avatarUrl = getResourceUrlByUir(userId, creatorAvatar,
+						EntityType.USER.getCode(), userId);
+				commentDTO.setCreatorAvatarUrl(avatarUrl);
+			}
+		}
 	}
 
 	private Comment processComment(Long userId, Long newsId, AddNewsCommentBySceneCommand cmd) {
@@ -937,8 +994,9 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	private void checkCommentParameter(Long userId, AddNewsCommentBySceneCommand cmd) {
+		//新的统一评论接口没有scenetoken，不需要常见检查  add by yanjun 20170602
 		// 检查namespace是否存在
-		getNamespaceFromSceneToken(userId, cmd.getSceneToken());
+		//getNamespaceFromSceneToken(userId, cmd.getSceneToken());
 
 		// 检查评论类型
 		checkCommentType(userId, cmd.getContentType());
@@ -951,7 +1009,8 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public void deleteNewsCommentByScene(DeleteNewsCommentBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		getNamespaceFromSceneToken(userId, cmd.getSceneToken());
+		//新的统一评论接口没有scenetoken，不需要常见检查  add by yanjun 20170602
+		//getNamespaceFromSceneToken(userId, cmd.getSceneToken());
 		deleteNewsComment(userId, cmd.getNewsToken(), cmd.getId());
 	}
 
@@ -1091,6 +1150,7 @@ public class NewsServiceImpl implements NewsService {
 					List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
 					for (BriefNewsDTO briefNews : news.getNewsList()) {
 						ContentBriefDTO dto = new ContentBriefDTO();
+						dto.setNewsToken(briefNews.getNewsToken());
 						dto.setContent(briefNews.getContentAbstract());
 						dto.setSubject(briefNews.getTitle());
 						dto.setPostUrl(briefNews.getCoverUri());
@@ -1155,9 +1215,10 @@ public class NewsServiceImpl implements NewsService {
 			
 			dto.setSearchTypeId(searchType.getId());
 			dto.setSearchTypeName(searchType.getName());
+			dto.setContentType(searchType.getContentType());
 			NewsFootnote footNote = new NewsFootnote();
 			footNote.setAuthor(source.getString("author"));
-			footNote.setCreateTime(source.getTimestamp("publishTime").toString());
+			footNote.setCreateTime(timeToStr(source.getTimestamp("publishTime")));
 			footNote.setNewsToken(WebTokenGenerator.getInstance().toWebToken(source.getLong("id")));
 			
 			if(StringUtils.isEmpty(highlight.getString("sourceDesc"))){
@@ -1174,6 +1235,11 @@ public class NewsServiceImpl implements NewsService {
 		response.setDtos(dtos);
 		response.setNextPageAnchor(nextPageAnchor);
 		return response;
+	}
+	
+	private String timeToStr(Timestamp time) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		return sdf.format(time);
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.acl.admin.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,27 +32,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
-import com.everhomes.rest.acl.admin.AddAclRoleAssignmentCommand;
-import com.everhomes.rest.acl.admin.AssignUserRoleAdminCommand;
-import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
-import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
-import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
-import com.everhomes.rest.acl.admin.DeleteUserRoleAdminCommand;
-import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
-import com.everhomes.rest.acl.admin.ListAclRolesCommand;
-import com.everhomes.rest.acl.admin.ListUserRolesAdminCommandResponse;
-import com.everhomes.rest.acl.admin.ListWebMenuCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
-import com.everhomes.rest.acl.admin.ListWebMenuResponse;
-import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
-import com.everhomes.rest.acl.admin.RoleDTO;
-import com.everhomes.rest.acl.admin.BatchAddTargetRoleCommand;
-import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.user.User;
@@ -173,7 +153,7 @@ public class AclAdminController extends ControllerBase {
     public RestResponse listAclRoles(ListAclRolesCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	List<Role> roles = this.aclProvider.getRolesByApp(cmd.getAppId());
     	List<RoleDTO> roleDto = new ArrayList<RoleDTO>();
@@ -215,38 +195,7 @@ public class AclAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
-    /**
-     * <b>URL: /admin/acl/createRolePrivilege</b>
-     * <p>创建角色权限</p>
-     */
-    @RequestMapping("createRolePrivilege")
-    @RestReturn(value=String.class)
-    public RestResponse createRolePrivilege(@Valid CreateRolePrivilegeCommand cmd) {
-    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
-    	rolePrivilegeService.createRolePrivilege(cmd);
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /admin/acl/updateRolePrivilege</b>
-     * <p>修改角色权限</p>
-     */
-    @RequestMapping("updateRolePrivilege")
-    @RestReturn(value=String.class)
-    public RestResponse updateRolePrivilege(@Valid UpdateRolePrivilegeCommand cmd) {
-    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
-    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
-    	rolePrivilegeService.updateRolePrivilege(cmd);
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+
     
     /**
      * <b>URL: /admin/acl/qryRolePrivileges</b>
@@ -262,23 +211,7 @@ public class AclAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    /**
-     * <b>URL: /admin/acl/deleteRolePrivilege</b>
-     * <p>删除角色权限</p>
-     */
-    @RequestMapping("deleteRolePrivilege")
-    @RestReturn(value=String.class)
-    public RestResponse deleteRolePrivilege(@Valid DeleteRolePrivilegeCommand cmd) {
-    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
-    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
-    	rolePrivilegeService.deleteRolePrivilege(cmd);
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+
     /**
      * <b>URL: /admin/acl/listAclRoleByOrganizationId</b>
      * <p>根据机构获取角色列表</p>
@@ -288,7 +221,7 @@ public class AclAdminController extends ControllerBase {
     public RestResponse listAclRoleByOrganizationId(@Valid ListAclRolesCommand cmd) {
     	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeList);
     	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
-    	RestResponse response =  new RestResponse(rolePrivilegeService.listAclRoleByOrganizationId(cmd));
+    	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -302,14 +235,13 @@ public class AclAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
     	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
-    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
     	rolePrivilegeService.createOrganizationSuperAdmin(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /admin/acl/createOrganizationOrdinaryAdmin  </b>
      * <p>创建普通管理员</p>
@@ -453,6 +385,5 @@ public class AclAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
+
 }

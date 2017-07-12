@@ -1,25 +1,6 @@
 // @formatter:off
 package com.everhomes.banner;
 
-import static com.everhomes.server.schema.Tables.EH_BANNERS;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectSeekStep3;
-import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -42,6 +23,19 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhBannersRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.*;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.everhomes.server.schema.Tables.EH_BANNERS;
 
 
 @Component
@@ -339,7 +333,7 @@ public class BannerProviderImpl implements BannerProvider {
 		    condition = condition.and(EH_BANNERS.SCENE_TYPE.eq(sceneType));
         }
 		if(pageAnchor != null) {
-			condition = condition.and(EH_BANNERS.CREATE_TIME.ge(new Timestamp(pageAnchor)));
+			condition = condition.and(EH_BANNERS.CREATE_TIME.le(new Timestamp(pageAnchor)));
 		}
 		if(applyPolicy != null) {
 			condition = condition.and(EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()));
@@ -372,5 +366,20 @@ public class BannerProviderImpl implements BannerProvider {
 				.from(EH_BANNERS).where(condition)
 				.groupBy(EH_BANNERS.SCENE_TYPE).fetchMap(EH_BANNERS.SCENE_TYPE, DSL.count());
 	}
-	
+
+    @Override
+    public Banner findAnyCustomizedBanner(Integer namespaceId, Byte scopeCode, Long scopeId, String sceneType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        Condition condition = EH_BANNERS.NAMESPACE_ID.eq(namespaceId);
+        if(scopeCode != null && scopeId != null) {
+            condition = condition.and(EH_BANNERS.SCOPE_CODE.eq(scopeCode).and(EH_BANNERS.SCOPE_ID.eq(scopeId)));
+        }
+        if (sceneType != null){
+            condition = condition.and(EH_BANNERS.SCENE_TYPE.eq(sceneType));
+        }
+        condition = condition.and(EH_BANNERS.APPLY_POLICY.eq(ApplyPolicy.CUSTOMIZED.getCode()));
+        return context.selectFrom(Tables.EH_BANNERS).where(condition).fetchAnyInto(Banner.class);
+    }
+
 }

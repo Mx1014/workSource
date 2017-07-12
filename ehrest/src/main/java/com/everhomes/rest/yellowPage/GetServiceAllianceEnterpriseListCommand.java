@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>ownerType: 拥有者类型：现在是comunity</li>
+ *  <li>ownerType: 拥有者类型 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
  *  <li>ownerId: 拥有者ID</li>
  *  <li>keywords: 关键字 企业名称</li>
  *  <li>parentId: 父id</li>
@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>categoryId: 所属服务联盟类型id</li>
  *  <li>nextPageAnchor: 下一页锚点</li>
  *  <li>pageSize: 每页的数量</li>
+ *  <li>sourceRequestType: 客户端或者web端 ,web端请务必传值。 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType}</li>
  * </ul>
  */
 public class GetServiceAllianceEnterpriseListCommand {
@@ -36,6 +37,8 @@ public class GetServiceAllianceEnterpriseListCommand {
 	
 	private Long type;
 	
+	private Byte sourceRequestType;
+
 	public Long getCommunityId() {
 		return communityId;
 	}
@@ -107,6 +110,14 @@ public class GetServiceAllianceEnterpriseListCommand {
 
 	public void setType(Long type) {
 		this.type = type;
+	}
+
+	public Byte getSourceRequestType() {
+		return sourceRequestType;
+	}
+
+	public void setSourceRequestType(Byte sourceRequestType) {
+		this.sourceRequestType = sourceRequestType;
 	}
 
 	@Override

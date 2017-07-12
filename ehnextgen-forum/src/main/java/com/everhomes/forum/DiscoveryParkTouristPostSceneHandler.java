@@ -133,6 +133,7 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
             filterDto.setAvatar(avatarUri);
             filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+            filterDto.setForumId(community.getDefaultForumId());
             filterList.add(filterDto);
 
 
@@ -229,13 +230,12 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         if(community != null) {
             String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
             long menuId = 1;
-            
-            // 菜单：小区圈
+            // 菜单：园区圈
             long group1Id = menuId++;
             TopicScopeDTO sentScopeDto = new TopicScopeDTO();
             sentScopeDto.setId(group1Id);
             sentScopeDto.setParentId(0L);
-            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_GROUP);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
             sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;

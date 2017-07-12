@@ -37,4 +37,7 @@ public interface VersionProvider {
     VersionUrl findVersionUrlById(long id);
     VersionUrl findVersionUrlByVersion(String realmName, String targetVersion);
 	List<VersionInfoDTO> listVersionInfo(Long pageAnchor, int pageSize);
+	String findAppNameByRealm(Long realmId);
+	String findIconUrlByRealm(Long realmId);
+	String findDownloadUrlByRealm(Long id);
 }

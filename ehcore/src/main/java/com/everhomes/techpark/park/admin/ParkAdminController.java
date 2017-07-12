@@ -30,9 +30,10 @@ import com.everhomes.util.RequireAuthentication;
 @RestController
 @RequireAuthentication(true)
 @RequestMapping("/admin/techpark/park")
+@Deprecated
 public class ParkAdminController extends ControllerBase{
 	
-	@Autowired
+//	@Autowired
 	private ParkService parkService;
 	
 	@Autowired

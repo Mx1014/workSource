@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>equipmentId: 设备id</li>
  *  <li>taskType: 类型 全部不传 参考{@link com.everhomes.rest.equipment.StandardType}</li>
+ *  <li>startTime: 开始时间</li>
+ *  <li>expireTime: 截止时间</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  * </ul>
@@ -18,6 +20,10 @@ public class ListTasksByEquipmentIdCommand {
 	private Long equipmentId;
 	
 	private Byte taskType;
+	
+	private Long startTime;
+	
+	private Long expireTime;
 	
 	private Long pageAnchor;
 	
@@ -39,6 +45,22 @@ public class ListTasksByEquipmentIdCommand {
 		this.taskType = taskType;
 	}
 	
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getExpireTime() {
+		return expireTime;
+	}
+
+	public void setExpireTime(Long expireTime) {
+		this.expireTime = expireTime;
+	}
+
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}

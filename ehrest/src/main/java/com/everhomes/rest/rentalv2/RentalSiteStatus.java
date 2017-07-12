@@ -4,11 +4,12 @@ package com.everhomes.rest.rentalv2;
  * <ul>
  * <li>NORMAL(0): 启用</li> 
  * <li>DISABLE(-1):停用</li> 
+ * <li>DISPLOY(-2):前端不展示</li> 
  * </ul>
  */
 public enum RentalSiteStatus {
    
-	NORMAL((byte)0),DISABLE((byte)-1) ;
+	NORMAL((byte)0),DISABLE((byte)-1),DISPLOY((byte)-2);
     
     private byte code;
     private RentalSiteStatus(byte code) {

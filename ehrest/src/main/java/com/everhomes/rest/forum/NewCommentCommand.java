@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>forumId: 论坛ID</li>
  * <li>topicId: 帖子ID</li>
  * <li>parentId: 回复的评论帖子ID</li>
+ * <li>parentCommentId: 父评论的ID</li>
  * <li>content_type: 帖子内容类型，{@link com.everhomes.rest.forum.PostContentType}</li>
  * <li>content: 帖子内容</li>
  * <li>embeddedAppId: 内嵌对象对应的App ID，{@link com.everhomes.rest.app.AppConstants}</li>
@@ -25,6 +26,8 @@ public class NewCommentCommand {
     private Long topicId;
     
     private Long parentId;
+    
+    private Long parentCommentId;
     
     private String contentType;
     
@@ -42,7 +45,15 @@ public class NewCommentCommand {
     public NewCommentCommand() {
     }
 
-    public Long getForumId() {
+    public Long getParentCommentId() {
+		return parentCommentId;
+	}
+
+	public void setParentCommentId(Long parentCommentId) {
+		this.parentCommentId = parentCommentId;
+	}
+
+	public Long getForumId() {
         return forumId;
     }
 

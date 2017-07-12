@@ -5,15 +5,30 @@ import javax.validation.constraints.NotNull;
 /**
  * 重新发送验证码
  * @author elians
- *signupToken:注册令牌
+ * <ul>
+ * <li>signupToken:注册令牌</li>
+ * <li>namespaceId: 域ID/li>
+ * <li>regionCode: 区域码</li>
+ * </ul>
  */
 public class ResendVerificationCodeCommand {
     @NotNull
     private String signupToken;
     
     private Integer namespaceId;
+
+    @NotNull
+    private Integer regionCode;
     
     public ResendVerificationCodeCommand() {
+    }
+
+    public Integer getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(Integer regionCode) {
+        this.regionCode = regionCode;
     }
 
     public String getSignupToken() {

@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *  <li>targetType: 设备-标准关联所属管理处类型</li>
  *  <li>targetId: 设备-标准关联所属管理处</li>
  *  <li>reviewStatus: 设备-标准关联状态，参考{@link com.everhomes.rest.equipment.EquipmentReviewStatus}</li>
+ *  <li>reviewStatus: 设备-标准关联审批结果，参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>keyword: 查询关键字</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
@@ -28,7 +29,9 @@ public class SearchEquipmentStandardRelationsCommand {
 	private String targetType;
 	
 	private Byte reviewStatus;
-	
+
+	private Byte reviewResult;
+
 	private String keyword;
 	
 	private Long pageAnchor;
@@ -73,6 +76,14 @@ public class SearchEquipmentStandardRelationsCommand {
 
 	public void setReviewStatus(Byte reviewStatus) {
 		this.reviewStatus = reviewStatus;
+	}
+
+	public Byte getReviewResult() {
+		return reviewResult;
+	}
+
+	public void setReviewResult(Byte reviewResult) {
+		this.reviewResult = reviewResult;
 	}
 
 	public String getKeyword() {

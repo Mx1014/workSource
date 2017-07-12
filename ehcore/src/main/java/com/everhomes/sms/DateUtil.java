@@ -1,6 +1,11 @@
 package com.everhomes.sms;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -146,7 +151,62 @@ public class DateUtil {
         	lDate.add(calBegin.getTime());  
             calBegin.add(Calendar.DAY_OF_MONTH, 1);  
  
-        }  
+        }
+        if(0 == lDate.size()){
+            lDate.add(calBegin.getTime());
+        }
         return lDate;  
+    }
+
+    /**
+     * 字符串转换成日期
+     * @param str
+     * @return date
+     */
+    public static Date strToDate(String str, String pattern) {
+
+        SimpleDateFormat format = new SimpleDateFormat(pattern);
+        Date date = null;
+        try {
+            date = format.parse(str);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
+
+    public static java.sql.Date parseDate(String date) {
+        String pattern = null;
+        if (date != null) {
+            if (date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                pattern = "yyyy-MM-dd";
+            } else if (date.matches("\\d{4}/\\d{2}/\\d{2}")) {
+                pattern = "yyyy/MM/dd";
+            } else if(date.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")){
+                pattern = "yyy-MM-dd HH:mm:ss";
+            } else if(date.matches("\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}")){
+                pattern = "yyy/MM/dd HH:mm:ss";
+            }
+        }
+        if(null != pattern){
+            TemporalAccessor accessor = DateTimeFormatter.ofPattern(pattern).parse(date);
+            LocalDate ld = LocalDate.from(accessor);
+            return java.sql.Date.valueOf(ld);
+        }
+        return null;
+    }
+
+    public static Timestamp parseTimestamp(String date) {
+        try{
+            if(date.matches("\\d{4}-\\d{2}-\\d{2}")){
+                date = date + " 00:00:00";
+            }
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date parsedDate = dateFormat.parse(date);
+            Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
+            return timestamp;
+        }catch(Exception e) {
+            return null;
+        }
     }
 }

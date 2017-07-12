@@ -3,12 +3,15 @@ package com.everhomes.launchpad;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
+import com.everhomes.rest.launchpad.ItemGroup;
+import com.everhomes.rest.launchpad.ItemServiceCategryStatus;
+import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
+import com.everhomes.server.schema.tables.pojos.EhItemServiceCategries;
+import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,6 +230,64 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 		return items;
 	}
+	
+	@Override
+	public List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, Map<Byte, Long> scopeMap, String keyword, int offset, int pageSize) {
+		
+		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+		
+//		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(ItemGroup.BIZS.getCode());
+		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId);
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+//		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq("/home");
+		
+		Condition scopeConditionAll = null;
+		for(Map.Entry<Byte, Long> entry: scopeMap.entrySet()){
+			if(entry.getValue() == null){
+				continue;
+			}
+			Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(entry.getKey());
+			scopeCondition = scopeCondition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(entry.getValue()));
+			if(scopeConditionAll == null){
+				scopeConditionAll = scopeCondition;
+			}else{
+				scopeConditionAll = scopeConditionAll.or(scopeCondition);
+			}
+		}
+		
+//		Condition scopeCondition
+//		Condition scopeConditionAll = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(ScopeType.ALL.getCode());
+//		scopeConditionAll = scopeConditionAll.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(0L));
+//		if(scopeCode != null && scopeId != null){
+//			Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode);
+//			scopeCondition = scopeCondition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+//			scopeConditionAll = scopeConditionAll.or(scopeCondition);
+//		}
+		
+		
+		condition = condition.and(scopeConditionAll);
+		
+        
+        
+		
+		if(keyword != null && !keyword.trim().equals("")){
+			Condition keyCondition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.like("%" + keyword + "%");
+			keyCondition = keyCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LABEL.like("%" + keyword + "%"));
+			condition = condition.and(keyCondition);
+		}
+		if(condition != null)
+			step.where(condition);
+
+		step.limit(pageSize).offset(offset).fetch().map((r) ->{
+			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+			return null;
+		});
+
+		return items;
+	}
+	
 	@Override
 	public List<LaunchPadLayoutDTO> listLaunchPadLayoutByKeyword(int pageSize,long offset,String keyword) {
 
@@ -268,11 +329,11 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
             if(condition != null){
                 condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType));
                 if(targetId != 0) 
-                    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+                    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq("" + targetId));
             }else{
                 condition = Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType);
                 if(targetId != 0)
-                    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+                    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq("" + targetId));
             }
         }
        
@@ -302,11 +363,11 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
              if(condition != null){
                  condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType));
                  if(targetId != 0) 
-                     condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+                     condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq("" + targetId));
              }else{
                  condition = Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType);
                  if(targetId != 0)
-                     condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+                     condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq("" + targetId));
              }
          }
         
@@ -325,7 +386,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
     public void deleteLaunchPadItemByTargetTypeAndTargetId(String targetType, long targetId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
         Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType);
-        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq("" + targetId));
         context.delete(Tables.EH_LAUNCH_PAD_ITEMS).where(condition).execute();
         
     }
@@ -334,7 +395,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
     public void deleteLaunchPadItemByScopeAndTargetId(Byte scopeCode,Long scopeId,String targetType, long targetId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
         Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType);
-        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq("" + targetId));
         if(scopeCode != null){
             condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
             if(scopeId != null)
@@ -432,5 +493,29 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		dao.update(userItem); 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserLaunchPadItems.class, null);
 	}
-	
+
+	public List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String sceneType){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		List<ItemServiceCategry> result = new ArrayList<ItemServiceCategry>();
+		SelectQuery<EhItemServiceCategriesRecord> query = context.selectQuery(Tables.EH_ITEM_SERVICE_CATEGRIES);
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.STATUS.eq(ItemServiceCategryStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.NAMESPACE_ID.eq(namespaceId));
+		if(null != sceneType){
+			query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.SCENE_TYPE.eq(sceneType));
+		}
+		query.addOrderBy(Tables.EH_ITEM_SERVICE_CATEGRIES.ORDER);
+		query.fetch().map(r -> {
+			result.add(ConvertHelper.convert(r, ItemServiceCategry.class));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public void createItemServiceCategry(ItemServiceCategry itemServiceCategry) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhItemServiceCategriesDao dao = new EhItemServiceCategriesDao(context.configuration());
+		dao.insert(itemServiceCategry);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhItemServiceCategries.class, null);
+	}
 }

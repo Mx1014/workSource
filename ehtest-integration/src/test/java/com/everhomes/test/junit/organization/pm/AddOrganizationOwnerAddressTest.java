@@ -26,14 +26,17 @@ public class AddOrganizationOwnerAddressTest extends BaseLoginAuthTestCase {
         String api = "/pm/addOrganizationOwnerAddress";
         AddOrganizationOwnerAddressCommand cmd = new AddOrganizationOwnerAddressCommand();
 
-        Long addressId = 1L;
+        Long addressId = 24206890946797813L;
         Long ownerId = 1L;
         Byte livingStatus = Byte.valueOf("1");
 
         cmd.setOrganizationId(1000001L);
         cmd.setAddressId(addressId);
         cmd.setLivingStatus(livingStatus);
-        cmd.setOwnerId(ownerId);
+        cmd.setOrgOwnerId(ownerId);
+
+        // cmd.setOwnerType(EhCommunities.class.getSimpleName());
+        // cmd.setOwnerId();
 
         AddOrganizationOwnerAddressRestResponse response = httpClientService.restPost(api, cmd, AddOrganizationOwnerAddressRestResponse.class);
 
@@ -43,7 +46,7 @@ public class AddOrganizationOwnerAddressTest extends BaseLoginAuthTestCase {
         OrganizationOwnerAddressDTO dto = response.getResponse();
         assertEquals("The response OrganizationOwnerAddressDTO addressId should be equal.", addressId, dto.getAddressId());
         assertEquals("The response OrganizationOwnerAddressDTO livingStatus should be equal.", "是", dto.getLivingStatus());
-        assertEquals("The response OrganizationOwnerAddressDTO apartment should be equal.", "101", dto.getApartment());
+        assertEquals("The response OrganizationOwnerAddressDTO apartment should be equal.", "102", dto.getApartment());
         assertEquals("The response OrganizationOwnerAddressDTO building should be equal.", "101-1", dto.getBuilding());
 
         DSLContext context = dbProvider.getDslContext();
@@ -58,7 +61,7 @@ public class AddOrganizationOwnerAddressTest extends BaseLoginAuthTestCase {
         assertNotNull("Record should not be null.", record);
         assertEquals("LivingStatus should be equal.", livingStatus, record.getLivingStatus());
         assertEquals("Address id should be equal.", addressId, record.getAddressId());
-        assertEquals("Owner id should be equal.", ownerId, record.getAddressId());
+        assertEquals("Owner id should be equal.", ownerId, record.getOrganizationOwnerId());
     }
 
     private void logon() {
@@ -73,7 +76,8 @@ public class AddOrganizationOwnerAddressTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-list-owner-addresses-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-list-owner-addresses-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

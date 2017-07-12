@@ -3,38 +3,9 @@ package com.everhomes.quality;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.quality.CreatQualityStandardCommand;
-import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
-import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
-import com.everhomes.rest.quality.DeleteQualityStandardCommand;
-import com.everhomes.rest.quality.DeleteFactorCommand;
-import com.everhomes.rest.quality.GetGroupMembersCommand;
-import com.everhomes.rest.quality.GroupUserDTO;
-import com.everhomes.rest.quality.ListEvaluationsCommand;
-import com.everhomes.rest.quality.ListEvaluationsResponse;
-import com.everhomes.rest.quality.ListQualityCategoriesCommand;
-import com.everhomes.rest.quality.ListQualityCategoriesResponse;
-import com.everhomes.rest.quality.ListQualityStandardsCommand;
-import com.everhomes.rest.quality.ListQualityStandardsResponse;
-import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
-import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
-import com.everhomes.rest.quality.ListFactorsCommand;
-import com.everhomes.rest.quality.ListFactorsResponse;
-import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
-import com.everhomes.rest.quality.ListQualityInspectionLogsCommand;
-import com.everhomes.rest.quality.ListQualityInspectionLogsResponse;
-import com.everhomes.rest.quality.QualityInspectionTaskDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
-import com.everhomes.rest.quality.QualityStandardsDTO;
-import com.everhomes.rest.quality.ReportRectifyResultCommand;
-import com.everhomes.rest.quality.ReportVerificationResultCommand;
-import com.everhomes.rest.quality.ReviewVerificationResultCommand;
-import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
-import com.everhomes.rest.quality.UpdateQualityStandardCommand;
-import com.everhomes.rest.quality.UpdateFactorCommand;
+import com.everhomes.rest.quality.*;
 
 public interface QualityService {
 
@@ -70,4 +41,34 @@ public interface QualityService {
 	List<OrganizationDTO> listUserRelateOrgGroups();
 	ListQualityInspectionLogsResponse listQualityInspectionLogs(ListQualityInspectionLogsCommand cmd);
 	QualityInspectionTaskDTO createQualityInspectionTask(CreateQualityInspectionTaskCommand cmd);
+	
+	void reviewQualityStandard(ReviewReviewQualityStandardCommand cmd);
+	void createQualitySpecification(CreateQualitySpecificationCommand cmd);
+	void updateQualitySpecification(UpdateQualitySpecificationCommand cmd);
+	void deleteQualitySpecification(DeleteQualitySpecificationCommand cmd);
+	ListQualitySpecificationsResponse listQualitySpecifications(ListQualitySpecificationsCommand cmd);
+	CountScoresResponse countScores(CountScoresCommand cmd);
+	CountTasksResponse countTasks(CountTasksCommand cmd);
+	
+	QualityInspectionSpecificationDTO getQualitySpecification(GetQualitySpecificationCommand cmd);
+	
+	ListQualityInspectionTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd);
+	ListQualityInspectionTasksResponse listUserQualityInspectionTaskTemplates(ListUserQualityInspectionTaskTemplatesCommand cmd);
+	void deleteUserQualityInspectionTaskTemplate(DeleteUserQualityInspectionTaskTemplateCommand cmd);
+	void sendTaskMsg(Long startTime, Long endTime);
+
+	SampleQualityInspectionDTO createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd);
+	SampleQualityInspectionDTO updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd);
+	SampleQualityInspectionDTO findSampleQualityInspection(FindSampleQualityInspectionCommand cmd);
+	void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd);
+	ListSampleQualityInspectionResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd);
+	ListQualityInspectionTasksResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd);
+
+	CountSampleTaskScoresResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd);
+	CountSampleTasksResponse countSampleTasks(CountSampleTasksCommand cmd);
+	CountScoresResponse countSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd);
+	CountSampleTaskSpecificationItemScoresResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd);
+
+	void updateSampleScoreStat();
+	QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd);
 }

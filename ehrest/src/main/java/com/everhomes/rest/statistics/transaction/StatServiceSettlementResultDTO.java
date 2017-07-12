@@ -15,8 +15,9 @@ package com.everhomes.rest.statistics.transaction;
  *<li>wechatRefundAmount:微信退款總額</li>
  *<li>paymentCardPaidAmount:一卡通交易總額</li>
  *<li>paymentCardRefundAmount:一卡通退款總額</li>
- *<li>totalCardPaidAmount:統計交易總額</li>
- *<li>totalCardRefundAmount:統計退款總額</li>
+ *<li>totalPaidAmount:統計交易總額</li>
+ *<li>totalRefundAmount:統計退款總額</li>
+ *<li>totalPaidCount:統計交易笔数</li>
  *</ul>
  */
 public class StatServiceSettlementResultDTO {
@@ -52,6 +53,8 @@ public class StatServiceSettlementResultDTO {
 	private Double totalPaidAmount;
 	
 	private Double totalRefundAmount;
+
+	private Long totalPaidCount;
 
 	public Long getNamespaceId() {
 		return namespaceId;
@@ -181,5 +184,11 @@ public class StatServiceSettlementResultDTO {
 		this.totalRefundAmount = totalRefundAmount;
 	}
 
-	
+	public Long getTotalPaidCount() {
+		return totalPaidCount;
+	}
+
+	public void setTotalPaidCount(Long totalPaidCount) {
+		this.totalPaidCount = totalPaidCount;
+	}
 }

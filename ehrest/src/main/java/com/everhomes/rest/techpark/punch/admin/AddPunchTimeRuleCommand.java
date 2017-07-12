@@ -11,15 +11,19 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 
- * <li>ownerType：organization/user</li>
- * <li>ownerId：id</li>
+ * <li>ownerType: 填organization</li>
+ * <li>ownerId：公司id</li>
+ * <li>targetType: 填organization/user</li>
+ * <li>targetId：对应设置目标的id比如机构比如人的id</li>
+ * 
  * <li>name：名称</li>
- * <li>startEarlyTime：最早上班时间</li>
- * <li>startLateTime：最晚上班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
+ * <li>description：描述</li>
+ * <li>startEarlyTime：最早上班时间(上班时间开始)</li>
+ * <li>startLateTime：最晚上班时间(上班时间结束)</li>
  * <li>endEarlyTime：最早下班班时间</li>
- * <li>noonLeaveTime：中午下班时间</li>
- * <li>afternoonArriveTime： 下午上班时间</li>
- * <li>punchTimesPerDay：每天打卡次数，2次或者4次)</li>
+ * <li>noonLeaveTime：中午下班时间 (休息时间开始)</li>
+ * <li>afternoonArriveTime： 下午上班时间(休息时间结束)</li>
+ * <li>punchTimesPerDay：每天打卡次数，2次或者4次(休息时间需要考勤 就是4次)</li>
  * <li>daySplitTime：前一天与后一天的分界点</li>
  * </ul>
  */
@@ -30,6 +34,10 @@ public class AddPunchTimeRuleCommand {
 	@NotNull
 	private Long ownerId;
 
+	private String targetType;
+	private Long targetId;
+
+	private String description;
 	private String name;
 	@NotNull
 	private Long startEarlyTime;
@@ -129,6 +137,30 @@ public class AddPunchTimeRuleCommand {
 
 	public void setDaySplitTime(Long daySplitTime) {
 		this.daySplitTime = daySplitTime;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

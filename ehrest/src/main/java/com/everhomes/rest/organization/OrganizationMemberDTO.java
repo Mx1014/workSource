@@ -1,19 +1,18 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.sql.Date;
 import java.util.List;
 
-import javax.management.relation.Role;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
-
+ * <li>detailId: 关联detail表，唯一的员工序列号</li>
  * <li>organizationId: 小区id</li>
  * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
@@ -25,14 +24,25 @@ import com.everhomes.util.StringHelper;
  * <li>status：状态</li>
  * <li>roles：角色列表</li>
  * <li>departments：部门列表</li>
+ * <li>memberDetailIds: 添加人员返回的detail表ID</>
  * <li>groups：群组列表</li>
  * <li>employeeNo：工号</li>
  * <li>initial：首字母</li>
+ * <li>proccesingTaskCount：执行任务数量</li>
+ * <li>executiveFlag：是否高管 1-是 0-否</li>
+ * <li>position：职位</li>
+ * <li>idNumber：身份证号码</li>
+ * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
+ * <li>employmentTime：转正时间</li>
+ * <li>profileIntegrity: 档案完整度,0-100%</li>
+ * <li>checkInTime: 入职日期</li>
+ * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>
  * </ul>
  */
 public class OrganizationMemberDTO {
 	@NotNull
     private Long   id;
+	private Long detailId;
 	@NotNull
     private Long   organizationId;
 	private String   organizationName;
@@ -62,17 +72,74 @@ public class OrganizationMemberDTO {
 	
 	private Long creatorUid;
 	
-	private Long   employeeNo;
+	private String  employeeNo;
 	private Byte   gender;
+
+    private Byte visibleFlag;
+
+    @ItemType(Long.class)
+    private List<Long> memberDetailIds;
 	
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> groups;
 	
 	@ItemType(OrganizationDTO.class)
-	private List<OrganizationDTO> departments;
-	
+	private List<OrganizationDTO> departments; 
+ 
+    private Byte executiveFlag;
+    private String position;
+    private String idNumber; 
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobPositions;
+
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobLevels;
+ 
+	private Integer proccesingTaskCount;
+
+    private String groupType;
+
+    private String groupPath;
+
+    private Byte employeeStatus;
+    private Date employmentTime;
+    private Integer profileIntegrity;
+    private Date checkInTime;
+	 
 	public OrganizationMemberDTO() {
     }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
+    }
+
+    public Byte getExecutiveFlag() {
+		return executiveFlag;
+	}
+
+	public void setExecutiveFlag(Byte executiveFlag) {
+		this.executiveFlag = executiveFlag;
+	}
+
+	public String getPosition() {
+		return position;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public String getIdNumber() {
+		return idNumber;
+	}
+
+	public void setIdNumber(String idNumber) {
+		this.idNumber = idNumber;
+	}
 
 	public Long getId() {
         return id;
@@ -211,14 +278,6 @@ public class OrganizationMemberDTO {
         this.creatorUid = creatorUid;
     }
 
-    public Long getEmployeeNo() {
-        return employeeNo;
-    }
-
-    public void setEmployeeNo(Long employeeNo) {
-        this.employeeNo = employeeNo;
-    }
-
     public Byte getGender() {
         return gender;
     }
@@ -272,8 +331,105 @@ public class OrganizationMemberDTO {
 		this.departments = departments;
 	}
 
-	@Override
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
+    }
+
+    public List<OrganizationDTO> getJobPositions() {
+        return jobPositions;
+    }
+
+    public void setJobPositions(List<OrganizationDTO> jobPositions) {
+        this.jobPositions = jobPositions;
+    }
+
+
+    public List<OrganizationDTO> getJobLevels() {
+        return jobLevels;
+    }
+
+    public void setJobLevels(List<OrganizationDTO> jobLevels) {
+        this.jobLevels = jobLevels;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+	public Integer getProccesingTaskCount() {
+		return proccesingTaskCount;
+	}
+
+	public void setProccesingTaskCount(Integer proccesingTaskCount) {
+		this.proccesingTaskCount = proccesingTaskCount;
+	}
+
+    public String getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(String groupType) {
+        this.groupType = groupType;
+    }
+
+    public String getGroupPath() {
+        return groupPath;
+    }
+
+    public void setGroupPath(String groupPath) {
+        this.groupPath = groupPath;
+    }
+
+    public Byte getEmployeeStatus() {
+        return employeeStatus;
+    }
+
+    public void setEmployeeStatus(Byte employeeStatus) {
+        this.employeeStatus = employeeStatus;
+    }
+
+    public Date getEmploymentTime() {
+        return employmentTime;
+    }
+
+    public void setEmploymentTime(java.sql.Date employmentTime) {
+        this.employmentTime = employmentTime;
+    }
+
+    public Integer getProfileIntegrity() {
+        return profileIntegrity;
+    }
+
+    public void setProfileIntegrity(Integer profileIntegrity) {
+        this.profileIntegrity = profileIntegrity;
+    }
+
+    public Date getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(java.sql.Date checkInTime) {
+        this.checkInTime = checkInTime;
+    }
+
+    public List<Long> getMemberDetailIds() {
+        return memberDetailIds;
+    }
+
+    public void setMemberDetailIds(List<Long> memberDetailIds) {
+        this.memberDetailIds = memberDetailIds;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
     }
 }

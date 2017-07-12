@@ -33,13 +33,13 @@ public class DeleteOrganizationOwnerCarTest extends BaseLoginAuthTestCase {
 
         EhOrganizationOwnerCarAttachmentsRecord attachmentsRecord = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS)
                 .where(Tables.EH_ORGANIZATION_OWNER_CAR_ATTACHMENTS.OWNER_ID.eq(1L))
-                .fetchOne();
+                .fetchAny();
 
         assertNotNull("The attachmentsRecord should not be not null.", attachmentsRecord);
 
         EhOrganizationOwnerOwnerCarRecord ownerOwnerCarRecord = context.selectFrom(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR)
                 .where(Tables.EH_ORGANIZATION_OWNER_OWNER_CAR.CAR_ID.eq(1L))
-                .fetchOne();
+                .fetchAny();
 
         assertNotNull("The ownerOwnerCarRecord should not be not null.", ownerOwnerCarRecord);
 
@@ -85,7 +85,8 @@ public class DeleteOrganizationOwnerCarTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-delete-owner-car-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-delete-owner-car-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

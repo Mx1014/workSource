@@ -1,7 +1,10 @@
 package com.everhomes.rest.equipment;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
 
@@ -17,6 +20,9 @@ import com.everhomes.util.StringHelper;
  *  <li>remarks: 备注</li>
  *  <li>standardType: 标准类别 参考{@link com.everhomes.rest.equipment.StandardType}</li>
  *  <li>repeat: 执行周期 参考{@link com.everhomes.rest.repeat.RepeatSettingsDTO}</li>
+ *  <li>templateId: 巡检项模板id</li>
+ *  <li>reviewExpiredDays: 审批过期时间限制（天）</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
  * </ul>
  */
 public class UpdateEquipmentStandardCommand {
@@ -43,6 +49,31 @@ public class UpdateEquipmentStandardCommand {
 	
 	private RepeatSettingsDTO repeat;
 	
+	private Long templateId;
+	
+	private Integer reviewExpiredDays;
+	
+	private Long inspectionCategoryId;
+	
+	@ItemType(StandardGroupDTO.class)
+	private List<StandardGroupDTO> group;
+	
+	public List<StandardGroupDTO> getGroup() {
+		return group;
+	}
+
+	public void setGroup(List<StandardGroupDTO> group) {
+		this.group = group;
+	}
+
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -121,6 +152,22 @@ public class UpdateEquipmentStandardCommand {
 
 	public void setRepeat(RepeatSettingsDTO repeat) {
 		this.repeat = repeat;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public Integer getReviewExpiredDays() {
+		return reviewExpiredDays;
+	}
+
+	public void setReviewExpiredDays(Integer reviewExpiredDays) {
+		this.reviewExpiredDays = reviewExpiredDays;
 	}
 
 	@Override

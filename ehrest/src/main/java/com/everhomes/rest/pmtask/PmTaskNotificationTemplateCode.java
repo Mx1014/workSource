@@ -20,4 +20,6 @@ public interface PmTaskNotificationTemplateCode {
     
     int CREATE_PM_TASK = 7; //新建任务时通知物业负责人
     
+    int REVISITED_TASK_LOG = 8;
+    
 }

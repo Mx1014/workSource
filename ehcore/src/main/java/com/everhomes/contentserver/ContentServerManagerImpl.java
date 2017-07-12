@@ -1,10 +1,5 @@
 package com.everhomes.contentserver;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -15,6 +10,12 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class ContentServerManagerImpl implements ContentServerMananger {
@@ -52,6 +53,9 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             LOGGER.error("Failed to parse login token, reqToken=" + request.getToken(), e);
         }
 
+        // 由于返回给客户端的URL需要与客户端所使用的scheme保持一致，故需要从请求中分析出使用的是http还是https，
+        // 再来拼接URL by lqs 20170119
+        String schemeInRequest = getScheme(request);
         ContentServer server = contentServerService.selectContentServer();
         if (server == null) {
             LOGGER.error("Content server not found, userId=" + ids[0] + ", reqToken=" + request.getToken() + ", loginToken=" + login);
@@ -62,7 +66,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         if (result != null) {
             request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType()
                     .name()));
-            request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
+            request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken(), schemeInRequest));
             return;
         }
         // add transaction command
@@ -77,15 +81,19 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         });
         result = resource.first();
         request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType().name()));
-        request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
+        request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken(), schemeInRequest));
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Upload resource file successfully, userId=" + ids[0] + ", reqToken=" + request.getToken() 
                 + ", loginToken=" + login + ", objectId=" + request.getObjectId() + ", url=" + request.getUrl());
         }
     }
 
-    private String createUrl(ContentServer content, String resourceId, String type, String token) {
-        return String.format("http://%s:%d/%s/%s?token=%s", content.getPublicAddress(), content.getPublicPort(), type,
+    private String createUrl(ContentServer content, String resourceId, String type, String token, String schemeInRequest) {
+        int port = content.getPublicPort();
+        if("https".equalsIgnoreCase(schemeInRequest)) {
+            port = 443;
+        }
+        return String.format("%s://%s:%d/%s/%s?token=%s", schemeInRequest, content.getPublicAddress(), port, type,
                 Generator.encodeUrl(resourceId), token);
     }
 
@@ -134,6 +142,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         switch (request.getAccessType()) {
         case LOOKUP:
             md5 = lookupInvoke(login, request.getObjectId());
+            buildMetaData(request);
             break;
         case DELETE:
             md5 = deleteInvoke(login, request.getObjectId());
@@ -146,21 +155,44 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
                     ContentServerErrorCode.ERROR_INVALID_ACTION, "Unsupported access type");
         }
+
         request.setMd5(md5);
+    }
+
+    private void buildMetaData(MessageHandleRequest request) {
+        String resourceId = Generator.decodeUrl(request.getObjectId());
+        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
+        if (resource != null) {
+            request.setFilename(resource.getResourceName());
+            /*if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("build object meta data {}", resource.getResourceName());
+            }*/
+        }
     }
 
     private String lookupInvoke(LoginToken login, String resourceId) {
         String orginResourceId = resourceId;
         resourceId = Generator.decodeUrl(resourceId);
-        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
+
+        // user的头像使用固定的链接，但是返回给contentserver的md5又不是固定的     add by xq.tian  2017/04/19
+        /*if (resourceId.startsWith("avatar/")) {
+            String uid = resourceId.substring(resourceId.indexOf("/") + 1, resourceId.length());
+            UserInfo userInfo = userService.getUserSnapshotInfo(Long.parseLong(uid));
+            String avatarUri = userInfo.getAvatarUri();
+            avatarUri = avatarUri.substring(avatarUri.lastIndexOf("/") + 1, avatarUri.length());
+            avatarUri = Generator.decodeUrl(avatarUri);
+            avatarUri = avatarUri.substring(avatarUri.lastIndexOf("/") + 1, avatarUri.length());
+            return avatarUri;
+        }*/
+
+        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId); 
         if (resource == null) {
-            LOGGER.error("Resource not found, orginResourceId=" + orginResourceId 
-                + ", decodeResourceId=" + resourceId + ", loginToken=" + login);
+            LOGGER.error("Resource not found, orginResourceId=" + orginResourceId +
+                    ", decodeResourceId=" + resourceId + ", loginToken=" + login);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Resource file not found");
         }
         return resource.getResourceMd5();
-
     }
 
     private String deleteInvoke(LoginToken login, String resourceId) {
@@ -197,4 +229,29 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         return null;
     }
 
+    /**
+     * 从content server中分析出头，以便跟随客户端来决定返回的URL是http还是https
+     * @param request
+     * @return
+     */
+    private String getScheme(MessageHandleRequest request) {
+        Map<String, String> meta = request.getMeta();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Try to strip the scheme from request, meta={}", meta);
+        }
+        
+        String scheme = "http";
+        if(meta != null) {
+            try {
+                String tmpScheme = meta.get("X-Forwarded-Scheme");
+                if(tmpScheme != null && tmpScheme.trim().length() > 0) {
+                    scheme = tmpScheme.trim();
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to strip scheme, meta={}", meta, e);
+            }
+        }
+        
+        return scheme;
+    }
 }

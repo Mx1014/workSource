@@ -43,4 +43,14 @@ public class ActivityAdminController extends ControllerBase {
         ListActivitiesReponse rsp = new ListActivitiesReponse(result.first(), result.second());
         return new RestResponse(rsp);
     }
+    
+    @RequestMapping("syncActivitySignupAttendeeCount")
+    @RestReturn(value = String.class)
+    public RestResponse syncActivitySignupAttendeeCount() {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+		activityService.syncActivitySignupAttendeeCount();
+    	RestResponse response = new RestResponse("OK");
+        return response;
+    }
 }

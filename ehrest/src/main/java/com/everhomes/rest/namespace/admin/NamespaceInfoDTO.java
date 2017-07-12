@@ -16,6 +16,18 @@ public class NamespaceInfoDTO {
 	private String name;
 	private String resourceType;
 
+	
+	public NamespaceInfoDTO() {
+		super();
+	}
+
+	public NamespaceInfoDTO(Integer id, String name, String resourceType) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.resourceType = resourceType;
+	}
+
 	public Integer getId() {
 		return id;
 	}

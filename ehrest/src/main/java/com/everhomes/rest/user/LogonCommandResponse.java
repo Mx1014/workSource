@@ -63,7 +63,7 @@ public class LogonCommandResponse {
         this.accessPoints = accessPoints;
     }
 
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

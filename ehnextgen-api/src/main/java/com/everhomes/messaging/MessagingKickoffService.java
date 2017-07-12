@@ -10,4 +10,6 @@ public interface MessagingKickoffService {
 
     boolean isKickoff(Integer namespaceId, LoginToken loginToken);
 
+	void remoteKickoffTag(Integer namespaceId, LoginToken loginToken);
+
 }

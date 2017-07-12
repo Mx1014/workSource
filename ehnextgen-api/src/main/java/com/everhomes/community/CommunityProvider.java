@@ -2,6 +2,7 @@
 package com.everhomes.community;
 
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -73,8 +74,39 @@ public interface CommunityProvider {
 	
 	List<CommunityDTO> listCommunitiesByNamespaceId(Byte communityType, Integer namespaceId, ListingLocator locator, int pageSize);
 	
-	List<CommunityDTO> listCommunitiesByType(List<Long> communityIds, Byte communityType, ListingLocator locator, int pageSize);
+	List<CommunityDTO> listCommunitiesByType(int namespaceId, List<Long> communityIds, Byte communityType, ListingLocator locator, int pageSize);
 
     List<Community> findCommunitiesByCityId(ListingLocator locator, int count, int namespaceId, long cityId);
 
+    /*--------添加修改资源分类 ------*/
+    void createResourceCategory(ResourceCategory resourceCategory);
+    
+    ResourceCategory findResourceCategoryById(Long id);
+    
+    void updateResourceCategory(ResourceCategory resourceCategory);
+    
+    void createResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment);
+    
+    ResourceCategoryAssignment findResourceCategoryAssignment(Long resourceId, String resourceType, Integer namespaceId);
+    
+    void deleteResourceCategoryAssignmentById(Long id);
+    
+    ResourceCategory findResourceCategoryByParentIdAndName(Long ownerId, String ownerType, Long parentId, String name, Byte type);
+    
+    void updateResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment);
+    
+    List<Community> listCommunitiesByCategory(Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor, 
+			Integer pageSize);
+    
+    List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, Long parentId, String path, Byte type);
+    
+    List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId);
+
+    List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId);
+    List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids, Byte type);
+    void deleteResourceCategoryById(Long id);
+
+    List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId, String resourceType, List<Long> resourceIds);
+
+    Map<Long, Community> listCommunitiesByIds(List<Long> ids);
 }

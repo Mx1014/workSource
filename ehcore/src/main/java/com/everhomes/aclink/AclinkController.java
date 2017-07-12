@@ -3,11 +3,15 @@ package com.everhomes.aclink;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +42,9 @@ import com.everhomes.rest.aclink.AclinkLogDTO;
 import com.everhomes.rest.aclink.AclinkLogListResponse;
 import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
+import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
+import com.everhomes.rest.aclink.AclinkSyncTimerCommand;
 import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
@@ -50,10 +56,12 @@ import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
 import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
 import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetPhoneVisitorCommand;
 import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
@@ -392,7 +400,7 @@ public class AclinkController extends ControllerBase {
     /**
      * 
      * <b>URL: /aclink/getVisitor</b>
-     * <p>列出所有二维码门禁列表 </p>
+     * <p> 设备访客二维码 </p>
      * @return
      */
     @RequestMapping("getVisitor")
@@ -410,8 +418,48 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
+     * <b>URL: /aclink/getVisitorPhone</b>
+     * <p> 保安认证的访客二维码 </p>
+     * @return
+     */
+    @RequestMapping("getVisitorPhone")
+    @RequireAuthentication(false)
+    @RestReturn(value=GetVisitorResponse.class)
+    public RestResponse getDoorVisitorAuthPhoneByUuid(GetVisitorCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.getVisitorPhone(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/checkVisitor</b>
+     * <p> 保安认证 </p>
+     * @return
+     */
+    @RequestMapping("checkVisitor")
+    @RestReturn(value=GetVisitorResponse.class)
+    public RestResponse doorCheckVisitor(GetPhoneVisitorCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        GetVisitorCommand cmd2 = new GetVisitorCommand();
+        cmd2.setId(cmd.getPhvid());
+        cmd2.setNamespaceId(cmd.getNamespaceId());
+        response.setResponseObject(doorAccessService.checkVisitor(cmd2));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
      * <b>URL: /aclink/v</b>
-     * <p>列出所有二维码门禁列表 </p>
+     * <p> 访客二维码信息 </p>
      * @return
      */
     @RequestMapping("v")
@@ -419,7 +467,54 @@ public class AclinkController extends ControllerBase {
     public Object doorVisitor(GetVisitorCommand cmd) {
         HttpHeaders httpHeaders = new HttpHeaders();
         try {
-            httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrCode.html?id=" + cmd.getId()));
+            //https://core.zuolin.com/evh/aclink/v?id=10ae5-15016
+            //https://core.zuolin.com/mobile/static/qr_access/qrCode.html?id=10ae5-15016
+            //getVisitor
+            DoorAuth auth = doorAccessService.getLinglingDoorAuthByUuid(cmd.getId());
+            if(auth.getDriver().equals(DoorAccessDriverType.PHONE_VISIT.getCode())) {
+                httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrPhoneCode.html?id=" + cmd.getId()));
+                
+            } else {
+                //if(auth.getDriver().equals(DoorAccessDriverType.ZUOLIN.getCode()))
+                httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrCode.html?id=" + cmd.getId()));    
+            }
+            
+        } catch (URISyntaxException e) {
+        }
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/v</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("phv")
+    @RequireAuthentication(false)
+    public Object doorPhoneVisitor(GetPhoneVisitorCommand cmd, HttpServletRequest request) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        String originUrl = "/mobile/static/qr_access/qrAdminCode.html?";
+        Map<String, String[]> maps = request.getParameterMap();
+        int i = 0;
+        for(Entry<String, String[]> m : maps.entrySet()) {
+         
+            String[] mv = m.getValue();
+            String vv = "";
+            if(mv.length > 0) {
+                vv = mv[0];
+            }
+            
+            if(i == 0) {
+                originUrl += m.getKey() + "=" + URLEncoder.encode(vv);
+            } else {
+                originUrl += "&" + m.getKey() + "=" + URLEncoder.encode(vv);
+            }
+            i++;
+        }
+        
+        try {
+                httpHeaders.setLocation(new URI(originUrl));
         } catch (URISyntaxException e) {
         }
         return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
@@ -464,7 +559,8 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("aclinkMessageTest")
     @RestReturn(value=ListDoorAccessResponse.class)
     public RestResponse aclinkMessageTest(@Valid AclinkMessageTestCommand cmd) {
-        doorAccessService.sendMessageToUser(cmd.getUid(), cmd.getDoorId(), cmd.getDoorType());
+//        doorAccessService.sendMessageToUser(cmd.getUid(), cmd.getDoorId(), cmd.getDoorType());
+        doorAccessService.test();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -474,13 +570,29 @@ public class AclinkController extends ControllerBase {
     /**
      * 
      * <b>URL: /aclink/remoteOpen</b>
-     * <p>删除一个组或者单独一个门禁设备</p>
+     * <p>远程开门</p>
      * @return
      */
     @RequestMapping("remoteOpen")
     @RestReturn(value=String.class)
     public RestResponse remoteOpen(@Valid AclinkRemoteOpenCommand cmd) {
         doorAccessService.remoteOpenDoor(cmd.getAuthId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/remoteOpenByHardwareId</b>
+     * <p>远程开门</p>
+     * @return
+     */
+    @RequestMapping("remoteOpenByHardwareId")
+    @RestReturn(value=String.class)
+    public RestResponse remoteOpen(@Valid AclinkRemoteOpenByHardwareIdCommand cmd) {
+        doorAccessService.remoteOpenDoor(cmd.getHardwareId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -531,6 +643,20 @@ public class AclinkController extends ControllerBase {
     @RestReturn(value=AclinkLogListResponse.class)
     public RestResponse createAclinkLog(@Valid AclinkLogCreateCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.createAclinkLog(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /aclink/syncTimer</b>
+     * <p>同步门禁时间</p>
+     * @return 同步门禁时间
+     */
+    @RequestMapping("syncTimer")
+    @RestReturn(value=QueryDoorMessageResponse.class)
+    public RestResponse syncTimer(@Valid AclinkSyncTimerCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.syncTimerMessage(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

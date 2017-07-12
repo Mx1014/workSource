@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -37,8 +38,9 @@ import com.everhomes.util.StringHelper;
  * <li>resourceTypeId：广场图标id</li> 
  * <li>siteItems：场所商品</li> 
  * <li>rentalSiteRules：场所时间段</li>
- * <li>billAttachments：订单附加信息</li>
- * <li>toastFlag：0-无 1-有，弹出一个toast提示用户可能分配到半场</li>
+ * <li>billAttachments：订单附加信息</li> 
+ * <li>unpayCancelTime：未支付取消时间</li>
+ * <li>confirmationPrompt: 确认提示(非必填)</li>
  * </ul>
  */
 public class RentalBillDTO {
@@ -76,6 +78,7 @@ public class RentalBillDTO {
 	private java.lang.String     useDetail;
 	private java.lang.String     vendorType;
 	private java.lang.Long       resourceTypeId; 
+	private Long unpayCancelTime;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems; 
 
@@ -86,13 +89,21 @@ public class RentalBillDTO {
 	private List<BillAttachmentDTO> billAttachments; 
 
 	private Byte toastFlag;
-	
+	private String confirmationPrompt;
+	private Long flowCaseId;
 	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-  
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
 
 	public String getBuildingName() {
 		return buildingName;
@@ -420,6 +431,24 @@ public class RentalBillDTO {
 		this.cancelFlag = cancelFlag;
 	}
 
- 
- 
+
+	public Long getUnpayCancelTime() {
+		return unpayCancelTime;
+	}
+
+
+	public void setUnpayCancelTime(Long unpayCancelTime) {
+		this.unpayCancelTime = unpayCancelTime;
+	}
+
+
+	public String getConfirmationPrompt() {
+		return confirmationPrompt;
+	}
+
+
+	public void setConfirmationPrompt(String confirmationPrompt) {
+		this.confirmationPrompt = confirmationPrompt;
+	}
+
 }

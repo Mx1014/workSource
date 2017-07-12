@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>ownerId: 任务所属组织等的id</li>
  *  <li>ownerType: 任务所属组织类型，如enterprise</li>
+ *  <li>targetId: 任务所属项目id</li>
+ *  <li>targetType: 任务所属项目</li>
  *  <li>taskType: 任务类型</li>
  *  <li>executeFlag: 是否按任务执行人查询任务 0-否 1-是</li>
  *  <li>isReview: 是否是审阅 0-否 1-是</li>
@@ -18,7 +20,7 @@ import com.everhomes.util.StringHelper;
  *  <li>reviewStatus: 审阅状态</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
- *  <li>manualFlag: 是否手动添加 0：自动生成，1：手动添加</li>
+ *  <li>manualFlag: 是否手动添加 0：自动生成，1：手动添加, 2: 核查生成</li>
  * </ul>
  */
 public class ListQualityInspectionTasksCommand {
@@ -28,6 +30,10 @@ public class ListQualityInspectionTasksCommand {
 	
 	@NotNull
 	private String ownerType;
+	
+	private Long targetId;
+	
+	private String targetType;
 	
 	@NotNull
 	private Byte taskType;
@@ -66,6 +72,22 @@ public class ListQualityInspectionTasksCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
 
 	public Byte getTaskType() {

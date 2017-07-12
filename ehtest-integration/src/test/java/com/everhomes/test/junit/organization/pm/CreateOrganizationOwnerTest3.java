@@ -33,10 +33,10 @@ public class CreateOrganizationOwnerTest3 extends BaseLoginAuthTestCase {
         String api = "/pm/createOrganizationOwner";
         CreateOrganizationOwnerCommand cmd = new CreateOrganizationOwnerCommand();
 
-        String contactToken = "13245678911";
+        String contactToken = "13245678933";
         String contactName = "zuolin";
         Long birthday = Date.valueOf("2016-01-01").getTime();
-        Long communityId = 111L;
+        Long communityId = 24206890946790405L;
         Long orgOwnerTypeId = 1L;
 
         cmd.setContactToken(contactToken);
@@ -59,7 +59,7 @@ public class CreateOrganizationOwnerTest3 extends BaseLoginAuthTestCase {
         assertNotNull("The createOrganizationOwner response DTO should be not null.", response.getResponse());
 
         OrganizationOwnerDTO dto = response.getResponse();
-        assertEquals("The createOrganizationOwner response DTO birthday should be equal.", new Date(birthday), dto.getBirthday());
+        assertEquals("The createOrganizationOwner response DTO birthday should be equal.", birthday, dto.getBirthday());
         assertEquals("The createOrganizationOwner response DTO contactName should be equal.", contactName, dto.getContactName());
         assertEquals("The createOrganizationOwner response DTO contactToken be equal.", contactToken, dto.getContactToken());
 
@@ -76,7 +76,9 @@ public class CreateOrganizationOwnerTest3 extends BaseLoginAuthTestCase {
         assertEquals("The created organizationOwner communityId should be equal.", communityId, record.getCommunityId());
         assertEquals("The created organizationOwner orgOwnerTypeId should be equal.", orgOwnerTypeId, record.getOrgOwnerTypeId());
 
-        EhOrganizationOwnerBehaviorsRecord behaviorsRecord = dslContext.selectFrom(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS).fetchOne();
+        EhOrganizationOwnerBehaviorsRecord behaviorsRecord = dslContext.selectFrom(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS)
+                .where(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.OWNER_ID.eq(record.getId()))
+                .fetchOne();
 
         assertNotNull("The organizationOwner behavior should be not null.", behaviorsRecord);
         assertEquals("The behavior ownerId should be equal.", behaviorsRecord.getOwnerId(), record.getId());
@@ -95,7 +97,8 @@ public class CreateOrganizationOwnerTest3 extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-create-owner-data-3.txt";
+        // userInfoFilePath = "data/json/customer-manage-create-owner-data-3.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

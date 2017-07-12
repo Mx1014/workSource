@@ -1,6 +1,28 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Record2;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -10,7 +32,10 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
@@ -22,21 +47,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Component
 public class AddressProviderImpl implements AddressProvider {
@@ -298,7 +308,7 @@ public class AddressProviderImpl implements AddressProvider {
 	
 	 @Override
 	 public Address findAddressByCommunityAndAddress(Long cityId, Long areaId, Long communityId, String addressName) {
-		 int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		 int namespaceId = UserContext.getCurrentNamespaceId();
 		 List<Address> addresses = new ArrayList<Address>();
 	        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
 	                (DSLContext context, Object reducingContext)-> {
@@ -323,7 +333,100 @@ public class AddressProviderImpl implements AddressProvider {
     public List<Address> listAddressByIds(Integer namespaceId, List<Long> ids) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_ADDRESSES)
-                .where(Tables.EH_ADDRESSES.ID.in(ids))
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ADDRESSES.ID.in(ids))
                 .fetchInto(Address.class);
     }
+
+    @Override
+    public List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(DSL.concat("%", buildingName, "%")).or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(DSL.concat("%", buildingName, "%"))))
+                .fetchInto(AddressDTO.class);
+    }
+
+	@Override
+	public Address findAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ADDRESSES)
+	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+	        .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+	        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
+			.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName));
+		
+	    Record record = step.fetchOne();
+	    
+		if (record != null) {
+			return ConvertHelper.convert(record, Address.class);
+		}
+		return null;
+	}
+
+	@Override
+	public List<Address> listAddressByNamespaceType(Integer namespaceId, Long communityId, String namespaceType) {
+		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ADDRESSES)
+	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+	        .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+	        .and(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(namespaceType))
+	        .fetch()
+	        .map(r->ConvertHelper.convert(r, Address.class));
+	}
+
+	@Override
+	public Map<Byte, Integer> countApartmentByLivingStatus(Long communityId) {
+		Map<Byte, Integer> map = new HashMap<>();
+		dbProvider.getDslContext(AccessSpec.readOnly())
+			.select(Tables.EH_ADDRESSES.LIVING_STATUS, DSL.count())
+			.from(Tables.EH_ADDRESSES)
+			.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+			.and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.groupBy(Tables.EH_ADDRESSES.LIVING_STATUS)
+			.fetch()
+			.map(r->{
+				map.put(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS), r.getValue(DSL.count()));
+				return null;
+			});
+		return map;
+	}
+
+	@Override
+	public Integer countApartment(Long communityId) {
+		return dbProvider.getDslContext(AccessSpec.readOnly())
+			.select(DSL.count())
+			.from(Tables.EH_ADDRESSES)
+			.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+			.and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.fetch()
+			.get(0)
+			.getValue(DSL.count());
+	}
+
+	@Override
+	public void updateOrganizationOwnerAddress(Long addressId) {
+		dbProvider.getDslContext(AccessSpec.readWrite())
+			.delete(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+			.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
+			.execute();
+	}
+
+	@Override
+	public void updateOrganizationAddress(Long addressId) {
+		dbProvider.getDslContext(AccessSpec.readWrite())
+			.update(Tables.EH_ORGANIZATION_ADDRESSES)
+			.set(Tables.EH_ORGANIZATION_ADDRESSES.STATUS, OrganizationAddressStatus.INACTIVE.getCode())
+			.where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
+			.execute();
+	}
+
+	@Override
+	public void updateOrganizationAddressMapping(Long addressId) {
+		dbProvider.getDslContext(AccessSpec.readWrite())
+			.delete(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+			.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+			.execute();
+	}
+    
 }

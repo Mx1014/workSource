@@ -1,5 +1,7 @@
 package com.everhomes.rest.messaging;
 
+import com.everhomes.util.StringHelper;
+
 public class AudioBody {
     private String url;
     private String uri;
@@ -45,6 +47,9 @@ public class AudioBody {
     public void setDuration(String duration) {
         this.duration = duration;
     }
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }

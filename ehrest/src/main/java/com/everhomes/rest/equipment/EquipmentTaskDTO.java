@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  *  <li>id: 任务主键id</li>
  *  <li>standardId: 标准id</li>
  *  <li>standardName: 标准名称</li>
+ *  <li>templateId: 模板id</li>
+ *  <li>templateName: 模板名称</li>
  *  <li>equipmentId: 设备id</li>
  *  <li>equipmentName: 设备名称</li>
  *  <li>equipmentLocation: 设备位置</li>
@@ -39,6 +41,7 @@ import com.everhomes.util.StringHelper;
  *  <li>result: 执行结果 参考{@link com.everhomes.rest.equipment.EquipmentTaskResult}</li>
  *  <li>reviewResult: 审阅结果 参考{@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>standardDescription: 标准内容</li>
+ *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
  * </ul>
  */
 public class EquipmentTaskDTO {
@@ -47,6 +50,10 @@ public class EquipmentTaskDTO {
 	private Long standardId;
 	
 	private String standardName;
+	
+	private Long templateId;
+	
+	private String templateName;
 	
 	private Long equipmentId;
 	
@@ -61,6 +68,10 @@ public class EquipmentTaskDTO {
 	private String ownerType;
 	
 	private Long ownerId;
+
+	private String targetType;
+
+	private Long targetId;
 	
 	private Byte taskType;
 	
@@ -109,7 +120,9 @@ public class EquipmentTaskDTO {
 	private String standardDescription;
 	
 	private Byte qrCodeFlag;
-	
+
+	private Byte pictureFlag;
+
 	public Long getId() {
 		return id;
 	}
@@ -132,6 +145,22 @@ public class EquipmentTaskDTO {
 
 	public void setStandardName(String standardName) {
 		this.standardName = standardName;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getTemplateName() {
+		return templateName;
+	}
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
 	}
 
 	public Long getEquipmentId() {
@@ -188,6 +217,22 @@ public class EquipmentTaskDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	public Byte getTaskType() {
@@ -380,6 +425,14 @@ public class EquipmentTaskDTO {
 
 	public void setQrCodeFlag(Byte qrCodeFlag) {
 		this.qrCodeFlag = qrCodeFlag;
+	}
+
+	public Byte getPictureFlag() {
+		return pictureFlag;
+	}
+
+	public void setPictureFlag(Byte pictureFlag) {
+		this.pictureFlag = pictureFlag;
 	}
 
 	@Override

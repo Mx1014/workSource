@@ -76,4 +76,15 @@ public interface GroupProvider {
     
     List<Group> listGroupByCommunityId(Long communityId, ListingQueryBuilderCallback queryBuilderCallback);
 	GroupMember findGroupMemberTopOne(Long groupId);
+    GroupMemberCaches listGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize);
+    void evictGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize);
+
+    List<GroupMember> listPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize,
+                                                     boolean includeCreator, Long creatorId);
+
+    List<GroupMember> listPublicGroupMembersByStatus(Long groupId, Byte status, Long from, int pageSize, boolean includeCreator, Long creatorId);
+
+    List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize);
+	GroupMemberLog findGroupMemberLogByGroupMemberId(Long groupMemberId);
+	void createGroupMemberLog(GroupMemberLog groupMemberLog);
 }
