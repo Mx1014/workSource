@@ -2852,6 +2852,10 @@ public class CommunityServiceImpl implements CommunityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
+        if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
+            organizationProvider.listOrganizationMemberLogs(1L);
+        }
+
 		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(
 				cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
 

@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.user;
+package com.everhomes.rest.user;
 
 import com.everhomes.util.StringHelper;
 
