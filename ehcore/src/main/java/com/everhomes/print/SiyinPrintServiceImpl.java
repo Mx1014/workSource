@@ -903,10 +903,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(paperSizePriceDTO == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
 		}
-		checkPrice(paperSizePriceDTO.getAthreePrice());
-		checkPrice(paperSizePriceDTO.getAfourPrice());
-		checkPrice(paperSizePriceDTO.getAfivePrice());
-		checkPrice(paperSizePriceDTO.getAsixPrice());
+		paperSizePriceDTO.setAthreePrice(checkPrice(paperSizePriceDTO.getAthreePrice()));
+		paperSizePriceDTO.setAfourPrice(checkPrice(paperSizePriceDTO.getAfourPrice()));
+		paperSizePriceDTO.setAfivePrice(checkPrice(paperSizePriceDTO.getAfivePrice()));
+		paperSizePriceDTO.setAsixPrice(checkPrice(paperSizePriceDTO.getAsixPrice()));
 		
 		SiyinPrintSetting settinga3 = ConvertHelper.convert(paperSizePriceDTO.getAthreePrice(), SiyinPrintSetting.class);
 		SiyinPrintSetting settinga4 = ConvertHelper.convert(paperSizePriceDTO.getAfourPrice(), SiyinPrintSetting.class);
@@ -949,7 +949,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	 * 检查扫描价格，并生成实体
 	 */
 	private SiyinPrintSetting checkColorTypeDTO(PrintSettingColorTypeDTO colorTypeDTO, String string, Long long1) {
-		checkPrice(colorTypeDTO);
+		colorTypeDTO = checkPrice(colorTypeDTO);
 		SiyinPrintSetting setting = ConvertHelper.convert(colorTypeDTO, SiyinPrintSetting.class);
 		setting.setOwnerType(string);
 		setting.setOwnerId(long1);
@@ -962,14 +962,24 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	/**
 	 * 检查价格信息
 	 */
-	private void checkPrice(PrintSettingColorTypeDTO colorTypeDTO) {
+	private PrintSettingColorTypeDTO checkPrice(PrintSettingColorTypeDTO colorTypeDTO) {
+		if(colorTypeDTO == null){
+			colorTypeDTO = new PrintSettingColorTypeDTO();
+		}
+		if(colorTypeDTO.getBlackWhitePrice() == null){
+			colorTypeDTO.setBlackWhitePrice(new BigDecimal(0));
+		}
 		if(colorTypeDTO.getBlackWhitePrice().compareTo(BigDecimal.ZERO) < 0)
 		{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, blackWhitePrice = " + colorTypeDTO.getBlackWhitePrice());
 		}
+		if(colorTypeDTO.getColorPrice()== null){
+			colorTypeDTO.setColorPrice(new BigDecimal(0));
+		}
 		if(colorTypeDTO.getColorPrice().compareTo(BigDecimal.ZERO) < 0){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, colorPrice = " + colorTypeDTO.getBlackWhitePrice());
 		}
+		return colorTypeDTO;
 	}
 	/**
 	 *计算订单统计值 
