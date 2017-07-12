@@ -1,6 +1,6 @@
--- by dengs,你大爷的，搞成这样子。
--- DROP TABLE IF EXISTS `eh_user_authorizations`;
-CREATE TABLE `eh_user_authorizations` (
+-- by dengs,第三方认证记录表
+-- DROP TABLE IF EXISTS `eh_authorization_thirdparty_records`;
+CREATE TABLE `eh_authorization_third_party_records` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
   `namespace_id` INTEGER,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
@@ -18,6 +18,24 @@ CREATE TABLE `eh_user_authorizations` (
   `full_address` VARCHAR(256)  COMMENT 'authorization success, and save full_address',
   `user_count` INTEGER  COMMENT 'authorization success, and save user_count',
   `result_json` TEXT,
+  `creator_uid` BIGINT,
+  `create_time` TimeStamp,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- by dengs,表单与第三方namespace关联表
+-- DROP TABLE IF EXISTS `eh_authorization_third_party_forms`;
+CREATE TABLE `eh_authorization_third_party_forms` (
+  `id` BIGINT NOT NULL COMMENT 'id for records',
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `sourceType` VARCHAR(32) COMMENT 'zj_personal_auth zj_organization_auth,form ownertype',
+  `sourceId` BIGINT COMMENT 'form owner id',
+  `authorization_url` VARCHAR(512) COMMENT 'third party authorization url',
+  `app_key` VARCHAR(128)  COMMENT 'app key',
+  `secret_key` VARCHAR(512)  COMMENT 'secret_key',
   `creator_uid` BIGINT,
   `create_time` TimeStamp,
 
