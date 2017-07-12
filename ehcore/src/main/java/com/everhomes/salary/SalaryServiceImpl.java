@@ -499,7 +499,7 @@ public class SalaryServiceImpl implements SalaryService {
             if (!StringUtils.isEmpty(cmd.getKeywords()))
                 command.setKeywords(cmd.getKeywords());
             command.setPageAnchor(Long.valueOf("0"));
-            command.setPageSize(20);
+            command.setPageSize(cmd.getPageSize());
             List<UniongroupMemberDetail> results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
             //  拼接字段
             response = this.listSalaryEmployeesCompleteInfo(results,organizations,wages,cmd.getIsException());
@@ -508,7 +508,7 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     //  将原始组织架构数据转至 unionMemberDetails 以便于字符串的拼接
-    private List<UniongroupMemberDetail> listEmployeesFromOrganization(ListSalaryEmployeesCommand cmd){
+    private List<UniongroupMemberDetail> listEmployeesFromOrganization(ListSalaryEmployeesCommand cmd) {
         //  1.将前端信息传递给组织架构的接口获取相关信息，从而查询所有人员
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(cmd.getOwnerId());
@@ -516,44 +516,44 @@ public class SalaryServiceImpl implements SalaryService {
             command.setOrganizationId(cmd.getDepartmentId());
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             command.setKeywords(cmd.getKeywords());
-        command.setPageSize(20);
+        command.setPageSize(cmd.getPageSize());
         ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationPersonnels(command, false);
 
         //  2.查询所有关联了薪酬组的用户与薪酬组id
-        List<Object[]> groups = this.uniongroupService.listUniongroupMemberGroupIds(UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
+        List<Object[]> groups = this.uniongroupService.listUniongroupMemberGroupIds(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
         List<UniongroupMemberDetail> results = new ArrayList<>();
-        response.getMembers().forEach(r ->{
-            UniongroupMemberDetail result = new UniongroupMemberDetail();
+        for (int y = 0; y < response.getMembers().size(); y++) {
 
-            result.setId(r.getId());
-            result.setEmployeeNo(r.getEmployeeNo());
-            result.setDetailId(r.getDetailId());
-            result.setTargetId(r.getTargetId());
-            result.setTargetType(r.getTargetType());
-            result.setContactName(r.getContactName());
-            for(int i=0; i<groups.size(); i++){
-                //  没有 detailId 的时候则视为无效数据
-                if(StringUtils.isEmpty(r.getDetailId()))
-                    continue;
-                if(r.getDetailId().equals(groups.get(i)[0])){
-                    result.setGroupId((Long)groups.get(i)[1]);
+            //  没有 detailId 的时候则视为无效数据
+            if (StringUtils.isEmpty(response.getMembers().get(y).getDetailId()))
+                continue;
+            UniongroupMemberDetail result = new UniongroupMemberDetail();
+            result.setId(response.getMembers().get(y).getId());
+            result.setEmployeeNo(response.getMembers().get(y).getEmployeeNo());
+            result.setDetailId(response.getMembers().get(y).getDetailId());
+            result.setTargetId(response.getMembers().get(y).getTargetId());
+            result.setTargetType(response.getMembers().get(y).getTargetType());
+            result.setContactName(response.getMembers().get(y).getContactName());
+            for (int i = 0; i < groups.size(); i++) {
+                if (response.getMembers().get(y).getDetailId().equals(groups.get(i)[0])) {
+                    result.setGroupId((Long) groups.get(i)[1]);
                     break;
                 }
             }
-            Map<Long,String> departments = new HashMap<>();
-            Map<Long,String> jobPositions = new HashMap<>();
-            if(null != r.getDepartments() && r.getDepartments().size()>0)
-            for(int i=0; i<r.getDepartments().size(); i++){
-                departments.put(new Long((long)i),r.getDepartments().get(i).getName());
-            }
-            if(null != r.getJobPositions() && r.getJobPositions().size()>0)
-            for(int i=0; i<r.getDepartments().size(); i++){
-                jobPositions.put(new Long((long)i),r.getJobPositions().get(i).getName());
-            }
+            Map<Long, String> departments = new HashMap<>();
+            Map<Long, String> jobPositions = new HashMap<>();
+            if (null != response.getMembers().get(y).getDepartments() && response.getMembers().get(y).getDepartments().size() > 0)
+                for (int i = 0; i < response.getMembers().get(y).getDepartments().size(); i++) {
+                    departments.put(new Long((long) i), response.getMembers().get(y).getDepartments().get(i).getName());
+                }
+            if (null != response.getMembers().get(y).getJobPositions() && response.getMembers().get(y).getJobPositions().size() > 0)
+                for (int i = 0; i < response.getMembers().get(y).getDepartments().size(); i++) {
+                    jobPositions.put(new Long((long) i), response.getMembers().get(y).getJobPositions().get(i).getName());
+                }
             result.setDepartment(departments);
             result.setJobPosition(jobPositions);
             results.add(result);
-        });
+        }
         return results;
     }
 
