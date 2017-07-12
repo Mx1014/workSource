@@ -503,3 +503,5 @@ update eh_rentalv2_resource_types set status = 2 where namespace_id = 999981;
 SET @jump_id = (SELECT MAX FROM `eh_service_alliance_jump_module`);
 insert into eh_service_alliance_jump_module (id, namespace_id, module_name, module_url, parent_id) values ((@jump_id := @jump_id + 1),999981,'审批','zl://approval/create?approvalId={}&sourceId={}', 0);
 
+update eh_launch_pad_items set action_data = replace(action_data, '"displayType": "list"', '"displayType": "grid"') where item_label = '服务联盟' and namespace_id=999981;
+
