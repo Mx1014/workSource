@@ -8,14 +8,14 @@ import java.util.List;
  *
  * <ul>
  * <li>itemCategoryId: 分类id</li>
- * <li>itemIds: 分类下面的所有item</li>
+ * <li>items: 分类下面的所有item</li>
  * </ul>
  */
 public class PortalItemCategoryRank {
     private Long itemCategoryId;
 
-    @ItemType(Long.class)
-    private List<Long> itemIds;
+    @ItemType(PortalItemReorder.class)
+    private List<PortalItemReorder> items;
 
     public Long getItemCategoryId() {
         return itemCategoryId;
@@ -25,11 +25,11 @@ public class PortalItemCategoryRank {
         this.itemCategoryId = itemCategoryId;
     }
 
-    public List<Long> getItemIds() {
-        return itemIds;
+    public List<PortalItemReorder> getItems() {
+        return items;
     }
 
-    public void setItemIds(List<Long> itemIds) {
-        this.itemIds = itemIds;
+    public void setItems(List<PortalItemReorder> items) {
+        this.items = items;
     }
 }

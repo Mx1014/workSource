@@ -19,12 +19,10 @@ import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.launchpad.ItemDisplayFlag;
-import com.everhomes.rest.launchpad.LaunchPadLayoutGroupDTO;
-import com.everhomes.rest.launchpad.LaunchPadLayoutJson;
-import com.everhomes.rest.launchpad.LaunchPadLayoutStatus;
+import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.portal.*;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.widget.NavigatorInstanceConfig;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -597,6 +595,8 @@ public class PortalServiceImpl implements PortalService {
 				PortalItem portalItem = checkPortalItem(portalItemReorder.getItemId());
 				portalItem.setOperatorUid(user.getId());
 				portalItem.setDefaultOrder(portalItemReorder.getDefaultOrder());
+				if(null != ItemDisplayFlag.fromCode(portalItemReorder.getDisplayFlag()))
+					portalItem.setDisplayFlag(portalItemReorder.getDisplayFlag());
 				portalItemProvider.updatePortalItem(portalItem);
 			}
 			return null;
@@ -803,11 +803,16 @@ public class PortalServiceImpl implements PortalService {
 		this.dbProvider.execute((status) -> {
 			for (PortalItemCategoryRank portalItemCategoryRank : cmd.getRanks()) {
 				PortalItemCategory portalItemCategory = portalItemCategoryProvider.findPortalItemCategoryById(portalItemCategoryRank.getItemCategoryId());
-				if(null != portalItemCategoryRank.getItemIds() && portalItemCategoryRank.getItemIds().size() != 0){
-					for (Long itemId: portalItemCategoryRank.getItemIds()) {
-						PortalItem portalItem = checkPortalItem(itemId);
+				if(null != portalItemCategoryRank.getItems() && portalItemCategoryRank.getItems().size() > 0){
+					for (PortalItemReorder item: portalItemCategoryRank.getItems()) {
+						PortalItem portalItem = checkPortalItem(item.getItemId());
 						portalItem.setOperatorUid(user.getId());
 						portalItem.setItemCategoryId(portalItemCategory.getId());
+						if(null != ItemDisplayFlag.fromCode(item.getDisplayFlag()))
+							portalItem.setDisplayFlag(item.getDisplayFlag());
+						portalItem.setMoreOrder(item.getMoreOrder());
+						if(null != portalItem.getDefaultOrder())
+							portalItem.setDefaultOrder(item.getDefaultOrder());
 						portalItemProvider.updatePortalItem(portalItem);
 					}
 				}
@@ -928,7 +933,20 @@ public class PortalServiceImpl implements PortalService {
 			group.setColumnCount(instanceConfig.getColumnCount());
 			if(TitleFlag.TRUE == TitleFlag.fromCode(instanceConfig.getTitleFlag())){
 				group.setTitle(instanceConfig.getTitle());
+				if(!StringUtils.isEmpty(instanceConfig.getTitleUri())){
+					String url = contentServerService.parserUri(instanceConfig.getTitleUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+					group.setIconUrl(url);
+				}
 			}
+
+			if(Widget.fromCode(group.getWidget()) == Widget.NAVIGATOR){
+				NavigatorInstanceConfig navigatorInstanceConfig = new NavigatorInstanceConfig();
+				navigatorInstanceConfig.setBackgroundColor(instanceConfig.getBackgroundColor());
+				if(Style.fromCode(group.getStyle()) == Style.GALLERY){
+
+				}
+			}
+
 		}
 
 		LaunchPadLayout launchPadLayout = new LaunchPadLayout();
