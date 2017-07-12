@@ -2256,6 +2256,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 
+
+
     @Override
     public void createOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationCommunityRequests.class));
