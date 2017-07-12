@@ -13,7 +13,7 @@ CREATE TABLE `eh_user_authorizations` (
   `organizationCode` VARCHAR(128)  COMMENT 'organization Code',
   `organizationContact` VARCHAR(128)  COMMENT 'organization Contact',
   `organizationPhone` VARCHAR(128)  COMMENT 'organization Phone',
-  `errorCode` TINYINT COMMENT '200 success,201 invaild param,202 unrent',
+  `errorCode` INTEGER COMMENT '200 success,201 invaild param,202 unrent',
   `address_id` BIGINT  COMMENT 'authorization success, and save address id',
   `full_address` VARCHAR(256)  COMMENT 'authorization success, and save full_address',
   `user_count` INTEGER  COMMENT 'authorization success, and save user_count',
