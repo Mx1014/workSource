@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.scheduler.RunningFlag;
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -738,21 +739,21 @@ public class PunchServiceImpl implements PunchService {
 					// 对于申请
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getDescription());
-					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
-					if (null == members || members.size() == 0) {
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), organization.getPath());
+					if (null == member ) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(members.get(0).getContactName());
+						punchExceptionDTO.setName(member.getContactName());
 					}
 				} else {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
-					if (null == members || members.size() == 0) {
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), organization.getPath());
+					if (null == member ) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(members.get(0).getContactName());
+						punchExceptionDTO.setName(member.getContactName());
 					}
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
@@ -1178,21 +1179,21 @@ public class PunchServiceImpl implements PunchService {
 					// 对于申请
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getDescription());
-					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
-					if (null == members || members.size() == 0) {
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), organization.getPath());
+					if (null == member) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(members.get(0).getContactName());
+						punchExceptionDTO.setName(member.getContactName());
 					}
 				} else {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
-					if (null == members || members.size() == 0) {
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), organization.getPath());
+					if (null == member) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(members.get(0).getContactName());
+						punchExceptionDTO.setName(member.getContactName());
 					}
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
@@ -1854,7 +1855,7 @@ public class PunchServiceImpl implements PunchService {
 					if(null!=punchDayLog.getWorkTime() )
 						dto.setWorkTime(punchDayLog.getWorkTime().getTime()); 
 					dto.setPunchTimesPerDay(punchDayLog.getPunchTimesPerDay());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getEnterpriseId());
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(dto.getUserId(), organization.getPath());
 
 					if (null == member) {
 					} else {
@@ -1865,12 +1866,12 @@ public class PunchServiceImpl implements PunchService {
 					if (null != dto.getOperatorUid()
 							&& 0 != dto.getOperatorUid()) {
 
-						List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
+						member = findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), organization.getPath());
 
-						if (null == members || members.size() == 0) {
+						if (null == member) {
 							dto.setOperatorName("无此人");
 						} else {
-							dto.setOperatorName(members.get(0).getContactName());
+							dto.setOperatorName(member.getContactName());
 						} 
 					}
 					
@@ -3899,11 +3900,10 @@ public class PunchServiceImpl implements PunchService {
 //						"have no punch rule");
 //			dto.setPunchRuleName(pr.getName());
 			if(PunchOwnerType.User.getCode().equals(other.getTargetType())){
-//				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
-		        List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, organization.getPath(), null, null, new CrossShardListingLocator(), 1000000);
-				if(null== members || members.size() == 0)
+				OrganizationMember member = findOrganizationMemberByOrgIdAndUId(other.getTargetId(), organization.getPath()); 
+				if(null== member)
 					continue;
-				dto.setTargetName(members.get(0).getContactName());
+				dto.setTargetName(member.getContactName());
 				OrganizationDTO dept =  this.findUserDepartment(other.getTargetId(), other.getOwnerId());
 				if(null != dept)
 					dto.setTargetDept(dept.getName());
@@ -3918,6 +3918,16 @@ public class PunchServiceImpl implements PunchService {
 			response.getPunchRuleMaps().add(dto);
 		} 
 		return response;
+	}
+	private OrganizationMember findOrganizationMemberByOrgIdAndUId(Long targetId, String path) {
+		List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, path, null, null, new CrossShardListingLocator(), 1000000);
+		if(null== members || members.size() == 0)
+			return null;
+		for(OrganizationMember member : members){
+			if(member.getTargetId().equals(targetId))
+				return member;
+		}
+		return null;
 	}
 	@Override
 	public Long getTopEnterpriseId(Long organizationId){
