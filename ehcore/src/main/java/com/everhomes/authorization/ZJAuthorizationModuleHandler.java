@@ -60,7 +60,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
     private DbProvider dbProvider;
     
     @Autowired
-    private UserAuthorizationProvider authorizationProvider;
+    private AuthorizationThirdPartyRecordProvider authorizationProvider;
 
 	@Override
 	public PostGeneralFormDTO personalAuthorization(PostGeneralFormCommand cmd) {
@@ -83,7 +83,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	
 	private void createFamily(PostGeneralFormCommand cmd,ZjgkJsonEntity<List<ZjgkResponse>> entity, Map<String, String> params, String resultJson, String authorizationType) {
 		List<ZjgkResponse> list = entity.getResponse();
-		List<UserAuthorization> authlist = new ArrayList<UserAuthorization>();
+		List<AuthorizationThirdPartyRecord> recordlist = new ArrayList<AuthorizationThirdPartyRecord>();
 		if(list!=null && list.size()>0){
 			for (ZjgkResponse zjgkResponse : list) {
 				zjgkResponse.setCommunityName("科技园"); // TODO
@@ -94,13 +94,13 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 				// TODO 认证状态设置为通过
 				
 				//认证记录到list
-				authlist.add(generalUserAuthorization(cmd,params,addressinfo,authorizationType,entity.getErrorCode()),resultJson);
+				recordlist.add(generalUserAuthorizationRecord(cmd,params,addressinfo,authorizationType,entity.getErrorCode(),resultJson));
 			}
 			
 			// TODO 应该删除之前的认证，再在记录。认证成功，记录到表中
 			dbProvider.execute((TransactionStatus status) -> {
-				for (UserAuthorization userAuthorization : authlist) {
-					authorizationProvider.createUserAuthorization(userAuthorization);
+				for (AuthorizationThirdPartyRecord record : recordlist) {
+					authorizationProvider.createAuthorizationThirdPartyRecord(record);
 				}
 				return null;
 			});
@@ -119,24 +119,26 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return claimcmd;
 	}
 
-	private UserAuthorization generalUserAuthorization(PostGeneralFormCommand cmd, Map<String, String> params,
+	private AuthorizationThirdPartyRecord generalUserAuthorizationRecord(PostGeneralFormCommand cmd, Map<String, String> params,
 			ClaimedAddressInfo addressinfo, String authorizationType, int errorCode, String resultJson) {
-		UserAuthorization authorization = new UserAuthorization();
-		authorization.setNamespaceId(cmd.getNamespaceId());
-		authorization.setType(authorizationType);
-		authorization.setPhone(params.get("phone"));
-		authorization.setName(params.get("name"));
-		authorization.setCertificatetype(params.get("certificateType"));
-		authorization.setCertificateno(params.get("certificateNo"));
-		authorization.setOrganizationcode(params.get("organizationCode"));
-		authorization.setOrganizationcontact(params.get("organizationContact"));
-		authorization.setOrganizationphone(params.get("organizationPhone"));
-		authorization.setErrorcode(errorCode);
-		authorization.setAddressId(addressinfo.getAddressId());
-		authorization.setFullAddress(addressinfo.getFullAddress());
-		authorization.setUserCount(addressinfo.getUserCount());
-		authorization.setResultJson(resultJson);
-		return authorization;
+		AuthorizationThirdPartyRecord record = new AuthorizationThirdPartyRecord();
+		record.setNamespaceId(cmd.getNamespaceId());
+		record.setOwnerType(cmd.getOwnerType());
+		record.setOwnerId(cmd.getOwnerId());
+		record.setType(authorizationType);
+		record.setPhone(params.get("phone"));
+		record.setName(params.get("name"));
+		record.setCertificatetype(params.get("certificateType"));
+		record.setCertificateno(params.get("certificateNo"));
+		record.setOrganizationcode(params.get("organizationCode"));
+		record.setOrganizationcontact(params.get("organizationContact"));
+		record.setOrganizationphone(params.get("organizationPhone"));
+		record.setErrorcode(errorCode);
+		record.setAddressId(addressinfo.getAddressId());
+		record.setFullAddress(addressinfo.getFullAddress());
+		record.setUserCount(addressinfo.getUserCount());
+		record.setResultJson(resultJson);
+		return record;
 	}
 
 	private FlowCase createWorkFlow(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity, String personalAuthorization) {
