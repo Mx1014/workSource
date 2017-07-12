@@ -800,9 +800,9 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-
+            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
             //  根据批次 id 查找批次具体内容
-            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(cmd.getSalaryGroupId());
+            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(salaryGroup.getOrganizationGroupId());
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
 
             ByteArrayOutputStream out = null;
