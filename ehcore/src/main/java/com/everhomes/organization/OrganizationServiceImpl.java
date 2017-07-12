@@ -5498,9 +5498,30 @@ public class OrganizationServiceImpl implements OrganizationService {
             orgCommoand.setStatus(cmd.getStatus());
         orgCommoand.setGroupType(org.getGroupType());
 
-        List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, cmd.getIsSignedup(), null, locator, pageSize);
+        // 人员退出公司页需要在内部管理的员工认证的已同意标签下显示 add by xq.tian 2017/07/12
+        List<OrganizationMember> organizationMembers = null;
+        if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
+            List<Long> orgIds = Collections.singletonList(cmd.getOrganizationId());
+            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds);
+            if (memberLogList != null) organizationMembers = memberLogList.parallelStream()
+                    .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
+                    .map(r -> {
+                        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
+                        if (member != null) {
+                            member.setOperatorUid(r.getOperatorUid());
+                            member.setApproveTime(r.getOperateTime().getTime());
+                            member.setContactName(r.getContactName());
+                            member.setContactToken(r.getContactToken());
+                        }
+                        return member;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } else {
+            organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, cmd.getIsSignedup(), null, locator, pageSize);
+        }
 
-        if (0 == organizationMembers.size()) {
+        if (organizationMembers == null || 0 == organizationMembers.size()) {
             return response;
         }
 
@@ -5518,6 +5539,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 User user = userProvider.findUserById(c.getTargetId());
                 if (user != null) {
                     dto.setNickName(user.getNickName());
+                }
+            }
+            if (dto.getOrganizationName() == null) {
+                Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
+                if (organization != null) {
+                    dto.setOrganizationName(organization.getName());
                 }
             }
             return dto;

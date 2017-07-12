@@ -1234,6 +1234,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return null;
     }
 
+    @Override
+    public OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+                .fetchAnyInto(OrganizationMember.class);
+    }
+
     /**
      * modify cause member_detail by lei lv
      **/
@@ -3496,6 +3505,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(results.size() == 0)
 			return null;
 		return results;
+	}
+
+	@Override
+	public List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds) {
+		List<OrganizationMemberLog> results = new ArrayList<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.in(organizationIds));
+        return query.fetchInto(OrganizationMemberLog.class);
 	}
 
 	@Override

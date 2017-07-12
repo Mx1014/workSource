@@ -678,7 +678,7 @@ public class FamilyServiceImpl implements FamilyService {
                     "User not in user group.");
         }
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
-        
+
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         
         sendFamilyNotificationForLeaveFamily(address, group, member);
@@ -969,20 +969,20 @@ public class FamilyServiceImpl implements FamilyService {
                 this.groupProvider.updateGroupMember(member);
                 
                 List<UserGroup> list = this.userProvider.listUserGroups(memberUid, GroupDiscriminator.FAMILY.getCode());
-                list = list.stream().filter((userGroup) ->{
+                list = list.stream().filter((userGroup) -> {
                     return userGroup.getGroupId().longValue() == group.getId().longValue();
                     
                 }).collect(Collectors.toList());
-                if(list != null && !list.isEmpty()){
+                if(list != null && !list.isEmpty()) {
                     UserGroup userGroup = list.get(0);
                     userGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
                     this.userProvider.updateUserGroup(userGroup);
                 }
                 group.setMemberCount(group.getMemberCount() + 1);
                 groupProvider.updateGroup(group);
-                
+
+                addGroupMemberLog(member, group);// add by xq.tian  2017/07/12
                 return true;
-                
             });
            return true;
         });
@@ -1019,41 +1019,43 @@ public class FamilyServiceImpl implements FamilyService {
     // add by xq.tian   20160922
     //
     private void autoApproveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
-        if (addressId != null) {
-            Address address = addressProvider.findAddressById(addressId);
-            if (address != null) {
-                User memberUser = userProvider.findUserById(memberUid);
-                UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
-                if (memberUser != null && userIdentifier != null) {
-                    List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId,
-                            address.getCommunityId(), userIdentifier.getIdentifierToken());
-                    if (pmOwners != null && pmOwners.size() > 0) {
-                        for (CommunityPmOwner owner : pmOwners) {
-                            OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
-                                    namespaceId, owner.getId(), addressId);
-                            if (ownerAddress != null) {
-                                if (ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
-                                    ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
-                                    propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
-                                }
-                            }
-                            // 不存在ownerAddress, 创建ownerAddress记录
-                            else {
-                                propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
-                                        memberUser.getNamespaceId(), owner.getId(), OrganizationOwnerAddressAuthType.ACTIVE);
-                            }
+        if (addressId == null) {
+            return;
+        }
+        Address address = addressProvider.findAddressById(addressId);
+        if (address == null) {
+            return;
+        }
+        User memberUser = userProvider.findUserById(memberUid);
+        UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
+        if (memberUser != null && userIdentifier != null) {
+            List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId,
+                    address.getCommunityId(), userIdentifier.getIdentifierToken());
+            if (pmOwners != null && pmOwners.size() > 0) {
+                for (CommunityPmOwner owner : pmOwners) {
+                    OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+                            namespaceId, owner.getId(), addressId);
+                    if (ownerAddress != null) {
+                        if (ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
+                            ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+                            propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
                         }
                     }
-                    // 不存在organizationOwner, 根据用户资料创建organizationOwner记录
+                    // 不存在ownerAddress, 创建ownerAddress记录
                     else {
-                        // 只传递communityId
-                        memberUser.setCommunityId(address.getCommunityId());
-                        long ownerId = propertyMgrService.createOrganizationOwnerByUser(memberUser, userIdentifier.getIdentifierToken());
-                        // 创建ownerAddress
                         propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
-                                memberUser.getNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.ACTIVE);
+                                memberUser.getNamespaceId(), owner.getId(), OrganizationOwnerAddressAuthType.ACTIVE);
                     }
                 }
+            }
+            // 不存在organizationOwner, 根据用户资料创建organizationOwner记录
+            else {
+                // 只传递communityId
+                memberUser.setCommunityId(address.getCommunityId());
+                long ownerId = propertyMgrService.createOrganizationOwnerByUser(memberUser, userIdentifier.getIdentifierToken());
+                // 创建ownerAddress
+                propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
+                        memberUser.getNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.ACTIVE);
             }
         }
     }

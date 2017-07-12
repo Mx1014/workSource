@@ -56,7 +56,7 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
     }
 
     @Override
-    public List<GroupMemberLog> queryGroupMemberLog(String userInfoKeyword, String communityKeyword, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
+    public List<GroupMemberLog> queryGroupMemberLog(String userInfoKeyword, String communityKeyword, List<Long> communityIds, Byte status, CrossShardListingLocator locator, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<Record> query = context.select(Tables.EH_GROUP_MEMBER_LOGS.fields())
@@ -70,6 +70,7 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
         query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_GROUP_MEMBER_LOGS.COMMUNITY_ID.eq(Tables.EH_COMMUNITIES.ID));
 
         query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.COMMUNITY_ID.in(communityIds));
+        query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.MEMBER_STATUS.eq(status));
         if (StringUtils.isNotBlank(userInfoKeyword)) {
             String keyword = "%" + userInfoKeyword + "%";
             query.addConditions(Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword)));

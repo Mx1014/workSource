@@ -1450,44 +1450,76 @@ public class CommunityServiceImpl implements CommunityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        List<GroupMemberDTO> memberDTOList = null;
+        List<GroupMemberDTO> memberDTOList;
 
         if (cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.REJECT.getCode())) {
             memberDTOList = listCommunityRejectUserAddress(cmd.getUserInfoKeyword(), cmd.getCommunityKeyword(), communityIds, locator, pageSize);
+        } else if (cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.ACTIVE.getCode())) {
+            memberDTOList = listCommunityActiveUserAddress(cmd, communityIds, locator, pageSize);
         } else {
-            List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator, pageSize, (loc, query) -> {
-                Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
-                c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
-
-                if (StringUtils.isNotBlank(cmd.getUserInfoKeyword())) {
-                    String keyword = "%" + cmd.getUserInfoKeyword() + "%";
-                    query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
-                    query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
-                    Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword));
-                    query.addConditions(condition);
-                }
-                if (StringUtils.isNotBlank(cmd.getCommunityKeyword())) {
-                    String keyword = "%" + cmd.getCommunityKeyword() + "%";
-                    query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
-                    query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_GROUPS.INTEGRAL_TAG2.eq(Tables.EH_COMMUNITIES.ID));
-                    query.addConditions(Tables.EH_COMMUNITIES.NAME.like(keyword));
-                }
-
-                query.addConditions(c);
-                if (null != locator.getAnchor()) {
-                    query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
-                }
-                query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
-                return query;
-            });
-            memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
+            memberDTOList = listCommunityWaitingApproveUserAddress(cmd, groupIds, locator, pageSize);
         }
-
 		CommunityAuthUserAddressResponse res = new CommunityAuthUserAddressResponse();
 		res.setDtos(memberDTOList);
 		res.setNextPageAnchor(locator.getAnchor());
 		return res;
 	}
+
+    private List<GroupMemberDTO> listCommunityActiveUserAddress(CommunityAuthUserAddressCommand cmd, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
+        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(cmd.getUserInfoKeyword(), cmd.getCommunityKeyword(), communityIds,
+                GroupMemberStatus.ACTIVE.getCode(), locator, pageSize);
+        if (memberLogs != null) {
+            return memberLogs.stream().map(r -> {
+                GroupMember member = ConvertHelper.convert(r, GroupMember.class);
+                GroupMemberDTO dto = toGroupMemberDTO(member);
+                Address address = addressProvider.findAddressById(r.getAddressId());
+                if (null != address) {
+                    dto.setAddressId(address.getId());
+                    dto.setApartmentName(address.getApartmentName());
+                    dto.setBuildingName(address.getBuildingName());
+                }
+                Community community = communityProvider.findCommunityById(r.getCommunityId());
+                if (community != null) {
+                    dto.setCityName(community.getCityName());
+                    dto.setAreaName(community.getAreaName());
+                    dto.setCommunityName(community.getName());
+                }
+                return dto;
+            }).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    private List<GroupMemberDTO> listCommunityWaitingApproveUserAddress(CommunityAuthUserAddressCommand cmd, List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
+        List<GroupMemberDTO> memberDTOList;
+        List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator, pageSize, (loc, query) -> {
+            Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+            c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
+
+            if (StringUtils.isNotBlank(cmd.getUserInfoKeyword())) {
+                String keyword = "%" + cmd.getUserInfoKeyword() + "%";
+                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
+                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+                Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword));
+                query.addConditions(condition);
+            }
+            if (StringUtils.isNotBlank(cmd.getCommunityKeyword())) {
+                String keyword = "%" + cmd.getCommunityKeyword() + "%";
+                query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
+                query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_GROUPS.INTEGRAL_TAG2.eq(Tables.EH_COMMUNITIES.ID));
+                query.addConditions(Tables.EH_COMMUNITIES.NAME.like(keyword));
+            }
+
+            query.addConditions(c);
+            if (null != locator.getAnchor()) {
+                query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
+            }
+            query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
+            return query;
+        });
+        memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
+        return memberDTOList;
+    }
 
     private GroupMemberDTO toGroupMemberDTO(GroupMember member) {
         GroupMemberDTO dto = ConvertHelper.convert(member, GroupMemberDTO.class);
@@ -1530,7 +1562,8 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     private List<GroupMemberDTO> listCommunityRejectUserAddress(String userInfoKeyword, String communityKeyword, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
-        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(userInfoKeyword, communityKeyword, communityIds, locator, pageSize);
+        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(userInfoKeyword, communityKeyword,
+                communityIds, GroupMemberStatus.REJECT.getCode(), locator, pageSize);
         if (memberLogs != null) {
             return memberLogs.stream().map(r -> {
                 GroupMember member = ConvertHelper.convert(r, GroupMember.class);
@@ -2852,14 +2885,32 @@ public class CommunityServiceImpl implements CommunityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
+        // 人员退出公司页需要在项目管理的用户认证的已同意标签下显示 add by xq.tian 2017/07/12
+        List<OrganizationMember> organizationMembers = null;
         if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
-            organizationProvider.listOrganizationMemberLogs(1L);
+            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds);
+            if (memberLogList != null) {
+                organizationMembers = memberLogList.parallelStream()
+                        .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
+                        .map(r -> {
+                            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
+                            if (member != null) {
+                                member.setOperatorUid(r.getOperatorUid());
+                                member.setApproveTime(r.getOperateTime().getTime());
+                                member.setContactName(r.getContactName());
+                                member.setContactToken(r.getContactToken());
+                            }
+                            return member;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            }
+        } else {
+            organizationMembers = this.organizationProvider.listOrganizationPersonnels(
+                    cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
         }
 
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(
-				cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
-
-		if(0 == organizationMembers.size()) {
+		if(organizationMembers == null || organizationMembers.size() == 0) {
 			return response;
 		}
 
@@ -2873,6 +2924,18 @@ public class CommunityServiceImpl implements CommunityService {
                     UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                     dto.setOperatorName(operator.getNickName());
                     dto.setOperatorPhone(operatorIdentifier.getIdentifierToken());
+                }
+                if (dto.getOrganizationName() == null) {
+                    Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
+                    if (organization != null) {
+                        dto.setOrganizationName(organization.getName());
+                    }
+                }
+                if (dto.getNickName() == null) {
+                    User user = userProvider.findUserById(dto.getTargetId());
+                    if (user != null) {
+                        dto.setNickName(user.getNickName());
+                    }
                 }
                 return dto;
             }).collect(Collectors.toList());

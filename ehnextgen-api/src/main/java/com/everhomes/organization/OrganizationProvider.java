@@ -65,7 +65,10 @@ public interface OrganizationProvider {
 	List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(Long communityId);
 	OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,String organizationType);
 	OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
-	List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
+
+    OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId);
+
+    List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
 	List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId);
 	void createOrganizationTask(OrganizationTask task);
@@ -397,8 +400,11 @@ public interface OrganizationProvider {
 			Long organizationId, Long buildId);
 
 	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
-	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
-			Byte operationType);
+
+    List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds);
+
+    List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
+                                                           Byte operationType);
 
     List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword, String orgNameKeyword, List<Long> orgIds,
                                                         Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, int pageSize);

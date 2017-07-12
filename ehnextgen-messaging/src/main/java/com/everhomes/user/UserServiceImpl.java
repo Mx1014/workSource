@@ -3936,7 +3936,7 @@ public class UserServiceImpl implements UserService {
                     if (newIdentifier != null) {
                         LOGGER.error("the new identifier are already exist {}", log.getIdentifierToken());
                         throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NEW_IDENTIFIER_USER_EXIST,
-                                "the new identifier are already exist {}", log.getIdentifierToken());
+                                "the new identifier are already exist %s", log.getIdentifierToken());
                     }
                     if (log.checkVerificationCode(cmd.getVerificationCode())) {
                         log.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
@@ -3952,7 +3952,7 @@ public class UserServiceImpl implements UserService {
                     } else {
                         LOGGER.error("verification code incorrect or expired {}", cmd.getVerificationCode());
                         throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_VERIFICATION_CODE_INCORRECT_OR_EXPIRED,
-                                "verification code incorrect or expired {}", cmd.getVerificationCode());
+                                "verification code incorrect or expired %s", cmd.getVerificationCode());
                     }
                     break;
                 default:
@@ -4024,18 +4024,15 @@ public class UserServiceImpl implements UserService {
                     CoordinationLocks.USER_APPEAL_LOG.getCode() + cmd.getId()).enter(() -> {
                 UserAppealLog log = userAppealLogProvider.findUserAppealLogById(cmd.getId());
                 if (log != null && !Objects.equals(log.getStatus(), cmd.getStatus())) {
-                    log.setStatus(status.getCode());
-                    userAppealLogProvider.updateUserAppealLog(log);
-
                     // 如果是通过，则重置用户手机号
                     if (status == UserAppealLogStatus.ACTIVE) {
                         Integer namespaceId = UserContext.getCurrentNamespaceId();
                         // 检查申诉新手机号是否已经是注册用户
-                        UserIdentifier newIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, log.getNewIdentifier());
+                        UserIdentifier newIdentifier = userProvider.findClaimedIdentifierByToken(log.getNamespaceId(), log.getNewIdentifier());
                         if (newIdentifier != null) {
                             LOGGER.error("the new identifier are already exist {}", log.getNewIdentifier());
                             throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NEW_IDENTIFIER_USER_EXIST,
-                                    "the new identifier are already exist {}", log.getNewIdentifier());
+                                    "the new identifier are already exist %s", log.getNewIdentifier());
                         }
                         User user = userProvider.findUserById(log.getOwnerUid());
                         UserResetIdentifierVo vo = new UserResetIdentifierVo(
@@ -4046,6 +4043,10 @@ public class UserServiceImpl implements UserService {
                         List<UserLogin> userLogins = listUserLogins(user.getId());
                         userLogins.forEach(this::logoff);
                     }
+                    log.setStatus(status.getCode());
+                    userAppealLogProvider.updateUserAppealLog(log);
+                } else {
+                    return null;
                 }
                 return log;
             });

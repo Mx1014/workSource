@@ -34,11 +34,12 @@ public interface UserServiceErrorCode {
     int ERROR_SMS_MIN_DURATION = 300001;//发送验证码时间不得小于60s
     int ERROR_SMS_TOO_FREQUENT_HOUR = 300002;//验证码请求过于频繁，请1小时候重试
     int ERROR_SMS_TOO_FREQUENT_DAY = 300003;//验证码请求过于频繁，请24小时后重试
-    int ERROR_PLEASE_TRY_AGAIN_TO_FIRST_STEP = 300004;//请回到第一步重试
-    int ERROR_VERIFICATION_CODE_INCORRECT_OR_EXPIRED = 300005;//验证码错误或已过期
-    int ERROR_UPDATE_USER_APPEAL_LOG = 300006;//审核申诉失败
-    int ERROR_NEW_IDENTIFIER_USER_EXIST = 300007;//该手机号码已被注册
     int ERROR_SMS_BLACK_LIST = 300004;//对不起，您的手机号在我们的黑名单列表
+
+    int ERROR_PLEASE_TRY_AGAIN_TO_FIRST_STEP = 300005;//请回到第一步重试
+    int ERROR_VERIFICATION_CODE_INCORRECT_OR_EXPIRED = 300006;//验证码错误或已过期
+    int ERROR_UPDATE_USER_APPEAL_LOG = 300007;//审核申诉失败
+    int ERROR_NEW_IDENTIFIER_USER_EXIST = 300008;//该手机号码已被注册
 
     static final int DOMAIN_NOT_CONFIGURED = 400000;
 
