@@ -1590,4 +1590,10 @@ SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
 insert into `eh_web_menu_scopes` (`id`, `menu_id`,`owner_type`, `owner_id`,`apply_policy`) values ((@menu_scope_id := @menu_scope_id + 1),50900,'EhNamespaces',999985,2);
 SET @jump_id = (SELECT MAX FROM `eh_service_alliance_jump_module`);
 insert into eh_service_alliance_jump_module (id, namespace_id, module_name, module_url, parent_id) values ((@jump_id := @jump_id + 1),999985,'审批','zl://approval/create?approvalId={}&sourceId={}', 0);
-	
+
+-- 加服务联盟表单中医理疗
+set @eh_request_templates_id = (select max(id) from eh_request_templates);
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) VALUES
+((@eh_request_templates_id := @eh_request_templates_id + 1), 'ReserveChinesePhysiotherapy', '中医理疗', '我要报名', 1, 1, '{"fields": [{"fieldName": "contact","fieldDisplayName": "姓名","fieldType": "string","fieldContentType": "text","fieldDesc": "请输入您的姓名","requiredFlag": "1"},{"fieldName": "remarks","fieldDisplayName": "性别","fieldType": "string","fieldContentType": "text","fieldDesc": "请输入您的性别","requiredFlag": "1"},{"fieldName": "reserveOrganization","fieldDisplayName": "公司名称","fieldType": "string","fieldContentType": "text","fieldDesc": "请输入您所在公司","requiredFlag": "1"},{"fieldName": "mobile","fieldDisplayName": "联系电话","fieldType": "string","fieldContentType": "text","fieldDesc": "请输入您的联系电话","requiredFlag": "1"}]}', 1, 1, NOW, 0, NULL);
+set @mapping_id = (select max(id) from eh_request_templates_namespace_mapping);
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES ((@mapping_id := @mapping_id + 1), 999985, @eh_request_templates_id);
