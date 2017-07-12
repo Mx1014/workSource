@@ -119,6 +119,11 @@ public class SiyinJobValidateServiceImpl {
            //将记录合并到订单上,并更新到数据库
            mergeRecordToOrder(record,order);
            dbProvider.execute(r->{
+        	   //订单金额为0，那么设置成支付状态。
+        	   	if(order.getOrderTotalFee() == null || order.getOrderTotalFee().intValue() == 0){
+        	   		order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+        	   		order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+        	   	}
 	   			if(order.getId() == null){
 	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
 	   			}else{
