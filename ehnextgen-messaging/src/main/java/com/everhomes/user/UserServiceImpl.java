@@ -3862,7 +3862,7 @@ public class UserServiceImpl implements UserService {
         if (newIdentifier == null) {
             // this.verifySmsTimes("resetIdentifier", oldIdentifier, request.getHeader(X_EVERHOMES_DEVICE));
 
-            UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(currUserId, oldIdentifier);
+            UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(currUserId, oldRegionCode, oldIdentifier);
             // 如果半个小时没有完成整个过程，需要从头开始执行整个流程
             if (log != null && log.notExpire(halfAnHour) && log.getClaimStatus() == IdentifierClaimStatus.CLAIMING.getCode()) {
                 log.setVerificationCode(verificationCode);
@@ -3885,7 +3885,7 @@ public class UserServiceImpl implements UserService {
         else {
             // this.verifySmsTimes("resetIdentifier", newIdentifier, request.getHeader(X_EVERHOMES_DEVICE));
 
-            UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(currUserId, oldIdentifier);
+            UserIdentifierLog log = userIdentifierLogProvider.findByUserId(currUserId);
             // 如果半个小时没有完成整个过程，需要从头开始执行整个流程
             if (log != null && log.notExpire(halfAnHour)
                     && (log.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()
@@ -4058,6 +4058,19 @@ public class UserServiceImpl implements UserService {
         LOGGER.error("update user appeal log failed, cmd = {}", cmd);
         throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UPDATE_USER_APPEAL_LOG,
                 "update user appeal log failed");
+    }
+
+    @Override
+    public UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd) {
+	    UserIdentifierLog log = userIdentifierLogProvider.findByIdentifier(cmd.getIdentifier());
+        if (log != null) {
+            return toUserIdentifierLogDTO(log);
+        }
+        return new UserIdentifierLogDTO();
+    }
+
+    private UserIdentifierLogDTO toUserIdentifierLogDTO(UserIdentifierLog log) {
+        return ConvertHelper.convert(log, UserIdentifierLogDTO.class);
     }
 
     private void sendMessageOrSmsByResetIdentifier(UserAppealLogStatus status, UserAppealLog log) {

@@ -58,11 +58,12 @@ public class UserIdentifierLogProviderImpl implements UserIdentifierLogProvider 
     }
 
     @Override
-    public UserIdentifierLog findByUserIdAndIdentifier(Long uid, String identifier) {
+    public UserIdentifierLog findByUserIdAndIdentifier(Long uid, Integer regionCode, String identifier) {
         return context().selectFrom(Tables.EH_USER_IDENTIFIER_LOGS)
                 .where(Tables.EH_USER_IDENTIFIER_LOGS.OWNER_UID.eq(uid))
+                .and(Tables.EH_USER_IDENTIFIER_LOGS.REGION_CODE.eq(regionCode))
                 .and(Tables.EH_USER_IDENTIFIER_LOGS.IDENTIFIER_TOKEN.eq(identifier))
-                .orderBy(Tables.EH_USER_IDENTIFIER_LOGS.CREATE_TIME.desc())
+                .orderBy(Tables.EH_USER_IDENTIFIER_LOGS.ID.desc())
                 .fetchAnyInto(UserIdentifierLog.class);
     }
 
@@ -70,7 +71,15 @@ public class UserIdentifierLogProviderImpl implements UserIdentifierLogProvider 
     public UserIdentifierLog findByUserId(Long uid) {
         return context().selectFrom(Tables.EH_USER_IDENTIFIER_LOGS)
                 .where(Tables.EH_USER_IDENTIFIER_LOGS.OWNER_UID.eq(uid))
-                .orderBy(Tables.EH_USER_IDENTIFIER_LOGS.CREATE_TIME.desc())
+                .orderBy(Tables.EH_USER_IDENTIFIER_LOGS.ID.desc())
+                .fetchAnyInto(UserIdentifierLog.class);
+    }
+
+    @Override
+    public UserIdentifierLog findByIdentifier(String identifier) {
+        return context().selectFrom(Tables.EH_USER_IDENTIFIER_LOGS)
+                .where(Tables.EH_USER_IDENTIFIER_LOGS.IDENTIFIER_TOKEN.eq(identifier))
+                .orderBy(Tables.EH_USER_IDENTIFIER_LOGS.ID.desc())
                 .fetchAnyInto(UserIdentifierLog.class);
     }
 

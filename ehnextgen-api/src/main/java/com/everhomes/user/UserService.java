@@ -208,4 +208,11 @@ public interface UserService {
      * @return
      */
     UserAppealLogDTO updateUserAppealLog(UpdateUserAppealLogCommand cmd);
+
+    /**
+     * 获取修改手机号的验证码
+     * @param cmd
+     * @return
+     */
+    UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd);
 }
