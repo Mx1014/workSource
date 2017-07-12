@@ -451,3 +451,35 @@ update  eh_locale_templates set text = 90043 where namespace_id = 999973 and sco
 -- 缺少数据导致 园区入驻、招租管理出错。20170710 add by yanjun
 SET @eh_lease_configs_id = (SELECT MAX(id) FROM `eh_lease_configs`);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES((@eh_lease_configs_id := @eh_lease_configs_id + 1),'999973','1','1','1','1','1','1');
+
+-- 修改资源预定脚本错误，将状态更新为2  20170711 add by yanjun
+UPDATE  eh_rentalv2_resource_types set status = 2 where id in (11029, 11030) and namespace_id = 999973;
+
+-- 服务联盟初始化数据     20170711 add by yanjun
+SET @parent_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', 240111044331050393, '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, 999973, '');
+
+-- 更新服务联盟 item  20170711 add by yanjun
+UPDATE  eh_launch_pad_items  SET action_type = '33',  action_data = CONCAT( '{"type":',  @parent_id, ',"parentId":', @parent_id, ',"displayType": "list"}') WHERE id IN (116466, 116478)  AND namespace_id = 999973;
+
+SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`)
+VALUES ((@service_alliance_id := @service_alliance_id + 1), 0, 'community', 240111044331050393, '服务联盟', '服务联盟首页', @parent_id, '', '', '', 'cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ', 2, NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, NULL);
+
+-- 增加统计分析子菜单  20170711 add by yanjun
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41310,'', 'EhNamespaces', 999973,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41320,'', 'EhNamespaces', 999973,2);
+
+-- 增加用户机构关联信息  20170711 add by yanjun
+SET @organization_member_details_id = (SELECT MAX(id) FROM `eh_organization_member_details`);
+INSERT INTO `eh_organization_member_details` (`id`, `namespace_id`, `target_type`, `target_id`, `birthday`, `organization_id`, `contact_name`, `contact_type`, `contact_token`, `contact_description`, `employee_no`, `avatar`, `gender`, `marital_flag`, `political_status`, `native_place`, `en_name`, `reg_residence`, `id_number`, `email`, `wechat`, `qq`, `emergency_name`, `emergency_contact`, `address`, `employee_type`, `employee_status`, `employment_time`, `dimission_time`, `salary_card_number`, `social_security_number`, `provident_fund_number`, `profile_integrity`, `check_in_time`)
+VALUES((@organization_member_details_id := @organization_member_details_id + 1),'999973','USER','311028',NULL,'1010579','沈颖慧','0','15900788890',NULL,NULL,NULL,'0','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0',NULL,NULL,NULL,NULL,NULL,'0','2017-07-11');
+
+UPDATE  eh_organization_members set detail_id = @organization_member_details_id where id = 2155060  and namespace_id = 999973;
+
+SET @eh_user_organizations_id = (SELECT MAX(id) FROM `eh_user_organizations`);
+INSERT INTO `eh_user_organizations` (`id`, `user_id`, `organization_id`, `group_path`, `group_type`, `status`, `namespace_id`, `create_time`, `visible_flag`, `update_time`)
+VALUES((@eh_user_organizations_id := @eh_user_organizations_id + 1),'311028','1010579','/1010579','ENTERPRISE','3','999973',NULL,'0',NULL);
