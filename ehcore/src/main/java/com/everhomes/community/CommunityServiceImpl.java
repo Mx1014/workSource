@@ -1999,7 +1999,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		LOGGER.debug("Get user organization list time:{}", System.currentTimeMillis() - time);
 		List<CommunityUserDto> userCommunities = new ArrayList<>();
-		LOGGER.debug("fanfanfanfanfnanfan:{}",users);
+
 		for(UserOrganizations r: users){
 			CommunityUserDto dto = ConvertHelper.convert(r, CommunityUserDto.class);
 			dto.setUserName(r.getNickName());
@@ -2013,6 +2013,7 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
 			}
 
+			LOGGER.debug("fanfanfan,userName:{}/userPhone:{}/userStatus:{}",r.getNickName(), r.getPhoneNumber(),r.getStatus());
 			if(UserOrganizationStatus.ACTIVE == UserOrganizationStatus.fromCode(r.getStatus())){
 				dto.setIsAuth(AuthFlag.YES.getCode());
 				if(null != r.getOrganizationId()){
