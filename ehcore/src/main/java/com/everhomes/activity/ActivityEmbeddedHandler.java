@@ -297,7 +297,8 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 				}
 			}
 		}
-        
+
+
         cmd.setOfficialFlag(officialFlag.getCode());
         post.setOfficialFlag(officialFlag.getCode());
         cmd.setCategoryId(categoryId);

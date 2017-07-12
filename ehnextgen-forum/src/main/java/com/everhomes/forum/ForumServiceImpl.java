@@ -1443,6 +1443,11 @@ public class ForumServiceImpl implements ForumService {
              if(cmd.getCategoryId() != null){
                  condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
              }
+
+             //支持标签搜索  add by yanjun 20170712
+             if(!StringUtils.isEmpty(cmd.getTag())){
+                 condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+             }
 	         
 	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
 	    	 if(LOGGER.isInfoEnabled()) {
@@ -2647,6 +2652,11 @@ public class ForumServiceImpl implements ForumService {
             if(cmd.getCategoryId() != null){
                 query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
             }
+
+            //支持标签搜索  add by yanjun 20170712
+            if(!StringUtils.isEmpty(cmd.getTag())){
+                query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+            }
             
             if(visibilityCondition != null) {
                 query.addConditions(visibilityCondition);
@@ -2815,7 +2825,10 @@ public class ForumServiceImpl implements ForumService {
             if(cmd.getCategoryId() != null){
                 query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
             }
-            
+            //支持标签搜索  add by yanjun 20170712
+            if(!StringUtils.isEmpty(cmd.getTag())){
+                query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+            }
             if(null != condition){
             	query.addConditions(condition);
             }
@@ -5347,6 +5360,11 @@ public class ForumServiceImpl implements ForumService {
                 //支持按话题、活动、投票来查询数据   add by yanjun 20170612
                 if(cmd.getCategoryId() != null){
                     query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                }
+
+                //支持标签搜索  add by yanjun 20170712
+                if(!StringUtils.isEmpty(cmd.getTag())){
+                    query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
                 }
                 
                 return query;

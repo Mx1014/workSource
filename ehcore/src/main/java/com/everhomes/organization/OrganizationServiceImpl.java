@@ -1894,6 +1894,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	    forumCmd.setPageSize(cmd.getPageSize());
     	    forumCmd.setExcludeCategories(cmd.getExcludeCategories());
     	    forumCmd.setCategoryId(cmd.getCategoryId());
+            forumCmd.setTag(cmd.getTag());
     	    response = forumService.listTopicsByForums(forumCmd);
 	        break;
 	    case COMMUNITY_ALL:
@@ -1904,6 +1905,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	// 因为此处EmbeddedAppId为空，在listOrgTopics方法中不会走到活动的查询中，因此此处加上论坛的CategoryId不会和活动的CategoryId混淆。
 			// add by yanjn  20170612
 	    	command.setCategoryId(cmd.getCategoryId());
+
+            command.setTag(cmd.getTag());
 
 	    	response = forumService.listOrgTopics(command);
 	        break;
