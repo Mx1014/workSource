@@ -1869,10 +1869,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 			User user = UserContext.current().getUser();
 			List<CommunityDTO> result = new ArrayList<>();
 			dtos.forEach(r -> {
-//				if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
-				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
-				result.add(r);
-//				}
+				if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
+//				userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
+					result.add(r);
+				}
 			});
 			response.setCommunities(result);
 
@@ -1935,7 +1935,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			List<FamilyDTO> families = new ArrayList<>();
 			if(familyList != null && familyList.size() > 0) {
 				familyList.forEach(f -> {
-					if(GroupMemberStatus.ACTIVE.equals(f.getMembershipStatus())) {
+					if(GroupMemberStatus.ACTIVE.equals(GroupMemberStatus.fromCode(f.getMembershipStatus()))) {
 						if(f.getCommunityId().equals(communityId))
 							families.add(f);
 					}
@@ -1950,7 +1950,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			List<OrganizationDTO> organizations = new ArrayList<>();
 			if(organizationList != null && organizationList.size() > 0) {
 				organizationList.forEach(f -> {
-					if(OrganizationMemberStatus.ACTIVE.equals(f.getMemberStatus())) {
+					if(OrganizationMemberStatus.ACTIVE.equals(OrganizationMemberStatus.fromCode(f.getMemberStatus()))) {
 						if(f.getCommunityId().equals(communityId))
 							organizations.add(f);
 					}
@@ -1961,7 +1961,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 			response.setOrganizationList(addressDTOs);
 //	    	}
-			LOGGER.info("getUserRelatedAddressesByCommunity: familyList: {}, organizationList: {}", familyList, organizationList);
+
 	    }
 
 	    List<PmTaskHistoryAddress> addresses = pmTaskProvider.listTaskHistoryAddresses(namespaceId, PmTaskOwnerType.COMMUNITY.getCode(),
