@@ -533,6 +533,9 @@ public class SalaryServiceImpl implements SalaryService {
             result.setTargetType(r.getTargetType());
             result.setContactName(r.getContactName());
             for(int i=0; i<groups.size(); i++){
+                //  没有 detailId 的时候则视为无效数据
+                if(StringUtils.isEmpty(r.getDetailId()))
+                    continue;
                 if(r.getDetailId().equals(groups.get(i)[0])){
                     result.setGroupId((Long)groups.get(i)[1]);
                     break;
