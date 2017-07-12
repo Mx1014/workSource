@@ -497,7 +497,7 @@ public class TalentServiceImpl implements TalentService {
 	}
 
 	@Override
-	public CreateOrUpdateRequestSettingResponse findRequestSetting(CreateOrUpdateRequestSettingCommand cmd) {
+	public CreateOrUpdateRequestSettingResponse findRequestSetting() {
 		Integer namespaceId = namespaceId();
 		String talentRequestName = configurationProvider.getValue(namespaceId, TALENT_REQUEST_NAME, "");
 		Long talentFormId = configurationProvider.getLongValue(namespaceId, TALENT_FORM_ID, 0L);

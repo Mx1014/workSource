@@ -22,6 +22,15 @@ public class CreateOrUpdateRequestSettingCommand {
 	private String requestName;
 	private Long formId;
 
+	public CreateOrUpdateRequestSettingCommand() {
+		super();
+	}
+
+	public CreateOrUpdateRequestSettingCommand(Long organizationId) {
+		super();
+		this.organizationId = organizationId;
+	}
+
 	public Byte getEnable() {
 		return enable;
 	}

@@ -32,6 +32,8 @@ public class TalentServiceAdvice {
     
     private static final List<String> enterpriseAdminAPIList = new ArrayList<>();
     
+    private static final List<String> notCheckList = new ArrayList<>();
+    
     static {
     	// 这里的都是企业管理员有权限访问的接口，其它接口都是只有超级管理员才有权限访问
     	enterpriseAdminAPIList.add("listTalentCategory");
@@ -40,6 +42,8 @@ public class TalentServiceAdvice {
     	enterpriseAdminAPIList.add("deleteTalentQueryHistory");
     	enterpriseAdminAPIList.add("clearTalentQueryHistory");
     	enterpriseAdminAPIList.add("getTalentDetail");
+    	
+    	notCheckList.add("findRequestSetting");
     }
     
 	@Before("execution(* com.everhomes.talent.TalentServiceImpl.*(..))")
@@ -53,8 +57,10 @@ public class TalentServiceAdvice {
 		
 		String methodName = joinPoint.getSignature().getName();
 		
-		// 检查是否为管理员
-		checkAdmin(methodName, cmd);
+		if (!notCheckList.contains(methodName)) {
+			// 检查是否为管理员
+			checkAdmin(methodName, cmd);
+		}
 	}
 
 	private void checkOwner(Object cmd) throws IllegalArgumentException, IllegalAccessException{
