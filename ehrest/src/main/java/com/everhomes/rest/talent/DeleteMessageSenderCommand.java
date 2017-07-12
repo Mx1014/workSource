@@ -26,6 +26,14 @@ public class DeleteMessageSenderCommand {
 	@NotNull
 	private Long id;
 
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}

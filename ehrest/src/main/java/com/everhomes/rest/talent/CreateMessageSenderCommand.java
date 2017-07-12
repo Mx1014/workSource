@@ -29,6 +29,14 @@ public class CreateMessageSenderCommand {
 	@NotNull
 	private Long userId;
 
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}

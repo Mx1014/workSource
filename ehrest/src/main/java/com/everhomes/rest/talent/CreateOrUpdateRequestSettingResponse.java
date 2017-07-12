@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.talent;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,7 +13,9 @@ import com.everhomes.util.StringHelper;
  * <li>formId: 表单id</li>
  * </ul>
  */
-public class CreateOrUpdateRequestSettingResponse {
+public class CreateOrUpdateRequestSettingResponse {	
+	@NotNull
+	private Long organizationId;
 	private Byte enable;
 	private String requestName;
 	private Long formId;
@@ -25,6 +29,14 @@ public class CreateOrUpdateRequestSettingResponse {
 		this.enable = enable;
 		this.requestName = requestName;
 		this.formId = formId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public Byte getEnable() {
