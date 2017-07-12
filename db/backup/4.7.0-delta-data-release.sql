@@ -678,3 +678,36 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 update eh_rentalv2_resource_types set status = 2 where namespace_id = 999981;
 SET @jump_id = (SELECT MAX FROM `eh_service_alliance_jump_module`);
 insert into eh_service_alliance_jump_module (id, namespace_id, module_name, module_url, parent_id) values ((@jump_id := @jump_id + 1),999981,'审批','zl://approval/create?approvalId={}&sourceId={}', 0);
+
+	
+-- 添加表单管理菜单和服务联盟的审批跳转
+SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
+insert into `eh_web_menu_scopes` (`id`, `menu_id`,`owner_type`, `owner_id`,`apply_policy`) values ((@menu_scope_id := @menu_scope_id + 1),50900,'EhNamespaces',999985,2);
+SET @jump_id = (SELECT MAX FROM `eh_service_alliance_jump_module`);
+insert into eh_service_alliance_jump_module (id, namespace_id, module_name, module_url, parent_id) values ((@jump_id := @jump_id + 1),999985,'审批','zl://approval/create?approvalId={}&sourceId={}', 0);
+
+-- 光大we谷域空间增加园区 add by sfyan 20170712
+SET @namespace_id = 999979;
+SET @community_forum_id = (select default_forum_id from eh_communities where namespace_id = @namespace_id limit 1); 
+SET @feedback_forum_id = (select feedback_forum_id from eh_communities where namespace_id = @namespace_id limit 1); 
+SET @shi_id = (select id FROM `eh_regions` where name = '东莞市' and namespace_id = @namespace_id and status = 2);  
+SET @qu_id = (select id FROM `eh_regions` where name = '松山湖' and namespace_id = @namespace_id and status = 2); 
+SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
+SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
+SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; -- 需要取现网eh_communities的ID的最大值再加一定余量
+SET @organization_id = (select id from eh_organizations where namespace_id = @namespace_id and organization_type = 'PM' and parent_id = 0 limit 1);
+SET @building1_id = (SELECT MAX(id) FROM `eh_buildings`) + 5;
+
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@community_id, UUID(), @shi_id, '东莞市',  @qu_id, '松山湖', '点栈创业工场', '点栈创业工场', '总部二路2号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 98, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 113.900261, 22.964468, 'uxbrfxfpyzur');
+
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
+	
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(@organization_id, @community_id);
+	
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, default_order,`namespace_id`)VALUES(@building1_id, @community_id, 'A3栋', '光大We谷A3栋', 0, '0769-22992838', '东莞市松山湖总部二路2号', 5206.73, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @building1_id, @namespace_id);
+

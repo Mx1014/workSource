@@ -1585,6 +1585,9 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
     VALUES(202154, 2008, 0, '摄影', '兴趣/旅游摄影/摄影', 0, 2, UTC_TIMESTAMP(), 999985);
 	
-	
-	
+-- 添加表单管理菜单和服务联盟的审批跳转
+SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
+insert into `eh_web_menu_scopes` (`id`, `menu_id`,`owner_type`, `owner_id`,`apply_policy`) values ((@menu_scope_id := @menu_scope_id + 1),50900,'EhNamespaces',999985,2);
+SET @jump_id = (SELECT MAX FROM `eh_service_alliance_jump_module`);
+insert into eh_service_alliance_jump_module (id, namespace_id, module_name, module_url, parent_id) values ((@jump_id := @jump_id + 1),999985,'审批','zl://approval/create?approvalId={}&sourceId={}', 0);
 	
