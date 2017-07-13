@@ -164,4 +164,4 @@ ALTER TABLE eh_news ADD COLUMN `visible_type` VARCHAR(32);
 
 
 -- 增加订单类型  add by yanjun 20170713  from activity-3.2.0
-ALTER TABLE `eh_activity_roster` ADD COLUMN `orderType` VARCHAR(128) NULL COMMENT 'orderType';
+ALTER TABLE `eh_activity_roster` ADD COLUMN `order_type` VARCHAR(128) NULL COMMENT 'orderType';
