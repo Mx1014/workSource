@@ -6882,6 +6882,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         return orgnaizationIds;
     }
 
+
+    private List<Long> getChildOrganizationIds(Long organizationId, List<String> groupTypes){
+        List<Long> orgnaizationIds = new ArrayList<>();
+        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organizationId, groupTypes);
+        for (Organization organization: organizations) {
+            orgnaizationIds.add(organization.getId());
+        }
+        return orgnaizationIds;
+    }
+
     private void addPathOrganizationId(String path, List<Long> orgnaizationIds){
         String[] idStrs = path.split("/");
         for (String idStr: idStrs) {
@@ -9998,18 +10008,25 @@ public class OrganizationServiceImpl implements OrganizationService {
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(com.everhomes.rest.common.EntityType.ALL.getCode(), 0L, cmd.getModuleId()));//负责全部业务范围的对象，也要查询出来
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), 0L)); //负责全部业务模块的对象，也要查询出来
 
+        List<String> groupTypes = new ArrayList<>();
+
+        if (null == cmd.getGroupTypes() || cmd.getGroupTypes().size() == 0) {//未指定机构类型
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        } else {
+            groupTypes = cmd.getGroupTypes();
+        }
         //将targetType = EntityType.ORGANIZATIONS的assigments过滤出targetId的set集合
         Set<Long> targetIdSet = new HashSet<>();
         for (ServiceModuleAssignment assignment : assignments) {
             if (EntityType.fromCode(assignment.getTargetType()) == EntityType.ORGANIZATIONS) {
-                //包含子部门，就拿path下面所有的机构
+                targetIdSet.add(assignment.getTargetId());
+                //包含子部门，下面所有的机构
                 if(IncludeChildFlagType.YES == IncludeChildFlagType.fromCode(assignment.getIncludeChildFlag())){
-                    Organization organization = organizationProvider.findOrganizationById(assignment.getTargetId());
-                    if(null != organization){
-                        addPathOrganizationId(organization.getPath(), targetIdSet);
-                    }
-                }else{
-                    targetIdSet.add(assignment.getTargetId());
+                    List<Long> orgIds = getChildOrganizationIds(assignment.getTargetId(), groupTypes);
+                    if(null != orgIds && orgIds.size() > 0)
+                        targetIdSet.addAll(orgIds);
                 }
             }
         }
@@ -10018,13 +10035,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         targetIdSet.stream().map(r -> {
             Organization organization = organizationProvider.findOrganizationById(r);
             if (null != organization && OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE) {
-                if (null == cmd.getGroupTypes() || cmd.getGroupTypes().size() == 0) {//未指定机构类型
-                    dtos.add(ConvertHelper.convert(organization, OrganizationDTO.class));
-                } else {
-                    if (cmd.getGroupTypes().contains(organization.getGroupType())) {//符合指定机构类型
-                        dtos.add(ConvertHelper.convert(organization, OrganizationDTO.class));
-                    }
-                }
+                dtos.add(ConvertHelper.convert(organization, OrganizationDTO.class));
             }
             return null;
         }).collect(Collectors.toList());
