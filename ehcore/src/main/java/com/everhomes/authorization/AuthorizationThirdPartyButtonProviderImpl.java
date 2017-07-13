@@ -97,6 +97,6 @@ public class AuthorizationThirdPartyButtonProviderImpl implements AuthorizationT
 		if(list!=null && list.size()>0){
 			return list.get(0);
 		}
-		return new AuthorizationThirdPartyButton();
+		return null;
 	}
 }

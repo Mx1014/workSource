@@ -1,5 +1,7 @@
 package com.everhomes.authorization;
 
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +40,8 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostGeneralFormCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
@@ -47,6 +51,7 @@ import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+1000000)
@@ -77,14 +82,19 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
     
     @Autowired
     private AuthorizationThirdPartyRecordProvider authorizationProvider;
+    
+  	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
+  	
 
 	@Override
 	public PostGeneralFormDTO personalAuthorization(PostGeneralFormCommand cmd) {
 		
 		Map<String, String> params = generalParams(cmd);
+		ZjgkJsonEntity<List<ZjgkResponse>> entity = null;
 		try {
 			String jsonStr = HttpUtils.post(url, params, 10, "UTF-8");
-			ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
+			entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
+//			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_UNRENT);
 			//请求成功，返回承租地址，那么创建家庭。
 			if(entity.isSuccess()){
 				createFamily(cmd,entity,params,jsonStr,PERSONAL_AUTHORIZATION);
@@ -94,9 +104,22 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		return processGeneralFormDTO(cmd,entity);
 	}
 	
+	private PostGeneralFormDTO processGeneralFormDTO(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity) {
+		PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+
+        List<PostApprovalFormItem> items = new ArrayList<>();
+        PostApprovalFormItem item = new PostApprovalFormItem();
+        item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        item.setFieldValue(generalContent(entity));
+        items.add(item);
+        dto.getValues().addAll(items);
+        return dto;
+	}
+
 	private void createFamily(PostGeneralFormCommand cmd,ZjgkJsonEntity<List<ZjgkResponse>> entity, Map<String, String> params, String resultJson, String authorizationType) {
 		List<ZjgkResponse> list = entity.getResponse();
 		List<AuthorizationThirdPartyRecord> recordlist = new ArrayList<AuthorizationThirdPartyRecord>();
@@ -107,9 +130,13 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			//加入第三方认证的家庭
 			for (ZjgkResponse zjgkResponse : list) {
 				zjgkResponse.setCommunityName("科技园"); // TODO
-				zjgkResponse.setBuildingName("4-4");
+				zjgkResponse.setBuildingName("4-4");// TODO
 				//生成加入家庭的command
 				ClaimAddressCommand claimcmd = generalClaimAddressCommand(cmd,zjgkResponse);
+				if(claimcmd == null){
+					zjgkResponse.setExistCommunityFlag((byte)0);
+					continue;
+				}
 				//加入家庭
 				ClaimedAddressInfo addressinfo = addressService.claimAddress(claimcmd);
 				//认证记录到list
@@ -184,6 +211,9 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	private ClaimAddressCommand generalClaimAddressCommand(PostGeneralFormCommand cmd, ZjgkResponse zjgkResponse) {
 		String communityName = zjgkResponse.getCommunityName();
 		Community community = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), communityName);
+		if(community == null){
+			return null;
+		}
 		ClaimAddressCommand claimcmd = new ClaimAddressCommand();
 		claimcmd.setCommunityId(community.getId());
 		claimcmd.setApartmentName(zjgkResponse.getApartmentName());
@@ -243,9 +273,9 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		StringBuffer buffer = new StringBuffer();
 		List<ZjgkResponse> list = entity.getResponse();
 		if(entity.isMismatching()){
-			buffer.append("提交信息匹配不成功：\n");
-			buffer.append("1、请检测信息填写是否正确，如填写有误，请重新提交");
-			buffer.append("2、如填写无误，请到携带相关证件管理处核对信息");
+			buffer.append("很遗憾，您的认证未成功：\n");
+			buffer.append("1、请检测信息填写是否正确，如填写有误，请重新提交\n");
+			buffer.append("2、如填写无误，请到携带相关证件管理处核对信息\n");
 			return buffer.toString();
 		}
 		if(entity.isUnrent()){
@@ -254,7 +284,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		}
 		if(entity.isSuccess())
 		{
-			buffer.append("认证成功！您的地址信息如下：\n");
+			buffer.append("恭喜您，成为我们的一员，您承租的地址信息如下：\n");
 		}
 		else{
 			buffer.append("不知道什么情况。\n");

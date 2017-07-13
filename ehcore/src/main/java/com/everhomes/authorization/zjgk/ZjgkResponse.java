@@ -8,6 +8,13 @@ public class ZjgkResponse {
 	private String buildingName;
 	private String apartmentName;
 	private String address;
+	private Byte existCommunityFlag = 1;
+	public Byte getExistCommunityFlag() {
+		return existCommunityFlag;
+	}
+	public void setExistCommunityFlag(Byte existCommunityFlag) {
+		this.existCommunityFlag = existCommunityFlag;
+	}
 	public String getCommunityName() {
 		return communityName;
 	}
