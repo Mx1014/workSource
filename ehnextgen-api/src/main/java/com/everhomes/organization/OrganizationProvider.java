@@ -401,7 +401,7 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
 
-    List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds);
+    List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String keywords, CrossShardListingLocator locator, int pageSize);
 
     List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
                                                            Byte operationType);

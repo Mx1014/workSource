@@ -3508,13 +3508,35 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds) {
-		List<OrganizationMemberLog> results = new ArrayList<>();
+	public List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String orgNameKeyword, CrossShardListingLocator locator, int pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.in(organizationIds));
-        return query.fetchInto(OrganizationMemberLog.class);
-	}
+        if (userInfoKeyword != null) {
+            String keyword = "%" + userInfoKeyword + "%";
+            query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_NAME.like(keyword)
+                    .or(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_TOKEN.like(keyword))
+                    .or(Tables.EH_USERS.NICK_NAME.like(keyword))
+            );
+        }
+        if (orgNameKeyword != null) {
+            String keyword = "%" + orgNameKeyword + "%";
+            query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.JOIN, Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword));
+        }
+        if (locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.le(locator.getAnchor()));
+        }
+        query.addLimit(pageSize + 1);
+
+        List<OrganizationMemberLog> list = query.fetchInto(OrganizationMemberLog.class);
+        if (list != null && list.size() > pageSize) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list = list.subList(0, pageSize);
+        }
+        return list;
+    }
 
 	@Override
 	public List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId,List<Long> organizationIds,Byte operationType) {

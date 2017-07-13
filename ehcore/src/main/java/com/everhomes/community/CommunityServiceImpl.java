@@ -2888,7 +2888,7 @@ public class CommunityServiceImpl implements CommunityService {
         // 人员退出公司页需要在项目管理的用户认证的已同意标签下显示 add by xq.tian 2017/07/12
         List<OrganizationMember> organizationMembers = null;
         if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
-            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds);
+            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), locator, pageSize);
             if (memberLogList != null) {
                 organizationMembers = memberLogList.parallelStream()
                         .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
