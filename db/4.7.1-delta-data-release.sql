@@ -156,4 +156,6 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41100,'', 'EhNamespaces', 999974,2);	
     
-    
+-- 更换web页面
+update eh_web_menus  set data_type = 'react:/repair-management/task-list' where id  = 20210;
+update eh_web_menus  set data_type = 'react:/repair-management/task-list' where id  = 20240;
