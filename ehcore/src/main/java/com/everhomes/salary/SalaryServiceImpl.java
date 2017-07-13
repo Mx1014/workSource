@@ -16,6 +16,7 @@ import com.everhomes.rest.salary.*;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.uniongroup.ListUniongroupMemberDetailResponse;
 import com.everhomes.uniongroup.UniongroupMemberDetail;
 import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.User;
@@ -483,9 +484,10 @@ public class SalaryServiceImpl implements SalaryService {
         if(StringUtils.isEmpty(cmd.getSalaryGroupId())){
 
             //  当没有传递薪酬组 id 的时候选择原始组织架构接口
-            List<UniongroupMemberDetail> results = this.listEmployeesFromOrganization(cmd);
+            ListUniongroupMemberDetailResponse results = this.listEmployeesFromOrganization(cmd);
             //  拼接字段
-            response = this.listSalaryEmployeesCompleteInfo(results,organizations,wages,cmd.getIsException());
+            response = this.listSalaryEmployeesCompleteInfo(results.getUniongroupMemberDetailList(),organizations,wages,cmd.getIsException());
+            response.setNextPageAnchor(results.getPageAnchor());
         }else{
 
             //  当传递了薪酬组 id 的时候选择 lei.lv 的新接口
@@ -501,15 +503,19 @@ public class SalaryServiceImpl implements SalaryService {
                 command.setKeywords(cmd.getKeywords());
             command.setPageAnchor(Long.valueOf("0"));
             command.setPageSize(cmd.getPageSize());
-            List<UniongroupMemberDetail> results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
+            ListUniongroupMemberDetailResponse results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
             //  拼接字段
-            response = this.listSalaryEmployeesCompleteInfo(results,organizations,wages,cmd.getIsException());
+            response = this.listSalaryEmployeesCompleteInfo(results.getUniongroupMemberDetailList(),organizations,wages,cmd.getIsException());
+            response.setNextPageAnchor(results.getPageAnchor());
         }
         return response;
     }
 
     //  将原始组织架构数据转至 unionMemberDetails 以便于字符串的拼接
-    private List<UniongroupMemberDetail> listEmployeesFromOrganization(ListSalaryEmployeesCommand cmd) {
+    private ListUniongroupMemberDetailResponse listEmployeesFromOrganization(ListSalaryEmployeesCommand cmd) {
+
+        ListUniongroupMemberDetailResponse res = new ListUniongroupMemberDetailResponse();
+
         //  1.将前端信息传递给组织架构的接口获取相关信息，从而查询所有人员
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(cmd.getOwnerId());
@@ -555,7 +561,9 @@ public class SalaryServiceImpl implements SalaryService {
             result.setJobPosition(jobPositions);
             results.add(result);
         }
-        return results;
+        res.setUniongroupMemberDetailList(results);
+        res.setPageAnchor(response.getNextPageAnchor());
+        return res;
     }
 
     //  拼接字符串的统一方法

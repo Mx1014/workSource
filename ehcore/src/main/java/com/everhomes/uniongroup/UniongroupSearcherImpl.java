@@ -176,6 +176,11 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             detail.setOperatorUid(Long.valueOf(m.get("operatorUid").toString()));
             list.add(detail);
         }
+
+        if (list.size() > cmd.getPageSize()) {
+            list.remove(list.size() - 1);
+            cmd.setPageAnchor(list.get(list.size() - 1).getId());
+        }
         return list;
     }
 
