@@ -53,11 +53,7 @@ import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.region.*;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.ui.user.UserProfileDTO;
+import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -74,7 +70,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -2173,7 +2168,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
 
-    // 商品对象
+    /*// 商品对象
     private static class Commodity {
         private String id;// 商品id
         private String commoNo;// 商品编号
@@ -2187,14 +2182,14 @@ public class BusinessServiceImpl implements BusinessService {
         public String toString() {
             return StringHelper.toJsonString(this);
         }
-    }
+    }*/
 
     // 电商服务器响应对象
     private static class Resp {
         private String version;
         private Integer errorCode;
-        @SerializedName("responseObject")
-        private List<Commodity> commodities = new ArrayList<>();
+        @SerializedName("response")
+        private List<ModulePromotionEntityDTO> response = new ArrayList<>();
 
         @Override
         public String toString() {
@@ -2202,14 +2197,10 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
 
-
     private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
-        String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml");
+        String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "/zl-ec/rest/openapi/commodity/listRecommend");
 
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
-
-        // bizApi = "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml";
-        // bizServer = "https://biz-beta.zuolin.com";
 
         if (StringUtils.isEmpty(bizApi)) {
             LOGGER.error("biz promotion api config are empty");
@@ -2223,29 +2214,13 @@ public class BusinessServiceImpl implements BusinessService {
 
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
         try {
-            String jsonStr = HttpUtils.post((bizServer + bizApi), param, 10, "UTF-8");
-
+            String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 10, "UTF-8");
             Resp resp = (Resp) StringHelper.fromJsonString(jsonStr, Resp.class);
-
             if (resp != null) {
-                List<ModulePromotionEntityDTO> dtoList = new ArrayList<>();
-                for (Commodity commodity : resp.commodities) {
-                    ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
-                    // dto.setId(commodity.id);
-                    dto.setSubject(commodity.commoName);
-                    dto.setPosterUrl(commodity.defaultPic);
-                    ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO(ModulePromotionInfoType.TEXT.getCode(), null, "¥" + commodity.price);
-                    dto.setInfoList(Collections.singletonList(infoDTO));
-
-                    dto.setMetadata(String.format("{\"url\":\"%s\"}", commodity.uri));
-
-                    dtoList.add(dto);
-                }
-                reponse.setEntities(dtoList);
+                reponse.setEntities(resp.response);
             }
             return reponse;
         } catch (Exception e) {
-            // e.printStackTrace();
             LOGGER.error("biz server response error", e);
         }
         return reponse;
