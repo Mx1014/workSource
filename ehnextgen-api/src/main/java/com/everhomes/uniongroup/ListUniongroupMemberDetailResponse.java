@@ -5,7 +5,11 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * Created by Administrator on 2017/7/12.
+ * <ul>
+ * <li>uniongroupMemberDetailList: 关联人员信息</li>
+ * <li>pageAnchor: 如果存在下一页，则返回锚点。如果查询到最后一页，则为返回为空</li>
+ * <li>pageSize: 每页查询条数</li>
+ * </ul>
  */
 public class ListUniongroupMemberDetailResponse {
     private List<UniongroupMemberDetail> uniongroupMemberDetailList;

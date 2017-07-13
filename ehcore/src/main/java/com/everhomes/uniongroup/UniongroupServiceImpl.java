@@ -253,13 +253,13 @@ public class UniongroupServiceImpl implements UniongroupService {
         search_cmd.setPageSize(cmd.getPageSize());
         List<UniongroupMemberDetail> list = uniongroupSearcher.query(search_cmd);
 
-        ListUniongroupMemberDetailResponse listUniongroupMemberDetailResponse = new ListUniongroupMemberDetailResponse();
+        ListUniongroupMemberDetailResponse response = new ListUniongroupMemberDetailResponse();
 
         if(list != null && list.size() > 0){
-            listUniongroupMemberDetailResponse.setPageAnchor(search_cmd.getPageAnchor());
-            listUniongroupMemberDetailResponse.setPageSize(search_cmd.getPageSize());
-            listUniongroupMemberDetailResponse.setUniongroupMemberDetailList(list);
-            return listUniongroupMemberDetailResponse;
+            response.setPageAnchor(search_cmd.getPageAnchor());
+            response.setPageSize(search_cmd.getPageSize());
+            response.setUniongroupMemberDetailList(list);
+            return response;
         }
         return null;
     }
