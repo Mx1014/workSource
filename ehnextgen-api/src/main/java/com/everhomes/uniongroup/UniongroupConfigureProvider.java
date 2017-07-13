@@ -29,6 +29,7 @@ public interface UniongroupConfigureProvider {
 
     void deleteUniongroupConfigresByOrgIds(Integer namespaceId, List<Long> orgIds);
 
+
     void createUniongroupMemberDetail(UniongroupMemberDetail uniongroupMemberDetail);
 
     void batchCreateUniongroupMemberDetail(List<EhUniongroupMemberDetails> unionDetailList);
