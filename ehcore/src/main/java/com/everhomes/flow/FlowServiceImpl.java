@@ -2680,6 +2680,14 @@ public class FlowServiceImpl implements FlowService {
             dto.setDisplayName("testwuye");
             return dto;
         }
+        
+        if (moduleId.equals(FlowConstants.TALENT_REQUEST)) {
+        	FlowModuleDTO dto = new FlowModuleDTO();
+        	dto.setModuleId(FlowConstants.TALENT_REQUEST);
+        	dto.setModuleName("企业人才");
+        	dto.setDisplayName("企业人才");
+        	return dto;
+        }
 
 //
 //		if(moduleId.equals(113l)) {
