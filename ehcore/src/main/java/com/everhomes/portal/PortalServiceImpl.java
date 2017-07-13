@@ -857,6 +857,8 @@ public class PortalServiceImpl implements PortalService {
 		portalNavigationBar.setDescription(cmd.getDescription());
 		portalNavigationBar.setTargetType(cmd.getTargetType());
 		portalNavigationBar.setTargetId(cmd.getTargetId());
+		portalNavigationBar.setIconUri(cmd.getIconUri());
+		portalNavigationBar.setSelectedIconUri(cmd.getSelectedIconUri());
 		portalNavigationBar.setOperatorUid(UserContext.current().getUser().getId());
 		portalNavigationBarProvider.updatePortalNavigationBar(portalNavigationBar);
 		return processPortalNavigationBarDTO(portalNavigationBar);
