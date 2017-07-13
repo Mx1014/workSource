@@ -143,7 +143,31 @@ public class SalaryServiceImpl implements SalaryService {
 	@Autowired
     private UniongroupService uniongroupService;
 
-	@Override
+    @Override
+    public ListSalaryContactResponse listSalaryContacts(ListOrganizationContactCommand cmd) {
+        ListSalaryContactResponse response = new ListSalaryContactResponse();
+        if (StringUtils.isEmpty(cmd.getOrganizationId()))
+            return response;
+        else {
+            ListOrganizationContactCommandResponse results = this.organizationService.listOrganizationContacts(cmd);
+            response.setMembers(results.getMembers().stream().filter(r -> {
+                return !StringUtils.isEmpty(r.getDetailId());
+            }).map(r -> {
+                OrganizationContactDTO dto = r;
+                return dto;
+            }).collect(Collectors.toList()));
+            response.setNamespaceId(results.getNamespaceId());
+            if (!StringUtils.isEmpty(results.getNextPageAnchor()))
+                response.setNextPageAnchor(results.getNextPageAnchor());
+            if (!StringUtils.isEmpty(results.getTotalCount()))
+                response.setTotalCount(results.getTotalCount());
+            if (!StringUtils.isEmpty(results.getNextPageOffset()))
+                response.setNextPageOffset(results.getNextPageOffset());
+            return response;
+        }
+    }
+
+    @Override
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
         ListSalaryDefaultEntitiesResponse response = new ListSalaryDefaultEntitiesResponse();
         List<SalaryDefaultEntity> result = this.salaryDefaultEntityProvider.listSalaryDefaultEntity();

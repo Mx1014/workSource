@@ -3,6 +3,8 @@ package com.everhomes.salary;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.salary.*;
 import com.everhomes.rest.uniongroup.RefreshPeriodValsCommand;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -28,7 +30,21 @@ public class SalaryController extends ControllerBase {
 	
 	@Autowired
 	private SalaryService salaryService;
-	
+
+	/**
+	 * <p>0.查询人员</p>
+	 * <b>URL: /salary/listSalaryDefaultEntities</b>
+	 */
+	@RequestMapping("listSalaryContacts")
+	@RestReturn(ListSalaryContactResponse.class)
+	public RestResponse listSalaryContacts(ListOrganizationContactCommand cmd){
+        ListSalaryContactResponse res = this.salaryService.listSalaryContacts(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <p>1.查询基础项目设置</p>
 	 * <b>URL: /salary/listSalaryDefaultEntities</b>
