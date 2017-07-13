@@ -294,8 +294,8 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping("getCurrentContactRealInfo")
     @RestReturn(value=SceneContactV2DTO.class)
-    public RestResponse getCurrentContactRealInfo() {
-        SceneContactV2DTO result = userService.getCurrentContactRealInfo();
+    public RestResponse getCurrentContactRealInfo(GetCurrentContactRealInfoCommand cmd) {
+        SceneContactV2DTO result = userService.getCurrentContactRealInfo(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

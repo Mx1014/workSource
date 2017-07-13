@@ -61,6 +61,7 @@ import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -3903,12 +3904,19 @@ public class UserServiceImpl implements UserService {
 
     //added by R 20170713, 通讯录2.4增加
     @Override
-	public SceneContactV2DTO getCurrentContactRealInfo(){
-		User user = UserContext.current().getUser();
-		SceneContactV2DTO dto = new SceneContactV2DTO();
-		dto.setUserId(user.getId());
-		return dto;
-	}
+    public SceneContactV2DTO getCurrentContactRealInfo(GetCurrentContactRealInfoCommand cmd) {
+        User user = UserContext.current().getUser();
+        OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), cmd.getOrganizationId());
+        if (detail == null)
+            return null;
+        else {
+            SceneContactV2DTO dto = new SceneContactV2DTO();
+            dto.setUserId(user.getId());
+            dto.setContactName(detail.getContactName());
+            dto.setContactToken(detail.getContactToken());
+            return dto;
+        }
+    }
 
 	@Override
     public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd){

@@ -406,5 +406,7 @@ public interface OrganizationProvider {
 
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
+	//added by R 20170713, for ui info
+	OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId);
 }
 
