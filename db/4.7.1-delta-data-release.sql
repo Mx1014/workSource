@@ -108,6 +108,7 @@ INSERT INTO `eh_news_communities` (`id`, `news_id`, `community_id`, `creator_uid
 	SELECT (@id := @id + 1), eh_news.id, community_id, 1, NOW() from eh_organization_communities join eh_news on eh_news.owner_id = eh_organization_communities.organization_id;
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) 
 	VALUES ('news', '10009', 'zh_CN', '请选择范围');
+UPDATE eh_web_menus set `name` = '园区快讯' where id = 10800;
 
 -- merge from pmtaskprivilege by xiongying 20170711
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20140,'任务列表',20100,'/20000/20100/20140','1','3','2','0',NOW());
@@ -149,6 +150,10 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (30097, '0', '物业报修 查看全部项目报表权限', '物业报修 业务模块权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20190','0',30097,'物业报修 查看全部项目报表权限','0',NOW());    
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20190','0',30097,'物业报修 查看全部项目报表权限','0',NOW());   
+
+-- 新配置wifi菜单 add by sfyan 20170713
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41100,'', 'EhNamespaces', 999974,2);	
     
     
