@@ -13,4 +13,8 @@ public interface AuthorizationThirdPartyRecordProvider {
 
 	List<AuthorizationThirdPartyRecord> listAuthorizationThirdPartyRecord();
 
+	List<AuthorizationThirdPartyRecord> listAuthorizationThirdPartyRecordByUserId(Integer namespaceId, Long userId);
+
+	void removeAuthorizationThirdPartyRecord(Integer currentNamespaceId, Long id);
+
 }

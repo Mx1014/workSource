@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>sourceType : 表单类型 {@link com.everhomes.rest.general_approval.GeneralFormSourceType}</li>
  * <li>sourceId : 表单id</li>
+ * <li>title : 认证方式标题文案</li>
+ * <li>detail : 认证描述文案</li>
  * </ul>
  *
  *  @author:dengs 2017年7月6日
@@ -17,6 +19,8 @@ public class FormSourceDTO {
     private Long ownerId;
     private String sourceType;
     private Long sourceId;
+    private String title;
+    private String detail;
     
 	public Long getOwnerId() {
 		return ownerId;
@@ -43,7 +47,19 @@ public class FormSourceDTO {
 		this.sourceId = sourceId;
 	}
     
-    @Override
+    public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getDetail() {
+		return detail;
+	}
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
+	@Override
     public String toString() {
     	return StringHelper.toJsonString(this);
     }

@@ -6,15 +6,15 @@ import org.apache.commons.lang.StringUtils;
 /**
  * <ul>
  * <li>LEASE_PROMOTION: 招租管理</li>
- * <li>ZJ_PERSONAL_AUTH("zj_personal_auth"): 个人认证表单</li>
- * <li>ZJ_ORGANIZATION_AUTH("zj_organization_auth"):  公司认证表单</li>
+ * <li>PERSONAL_AUTH("personal_auth"): 个人认证表单</li>
+ * <li>ORGANIZATION_AUTH("organization_auth"):  公司认证表单</li>
  * </ul>
  * @author janson
  *
  */
 public enum GeneralFormSourceType {
 	LEASE_PROMOTION("EhLeasePromotions"), GENERAL_APPROVE("GENERAL_APPROVE"), BUILDING("EhBuildings"),
-	ZJ_PERSONAL_AUTH("zj_personal_auth"),ZJ_ORGANIZATION_AUTH("zj_organization_auth");
+	PERSONAL_AUTH("personal_auth"),ORGANIZATION_AUTH("organization_auth");
 
 	private String code;
 

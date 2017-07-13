@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>modifyFlag  : 0不显示,2 是否显示 修改button 参考 {@link com.everhomes.rest.ui.user.FamilyButtonStatusType}</li>
  * <li>familiesFlag : 是否显示 家庭成员button 参考 {@link com.everhomes.rest.ui.user.FamilyButtonStatusType}</li>
  * <li>qrcodeFlag : 是否显示 二维码button 参考 {@link com.everhomes.rest.ui.user.FamilyButtonStatusType}</li>
+ * <li>deleteFlag : 是否显示 删除按钮 参考 {@link com.everhomes.rest.ui.user.FamilyButtonStatusType}</li>
  * </ul>
  *
  *  @author:dengs 2017年7月12日
@@ -19,15 +20,18 @@ public class GetFamilyButtonStatusResponse {
 	private Byte modifyFlag;
 	private Byte familiesFlag;
 	private Byte qrcodeFlag;
+	private Byte deleteFlag;
 	
 	public GetFamilyButtonStatusResponse() {
 	}
-	public GetFamilyButtonStatusResponse(String title, Byte modifyFlag, Byte familiesFlag, Byte qrcodeFlag) {
+	public GetFamilyButtonStatusResponse(String title, Byte modifyFlag, Byte familiesFlag, Byte qrcodeFlag,
+			Byte deleteFlag) {
 		super();
 		this.title = title;
 		this.modifyFlag = modifyFlag;
 		this.familiesFlag = familiesFlag;
 		this.qrcodeFlag = qrcodeFlag;
+		this.deleteFlag = deleteFlag;
 	}
 	public String getTitle() {
 		return title;
@@ -52,6 +56,12 @@ public class GetFamilyButtonStatusResponse {
 	}
 	public void setQrcodeFlag(Byte qrcodeFlag) {
 		this.qrcodeFlag = qrcodeFlag;
+	}
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
 	}
 
 	@Override

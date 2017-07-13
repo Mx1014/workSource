@@ -4,6 +4,8 @@ package com.everhomes.authorization;
 import java.sql.Timestamp;
 import java.util.List;
 
+import javax.persistence.Table;
+
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -82,5 +84,20 @@ public class AuthorizationThirdPartyRecordProviderImpl implements AuthorizationT
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<AuthorizationThirdPartyRecord> listAuthorizationThirdPartyRecordByUserId(Integer namespaceId, Long userId) {
+		return getReadOnlyContext().select().from(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
+				.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.CREATOR_UID.eq(userId))
+				.fetch().map(r -> ConvertHelper.convert(r, AuthorizationThirdPartyRecord.class));
+	}
+
+	@Override
+	public void removeAuthorizationThirdPartyRecord(Integer namespaceId, Long userId) {
+		getReadOnlyContext().delete(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
+			.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.CREATOR_UID.eq(userId)).execute();
 	}
 }
