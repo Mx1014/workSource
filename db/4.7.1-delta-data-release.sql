@@ -152,4 +152,6 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
     VALUES((@module_privilege_id := @module_privilege_id + 1),'20190','0',30097,'物业报修 查看全部项目报表权限','0',NOW());    
     
-    
+-- 资源预约 add by sw 20170711
+UPDATE eh_rentalv2_resources set default_order = id;
+
