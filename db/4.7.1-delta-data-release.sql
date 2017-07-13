@@ -108,6 +108,7 @@ INSERT INTO `eh_news_communities` (`id`, `news_id`, `community_id`, `creator_uid
 	SELECT (@id := @id + 1), eh_news.id, community_id, 1, NOW() from eh_organization_communities join eh_news on eh_news.owner_id = eh_organization_communities.organization_id;
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) 
 	VALUES ('news', '10009', 'zh_CN', '请选择范围');
+UPDATE eh_web_menus set `name` = '园区快讯' where id = 10800;
 
 -- merge from pmtaskprivilege by xiongying 20170711
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(20140,'任务列表',20100,'/20000/20100/20140','1','3','2','0',NOW());
