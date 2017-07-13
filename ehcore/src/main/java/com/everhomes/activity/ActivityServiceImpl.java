@@ -549,6 +549,11 @@ public class ActivityServiceImpl implements ActivityService {
 		 	return;
 		 }
 
+		 // 来自微信的请求支持支付报名   edit by yanjun 20170713
+		 if(cmd.getSignupSourceFlag() != null && cmd.getSignupSourceFlag().byteValue() == SignupSourceFlag.WECHAT.getCode()){
+			 return;
+		 }
+
 		 if(version == null){
 			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
@@ -1514,8 +1519,14 @@ public class ActivityServiceImpl implements ActivityService {
 		refundCmd.setOrderNo(String.valueOf(roster.getOrderNo()));
 		
 		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(roster.getVendorType()).getStyleNo()); 
-		
-		refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+
+		// 老数据无该字段，它们都是ACTIVITYSIGNUPORDER类型的  edit by yanjun 20170713
+		if(roster.getOrderType() != null && !"".equals(roster.getOrderType())){
+			refundCmd.setOrderType(roster.getOrderType());
+		}else{
+			refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+		}
+
 		
 		refundCmd.setRefundAmount(roster.getPayAmount());
 		

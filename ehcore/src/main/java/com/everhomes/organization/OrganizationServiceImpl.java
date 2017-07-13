@@ -6691,11 +6691,15 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @param member
      */
     private void deleteEnterpriseContactStatus(Long operatorUid, OrganizationMember member) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(() -> {
             //modify by wh  2016-10-12 拒绝后置为拒绝状态而非删除
             member.setStatus(OrganizationMemberStatus.REJECT.getCode());
             this.organizationProvider.updateOrganizationMember(member);
             //this.organizationProvider.deleteOrganizationMemberById(member.getId());
+            //更新user_organization表的记录
+            UserOrganizations userOrganization = this.userOrganizationProvider.findUserOrganizations(namespaceId, member.getOrganizationId(), member.getTargetId());
+            this.userOrganizationProvider.rejectUserOrganizations(userOrganization);
             return null;
         });
 
@@ -9350,13 +9354,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
-    /**odify By lei.lv 2017-6-26**/
+    /**modify By lei.lv 2017-6-26**/
     @Override
     public List<OrganizationMemberDTO> listAllChildOrganizationPersonnel(Long organizationId, List<String> groupTypes, String userName) {
         Organization organization = checkOrganization(organizationId);
         List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(userName, organization.getPath(), groupTypes, VisibleFlag.SHOW, new CrossShardListingLocator(), 1000000);
         List<OrganizationMemberDTO> dtos = members.stream().map(r -> {
-            return ConvertHelper.convert(members,OrganizationMemberDTO.class);
+            return ConvertHelper.convert(r,OrganizationMemberDTO.class);
         }).collect(Collectors.toList());
         return dtos;
     }

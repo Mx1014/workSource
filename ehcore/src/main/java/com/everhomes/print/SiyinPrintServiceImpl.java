@@ -867,14 +867,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	 * 检查打印/复印扫描教程并产生实体
 	 */
 	private SiyinPrintSetting checkCourseList(List<String> printCourseList,List<String> scancopyCourseList, String ownerType, Long ownerId,String hotline) {
-		if(printCourseList == null || printCourseList.size() == 0)
-		{
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, printCourseList = " + printCourseList);
-		}
-		if(printCourseList.size() == 0 || scancopyCourseList.size() == 0){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, scancopyCourseList = " + scancopyCourseList);
-		}
-		
 		SiyinPrintSetting setting = new SiyinPrintSetting();
 		setting.setScanCopyCourse("");
 		setting.setPrintCourse("");
@@ -882,14 +874,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		setting.setOwnerId(ownerId);
 		setting.setSettingType(PrintSettingType.COURSE_HOTLINE.getCode());
 		setting.setNamespaceId(UserContext.getCurrentNamespaceId());
-		for (String string2 : scancopyCourseList) {
-			setting.setScanCopyCourse(setting.getScanCopyCourse() +string2+ "|");
-		}
 		
-		for (String string2 : printCourseList) {
-			setting.setPrintCourse(setting.getPrintCourse()+string2+"|");
-		}
-		
+		setting.setScanCopyCourse(getLocalActivityString(PrintErrorCode.PRINT_COURSE_LIST));
+		setting.setPrintCourse(getLocalActivityString(PrintErrorCode.SCAN_COPY_COURSE_LIST));
 		setting.setHotline(hotline);
 		return setting;
 	}

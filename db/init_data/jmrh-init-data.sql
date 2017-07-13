@@ -77,8 +77,9 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
 	VALUES(2145060, 1034291, 'USER', 319545  , 'manager', '关子忠', 0, '13910753575', 3, 999972);	
 -- todo
+SET @role_assignment_id = (SELECT MAX(id) FROM eh_acl_role_assignments);
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES(16697, 'EhOrganizations', 1034291, 'EhUsers', 319545  , 1001, 1, UTC_TIMESTAMP());
+	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', 1034291, 'EhUsers', 319545  , 1001, 1, UTC_TIMESTAMP());
 
 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
