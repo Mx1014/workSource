@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import com.everhomes.user.User;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -89,11 +90,17 @@ public class WeChatServiceImpl implements WeChatService {
 	public GetSignatureResponse getSignature(GetSignatureCommand cmd) {
 		
 		String ticket = getJsapiTicket();
+		LOGGER.debug("ticket from getJsapiTicket={}", ticket);
 		Map<String, String> ret = sign(ticket, cmd.getUrl());
 		GetSignatureResponse resp = new GetSignatureResponse();
 		resp.setNonceStr(ret.get("nonceStr"));
 		resp.setSignature(ret.get("signature"));
 		resp.setTimestamp(ret.get("timestamp"));
+		// 增加appId，add by yanjun 20170624
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String appId = this.getAppIdByNamespaceId(namespaceId);
+        resp.setAppId(appId);
+
 		resp.setTicket(ticket);
 		return resp;
 	}
@@ -218,8 +225,8 @@ public class WeChatServiceImpl implements WeChatService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		LOGGER.info("cacheAccessToken :" + namespaceId);
     	String params = "grant_type=" + WeChatConstant.ACCESSTOKEN_GRANTTYPE
-    					+ "&appid=" + configProvider.getValue(namespaceId, WeChatConstant.WECHAT_APPID, "")
-    					+ "&secret=" + configProvider.getValue(namespaceId, WeChatConstant.WECHAT_APPSECRET, "");
+    					+ "&appid=" + configProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_APPID, "")
+    					+ "&secret=" + configProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_SECRET, "");
 		
 		String body = this.restCall(WeChatConstant.GET_ACCESSTOKEN, null, params);
 		
@@ -240,8 +247,13 @@ public class WeChatServiceImpl implements WeChatService {
 		AccessTokenResponse resp = (AccessTokenResponse)StringHelper.fromJsonString(atBody, AccessTokenResponse.class);
     	String params = "access_token=" + resp.getAccess_token()
     					+ "&type=" + WeChatConstant.JSAPI_TYPE;
+
+        LOGGER.debug("cacheJsapiToken restCall getticket param body={}", params);
 		
 		String body = this.restCall(WeChatConstant.GET_JSAPI_TICKET, null, params);
+
+        LOGGER.debug("cacheJsapiToken restCall getticket return body={}", body);
+
 		if(body == "") {
             return null;
         }
@@ -273,6 +285,8 @@ public class WeChatServiceImpl implements WeChatService {
         Map<String, String> keys = new HashMap<String, String>();
             
         keys.put(UserContext.getCurrentNamespaceId() + JSAPI_TICKENT, resp.getTicket());
+
+        LOGGER.debug("makeJsApiTicket return keys={}", keys);
         
         return keys;
 	}
@@ -316,6 +330,8 @@ public class WeChatServiceImpl implements WeChatService {
                   "&timestamp=" + timestamp +
                   "&url=" + url;
         System.out.println(string1);
+        //TODO delete Log
+        LOGGER.debug(string1);
 
         try
         {
@@ -361,4 +377,14 @@ public class WeChatServiceImpl implements WeChatService {
         return Long.toString(System.currentTimeMillis() / 1000);
     }
 
+    @Override
+    public String getAppIdByNamespaceId(Integer namespaceId) {
+        String appId = configProvider.getValue(namespaceId, "wx.offical.account.appid", "");
+
+        //增加默认公众号   add by yanjun 20170620
+        if(org.springframework.util.StringUtils.isEmpty(appId)){
+            appId = configProvider.getValue("wx.offical.account.default.appid", "");
+        }
+        return appId;
+    }
 }

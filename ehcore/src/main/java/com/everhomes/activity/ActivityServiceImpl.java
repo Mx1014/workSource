@@ -61,10 +61,7 @@ import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
@@ -552,6 +549,11 @@ public class ActivityServiceImpl implements ActivityService {
 		 	return;
 		 }
 
+		 // 来自微信的请求支持支付报名   edit by yanjun 20170713
+		 if(cmd.getSignupSourceFlag() != null || cmd.getSignupSourceFlag().byteValue() == SignupSourceFlag.WECHAT.getCode()){
+			 return;
+		 }
+
 		 if(version == null){
 			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
@@ -686,7 +688,104 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		return dto;
 	}
-    
+
+	@Override
+	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
+//		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
+
+		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+		if(roster == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+					"no roster.");
+		}
+		Activity activity = activityProvider.findActivityById(roster.getActivityId());
+		if(activity == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+					"no activity.");
+		}
+
+		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
+
+		CreateWechatJsPayOrderBody orderCmdBody = new CreateWechatJsPayOrderBody();
+		orderCmdBody.setBody(orderCmd);
+
+		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
+
+		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmdBody, PayZuolinCreateWechatJsPayOrderResp.class);
+
+		if(response.getResult()){
+			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
+					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+			return response.getBody();
+		}
+		else{
+			LOGGER.error("CreateWechatJsPayOrder fail, orderNo={}, userId={}, activityId={}, response={}",
+					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+					ActivityServiceErrorCode.ERROR_CREATE_WXJS_ORDER_ERROR,
+					"CreateWechatJsPayOrder error");
+		}
+	}
+
+
+	private CreateWechatJsPayOrderCmd newWechatOrderCmd(Activity activity, ActivityRoster roster){
+
+		//调用统一处理订单接口，返回统一订单格式
+		CreateWechatJsPayOrderCmd orderCmd = new CreateWechatJsPayOrderCmd();
+		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
+				UserContext.current().getUser().getLocale(),
+				"activity roster pay");
+
+		//与微信认证登录时候一致，查找当前域空间的公众号，没有就选择默认的。
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		orderCmd.setRealm("wechat_" + namespaceId);
+		String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
+
+		//用于判断公众号是否是默认的，默认的话将realm设置为wechat_0
+		String appId_default = configurationProvider.getValue("wx.offical.account.appid", "");
+		if(appId != null && appId_default != null && appId.equals(appId_default)){
+			orderCmd.setRealm("wechat_0");
+		}
+
+
+//		if(StringUtils.isEmpty(appId)){
+//			orderCmd.setRealm("wechat_0");
+//		}
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDERWECHAT.getPycode());
+		orderCmd.setOnlinePayStyleNo(VendorType.WEI_XIN.getStyleNo());
+		orderCmd.setOrderNo(roster.getOrderNo().toString());
+		orderCmd.setOrderAmount(activity.getChargePrice().toString());
+		User user = UserContext.current().getUser();
+		orderCmd.setUserId(user.getNamespaceUserToken());
+		orderCmd.setSubject(temple);
+
+		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
+		Long timestamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		orderCmd.setAppKey(appKey);
+		orderCmd.setTimestamp(timestamp);
+		orderCmd.setRandomNum(randomNum);
+
+		App app = appProvider.findAppByKey(appKey);
+
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("realm", orderCmd.getRealm());
+		map.put("orderType",orderCmd.getOrderType());
+		map.put("onlinePayStyleNo",orderCmd.getOnlinePayStyleNo());
+		map.put("orderNo",orderCmd.getOrderNo());
+		map.put("orderAmount",orderCmd.getOrderAmount());
+		map.put("userId", orderCmd.getUserId());
+		map.put("subject",orderCmd.getSubject());
+		map.put("appKey",orderCmd.getAppKey());
+		map.put("timestamp",orderCmd.getTimestamp() + "");
+		map.put("randomNum",orderCmd.getRandomNum() + "");
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		orderCmd.setSignature(URLEncoder.encode(signature));
+		return orderCmd;
+	}
+
+
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
     	Activity outActivity = checkActivityExist(cmd.getActivityId());
@@ -1420,8 +1519,14 @@ public class ActivityServiceImpl implements ActivityService {
 		refundCmd.setOrderNo(String.valueOf(roster.getOrderNo()));
 		
 		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(roster.getVendorType()).getStyleNo()); 
-		
-		refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+
+		// 老数据无该字段，它们都是ACTIVITYSIGNUPORDER类型的  edit by yanjun 20170713
+		if(roster.getOrderType() != null && !"".equals(roster.getOrderType())){
+			refundCmd.setOrderType(roster.getOrderType());
+		}else{
+			refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+		}
+
 		
 		refundCmd.setRefundAmount(roster.getPayAmount());
 		
@@ -4513,6 +4618,7 @@ public class ActivityServiceImpl implements ActivityService {
 			rosterOrderSetting.setTime(((long)( cmd.getDays()*24+cmd.getHours()))*3600*1000);
 			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
 			rosterOrderSetting.setOperatorUid(rosterOrderSetting.getCreatorUid());
+			rosterOrderSetting.setWechatSignup(cmd.getWechatSignup());
 			
 			rosterOrderSettingProvider.updateRosterOrderSetting(rosterOrderSetting);
 		}else {
@@ -4523,6 +4629,7 @@ public class ActivityServiceImpl implements ActivityService {
 			rosterOrderSetting.setCreatorUid(UserContext.current().getUser().getId());
 			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
 			rosterOrderSetting.setOperatorUid(rosterOrderSetting.getCreatorUid());
+			rosterOrderSetting.setWechatSignup(cmd.getWechatSignup());
 			
 			rosterOrderSettingProvider.createRosterOrderSetting(rosterOrderSetting);
 		}
@@ -4544,10 +4651,11 @@ public class ActivityServiceImpl implements ActivityService {
 		if (rosterOrderSetting != null) {
 			Integer days = (int) (rosterOrderSetting.getTime() / 1000 / 3600 / 24);
 			Integer hours  = (int) (rosterOrderSetting.getTime() / 1000 / 3600 % 24);
-			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), days, hours, rosterOrderSetting.getTime());
+			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), days, hours,
+					rosterOrderSetting.getTime(), rosterOrderSetting.getWechatSignup());
 		}
 		
-		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L);
+		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L, WechatSignupFlag.NO.getCode());
 	}
 	
 
@@ -4569,10 +4677,12 @@ public class ActivityServiceImpl implements ActivityService {
 		orderCommand.setNamespaceId(cmd.getNamespaceId());
 		orderCommand.setDays(cmd.getOrderDays());
 		orderCommand.setHours(cmd.getOrderHours());
+		orderCommand.setWechatSignup(cmd.getWechatSignup());
 		RosterOrderSettingDTO orderResponse = this.setRosterOrderSetting(orderCommand);
 		timeResponse.setOrderDays(orderResponse.getDays());
 		timeResponse.setOrderHours(orderResponse.getHours());
 		timeResponse.setOrderTime(orderResponse.getTime());
+		timeResponse.setWechatSignup(orderResponse.getWechatSignup());
 		
 		return timeResponse;
 	}
@@ -4595,6 +4705,7 @@ public class ActivityServiceImpl implements ActivityService {
 		timeResponse.setOrderDays(orderResponse.getDays());
 		timeResponse.setOrderHours(orderResponse.getHours());
 		timeResponse.setOrderTime(orderResponse.getTime());
+		timeResponse.setWechatSignup(orderResponse.getWechatSignup());
 		
 		return timeResponse;
 	}  

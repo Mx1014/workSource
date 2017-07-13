@@ -61,6 +61,7 @@ import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -83,10 +84,7 @@ import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
@@ -3895,7 +3893,10 @@ public class UserServiceImpl implements UserService {
 		resp.setDtos(new ArrayList<>());
 		for(User u : users) {
 			UserDTO dto = ConvertHelper.convert(u, UserDTO.class);
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(u.getId());
 			dto.setName(dto.getNickName());
+			if(members.size() > 0)
+				dto.setName(members.get(0).getContactName());
 			resp.getDtos().add(dto);
 		}
 		return resp;

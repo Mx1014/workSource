@@ -1960,8 +1960,6 @@ public class CommunityServiceImpl implements CommunityService {
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
 				query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
-				query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-				query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
 
 				if(null != cmd.getOrganizationId()){
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
@@ -2001,6 +1999,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		LOGGER.debug("Get user organization list time:{}", System.currentTimeMillis() - time);
 		List<CommunityUserDto> userCommunities = new ArrayList<>();
+
 		for(UserOrganizations r: users){
 			CommunityUserDto dto = ConvertHelper.convert(r, CommunityUserDto.class);
 			dto.setUserName(r.getNickName());
@@ -2014,25 +2013,26 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
 			}
 
-			if(OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(r.getStatus())){
+			LOGGER.debug("user,userName:{}/userPhone:{}/userStatus:{}",r.getNickName(), r.getPhoneNumber(),r.getStatus());
+			if(UserOrganizationStatus.ACTIVE == UserOrganizationStatus.fromCode(r.getStatus())){
 				dto.setIsAuth(AuthFlag.YES.getCode());
+				if(null != r.getOrganizationId()){
+					List<OrganizationMember> ms = new ArrayList<>();
+					List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
+					for (OrganizationMember member: members) {
+						if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE){
+							dto.setOrganizationMemberName(member.getContactName());
+							ms.add(member);
+						}
+					}
+					List<OrganizationDetailDTO> organizations = new ArrayList<>();
+					organizations.addAll(populateOrganizationDetails(ms));
+					dto.setOrganizations(organizations);
+				}
 			}else{
 				dto.setIsAuth(AuthFlag.NO.getCode());
 			}
 
-			if(null != r.getOrganizationId()){
-				List<OrganizationMember> ms = new ArrayList<>();
-				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
-				for (OrganizationMember member: members) {
-					if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE){
-						dto.setOrganizationMemberName(member.getContactName());
-						ms.add(member);
-					}
-				}
-				List<OrganizationDetailDTO> organizations = new ArrayList<>();
-				organizations.addAll(populateOrganizationDetails(ms));
-				dto.setOrganizations(organizations);
-			}
 			userCommunities.add(dto);
 		}
 		LOGGER.debug("Get user detail list time:{}", System.currentTimeMillis() - time);

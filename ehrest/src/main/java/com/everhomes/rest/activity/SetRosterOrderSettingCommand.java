@@ -9,12 +9,14 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间id</li>
  * <li>days: 天数</li>
  * <li>hours: 小时数</li>
+ * <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
  * </ul>
  */
 public class SetRosterOrderSettingCommand {
 	private Integer namespaceId;
 	private Integer days;
 	private Integer hours;
+	private Byte wechatSignup;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -34,7 +36,15 @@ public class SetRosterOrderSettingCommand {
 	public void setHours(Integer hours) {
 		this.hours = hours;
 	}
-	
+
+	public Byte getWechatSignup() {
+		return wechatSignup;
+	}
+
+	public void setWechatSignup(Byte wechatSignup) {
+		this.wechatSignup = wechatSignup;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
