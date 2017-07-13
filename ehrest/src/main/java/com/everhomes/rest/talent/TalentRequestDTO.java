@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class TalentRequestDTO {
+	private Long id;
 	private String requestor;
 	private String phone;
 	private String organizationName;
@@ -29,6 +30,14 @@ public class TalentRequestDTO {
 	private Long createTime;
 	@ItemType(FlowCaseEntity.class)
 	private List<FlowCaseEntity> flowCaseEntities;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public Long getTalentId() {
 		return talentId;

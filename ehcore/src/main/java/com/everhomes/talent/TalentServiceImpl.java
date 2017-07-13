@@ -582,6 +582,7 @@ public class TalentServiceImpl implements TalentService {
 
 	private TalentRequestDTO convertWithoutDetail(TalentRequest talentRequest) {
 		TalentRequestDTO talentRequestDTO = new TalentRequestDTO();
+		talentRequestDTO.setId(talentRequest.getId());
 		talentRequestDTO.setRequestor(talentRequest.getRequestor());
 		talentRequestDTO.setPhone(talentRequest.getPhone());
 		talentRequestDTO.setOrganizationName(talentRequest.getOrganizationName());
