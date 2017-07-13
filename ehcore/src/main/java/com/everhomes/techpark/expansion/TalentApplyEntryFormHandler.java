@@ -264,10 +264,6 @@ public class TalentApplyEntryFormHandler implements GeneralFormModuleHandler {
     	talentRequestProvider.createTalentRequest(talentRequest);
     	return talentRequest;
 	}
-
-	private Long userId() {
-		return UserContext.current().getUser().getId();
-	}
 	
 	private Integer namespaceId() {
 		return UserContext.getCurrentNamespaceId();
@@ -275,40 +271,7 @@ public class TalentApplyEntryFormHandler implements GeneralFormModuleHandler {
 	
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());
-
-        GeneralFormDTO dto = null;
-        if (null != request) {
-            GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
-            cmd2.setFormId(request.getSourceId());
-
-            dto = generalFormService.getTemplateByFormId(cmd2);
-            List<GeneralFormFieldDTO> temp = dto.getFormFields();
-
-            //查询初始默认数据
-            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
-                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
-
-            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-
-            fieldDTOs.addAll(temp);
-            dto.setFormFields(fieldDTOs);
-        } else {
-            //查询初始默认数据
-            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
-                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
-
-            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
-
-            dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-
-            dto.setFormFields(fieldDTOs);
-        }
-
-        return dto;
+        return generalFormService.getTemplateByFormId(new GetTemplateByFormIdCommand(talentService.findRequestSetting().getFormId()));
     }
 
 }
