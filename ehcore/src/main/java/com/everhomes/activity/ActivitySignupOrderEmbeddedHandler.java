@@ -38,6 +38,8 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
+		LOGGER.info("ActivitySignupOrderEmbeddedHandler paySuccess cmd = {}", cmd);
+
 		ActivityRoster roster = activityProvider.findRosterByOrderNo(Long.valueOf(cmd.getOrderNo()));
 		if(roster == null){
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
@@ -63,6 +65,8 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 
 	@Override
 	public void payFail(PayCallbackCommand cmd) {
+		LOGGER.info("ActivitySignupOrderEmbeddedHandler payFail cmd = {}", cmd);
+
 		if(LOGGER.isDebugEnabled())
 			LOGGER.error("onlinePayBillFail");
 		ActivityRoster roster = activityProvider.findRosterByOrderNo(Long.valueOf(cmd.getOrderNo()));
