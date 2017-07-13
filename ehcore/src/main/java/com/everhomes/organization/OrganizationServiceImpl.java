@@ -6691,11 +6691,15 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @param member
      */
     private void deleteEnterpriseContactStatus(Long operatorUid, OrganizationMember member) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(() -> {
             //modify by wh  2016-10-12 拒绝后置为拒绝状态而非删除
             member.setStatus(OrganizationMemberStatus.REJECT.getCode());
             this.organizationProvider.updateOrganizationMember(member);
             //this.organizationProvider.deleteOrganizationMemberById(member.getId());
+            //更新user_organization表的记录
+            UserOrganizations userOrganization = this.userOrganizationProvider.findUserOrganizations(namespaceId, member.getOrganizationId(), member.getTargetId());
+            this.userOrganizationProvider.inactiveUserOrganizations(userOrganization);
             return null;
         });
 
