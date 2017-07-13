@@ -57,16 +57,16 @@ SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @eh_acl_privileges_id, 1001, 'EhAclRoles', 0, 1, NOW());
 
--- 菜单的范围 --0域不加scope
--- SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
--- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), 41400, '', 'EhNamespaces', 0, 2);
--- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), 41410, '', 'EhNamespaces', 0, 2);
--- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), 41420, '', 'EhNamespaces', 0, 2);
--- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), 41430, '', 'EhNamespaces', 0, 2);
+-- 菜单的范围 --volog中
+ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 41400, '', 'EhNamespaces', 1, 2);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 41410, '', 'EhNamespaces', 1, 2);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 41420, '', 'EhNamespaces', 1, 2);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 41430, '', 'EhNamespaces', 1, 2);
 
 -- 模块
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
@@ -156,4 +156,6 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41100,'', 'EhNamespaces', 999974,2);	
     
-    
+-- 资源预约 add by sw 20170711
+UPDATE eh_rentalv2_resources set default_order = id;
+

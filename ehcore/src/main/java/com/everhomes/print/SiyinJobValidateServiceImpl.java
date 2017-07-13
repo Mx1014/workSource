@@ -423,12 +423,12 @@ public class SiyinJobValidateServiceImpl {
 			PrintJobTypeType jobType = PrintJobTypeType.fromCode(record.getJobType());
 			if(jobType == PrintJobTypeType.SCAN){//如果是扫描
 				if(record.getColorSurfaceCount() != 0){//彩色扫描面数不为空,计算 值
-					key = record.getJobType()+"--"+PrintColorType.COLOR.getCode();
+					key = record.getJobType()+"-"+PrintColorType.COLOR.getCode();
 					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getColorSurfaceCount()));
 				}
 				
 				if(record.getMonoSurfaceCount() != 0){//黑白计算
-					key = record.getJobType()+"--"+PrintColorType.BLACK_WHITE.getCode();
+					key = record.getJobType()+"-"+PrintColorType.BLACK_WHITE.getCode();
 					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getMonoSurfaceCount()));
 				}
 			}else{//打印和复印
