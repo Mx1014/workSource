@@ -203,9 +203,12 @@ public class UniongroupServiceImpl implements UniongroupService {
     public List<UniongroupConfiguresDTO> getConfiguresListByGroupId(GetUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<UniongroupConfigures> configures = this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, cmd.getGroupId());
-        return configures.stream().map(r -> {
-            return ConvertHelper.convert(r, UniongroupConfiguresDTO.class);
-        }).collect(Collectors.toList());
+        if(configures != null){
+            return configures.stream().map(r -> {
+                return ConvertHelper.convert(r, UniongroupConfiguresDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return null;
     }
 
     @Override
