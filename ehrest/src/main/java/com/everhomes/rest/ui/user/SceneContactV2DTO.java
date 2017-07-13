@@ -2,6 +2,8 @@ package com.everhomes.rest.ui.user;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.Map;
+
 /**
  * <ul>
  * <li>userId:通讯录关联的用户ID</li>
@@ -10,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactName: 联系人名字</li>
  * <li>contactAvatar: 联系人头像</li>
  * <li>contactEnglishName: 联系人英文名字</li>
+ * <li>gender: 联系人性别：0-保密, 1-男性, 2-女性</li>
  * <li>jobPosition: 联系人岗位</li>
  * <li>contactToken: 联系人号码</li>
  * <li>email: 联系人邮箱</li>
@@ -30,13 +33,16 @@ public class SceneContactV2DTO {
 
     private String contactEnglishName;
 
-    private String jobPosition;
+    private Byte gender;
+
+    private Map<Long,String> jobPosition;
+
+    private Map<Long,String> departments;
 
     private String contactToken;
 
     private String email;
 
-    private String departments;
 
     public SceneContactV2DTO() {
     }
@@ -89,12 +95,28 @@ public class SceneContactV2DTO {
         this.contactEnglishName = contactEnglishName;
     }
 
-    public String getJobPosition() {
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
+
+    public Map<Long, String> getJobPosition() {
         return jobPosition;
     }
 
-    public void setJobPosition(String jobPosition) {
+    public void setJobPosition(Map<Long, String> jobPosition) {
         this.jobPosition = jobPosition;
+    }
+
+    public Map<Long, String> getDepartments() {
+        return departments;
+    }
+
+    public void setDepartments(Map<Long, String> departments) {
+        this.departments = departments;
     }
 
     public String getContactToken() {
@@ -113,13 +135,6 @@ public class SceneContactV2DTO {
         this.email = email;
     }
 
-    public String getDepartments() {
-        return departments;
-    }
-
-    public void setDepartments(String departments) {
-        this.departments = departments;
-    }
 
     @Override
     public String toString() {

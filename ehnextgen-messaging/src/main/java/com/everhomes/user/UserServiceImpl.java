@@ -3918,9 +3918,33 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-	@Override
-    public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd){
-	    return null;
+    @Override
+    public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
+        OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        if (detail == null)
+            return null;
+        else {
+            SceneContactV2DTO dto = new SceneContactV2DTO();
+            dto.setUserId(detail.getTargetId());
+            dto.setDetailId(detail.getId());
+            if (!StringUtils.isEmpty(detail.getAvatar()))
+                dto.setContactAvatar(detail.getAvatar());
+            dto.setContactName(detail.getContactName());
+            if (!StringUtils.isEmpty(detail.getEnName()))
+                dto.setContactEnglishName(detail.getEnName());
+            dto.setGender(detail.getGender());
+            dto.setContactToken(detail.getContactToken());
+            if (!StringUtils.isEmpty(detail.getEmail()))
+                dto.setEmail(detail.getEmail());
+            Organization organization = this.organizationProvider.findOrganizationById(detail.getOrganizationId());
+            Map<Long, String> departMap = this.organizationProvider.listOrganizationsOfDetail(detail.getNamespaceId(), dto.getDetailId(), OrganizationGroupType.DEPARTMENT.getCode());
+            Map<Long, String> jobPosiMap = this.organizationProvider.listOrganizationsOfDetail(detail.getNamespaceId(), dto.getDetailId(), OrganizationGroupType.JOB_POSITION.getCode());
+            dto.setEnterpriseName(organization.getName());
+            if (departMap != null && departMap.size() > 0)
+                dto.setDepartments(departMap);
+            if (jobPosiMap != null && jobPosiMap.size() > 0)
+                dto.setJobPosition(jobPosiMap);
+            return dto;
+        }
     }
-
 }
