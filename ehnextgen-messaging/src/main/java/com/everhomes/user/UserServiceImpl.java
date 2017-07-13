@@ -50,6 +50,8 @@ import com.everhomes.acl.Role;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.authorization.AuthorizationThirdPartyForm;
+import com.everhomes.authorization.AuthorizationThirdPartyFormProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -227,8 +229,6 @@ import com.everhomes.sms.SmsBlackListCreateType;
 import com.everhomes.sms.SmsBlackListProvider;
 import com.everhomes.sms.SmsBlackListStatus;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
-import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RandomGenerator;
@@ -377,7 +377,7 @@ public class UserServiceImpl implements UserService {
     private GroupProvider groupProvider;
     
     @Autowired
-    private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+    private AuthorizationThirdPartyFormProvider authorizationThirdPartyFormProvider;
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
@@ -3991,7 +3991,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ListAuthFormsResponse listAuthForms() {
 		int namespaceId = UserContext.getCurrentNamespaceId();
-		List<LeaseFormRequest> list = enterpriseApplyEntryProvider.listLeaseRequestForm(namespaceId, Long.valueOf(namespaceId), "EhNamespaces");
+		List<AuthorizationThirdPartyForm> list = authorizationThirdPartyFormProvider.listFormSourceByNamespaceId(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
 		ListAuthFormsResponse response = new ListAuthFormsResponse();
 		response.setSourceDto(list.stream().map(r->ConvertHelper.convert(r, FormSourceDTO.class)).collect(Collectors.toList()));
 		return response;

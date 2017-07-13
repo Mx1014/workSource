@@ -41,3 +41,20 @@ CREATE TABLE `eh_authorization_third_party_forms` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- by dengs,家庭按钮状态表
+-- DROP TABLE IF EXISTS `eh_authorization_third_party_forms`;
+CREATE TABLE `eh_authorization_third_party_forms` (
+  `id` BIGINT NOT NULL COMMENT 'id for records',
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `title` VARCHAR(128) COMMENT 'zj_personal_auth zj_organization_auth,form ownertype',
+  `modifyFlag` TinyINT COMMENT 'form owner id',
+  `familiesFlag` VARCHAR(512) COMMENT 'third party authorization url',
+  `qrcodeFlag` VARCHAR(128)  COMMENT 'app key',
+  `creator_uid` BIGINT,
+  `create_time` TimeStamp,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

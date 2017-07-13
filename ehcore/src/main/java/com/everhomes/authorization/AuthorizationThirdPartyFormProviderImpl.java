@@ -83,4 +83,12 @@ public class AuthorizationThirdPartyFormProviderImpl implements AuthorizationThi
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public List<AuthorizationThirdPartyForm> listFormSourceByNamespaceId(String ownerType,Long ownerId) {
+		return getReadOnlyContext().select().from(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS)
+		.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.OWNER_TYPE.eq(ownerType))
+		.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.OWNER_ID.eq(ownerId))
+		.fetch().map(r -> ConvertHelper.convert(r, AuthorizationThirdPartyForm.class));
+	}
 }
