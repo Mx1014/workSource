@@ -1231,6 +1231,9 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public ListPeriodSalaryEmployeesResponse listPeriodSalaryEmployees(ListPeriodSalaryEmployeesCommand cmd) {
         ListPeriodSalaryEmployeesResponse response = new ListPeriodSalaryEmployeesResponse();
+        if (null == cmd.getOrganizationId()) {
+            cmd.setOrganizationId(cmd.getOwnerId());
+        }
         //1.查entities
         SalaryGroup periodGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
         List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(periodGroup.getOrganizationGroupId());
