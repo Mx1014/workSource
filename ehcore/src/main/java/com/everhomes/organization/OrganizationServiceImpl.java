@@ -10155,16 +10155,18 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             });
             List<OrganizationMember> depart_members = new ArrayList<>();
-            for(Long orgId :organizationIds){
-                members.stream().map(r ->{
-                    Organization org = this.checkOrganization(orgId);
-                    if(org != null){
-                        if(this.organizationProvider.checkOneOfOrganizationWithContextToken(org.getPath(), r.getContactToken())){
-                            depart_members.add(r);
+            if(organizationIds != null){
+                for(Long orgId :organizationIds){
+                    members.stream().map(r ->{
+                        Organization org = this.checkOrganization(orgId);
+                        if(org != null){
+                            if(this.organizationProvider.checkOneOfOrganizationWithContextToken(org.getPath(), r.getContactToken())){
+                                depart_members.add(r);
+                            }
                         }
-                    }
-                   return null;
-                }).collect(Collectors.toList());
+                        return null;
+                    }).collect(Collectors.toList());
+                }
             }
             return depart_members;
         }
