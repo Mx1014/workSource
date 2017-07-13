@@ -23,9 +23,9 @@ public class ItemGroupInstanceConfig {
 
 	private Integer columnCount;
 
-	private String margin;
+	private Integer margin;
 
-	private String padding;
+	private Integer padding;
 
 	private String backgroundColor;
 
@@ -51,19 +51,19 @@ public class ItemGroupInstanceConfig {
 		this.columnCount = columnCount;
 	}
 
-	public String getMargin() {
+	public Integer getMargin() {
 		return margin;
 	}
 
-	public void setMargin(String margin) {
+	public void setMargin(Integer margin) {
 		this.margin = margin;
 	}
 
-	public String getPadding() {
+	public Integer getPadding() {
 		return padding;
 	}
 
-	public void setPadding(String padding) {
+	public void setPadding(Integer padding) {
 		this.padding = padding;
 	}
 

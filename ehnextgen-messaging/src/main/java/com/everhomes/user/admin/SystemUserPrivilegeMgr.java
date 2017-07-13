@@ -13,11 +13,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
-import com.everhomes.rest.common.PortalType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.*;
 
 import org.slf4j.Logger;
@@ -262,7 +258,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                 }
 
             }
-        }else if(null != domain && PortalType.fromCode(domain.getPortalType()) == PortalType.ZUOLIN){
+        }else if(null != domain && EntityType.fromCode(domain.getPortalType()) == EntityType.ZUOLIN_ADMIN){
             if(checkRoleAccess(userId, ownerType, ownerId, null, privilegeId)){
                 LOGGER.debug("check role privilege success.userId={}, ownerType={}, ownerId={}, currentOrgId = {}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
                 return true;

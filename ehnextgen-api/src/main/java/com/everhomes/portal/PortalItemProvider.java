@@ -14,9 +14,11 @@ public interface PortalItemProvider {
 
 	PortalItem findPortalItemById(Long id);
 
-	List<PortalItem> listPortalItem(Long itemCategoryId);
+	List<PortalItem> listPortalItemByCategoryId(Long itemCategoryId);
+
+	List<PortalItem> listPortalItemByGroupId(Long itemGroupId);
 
 	List<PortalItem> listPortalItem(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
-	List<PortalItem> listPortalItem(Long itemCategoryId, Integer namespaceId, String actionType);
+	List<PortalItem> listPortalItem(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId);
 }

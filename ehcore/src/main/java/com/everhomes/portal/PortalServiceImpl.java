@@ -19,10 +19,11 @@ import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.portal.*;
 import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.widget.NavigatorInstanceConfig;
+import com.everhomes.rest.widget.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -635,7 +636,7 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItemCategory> portalItemCategories = portalItemCategoryProvider.listPortalItemCategory(namespaceId);
 		List<PortalItemCategoryDTO> dtos = portalItemCategories.stream().map(r ->{
 			PortalItemCategoryDTO dto = processPortalItemCategoryDTO(r);
-			List<PortalItem> portalItems = portalItemProvider.listPortalItem(r.getId());
+			List<PortalItem> portalItems = portalItemProvider.listPortalItemByCategoryId(r.getId());
 			dto.setItems(portalItems.stream().map(i ->{
 				return processPortalItemDTO(i);
 			}).collect(Collectors.toList()));
@@ -731,7 +732,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	private PortalItem getItemAllOrMore(Integer namespaceId, AllOrMoreType type){
-		List<PortalItem> portalItems = portalItemProvider.listPortalItem(null, namespaceId, PortalItemActionType.ALLORMORE.getCode());
+		List<PortalItem> portalItems = portalItemProvider.listPortalItem(null, namespaceId, PortalItemActionType.ALLORMORE.getCode(), null);
 		for (PortalItem portalItem: portalItems) {
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
 			if(null != actionData && AllOrMoreType.fromCode(actionData.getType()) == type){
@@ -918,6 +919,8 @@ public class PortalServiceImpl implements PortalService {
 
 	private void publishLayout(PortalLayout layout){
 
+		User user = UserContext.current().getUser();
+
 		List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.getCode(), layout.getId(), null);
 
 		Long versionCode = 0L;
@@ -930,7 +933,7 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItemGroup> itemGroups = portalItemGroupProvider.listPortalItemGroup(layout.getId());
 		for (PortalItemGroup itemGroup: itemGroups) {
 			LaunchPadLayoutGroupDTO group = ConvertHelper.convert(itemGroup, LaunchPadLayoutGroupDTO.class);
-			group.setGroupName(itemGroup.getName());
+			group.setGroupName(itemGroup.getLabel());
 			ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
 			group.setColumnCount(instanceConfig.getColumnCount());
 			if(TitleFlag.TRUE == TitleFlag.fromCode(instanceConfig.getTitleFlag())){
@@ -942,20 +945,65 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			if(Widget.fromCode(group.getWidget()) == Widget.NAVIGATOR){
-				NavigatorInstanceConfig navigatorInstanceConfig = new NavigatorInstanceConfig();
-				navigatorInstanceConfig.setBackgroundColor(instanceConfig.getBackgroundColor());
+				NavigatorInstanceConfig config = new NavigatorInstanceConfig();
+				config.setBackgroundColor(instanceConfig.getBackgroundColor());
 				if(Style.fromCode(group.getStyle()) == Style.GALLERY){
-
+					config.setCssStyleFlag(CssStyleFlagType.YES.getCode());
 				}
+				config.setPaddingBottom(instanceConfig.getPadding());
+				config.setPaddingLeft(instanceConfig.getPadding());
+				config.setPaddingRight(instanceConfig.getPadding());
+				config.setPaddingTop(instanceConfig.getPadding());
+				config.setColumnSpacing(instanceConfig.getMargin());
+				config.setLineSpacing(instanceConfig.getMargin());
+				config.setItemGroup(itemGroup.getName());
+				group.setInstanceConfig(StringHelper.toJsonString(config));
+			}else if(Widget.fromCode(group.getWidget()) == Widget.BANNERS){
+				BannersInstanceConfig config = new BannersInstanceConfig();
+				config.setItemGroup(itemGroup.getName());
+				group.setInstanceConfig(StringHelper.toJsonString(config));
+			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS){
+				NewsInstanceConfig config = new NewsInstanceConfig();
+				config.setItemGroup(itemGroup.getName());
+//				config.setCategoryId();
+				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
+				group.setInstanceConfig(StringHelper.toJsonString(config));
+			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS_FLASH){
+				NewsFlashInstanceConfig config = new NewsFlashInstanceConfig();
+				config.setItemGroup(itemGroup.getName());
+				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
+//				config.setCategoryId();
+				config.setNewsSize(instanceConfig.getNewsSize());
+				group.setInstanceConfig(StringHelper.toJsonString(config));
+			}else if(Widget.fromCode(group.getWidget()) == Widget.BULLETINS){
+				BulletinsInstanceConfig config = new BulletinsInstanceConfig();
+				config.setItemGroup(itemGroup.getName());
+				config.setRowCount(instanceConfig.getRowCount());
+				group.setInstanceConfig(StringHelper.toJsonString(config));
+			}else if(Widget.fromCode(group.getWidget()) == Widget.OPPUSH){
+				OPPushInstanceConfig config = new OPPushInstanceConfig();
+				config.setItemGroup(itemGroup.getName());
+				config.setNewsSize(instanceConfig.getNewsSize());
+//				config.setDescriptionHeight();
+//				config.setSubjectHeight();
+				//应用入口的应用不明
+				group.setInstanceConfig(StringHelper.toJsonString(config));
+			}else if(Widget.fromCode(group.getWidget()) == Widget.TAB){
+				TabInstanceConfig config = new TabInstanceConfig();
+				config.setItemGroup(itemGroup.getName());
+				group.setInstanceConfig(StringHelper.toJsonString(config));
 			}
-
+			groups.add(group);
 		}
-
+		layoutJson.setGroups(groups);
+		String json = StringHelper.toJsonString(layoutJson);
 		LaunchPadLayout launchPadLayout = new LaunchPadLayout();
+		List<PortalLaunchPadMapping> mappings = new ArrayList<>();
 		if(portalLaunchPadMappings.size() > 0){
 			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
 				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
 				launchPadLayout.setVersionCode(versionCode);
+				launchPadLayout.setLayoutJson(json);
 				launchPadProvider.updateLaunchPadLayout(launchPadLayout);
 			}
 		}else{
@@ -967,15 +1015,21 @@ public class PortalServiceImpl implements PortalService {
 			launchPadLayout.setScopeCode((byte)0);
 			launchPadLayout.setApplyPolicy((byte)0);
 			launchPadLayout.setScopeId(0L);
+			launchPadLayout.setLayoutJson(json);
 			for (SceneType sceneType: SceneType.values()) {
 				if(sceneType == SceneType.DEFAULT ||
 						sceneType == SceneType.PARK_TOURIST ||
 						sceneType == SceneType.PM_ADMIN){
 					launchPadLayout.setSceneType(sceneType.getCode());
 					launchPadProvider.createLaunchPadLayout(launchPadLayout);
+					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+					mapping.setContentType(EntityType.PORTAL_LAYOUT.getCode());
+					mapping.setPortalContentId(layout.getId());
+					mapping.setCreatorUid(user.getId());
+					mapping.setLaunchPadContentId(launchPadLayout.getId());
+					mappings.add(mapping);
 				}
 			}
-
 		}
 
 
@@ -986,6 +1040,27 @@ public class PortalServiceImpl implements PortalService {
 //
 //
 //		launchPadProvider.createLaunchPadItem();
+	}
+
+	public void publishGroupItem(PortalItemGroup itemGroup){
+		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId());
+		List<LaunchPadItem> items = new ArrayList<>();
+		for (PortalItem portalItem: portalItems) {
+			List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
+			for (PortalContentScope scope: contentScopes) {
+
+
+
+
+				LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
+				item.setAppId(AppConstants.APPID_DEFAULT);
+				item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
+				item.setMinVersion(1L);
+				item.setItemGroup(portalItem.getName());
+				item.setItemLabel(portalItem.getLabel());
+			}
+
+		}
 	}
 
 	public static void main(String[] args) {

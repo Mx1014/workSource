@@ -63,12 +63,17 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	}
 
 	@Override
-	public List<PortalItem> listPortalItem(Long itemCategoryId){
-		return listPortalItem(itemCategoryId, null, null);
+	public List<PortalItem> listPortalItemByCategoryId(Long itemCategoryId){
+		return listPortalItem(itemCategoryId, null, null, null);
 	}
 
 	@Override
-	public List<PortalItem> listPortalItem(Long itemCategoryId, Integer namespaceId, String actionType) {
+	public List<PortalItem> listPortalItemByGroupId(Long itemGroupId){
+		return listPortalItem(null, null, null, itemGroupId);
+	}
+
+	@Override
+	public List<PortalItem> listPortalItem(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId) {
 		Condition cond = Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode());
 		if(null != itemCategoryId){
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.eq(itemCategoryId));
@@ -79,6 +84,10 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 
 		if(null != PortalItemActionType.fromCode(actionType)){
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.ACTION_TYPE.eq(actionType));
+		}
+
+		if(null != itemGroupId){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId));
 		}
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
