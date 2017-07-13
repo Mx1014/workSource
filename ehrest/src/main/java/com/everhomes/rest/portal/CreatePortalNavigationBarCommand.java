@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>description: 门户itemGroup描述</li>
  * <li>targetType: 对象类型</li>
  * <li>targetId: 对象id</li>
+ * <li>iconUri: icon 图片</li>
+ * <li>selectedIconUri: icon选中图片</li>
  * </ul>
  */
 public class CreatePortalNavigationBarCommand {
@@ -24,6 +26,11 @@ public class CreatePortalNavigationBarCommand {
 	private String targetType;
 
 	private Long targetId;
+
+	private String iconUri;
+
+	private String selectedIconUri;
+
 
 	public CreatePortalNavigationBarCommand() {
 
@@ -75,6 +82,22 @@ public class CreatePortalNavigationBarCommand {
 
 	public void setTargetId(Long targetId) {
 		this.targetId = targetId;
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public void setIconUri(String iconUri) {
+		this.iconUri = iconUri;
+	}
+
+	public String getSelectedIconUri() {
+		return selectedIconUri;
+	}
+
+	public void setSelectedIconUri(String selectedIconUri) {
+		this.selectedIconUri = selectedIconUri;
 	}
 
 	@Override

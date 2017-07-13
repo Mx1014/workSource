@@ -4,8 +4,8 @@ package com.everhomes.rest.portal;
  * <ul>
  * <li>label: 门户导航栏名称</li>
  * <li>description: 门户itemGroup描述</li>
- * <li>actionType: 内容类型</li>
- * <li>actionData: 内容需要的参数，类型 我：无参数 门户：门户id(例如：{'layoutId':1})，业务应用：应用id(例如：{'moduleAppId':1}</li>
+ * <li>targetId: 对象类型</li>
+ * <li>targetType: 对象id</li>
  *  <li>createTime: 创建时间</li>
  * <li>updateTime: 修改时间</li>
  * <li>creatorUid: 创建人id</li>
@@ -18,6 +18,8 @@ public class PortalNavigationBarDTO {
     private String label;
     private String contentName;
     private String description;
+    private Long targetId;
+    private String targetType;
     private Long createTime;
     private Long updateTime;
     private Long operatorUid;
@@ -95,5 +97,21 @@ public class PortalNavigationBarDTO {
 
     public void setOperatorUName(String operatorUName) {
         this.operatorUName = operatorUName;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 }
