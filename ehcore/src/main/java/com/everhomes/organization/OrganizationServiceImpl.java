@@ -9520,6 +9520,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationContactDTO> members = organizationMembers.stream().map(r -> {
             OrganizationContactDTO dto = ConvertHelper.convert(r, OrganizationContactDTO.class);
 
+            //added by R 20120713, 获取岗位与 detailId
+            List<OrganizationDTO> positionList = this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, r.getContactToken(), org.getPath());
+            String position = "";
+            if(positionList !=null && positionList.size()>0) {
+                for (OrganizationDTO sonList : positionList) {
+                    position += (sonList.getName() + ",");
+                }
+                position = position.substring(0,position.length()-1);
+            }
+            dto.setJobPosition(position);
+            if(!StringUtils.isEmpty(r.getDetailId()))
+                dto.setDetailId(r.getDetailId());
+
             //获取用户头像 昵称
             if (OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())) {
                 User user = userProvider.findUserById(r.getTargetId());

@@ -126,6 +126,9 @@ public class UserUiController extends ControllerBase {
 					dto.setInitial(r.getInitial());
 					dto.setFullInitial(r.getFullInitial());
 					dto.setFullPinyin(r.getFullPinyin());
+					//增加岗位显示与 detailId added by R 20120713
+					dto.setJobPosition(r.getJobPosition());
+					dto.setDetailId(r.getDetailId());
 					return dto;
 				}).collect(Collectors.toList());
 			}
