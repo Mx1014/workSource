@@ -33,6 +33,8 @@ CREATE TABLE `eh_portal_navigation_bars` (
   `label` varchar(64) DEFAULT NULL,
   `target_type` varchar(64) NOT NULL,
   `target_id` bigint(20) NOT NULL,
+  `icon_uri` varchar(1024) DEFAULT NULL,
+  `selected_icon_uri` varchar(1024) DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,

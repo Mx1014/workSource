@@ -4,8 +4,8 @@ package com.everhomes.rest.portal;
  * <ul>
  * <li>label: 门户导航栏名称</li>
  * <li>description: 门户导航栏描述</li>
- * <li>targetId: 对象类型</li>
- * <li>targetType: 对象id</li>
+ * <li>targetId: 对象id</li>
+ * <li>targetType: 对象类型</li>
  * <li>iconUrl: 导航的icon图片url</li>
  * <li>selectedIconUrl: 选中导航的icon图片url</li>
  *  <li>createTime: 创建时间</li>
