@@ -1519,8 +1519,14 @@ public class ActivityServiceImpl implements ActivityService {
 		refundCmd.setOrderNo(String.valueOf(roster.getOrderNo()));
 		
 		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(roster.getVendorType()).getStyleNo()); 
-		
-		refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+
+		// 老数据无该字段，它们都是ACTIVITYSIGNUPORDER类型的  edit by yanjun 20170713
+		if(roster.getOrderType() != null && !"".equals(roster.getOrderType())){
+			refundCmd.setOrderType(roster.getOrderType());
+		}else{
+			refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+		}
+
 		
 		refundCmd.setRefundAmount(roster.getPayAmount());
 		
