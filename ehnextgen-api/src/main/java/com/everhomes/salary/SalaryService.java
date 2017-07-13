@@ -2,6 +2,8 @@
 package com.everhomes.salary;
 
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.salary.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,6 +12,8 @@ import java.text.ParseException;
 import java.util.List;
 
 public interface SalaryService {
+
+	public ListSalaryContactResponse listSalaryContacts(ListOrganizationContactCommand cmd);
 
 
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities();
