@@ -9192,13 +9192,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
-    /**odify By lei.lv 2017-6-26**/
+    /**modify By lei.lv 2017-6-26**/
     @Override
     public List<OrganizationMemberDTO> listAllChildOrganizationPersonnel(Long organizationId, List<String> groupTypes, String userName) {
         Organization organization = checkOrganization(organizationId);
         List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(userName, organization.getPath(), groupTypes, VisibleFlag.SHOW, new CrossShardListingLocator(), 1000000);
         List<OrganizationMemberDTO> dtos = members.stream().map(r -> {
-            return ConvertHelper.convert(members,OrganizationMemberDTO.class);
+            return ConvertHelper.convert(r,OrganizationMemberDTO.class);
         }).collect(Collectors.toList());
         return dtos;
     }
