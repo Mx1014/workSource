@@ -4,22 +4,22 @@ import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
- * <li>targetId: 联系人的uuid</li>
+ * <li>detailId: 联系人的档案id</li>
  *</ul>
  */
 public class GetRelevantContactInfoCommand {
 	 
-	private Long targetId;
+	private Long detailId;
 
 	public GetRelevantContactInfoCommand() {
 	}
 
-	public Long getTargetId() {
-		return targetId;
+	public Long getDetailId() {
+		return detailId;
 	}
 
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
+	public void setDetailId(Long detailId) {
+		this.detailId = detailId;
 	}
 
 	@Override
