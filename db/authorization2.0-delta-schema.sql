@@ -19,7 +19,9 @@ CREATE TABLE `eh_authorization_third_party_records` (
   `user_count` INTEGER  COMMENT 'authorization success, and save user_count',
   `result_json` TEXT,
   `creator_uid` BIGINT,
-  `create_time` TimeStamp,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -37,24 +39,28 @@ CREATE TABLE `eh_authorization_third_party_forms` (
   `app_key` VARCHAR(128)  COMMENT 'app key',
   `secret_key` VARCHAR(512)  COMMENT 'secret_key',
   `creator_uid` BIGINT,
-  `create_time` TimeStamp,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- by dengs,家庭按钮状态表
--- DROP TABLE IF EXISTS `eh_authorization_third_party_forms`;
-CREATE TABLE `eh_authorization_third_party_forms` (
+-- DROP TABLE IF EXISTS `eh_authorization_third_party_buttons`;
+CREATE TABLE `eh_authorization_third_party_buttons` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
   `namespace_id` INTEGER,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `title` VARCHAR(128) COMMENT 'zj_personal_auth zj_organization_auth,form ownertype',
-  `modifyFlag` TinyINT COMMENT 'form owner id',
-  `familiesFlag` VARCHAR(512) COMMENT 'third party authorization url',
-  `qrcodeFlag` VARCHAR(128)  COMMENT 'app key',
+  `title` VARCHAR(128) COMMENT '人才公寓',
+  `modify_flag` TINYINT COMMENT '0,hidden,1,show',
+  `families_flag` TINYINT COMMENT '0,hidden,1,show',
+  `qrcode_flag` TINYINT COMMENT '0,hidden,1,show',
   `creator_uid` BIGINT,
-  `create_time` TimeStamp,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -171,7 +171,7 @@
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
         eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
             eh_sms_black_lists |
-            eh_authorization_third_party_forms | eh_authorization_third_party_records |
+            eh_authorization_third_party_forms | eh_authorization_third_party_records | eh_authorization_third_party_buttons |
         </includes>
 
             <!-- All elements that are excluded from your schema
