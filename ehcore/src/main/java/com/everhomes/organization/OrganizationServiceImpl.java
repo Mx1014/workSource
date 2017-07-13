@@ -6699,7 +6699,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             //this.organizationProvider.deleteOrganizationMemberById(member.getId());
             //更新user_organization表的记录
             UserOrganizations userOrganization = this.userOrganizationProvider.findUserOrganizations(namespaceId, member.getOrganizationId(), member.getTargetId());
-            this.userOrganizationProvider.inactiveUserOrganizations(userOrganization);
+            this.userOrganizationProvider.rejectUserOrganizations(userOrganization);
             return null;
         });
 

@@ -85,4 +85,15 @@ public class UserOrganizationProviderImpl implements UserOrganizationProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganizations.class, userOrganizations.getId());
         return userOrganizations;
     }
+
+    @Override
+    public UserOrganizations rejectUserOrganizations(UserOrganizations userOrganizations) {
+        assert (userOrganizations.getId() == null);
+        userOrganizations.setStatus(UserOrganizationStatus.REJECT.getCode());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserOrganizationsDao dao = new EhUserOrganizationsDao(context.configuration());
+        dao.update(userOrganizations);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganizations.class, userOrganizations.getId());
+        return userOrganizations;
+    }
 }

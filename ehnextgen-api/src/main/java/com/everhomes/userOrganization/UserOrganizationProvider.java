@@ -14,4 +14,6 @@ public interface UserOrganizationProvider {
     void deleteUserOrganizations(UserOrganizations userOrganizations);
 
     UserOrganizations inactiveUserOrganizations(UserOrganizations userOrganizations);
+
+    UserOrganizations rejectUserOrganizations(UserOrganizations userOrganizations);
 }
