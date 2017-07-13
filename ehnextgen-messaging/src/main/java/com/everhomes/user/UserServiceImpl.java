@@ -1185,9 +1185,10 @@ public class UserServiceImpl implements UserService {
 			foundLoginByLoginType(user, deviceIdentifier, LoginType.USER, ref);
 		}
 
-		UserLogin foundLogin = ref.getFoundLogin();
-		if(foundLogin == null) {
-			foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify);
+        String appVersion = UserContext.current().getVersion();
+        UserLogin foundLogin = ref.getFoundLogin();
+        if(foundLogin == null) {
+            foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify, appVersion);
 			accessor.putMapValueObject(hkeyIndex, ref.getNextLoginId());
 
 			isNew = true;
@@ -1197,6 +1198,7 @@ public class UserServiceImpl implements UserService {
 		foundLogin.setStatus(UserLoginStatus.LOGGED_IN);
 		foundLogin.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 		foundLogin.setPusherIdentify(pusherIdentify);
+		foundLogin.setAppVersion(appVersion);
 		String hkeyLogin = String.valueOf(ref.getNextLoginId());
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
@@ -1304,6 +1306,9 @@ public class UserServiceImpl implements UserService {
 			login.setBorderSessionId(borderSessionId);
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 			accessor.putMapValueObject(hkeyLogin, login);
+
+			// 发布用户切换App到前台事件   add by xq.tian 2017/07/13
+            applicationEventPublisher.publishEvent(new BorderRegisterEvent(login));
 
 			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
 			return login;
