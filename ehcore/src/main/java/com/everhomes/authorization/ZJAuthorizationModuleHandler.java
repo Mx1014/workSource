@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.apache.poi.hssf.dev.ReSave;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.address.Address;
 import com.everhomes.address.AddressService;
 import com.everhomes.authorization.zjgk.ZjgkJsonEntity;
 import com.everhomes.authorization.zjgk.ZjgkResponse;
@@ -22,11 +22,16 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.Family;
+import com.everhomes.family.FamilyService;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.rest.address.ClaimAddressCommand;
 import com.everhomes.rest.address.ClaimedAddressInfo;
+import com.everhomes.rest.family.ApproveMemberCommand;
+import com.everhomes.rest.family.BatchApproveMemberCommand;
+import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -34,6 +39,11 @@ import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostGeneralFormCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 
 @Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+1000000)
@@ -52,6 +62,9 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	
 	@Autowired
 	public FlowService flowService;
+	
+	@Autowired
+	public FamilyService familyService;
 	
     @Autowired
     private AddressService addressService;
@@ -85,20 +98,19 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		List<ZjgkResponse> list = entity.getResponse();
 		List<AuthorizationThirdPartyRecord> recordlist = new ArrayList<AuthorizationThirdPartyRecord>();
 		if(list!=null && list.size()>0){
-			for (ZjgkResponse zjgkResponse : list) {
-				zjgkResponse.setCommunityName("科技园"); // TODO
-				//生成加入家庭的command
-				ClaimAddressCommand claimcmd = generalClaimAddressCommand(cmd,zjgkResponse);
-				//加入家庭
-				ClaimedAddressInfo addressinfo = addressService.claimAddress(claimcmd);
-				// TODO 认证状态设置为通过
-				
-				//认证记录到list
-				recordlist.add(generalUserAuthorizationRecord(cmd,params,addressinfo,authorizationType,entity.getErrorCode(),resultJson));
-			}
-			
-			// TODO 应该删除之前的认证，再在记录。认证成功，记录到表中
 			dbProvider.execute((TransactionStatus status) -> {
+				for (ZjgkResponse zjgkResponse : list) {
+					zjgkResponse.setCommunityName("科技园"); // TODO
+					//生成加入家庭的command
+					ClaimAddressCommand claimcmd = generalClaimAddressCommand(cmd,zjgkResponse);
+					//加入家庭
+					ClaimedAddressInfo addressinfo = addressService.claimAddress(claimcmd);
+					//认证记录到list
+					recordlist.add(generalUserAuthorizationRecord(cmd,params,addressinfo,authorizationType,entity.getErrorCode(),resultJson));
+				}
+				// TODO 认证状态设置为通过
+				familyService.adminBatchApproveMember(generateBatchApproveMemberCommand());
+				// TODO 应该删除之前的认证，再在记录。认证成功，记录到表中
 				for (AuthorizationThirdPartyRecord record : recordlist) {
 					authorizationProvider.createAuthorizationThirdPartyRecord(record);
 				}
@@ -106,6 +118,23 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			});
 		}
 		
+	}
+	
+
+	private BatchApproveMemberCommand generateBatchApproveMemberCommand() {
+		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
+		BatchApproveMemberCommand batchCmd = new BatchApproveMemberCommand();
+		List<ApproveMemberCommand> members = familyList.stream().map(r -> {
+			ApproveMemberCommand cmd = new ApproveMemberCommand();
+			cmd.setAddressId(r.getAddressId());
+			cmd.setId(r.getId());
+			User user = UserContext.current().getUser();
+		    long userId = user.getId();
+			cmd.setMemberUid(userId);
+			return cmd;
+		}).collect(Collectors.toList());
+		batchCmd.setMembers(members);
+		return batchCmd;
 	}
 
 	//调用认证接口，需要生成认证的command
