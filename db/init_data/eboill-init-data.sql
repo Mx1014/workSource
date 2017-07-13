@@ -166,63 +166,63 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 	VALUES (1960468, 240111044331050393, '富联二路177弄41幢23号', '富联二路177弄41幢23号', 0, null, '富联二路177弄41幢23号', 735.65, 121.242, 31.2234, 'wtw1wuj9rree', null, null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999973, 196068);
 	
 -- 门牌信息
+SET @eh_addresses_id = (SELECT MAX(id) FROM `eh_addresses`);
+SET @mappings_id = (SELECT MAX(id) FROM `eh_organization_address_mappings`);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262350,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-1层','富联二路177弄40幢4号','1层','2','0',UTC_TIMESTAMP(), 999973);
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-1层','富联二路177弄40幢4号','1层','2','0',UTC_TIMESTAMP(), 999973);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-1层', '0');
 
-INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262351,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-2层','富联二路177弄40幢4号','2层','2','0',UTC_TIMESTAMP(), 999973);
-
-INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262352,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-3层','富联二路177弄40幢4号','3层','2','0',UTC_TIMESTAMP(), 999973);
-
-INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262353,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-4层','富联二路177弄40幢4号','4层','2','0',UTC_TIMESTAMP(), 999973);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262354,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-5层','富联二路177弄40幢4号','5层','2','0',UTC_TIMESTAMP(), 999973);
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-2层','富联二路177弄40幢4号','2层','2','0',UTC_TIMESTAMP(), 999973);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-2层', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262355,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-6层','富联二路177弄40幢4号','6层','2','0',UTC_TIMESTAMP(), 999973);
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-3层','富联二路177弄40幢4号','3层','2','0',UTC_TIMESTAMP(), 999973);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-3层', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262356,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-7层','富联二路177弄40幢4号','7层','2','0',UTC_TIMESTAMP(), 999973);
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-4层','富联二路177弄40幢4号','4层','2','0',UTC_TIMESTAMP(), 999973);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-4层', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262357,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-8层','富联二路177弄40幢4号','8层','2','0',UTC_TIMESTAMP(), 999973);
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-5层','富联二路177弄40幢4号','5层','2','0',UTC_TIMESTAMP(), 999973);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-5层', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262358,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-9层','富联二路177弄40幢4号','9层','2','0',UTC_TIMESTAMP(), 999973);
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-6层','富联二路177弄40幢4号','6层','2','0',UTC_TIMESTAMP(), 999973);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-6层', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262359,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-10层','富联二路177弄40幢4号','10层','2','0',UTC_TIMESTAMP(), 999973);
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-7层','富联二路177弄40幢4号','7层','2','0',UTC_TIMESTAMP(), 999973);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-7层', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262360,UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-11层','富联二路177弄40幢4号','11层','2','0',UTC_TIMESTAMP(), 999973);
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-8层','富联二路177弄40幢4号','8层','2','0',UTC_TIMESTAMP(), 999973);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-8层', '0');
 
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-9层','富联二路177弄40幢4号','9层','2','0',UTC_TIMESTAMP(), 999973);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-9层', '0');
 
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-10层','富联二路177弄40幢4号','10层','2','0',UTC_TIMESTAMP(), 999973);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37645, 1010579, 240111044331050393, 239825274387262350, '富联二路177弄40幢4号-1层', '0');
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-10层', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES((@eh_addresses_id := @eh_addresses_id + 1),UUID(),240111044331050393, 14815, '上海市',  14816, '宝山区' ,'富联二路177弄40幢4号-11层','富联二路177弄40幢4号','11层','2','0',UTC_TIMESTAMP(), 999973);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37646, 1010579, 240111044331050393, 239825274387262351, '富联二路177弄40幢4号-2层', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37647, 1010579, 240111044331050393, 239825274387262352, '富联二路177弄40幢4号-3层', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37648, 1010579, 240111044331050393, 239825274387262353, '富联二路177弄40幢4号-4层', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37649, 1010579, 240111044331050393, 239825274387262354, '富联二路177弄40幢4号-5层', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37650, 1010579, 240111044331050393, 239825274387262355, '富联二路177弄40幢4号-6层', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37651, 1010579, 240111044331050393, 239825274387262356, '富联二路177弄40幢4号-7层', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37652, 1010579, 240111044331050393, 239825274387262357, '富联二路177弄40幢4号-8层', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37653, 1010579, 240111044331050393, 239825274387262358, '富联二路177弄40幢4号-9层', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37654, 1010579, 240111044331050393, 239825274387262359, '富联二路177弄40幢4号-10层', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37655, 1010579, 240111044331050393, 239825274387262360, '富联二路177弄40幢4号-11层', '0');
-	
+	VALUES ((@mappings_id := @mappings_id + 1), 1010579, 240111044331050393, @eh_addresses_id, '富联二路177弄40幢4号-11层', '0');
 
 
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES (11029, '会议室预订', 0, NULL, 0, 999973);

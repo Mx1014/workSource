@@ -2013,7 +2013,7 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
 			}
 
-			LOGGER.debug("fanfanfan,userName:{}/userPhone:{}/userStatus:{}",r.getNickName(), r.getPhoneNumber(),r.getStatus());
+			LOGGER.debug("user,userName:{}/userPhone:{}/userStatus:{}",r.getNickName(), r.getPhoneNumber(),r.getStatus());
 			if(UserOrganizationStatus.ACTIVE == UserOrganizationStatus.fromCode(r.getStatus())){
 				dto.setIsAuth(AuthFlag.YES.getCode());
 				if(null != r.getOrganizationId()){
