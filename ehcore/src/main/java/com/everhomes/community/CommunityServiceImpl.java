@@ -1960,6 +1960,9 @@ public class CommunityServiceImpl implements CommunityService {
 						dto.setIsAuth(AuthFlag.YES.getCode());
 					}
 				}
+				List<OrganizationDetailDTO> organizations = new ArrayList<>();
+				organizations.addAll(populateOrganizationDetails(ms));
+				dto.setOrganizations(organizations);
 			} else {
 				dto.setIsAuth(AuthFlag.NO.getCode());
 			}
