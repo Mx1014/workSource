@@ -549,6 +549,11 @@ public class ActivityServiceImpl implements ActivityService {
 		 	return;
 		 }
 
+		 // 来自微信的请求支持支付报名   edit by yanjun 20170713
+		 if(cmd.getSignupSourceFlag() != null || cmd.getSignupSourceFlag().byteValue() == SignupSourceFlag.WECHAT.getCode()){
+			 return;
+		 }
+
 		 if(version == null){
 			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
