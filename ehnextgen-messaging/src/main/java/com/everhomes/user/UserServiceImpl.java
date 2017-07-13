@@ -3903,7 +3903,7 @@ public class UserServiceImpl implements UserService {
 
     //added by R 20170713, 通讯录2.4增加
     @Override
-	public SceneContactV2DTO getCurrentContactRealInfo(GetRelevantContactInfoCommand cmd){
+	public SceneContactV2DTO getCurrentContactRealInfo(){
 		User user = UserContext.current().getUser();
 		SceneContactV2DTO dto = new SceneContactV2DTO();
 		dto.setUserId(user.getId());
