@@ -128,12 +128,12 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		record.setType(authorizationType);
 		record.setPhone(params.get("phone"));
 		record.setName(params.get("name"));
-		record.setCertificatetype(params.get("certificateType"));
-		record.setCertificateno(params.get("certificateNo"));
-		record.setOrganizationcode(params.get("organizationCode"));
-		record.setOrganizationcontact(params.get("organizationContact"));
-		record.setOrganizationphone(params.get("organizationPhone"));
-		record.setErrorcode(errorCode);
+		record.setCertificateType(params.get("certificateType"));
+		record.setCertificateNo(params.get("certificateNo"));
+		record.setOrganizationCode(params.get("organizationCode"));
+		record.setOrganizationContact(params.get("organizationContact"));
+		record.setOrganizationPhone(params.get("organizationPhone"));
+		record.setErrorCode(errorCode);
 		record.setAddressId(addressinfo.getAddressId());
 		record.setFullAddress(addressinfo.getFullAddress());
 		record.setUserCount(addressinfo.getUserCount());
