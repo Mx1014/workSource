@@ -159,7 +159,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 -- 更换web页面
 update eh_web_menus  set data_type = 'react:/repair-management/task-list' where id  = 20210;
-update eh_web_menus  set data_type = 'react:/repair-management/task-list' where id  = 20240;
+update eh_web_menus  set data_type = 'react:/repair-management/task-list/202564' where id  = 20240;
 
 -- 资源预约 add by sw 20170711
 UPDATE eh_rentalv2_resources set default_order = id;
