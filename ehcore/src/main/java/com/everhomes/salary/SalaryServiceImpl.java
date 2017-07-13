@@ -1803,8 +1803,11 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
 	public ListSalarySendHistoryResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd) {
+        if (null == cmd.getOrganizationId()) {
+            cmd.setOrganizationId(cmd.getOwnerId());
+        }
+        Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
 
-		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
         List<Long> detailIds = new ArrayList<>();
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setKeywords(cmd.getKeyWord());
