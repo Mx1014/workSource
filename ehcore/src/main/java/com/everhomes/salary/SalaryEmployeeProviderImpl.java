@@ -106,9 +106,9 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	}
 
 	@Override
-	public List<SalaryEmployee> listSalaryEmployees(List<Long> userIds, List<String> periods) {
+	public List<SalaryEmployee> listSalaryEmployees(List<Long> detailIds, List<String> periods) {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.USER_ID.in(userIds))
+				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds))
 				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.in(periods))
 				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
@@ -121,9 +121,9 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	}
 
 	@Override
-	public List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> userIds, Byte checkFlag) {
+	public List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> detailIds, Byte checkFlag) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.USER_ID.in(userIds));
+				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds));
 		step.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
 		if(null != checkFlag)
 			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
@@ -132,9 +132,9 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	}
 
 	@Override
-	public void deleteSalaryEmployee(Long ownerId, Long userId, Long salaryGroupId) {
+	public void deleteSalaryEmployee(Long ownerId, Long detail_id, Long salaryGroupId) {
 		getReadWriteContext().delete(Tables.EH_SALARY_EMPLOYEES)
-				.where(Tables.EH_SALARY_EMPLOYEES.USER_ID.eq(userId))
+				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detail_id))
 				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
 				.and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId)).execute();
 
@@ -156,10 +156,10 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	}
 
 	@Override
-	public SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndUserId(Long salaryGroupId, Long userId) {
+	public SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndDetailId(Long salaryGroupId, Long detailId) {
 		List<SalaryEmployee> result = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
 				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
-				.and(Tables.EH_SALARY_EMPLOYEES.USER_ID.eq(userId))
+				.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detailId))
 				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
 		if (null == result || result.size() == 0) {

@@ -106,5 +106,5 @@ public interface SalaryService {
 
 
 	//  added by R, for salaryGroup 20170706
-	SalaryEmployeeDTO getPersonnelInfoByUserIdForSalary(Long userId);
+	SalaryEmployeeDTO getPersonnelInfoByDetailIdForSalary(Long userId);
 }

@@ -644,7 +644,7 @@ public class SalaryServiceImpl implements SalaryService {
         //  获取对应批次的项目字段
         List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
         //  获取个人的项目字段
-        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(), cmd.getOwnerType(), cmd.getOwnerId());
+        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(), cmd.getOwnerType(), cmd.getOwnerId());
 
         //  若没有关联批次则直接返回空
         if (!salaryGroupEntities.isEmpty()) {
@@ -696,10 +696,10 @@ public class SalaryServiceImpl implements SalaryService {
         this.addToOrganizationSalaryGroup(addCommand);
 
         // 2.删除原有的薪酬设定
-        List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
+        List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(),cmd.getOwnerType(),cmd.getOwnerId());
         if(!StringUtils.isEmpty(originVals) && originVals.size() > 0) {
-            this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(originVals.get(0).getGroupId(),
-                    originVals.get(0).getUserId(), cmd.getOwnerType(), cmd.getOwnerId());
+            this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdDetailId(originVals.get(0).getGroupId(),
+                    originVals.get(0).getUserDetailId(), cmd.getOwnerType(), cmd.getOwnerId());
         }
     }
 
@@ -723,16 +723,16 @@ public class SalaryServiceImpl implements SalaryService {
             this.addToOrganizationSalaryGroup(addCommand);
 
             //  添加到薪酬组的个人设定中
-            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
+            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getUserDetailId(),cmd.getOwnerType(),cmd.getOwnerId());
             if(originVals.isEmpty()){
                 cmd.getEmployeeOriginVal().stream().forEach(r -> {
-                    this.createSalaryEmployeeOriginVal(r, cmd.getOwnerType(),cmd.getOwnerId(),
+                    createSalaryEmployeeOriginVal(r, cmd.getOwnerType(),cmd.getOwnerId(),
                             cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getUserDetailId());
                 });
             }else{
-                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdUserId(cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
+                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdDetailId(cmd.getSalaryGroupId(),cmd.getUserDetailId(),cmd.getOwnerType(),cmd.getOwnerId());
                 cmd.getEmployeeOriginVal().stream().forEach(s ->{
-                    this.createSalaryEmployeeOriginVal(s, cmd.getOwnerType(),cmd.getOwnerId(),
+                    createSalaryEmployeeOriginVal(s, cmd.getOwnerType(),cmd.getOwnerId(),
                             cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getUserDetailId());
                 });
             }
@@ -969,10 +969,11 @@ public class SalaryServiceImpl implements SalaryService {
                     continue;
                 }
                 //保存并置状态
-                Long userId = Long.valueOf(data.getSalaryEmployeeVal().get(0));
+                // TODO: 2017/7/13 改成memberid 
+                Long detailId = Long.valueOf(data.getSalaryEmployeeVal().get(1));
                 List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.
-                        listSalaryEmployeeOriginValByUserId(cmd.getOwnerType(), cmd.getOwnerId(), userId);
-                SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeBySalaryGroupIdAndUserId(cmd.getSalaryGroupId(),userId);
+                        listSalaryEmployeeOriginValByDetailId(cmd.getOwnerType(), cmd.getOwnerId(), detailId);
+                SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeBySalaryGroupIdAndDetailId(cmd.getSalaryGroupId(),detailId);
                 savePeriodSalaryGroup(employee,salaryEmployeePeriodVals,cmd.getSalaryGroupId());
             }
         }
@@ -1015,15 +1016,16 @@ public class SalaryServiceImpl implements SalaryService {
     private List<SalaryEmployeePeriodVal> processSalaryOriginValDataToPeriodVals(List<SalaryGroupEntity> importGroupEntities, ImportSalaryEmployeeOriginValDTO data, Long salaryGroupId, String ownerType, Long ownerId) {
         //  获取个人的项目字段
         //对于核算的导入导出 salaryGroupId是这个表的id
+        // TODO: 2017/7/13 改成member 
         SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(salaryGroupId);
-        Long userId = Long.valueOf(data.getSalaryEmployeeVal().get(0));
+        Long detailId = Long.valueOf(data.getSalaryEmployeeVal().get(1));
         List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.
-                listSalaryEmployeeOriginValByUserId(ownerType, ownerId, userId);
-        SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeBySalaryGroupIdAndUserId(salaryGroupId,userId);
+                listSalaryEmployeeOriginValByDetailId(ownerType, ownerId, detailId);
+        SalaryEmployee employee = salaryEmployeeProvider.findSalaryEmployeeBySalaryGroupIdAndDetailId(salaryGroupId,detailId);
 
         List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryGroup.getOrganizationGroupId());
         //如果没有originVal 用salaryGroupEntities生成orginVals
-        processSalaryEmployeeOriginValsBeforeCalculate(salaryGroupEntities, salaryEmployeeOriginVals,userId);
+        processSalaryEmployeeOriginValsBeforeCalculate(salaryGroupEntities, salaryEmployeeOriginVals,detailId);
         //把originVal用导入的data来替换
         processImportValueToOriginVal(importGroupEntities, salaryEmployeeOriginVals, data);
         //用salaryGroupEntities生成periodVals,并用originVal替换掉默认值
@@ -1214,9 +1216,18 @@ public class SalaryServiceImpl implements SalaryService {
         }).collect(Collectors.toList()));
         //2.查人员 periodGroupId 可以确定:公司,薪酬组和期数
         Organization org = organizationProvider.findOrganizationById(punchService.getTopEnterpriseId(cmd.getOwnerId()));
-        List<Long> userIds = punchService.listDptUserIds(org, cmd.getOrganizationId(), cmd.getKeyWords(), NormalFlag.YES.getCode());
-
-        List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployees(cmd.getSalaryPeriodGroupId(),userIds,cmd.getCheckFlag());
+        List<Long> detailIds = new ArrayList<>();
+        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        command.setKeywords(cmd.getKeyWords());
+        command.setPageSize(Integer.MAX_VALUE - 1);
+        command.setOrganizationId(cmd.getOrganizationId());
+        ListOrganizationMemberCommandResponse personels = organizationService.listOrganizationPersonnels(command, false);
+        if(null == personels.getMembers())
+            return null;
+        for(OrganizationMemberDTO memberDTO:personels.getMembers()){
+            detailIds.add(memberDTO.getDetailId());
+        }
+        List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployees(cmd.getSalaryPeriodGroupId(),detailIds,cmd.getCheckFlag());
 		if(null == result )
 			return response;
         Integer uncheckCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),SalaryGroupStatus.UNCHECK.getCode());
@@ -1234,7 +1245,7 @@ public class SalaryServiceImpl implements SalaryService {
 		SalaryPeriodEmployeeDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeDTO.class);
 		//岗位 
         // TODO: 2017/7/6 这里和荣楠的实现重叠了,重构一下
-        SalaryEmployeeDTO detailDTO = getPersonnelInfoByUserIdForSalary(r.getUserId());
+        SalaryEmployeeDTO detailDTO = getPersonnelInfoByDetailIdForSalary(r.getUserDetailId());
         dto.setJobPositions(detailDTO.getJobPosition());
         //批次名
 		Organization org = organizationProvider.findOrganizationById(r.getOrganizationGroupId());
@@ -1291,7 +1302,7 @@ public class SalaryServiceImpl implements SalaryService {
         this.dbProvider.execute((TransactionStatus status) -> {
             SalaryEmployee salaryEmployee = salaryEmployeeProvider.findSalaryEmployeeById(cmd.getSalaryEmployeeId());
             List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryEmployee.getOrganizationGroupId());
-            List<SalaryEmployeeOriginVal> originVals = salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(salaryEmployee.getOwnerType(), salaryEmployee.getOwnerId(), salaryEmployee.getUserId());
+            List<SalaryEmployeeOriginVal> originVals = salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(salaryEmployee.getOwnerType(), salaryEmployee.getOwnerId(), salaryEmployee.getUserDetailId());
             List<SalaryEmployeePeriodVal> periodVals = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(salaryEmployee.getId());
             salaryEmployeePeriodValProvider.deletePeriodVals(salaryEmployee.getId());
             cmd.getPeriodEmployeeEntities().stream().map(r ->{
@@ -1306,7 +1317,7 @@ public class SalaryServiceImpl implements SalaryService {
                 return null;
             });
             //前置处理originVals --主要是没有设置过个人的设置则继承批次设置
-            processSalaryEmployeeOriginValsBeforeCalculate(groupEntities, originVals, salaryEmployee.getUserId());
+            processSalaryEmployeeOriginValsBeforeCalculate(groupEntities, originVals, salaryEmployee.getUserDetailId());
 
             processSalaryEmployeePeriodVals(groupEntities, originVals, periodVals);
 
@@ -1461,7 +1472,7 @@ public class SalaryServiceImpl implements SalaryService {
             List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryPeriodGroup.getOrganizationGroupId(), NormalFlag.YES.getCode());
             List<SalaryEmployeePeriodVal> employeeEntityVals = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(employee.getId());
 			String entityTable = processEntityTableString(groupEntities, employeeEntityVals);
-            SalaryEmployeeDTO employeeDTO = getPersonnelInfoByUserIdForSalary(employee.getUserId());
+            SalaryEmployeeDTO employeeDTO = getPersonnelInfoByDetailIdForSalary(employee.getUserDetailId());
             String toAddress = employeeDTO.getEmail();
 			String emailSubject = "薪酬发放";
 			sendSalaryEmail(salaryPeriodGroup.getNamespaceId(),toAddress, emailSubject,salaryOrg.getEmailContent(), entityTable);
@@ -1577,23 +1588,19 @@ public class SalaryServiceImpl implements SalaryService {
                 LOGGER.error("salaryOrg no members :" + salaryOrg);
                 continue;
             }
-            List<Long> userIds = members.stream().map(r->{
-                return r.getTargetId();
-            }).collect(Collectors.toList());
-			for (Long userId : userIds) {
-                if(userId.equals(0L))
-                    continue;
+            for (UniongroupMemberDetailsDTO member : members) {
 				SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
-                employee.setUserId(userId);
-				employee.setSalaryGroupId(salaryGroup.getId());
+                employee.setUserId(member.getTargetId());
+                employee.setUserDetailId(member.getDetailId());
+                employee.setSalaryGroupId(salaryGroup.getId());
                 salaryEmployeePeriodValProvider.deletePeriodVals(employee.getId());
-                salaryEmployeeProvider.deleteSalaryEmployee(employee.getOwnerId(),employee.getUserId(),employee.getSalaryGroupId());
+                salaryEmployeeProvider.deleteSalaryEmployee(employee.getOwnerId(),employee.getUserDetailId(),employee.getSalaryGroupId());
 				salaryEmployeeProvider.createSalaryEmployee(employee);
 
 				//  获取个人的项目字段
-				List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(employee.getOwnerType(), employee.getOwnerId(), userId);
+				List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(employee.getOwnerType(), employee.getOwnerId(), member.getDetailId());
                 LOGGER.debug("\n entities ++ " + salaryGroupEntities);
-                processSalaryEmployeeOriginValsBeforeCalculate(salaryGroupEntities, salaryEmployeeOriginVals,userId);
+                processSalaryEmployeeOriginValsBeforeCalculate(salaryGroupEntities, salaryEmployeeOriginVals ,member.getDetailId());
                 LOGGER.debug("\n after before calculate : salary origin  Vals ++ " + salaryEmployeeOriginVals);
                 List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals = initSalaryEmployeePeriodVals(salaryGroupEntities,employee,salaryEmployeeOriginVals);
                 //3.循环每一个批次设置的字段项，给他做成本期的periodVal 如果entity不是计算公式就设置值，如果是公式就空
@@ -1650,17 +1657,17 @@ public class SalaryServiceImpl implements SalaryService {
     /**
      * 前置处理originVals --主要是没有设置过个人的设置则继承批次设置
      * */
-    private void processSalaryEmployeeOriginValsBeforeCalculate(List<SalaryGroupEntity> salaryGroupEntities, List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals, Long userId){
+    private void processSalaryEmployeeOriginValsBeforeCalculate(List<SalaryGroupEntity> salaryGroupEntities, List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals, Long detailId){
         //如果这个个人没设置vals 就用批次设置的默认值
         if (salaryEmployeeOriginVals.size() == 0) {
             for (SalaryGroupEntity entity : salaryGroupEntities) {
                 SalaryEmployeeOriginVal val = ConvertHelper.convert(entity, SalaryEmployeeOriginVal.class);
                 val.setGroupEntityId(entity.getId());
                 val.setGroupEntityName(entity.getName());
-                val.setUserId(userId);
+                val.setUserDetailId(detailId);
                 val.setOriginEntityId(entity.getId());
                 if (entity.getType().equals(SalaryEntityType.TEXT.getCode())) {
-                    val.setSalaryValue(processSalaryValue(entity.getOriginEntityId(),userId));
+                    val.setSalaryValue(processSalaryValue(entity.getOriginEntityId(),detailId));
                 } else if (entity.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
                     val.setSalaryValue(entity.getDefaultValue());
                 }
@@ -1669,8 +1676,8 @@ public class SalaryServiceImpl implements SalaryService {
         }
     }
 
-    private String processSalaryValue(Long originEntityId, Long userId) {
-        SalaryEmployeeDTO dto = getPersonnelInfoByUserIdForSalary(userId);
+    private String processSalaryValue(Long originEntityId, Long detailId) {
+        SalaryEmployeeDTO dto = getPersonnelInfoByDetailIdForSalary(detailId);
         if(originEntityId.equals(SalaryConstants.ENTITY_ID_GONGHAO)){
             return dto.getEmployeeNo();
         }else if(originEntityId.equals(SalaryConstants.ENTITY_ID_BUMEN)){
@@ -1771,13 +1778,23 @@ public class SalaryServiceImpl implements SalaryService {
 	public ListSalarySendHistoryResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd) {
 
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		List<Long> userIds = punchService.listDptUserIds(org, cmd.getOrganizationId(), cmd.getKeyWord(), NormalFlag.YES.getCode());
-		Calendar startClanedar = Calendar.getInstance();
+        List<Long> detailIds = new ArrayList<>();
+        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        command.setKeywords(cmd.getKeyWord());
+        command.setPageSize(Integer.MAX_VALUE - 1);
+        command.setOrganizationId(cmd.getOrganizationId());
+        ListOrganizationMemberCommandResponse personels = organizationService.listOrganizationPersonnels(command, false);
+        if(null == personels.getMembers())
+            return null;
+        for(OrganizationMemberDTO memberDTO:personels.getMembers()){
+            detailIds.add(memberDTO.getDetailId());
+        }
+        Calendar startClanedar = Calendar.getInstance();
 		startClanedar.setTimeInMillis(cmd.getBeginTime());
 		Calendar endClanedar = Calendar.getInstance();
 		endClanedar.setTimeInMillis(cmd.getEndTime());
 		List<String> periods = processPeriods(startClanedar,endClanedar);
-		List<SalaryEmployee> results = salaryEmployeeProvider.listSalaryEmployees(userIds, periods);
+		List<SalaryEmployee> results = salaryEmployeeProvider.listSalaryEmployees(detailIds, periods);
 		List<SalaryPeriodEmployeeDTO> employeeDtos = results.stream().map(r2 -> {
 			SalaryPeriodEmployeeDTO dto2 = processSalaryPeriodEmployeeDTO(r2);
 			return dto2;
@@ -1914,11 +1931,11 @@ public class SalaryServiceImpl implements SalaryService {
 
     //  added by R, for salaryGroup 20170706
     @Override
-    public SalaryEmployeeDTO getPersonnelInfoByUserIdForSalary(Long userId){
+    public SalaryEmployeeDTO getPersonnelInfoByDetailIdForSalary(Long detailId){
 //        PersonnelsDetailsV2Response response = new PersonnelsDetailsV2Response();
 
         SalaryEmployeeDTO result = new SalaryEmployeeDTO();
-        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByTargetId(userId);
+        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         Integer namespaceId = memberDetails.getNamespaceId();
         Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,memberDetails.getId(),OrganizationGroupType.DEPARTMENT.getCode());
         String department = "";

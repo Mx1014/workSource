@@ -23,11 +23,11 @@ public interface SalaryEmployeeProvider {
 
 	List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> userIds, Byte checkFlag);
 
-	void deleteSalaryEmployee(Long ownerId, Long userId, Long salaryGroupId);
+	void deleteSalaryEmployee(Long ownerId, Long detail_id, Long salaryGroupId);
 
 	void deleteSalaryEmployee(SalaryEmployee employee);
 
 	Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId,  Byte code);
 
-	SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndUserId(Long salaryGroupId, Long userId);
+	SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndDetailId(Long salaryGroupId, Long memberId);
 }
