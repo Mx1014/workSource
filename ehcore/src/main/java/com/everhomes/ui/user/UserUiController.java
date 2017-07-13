@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.ui.user.*;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,20 +29,6 @@ import com.everhomes.rest.family.ListNeighborUsersCommand;
 import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
-import com.everhomes.rest.ui.user.GetUserOpPromotionCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListContactBySceneRespose;
-import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
-import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-import com.everhomes.rest.ui.user.SceneContactDTO;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
 import com.everhomes.util.WebTokenGenerator;
@@ -299,5 +286,35 @@ public class UserUiController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /ui/user/getCurrentContactRealInfo</b>
+     * <p>获取当前用户信息的真实信息。</p>
+     * <p>获取信息包括用户姓名和手机号</p>
+     */
+    @RequestMapping("getCurrentContactRealInfo")
+    @RestReturn(value=SceneContactV2DTO.class)
+    public RestResponse getCurrentContactRealInfo(GetRelevantContactInfoCommand cmd) {
+        SceneContactV2DTO result = userService.getCurrentContactRealInfo(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /ui/user/getRelevantContactInfo</b>
+     * <p>获取当前用户信息的真实信息。</p>
+     * <p>获取信息包括用户姓名和手机号</p>
+     */
+    @RequestMapping("getRelevantContactInfo")
+    @RestReturn(value=SceneContactV2DTO.class)
+    public RestResponse getCurrentUserRealInfo(GetRelevantContactInfoCommand cmd) {
+        SceneContactV2DTO result = userService.getRelevantContactInfo(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

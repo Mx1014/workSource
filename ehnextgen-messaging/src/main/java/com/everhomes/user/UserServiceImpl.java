@@ -3900,4 +3900,19 @@ public class UserServiceImpl implements UserService {
 		}
 		return resp;
 	}
+
+    //added by R 20170713, 通讯录2.4增加
+    @Override
+	public SceneContactV2DTO getCurrentContactRealInfo(GetRelevantContactInfoCommand cmd){
+		User user = UserContext.current().getUser();
+		SceneContactV2DTO dto = new SceneContactV2DTO();
+		dto.setUserId(user.getId());
+		return dto;
+	}
+
+	@Override
+    public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd){
+	    return null;
+    }
+
 }
