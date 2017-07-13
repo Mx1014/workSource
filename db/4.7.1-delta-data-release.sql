@@ -156,6 +156,49 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41100,'', 'EhNamespaces', 999974,2);	
     
+
 -- 更换web页面
 update eh_web_menus  set data_type = 'react:/repair-management/task-list' where id  = 20210;
 update eh_web_menus  set data_type = 'react:/repair-management/task-list' where id  = 20240;
+
+-- 资源预约 add by sw 20170711
+UPDATE eh_rentalv2_resources set default_order = id;
+
+-- 重新同步user_organization表
+DELETE FROM eh_user_organizations;
+SET @user_organization_id = 0;
+INSERT INTO eh_user_organizations (
+id,
+namespace_id,
+user_id,
+organization_id,
+status,
+group_type,
+group_path,
+create_time,
+update_time,
+visible_flag
+) SELECT
+(@user_organization_id := @user_organization_id + 1),
+ifnull(eom.namespace_id, 0),
+eom.target_id,
+eom.organization_id,
+eom.status,
+eom.group_type,
+eom.group_path,
+eom.create_time,
+eom.update_time,
+eom.visible_flag
+FROM
+eh_organization_members eom
+LEFT JOIN eh_organizations eo ON eom.organization_id = eo.id
+WHERE
+eom.group_type = 'ENTERPRISE'
+AND
+eom.target_type = 'USER'
+GROUP BY
+eom.organization_id,
+eom.contact_token
+ORDER BY
+eom.id;
+

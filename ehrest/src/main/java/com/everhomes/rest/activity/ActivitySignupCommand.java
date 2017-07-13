@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *<li>position:职位</li>
  *<li>email:邮箱</li>
  *<li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
+ *<li>signupSourceFlag: 来源  参考{@link com.everhomes.rest.activity.SignupSourceFlag}</li>
  *</ul>
  */
 public class ActivitySignupCommand {
@@ -34,6 +35,7 @@ public class ActivitySignupCommand {
     private String position;
     private String email;
     private String payFlag;
+	private Byte signupSourceFlag;
     
     
     public ActivitySignupCommand() {
@@ -117,6 +119,14 @@ public class ActivitySignupCommand {
 
 	public void setPayFlag(String payFlag) {
 		this.payFlag = payFlag;
+	}
+
+	public Byte getSignupSourceFlag() {
+		return signupSourceFlag;
+	}
+
+	public void setSignupSourceFlag(Byte signupSourceFlag) {
+		this.signupSourceFlag = signupSourceFlag;
 	}
 
 	@Override
