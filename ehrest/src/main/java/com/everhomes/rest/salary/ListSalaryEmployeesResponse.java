@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  * <ul>返回值:
  * <li>salaryEmployeeDTO: 基础字段参考{@link com.everhomes.rest.salary.SalaryEmployeeDTO}</li>
  * <li>exceptionCount: 异常人数</li>
+ * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
+ * <li>nextPageAnchro</li>
  * </ul>
  */
 public class ListSalaryEmployeesResponse {
@@ -19,6 +21,10 @@ public class ListSalaryEmployeesResponse {
 	private List<SalaryEmployeeDTO> salaryEmployeeDTO;
 
 	private Integer exceptionCount;
+
+	private Integer nextPageOffset;
+
+	private Long nextPageAnchor;
 
 	public ListSalaryEmployeesResponse() {
 
@@ -43,6 +49,22 @@ public class ListSalaryEmployeesResponse {
 
 	public void setExceptionCount(Integer exceptionCount) {
 		this.exceptionCount = exceptionCount;
+	}
+
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
+	}
+
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
+	}
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 	@Override
