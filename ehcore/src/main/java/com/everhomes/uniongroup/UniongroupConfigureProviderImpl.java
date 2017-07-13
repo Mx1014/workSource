@@ -180,7 +180,6 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupConfiguresDao.class, null);
     }
 
-
     /**
      * UniongroupMemberDetail
      **/

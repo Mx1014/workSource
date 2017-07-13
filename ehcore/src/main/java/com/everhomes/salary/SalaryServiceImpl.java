@@ -1605,6 +1605,8 @@ public class SalaryServiceImpl implements SalaryService {
                 return r.getTargetId();
             }).collect(Collectors.toList());
 			for (Long userId : userIds) {
+                if(userId.equals(0L))
+                    continue;
 				SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
                 employee.setUserId(userId);
 				employee.setSalaryGroupId(salaryGroup.getId());
