@@ -110,6 +110,7 @@ CREATE TABLE `eh_salary_employees` (
   `salary_period` VARCHAR(32) COMMENT 'example:201705',
   `user_id` BIGINT ,
   `user_detail_id` BIGINT ,
+  `member_id` BIGINT ,
   `creator_uid` BIGINT COMMENT'人员id',
   `organization_group_id` BIGINT COMMENT '标签(统计分类) organization group表pk',  
   `salary_group_id` BIGINT COMMENT '标签(统计分类) salary group表pk',   
