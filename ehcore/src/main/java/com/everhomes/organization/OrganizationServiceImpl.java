@@ -6885,7 +6885,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private List<Long> getChildOrganizationIds(Long organizationId, List<String> groupTypes){
         List<Long> orgnaizationIds = new ArrayList<>();
-        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organizationId, groupTypes);
+        Organization org = checkOrganization(organizationId);
+        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
         for (Organization organization: organizations) {
             orgnaizationIds.add(organization.getId());
         }
