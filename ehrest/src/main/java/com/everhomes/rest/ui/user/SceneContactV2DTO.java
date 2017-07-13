@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>detailId: 联系人档案id</li>
  * <li>enterpriseName: 公司名称</li>
  * <li>contactName: 联系人名字</li>
+ * <li>contactAvatar: 联系人头像</li>
  * <li>contactEnglishName: 联系人英文名字</li>
  * <li>jobPosition: 联系人岗位</li>
  * <li>contactToken: 联系人号码</li>
@@ -20,6 +21,8 @@ public class SceneContactV2DTO {
     private Long userId;
 
     private Long detailId;
+
+    private String contactAvatar;
 
     private String enterpriseName;
 
@@ -68,6 +71,14 @@ public class SceneContactV2DTO {
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
+    }
+
+    public String getContactAvatar() {
+        return contactAvatar;
+    }
+
+    public void setContactAvatar(String contactAvatar) {
+        this.contactAvatar = contactAvatar;
     }
 
     public String getContactEnglishName() {
