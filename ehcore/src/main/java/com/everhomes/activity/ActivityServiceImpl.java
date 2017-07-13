@@ -550,7 +550,7 @@ public class ActivityServiceImpl implements ActivityService {
 		 }
 
 		 // 来自微信的请求支持支付报名   edit by yanjun 20170713
-		 if(cmd.getSignupSourceFlag() != null || cmd.getSignupSourceFlag().byteValue() == SignupSourceFlag.WECHAT.getCode()){
+		 if(cmd.getSignupSourceFlag() != null && cmd.getSignupSourceFlag().byteValue() == SignupSourceFlag.WECHAT.getCode()){
 			 return;
 		 }
 
