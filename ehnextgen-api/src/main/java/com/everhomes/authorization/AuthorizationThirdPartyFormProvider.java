@@ -13,6 +13,6 @@ public interface AuthorizationThirdPartyFormProvider {
 
 	List<AuthorizationThirdPartyForm> listAuthorizationThirdPartyForm();
 
-	List<AuthorizationThirdPartyForm> listFormSourceByNamespaceId(String ownerType,Long ownerId);
+	List<AuthorizationThirdPartyForm> listFormSourceByOwner(String ownerType,Long ownerId);
 
 }

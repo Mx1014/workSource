@@ -85,7 +85,7 @@ public class AuthorizationThirdPartyFormProviderImpl implements AuthorizationThi
 	}
 
 	@Override
-	public List<AuthorizationThirdPartyForm> listFormSourceByNamespaceId(String ownerType,Long ownerId) {
+	public List<AuthorizationThirdPartyForm> listFormSourceByOwner(String ownerType,Long ownerId) {
 		return getReadOnlyContext().select().from(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS)
 		.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.OWNER_TYPE.eq(ownerType))
 		.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.OWNER_ID.eq(ownerId))

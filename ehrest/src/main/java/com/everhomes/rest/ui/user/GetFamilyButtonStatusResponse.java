@@ -19,6 +19,16 @@ public class GetFamilyButtonStatusResponse {
 	private Byte modifyFlag;
 	private Byte familiesFlag;
 	private Byte qrcodeFlag;
+	
+	public GetFamilyButtonStatusResponse() {
+	}
+	public GetFamilyButtonStatusResponse(String title, Byte modifyFlag, Byte familiesFlag, Byte qrcodeFlag) {
+		super();
+		this.title = title;
+		this.modifyFlag = modifyFlag;
+		this.familiesFlag = familiesFlag;
+		this.qrcodeFlag = qrcodeFlag;
+	}
 	public String getTitle() {
 		return title;
 	}

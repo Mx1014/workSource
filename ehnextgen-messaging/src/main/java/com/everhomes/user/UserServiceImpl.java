@@ -50,6 +50,8 @@ import com.everhomes.acl.Role;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.authorization.AuthorizationThirdPartyButton;
+import com.everhomes.authorization.AuthorizationThirdPartyButtonProvider;
 import com.everhomes.authorization.AuthorizationThirdPartyForm;
 import com.everhomes.authorization.AuthorizationThirdPartyFormProvider;
 import com.everhomes.bigcollection.Accessor;
@@ -146,6 +148,7 @@ import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.ContentBriefDTO;
+import com.everhomes.rest.ui.user.FamilyButtonStatusType;
 import com.everhomes.rest.ui.user.FormSourceDTO;
 import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
@@ -378,6 +381,9 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private AuthorizationThirdPartyFormProvider authorizationThirdPartyFormProvider;
+    
+    @Autowired
+    private AuthorizationThirdPartyButtonProvider authorizationThirdPartyButtonProvider;
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
@@ -3991,7 +3997,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ListAuthFormsResponse listAuthForms() {
 		int namespaceId = UserContext.getCurrentNamespaceId();
-		List<AuthorizationThirdPartyForm> list = authorizationThirdPartyFormProvider.listFormSourceByNamespaceId(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
+		List<AuthorizationThirdPartyForm> list = authorizationThirdPartyFormProvider.listFormSourceByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
 		ListAuthFormsResponse response = new ListAuthFormsResponse();
 		response.setSourceDto(list.stream().map(r->ConvertHelper.convert(r, FormSourceDTO.class)).collect(Collectors.toList()));
 		return response;
@@ -4017,6 +4023,11 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public GetFamilyButtonStatusResponse getFamilyButtonStatus(){
-		return null;
+		int namespaceId = UserContext.getCurrentNamespaceId();
+		AuthorizationThirdPartyButton buttonstatus = authorizationThirdPartyButtonProvider.getButtonStatusByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
+		GetFamilyButtonStatusResponse response = ConvertHelper.convert(buttonstatus, GetFamilyButtonStatusResponse.class);
+		if(response == null)
+			response = new GetFamilyButtonStatusResponse("家庭信息",FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode());
+		return response;
 	}
 }
