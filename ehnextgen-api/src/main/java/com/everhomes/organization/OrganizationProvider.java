@@ -291,6 +291,7 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
 
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
+
 	List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize);
 	List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
@@ -413,5 +414,7 @@ public interface OrganizationProvider {
 	List<Organization> listHeadEnterprises();
 
 	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
+
+	List<OrganizationMember> listOrganizationMemberByPathHavingDetailId(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
 }
 
