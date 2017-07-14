@@ -236,8 +236,8 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 				JinyiCard newCard = getCardInfo(order.getPlateNumber());
 
 				if (null != newCard) {
-					String expiredate = card.getExpiredate() + " 23:59:59";
-					String effectdate = card.getEffectdate() + " 00:00:00";
+					String expiredate = newCard.getExpiredate() + " 23:59:59";
+					String effectdate = newCard.getEffectdate() + " 00:00:00";
 					LocalDateTime expireTime = LocalDateTime.parse(expiredate, dtf2);
 					LocalDateTime effectTime = LocalDateTime.parse(effectdate, dtf2);
 
