@@ -196,7 +196,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 //        	item.setFieldValue(generalContent(entity,documentflows));
 //		}
         ApplyEntryResponse resp = new ApplyEntryResponse();
-        processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
+        resp.setUrl(processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
         item.setFieldValue(StringHelper.toJsonString(resp));
         items.add(item);
         dto.getValues().addAll(items);
