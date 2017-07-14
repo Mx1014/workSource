@@ -48,6 +48,7 @@ import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.general_approval.PostGeneralFormCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -153,17 +154,17 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
         PostApprovalFormItem item = new PostApprovalFormItem();
         item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
         item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
-        if(PERSONAL_AUTHORIZATION.equals(type)){
-        	String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
-    				AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL_S);
-    		String[] documentflows = documentflow.split("\\|");
-        	item.setFieldValue(generalContent(entity,documentflows));
-		}else{
-			String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
-    				AuthorizationErrorCode.ORGANIZATION_BACK_CODE_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.ORGANIZATION_BACK_CODE_DETAIL_S);
-    		String[] documentflows = documentflow.split("\\|");
-        	item.setFieldValue(generalContent(entity,documentflows));
-		}
+//        if(PERSONAL_AUTHORIZATION.equals(type)){
+//        	String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+//    				AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL_S);
+//    		String[] documentflows = documentflow.split("\\|");
+//        	item.setFieldValue(generalContent(entity,documentflows));
+//		}else{
+//			String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+//    				AuthorizationErrorCode.ORGANIZATION_BACK_CODE_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.ORGANIZATION_BACK_CODE_DETAIL_S);
+//    		String[] documentflows = documentflow.split("\\|");
+//        	item.setFieldValue(generalContent(entity,documentflows));
+//		}
         item.setFieldValue(processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
         items.add(item);
         dto.getValues().addAll(items);
@@ -386,7 +387,20 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		List<PostApprovalFormItem> values = cmd.getValues();
 		Map<String, String> params= new HashMap<String,String>();
 		for (PostApprovalFormItem item : values) {
-			params.put(item.getFieldName(), item.getFieldValue());
+			GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(item.getFieldType());
+			switch (fieldType) {
+			case SINGLE_LINE_TEXT:
+			case MULTI_LINE_TEXT:
+			case INTEGER_TEXT:
+			case NUMBER_TEXT:
+			case DROP_BOX:
+			case DATE:
+				PostApprovalFormTextValue value = JSONObject.parseObject(item.getFieldValue(),PostApprovalFormTextValue.class);
+				params.put(item.getFieldName(), value.getText());
+				break;
+			default:
+				break;
+			}
 			if(item.getFieldName().equals("certificateType")){
 				params.put(item.getFieldName(), "1");
 			}
