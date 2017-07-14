@@ -209,6 +209,29 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 		return items;
 	}
+
+	@Override
+	public List<LaunchPadItem> listLaunchPadItemsByItemGroup(Integer namespaceId, String itemLocation,String itemGroup){
+		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+
+		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup);
+		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq(itemLocation));
+		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
+		step.where(condition).fetch().map((r) ->{
+			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+			return null;
+		});
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Query launch pad items by tag and scope, sql=" + step.getSQL());
+			LOGGER.debug("Query launch pad items by tag and scope, bindValues=" + step.getBindValues());
+		}
+
+		return items;
+	}
+
 	@Override
 	public List<LaunchPadItem> getLaunchPadItemsByKeyword(String keyword, int offset, int pageSize) {
 
@@ -517,5 +540,12 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		EhItemServiceCategriesDao dao = new EhItemServiceCategriesDao(context.configuration());
 		dao.insert(itemServiceCategry);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhItemServiceCategries.class, null);
+	}
+
+	@Override
+	public void deleteItemServiceCategryById(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhItemServiceCategriesDao dao = new EhItemServiceCategriesDao(context.configuration());
+		dao.deleteById(id);
 	}
 }

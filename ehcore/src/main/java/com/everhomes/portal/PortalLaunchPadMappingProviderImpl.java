@@ -36,7 +36,6 @@ public class PortalLaunchPadMappingProviderImpl implements PortalLaunchPadMappin
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalLaunchPadMappings.class));
 		portalLaunchPadMapping.setId(id);
 		portalLaunchPadMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalLaunchPadMapping.setCreatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().insert(portalLaunchPadMapping);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalLaunchPadMappings.class, null);
 	}
@@ -46,6 +45,12 @@ public class PortalLaunchPadMappingProviderImpl implements PortalLaunchPadMappin
 		assert (portalLaunchPadMapping.getId() != null);
 		getReadWriteDao().update(portalLaunchPadMapping);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalLaunchPadMappings.class, portalLaunchPadMapping.getId());
+	}
+
+	@Override
+	public void deletePortalLaunchPadMapping(Long id) {
+		assert (id!= null);
+		getReadWriteDao().deleteById(id);
 	}
 
 	@Override

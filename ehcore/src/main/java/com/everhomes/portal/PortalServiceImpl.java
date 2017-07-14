@@ -9,6 +9,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.launchpad.ItemServiceCategry;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadLayout;
 import com.everhomes.launchpad.LaunchPadProvider;
@@ -20,6 +21,9 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.MoreActionData;
+import com.everhomes.rest.common.NavigationActionData;
+import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.portal.*;
 import com.everhomes.rest.ui.user.SceneType;
@@ -400,6 +404,7 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public PortalItemDTO createPortalItem(CreatePortalItemCommand cmd) {
 		PortalItemGroup portalItemGroup = checkPortalItemGroup(cmd.getItemGroupId());
+		PortalLayout portalLayout = checkPortalLayout(portalItemGroup.getLayoutId());
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(portalItemGroup.getNamespaceId());
 		PortalItem portalItem = ConvertHelper.convert(cmd, PortalItem.class);
@@ -410,8 +415,9 @@ public class PortalServiceImpl implements PortalService {
 		portalItem.setCreatorUid(user.getId());
 		portalItem.setOperatorUid(user.getId());
 		portalItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+
 		portalItem.setGroupName(portalItemGroup.getName());
-		portalItem.setItemLocation("/" + portalItem.getGroupName());
+		portalItem.setItemLocation(getItemLocation(portalLayout.getName()));
 		this.dbProvider.execute((status) -> {
 			portalItemProvider.createPortalItem(portalItem);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
@@ -1042,25 +1048,159 @@ public class PortalServiceImpl implements PortalService {
 //		launchPadProvider.createLaunchPadItem();
 	}
 
-	public void publishGroupItem(PortalItemGroup itemGroup){
+	public void publishItem(PortalItemGroup itemGroup){
+		User user = UserContext.current().getUser();
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId());
-		List<LaunchPadItem> items = new ArrayList<>();
 		for (PortalItem portalItem: portalItems) {
-			List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
-			for (PortalContentScope scope: contentScopes) {
+			if(PortalItemStatus.ACTIVE == PortalItemStatus.fromCode(portalItem.getStatus())){
 
+				List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
 
+				if(null != mappings && mappings.size() > 0){
+					for (PortalLaunchPadMapping mapping: mappings) {
+						launchPadProvider.deleteLaunchPadItem(mapping.getLaunchPadContentId());
+						portalLaunchPadMappingProvider.deletePortalLaunchPadMapping(mapping.getId());
+					}
+				}
+				List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
+				for (PortalContentScope scope: contentScopes) {
+					LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
+					if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
+						item.setScopeCode(ScopeType.RESIDENTIAL.getCode());
+						item.setScopeId(scope.getContentId());
+						item.setSceneType(SceneType.DEFAULT.getCode());
+					}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
+						item.setScopeCode(ScopeType.COMMUNITY.getCode());
+						item.setScopeId(scope.getContentId());
+						item.setSceneType(SceneType.PARK_TOURIST.getCode());
+					}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
+						item.setScopeCode(ScopeType.PM.getCode());
+						item.setScopeId(scope.getContentId());
+						item.setSceneType(SceneType.PM_ADMIN.getCode());
+					}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
+						item.setScopeCode(ScopeType.ORGANIZATION.getCode());
+						item.setScopeId(scope.getContentId());
+						item.setSceneType(SceneType.PARK_TOURIST.getCode());
+					}
 
+					if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
+						item.setActionType(ActionType.NAVIGATION.getCode());
+						LayoutActionData data = (LayoutActionData)StringHelper.fromJsonString(portalItem.getActionData(), LayoutActionData.class);
+						PortalLayout layout = portalLayoutProvider.findPortalLayoutById(data.getLayoutId());
+						if(null != layout){
+							NavigationActionData actionData = new NavigationActionData();
+							actionData.setItemLocation(getItemLocation(layout.getName()));
+							actionData.setLayoutName(layout.getName());
+							actionData.setTitle(layout.getLabel());
+							item.setActionData(StringHelper.toJsonString(actionData));
+						}else{
+							LOGGER.error("Unable to find the portal layout.id = {}, actionData = {}", data.getLayoutId(), portalItem.getActionData());
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+									"Unable to find the portal layout.");
+						}
 
-				LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
-				item.setAppId(AppConstants.APPID_DEFAULT);
-				item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
-				item.setMinVersion(1L);
-				item.setItemGroup(portalItem.getName());
-				item.setItemLabel(portalItem.getLabel());
+					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){
+						//复杂
+					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ZUOLINURL){
+						item.setActionType(ActionType.OFFICIAL_URL.getCode());
+						item.setActionData(portalItem.getActionData());
+					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.THIRDURL){
+						item.setActionType(ActionType.THIRDPART_URL.getCode());
+						item.setActionData(portalItem.getActionData());
+					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
+						AllOrMoreActionData data = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
+						if(AllOrMoreType.fromCode(data.getType()) == AllOrMoreType.ALL){
+							item.setActionType(ActionType.ALL_BUTTON.getCode());
+						}else{
+							item.setActionType(ActionType.MORE_BUTTON.getCode());
+						}
+						MoreActionData actionData = new MoreActionData();
+						actionData.setItemLocation(portalItem.getItemLocation());
+						actionData.setItemGroup(portalItem.getGroupName());
+						item.setActionData(StringHelper.toJsonString(actionData));
+					}
+
+					item.setAppId(AppConstants.APPID_DEFAULT);
+					item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+					item.setMinVersion(1L);
+					item.setItemGroup(portalItem.getGroupName());
+					item.setItemLabel(portalItem.getLabel());
+					item.setItemName(portalItem.getName());
+					item.setDeleteFlag(DeleteFlagType.YES.getCode());
+					item.setScaleType(ScaleType.TAILOR.getCode());
+					item.setServiceCategryId(portalItem.getItemCategoryId());
+					launchPadProvider.createLaunchPadItem(item);
+
+					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+					mapping.setContentType(EntityType.PORTAL_ITEM.getCode());
+					mapping.setPortalContentId(portalItem.getId());
+					mapping.setLaunchPadContentId(item.getId());
+					mapping.setCreatorUid(user.getId());
+					portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+				}
 			}
-
 		}
+	}
+
+
+	public void publishItemCategory(Integer namespaceId){
+		User user = UserContext.current().getUser();
+		PortalItem allItem = getItemAllOrMore(namespaceId, AllOrMoreType.ALL);
+		AllOrMoreActionData actionData = null;
+		if(null != allItem)actionData = (AllOrMoreActionData)StringHelper.fromJsonString(allItem.getActionData(), AllOrMoreActionData.class);
+		List<PortalItemCategory> categorys = portalItemCategoryProvider.listPortalItemCategory(namespaceId);
+		for (PortalItemCategory category: categorys) {
+			List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId());
+			List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId(), null);
+			if(null != mappings && mappings.size() > 0){
+				for (PortalLaunchPadMapping mapping: mappings) {
+					launchPadProvider.deleteItemServiceCategryById(mapping.getLaunchPadContentId());
+					portalLaunchPadMappingProvider.deletePortalLaunchPadMapping(mapping.getId());
+				}
+			}
+			for (PortalContentScope scope: contentScopes) {
+				ItemServiceCategry itemCategory = ConvertHelper.convert(category, ItemServiceCategry.class);
+				if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
+					itemCategory.setSceneType(SceneType.DEFAULT.getCode());
+				}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
+//					itemCategory.setScopeCode(ScopeType.COMMUNITY.getCode());
+//					itemCategory.setScopeId(scope.getContentId());
+					itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
+				}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
+//					itemCategory.setScopeCode(ScopeType.PM.getCode());
+//					itemCategory.setScopeId(scope.getContentId());
+					itemCategory.setSceneType(SceneType.PM_ADMIN.getCode());
+				}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
+//					itemCategory.setScopeCode(ScopeType.ORGANIZATION.getCode());
+//					itemCategory.setScopeId(scope.getContentId());
+					itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
+				}
+				itemCategory.setStatus(ItemServiceCategryStatus.ACTIVE.getCode());
+				itemCategory.setCreatorUid(user.getId());
+
+				if(StringUtils.isEmpty(category.getIconUri()) && null != actionData){
+					itemCategory.setIconUri(actionData.getDefUri());
+				}
+
+				if(AlignType.CENTER == AlignType.fromCode(category.getAlign()))
+					itemCategory.setAlign(ItemServiceCategryAlign.CENTER.getCode());
+				else if(AlignType.LEFT == AlignType.fromCode(category.getAlign()))
+					itemCategory.setAlign(ItemServiceCategryAlign.LEFT.getCode());
+
+				if(null == ItemServiceCategryAlign.fromCode(itemCategory.getAlign())  && null != actionData){
+					if(AlignType.CENTER == AlignType.fromCode(actionData.getAlign()))
+						itemCategory.setAlign(ItemServiceCategryAlign.CENTER.getCode());
+					else if(AlignType.LEFT == AlignType.fromCode(actionData.getAlign()))
+						itemCategory.setAlign(ItemServiceCategryAlign.LEFT.getCode());
+				}
+				itemCategory.setOrder(category.getDefaultOrder());
+				launchPadProvider.createItemServiceCategry(itemCategory);
+			}
+		}
+	}
+
+	private String getItemLocation(String layoutName){
+		return "/" + layoutName;
 	}
 
 	public static void main(String[] args) {

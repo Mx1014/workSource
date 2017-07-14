@@ -35,4 +35,6 @@ public interface LaunchPadProvider {
 	LaunchPadItem findLaunchPadItemByTargetAndScopeAndSence(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId, SceneType sceneType);
     List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String sceneType);
     void createItemServiceCategry(ItemServiceCategry itemServiceCategry);
+    void deleteItemServiceCategryById(Long id);
+    List<LaunchPadItem> listLaunchPadItemsByItemGroup(Integer namespaceId, String itemLocation,String itemGroup);
 }
