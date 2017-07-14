@@ -60,7 +60,9 @@ public class UniongroupServiceImpl implements UniongroupService {
         List<UniongroupConfigures> configureList = new ArrayList<>();
         List<UniongroupTarget> targets = cmd.getTargets();
         if (targets != null) {
-            targets.stream().filter(r ->{return r.getId() != null && r.getType() != null;}).map(r -> {
+            targets.stream().filter(r -> {
+                return r.getId() != null && r.getType() != null;
+            }).map(r -> {
                 //------------------------------重复项过滤规则：后更新的规则覆盖先更新的规则------------------------------
                 UniongroupConfigures old_uc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, r.getId());
                 if (old_uc != null) {
@@ -203,7 +205,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     public List<UniongroupConfiguresDTO> getConfiguresListByGroupId(GetUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<UniongroupConfigures> configures = this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, cmd.getGroupId());
-        if(configures != null){
+        if (configures != null) {
             return configures.stream().map(r -> {
                 return ConvertHelper.convert(r, UniongroupConfiguresDTO.class);
             }).collect(Collectors.toList());
@@ -244,7 +246,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public ListUniongroupMemberDetailResponse listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd) {
-       Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         SearchUniongroupDetailCommand search_cmd = new SearchUniongroupDetailCommand();
 
@@ -253,7 +255,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         search_cmd.setEnterpriseId(cmd.getOwnerId());
         if (cmd.getKeywords() != null)
             search_cmd.setKeyword(cmd.getKeywords());
-        if(cmd.getGroupId() != null)
+        if (cmd.getGroupId() != null)
             search_cmd.setGroupId(cmd.getGroupId());
 
         search_cmd.setNamespaceId(namespaceId);
@@ -261,9 +263,10 @@ public class UniongroupServiceImpl implements UniongroupService {
         search_cmd.setPageSize(cmd.getPageSize());
         List<UniongroupMemberDetail> list = uniongroupSearcher.query(search_cmd);
 
+
         ListUniongroupMemberDetailResponse response = new ListUniongroupMemberDetailResponse();
 
-        if(list != null && list.size() > 0){
+        if (list != null && list.size() > 0) {
             response.setPageAnchor(search_cmd.getPageAnchor());
             response.setPageSize(search_cmd.getPageSize());
             response.setUniongroupMemberDetailList(list);
@@ -307,33 +310,33 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId){
-        return this.uniongroupConfigureProvider.countUnionGroupMemberDetailsByOrgId(namespaceId,ownerId);
+    public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId) {
+        return this.uniongroupConfigureProvider.countUnionGroupMemberDetailsByOrgId(namespaceId, ownerId);
     }
 
     @Override
-    public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId){
-        return this.uniongroupConfigureProvider.listUniongroupMemberDetailsCount(namespaceId,groupIds,ownerId);
+    public List<Object[]> listUniongroupMemberCount(Integer namespaceId, List<Long> groupIds, Long ownerId) {
+        return this.uniongroupConfigureProvider.listUniongroupMemberDetailsCount(namespaceId, groupIds, ownerId);
     }
 
     @Override
-    public List<Object[]> listUniongroupMemberDetailsInfo(Integer namespaceId, Long salaryGroupIds, Long ownerId){
-        return this.uniongroupConfigureProvider.listUniongroupMemberDetailsInfo(namespaceId,salaryGroupIds,ownerId);
+    public List<Object[]> listUniongroupMemberDetailsInfo(Integer namespaceId, Long salaryGroupIds, Long ownerId) {
+        return this.uniongroupConfigureProvider.listUniongroupMemberDetailsInfo(namespaceId, salaryGroupIds, ownerId);
     }
 
     @Override
-    public void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId){
-        this.uniongroupConfigureProvider.deleteUniongroupConfigresByGroupId(groupId,organizationId);
+    public void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId) {
+        this.uniongroupConfigureProvider.deleteUniongroupConfigresByGroupId(groupId, organizationId);
     }
 
     @Override
-    public void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId){
-        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailByGroupId(groupId,organizationId);
+    public void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId) {
+        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailByGroupId(groupId, organizationId);
     }
 
     @Override
-    public List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId){
-        return this.uniongroupConfigureProvider.listUniongroupMemberGroupIds(namespaceId,ownerId);
+    public List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId) {
+        return this.uniongroupConfigureProvider.listUniongroupMemberGroupIds(namespaceId, ownerId);
     }
 
 
@@ -341,7 +344,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     public void reallocatedUnion(Long enterpriseId, List<Long> departmentIds, OrganizationMember organizationMember) {
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         Integer namespaceId = 1000000;
-                //根据层级关系将departmentIds排序
+        //根据层级关系将departmentIds排序
         Organization organization = checkOrganization(enterpriseId);
         List<Organization> departments = this.organizationProvider.listOrganizationsByIds(departmentIds);
         //按层级退化
@@ -356,20 +359,20 @@ public class UniongroupServiceImpl implements UniongroupService {
 //        });
         Long groupId = 0L;
         /**判断departmentIds是否已经被分配薪酬组**/
-        for(int i = departmentIds.size()-1; i >= 0; i--){
-            UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId , departmentIds.get(i));
-            if(uniongroupConfigures != null){
+        for (int i = departmentIds.size() - 1; i >= 0; i--) {
+            UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, departmentIds.get(i));
+            if (uniongroupConfigures != null) {
                 groupId = uniongroupConfigures.getGroupId();
                 break;
             }
         }
 
         /**如果没有查询到被分配的薪酬组**/
-        if(groupId == 0){
+        if (groupId == 0) {
             //1 进化成独立无包含关系的集合
             List<Organization> departs_one = new ArrayList<>();
             List<String> pathList = new ArrayList<>();
-            departments.stream().map(r->{
+            departments.stream().map(r -> {
                 if (!checkMaxPathOrganizationList(r.getPath(), pathList)) {
                     pathList.add(r.getPath());
                     departs_one.add(r);
@@ -379,28 +382,28 @@ public class UniongroupServiceImpl implements UniongroupService {
 
             //2 从该集合最后一项开始找起，直到找到应有的薪酬组
             UniongroupConfigures unc = null;
-            for(int i = departs_one.size()-1; i >= 0; i--){
+            for (int i = departs_one.size() - 1; i >= 0; i--) {
                 Organization _org = departs_one.get(i);
-                while(unc == null){
+                while (unc == null) {
                     //判断是否在配置表中
-                    unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId , _org.getId());
+                    unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, _org.getId());
                     _org = this.organizationProvider.findOrganizationById(_org.getParentId());
-                    if(_org == null || unc != null){
+                    if (_org == null || unc != null) {
                         break;
                     }
                 }
-                if(unc != null){
+                if (unc != null) {
                     break;
                 }
             }
             //3 如果循环后找到薪酬组
-            if(unc != null){
+            if (unc != null) {
                 groupId = unc.getGroupId();
             }
         }
 
         //找到可以使用的薪酬组id
-        if(groupId != 0){
+        if (groupId != 0) {
             EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
             uniongroupMemberDetails.setGroupId(groupId);
             uniongroupMemberDetails.setGroupType(UniongroupType.SALARYGROUP.getCode());
@@ -421,12 +424,27 @@ public class UniongroupServiceImpl implements UniongroupService {
         }
     }
 
-    /**校验path是否被pathList中的任意项包含**/
-    private boolean checkMaxPathOrganizationList(String path, List<String> pathList){
-        if(pathList.size() > 0){
-            for(String pl:pathList){
+    @Override
+    public void syncUniongroupAfterLeaveTheJob(Long detailId) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //1.删除配置表和关系表中的数据
+        UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, detailId);
+        if (uniongroupConfigures != null)
+            this.uniongroupConfigureProvider.deleteUniongroupConfigres(uniongroupConfigures);
+        UniongroupMemberDetail uniongroupMemberDetail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId);
+        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
+        //2.删除搜索引擎中的失效索引
+        this.uniongroupSearcher.deleteById(uniongroupMemberDetail.getId());
+    }
+
+    /**
+     * 校验path是否被pathList中的任意项包含
+     **/
+    private boolean checkMaxPathOrganizationList(String path, List<String> pathList) {
+        if (pathList.size() > 0) {
+            for (String pl : pathList) {
                 //如果该path已经被包含
-                if(pl.indexOf(path) > -1){
+                if (pl.indexOf(path) > -1) {
                     return true;
                 }
             }

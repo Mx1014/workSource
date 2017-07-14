@@ -45,7 +45,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
     @Override
     public void deleteById(Long id) {
-
+        deleteById(id.toString());
     }
 
     @Override

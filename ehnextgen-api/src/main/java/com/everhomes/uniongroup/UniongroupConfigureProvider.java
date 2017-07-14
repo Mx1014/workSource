@@ -38,6 +38,8 @@ public interface UniongroupConfigureProvider {
 
     UniongroupMemberDetail findUniongroupMemberDetailById(Long id);
 
+    UniongroupMemberDetail findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId);
+
     List<UniongroupMemberDetail> listUniongroupMemberDetail(Integer namespaceId, Long groupId, Long ownerId);
 
     void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds);

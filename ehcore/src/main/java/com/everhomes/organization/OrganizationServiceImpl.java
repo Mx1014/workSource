@@ -10596,6 +10596,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
             this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.LEAVE.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
+            //离职时薪酬组相关的改动
+            this.uniongroupService.syncUniongroupAfterLeaveTheJob(cmd.getDetailId());
         }
     }
 

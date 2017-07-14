@@ -52,4 +52,7 @@ public interface UniongroupService {
      * 新增或修改人员重新分配薪酬组
      **/
     void reallocatedUnion(Long enterpriseId, List<Long> departmentIds, OrganizationMember organizationMember);
+
+    /**离职时薪酬组相关的改动**/
+    void syncUniongroupAfterLeaveTheJob(Long detailId);
 }
