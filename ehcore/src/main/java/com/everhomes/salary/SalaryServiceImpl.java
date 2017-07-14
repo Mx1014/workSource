@@ -547,6 +547,8 @@ public class SalaryServiceImpl implements SalaryService {
             command.setOrganizationId(cmd.getDepartmentId());
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             command.setKeywords(cmd.getKeywords());
+        if (!StringUtils.isEmpty(cmd.getPageAnchor()))
+            command.setPageAnchor(cmd.getPageAnchor());
         command.setPageSize(cmd.getPageSize());
         ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationPersonnels(command, false);
 
@@ -832,11 +834,9 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
             //  根据批次 id 查找批次具体内容
-            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(salaryGroup.getOrganizationGroupId());
+            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listPeriodSalaryWithExportRegular(cmd.getSalaryGroupId());
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-
             ByteArrayOutputStream out = null;
             XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(results,organization.getName());
             createOutPutSteam(workbook, out, httpServletResponse);
@@ -1135,10 +1135,10 @@ public class SalaryServiceImpl implements SalaryService {
 	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
+            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
             //  根据批次 id 查找批次具体内容
-            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listPeriodSalaryWithExportRegular(cmd.getSalaryGroupId());
+            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(salaryGroup.getOrganizationGroupId());
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-
             ByteArrayOutputStream out = null;
             XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(results,organization.getName());
             createOutPutSteam(workbook, out, httpServletResponse);
