@@ -11,3 +11,16 @@ INSERT INTO `eh_authorization_third_party_forms` (`id`, `namespace_id`, `owner_t
 
 -- buttons状态
 INSERT INTO `eh_authorization_third_party_buttons` (`id`, `namespace_id`, `owner_type`, `owner_id`, `title`, `modify_flag`, `families_flag`, `qrcode_flag`, `delete_flag`, `blank_detail`,`button_detail`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES (1, @namespace_id, 'EhNamespaces', @namespace_id, '公寓信息', 0, 1, 0, 0,'您还未加入任何公寓，快来加入吧！','申请认证', NULL, NOW(), NULL, NOW());
+
+-- 文本
+set @eh_locale_strings_id = (select MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'work_flow_title', 'zh_CN', '姓名 : |证件号码 : |个人认证申请|组织机构代码 : |企业联系人 : |企业认证申请');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'personal_back_code_detail', 'zh_CN', '很遗憾，您的认证未成功：|1、请检测信息填写是否正确，如填写有误，请重新提交|2、如填写无误，请到携带相关证件管理处核对信息|您已退租，如有疑问请联系客服|恭喜您，成为我们的一员，您承租的地址信息如下：|未定义的返回码|园区[|]不存在|园区[|]名称存在多个|地址');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'organization_back_code_detail', 'zh_CN', '提交信息匹配不成功：|1、请检测信息填写是否正确，如填写有误，请重新提交|2、如填写无误，请到携带相关证件管理处核对信息|您已退租，如有疑问请联系客服|认证成功！您承租地址信息如下：|未定义的返回码|园区[|]不存在|园区[|]名称存在多个|地址');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'work_flow_content', 'zh_CN', '组织机构代码|企业联系人|企业联系电话|认证反馈结果|手机号|姓名|证件类型|证件号码|认证反馈结果|身份证|未知证件类型');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'family_detail', 'zh_CN', '家庭信息|您还未加入任何家庭，快去加入吧!|添加住址');

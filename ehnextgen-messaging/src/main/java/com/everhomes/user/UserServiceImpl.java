@@ -50,6 +50,7 @@ import com.everhomes.acl.Role;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.authorization.AuthorizationErrorCode;
 import com.everhomes.authorization.AuthorizationThirdPartyButton;
 import com.everhomes.authorization.AuthorizationThirdPartyButtonProvider;
 import com.everhomes.authorization.AuthorizationThirdPartyForm;
@@ -4026,8 +4027,12 @@ public class UserServiceImpl implements UserService {
 		int namespaceId = UserContext.getCurrentNamespaceId();
 		AuthorizationThirdPartyButton buttonstatus = authorizationThirdPartyButtonProvider.getButtonStatusByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
 		GetFamilyButtonStatusResponse response = ConvertHelper.convert(buttonstatus, GetFamilyButtonStatusResponse.class);
-		if(response == null)
-			response = new GetFamilyButtonStatusResponse("家庭信息",FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),"您还未加入任何家庭，快去加入吧！","添加住址");
+		if(response == null){
+			String document = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+					AuthorizationErrorCode.FAMILY_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.FAMILY_DETAIL_S);
+			String[] documents = document.split("\\|");
+			response = new GetFamilyButtonStatusResponse(documents[0],FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),documents[1],documents[2]);
+		}
 		return response;
 	}
 }

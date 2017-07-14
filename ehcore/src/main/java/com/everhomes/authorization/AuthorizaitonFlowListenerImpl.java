@@ -22,6 +22,7 @@ import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowService;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
@@ -29,7 +30,9 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
+import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 
 @Component
@@ -40,12 +43,9 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 	private FlowService flowService;
 	@Autowired
 	private AuthorizationThirdPartyRecordProvider recordProvider;
+	
 	@Autowired
-    private ParkingProvider parkingProvider;
-	@Autowired
-	private SmsProvider smsProvider;
-	@Autowired
-    private ContentServerService contentServerService;
+	private LocaleStringService localeStringService;
 	
 	@Override
 	public FlowModuleInfo initModule() {
@@ -100,95 +100,153 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-		List<FlowCaseEntity> entities = new ArrayList<>(); 
-//		//前面写服务联盟特有的默认字段-姓名-电话-企业-申请类型-申请来源-服务机构
-//		//姓名
-		FlowCaseEntity e = new FlowCaseEntity();
 		AuthorizationThirdPartyRecord record = recordProvider.getAuthorizationThirdPartyRecordByFlowCaseId(flowCase.getId());
 		if(record == null){
 			LOGGER.error("unknow flowcase id = {}",flowCase.getId());
 			return null;
 		}
-		if(record.getType() == AuthorizationModuleHandler.PERSONAL_AUTHORIZATION){
-			return createPersonalEntities(record);
-		}else if(record.getType() == AuthorizationModuleHandler.ORGANIZATION_AUTHORIZATION){
-			return createOrganiztionEntites(record);
+		String document = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+				AuthorizationErrorCode.WORK_FLOW_CONTENT, UserContext.current().getUser().getLocale(),AuthorizationErrorCode.WORK_FLOW_CONTENT_S);
+		String[] documents = document.split("\\|");
+		if(AuthorizationModuleHandler.PERSONAL_AUTHORIZATION.equals(record.getType().trim())){
+			return createPersonalEntities(record,documents);
+		}else if(AuthorizationModuleHandler.ORGANIZATION_AUTHORIZATION.equals(record.getType().trim())){
+			return createOrganiztionEntites(record,documents);
 		}
 		LOGGER.error("unknow record type = {}",record.getType());
 		return null;
 	}
 
-	private List<FlowCaseEntity> createOrganiztionEntites(AuthorizationThirdPartyRecord record) {
+	private List<FlowCaseEntity> createOrganiztionEntites(AuthorizationThirdPartyRecord record, String[] documents) {
+		String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+				AuthorizationErrorCode.ORGANIZATION_BACK_CODE_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.ORGANIZATION_BACK_CODE_DETAIL_S);
+		String[] documentflows = documentflow.split("\\|");
+		
 		List<FlowCaseEntity> entities = new ArrayList<>(); 
 		ZjgkJsonEntity<List<ZjgkResponse>> zjgkResponses = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 		//组织机构代码
 		FlowCaseEntity e = new FlowCaseEntity();
-		e.setKey("组织机构代码");
+		e.setKey(documents[0]);
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(record.getOrganizationCode());
 		entities.add(e);
 		//企业联系人
 		e = new FlowCaseEntity();
-		e.setKey("企业联系人");
+		e.setKey(documents[1]);
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(record.getOrganizationContact());
 		entities.add(e);
 		//企业联系电话
 		e = new FlowCaseEntity();
-		e.setKey("企业联系电话");
+		e.setKey(documents[2]);
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(record.getOrganizationPhone());
 		entities.add(e);
 		
 		//认证反馈结果
 		e = new FlowCaseEntity();
-		e.setKey("认证反馈结果");
+		e.setKey(documents[3]);
 		e.setEntityType(FlowCaseEntityType.TEXT.getCode()); 
-		e.setValue(ZJAuthorizationModuleHandler.generalContent(zjgkResponses));
+		e.setValue(generateContent(zjgkResponses,documentflows));
 		entities.add(e);
+		
+		//地址
+		generateAddressEntity(entities, zjgkResponses.getResponse(), documentflows);
 		
 		return entities;
 	}
 
-	private List<FlowCaseEntity> createPersonalEntities(AuthorizationThirdPartyRecord record) {
+	private List<FlowCaseEntity> createPersonalEntities(AuthorizationThirdPartyRecord record, String[] documents) {
+		String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+				AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL_S);
+		String[] documentflows = documentflow.split("\\|");
+		
 		List<FlowCaseEntity> entities = new ArrayList<>(); 
 		ZjgkJsonEntity<List<ZjgkResponse>> zjgkResponses = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 		//手机号
 		FlowCaseEntity e = new FlowCaseEntity();
-		e.setKey("手机号");
+		e.setKey(documents[4]);
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(record.getPhone());
 		entities.add(e);
 		//姓名
 		e = new FlowCaseEntity();
-		e.setKey("姓名");
+		e.setKey(documents[5]);
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(record.getName());
 		entities.add(e);
 		//证件类型
 		e = new FlowCaseEntity();
-		e.setKey("证件类型");
+		e.setKey(documents[6]);
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(record.getCertificateType() == "1"?"身份证":"未知");
+		e.setValue(record.getCertificateType() == "1"?documents[9]:documents[10]);
 		entities.add(e);
 		//证件号码
 		e = new FlowCaseEntity();
-		e.setKey("证件号码");
+		e.setKey(documents[7]);
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(record.getCertificateNo());
 		entities.add(e);
 		
 		//认证反馈结果
 		e = new FlowCaseEntity();
-		e.setKey("认证反馈结果");
+		e.setKey(documents[8]);
 		e.setEntityType(FlowCaseEntityType.TEXT.getCode()); 
-		e.setValue(ZJAuthorizationModuleHandler.generalContent(zjgkResponses));
+		e.setValue(generateContent(zjgkResponses,documentflows));
 		entities.add(e);
 		
+		//地址
+		generateAddressEntity(entities, zjgkResponses.getResponse(),documentflows);
 		return entities;
 	
 	}
-
+	
+	public void generateAddressEntity(List<FlowCaseEntity> entities, List<ZjgkResponse> list, String[] documentflows) {
+		FlowCaseEntity e = new FlowCaseEntity();
+		for (int i = 0; i < list.size(); i++) {
+			StringBuffer buffer = new StringBuffer();
+			ZjgkResponse zjgkResponse =list.get(i);
+			if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.EXIST_COMMUNITY){
+				buffer.append(list.get(i).getBuildingName()).append(list.get(i).getApartmentName());
+			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.NOT_EXIST_COMMUNITY){
+				buffer.append(documentflows[6]).append(zjgkResponse.getCommunityName()).append(documentflows[7]).append("\n");
+			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.MULTI_COMMUNITY){
+				buffer.append(documentflows[8]).append(zjgkResponse.getCommunityName()).append(documentflows[9]).append("\n");
+			}
+			e.setKey(documentflows[10]+(i+1));
+			e.setEntityType(FlowCaseEntityType.TEXT.getCode()); 
+			e.setValue(buffer.toString());
+			entities.add(e);
+		}
+	}
+	
+	public String generateContent(ZjgkJsonEntity<List<ZjgkResponse>> entity, String[] documentflows) {
+		StringBuffer buffer = new StringBuffer();
+		if(entity.isMismatching()){
+			buffer.append("\n")
+			.append(documentflows[0])
+			.append("\n")
+			.append(documentflows[1])
+			.append("\n")
+			.append(documentflows[2])
+			.append("\n");
+		}
+		else if(entity.isUnrent()){
+			buffer.append("\n")
+			.append(documentflows[3])
+			.append("\n");
+		}
+		else if(entity.isSuccess())
+		{
+			buffer.append("\n").append(documentflows[4]).append("\n");
+		}
+		else{
+			buffer.append("\n").append(documentflows[5]).append(entity.getErrorCode()).append(" ");
+		}
+		return buffer.toString();
+		
+	}
+	
 	@Override
 	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
 		// TODO Auto-generated method stub
