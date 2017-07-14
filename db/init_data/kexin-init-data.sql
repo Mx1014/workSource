@@ -1581,3 +1581,8 @@ where namespace_id='999983' AND module_name='物业报修';
 
 --【正中会】“海外电商”icon替换链接内容 bydengs,20170707
 update eh_launch_pad_items SET action_type = 13, action_data = '{"url":"https://core.zuolin.com/mobile/static/overseas_supplier/guide.html"}' WHERE `item_label` = '海外电商' and namespace_id=999983;
+
+
+-- 科兴场地预约支付模式修改 add by sfyan 20170714
+update `eh_rentalv2_resource_types` set pay_mode = 1 where name = '场地预约' and namespace_id = 999983;
+update `eh_launch_pad_items` set action_data = replace(action_data, '"payMode":2', '"payMode":1') where item_label = '场地预约' and namespace_id = 999983;

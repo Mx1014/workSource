@@ -202,6 +202,25 @@ eom.contact_token
 ORDER BY
 eom.id;
 
+
+-- 补充紫荆数据 add by sfyan 20170714
+SET @namespace_resource_id = (select max(id) from eh_namespace_resources) + 1; 
+SET @community_id = (select id from eh_communities where name = '南海科技园' and namespace_id = 999984); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES(@namespace_resource_id, 999984, 'COMMUNITY', @community_id, UTC_TIMESTAMP());
+
+-- 科兴场地预约支付模式修改 add by sfyan 20170714
+update `eh_rentalv2_resource_types` set pay_mode = 1 where name = '场地预约' and namespace_id = 999983;
+update `eh_launch_pad_items` set action_data = replace(action_data, '"payMode":2', '"payMode":1') where item_label = '场地预约' and namespace_id = 999983;
+	
+-- 荣超股份增加考勤统计菜单 add by sfyan 20170714
+SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1),506600,'', 'EhNamespaces', 999975,2);	
+	
+-- 康利item url修改 add by sfyan 20170714
+update `eh_launch_pad_items` set `action_data` = '{"url":"http://alpha.vrbrowserextern.bqlnv.com.cn/vreditor/view/64997823126520945"}' where `item_label` = '园区3D图' and namespace_id = 999978;
+	
 -- 添加id为0的用户 add by sw 20170714
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (0, UUID(), 269862, 'ANNONYMOUS_LOGIN', '', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 0);
+
