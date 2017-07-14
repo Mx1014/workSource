@@ -10,17 +10,17 @@ import java.util.Map;
 
 /**
  * <ul>
- * <li>userId:通讯录关联的用户ID</li>
+ * <li>userId: 通讯录关联的用户ID</li>
  * <li>detailId: 联系人档案id</li>
+ * <li>contactAvatar: 联系人头像</li>
  * <li>enterpriseName: 公司名称</li>
  * <li>contactName: 联系人名字</li>
- * <li>contactAvatar: 联系人头像</li>
  * <li>contactEnglishName: 联系人英文名字</li>
  * <li>gender: 联系人性别：0-保密, 1-男性, 2-女性</li>
- * <li>jobPosition: 联系人岗位</li>
+ * <li>jobPosition: 联系人岗位 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>departments: 联系人部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>contactToken: 联系人号码</li>
  * <li>email: 联系人邮箱</li>
- * <li>departments: 联系人部门</li>
  * </ul>
  */
 public class SceneContactV2DTO {
