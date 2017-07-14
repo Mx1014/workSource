@@ -533,9 +533,12 @@ public class SalaryServiceImpl implements SalaryService {
             command.setPageAnchor(Long.valueOf("0"));
             command.setPageSize(cmd.getPageSize());
             ListUniongroupMemberDetailResponse results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
-            //  拼接字段
-            response = this.listSalaryEmployeesCompleteInfo(results.getUniongroupMemberDetailList(),organizations,wages,cmd.getIsException());
-            response.setNextPageAnchor(results.getPageAnchor());
+            if (results != null && results.getUniongroupMemberDetailList().size() > 0) {
+                //  拼接字段
+                response = this.listSalaryEmployeesCompleteInfo(results.getUniongroupMemberDetailList(), organizations, wages, cmd.getIsException());
+                response.setNextPageAnchor(results.getPageAnchor());
+            } else
+                return response;
         }
         return response;
     }
