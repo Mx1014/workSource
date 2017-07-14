@@ -15,6 +15,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAuthorizationThirdPartyRecordsDao;
@@ -87,11 +88,17 @@ public class AuthorizationThirdPartyRecordProviderImpl implements AuthorizationT
 	}
 
 	@Override
-	public List<AuthorizationThirdPartyRecord> listAuthorizationThirdPartyRecordByUserId(Integer namespaceId, Long userId) {
-		return getReadOnlyContext().select().from(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
+	public AuthorizationThirdPartyRecord getAuthorizationThirdPartyRecordByUserId(Integer namespaceId, Long userId, String authorizationType) {
+		List<AuthorizationThirdPartyRecord> records = getReadOnlyContext().select().from(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
 				.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.TYPE.eq(authorizationType))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.fetch().map(r -> ConvertHelper.convert(r, AuthorizationThirdPartyRecord.class));
+		if(records == null || records.size() == 0)
+			return null;
+		return records.get(0);
+				
 	}
 
 	@Override
@@ -99,5 +106,26 @@ public class AuthorizationThirdPartyRecordProviderImpl implements AuthorizationT
 		getReadOnlyContext().delete(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
 			.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
 			.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.CREATOR_UID.eq(userId)).execute();
+	}
+
+	@Override
+	public AuthorizationThirdPartyRecord getAuthorizationThirdPartyRecordByFlowCaseId(Long flowCaseId) {
+		List<AuthorizationThirdPartyRecord> list = getReadOnlyContext().select().from(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
+				.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.FLOW_CASE_ID.eq(flowCaseId))
+				.fetch().map(r -> ConvertHelper.convert(r, AuthorizationThirdPartyRecord.class));
+		if(list!=null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
+	}
+
+	@Override
+	public void updateAuthorizationThirdPartyRecordStatusByUseId(Integer namespaceId, Long userId,
+			String authorizationType) {
+		 getReadWriteContext().update(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
+		 .set(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.STATUS, CommonStatus.INACTIVE.getCode())
+		 .where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
+		 .and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.CREATOR_UID.eq(userId))
+		 .and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.TYPE.eq(authorizationType)).execute();
 	}
 }

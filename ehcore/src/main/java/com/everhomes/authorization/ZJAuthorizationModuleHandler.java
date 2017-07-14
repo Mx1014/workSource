@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.rest.address.ClaimAddressCommand;
 import com.everhomes.rest.address.ClaimedAddressInfo;
 import com.everhomes.rest.address.DisclaimAddressCommand;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.family.ApproveMemberCommand;
 import com.everhomes.rest.family.BatchApproveMemberCommand;
 import com.everhomes.rest.family.FamilyDTO;
@@ -53,8 +56,9 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
-@Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+1000000)
+@Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+0)
 public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ZJAuthorizationModuleHandler.class);
 	   
@@ -83,30 +87,51 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
     @Autowired
     private AuthorizationThirdPartyRecordProvider authorizationProvider;
     
-  	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
-  	
-
+    @Autowired
+    private AuthorizationThirdPartyFormProvider authorizationThirdPartyFormProvider;
+    
 	@Override
 	public PostGeneralFormDTO personalAuthorization(PostGeneralFormCommand cmd) {
-		
+		getSettinginfo(cmd);
 		Map<String, String> params = generalParams(cmd);
 		ZjgkJsonEntity<List<ZjgkResponse>> entity = null;
 		try {
 			String jsonStr = HttpUtils.post(url, params, 10, "UTF-8");
+			//向第三方认证。
 			entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
-//			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_UNRENT);
+			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SUCCESS);
 			//请求成功，返回承租地址，那么创建家庭。
-			if(entity.isSuccess()){
-				createFamily(cmd,entity,params,jsonStr,PERSONAL_AUTHORIZATION);
-			}
+			AuthorizationThirdPartyRecord record = createFamily(cmd,entity,params,PERSONAL_AUTHORIZATION);
 			//创建工作流
-			createWorkFlow(cmd,entity,PERSONAL_AUTHORIZATION);
+			FlowCase flowCase = createWorkFlow(cmd,entity,PERSONAL_AUTHORIZATION,params);
+			record.setFlowCaseId(flowCase.getId());
+			//记录认证参数和结果，提供给工作流使用
+			createRecords(record,PERSONAL_AUTHORIZATION);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return processGeneralFormDTO(cmd,entity);
 	}
 	
+	private void getSettinginfo(PostGeneralFormCommand cmd) {
+//		List<AuthorizationThirdPartyForm> list = authorizationThirdPartyFormProvider.listFormSourceByOwner(cmd.getOwnerType(), cmd.getOwnerId());
+//		if(list!=null && list.size()>0){
+//			AuthorizationThirdPartyForm setting = list.get(0);
+//			thiurl = setting.getAuthorizationUrl();
+//			
+//		}
+	}
+
+	private void createRecords(AuthorizationThirdPartyRecord record,String type) {
+		//记录对同一个用户来说，只有一条有效，其他的则提供给工作流显示而已，设置为无效
+		dbProvider.execute(status -> {
+			authorizationProvider.updateAuthorizationThirdPartyRecordStatusByUseId(UserContext.getCurrentNamespaceId(),UserContext.current().getUser().getId(),type);
+			authorizationProvider.createAuthorizationThirdPartyRecord(record);
+			return null;
+		});
+	}
+
 	private PostGeneralFormDTO processGeneralFormDTO(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
 
@@ -120,54 +145,48 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
         return dto;
 	}
 
-	private void createFamily(PostGeneralFormCommand cmd,ZjgkJsonEntity<List<ZjgkResponse>> entity, Map<String, String> params, String resultJson, String authorizationType) {
+	private AuthorizationThirdPartyRecord createFamily(PostGeneralFormCommand cmd,ZjgkJsonEntity<List<ZjgkResponse>> entity, Map<String, String> params, String authorizationType) {
 		List<ZjgkResponse> list = entity.getResponse();
-		List<AuthorizationThirdPartyRecord> recordlist = new ArrayList<AuthorizationThirdPartyRecord>();
-		if(list != null && list.size() > 0){
+		AuthorizationThirdPartyRecord record = null;
+		if(entity.isSuccess() && list != null && list.size() > 0){
 			//此处不加，事务，因为调用的方法中存在事务
 			//先让用户离开通过第三方认证的家庭
-			leaveThirdPartyAuthAddress();
+			leaveThirdPartyAuthAddress(authorizationType);
 			//加入第三方认证的家庭
 			for (ZjgkResponse zjgkResponse : list) {
 				zjgkResponse.setCommunityName("科技园"); // TODO
-				zjgkResponse.setBuildingName("4-4");// TODO
+				zjgkResponse.setBuildingName("4-79");// TODO
 				//生成加入家庭的command
-				ClaimAddressCommand claimcmd = generalClaimAddressCommand(cmd,zjgkResponse);
+				ClaimAddressCommand claimcmd = generateClaimAddressCommand(cmd,zjgkResponse);
 				if(claimcmd == null){
 					zjgkResponse.setExistCommunityFlag((byte)0);
 					continue;
 				}
 				//加入家庭
 				ClaimedAddressInfo addressinfo = addressService.claimAddress(claimcmd);
-				//认证记录到list
-				recordlist.add(generalUserAuthorizationRecord(cmd,params,addressinfo,authorizationType,entity.getErrorCode(),resultJson));
+				zjgkResponse.setAddressId(addressinfo.getAddressId());
+				zjgkResponse.setFullAddress(addressinfo.getFullAddress());
+				zjgkResponse.setUserCount(addressinfo.getUserCount());
 			}
-			
+			record = generateUserAuthorizationRecord(cmd,params,authorizationType,entity);
 			// 认证状态设置为通过，家庭认证通过。
-			familyService.adminBatchApproveMember(generateBatchApproveMemberCommand(recordlist));
-			dbProvider.execute(status -> {
-				//删除之前第三方认证记录
-				authorizationProvider.removeAuthorizationThirdPartyRecord(UserContext.getCurrentNamespaceId(),UserContext.current().getUser().getId());
-				// 认证成功，记录到认证记录表中
-				for (AuthorizationThirdPartyRecord record : recordlist) {
-					authorizationProvider.createAuthorizationThirdPartyRecord(record);
-				}
-				return null;
-			});
+			familyService.adminBatchApproveMember(generateBatchApproveMemberCommand(record));
+		}else{
+			record = generateUserAuthorizationRecord(cmd,params,authorizationType,entity);
 		}
-		
+		return record;
 	}
 
 
 	//先离开第三方认证的家庭。再次认证才不会出错。
-	private void leaveThirdPartyAuthAddress() {
+	private void leaveThirdPartyAuthAddress(String authorizationType) {
 		//获取用户所有的家庭
 		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
 		//认证记录
-		List<AuthorizationThirdPartyRecord> listrecords = authorizationProvider.listAuthorizationThirdPartyRecordByUserId(UserContext.getCurrentNamespaceId(),UserContext.current().getUser().getId());
+		AuthorizationThirdPartyRecord record = authorizationProvider.getAuthorizationThirdPartyRecordByUserId(UserContext.getCurrentNamespaceId(),UserContext.current().getUser().getId(),authorizationType);
 		//用户所在家庭的地址，在第三方认证记录表中，那么久离开。
 		familyList.stream().filter(r ->{
-			return isInleaveRecord(listrecords, r.getAddressId());
+			return isInleaveRecord(record, r.getAddressId());
 		}).map(r -> {
 			DisclaimAddressCommand cmd = new DisclaimAddressCommand();
 			cmd.setAddressId(r.getAddressId());
@@ -177,14 +196,14 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	}
 
 	//生成批量认证的command。
-	private BatchApproveMemberCommand generateBatchApproveMemberCommand(List<AuthorizationThirdPartyRecord> leavelist) {
+	private BatchApproveMemberCommand generateBatchApproveMemberCommand(AuthorizationThirdPartyRecord record) {
 		//获取用户所有的家庭
 		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
 		//只有第三方认证的家庭，才做
 		BatchApproveMemberCommand batchCmd = new BatchApproveMemberCommand();
 		//过滤出在第三方认证的信息，直接认证成功。
 		List<ApproveMemberCommand> members = familyList.stream().filter(r ->{
-			return isInleaveRecord(leavelist, r.getAddressId());
+			return isInleaveRecord(record, r.getAddressId());
 		}).map(r -> {
 			ApproveMemberCommand cmd = new ApproveMemberCommand();
 			cmd.setAddressId(r.getAddressId());
@@ -198,9 +217,11 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return batchCmd;
 	}
 	
-	private boolean isInleaveRecord(List<AuthorizationThirdPartyRecord> leavelist, long addressId){
-		for (AuthorizationThirdPartyRecord record : leavelist) {
-			if(record.getAddressId() != null && record.getAddressId().longValue() == addressId){
+	//在记录
+	private boolean isInleaveRecord(AuthorizationThirdPartyRecord record, long addressId){
+		ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
+		for (ZjgkResponse zjgkResponse: entity.getResponse()) {
+			if(zjgkResponse.getAddressId() != null && zjgkResponse.getAddressId().longValue() == addressId){
 				return true;
 			}
 		}
@@ -208,7 +229,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	}
 
 	//调用认证接口，需要生成认证的command
-	private ClaimAddressCommand generalClaimAddressCommand(PostGeneralFormCommand cmd, ZjgkResponse zjgkResponse) {
+	private ClaimAddressCommand generateClaimAddressCommand(PostGeneralFormCommand cmd, ZjgkResponse zjgkResponse) {
 		String communityName = zjgkResponse.getCommunityName();
 		Community community = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), communityName);
 		if(community == null){
@@ -221,8 +242,8 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return claimcmd;
 	}
 
-	private AuthorizationThirdPartyRecord generalUserAuthorizationRecord(PostGeneralFormCommand cmd, Map<String, String> params,
-			ClaimedAddressInfo addressinfo, String authorizationType, int errorCode, String resultJson) {
+	private AuthorizationThirdPartyRecord generateUserAuthorizationRecord(PostGeneralFormCommand cmd, Map<String, String> params,
+			String authorizationType,ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		AuthorizationThirdPartyRecord record = new AuthorizationThirdPartyRecord();
 		record.setNamespaceId(UserContext.getCurrentNamespaceId());
 		record.setOwnerType(cmd.getOwnerType());
@@ -235,15 +256,16 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		record.setOrganizationCode(params.get("organizationCode"));
 		record.setOrganizationContact(params.get("organizationContact"));
 		record.setOrganizationPhone(params.get("organizationPhone"));
-		record.setErrorCode(errorCode);
-		record.setAddressId(addressinfo.getAddressId());
-		record.setFullAddress(addressinfo.getFullAddress());
-		record.setUserCount(addressinfo.getUserCount());
-		record.setResultJson(resultJson);
+		record.setErrorCode(entity.getErrorCode());
+//		record.setAddressId(addressinfo.getAddressId());
+//		record.setFullAddress(addressinfo.getFullAddress());
+//		record.setUserCount(addressinfo.getUserCount());
+		record.setResultJson(StringHelper.toJsonString(entity));
+		record.setStatus(CommonStatus.ACTIVE.getCode());
 		return record;
 	}
 
-	private FlowCase createWorkFlow(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity, String personalAuthorization) {
+	private FlowCase createWorkFlow(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity, String authorizationType, Map<String, String> params) {
 		
 		GeneralModuleInfo ga = new GeneralModuleInfo();
 
@@ -254,22 +276,28 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		ga.setModuleId(FlowConstants.AUTHORIZATION_MODULE);
 		ga.setProjectId(cmd.getOwnerId());
 		ga.setProjectType(EntityType.NAMESPACE.getCode());
+		ga.setOrganizationId(Long.valueOf(authorizationType));//用来存认证类型type
 
 		
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 		createFlowCaseCommand.setApplyUserId(UserContext.current().getUser().getId());
 		createFlowCaseCommand.setReferId(cmd.getOwnerId());
 		createFlowCaseCommand.setReferType(cmd.getOwnerType());
-		createFlowCaseCommand.setContent(generalContent(entity));
-
-		createFlowCaseCommand.setProjectId(cmd.getOwnerId());
-		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+		if(authorizationType == PERSONAL_AUTHORIZATION){
+			createFlowCaseCommand.setContent("姓名 : "+params.get("name")+"\n证件号码 : "+params.get("certificateNo"));
+			createFlowCaseCommand.setTitle("个人认证申请");
+		}else{
+			createFlowCaseCommand.setContent("组织机构代码 : "+params.get("organizationCode")+"\n企业联系人 : "+params.get("organizationContact"));
+			createFlowCaseCommand.setTitle("企业认证申请");
+		}
+//		createFlowCaseCommand.setProjectId(cmd.getOwnerId());
+//		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 		
 		FlowCase flowcase = flowService.createDumpFlowCase(ga, createFlowCaseCommand);
 		return flowcase;
 	}
 
-	private String generalContent(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
+	public static String generalContent(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		StringBuffer buffer = new StringBuffer();
 		List<ZjgkResponse> list = entity.getResponse();
 		if(entity.isMismatching()){
@@ -291,7 +319,12 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		}
 		if(list!=null && list.size()>0){
 			for (ZjgkResponse zjgkResponse : list) {
-				buffer.append(zjgkResponse.getAddress()).append("\n");
+				if(zjgkResponse.getExistCommunityFlag() == 1){
+					buffer.append(zjgkResponse.getAddress()).append("\n");
+				}else{
+					buffer.append("园区[").append(zjgkResponse.getCommunityName()).append("]不存在");
+				}
+				
 			}
 		}
 		return buffer.toString();
@@ -316,7 +349,26 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 
 	@Override
 	public PostGeneralFormDTO organiztionAuthorization(PostGeneralFormCommand cmd) {
-		return null;
+		getSettinginfo(cmd);
+		Map<String, String> params = generalParams(cmd);
+		ZjgkJsonEntity<List<ZjgkResponse>> entity = null;
+		try {
+			String jsonStr = HttpUtils.post(url, params, 10, "UTF-8");
+			//向第三方认证。
+			entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
+			//请求成功，返回承租地址，那么创建家庭。
+			AuthorizationThirdPartyRecord record = createFamily(cmd,entity,params,ORGANIZATION_AUTHORIZATION);
+			//创建工作流
+			FlowCase flowCase = createWorkFlow(cmd,entity,ORGANIZATION_AUTHORIZATION,params);
+			record.setFlowCaseId(flowCase.getId());
+			//记录认证参数和结果，提供给工作流使用
+			createRecords(record,ORGANIZATION_AUTHORIZATION);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return processGeneralFormDTO(cmd,entity);
+	
 	}
 
 }

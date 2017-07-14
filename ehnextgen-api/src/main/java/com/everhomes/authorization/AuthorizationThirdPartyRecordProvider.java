@@ -13,8 +13,12 @@ public interface AuthorizationThirdPartyRecordProvider {
 
 	List<AuthorizationThirdPartyRecord> listAuthorizationThirdPartyRecord();
 
-	List<AuthorizationThirdPartyRecord> listAuthorizationThirdPartyRecordByUserId(Integer namespaceId, Long userId);
+	AuthorizationThirdPartyRecord getAuthorizationThirdPartyRecordByUserId(Integer namespaceId, Long userId, String authorizationType);
 
 	void removeAuthorizationThirdPartyRecord(Integer currentNamespaceId, Long id);
+
+	AuthorizationThirdPartyRecord getAuthorizationThirdPartyRecordByFlowCaseId(Long flowCaseId);
+
+	void updateAuthorizationThirdPartyRecordStatusByUseId(Integer namespaceId, Long userId, String authorizationType);
 
 }

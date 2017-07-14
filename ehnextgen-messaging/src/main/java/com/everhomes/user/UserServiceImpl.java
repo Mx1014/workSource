@@ -4027,7 +4027,7 @@ public class UserServiceImpl implements UserService {
 		AuthorizationThirdPartyButton buttonstatus = authorizationThirdPartyButtonProvider.getButtonStatusByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
 		GetFamilyButtonStatusResponse response = ConvertHelper.convert(buttonstatus, GetFamilyButtonStatusResponse.class);
 		if(response == null)
-			response = new GetFamilyButtonStatusResponse("家庭信息",FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode());
+			response = new GetFamilyButtonStatusResponse("家庭信息",FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),"您还未加入任何家庭，快去加入吧！");
 		return response;
 	}
 }

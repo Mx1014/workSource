@@ -8,7 +8,10 @@ public class ZjgkResponse {
 	private String buildingName;
 	private String apartmentName;
 	private String address;
-	private Byte existCommunityFlag = 1;
+	private Long addressId;
+    private String fullAddress;
+    private Integer userCount;
+    private Byte existCommunityFlag = 1;
 	public Byte getExistCommunityFlag() {
 		return existCommunityFlag;
 	}
@@ -39,7 +42,24 @@ public class ZjgkResponse {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-	
+	public Long getAddressId() {
+		return addressId;
+	}
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+	public String getFullAddress() {
+		return fullAddress;
+	}
+	public void setFullAddress(String fullAddress) {
+		this.fullAddress = fullAddress;
+	}
+	public Integer getUserCount() {
+		return userCount;
+	}
+	public void setUserCount(Integer userCount) {
+		this.userCount = userCount;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
