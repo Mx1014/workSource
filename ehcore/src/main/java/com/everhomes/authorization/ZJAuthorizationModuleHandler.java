@@ -154,8 +154,8 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			leaveThirdPartyAuthAddress(authorizationType);
 			//加入第三方认证的家庭
 			for (ZjgkResponse zjgkResponse : list) {
-				zjgkResponse.setCommunityName("科技园"); // TODO
-				zjgkResponse.setBuildingName("4-79");// TODO
+//				zjgkResponse.setCommunityName("科技园"); // TODO
+//				zjgkResponse.setBuildingName("4-79");// TODO
 				//生成加入家庭的command
 				ClaimAddressCommand claimcmd = generateClaimAddressCommand(cmd,zjgkResponse);
 				if(claimcmd == null){
