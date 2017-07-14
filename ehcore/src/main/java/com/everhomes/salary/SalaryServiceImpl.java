@@ -586,7 +586,7 @@ public class SalaryServiceImpl implements SalaryService {
                     departments.put(new Long((long) i), response.getMembers().get(y).getDepartments().get(i).getName());
                 }
             if (null != response.getMembers().get(y).getJobPositions() && response.getMembers().get(y).getJobPositions().size() > 0)
-                for (int i = 0; i < response.getMembers().get(y).getDepartments().size(); i++) {
+                for (int i = 0; i < response.getMembers().get(y).getJobPositions().size(); i++) {
                     jobPositions.put(new Long((long) i), response.getMembers().get(y).getJobPositions().get(i).getName());
                 }
             result.setDepartment(departments);
