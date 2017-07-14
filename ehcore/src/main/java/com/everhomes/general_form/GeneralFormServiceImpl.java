@@ -324,7 +324,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 				if (showDefaultFields || !defaultFields.contains(val.getFieldName())) {
 					// 不在默认fields的就是自定义字符串，组装这些
 					GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					if(null == dto ){
+					if(null == dto || GeneralFormDataVisibleType.fromCode(dto.getVisibleType()) == GeneralFormDataVisibleType.HIDDEN){
 						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
 						continue;
 					}
