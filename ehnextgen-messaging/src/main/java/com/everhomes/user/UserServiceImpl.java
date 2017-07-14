@@ -3936,15 +3936,36 @@ public class UserServiceImpl implements UserService {
             dto.setContactToken(detail.getContactToken());
             if (!StringUtils.isEmpty(detail.getEmail()))
                 dto.setEmail(detail.getEmail());
-            Organization organization = this.organizationProvider.findOrganizationById(detail.getOrganizationId());
-            Map<Long, String> departMap = this.organizationProvider.listOrganizationsOfDetail(detail.getNamespaceId(), dto.getDetailId(), OrganizationGroupType.DEPARTMENT.getCode());
-            Map<Long, String> jobPosiMap = this.organizationProvider.listOrganizationsOfDetail(detail.getNamespaceId(), dto.getDetailId(), OrganizationGroupType.JOB_POSITION.getCode());
-            dto.setEnterpriseName(organization.getName());
-            if (departMap != null && departMap.size() > 0)
-                dto.setDepartments(departMap);
-            if (jobPosiMap != null && jobPosiMap.size() > 0)
-                dto.setJobPosition(jobPosiMap);
+            getRelevantContactEnterprise(dto, detail.getOrganizationId());
             return dto;
+        }
+    }
+
+    private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
+        Long orgId;
+        Organization org = this.organizationProvider.findOrganizationById(organizationId);
+        if (org != null) {
+            if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
+                orgId = org.getDirectlyEnterpriseId();
+            } else {
+                orgId = org.getId();
+            }
+            Long directlyOrgId = orgId;
+
+            List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypes.add(OrganizationGroupType.GROUP.getCode());
+
+            Organization directlyEnterprise = this.organizationProvider.findOrganizationById(directlyOrgId);
+
+            // 公司
+            dto.setEnterpriseName(directlyEnterprise.getName());
+            // 部门
+            dto.setDepartments(this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath()));
+            // 岗位
+            dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
+
         }
     }
 }

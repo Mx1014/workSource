@@ -82,7 +82,7 @@ public class UserUiController extends ControllerBase {
     /**
      * <p>根据指定的场景查询通讯录列表。</p>
      * <p>对于左邻版，普通用户查询的是邻居好友列表；对于园区版，查询的是公司通讯录列表；而对于物业管理员场景，查询的是同事列表。</p> 
-     * <p>url:/ui/user/listContactsByScene</p>
+     * <p>url:/ui/user/ </p>
      */
     @RequestMapping(value = "listContactsByScene")
     @RestReturn(value = ListContactBySceneRespose.class)

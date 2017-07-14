@@ -1,7 +1,11 @@
 package com.everhomes.rest.ui.user;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.util.StringHelper;
 
+import java.rmi.MarshalledObject;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,9 +39,11 @@ public class SceneContactV2DTO {
 
     private Byte gender;
 
-    private Map<Long,String> jobPosition;
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobPosition;
 
-    private Map<Long,String> departments;
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> departments;
 
     private String contactToken;
 
@@ -103,19 +109,19 @@ public class SceneContactV2DTO {
         this.gender = gender;
     }
 
-    public Map<Long, String> getJobPosition() {
+    public List<OrganizationDTO> getJobPosition() {
         return jobPosition;
     }
 
-    public void setJobPosition(Map<Long, String> jobPosition) {
+    public void setJobPosition(List<OrganizationDTO> jobPosition) {
         this.jobPosition = jobPosition;
     }
 
-    public Map<Long, String> getDepartments() {
+    public List<OrganizationDTO> getDepartments() {
         return departments;
     }
 
-    public void setDepartments(Map<Long, String> departments) {
+    public void setDepartments(List<OrganizationDTO> departments) {
         this.departments = departments;
     }
 
