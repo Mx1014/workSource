@@ -8144,3 +8144,9 @@ SET @eh_namespace_resources_id = (SELECT MAX(id) FROM `eh_namespace_resources`);
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES((@eh_namespace_resources_id := @eh_namespace_resources_id + 1), 999975, 'COMMUNITY', @eh_community_8_id, UTC_TIMESTAMP());	
 -- 8 add END  by dengs,20170710
+
+
+
+-- 荣超股份增加考勤统计菜单 add by sfyan 20170714
+SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1),506600,'', 'EhNamespaces', 999975,2);	
