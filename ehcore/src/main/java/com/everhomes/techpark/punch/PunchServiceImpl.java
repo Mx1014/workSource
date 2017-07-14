@@ -5033,6 +5033,10 @@ public class PunchServiceImpl implements PunchService {
 			if(null == punchScheduling.getTimeRuleId())
 				continue;
 			PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
+			if(null == ptr || null == punchScheduling.getRuleDate()){
+				LOGGER.error("punch time rule is null!! or  rule date is null!!   punchScheduling = "+punchScheduling.toString());
+				continue;
+			}
 			long punchDateLong = punchScheduling.getRuleDate().getTime()+ptr.getDaySplitTimeLong(); 
 			if(punchDateLong > endLong || punchDateLong < beginLong)
 				continue;
