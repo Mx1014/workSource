@@ -5914,7 +5914,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhoneAndNamespaceId(m.getContactToken(), namespaceId);
             for(OrganizationMember _m :members){
                 if (_m.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())) {
-//                    _m.setContactName(cmd.getAccountName());
+                    _m.setContactName(cmd.getAccountName());
                     _m.setTargetType(OrganizationMemberTargetType.USER.getCode());
                     _m.setTargetId(userIdentifier.getOwnerUid());
                     _m.setNamespaceId(namespaceId);
@@ -9544,7 +9544,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                         avatarUri = userService.getUserAvatarUriByGender(user.getId(), user.getNamespaceId(), user.getGender());
 
                     dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId()));
-                    dto.setNickName(dto.getNickName());
                 }
             } else {
                 String avatarUri = userService.getUserAvatarUriByGender(0L, UserContext.getCurrentNamespaceId(), dto.getGender());
