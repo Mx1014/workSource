@@ -173,7 +173,7 @@ public class TalentApplyEntryFormHandler implements GeneralFormModuleHandler {
 		String scope = TalentTemplateCode.SCOPE;
         int code = TalentTemplateCode.REQUEST_MESSAGE;
         String text = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), null, "");
-		String[] textSplit = text.split("|");
+		String[] textSplit = text.split("\\|");
 		
 		String uri = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
 		
