@@ -1616,7 +1616,11 @@ public class SalaryServiceImpl implements SalaryService {
                 continue;
             }
             for (UniongroupMemberDetailsDTO member : members) {
-				SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
+                OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+                if (memberDetail.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
+                    continue;
+                }
+                SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
                 employee.setUserId(member.getTargetId());
                 employee.setUserDetailId(member.getDetailId());
                 employee.setSalaryGroupId(salaryGroup.getId());
