@@ -546,7 +546,15 @@ public class SalaryServiceImpl implements SalaryService {
         ListUniongroupMemberDetailResponse res = new ListUniongroupMemberDetailResponse();
 
         //  1.将前端信息传递给组织架构的接口获取相关信息，从而查询所有人员
-        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        String keywords = "";
+        Long organizationId = cmd.getOwnerId();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if (!StringUtils.isEmpty(cmd.getKeywords()))
+            keywords = cmd.getKeywords();
+        if (!StringUtils.isEmpty(cmd.getDepartmentId()))
+            organizationId = cmd.getDepartmentId();
+/*        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(cmd.getOwnerId());
         if (!StringUtils.isEmpty(cmd.getDepartmentId()))
             command.setOrganizationId(cmd.getDepartmentId());
@@ -555,7 +563,8 @@ public class SalaryServiceImpl implements SalaryService {
         if (!StringUtils.isEmpty(cmd.getPageAnchor()))
             command.setPageAnchor(cmd.getPageAnchor());
         command.setPageSize(cmd.getPageSize());
-        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationPersonnels(command, false);
+        List<OrganizationMember> members = listOrganizationMemberByPathHavingDetailId*/
+        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationMemberByPathHavingDetailId(keywords,pageAnchor,organizationId,pageSize);
 
         //  2.查询所有关联了薪酬组的用户与薪酬组id
         List<Object[]> groups = this.uniongroupService.listUniongroupMemberGroupIds(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
@@ -563,8 +572,8 @@ public class SalaryServiceImpl implements SalaryService {
         for (int y = 0; y < response.getMembers().size(); y++) {
 
             //  没有 detailId 的时候则视为无效数据
-            if (StringUtils.isEmpty(response.getMembers().get(y).getDetailId()))
-                continue;
+/*            if (StringUtils.isEmpty(response.getMembers().get(y).getDetailId()))
+                continue;*/
             UniongroupMemberDetail result = new UniongroupMemberDetail();
             result.setId(response.getMembers().get(y).getId());
             result.setEmployeeNo(response.getMembers().get(y).getEmployeeNo());
