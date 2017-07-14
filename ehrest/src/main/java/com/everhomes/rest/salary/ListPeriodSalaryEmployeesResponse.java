@@ -11,12 +11,14 @@ import com.everhomes.util.StringHelper;
  * <ul>返回值:
  * <li>uncheckCount: 未核算人数</li>
  * <li>checkedCount: 已核算人数</li>
+ * <li>nextPageAnchor: 下页锚点</li>
  * <li>salaryGroupEntities: 字段项列表 参考{@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
  * <li>salaryPeriodEmployees: 某薪酬批次的员工核算列表参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeDTO}</li>
  * </ul>
  */
 public class ListPeriodSalaryEmployeesResponse {
 
+	private Long nextPageAnchor;
 	private Integer uncheckCount;
 	private Integer checkedCount;
 	@ItemType(SalaryGroupEntityDTO.class)
@@ -69,5 +71,13 @@ public class ListPeriodSalaryEmployeesResponse {
 
 	public void setCheckedCount(Integer checkedCount) {
 		this.checkedCount = checkedCount;
+	}
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 }
