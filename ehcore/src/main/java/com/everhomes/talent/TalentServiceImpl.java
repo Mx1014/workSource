@@ -604,7 +604,7 @@ public class TalentServiceImpl implements TalentService {
 		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
         cmd.setSourceType(EntityType.TALENT_REQUEST.getCode());
         cmd.setSourceId(talentRequest.getId());
-        List<FlowCaseEntity> flowCaseEntities = generalFormService.getGeneralFormFlowEntities(cmd);
+        List<FlowCaseEntity> flowCaseEntities = generalFormService.getGeneralFormFlowEntities(cmd, true);
 		talentRequestDTO.setFlowCaseEntities(flowCaseEntities);
 		return talentRequestDTO;
 	}

@@ -64,7 +64,7 @@ public class TalentApplyEntryFlowListener implements FlowModuleListener {
     	GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
         cmd2.setSourceType(EntityType.TALENT_REQUEST.getCode());
         cmd2.setSourceId(talentRequest.getId());
-        List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd2);
+        List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd2, true);
         append(formEntities, talentRequest.getContent());
     	return formEntities;
     }
