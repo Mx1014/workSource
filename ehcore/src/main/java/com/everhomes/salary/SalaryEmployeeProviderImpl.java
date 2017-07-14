@@ -4,6 +4,7 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -121,12 +122,16 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	}
 
 	@Override
-	public List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> detailIds, Byte checkFlag) {
+	public List<SalaryEmployee> listSalaryEmployees(Long salaryPeriodGroupId, List<Long> detailIds, Byte checkFlag, CrossShardListingLocator locator, int pageSize) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
 				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds));
 		step.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId));
 		if(null != checkFlag)
 			step.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(checkFlag));
+		if (null != locator && locator.getAnchor() != null) {
+			step.and(Tables.EH_SALARY_EMPLOYEES.ID.gt(locator.getAnchor()));
+		}
+		step.limit(pageSize);
 		return step.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
 	}

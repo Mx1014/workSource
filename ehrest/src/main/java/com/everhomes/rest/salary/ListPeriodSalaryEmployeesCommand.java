@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId : 筛选的部门id </li>
  * <li>keyWords: 搜索关键字</li>
  * <li>checkFlag: 0-未核算 1-已核算 不传null 不过滤</li>
+ * <li>pageAnchor: 分页锚点</li>
+ * <li>pageSize: 每页数目</li>
  * </ul>
  */
 public class ListPeriodSalaryEmployeesCommand {
@@ -28,6 +30,10 @@ public class ListPeriodSalaryEmployeesCommand {
 
 	private Byte checkFlag;
 
+	private Long pageAnchor;
+
+	private Integer pageSize;
+
 	public ListPeriodSalaryEmployeesCommand() {
 
 	}
@@ -37,6 +43,22 @@ public class ListPeriodSalaryEmployeesCommand {
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.salaryPeriodGroupId = salaryPeriodGroupId;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	public String getOwnerType() {

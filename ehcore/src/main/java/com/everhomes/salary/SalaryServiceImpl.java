@@ -6,6 +6,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.organization.*;
@@ -15,6 +16,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.salary.*;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.uniongroup.*;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.uniongroup.ListUniongroupMemberDetailResponse;
 import com.everhomes.uniongroup.UniongroupMemberDetail;
@@ -142,6 +144,9 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Autowired
     private UniongroupService uniongroupService;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public ListSalaryContactResponse listSalaryContacts(ListOrganizationContactCommand cmd) {
@@ -547,6 +552,8 @@ public class SalaryServiceImpl implements SalaryService {
             command.setOrganizationId(cmd.getDepartmentId());
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             command.setKeywords(cmd.getKeywords());
+        if (!StringUtils.isEmpty(cmd.getPageAnchor()))
+            command.setPageAnchor(cmd.getPageAnchor());
         command.setPageSize(cmd.getPageSize());
         ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationPersonnels(command, false);
 
@@ -832,11 +839,9 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
             //  根据批次 id 查找批次具体内容
-            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(salaryGroup.getOrganizationGroupId());
+            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listPeriodSalaryWithExportRegular(cmd.getSalaryGroupId());
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-
             ByteArrayOutputStream out = null;
             XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(results,organization.getName());
             createOutPutSteam(workbook, out, httpServletResponse);
@@ -1135,10 +1140,10 @@ public class SalaryServiceImpl implements SalaryService {
 	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
+            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
             //  根据批次 id 查找批次具体内容
-            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listPeriodSalaryWithExportRegular(cmd.getSalaryGroupId());
+            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(salaryGroup.getOrganizationGroupId());
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-
             ByteArrayOutputStream out = null;
             XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(results,organization.getName());
             createOutPutSteam(workbook, out, httpServletResponse);
@@ -1254,9 +1259,19 @@ public class SalaryServiceImpl implements SalaryService {
         for(OrganizationMemberDTO memberDTO:personels.getMembers()){
             detailIds.add(memberDTO.getDetailId());
         }
-        List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployees(cmd.getSalaryPeriodGroupId(),detailIds,cmd.getCheckFlag());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployees(
+                cmd.getSalaryPeriodGroupId(),detailIds,cmd.getCheckFlag(),locator,pageSize+1);
 		if(null == result )
 			return response;
+        Long nextPageAnchor = null;
+        if (result != null && result.size() > pageSize) {
+            result.remove(result.size() - 1);
+            nextPageAnchor = result.get(result.size() - 1).getId();
+        }
+        response.setNextPageAnchor(nextPageAnchor);
         Integer uncheckCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),SalaryGroupStatus.UNCHECK.getCode());
         Integer toltalCount = salaryEmployeeProvider.countSalaryEmployeesByStatus(cmd.getSalaryPeriodGroupId(),null);
         response.setCheckedCount(toltalCount - uncheckCount);
