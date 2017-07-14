@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>detailId: 联系人的档案id</li>
+ * <li>detailId: 联系人的档案id(当前用户不需要传)</li>
  * <li>organizationId: 公司id</li>
  * </ul>
  */

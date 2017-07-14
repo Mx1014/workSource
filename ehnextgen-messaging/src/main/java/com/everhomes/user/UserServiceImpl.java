@@ -60,10 +60,7 @@ import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
@@ -3902,44 +3899,49 @@ public class UserServiceImpl implements UserService {
 		return resp;
 	}
 
-    //added by R 20170713, 通讯录2.4增加
-    @Override
-    public SceneContactV2DTO getCurrentContactRealInfo(GetCurrentContactRealInfoCommand cmd) {
-        User user = UserContext.current().getUser();
-        OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), cmd.getOrganizationId());
-        if (detail == null)
-            return null;
-        else {
-            SceneContactV2DTO dto = new SceneContactV2DTO();
-            dto.setUserId(user.getId());
-            dto.setContactName(detail.getContactName());
-            dto.setContactToken(detail.getContactToken());
-            return dto;
-        }
-    }
+	//added by R 20170713, 通讯录2.4增加
+	@Override
+	public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
+		if (org.springframework.util.StringUtils.isEmpty(cmd.getDetailId())) {
+			//	没有 detaild 则获取当前用户信息
+			SceneContactV2DTO dto = this.getCurrentContactRealInfo(cmd.getOrganizationId());
+			return dto;
+		} else {
+			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+			if (detail == null)
+				return null;
+			else {
+				SceneContactV2DTO dto = new SceneContactV2DTO();
+				dto.setUserId(detail.getTargetId());
+				dto.setDetailId(detail.getId());
+				if (!StringUtils.isEmpty(detail.getAvatar()))
+					dto.setContactAvatar(detail.getAvatar());
+				dto.setContactName(detail.getContactName());
+				if (!StringUtils.isEmpty(detail.getEnName()))
+					dto.setContactEnglishName(detail.getEnName());
+				dto.setGender(detail.getGender());
+				dto.setContactToken(detail.getContactToken());
+				if (!StringUtils.isEmpty(detail.getEmail()))
+					dto.setEmail(detail.getEmail());
+				getRelevantContactEnterprise(dto, detail.getOrganizationId());
+				return dto;
+			}
+		}
+	}
 
-    @Override
-    public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
-        OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        if (detail == null)
-            return null;
-        else {
-            SceneContactV2DTO dto = new SceneContactV2DTO();
-            dto.setUserId(detail.getTargetId());
-            dto.setDetailId(detail.getId());
-            if (!StringUtils.isEmpty(detail.getAvatar()))
-                dto.setContactAvatar(detail.getAvatar());
-            dto.setContactName(detail.getContactName());
-            if (!StringUtils.isEmpty(detail.getEnName()))
-                dto.setContactEnglishName(detail.getEnName());
-            dto.setGender(detail.getGender());
-            dto.setContactToken(detail.getContactToken());
-            if (!StringUtils.isEmpty(detail.getEmail()))
-                dto.setEmail(detail.getEmail());
-            getRelevantContactEnterprise(dto, detail.getOrganizationId());
-            return dto;
-        }
-    }
+	private SceneContactV2DTO getCurrentContactRealInfo(Long organizationId) {
+		User user = UserContext.current().getUser();
+		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), organizationId);
+		if (detail == null)
+			return null;
+		else {
+			SceneContactV2DTO dto = new SceneContactV2DTO();
+			dto.setUserId(user.getId());
+			dto.setContactName(detail.getContactName());
+			dto.setContactToken(detail.getContactToken());
+			return dto;
+		}
+	}
 
     private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
         Long orgId;
@@ -3958,10 +3960,13 @@ public class UserServiceImpl implements UserService {
             groupTypes.add(OrganizationGroupType.GROUP.getCode());
 
             Organization directlyEnterprise = this.organizationProvider.findOrganizationById(directlyOrgId);
-
-            // 公司
-            dto.setEnterpriseName(directlyEnterprise.getName());
-            // 部门
+			OrganizationDetail directlyEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(directlyOrgId);
+			// 公司
+			if (!StringUtils.isEmpty(directlyEnterpriseDetail.getDisplayName()))
+				dto.setEnterpriseName(directlyEnterpriseDetail.getDisplayName());
+			else
+				dto.setEnterpriseName(directlyEnterprise.getName());
+			// 部门
             dto.setDepartments(this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath()));
             // 岗位
             dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));

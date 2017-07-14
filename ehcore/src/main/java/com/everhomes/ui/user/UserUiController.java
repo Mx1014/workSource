@@ -287,11 +287,7 @@ public class UserUiController extends ControllerBase {
 		return response;
 	}
 
-    /**
-     * <b>URL: /ui/user/getCurrentContactRealInfo</b>
-     * <p>获取当前用户信息的真实信息。</p>
-     * <p>获取信息包括用户姓名和手机号</p>
-     */
+/*
     @RequestMapping("getCurrentContactRealInfo")
     @RestReturn(value=SceneContactV2DTO.class)
     public RestResponse getCurrentContactRealInfo(GetCurrentContactRealInfoCommand cmd) {
@@ -300,7 +296,7 @@ public class UserUiController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /ui/user/getRelevantContactInfo</b>
@@ -309,7 +305,7 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping("getRelevantContactInfo")
     @RestReturn(value=SceneContactV2DTO.class)
-    public RestResponse getCurrentUserRealInfo(GetRelevantContactInfoCommand cmd) {
+    public RestResponse getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
         SceneContactV2DTO result = userService.getRelevantContactInfo(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
