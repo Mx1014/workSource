@@ -478,8 +478,25 @@ SET @organization_member_details_id = (SELECT MAX(id) FROM `eh_organization_memb
 INSERT INTO `eh_organization_member_details` (`id`, `namespace_id`, `target_type`, `target_id`, `birthday`, `organization_id`, `contact_name`, `contact_type`, `contact_token`, `contact_description`, `employee_no`, `avatar`, `gender`, `marital_flag`, `political_status`, `native_place`, `en_name`, `reg_residence`, `id_number`, `email`, `wechat`, `qq`, `emergency_name`, `emergency_contact`, `address`, `employee_type`, `employee_status`, `employment_time`, `dimission_time`, `salary_card_number`, `social_security_number`, `provident_fund_number`, `profile_integrity`, `check_in_time`)
 VALUES((@organization_member_details_id := @organization_member_details_id + 1),'999973','USER','311028',NULL,'1010579','沈颖慧','0','15900788890',NULL,NULL,NULL,'0','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0',NULL,NULL,NULL,NULL,NULL,'0','2017-07-11');
 
-UPDATE  eh_organization_members set detail_id = @organization_member_details_id where id = 2155060  and namespace_id = 999973;
+UPDATE  eh_organization_members set detail_id = @organization_member_details_id, group_type = 'ENTERPRISE', group_path = '/1010579' where id = 2155060  and namespace_id = 999973;
 
 SET @eh_user_organizations_id = (SELECT MAX(id) FROM `eh_user_organizations`);
 INSERT INTO `eh_user_organizations` (`id`, `user_id`, `organization_id`, `group_path`, `group_type`, `status`, `namespace_id`, `create_time`, `visible_flag`, `update_time`)
 VALUES((@eh_user_organizations_id := @eh_user_organizations_id + 1),'311028','1010579','/1010579','ENTERPRISE','3','999973',NULL,'0',NULL);
+
+
+-- 更新服务联盟 item  20170713 add by yanjun
+UPDATE  eh_launch_pad_items  SET action_data = REPLACE(action_data, '"displayType": "list"', '"displayType": "tab"') WHERE id IN (116466, 116478)  AND namespace_id = 999973;
+
+-- 更新服务联盟 item  20170714 add by yanjun
+SET @eh_app_urls_id = (SELECT MAX(id) FROM eh_app_urls);
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES((@eh_app_urls_id := @eh_app_urls_id + 1),'999973','保集E智谷','1','http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.haian.park','cs://1/image/aW1hZ2UvTVRwa09HVTNOekpoTVRkak5EYzNZVGd3TTJKbVl6VTFPR0kyTVdZd01qZzRNZw','移动平台聚合服务，助力园区效能提升');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES((@eh_app_urls_id := @eh_app_urls_id + 1),'999973','保集E智谷','2','http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.haian.park','cs://1/image/aW1hZ2UvTVRwa09HVTNOekpoTVRkak5EYzNZVGd3TTJKbVl6VTFPR0kyTVdZd01qZzRNZw','移动平台聚合服务，助力园区效能提升');
+
+
+-- 招租管理-工作流菜单   20170714 add by yanjun
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40130,'', 'EhNamespaces', 999973,2);
+
+-- 修复脚本问题  20170714 add by yanjun
+UPDATE eh_namespace_resources SET namespace_id = 999973 where id = 19913;
