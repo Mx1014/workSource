@@ -450,7 +450,7 @@ update  eh_locale_templates set text = 90043 where namespace_id = 999973 and sco
 
 -- 缺少数据导致 园区入驻、招租管理出错。20170710 add by yanjun
 SET @eh_lease_configs_id = (SELECT MAX(id) FROM `eh_lease_configs`);
-INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES((@eh_lease_configs_id := @eh_lease_configs_id + 1),'999973','1','1','1','1','1','1');
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`, `display_name_str`, `display_order_str`) VALUES((@eh_lease_configs_id := @eh_lease_configs_id + 1),'999973','1','1','1','1','1','1','园区介绍, 虚位以待', '1,2');
 
 -- 修改资源预定脚本错误，将状态更新为2  20170711 add by yanjun
 UPDATE  eh_rentalv2_resource_types set status = 2 where id in (11029, 11030) and namespace_id = 999973;
@@ -500,3 +500,15 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 -- 修复脚本问题  20170714 add by yanjun
 UPDATE eh_namespace_resources SET namespace_id = 999973 where id = 19913;
+
+-- 缺少字段  20170714 add by yanjun
+UPDATE `eh_lease_configs` SET display_name_str = '园区介绍, 虚位以待', display_order_str = '1,2' WHERE namespace_id = 999973;
+
+-- 增加资源预定工作流，表单管理菜单  20170714 add by yanjun
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40450,'', 'EhNamespaces', 999973,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50900,'', 'EhNamespaces', 999973,2);
+
+-- 服务联盟模块-加审批表单  20170714 add by yanjun
+SET @jump_module_id = (SELECT MAX(id) FROM `eh_service_alliance_jump_module`);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ((@jump_module_id := @jump_module_id + 1), 999973, '审批', 'zl://approval/create?approvalId={}&sourceId={}', 0);
