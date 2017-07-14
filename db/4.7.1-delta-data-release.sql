@@ -215,6 +215,7 @@ update `eh_launch_pad_items` set action_data = replace(action_data, '"payMode":2
 	
 -- 荣超股份增加考勤统计菜单 add by sfyan 20170714
 SET @menu_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1),50660,'', 'EhNamespaces', 999975,2);	
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1),506600,'', 'EhNamespaces', 999975,2);	
 	
 -- 康利item url修改 add by sfyan 20170714
