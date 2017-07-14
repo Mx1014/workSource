@@ -4,6 +4,10 @@ package com.everhomes.authorization.zjgk;
 import com.everhomes.util.StringHelper;
 
 public class ZjgkResponse {
+	public static final byte EXIST_COMMUNITY = 1;//存在一个园区
+	public static final byte NOT_EXIST_COMMUNITY = 0;//不存在园区
+	public static final byte MULTI_COMMUNITY = -1;//多个园区
+	
 	private String communityName;
 	private String buildingName;
 	private String apartmentName;
@@ -11,7 +15,7 @@ public class ZjgkResponse {
 	private Long addressId;
     private String fullAddress;
     private Integer userCount;
-    private Byte existCommunityFlag = 1;
+    private Byte existCommunityFlag = EXIST_COMMUNITY;
 	public Byte getExistCommunityFlag() {
 		return existCommunityFlag;
 	}

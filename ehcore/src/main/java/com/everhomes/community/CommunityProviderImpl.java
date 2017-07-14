@@ -1384,20 +1384,20 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
 	@Override
-	public Community findCommunityByNamespaceIdAndName(Integer namespaceId, String communityName) {
-    	 final Community[] result = new Community[1];
+	public List<Community> listCommunityByNamespaceIdAndName(Integer namespaceId, String communityName) {
+    	 List<Community> result = new ArrayList<Community>();
 
          this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
              (DSLContext context, Object reducingContext) -> {
             	 context.select().from(Tables.EH_COMMUNITIES)
         		 .where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
         		.and(Tables.EH_COMMUNITIES.NAME.eq(communityName)).fetch().map(r ->{
-        			return result[0] = ConvertHelper.convert(r,Community.class);
+        			return result.add(ConvertHelper.convert(r,Community.class));
         		});
             	 return true;
              });
          
-         return result[0];
+         return result;
     
 	}
 }

@@ -69,6 +69,8 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	
 	static final String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
 	
+	static final String[] communites = {"深业花园","岭秀名苑","深发花园","风临左岸","深业中心大厦","地王","地王","天天","幸福","屠龙","抗日战争","富人","南领花园","不存在的小区1","不存在的小区2","不存在的小区3","不存在的小区4","不存在的小区5","不存在的小区6"};
+	
     @Autowired
     private CommunityProvider communityProvider;
 	
@@ -126,8 +128,13 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	private void createRecords(AuthorizationThirdPartyRecord record,String type) {
 		//记录对同一个用户来说，只有一条有效，其他的则提供给工作流显示而已，设置为无效
 		dbProvider.execute(status -> {
-			authorizationProvider.updateAuthorizationThirdPartyRecordStatusByUseId(UserContext.getCurrentNamespaceId(),UserContext.current().getUser().getId(),type);
-			authorizationProvider.createAuthorizationThirdPartyRecord(record);
+			if(record.getErrorCode() == ZjgkJsonEntity.ERRORCODE_SUCCESS){
+				authorizationProvider.updateAuthorizationThirdPartyRecordStatusByUseId(UserContext.getCurrentNamespaceId(),UserContext.current().getUser().getId(),type);
+				authorizationProvider.createAuthorizationThirdPartyRecord(record);
+			}else{
+				record.setStatus(CommonStatus.INACTIVE.getCode());
+				authorizationProvider.createAuthorizationThirdPartyRecord(record);
+			}
 			return null;
 		});
 	}
@@ -154,12 +161,16 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			leaveThirdPartyAuthAddress(authorizationType);
 			//加入第三方认证的家庭
 			for (ZjgkResponse zjgkResponse : list) {
-//				zjgkResponse.setCommunityName("科技园"); // TODO
-//				zjgkResponse.setBuildingName("4-79");// TODO
+				zjgkResponse.setCommunityName(communites[(int)(Math.random()*19)]); // TODO
+				zjgkResponse.setBuildingName(generateRandomNumber(2)+"-"+generateRandomNumber(3));// TODO
 				//生成加入家庭的command
 				ClaimAddressCommand claimcmd = generateClaimAddressCommand(cmd,zjgkResponse);
 				if(claimcmd == null){
-					zjgkResponse.setExistCommunityFlag((byte)0);
+					zjgkResponse.setExistCommunityFlag(ZjgkResponse.NOT_EXIST_COMMUNITY);
+					continue;
+				}
+				if(claimcmd.getCommunityId() == null){
+					zjgkResponse.setExistCommunityFlag(ZjgkResponse.MULTI_COMMUNITY);
 					continue;
 				}
 				//加入家庭
@@ -175,6 +186,10 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			record = generateUserAuthorizationRecord(cmd,params,authorizationType,entity);
 		}
 		return record;
+	}
+	
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
 	}
 
 
@@ -231,12 +246,15 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	//调用认证接口，需要生成认证的command
 	private ClaimAddressCommand generateClaimAddressCommand(PostGeneralFormCommand cmd, ZjgkResponse zjgkResponse) {
 		String communityName = zjgkResponse.getCommunityName();
-		Community community = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), communityName);
-		if(community == null){
+		List<Community> communities = communityProvider.listCommunityByNamespaceIdAndName(cmd.getNamespaceId(), communityName);
+		ClaimAddressCommand claimcmd = new ClaimAddressCommand();
+		if(communities == null){
 			return null;
 		}
-		ClaimAddressCommand claimcmd = new ClaimAddressCommand();
-		claimcmd.setCommunityId(community.getId());
+		if(communities.size()>1){
+			return claimcmd;
+		}
+		claimcmd.setCommunityId(communities.get(0).getId());
 		claimcmd.setApartmentName(zjgkResponse.getApartmentName());
 		claimcmd.setBuildingName(zjgkResponse.getBuildingName());
 		return claimcmd;
@@ -315,14 +333,16 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			buffer.append("恭喜您，成为我们的一员，您承租的地址信息如下：\n");
 		}
 		else{
-			buffer.append("不知道什么情况。\n");
+			buffer.append("未定义的返回码 ").append(entity.getErrorCode()).append(" ");
 		}
 		if(list!=null && list.size()>0){
 			for (ZjgkResponse zjgkResponse : list) {
-				if(zjgkResponse.getExistCommunityFlag() == 1){
-					buffer.append(zjgkResponse.getAddress()).append("\n");
-				}else{
-					buffer.append("园区[").append(zjgkResponse.getCommunityName()).append("]不存在");
+				if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.EXIST_COMMUNITY){
+					buffer.append(zjgkResponse.getCommunityName()).append(zjgkResponse.getBuildingName()).append(zjgkResponse.getApartmentName()).append("\n");
+				}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.NOT_EXIST_COMMUNITY){
+					buffer.append("园区[").append(zjgkResponse.getCommunityName()).append("]不存在\n");
+				}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.MULTI_COMMUNITY){
+					buffer.append("园区[").append(zjgkResponse.getCommunityName()).append("]名称存在多个\n");
 				}
 				
 			}

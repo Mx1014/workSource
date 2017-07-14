@@ -103,9 +103,9 @@ public class AuthorizationThirdPartyRecordProviderImpl implements AuthorizationT
 
 	@Override
 	public void removeAuthorizationThirdPartyRecord(Integer namespaceId, Long userId) {
-		getReadOnlyContext().delete(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
-			.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
-			.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.CREATOR_UID.eq(userId)).execute();
+//		getReadOnlyContext().delete(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
+//			.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
+//			.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.CREATOR_UID.eq(userId)).execute();
 	}
 
 	@Override
