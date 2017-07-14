@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
@@ -24,6 +25,7 @@ import com.everhomes.authorization.zjgk.ZjgkJsonEntity;
 import com.everhomes.authorization.zjgk.ZjgkResponse;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationsProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -53,6 +55,7 @@ import com.everhomes.rest.general_approval.PostGeneralFormCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.user.User;
@@ -72,7 +75,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	
 	static final String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
 	
-	static final String[] communites = {"深业花园","岭秀名苑","深发花园","风临左岸","深业中心大厦","地王","地王","天天","幸福","屠龙","抗日战争","富人","南领花园","不存在的小区1","不存在的小区2","不存在的小区3","不存在的小区4","不存在的小区5","不存在的小区6"};
+	static final String[] communites = {"深业花园","岭秀名苑","深发花园","风临左岸","深业中心大厦","地王","地王","天天","幸福","屠龙","抗日战争","富人","南领花园"};
 	
     @Autowired
     private CommunityProvider communityProvider;
@@ -98,17 +101,44 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
     @Autowired
     private AuthorizationThirdPartyFormProvider authorizationThirdPartyFormProvider;
     
+    @Value("${auth.debug}")
+    private boolean isdebug;
+    
+    private int length;
+    
+    private boolean isdebug(){
+    	return isdebug;
+    }
 	@Override
 	public PostGeneralFormDTO personalAuthorization(PostGeneralFormCommand cmd) {
 		getSettinginfo(cmd);
-		Map<String, String> params = generalParams(cmd);
+		Map<String, String> params = generateParams(cmd,PERSONAL_AUTHORIZATION);
+		length = params.get("certificateNo").length();
+		if(isdebug()){
+			params.put("phone", "18761600673");
+			params.put("name", "成泽伟");
+			params.put("certificateType", "1");
+			params.put("certificateNo", "321201199307070219");
+			String signature = computeSignature(params, secretKey);
+			params.put("signature", signature);
+		}
 		ZjgkJsonEntity<List<ZjgkResponse>> entity = null;
 		FlowCase flowCase = null;
 		try {
 			String jsonStr = HttpUtils.post(url, params, 10, "UTF-8");
 			//向第三方认证。
 			entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
-			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SUCCESS);
+			if(isdebug()){
+				if(length == 1){
+					entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SUCCESS);
+				}else if(length == 2){
+					entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_MISMATCHING);
+					entity.setResponse(new ArrayList<>());
+				}else{
+					entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_UNRENT);
+					entity.setResponse(new ArrayList<>());
+				}
+			}
 			//请求成功，返回承租地址，那么创建家庭。
 			AuthorizationThirdPartyRecord record = createFamily(cmd,entity,params,PERSONAL_AUTHORIZATION);
 			//创建工作流
@@ -165,7 +195,9 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 //    		String[] documentflows = documentflow.split("\\|");
 //        	item.setFieldValue(generalContent(entity,documentflows));
 //		}
-        item.setFieldValue(processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+        ApplyEntryResponse resp = new ApplyEntryResponse();
+        processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
+        item.setFieldValue(StringHelper.toJsonString(resp));
         items.add(item);
         dto.getValues().addAll(items);
         return dto;
@@ -383,7 +415,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return buffer.toString();
 	}
 
-	private Map<String, String> generalParams(PostGeneralFormCommand cmd){
+	private Map<String, String> generateParams(PostGeneralFormCommand cmd, String type){
 		List<PostApprovalFormItem> values = cmd.getValues();
 		Map<String, String> params= new HashMap<String,String>();
 		for (PostApprovalFormItem item : values) {
@@ -408,7 +440,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		params.put("appKey", appKey);
 		params.put("timestamp", ""+System.currentTimeMillis());
 		params.put("nonce", ""+(long)(Math.random()*100000));
-		params.put("type", PERSONAL_AUTHORIZATION);
+		params.put("type", type);
 		String signature = computeSignature(params, secretKey);
 		params.put("signature", signature);
 		return params;
@@ -419,13 +451,32 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	@Override
 	public PostGeneralFormDTO organiztionAuthorization(PostGeneralFormCommand cmd) {
 		getSettinginfo(cmd);
-		Map<String, String> params = generalParams(cmd);
+		Map<String, String> params = generateParams(cmd,ORGANIZATION_AUTHORIZATION);
+		length = params.get("organizationCode").length();
+		if(isdebug()){
+			params.put("organizationCode", "111111111111111");
+			params.put("organizationContact", "Test");
+			params.put("organizationPhone", "12345678901");
+			String signature = computeSignature(params, secretKey);
+			params.put("signature", signature);
+		}
 		ZjgkJsonEntity<List<ZjgkResponse>> entity = null;
 		FlowCase flowCase = null;
 		try {
 			String jsonStr = HttpUtils.post(url, params, 10, "UTF-8");
 			//向第三方认证。
 			entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
+			if(isdebug()){
+				if(length == 1){
+					entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SUCCESS);
+				}else if(length == 2){
+					entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_MISMATCHING);
+					entity.setResponse(new ArrayList<>());
+				}else{
+					entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_UNRENT);
+					entity.setResponse(new ArrayList<>());
+				}
+			}
 			//请求成功，返回承租地址，那么创建家庭。
 			AuthorizationThirdPartyRecord record = createFamily(cmd,entity,params,ORGANIZATION_AUTHORIZATION);
 			//创建工作流
