@@ -223,7 +223,7 @@ public class Utils {
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(nvps, StandardCharsets.UTF_8));
 
-            httpPost.addHeader("content-type", "application/x-www-form-urlencoded");
+//            httpPost.addHeader("content-type", "application/x-www-form-urlencoded");
             if (null != headers) {
                 Set<Map.Entry<String, String>> headersEntry = headers.entrySet();
                 for (Map.Entry<String, String> e: headersEntry) {

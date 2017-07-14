@@ -252,8 +252,14 @@ public class UserController extends ControllerBase {
      */
     @RequestMapping("signupByAppKey")
     @RestReturn(String.class)
-    public RestResponse signupByAppKey(@Valid SignupCommand cmd, HttpServletRequest request) {
-        SignupToken token = userService.signup(cmd, request);
+    public RestResponse signupByAppKey(@Valid SignupCommandByAppKey cmd, HttpServletRequest request) {
+        // 手机号或者邮箱，SignupCommandByAppKey拷贝自com.everhomes.rest.user.SignupCommand， 由于原来使用token字段来填手机号，
+        // 但token属于特殊字段，会导致Webtoken解释异常，故在新接口把字段名称修改一下，但在service仍然用回原来的command
+        // by lqs 20170714
+        SignupCommand newCmd = ConvertHelper.convert(cmd, SignupCommand.class);
+        newCmd.setToken(cmd.getUserIdentifier());
+        
+        SignupToken token = userService.signup(newCmd, request);
         return new RestResponse(WebTokenGenerator.getInstance().toWebToken(token));
     }
 
