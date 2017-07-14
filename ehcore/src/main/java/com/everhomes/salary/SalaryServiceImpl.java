@@ -503,21 +503,21 @@ public class SalaryServiceImpl implements SalaryService {
     }*/
 
     @Override
-    public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd){
+    public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
         ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
         //  保存所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
         //  保存所有员工工资明细情况
         List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails();
 
-        if(StringUtils.isEmpty(cmd.getSalaryGroupId())){
+        if (StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
             //  当没有传递薪酬组 id 的时候选择原始组织架构接口
             ListUniongroupMemberDetailResponse results = this.listEmployeesFromOrganization(cmd);
             //  拼接字段
-            response = this.listSalaryEmployeesCompleteInfo(results.getUniongroupMemberDetailList(),organizations,wages,cmd.getIsException());
+            response = this.listSalaryEmployeesCompleteInfo(results.getUniongroupMemberDetailList(), organizations, wages, cmd.getIsException());
             response.setNextPageAnchor(results.getPageAnchor());
-        }else{
+        } else {
 
             //  当传递了薪酬组 id 的时候选择 lei.lv 的新接口
             ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
@@ -531,7 +531,9 @@ public class SalaryServiceImpl implements SalaryService {
             if (!StringUtils.isEmpty(cmd.getKeywords()))
                 command.setKeywords(cmd.getKeywords());
             command.setPageAnchor(Long.valueOf("0"));
-            command.setPageSize(cmd.getPageSize());
+            if (!StringUtils.isEmpty(cmd.getPageAnchor()))
+                command.setPageAnchor(cmd.getPageAnchor());
+            command.setPageSize(20);
             ListUniongroupMemberDetailResponse results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
             if (results != null && results.getUniongroupMemberDetailList().size() > 0) {
                 //  拼接字段
@@ -557,26 +559,13 @@ public class SalaryServiceImpl implements SalaryService {
             keywords = cmd.getKeywords();
         if (!StringUtils.isEmpty(cmd.getDepartmentId()))
             organizationId = cmd.getDepartmentId();
-/*        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-        command.setOrganizationId(cmd.getOwnerId());
-        if (!StringUtils.isEmpty(cmd.getDepartmentId()))
-            command.setOrganizationId(cmd.getDepartmentId());
-        if (!StringUtils.isEmpty(cmd.getKeywords()))
-            command.setKeywords(cmd.getKeywords());
-        if (!StringUtils.isEmpty(cmd.getPageAnchor()))
-            command.setPageAnchor(cmd.getPageAnchor());
-        command.setPageSize(cmd.getPageSize());
-        List<OrganizationMember> members = listOrganizationMemberByPathHavingDetailId*/
-        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationMemberByPathHavingDetailId(keywords,pageAnchor,organizationId,pageSize);
+        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationMemberByPathHavingDetailId(keywords, pageAnchor, organizationId, pageSize);
 
         //  2.查询所有关联了薪酬组的用户与薪酬组id
         List<Object[]> groups = this.uniongroupService.listUniongroupMemberGroupIds(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
         List<UniongroupMemberDetail> results = new ArrayList<>();
         for (int y = 0; y < response.getMembers().size(); y++) {
 
-            //  没有 detailId 的时候则视为无效数据
-/*            if (StringUtils.isEmpty(response.getMembers().get(y).getDetailId()))
-                continue;*/
             UniongroupMemberDetail result = new UniongroupMemberDetail();
             result.setId(response.getMembers().get(y).getId());
             result.setEmployeeNo(response.getMembers().get(y).getEmployeeNo());
@@ -612,7 +601,7 @@ public class SalaryServiceImpl implements SalaryService {
     //  拼接字符串的统一方法
     private ListSalaryEmployeesResponse listSalaryEmployeesCompleteInfo(
             List<UniongroupMemberDetail> results, List<Organization> organizations,
-            List<Object[]> wages,Byte isException){
+            List<Object[]> wages, Byte isException) {
 
         ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
         List<SalaryEmployeeDTO> dtos = new ArrayList<>();
@@ -627,7 +616,7 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setContactName(results.get(i).getContactName());
                 dto.setSalaryGroupId(results.get(i).getGroupId());
                 //  拼接部门
-                if (null != results.get(i).getDepartment() && results.get(i).getDepartment().size()>0) {
+                if (null != results.get(i).getDepartment() && results.get(i).getDepartment().size() > 0) {
                     for (Long k : results.get(i).getDepartment().keySet()) {
                         department += (results.get(i).getDepartment().get(k) + ",");
                     }
@@ -635,7 +624,7 @@ public class SalaryServiceImpl implements SalaryService {
 
                 }
                 //  拼接岗位
-                if (null != results.get(i).getJobPosition() && results.get(i).getJobPosition().size()>0) {
+                if (null != results.get(i).getJobPosition() && results.get(i).getJobPosition().size() > 0) {
                     for (Long k : results.get(i).getJobPosition().keySet()) {
                         jobPosition += (results.get(i).getJobPosition().get(k) + ",");
                     }
