@@ -4,8 +4,6 @@ package com.everhomes.authorization;
 import java.sql.Timestamp;
 import java.util.List;
 
-import javax.persistence.Table;
-
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -127,5 +125,21 @@ public class AuthorizationThirdPartyRecordProviderImpl implements AuthorizationT
 		 .where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
 		 .and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.CREATOR_UID.eq(userId))
 		 .and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.TYPE.eq(authorizationType)).execute();
+	}
+
+	@Override
+	public AuthorizationThirdPartyRecord findAuthorizationThirdPartyRecordByPhone(String phone, Byte type,
+			Integer namespaceId) {
+		List<AuthorizationThirdPartyRecord> list = getReadOnlyContext().select()
+				.from(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
+				.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.PHONE.eq(phone))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.TYPE.eq(type+""))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.fetch().map(r -> ConvertHelper.convert(r, AuthorizationThirdPartyRecord.class));
+		if(list!=null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
 	}
 }

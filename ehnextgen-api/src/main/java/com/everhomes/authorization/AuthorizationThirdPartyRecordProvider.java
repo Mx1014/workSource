@@ -21,4 +21,7 @@ public interface AuthorizationThirdPartyRecordProvider {
 
 	void updateAuthorizationThirdPartyRecordStatusByUseId(Integer namespaceId, Long userId, String authorizationType);
 
+	AuthorizationThirdPartyRecord findAuthorizationThirdPartyRecordByPhone(String phone, Byte type,
+			Integer namespaceId);
+
 }

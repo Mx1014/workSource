@@ -15,4 +15,7 @@ public interface AuthorizationThirdPartyFormProvider {
 
 	List<AuthorizationThirdPartyForm> listFormSourceByOwner(String ownerType,Long ownerId);
 
+	AuthorizationThirdPartyForm getFormSource(Integer currentNamespaceId, String ownerType, Long ownerId,
+			String sourceType, Long sourceId);
+
 }

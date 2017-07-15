@@ -91,4 +91,20 @@ public class AuthorizationThirdPartyFormProviderImpl implements AuthorizationThi
 		.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.OWNER_ID.eq(ownerId))
 		.fetch().map(r -> ConvertHelper.convert(r, AuthorizationThirdPartyForm.class));
 	}
+
+	@Override
+	public AuthorizationThirdPartyForm getFormSource(Integer currentNamespaceId, String ownerType, Long ownerId,
+			String sourceType, Long sourceId) {
+		List<AuthorizationThirdPartyForm> list = getReadOnlyContext().select().from(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS)
+				.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.NAMESPACE_ID.eq(currentNamespaceId))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.SOURCE_TYPE.eq(sourceType))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_FORMS.SOURCE_ID.eq(sourceId))
+				.fetch().map(r -> ConvertHelper.convert(r, AuthorizationThirdPartyForm.class));
+		if(list!=null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
+	}
 }

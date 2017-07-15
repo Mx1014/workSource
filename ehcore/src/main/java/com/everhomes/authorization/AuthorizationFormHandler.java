@@ -12,7 +12,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
@@ -22,20 +21,12 @@ import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 public abstract class AuthorizationFormHandler implements GeneralFormModuleHandler {
 
-    @Autowired
-    private EnterpriseApplyEntryService enterpriseApplyEntryService;
-    @Autowired
-    private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
-    @Autowired
-    private GeneralFormService generalFormService;
     @Autowired
     private GeneralFormProvider generalFormProvider;
 

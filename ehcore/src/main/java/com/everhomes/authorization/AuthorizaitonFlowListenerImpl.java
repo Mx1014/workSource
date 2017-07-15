@@ -9,29 +9,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.authorization.zjgk.ZjgkJsonEntity;
 import com.everhomes.authorization.zjgk.ZjgkResponse;
-import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowService;
-import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
-import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
-import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 
@@ -179,7 +172,7 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		e = new FlowCaseEntity();
 		e.setKey(documents[6]);
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(record.getCertificateType() == "1"?documents[9]:documents[10]);
+		e.setValue("1".equals(record.getCertificateType())?documents[9]:documents[10]);
 		entities.add(e);
 		//证件号码
 		e = new FlowCaseEntity();
@@ -203,11 +196,12 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 	
 	public void generateAddressEntity(List<FlowCaseEntity> entities, List<ZjgkResponse> list, String[] documentflows) {
 		FlowCaseEntity e = new FlowCaseEntity();
+		if(list!=null && list.size()>0)
 		for (int i = 0; i < list.size(); i++) {
 			StringBuffer buffer = new StringBuffer();
 			ZjgkResponse zjgkResponse =list.get(i);
 			if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.EXIST_COMMUNITY){
-				buffer.append(list.get(i).getBuildingName()).append(list.get(i).getApartmentName());
+				buffer.append(list.get(i).getCommunityName()).append(list.get(i).getBuildingName()).append("-").append(list.get(i).getApartmentName());
 			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.NOT_EXIST_COMMUNITY){
 				buffer.append(documentflows[6]).append(zjgkResponse.getCommunityName()).append(documentflows[7]).append("\n");
 			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.MULTI_COMMUNITY){
@@ -223,7 +217,7 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 	public String generateContent(ZjgkJsonEntity<List<ZjgkResponse>> entity, String[] documentflows) {
 		StringBuffer buffer = new StringBuffer();
 		if(entity.isMismatching()){
-			buffer.append("\n")
+			buffer//.append("\n")
 			.append(documentflows[0])
 			.append("\n")
 			.append(documentflows[1])
@@ -232,8 +226,18 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 			.append("\n");
 		}
 		else if(entity.isUnrent()){
-			buffer.append("\n")
+			buffer.append("")
 			.append(documentflows[3])
+			.append("\n");
+		}
+		else if(entity.isRequestFail()){
+			buffer.append("")
+			.append(documentflows[11])
+			.append("\n");
+		}
+		else if(entity.isNotPassInZuolin()){
+			buffer.append("")
+			.append(documentflows[12])
 			.append("\n");
 		}
 		else if(entity.isSuccess())
