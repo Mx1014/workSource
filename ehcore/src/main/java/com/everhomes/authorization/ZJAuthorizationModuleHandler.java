@@ -109,7 +109,11 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	public PostGeneralFormDTO authorization(PostGeneralFormCommand cmd, String type) {
 		getSettinginfo(cmd);
 		Map<String, String> params = generateParams(cmd,type);
-		length = params.get("organizationCode") == null?params.get("certificateNo").length():params.get("organizationCode").length();
+		if(ORGANIZATION_AUTHORIZATION.equals(type)){
+			length = params.get("organizationCode").length();
+		}else{
+			length = params.get("certificateNo").length();
+		}
 		ZjgkJsonEntity<List<ZjgkResponse>> entity = new ZjgkJsonEntity<List<ZjgkResponse>>();
 		//调试模式
 		if(isdebug()){
@@ -250,6 +254,10 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 				//开发中，发现如果认证返回的小区，如果在数据库中没有查到和管理公司（eh_organization_communities）的关联,会抛出异常。
 				//在此处理为认证失败
 				record.setErrorCode(ZjgkJsonEntity.ERRORCODE_NOT_PASS_IN_ZUOLIN);
+				entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_NOT_PASS_IN_ZUOLIN);
+				entity.setErrorDescription("认证异常");
+				entity.getResponse().clear();
+				record.setResultJson(StringHelper.toJsonString(entity));
 				//用户退出还未认证的家庭。
 				for (ApproveMemberCommand r : batchAppCmd.getMembers()) {
 					DisclaimAddressCommand disCmd = new DisclaimAddressCommand();
