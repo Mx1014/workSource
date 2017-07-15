@@ -454,6 +454,13 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	private Map<String, String> generateParams(PostGeneralFormCommand cmd, String type){
 		List<PostApprovalFormItem> values = cmd.getValues();
 		Map<String, String> params= new HashMap<String,String>();
+		params.put("organizationCode","1232123");
+		params.put("organizationContact","Test");
+		params.put("organizationPhone","1234567890");
+		params.put("phone","18761600673");
+		params.put("name","dsf");
+		params.put("certificateType","1");
+		params.put("certificateNo","321201199307070219");
 		for (PostApprovalFormItem item : values) {
 			GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(item.getFieldType());
 			switch (fieldType) {
