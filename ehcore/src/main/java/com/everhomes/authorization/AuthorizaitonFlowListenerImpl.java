@@ -4,6 +4,8 @@ package com.everhomes.authorization;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
@@ -95,7 +98,7 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
 		AuthorizationThirdPartyRecord record = recordProvider.getAuthorizationThirdPartyRecordByFlowCaseId(flowCase.getId());
 		if(record == null){
-			LOGGER.error("unknow flowcase id = {}",flowCase.getId());
+			LOGGER.error("unKnown flowcase id = {}",flowCase.getId());
 			return null;
 		}
 		String document = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
@@ -106,7 +109,7 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		}else if(AuthorizationModuleHandler.ORGANIZATION_AUTHORIZATION.equals(record.getType().trim())){
 			return createOrganiztionEntites(record,documents);
 		}
-		LOGGER.error("unknow record type = {}",record.getType());
+		LOGGER.error("unKnown record type = {}",record.getType());
 		return null;
 	}
 
@@ -196,12 +199,16 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 	
 	public void generateAddressEntity(List<FlowCaseEntity> entities, List<ZjgkResponse> list, String[] documentflows) {
 		FlowCaseEntity e = new FlowCaseEntity();
-		if(list!=null && list.size()>0)
+		
+		if(CollectionUtils.isEmpty(list)){
+			return ;
+		}
+		
 		for (int i = 0; i < list.size(); i++) {
 			StringBuffer buffer = new StringBuffer();
 			ZjgkResponse zjgkResponse =list.get(i);
 			if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.EXIST_COMMUNITY){
-				buffer.append(list.get(i).getCommunityName()).append(list.get(i).getBuildingName()).append("-").append(list.get(i).getApartmentName());
+				buffer.append(zjgkResponse.getCommunityName()).append(zjgkResponse.getBuildingName()).append('-').append(zjgkResponse.getApartmentName());
 			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.NOT_EXIST_COMMUNITY){
 				buffer.append(documentflows[6]).append(zjgkResponse.getCommunityName()).append(documentflows[7]).append("\n");
 			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.MULTI_COMMUNITY){
@@ -265,8 +272,8 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		
+		if(flowCase != null)
+			flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
 	}
 
 	@Override
