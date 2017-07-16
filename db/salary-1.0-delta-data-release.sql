@@ -175,3 +175,7 @@ INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_ty
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privileges_id, 1001, 'EhAclRoles', 0, 1, NOW()); 
 
 
+SET @locale_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100001','zh_CN','没有文件');
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100002','zh_CN','姓名为空');
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100003','zh_CN','手机号码有误');
