@@ -29,4 +29,5 @@ public interface PmTaskErrorCode {
     int ERROR_CREATE_TASK_PRIVILEGE = 10012; //没有代发权限！
 
     int ERROR_USER_INFO = 10013; //查不到该用户信息！
+    int ERROR_APP_KEY = 10014; //查不到对应的app key！
 }

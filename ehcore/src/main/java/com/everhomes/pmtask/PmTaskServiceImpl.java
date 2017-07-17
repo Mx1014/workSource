@@ -1,11 +1,9 @@
 package com.everhomes.pmtask;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
@@ -46,7 +46,9 @@ import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.schema.tables.pojos.EhApps;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -180,6 +182,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+	@Autowired
+	private AppProvider appProvider;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -2279,5 +2283,90 @@ public class PmTaskServiceImpl implements PmTaskService {
 		});
 
 		return dto;
+	}
+
+	@Override
+	public void notifyTaskResult(NotifyTaskResultCommand cmd) {
+		//根据app key来验证是否有接口权限以及是提供给哪个第三方的 eh_apps里面拿到name
+		App app = appProvider.findAppByKey(cmd.getAppKey());
+		if(app == null) {
+			LOGGER.error("app key is not exist.");
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_APP_KEY,
+					"app key is not exist.");
+		}
+		Long taskId = Long.valueOf(cmd.getTaskNum());
+		PmTask task = pmTaskProvider.findTaskById(taskId);
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+		stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
+		dbProvider.execute((TransactionStatus status) -> {
+			flowService.processAutoStep(stepDTO);
+
+			task.setRemarkSource(TaskRemarkSource.fromCode(app.getName()).getCode());
+			task.setRemark(cmd.getRemark());
+			pmTaskProvider.updateTask(task);
+			return null;
+		});
+	}
+
+	@Override
+	public void exportTasksCard(ExportTasksCardCommand cmd, HttpServletResponse response) {
+		List<Long> taskIds = new ArrayList<>();
+		if(!StringUtils.isEmpty(cmd.getIds())) {
+			String[] ids = cmd.getIds().split(",");
+			for(String id : ids) {
+				taskIds.add(Long.valueOf(id));
+			}
+		}
+		LOGGER.info("taskIds: {}", taskIds);
+//		List<EquipmentInspectionEquipments> equipments = equipmentProvider.listEquipmentsById(equipmentIds);
+//		List<EquipmentsDTO> dtos = equipments.stream().map(equipment -> {
+//			EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
+//			return dto;
+//		}).collect(Collectors.toList());
+//
+//		String filePath = cmd.getFilePath();
+//		if(StringUtils.isEmpty(cmd.getFilePath())) {
+//			URL rootPath = EquipmentServiceImpl.class.getResource("/");
+//			filePath = rootPath.getPath() + this.downloadDir ;
+//			File file = new File(filePath);
+//			if(!file.exists())
+//				file.mkdirs();
+//
+//		}
+//
+////		return download(filePath,response);
+//
+//		DocUtil docUtil=new DocUtil();
+//		List<String> files = new ArrayList<>();
+//
+//		for(int i = 0; i <dtos.size(); i++ ) {
+//			EquipmentsDTO dto1 = dtos.get(i);
+//			EquipmentsDTO dto2 = dtos.get(i+1);
+////			DocUtil docUtil=new DocUtil();
+//			Map<String, Object> dataMap=createTwoEquipmentCardDoc(dto1, dto2);
+//
+//			String savePath = filePath + dto1.getId()+ "-" + dto1.getName() +
+//					"-" + dto2.getId()+ "-" + dto2.getName() + ".doc";
+//
+//			docUtil.createDoc(dataMap, "shenye2", savePath);
+//			if(StringUtils.isEmpty(cmd.getFilePath())) {
+////				download(savePath,response);
+//				files.add(savePath);
+//			}
+//		}
+//		if(StringUtils.isEmpty(cmd.getFilePath())) {
+//			if(files.size() > 1) {
+//				String zipPath = filePath + System.currentTimeMillis() + "EquipmentCard.zip";
+//				LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+//				DownloadUtils.writeZip(files, zipPath);
+//				download(zipPath,response);
+//			} else if(files.size() == 1) {
+//				download(files.get(0),response);
+//			}
+//
+//		}
 	}
 }

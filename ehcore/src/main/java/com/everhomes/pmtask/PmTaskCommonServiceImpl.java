@@ -3,6 +3,7 @@ package com.everhomes.pmtask;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -14,6 +15,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -342,6 +344,7 @@ class PmTaskCommonServiceImpl {
             case "ASSIGNING": return PmTaskFlowStatus.ASSIGNING.getCode();
             case "PROCESSING": return PmTaskFlowStatus.PROCESSING.getCode();
             case "COMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
+            case "HANDOVER": return PmTaskFlowStatus.PROCESSING.getCode();
             default: return null;
         }
     }
@@ -477,4 +480,11 @@ class PmTaskCommonServiceImpl {
         else
             return "";
     }
+
+    void handoverTaskToTrd(PmTask task) {
+        String handlerPrefix = HandoverTaskHandler.HANDOVER_VENDOR_PREFIX;
+        HandoverTaskHandler handler = PlatformContext.getComponent(handlerPrefix + task.getNamespaceId());
+        handler.handoverTaskToTrd(task);
+    }
+
 }

@@ -150,6 +150,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
+			}else if ("HANDOVER".equals(nodeType)) {
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				pmTaskProvider.updateTask(task);
+				//通知第三方 config表中配置api请求地址
+				pmTaskCommonService.handoverTaskToTrd(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
