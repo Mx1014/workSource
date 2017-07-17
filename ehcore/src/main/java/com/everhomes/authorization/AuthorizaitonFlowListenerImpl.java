@@ -121,34 +121,16 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		List<FlowCaseEntity> entities = new ArrayList<>(); 
 		ZjgkJsonEntity<List<ZjgkResponse>> zjgkResponses = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 		//组织机构代码
-		FlowCaseEntity e = new FlowCaseEntity();
-		e.setKey(documents[0]);
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(record.getOrganizationCode());
-		entities.add(e);
+		entities.add(getFlowCaseEntity(documents[0], FlowCaseEntityType.MULTI_LINE.getCode(), record.getOrganizationCode()));
 		//企业联系人
-		e = new FlowCaseEntity();
-		e.setKey(documents[1]);
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(record.getOrganizationContact());
-		entities.add(e);
+		entities.add(getFlowCaseEntity(documents[1], FlowCaseEntityType.MULTI_LINE.getCode(), record.getOrganizationContact()));
 		//企业联系电话
-		e = new FlowCaseEntity();
-		e.setKey(documents[2]);
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(record.getOrganizationPhone());
-		entities.add(e);
+		entities.add(getFlowCaseEntity(documents[2], FlowCaseEntityType.MULTI_LINE.getCode(), record.getOrganizationPhone()));
 		
 		//认证反馈结果
-		e = new FlowCaseEntity();
-		e.setKey(documents[3]);
-		e.setEntityType(FlowCaseEntityType.TEXT.getCode()); 
-		e.setValue(generateContent(zjgkResponses,documentflows));
-		entities.add(e);
-		
+		entities.addAll(generateContent(zjgkResponses,documentflows));
 		//地址
 		generateAddressEntity(entities, zjgkResponses.getResponse(), documentflows);
-		
 		return entities;
 	}
 
@@ -160,36 +142,16 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		List<FlowCaseEntity> entities = new ArrayList<>(); 
 		ZjgkJsonEntity<List<ZjgkResponse>> zjgkResponses = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 		//手机号
-		FlowCaseEntity e = new FlowCaseEntity();
-		e.setKey(documents[4]);
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(record.getPhone());
-		entities.add(e);
+		entities.add(getFlowCaseEntity(documents[4], FlowCaseEntityType.MULTI_LINE.getCode(), record.getPhone()));
 		//姓名
-		e = new FlowCaseEntity();
-		e.setKey(documents[5]);
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(record.getName());
-		entities.add(e);
+		entities.add(getFlowCaseEntity(documents[5], FlowCaseEntityType.MULTI_LINE.getCode(), record.getName()));
 		//证件类型
-		e = new FlowCaseEntity();
-		e.setKey(documents[6]);
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue("1".equals(record.getCertificateType())?documents[9]:documents[10]);
-		entities.add(e);
+		entities.add(getFlowCaseEntity(documents[6], FlowCaseEntityType.MULTI_LINE.getCode(), "1".equals(record.getCertificateType())?documents[9]:documents[10]));
 		//证件号码
-		e = new FlowCaseEntity();
-		e.setKey(documents[7]);
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(record.getCertificateNo());
-		entities.add(e);
+		entities.add(getFlowCaseEntity(documents[7], FlowCaseEntityType.MULTI_LINE.getCode(), record.getCertificateNo()));
 		
 		//认证反馈结果
-		e = new FlowCaseEntity();
-		e.setKey(documents[8]);
-		e.setEntityType(FlowCaseEntityType.TEXT.getCode()); 
-		e.setValue(generateContent(zjgkResponses,documentflows));
-		entities.add(e);
+		entities.addAll(generateContent(zjgkResponses,documentflows));
 		
 		//地址
 		generateAddressEntity(entities, zjgkResponses.getResponse(),documentflows);
@@ -221,41 +183,68 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		}
 	}
 	
-	public String generateContent(ZjgkJsonEntity<List<ZjgkResponse>> entity, String[] documentflows) {
-		StringBuffer buffer = new StringBuffer();
+	public List<FlowCaseEntity> generateContent(ZjgkJsonEntity<List<ZjgkResponse>> entity, String[] documentflows) {
+		List<FlowCaseEntity> entities = new ArrayList<FlowCaseEntity>();
+		FlowCaseEntity e = new FlowCaseEntity();
+//		StringBuffer buffer = new StringBuffer();
 		if(entity.isMismatching()){
-			buffer//.append("\n")
-			.append(documentflows[0])
-			.append("\n")
-			.append(documentflows[1])
-			.append("\n")
-			.append(documentflows[2])
-			.append("\n");
+			entities.add(getFlowCaseEntity(documentflows[0], FlowCaseEntityType.TEXT.getCode()));
+			entities.add(getFlowCaseEntity(documentflows[1], FlowCaseEntityType.TEXT.getCode()));
+			entities.add(getFlowCaseEntity(documentflows[2], FlowCaseEntityType.TEXT.getCode()));
+//			buffer//.append("\n")
+//			.append(documentflows[0])
+//			.append("\n")
+//			.append(documentflows[1])
+//			.append("\n")
+//			.append(documentflows[2])
+//			.append("\n");
 		}
 		else if(entity.isUnrent()){
-			buffer.append("")
-			.append(documentflows[3])
-			.append("\n");
+			entities.add(getFlowCaseEntity(documentflows[3], FlowCaseEntityType.TEXT.getCode()));
+//			buffer.append("")
+//			.append(documentflows[3])
+//			.append("\n");
 		}
 		else if(entity.isRequestFail()){
-			buffer.append("")
-			.append(documentflows[11])
-			.append("\n");
+			entities.add(getFlowCaseEntity(documentflows[11], FlowCaseEntityType.TEXT.getCode()));
+//			buffer.append("")
+//			.append(documentflows[11])
+//			.append("\n");
 		}
 		else if(entity.isNotPassInZuolin()){
-			buffer.append("")
-			.append(documentflows[12])
-			.append("\n");
+			entities.add(getFlowCaseEntity(documentflows[12], FlowCaseEntityType.TEXT.getCode()));
+//			buffer.append("")
+//			.append(documentflows[12])
+//			.append("\n");
 		}
 		else if(entity.isSuccess())
 		{
-			buffer.append("\n").append(documentflows[4]).append("\n");
+			entities.add(getFlowCaseEntity(documentflows[4], FlowCaseEntityType.TEXT.getCode()));
+//			buffer.append("\n").append(documentflows[4]).append("\n");
 		}
 		else{
-			buffer.append("\n").append(documentflows[5]).append(entity.getErrorCode()).append(" ");
+			entities.add(getFlowCaseEntity(documentflows[5], FlowCaseEntityType.TEXT.getCode()));
+//			buffer.append("\n").append(documentflows[5]).append(entity.getErrorCode()).append(" ");
 		}
-		return buffer.toString();
+//		return buffer.toString();
+		return entities;
 		
+	}
+	
+	public FlowCaseEntity getFlowCaseEntity(String key,String entityType,String value){
+		FlowCaseEntity e = new FlowCaseEntity();
+		e.setKey(key);
+		e.setEntityType(entityType);
+		e.setValue(value);
+		return e;
+	}
+	
+	public FlowCaseEntity getFlowCaseEntity(String key,String entityType){
+		return getFlowCaseEntity(key, entityType, null);
+	}
+	
+	public FlowCaseEntity getFlowCaseEntity(String key){
+		return getFlowCaseEntity(key, FlowCaseEntityType.MULTI_LINE.getCode());
 	}
 	
 	@Override
