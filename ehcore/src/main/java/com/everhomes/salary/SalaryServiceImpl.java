@@ -695,13 +695,19 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setOriginEntityId(r.getOriginEntityId());
                 dto.setGroupEntityName(r.getName());
                 dto.setSalaryValue(r.getDefaultValue());
+
                 //  为对应字段赋值
-                if (!salaryEmployeeOriginVals.isEmpty()) {
-                    for (int i = 0; i < salaryEmployeeOriginVals.size(); i++) {
-                        if (r.getName().equals(salaryEmployeeOriginVals.get(i).getGroupEntityName())) {
-                            dto.setSalaryValue(salaryEmployeeOriginVals.get(i).getSalaryValue());
-                            dto.setId(salaryEmployeeOriginVals.get(i).getId());
-                            break;
+                if (r.getType().equals(SalaryEntityType.TEXT.getCode())) {
+                    dto.setSalaryValue(processSalaryValue(r.getOriginEntityId(), cmd.getDetailId()));
+                    dto.setId(r.getId());
+                } else {
+                    if (!salaryEmployeeOriginVals.isEmpty()) {
+                        for (int i = 0; i < salaryEmployeeOriginVals.size(); i++) {
+                            if (r.getName().equals(salaryEmployeeOriginVals.get(i).getGroupEntityName())) {
+                                dto.setSalaryValue(salaryEmployeeOriginVals.get(i).getSalaryValue());
+                                dto.setId(salaryEmployeeOriginVals.get(i).getId());
+                                break;
+                            }
                         }
                     }
                 }
