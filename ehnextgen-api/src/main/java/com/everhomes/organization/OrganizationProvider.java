@@ -65,7 +65,10 @@ public interface OrganizationProvider {
 	List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(Long communityId);
 	OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,String organizationType);
 	OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
-	List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
+
+    OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId);
+
+    List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
 	List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId);
 	void createOrganizationTask(OrganizationTask task);
@@ -206,7 +209,7 @@ public interface OrganizationProvider {
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
 	
     List<OrganizationMember> listOrganizationMemberByOrganizationIds(ListingLocator locator, int pageSize, Condition cond, List<Long> organizationIds);
-
+    
     List<OrganizationMember> listOrganizationMemberByTokens(String contactPhone, List<Long> organizationIds);
     
     Organization findOrganizationByParentAndName(Long parentId, String name);
@@ -262,7 +265,9 @@ public interface OrganizationProvider {
 	
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
 
-	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
+    List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds);
+
+    OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId, String email);
  
 	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
 	Organization findOrganizationByName(String name, Integer namespaceId);
@@ -395,8 +400,14 @@ public interface OrganizationProvider {
 			Long organizationId, Long buildId);
 
 	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
-	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
-			Byte operationType);
+
+    List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String keywords, CrossShardListingLocator locator, int pageSize);
+
+    List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
+                                                           Byte operationType);
+
+    List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword, String orgNameKeyword, List<Long> orgIds,
+                                                        Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, int pageSize);
 
 	List<UserOrganizations> listUserOrganizations(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback callback);
 
@@ -407,4 +418,3 @@ public interface OrganizationProvider {
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
 }
-
