@@ -194,11 +194,11 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		for (int i = 0; i < list.size(); i++) {
 			ZjgkResponse zjgkResponse =list.get(i);
 			if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.EXIST_COMMUNITY){
-				buffer.append(zjgkResponse.getCommunityName()).append(zjgkResponse.getBuildingName()).append('-').append(zjgkResponse.getApartmentName());
+				buffer.append(documentflows[10]+(i+1)+" : ").append(zjgkResponse.getCommunityName()).append(zjgkResponse.getBuildingName()).append('-').append(zjgkResponse.getApartmentName());
 			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.NOT_EXIST_COMMUNITY){
-				buffer.append(documentflows[6]).append(zjgkResponse.getCommunityName()).append(documentflows[7]).append("\n");
+				buffer.append(documentflows[10]+(i+1)+" : ").append(documentflows[6]).append(zjgkResponse.getCommunityName()).append(documentflows[7]).append("\n");
 			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.MULTI_COMMUNITY){
-				buffer.append(documentflows[8]).append(zjgkResponse.getCommunityName()).append(documentflows[9]).append("\n");
+				buffer.append(documentflows[10]+(i+1)+" : ").append(documentflows[8]).append(zjgkResponse.getCommunityName()).append(documentflows[9]).append("\n");
 			}
 		}
 		return buffer.toString();
