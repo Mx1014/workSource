@@ -1,21 +1,13 @@
 package com.everhomes.openapi;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,15 +75,25 @@ public class AuthoriztionController extends ControllerBase {
 			ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 			List<ZjgkResponse> list = entity.getResponse();
 			if(list!=null){
-				for (ZjgkResponse r : list) {
-					//依次退租
-					DisclaimAddressCommand disCmd = new DisclaimAddressCommand();
-					disCmd.setAddressId(r.getAddressId());
-					addressService.disclaimAddress(disCmd);
+				try{
+					for (ZjgkResponse r : list) {
+						//依次退租
+						DisclaimAddressCommand disCmd = new DisclaimAddressCommand();
+						disCmd.setAddressId(r.getAddressId());
+						addressService.disclaimAddress(disCmd);
+					}
+				}catch(RuntimeErrorException e){
+					LOGGER.error("disclaim address error, e = {}", e);
+					throw RuntimeErrorException.errorWith("asset", 201,
+							"退出失败,"+e.getMessage());
 				}
 			}
 		}
-		return new RestResponse();
+		RestResponse r = new RestResponse();
+		r.setErrorScope("asset");
+		r.setErrorDetails("OK");
+		r.setErrorDescription("OK");
+		return r;
 	}
 
 	private void checkCmd(UnrentFeedbackCommand cmd) {
