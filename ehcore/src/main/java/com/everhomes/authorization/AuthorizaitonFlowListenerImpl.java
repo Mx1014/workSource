@@ -240,7 +240,7 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 	}
 	
 	public FlowCaseEntity getFlowCaseEntity(String key,String entityType){
-		return getFlowCaseEntity(key, entityType, null);
+		return getFlowCaseEntity(key, entityType, "");
 	}
 	
 	public FlowCaseEntity getFlowCaseEntity(String key){
