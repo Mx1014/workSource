@@ -354,7 +354,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					role.setCreatorUName(user.getNickName());
 				}
 			}
-			return ConvertHelper.convert(r, RoleDTO.class);
+			return role;
 		}).collect(Collectors.toList()));
 		response.setNextPageAnchor(locator.getAnchor());
 		return response;
