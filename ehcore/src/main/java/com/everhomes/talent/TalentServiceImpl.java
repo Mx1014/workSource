@@ -589,7 +589,9 @@ public class TalentServiceImpl implements TalentService {
 		talentRequestDTO.setCreateTime(talentRequest.getCreateTime().getTime());
 		talentRequestDTO.setTalentId(talentRequest.getTalentId());
 		Talent talent = talentProvider.findTalentById(talentRequest.getTalentId());
-		talentRequestDTO.setTalentName(talent.getName());
+		if(talent != null){
+			talentRequestDTO.setTalentName(talent.getName());
+		}
 		return talentRequestDTO;
 	}
 	
