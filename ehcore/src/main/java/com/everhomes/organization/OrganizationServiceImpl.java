@@ -10214,6 +10214,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                         return null;
                     }).collect(Collectors.toList());
                 }
+            }else{
+                return members;
             }
             return depart_members;
         }
