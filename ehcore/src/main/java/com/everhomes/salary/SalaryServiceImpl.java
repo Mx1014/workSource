@@ -1326,7 +1326,8 @@ public class SalaryServiceImpl implements SalaryService {
 			}else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_BUMEN)) {
 				dto.setDepartments(r2.getSalaryValue());
 			}else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_SHIFA)) {
-				dto.setPaidMoney(new BigDecimal(r2.getSalaryValue()));
+                if(null != r2.getSalaryValue())
+				    dto.setPaidMoney(new BigDecimal(r2.getSalaryValue()));
 			}
 
 			return dto2;
