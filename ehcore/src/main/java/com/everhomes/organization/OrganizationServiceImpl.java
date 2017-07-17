@@ -5081,7 +5081,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         //只要退出和删除当前公司和当前公司的所有机构成员信息，不要删除或退出掉子公司和子公司的所有机构的成员信息 add by sfyan 20170427
         for (OrganizationMember organizationMember : organizationMembers) {
             Organization org = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
-            //所在的机构直属于当前公司或者就是当前公司的成员 需要删除
+            //所在的机构直属于当前公司或者就是当前公司的成员 需要删除(筛选出属于本公司的记录)
             if (organization.getId().equals(org.getDirectlyEnterpriseId()) || organization.getId().equals(org.getId())) {
                 members.add(organizationMember);
             }
@@ -12051,9 +12051,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     private void deleteUserOrganizationWithMembers(List<OrganizationMember> members) {
         dbProvider.execute((TransactionStatus status) -> {
             for (OrganizationMember member : members) {
-                UserOrganizations userOrganization = userOrganizationProvider.findUserOrganizations(member.getNamespaceId(), member.getOrganizationId(), member.getTargetId());
-                if (userOrganization != null) {
-                    this.userOrganizationProvider.deleteUserOrganizations(userOrganization);
+                if(member.getGroupType() == OrganizationGroupType.ENTERPRISE.getCode()){
+                    UserOrganizations userOrganization = userOrganizationProvider.findUserOrganizations(member.getNamespaceId(), member.getOrganizationId(), member.getTargetId());
+                    if (userOrganization != null) {
+                        this.userOrganizationProvider.deleteUserOrganizations(userOrganization);
+                    }
                 }
             }
             return null;

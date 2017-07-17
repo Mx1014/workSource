@@ -17,6 +17,7 @@ public class SalaryConstants {
 	public static final Long ENTITY_ID_BUMEN = 5L;
 	public static final Long ENTITY_ID_SHENFENZHENG = 7L;
 	public static final Long ENTITY_ID_BANKNO = 8L;
+	public static final Long ENTITY_ID_PERIOD = 9L;
 
 
 }

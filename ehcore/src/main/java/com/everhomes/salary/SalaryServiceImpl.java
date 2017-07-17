@@ -1330,14 +1330,20 @@ public class SalaryServiceImpl implements SalaryService {
 		dto.setPeriodEmployeeEntities(result.stream().map(r2 ->{
 			SalaryPeriodEmployeeEntityDTO dto2 = processSalaryPeriodEmployeeEntityDTO(r2);
 //			dto2.setIsFormula(NormalFlag.NO.getCode());
-			if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_GONGHAO)) {
-				dto.setEmployeeNo(r2.getSalaryValue());
+            if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_GONGHAO)) {
+                dto2.setSalaryValue(processSalaryValue(r2.getOriginEntityId(),r.getUserDetailId()));
+				dto.setEmployeeNo(dto2.getSalaryValue());
 			}else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_NAME)) {
-				dto.setContactName(r2.getSalaryValue());
+                dto2.setSalaryValue(processSalaryValue(r2.getOriginEntityId(),r.getUserDetailId()));
+                dto.setContactName(dto2.getSalaryValue());
 			}else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_BUMEN)) {
-				dto.setDepartments(r2.getSalaryValue());
-			}else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_SHIFA)) {
-				dto.setPaidMoney(new BigDecimal(r2.getSalaryValue()));
+                dto2.setSalaryValue(processSalaryValue(r2.getOriginEntityId(),r.getUserDetailId()));
+                dto.setDepartments(dto2.getSalaryValue());
+            }else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_PERIOD)) {
+                dto2.setSalaryValue(r.getSalaryPeriod());
+            }else if (r2.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_SHIFA)) {
+                if(null != r2.getSalaryValue())
+				    dto.setPaidMoney(new BigDecimal(r2.getSalaryValue()));
 			}
 
 			return dto2;
@@ -1546,8 +1552,10 @@ public class SalaryServiceImpl implements SalaryService {
             SalaryEmployeeDTO employeeDTO = getPersonnelInfoByDetailIdForSalary(employee.getUserDetailId());
             String toAddress = employeeDTO.getEmail();
 			String emailSubject = "薪酬发放";
-			sendSalaryEmail(salaryPeriodGroup.getNamespaceId(),toAddress, emailSubject,salaryOrg.getEmailContent(), entityTable);
-		}
+            sendSalaryEmail(salaryPeriodGroup.getNamespaceId(), toAddress, emailSubject, salaryOrg.getEmailContent(), entityTable);
+            employee.setStatus(SalaryGroupStatus.SENDED.getCode());
+            salaryEmployeeProvider.updateSalaryEmployee(employee);
+        }
 	}
 
 	private void sendSalaryEmail(Integer namespaceId, String toAddress, String emailSubject, String emailContent, String entityTable) {
