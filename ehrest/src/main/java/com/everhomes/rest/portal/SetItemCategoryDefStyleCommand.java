@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>id: 门户item的id</li>
  * <li>align: align样式</li>
+ * <li>defUri: 默认图片uri</li>
  * </ul>
  */
 public class SetItemCategoryDefStyleCommand {

@@ -125,6 +125,7 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
 		moduleApp.setCreatorUid(UserContext.current().getUser().getId());
 		moduleApp.setOperatorUid(moduleApp.getCreatorUid());
+		moduleApp.setActionType(serviceModule.getActionType());
 		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
 	}
@@ -784,7 +785,7 @@ public class PortalServiceImpl implements PortalService {
 	public void setPortalItemActionData(SetPortalItemActionDataCommand cmd) {
 		PortalItem portalItem = checkPortalItem(cmd.getId());
 		portalItem.setOperatorUid(UserContext.current().getUser().getId());
-		portalItem.setActionData(cmd.getInstanceConfig());
+		portalItem.setActionData(cmd.getActionData());
 		portalItemProvider.updatePortalItem(portalItem);
 	}
 
@@ -917,10 +918,10 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public void publish(PublishCommand cmd) {
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId());
+
 		for (PortalLayout layout: layouts) {
 			publishLayout(layout);
 		}
-
 	}
 
 	private void publishLayout(PortalLayout layout){
@@ -971,6 +972,10 @@ public class PortalServiceImpl implements PortalService {
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS){
 				NewsInstanceConfig config = new NewsInstanceConfig();
 				config.setItemGroup(itemGroup.getName());
+				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+				if(null != moduleApp){
+
+				}
 //				config.setCategoryId();
 				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
 				group.setInstanceConfig(StringHelper.toJsonString(config));
@@ -978,6 +983,10 @@ public class PortalServiceImpl implements PortalService {
 				NewsFlashInstanceConfig config = new NewsFlashInstanceConfig();
 				config.setItemGroup(itemGroup.getName());
 				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
+				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+				if(null != moduleApp){
+
+				}
 //				config.setCategoryId();
 				config.setNewsSize(instanceConfig.getNewsSize());
 				group.setInstanceConfig(StringHelper.toJsonString(config));
@@ -993,6 +1002,10 @@ public class PortalServiceImpl implements PortalService {
 //				config.setDescriptionHeight();
 //				config.setSubjectHeight();
 				//应用入口的应用不明
+				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+				if(null != moduleApp){
+
+				}
 				group.setInstanceConfig(StringHelper.toJsonString(config));
 			}else if(Widget.fromCode(group.getWidget()) == Widget.TAB){
 				TabInstanceConfig config = new TabInstanceConfig();
@@ -1105,7 +1118,11 @@ public class PortalServiceImpl implements PortalService {
 
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){
 						ModuleAppActionData data = (ModuleAppActionData)StringHelper.fromJsonString(portalItem.getActionData(), ModuleAppActionData.class);
-
+						ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(data.getModuleAppId());
+						if(null != moduleApp){
+							item.setActionType(moduleApp.getActionType());
+							item.setActionData(moduleApp.getInstanceConfig());
+						}
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ZUOLINURL){
 						item.setActionType(ActionType.OFFICIAL_URL.getCode());
 						item.setActionData(portalItem.getActionData());

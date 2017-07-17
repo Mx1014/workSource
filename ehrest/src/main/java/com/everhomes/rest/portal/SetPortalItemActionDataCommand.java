@@ -7,14 +7,14 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>id: 门户item的id</li>
- * <li>status: 门户item的状态</li>
+ * <li>actionData: item参数</li>
  * </ul>
  */
 public class SetPortalItemActionDataCommand {
 
 	private Long id;
 
-	private String instanceConfig;
+	private String actionData;
 
 	public SetPortalItemActionDataCommand() {
 
@@ -33,12 +33,12 @@ public class SetPortalItemActionDataCommand {
 		this.id = id;
 	}
 
-	public String getInstanceConfig() {
-		return instanceConfig;
+	public String getActionData() {
+		return actionData;
 	}
 
-	public void setInstanceConfig(String instanceConfig) {
-		this.instanceConfig = instanceConfig;
+	public void setActionData(String actionData) {
+		this.actionData = actionData;
 	}
 
 	@Override

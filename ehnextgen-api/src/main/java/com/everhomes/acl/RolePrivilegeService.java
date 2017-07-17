@@ -72,7 +72,7 @@ public interface RolePrivilegeService {
 	 * @param cmd
 	 * @return
 	 */
-	List<RoleDTO> listRoles(ListRolesCommand cmd);
+	ListRolesResponse listRoles(ListRolesCommand cmd);
 	
 	/**
 	 * 判断是否是系统管理员

@@ -39,6 +39,16 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>批量创建模块应用</p>
+	 * <b>URL: /portal/batchCreateServiceModuleApp</b>
+	 */
+	@RequestMapping("batchCreateServiceModuleApp")
+	@RestReturn(ServiceModuleAppDTO.class)
+	public RestResponse batchCreateServiceModuleApp(BatchCreateServiceModuleAppCommand cmd){
+		return new RestResponse();
+	}
+
+	/**
 	 * <p>3.修改模块应用</p>
 	 * <b>URL: /portal/updateServiceModuleApp</b>
 	 */
@@ -46,6 +56,16 @@ public class PortalController extends ControllerBase {
 	@RestReturn(ServiceModuleAppDTO.class)
 	public RestResponse updateServiceModuleApp(UpdateServiceModuleAppCommand cmd){
 		return new RestResponse(portalService.updateServiceModuleApp(cmd));
+	}
+
+	/**
+	 * <p>设置模块应用的instanceConfig</p>
+	 * <b>URL: /portal/setServiceModuleAppInstanceConfig</b>
+	 */
+	@RequestMapping("setServiceModuleAppInstanceConfig")
+	@RestReturn(String.class)
+	public RestResponse setServiceModuleAppInstanceConfig(SetServiceModuleAppInstanceConfigCommand cmd){
+		return new RestResponse();
 	}
 
 	/**

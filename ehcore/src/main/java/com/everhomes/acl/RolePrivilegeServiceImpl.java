@@ -186,6 +186,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createRole(CreateRoleCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
 		User user = UserContext.current().getUser();
 		//创建角色
 		Role role = new Role();
@@ -335,23 +336,28 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public List<RoleDTO> listRoles(ListRolesCommand cmd) {
+	public ListRolesResponse listRoles(ListRolesCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<Role> roles = privilegeProvider.getRolesByOwnerAndKeywords(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getKeywords());
-
-		return roles.stream().map(r->{
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Role> roles = privilegeProvider.listRolesByOwnerAndKeywords(locator,pageSize,namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getKeywords());
+		ListRolesResponse response = new ListRolesResponse();
+		response.setDtos(roles.stream().map(r->{
 			RoleDTO role = ConvertHelper.convert(r, RoleDTO.class);
 			if(r.getCreateTime() != null) {
-				role.setCreateTime(r.getCreateTime().getTime());	
+				role.setCreateTime(r.getCreateTime().getTime());
 			}
 			if(r.getCreatorUid() != null) {
 				User user = userProvider.findUserById(r.getCreatorUid());
 				if(null != user){
 					role.setCreatorUName(user.getNickName());
-				}	
+				}
 			}
 			return ConvertHelper.convert(r, RoleDTO.class);
-		}).collect(Collectors.toList());
+		}).collect(Collectors.toList()));
+		response.setNextPageAnchor(locator.getAnchor());
+		return response;
 	}
 
 	@Override

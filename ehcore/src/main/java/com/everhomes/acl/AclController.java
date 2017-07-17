@@ -342,7 +342,7 @@ public class AclController extends ControllerBase {
      * <p>角色列表</p>
      */
     @RequestMapping("listRoles")
-    @RestReturn(value=RoleDTO.class, collection = true)
+    @RestReturn(value=ListRolesResponse.class)
     public RestResponse listRoles(@Valid ListRolesCommand cmd) {
         RestResponse response = new RestResponse(rolePrivilegeService.listRoles(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
