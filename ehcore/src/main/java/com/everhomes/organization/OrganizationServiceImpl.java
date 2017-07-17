@@ -5136,6 +5136,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         return "0";
     }
 
+    @Override
+    public void leaveTheJob(LeaveTheJobCommand cmd) {
+//        DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
+//        deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
+//        UpdateOrganizationEmployeeStatusCommand updateOrganizationEmployeeStatusCommand = new UpdateOrganizationEmployeeStatusCommand();
+//        updateOrganizationEmployeeStatus(updateOrganizationEmployeeStatusCommand);
+    }
+
     /**
      * 根据contactToken退出删除organization path路径下的所有机构
      *
