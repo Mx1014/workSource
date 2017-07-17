@@ -1,0 +1,138 @@
+{
+  "eh_content_server_resources": [
+    {
+      "id": 50639,
+      "owner_id": 212500,
+      "resource_id": "image/MTpmNTA4MmE5NTNmNjFiYThmNzRjMjA0NzI3ZmI5OTBmOA",
+      "resource_md5": "MTpmNTA4MmE5NTNmNjFiYThmNzRjMjA0NzI3ZmI5OTBmOA",
+      "resource_type": 1,
+      "resource_size": 465798,
+      "resource_name": "abc.jpg"
+    }
+  ],
+  "eh_os_objects": [
+    {
+      "id": 4,
+      "namespace_id": 0,
+      "owner_type": "EhCommunities",
+      "owner_id": 24210090697425999,
+      "service_type": "EhOrganizationFiles",
+      "parent_id": 0,
+      "object_type": 1,
+      "md5": "f5082a953f61ba8f74c204727fb99055",
+      "name": "abc.jpg",
+      "size": 465798,
+      "content_type": "file",
+      "content_uri": "cs://1/image/MTpmNTA4MmE5NTNmNjFiYThmNzRjMjA0NzI3ZmI5OTZZZZ",
+      "download_count": 0,
+      "status": 2,
+      "creator_uid": 1001,
+      "create_time": "2017-02-17 16:21:20"
+    },
+    {
+      "id": 5,
+      "namespace_id": 0,
+      "owner_type": "EhNamespaces",
+      "owner_id": 0,
+      "service_type": "EhOrganizationFiles",
+      "parent_id": 0,
+      "object_type": 1,
+      "md5": "f5082a953f61ba8f74c204727fb99066",
+      "name": "abc.jpg",
+      "size": 465798,
+      "content_type": "file",
+      "content_uri": "cs://1/image/MTpmNTA4MmE5NTNmNjFiYThmNzRjMjA0NzI3ZmI5OTZZee",
+      "download_count": 0,
+      "status": 2,
+      "creator_uid": 1001,
+      "create_time": "2017-02-17 16:21:20"
+    },
+    {
+      "id": 6,
+      "namespace_id": 0,
+      "owner_type": "EhCommunities",
+      "owner_id": 24210090697425925,
+      "service_type": "EhOrganizationFiles",
+      "parent_id": 0,
+      "object_type": 1,
+      "md5": "f5082a953f61ba8f74c204727fb990kk",
+      "name": "cde.jpg",
+      "size": 6666666,
+      "content_type": "file",
+      "content_uri": "cs://1/image/MTpmNTA4MmE5NTNmNjFiYThmNzRjMjA0NzI3ZmI5OTZZvv",
+      "download_count": 0,
+      "status": 2,
+      "creator_uid": 1001,
+      "create_time": "2017-02-17 16:21:20"
+    }
+  ],
+  "eh_organizations": [
+    {
+      "id": "1000750",
+      "parent_id": "0",
+      "organization_type": "PM",
+      "name": "深业集团（深圳）物业管理有限公司",
+      "address_id": "0",
+      "description": "",
+      "path": "/1000750",
+      "level": "1",
+      "status": "2",
+      "department_type": "",
+      "group_type": "ENTERPRISE",
+      "group_id": "122",
+      "directly_enterprise_id": "0"
+    }
+  ],
+  "eh_communities": [
+    {
+      "area_name": "龙岗区",
+      "apt_segment2": "门牌号",
+      "apt_segment1": "楼栋号",
+      "apt_segment3": "0",
+      "description": "",
+      "area_id": "13910",
+      "uuid": "641325b8-65a9-11e5-801d-00163e0018d7",
+      "city_name": "深圳市",
+      "detail_description": "",
+      "feedback_forum_id": "2",
+      "id": "24210090697425925",
+      "address": "龙岗布吉镇坂雪岗工业区，梅观高速与机荷高速交汇处",
+      "create_time": "2014-07-30 09:14:53",
+      "default_forum_id": "1",
+      "alias_name": "",
+      "zipcode": "",
+      "namespace_id": "0",
+      "apt_seg1_sample": "",
+      "apt_seg2_sample": "",
+      "name": "万科城",
+      "apt_seg3_sample": "",
+      "community_type": "0",
+      "apt_count": "4018",
+      "city_id": "13905",
+      "status": "2"
+    }
+  ],
+  "eh_organization_community_requests": [
+    {
+      "id": 110001,
+      "community_id": 24210090697425925,
+      "member_type": "organization",
+      "member_id": 1000750,
+      "member_status": 3,
+      "create_time": "2015-11-13 17:24:35",
+      "update_time": "2015-11-13 17:24:35"
+    }
+  ],
+  "eh_os_object_download_logs": [
+    {
+      "id": 1,
+      "namespace_id": 0,
+      "owner_type": "EhCommunities",
+      "owner_id": 24210090697425999,
+      "service_type": "EhOrganizationFiles",
+      "object_id": 5,
+      "creator_uid": 1001,
+      "create_time": "2017-02-20 13:38:29"
+    }
+  ]
+}

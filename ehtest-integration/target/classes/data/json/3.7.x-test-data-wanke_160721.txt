@@ -1,0 +1,99 @@
+{
+  "eh_community_services": [
+        {
+            "id": 1,
+            "namespace_id": 0,
+            "owner_type": "community",
+            "owner_id": 240111044331051460,
+            "scope_code": 1,
+            "scope_id": 1,
+            "item_name": "物业报修",
+            "item_label": "物业报修",
+            "icon_uri": "cs://1/image/aW1hZ2UvTVRveU5tSXhOMlV6TmpSak5qQmpOMlk1T1RVMFpqSTNPR0U1TXpNMll6QmlNdw",
+            "action_type": 1,
+            "action_data": "{\"contentCategory\":1004,\"actionCategory\":0,\"forumId\":1,\"embedAppId\":27,\"entityTag\":\"PM\"}",
+            "scene_type": "default"
+        }
+    ],
+    "eh_configurations": [
+        {
+            "id": 88,
+            "name": "wanke.test.userToken",
+            "value": "qqqq123",
+            "description": "",
+            "namespace_id": 0,
+            "display_name": ""
+        },
+        {
+            "id": 89,
+            "name": "wanke.test.identifierToken",
+            "value": "13265549907",
+            "description": "",
+            "namespace_id": 0,
+            "display_name": ""
+        },
+        {
+            "id": 90,
+            "name": "wanke.test.organizationToken",
+            "value": "80320",
+            "description": "",
+            "namespace_id": 0,
+            "display_name": ""
+        },
+        {
+            "id": 91,
+            "name": "wanke.test.isDebugEnabled",
+            "value": "true",
+            "description": "",
+            "namespace_id": 0,
+            "display_name": ""
+        }
+    ],
+    "eh_organizations": [
+        {
+            "id": 1001027,
+            "parent_id": 0,
+            "organization_type": "PM",
+            "name": "武汉大学产学研大楼物业",
+            "address_id": 239825274387098430,
+            "path": "/1001027",
+            "level": 1,
+            "status": 2,
+            "group_type": "ENTERPRISE",
+            "directly_enterprise_id": 0,
+            "namespace_id": 0,
+            "show_flag": 1,
+            "namespace_organization_token": "80320",
+            "namespace_organization_type": "wanke"
+        }
+    ],
+    "eh_organization_communities": [
+        {
+            "id": 105,
+            "organization_id": 1001027,
+            "community_id": 240111044331051460
+        }
+    ],
+     "eh_communities": [
+        {
+            "id": 240111044331051460,
+            "uuid": "1ab3fe8b-32ba-11e6-85aa-005056961cf5",
+            "city_id": 13905,
+            "city_name": "深圳市",
+            "area_id": 13908,
+            "area_name": "南山区",
+            "name": "武汉大学产学研大楼",
+            "alias_name": "武汉大学产学研大楼",
+            "address": "深圳市南山区粤兴二道6号",
+            "apt_count": 70,
+            "creator_uid": 1,
+            "status": 2,
+            "create_time": "2016:6:15 05:29:17",
+            "community_type": 1,
+            "default_forum_id": 1,
+            "feedback_forum_id": 2,
+            "update_time": "2016:6:15 05:29:17",
+            "namespace_id": 0
+        }
+    ]
+}

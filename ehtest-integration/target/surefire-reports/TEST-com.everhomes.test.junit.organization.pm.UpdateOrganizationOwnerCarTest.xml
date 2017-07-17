@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite tests="1" failures="0" name="com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest" time="8.414" errors="1" skipped="0">
+  <properties>
+    <property name="idea.version" value="2016.1.3"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib"/>
+    <property name="java.vm.version" value="25.92-b14"/>
+    <property name="gopherProxySet" value="false"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="java.vendor.url" value="http://java.oracle.com/"/>
+    <property name="path.separator" value=":"/>
+    <property name="guice.disable.misplaced.annotation.check" value="true"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="file.encoding.pkg" value="sun.io"/>
+    <property name="idea.launcher.port" value="7532"/>
+    <property name="user.country" value="CN"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="sun.os.patch.level" value="unknown"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="user.dir" value="/Users/wuhan/workspace/ehnextgen/ehtest-integration"/>
+    <property name="java.runtime.version" value="1.8.0_92-b14"/>
+    <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
+    <property name="java.endorsed.dirs" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/endorsed"/>
+    <property name="os.arch" value="x86_64"/>
+    <property name="java.io.tmpdir" value="/var/folders/bb/zz9n79kd7dgg67_c9rrkrdlc0000gn/T/"/>
+    <property name="line.separator" value="
+"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="classworlds.conf" value="/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/bin/m2.conf"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/wuhan/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.class.version" value="52.0"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="maven.repo.local" value="/Users/wuhan/.m2/repository"/>
+    <property name="os.version" value="10.12"/>
+    <property name="http.nonProxyHosts" value="local„ÄÅ169.254/16|*.local„ÄÅ169.254/16"/>
+    <property name="user.home" value="/Users/wuhan"/>
+    <property name="user.timezone" value="Asia/Shanghai"/>
+    <property name="java.awt.printerjob" value="sun.lwawt.macosx.CPrinterJob"/>
+    <property name="java.specification.version" value="1.8"/>
+    <property name="idea.launcher.bin.path" value="/Applications/IntelliJ IDEA.app/Contents/bin"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="user.name" value="wuhan"/>
+    <property name="java.class.path" value="/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/boot/plexus-classworlds-2.4.jar:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar"/>
+    <property name="java.vm.specification.version" value="1.8"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.home" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre"/>
+    <property name="sun.java.command" value="com.intellij.rt.execution.application.AppMain org.codehaus.classworlds.Launcher -Didea.version=2016.1.3 -s /Users/wuhan/.m2/everhome.settings.xml -Dmaven.repo.local=/Users/wuhan/.m2/repository clean install -P !U"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="user.language" value="zh"/>
+    <property name="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit"/>
+    <property name="java.vm.info" value="mixed mode"/>
+    <property name="java.version" value="1.8.0_92"/>
+    <property name="java.ext.dirs" value="/Users/wuhan/Library/Java/Extensions:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/ext:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java"/>
+    <property name="sun.boot.class.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/classes"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="maven.home" value="/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3"/>
+    <property name="file.separator" value="/"/>
+    <property name="java.vendor.url.bug" value="http://bugreport.sun.com/bugreport/"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="socksNonProxyHosts" value="local„ÄÅ169.254/16|*.local„ÄÅ169.254/16"/>
+    <property name="ftp.nonProxyHosts" value="local„ÄÅ169.254/16|*.local„ÄÅ169.254/16"/>
+    <property name="sun.cpu.isalist" value=""/>
+  </properties>
+  <testcase classname="com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest" name="testUpdateOrganizationOwnerCar" time="8.414">
+    <error message="Failed to login before synchronizing sequence, user=root, error={&quot;version&quot;:&quot;1.0.0&quot;,&quot;errorScope&quot;:&quot;HTTP&quot;,&quot;errorCode&quot;:502,&quot;errorDescription&quot;:&quot;Connect to 127.0.0.1:8080 [/127.0.0.1] failed: Connection refused&quot;}" type="java.lang.IllegalStateException">java.lang.IllegalStateException: Failed to login before synchronizing sequence, user=root, error={&quot;version&quot;:&quot;1.0.0&quot;,&quot;errorScope&quot;:&quot;HTTP&quot;,&quot;errorCode&quot;:502,&quot;errorDescription&quot;:&quot;Connect to 127.0.0.1:8080 [/127.0.0.1] failed: Connection refused&quot;}
+	at com.everhomes.test.core.api.ApiProviderImpl.syncSequence(ApiProviderImpl.java:36)
+	at com.everhomes.test.core.base.BaseLoginAuthTestCase.syncSequence(BaseLoginAuthTestCase.java:74)
+	at com.everhomes.test.core.base.BaseLoginAuthTestCase.setUp(BaseLoginAuthTestCase.java:46)
+	at com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest.setUp(UpdateOrganizationOwnerCarTest.java:17)
+	at sun.reflect.GeneratedMethodAccessor36.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:47)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:44)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:24)
+	at org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks.evaluate(RunBeforeTestMethodCallbacks.java:74)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks.evaluate(RunAfterTestMethodCallbacks.java:83)
+	at org.springframework.test.context.junit4.statements.SpringRepeat.evaluate(SpringRepeat.java:72)
+	at org.springframework.test.context.junit4.SpringJUnit4ClassRunner.runChild(SpringJUnit4ClassRunner.java:233)
+	at org.springframework.test.context.junit4.SpringJUnit4ClassRunner.runChild(SpringJUnit4ClassRunner.java:87)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:238)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:63)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:236)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:53)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:229)
+	at org.springframework.test.context.junit4.statements.RunBeforeTestClassCallbacks.evaluate(RunBeforeTestClassCallbacks.java:61)
+	at org.springframework.test.context.junit4.statements.RunAfterTestClassCallbacks.evaluate(RunAfterTestClassCallbacks.java:71)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:309)
+	at org.springframework.test.context.junit4.SpringJUnit4ClassRunner.run(SpringJUnit4ClassRunner.java:176)
+	at org.apache.maven.surefire.junit4.JUnit4TestSet.execute(JUnit4TestSet.java:53)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.executeTestSet(JUnit4Provider.java:123)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.invoke(JUnit4Provider.java:104)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.maven.surefire.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:164)
+	at org.apache.maven.surefire.booter.ProviderFactory$ProviderProxy.invoke(ProviderFactory.java:110)
+	at org.apache.maven.surefire.booter.SurefireStarter.invokeProvider(SurefireStarter.java:175)
+	at org.apache.maven.surefire.booter.SurefireStarter.runSuitesInProcessWhenForked(SurefireStarter.java:107)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:68)
+</error>
+    <system-out>13:14:43.513 [main] DEBUG o.s.t.c.s.DirtiesContextTestExecutionListener - After test class: context [DefaultTestContext@32332a54 testClass = UpdateOrganizationOwnerAddressStatusTest, testInstance = [null], testMethod = [null], testException = [null], mergedContextConfiguration = [MergedContextConfiguration@69b1e44b testClass = UpdateOrganizationOwnerAddressStatusTest, locations = &apos;{}&apos;, classes = &apos;{class com.everhomes.test.core.base.BaseServerConfig, class com.everhomes.test.core.persist.PersistConfig, class com.everhomes.test.core.redis.RedisConfig}&apos;, contextInitializerClasses = &apos;[]&apos;, activeProfiles = &apos;{}&apos;, contextLoader = &apos;org.springframework.test.context.support.AnnotationConfigContextLoader&apos;, parent = [null]]], dirtiesContext [false].
+13:14:43.513 [main] DEBUG o.s.t.c.j.SpringJUnit4ClassRunner - SpringJUnit4ClassRunner constructor called with [class com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest].
+13:14:43.514 [main] DEBUG o.s.test.context.ContextLoaderUtils - Found explicit ContextLoader class [org.springframework.test.context.support.AnnotationConfigContextLoader] for context configuration attributes [ContextConfigurationAttributes@6d3f5c62 declaringClass = &apos;com.everhomes.test.core.base.BaseServerTestCase&apos;, classes = &apos;{class com.everhomes.test.core.base.BaseServerConfig, class com.everhomes.test.core.persist.PersistConfig, class com.everhomes.test.core.redis.RedisConfig}&apos;, locations = &apos;{}&apos;, inheritLocations = true, initializers = &apos;{}&apos;, inheritInitializers = true, name = [null], contextLoaderClass = &apos;org.springframework.test.context.support.AnnotationConfigContextLoader&apos;]
+13:14:43.514 [main] DEBUG o.s.test.context.ContextLoaderUtils - Could not find an &apos;annotation declaring class&apos; for annotation type [org.springframework.test.context.ActiveProfiles] and class [com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest]
+13:14:43.514 [main] DEBUG o.s.test.context.TestContextManager - @TestExecutionListeners is not present for class [com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest]: using defaults.
+13:14:43.514 [main] DEBUG o.s.t.annotation.ProfileValueUtils - Retrieved @ProfileValueSourceConfiguration [null] for test class [com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest]
+13:14:43.514 [main] DEBUG o.s.t.annotation.ProfileValueUtils - Retrieved ProfileValueSource type [class org.springframework.test.annotation.SystemProfileValueSource] for class [com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest]
+13:14:43.514 [main] DEBUG o.s.t.annotation.ProfileValueUtils - Retrieved @ProfileValueSourceConfiguration [null] for test class [com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest]
+13:14:43.514 [main] DEBUG o.s.t.annotation.ProfileValueUtils - Retrieved ProfileValueSource type [class org.springframework.test.annotation.SystemProfileValueSource] for class [com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest]
+13:14:43.514 [main] DEBUG o.s.t.annotation.ProfileValueUtils - Retrieved @ProfileValueSourceConfiguration [null] for test class [com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest]
+13:14:43.514 [main] DEBUG o.s.t.annotation.ProfileValueUtils - Retrieved ProfileValueSource type [class org.springframework.test.annotation.SystemProfileValueSource] for class [com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest]
+13:14:43.514 [main] DEBUG o.s.t.c.s.DependencyInjectionTestExecutionListener - Performing dependency injection for test context [[DefaultTestContext@584ea55d testClass = UpdateOrganizationOwnerCarTest, testInstance = null(com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest), testMethod = [null], testException = [null], mergedContextConfiguration = [MergedContextConfiguration@36e550f2 testClass = UpdateOrganizationOwnerCarTest, locations = &apos;{}&apos;, classes = &apos;{class com.everhomes.test.core.base.BaseServerConfig, class com.everhomes.test.core.persist.PersistConfig, class com.everhomes.test.core.redis.RedisConfig}&apos;, contextInitializerClasses = &apos;[]&apos;, activeProfiles = &apos;{}&apos;, contextLoader = &apos;org.springframework.test.context.support.AnnotationConfigContextLoader&apos;, parent = [null]]]].
+13:14:43.514 [main] DEBUG o.s.t.c.CacheAwareContextLoaderDelegate - Retrieved ApplicationContext from cache with key [[MergedContextConfiguration@36e550f2 testClass = UpdateOrganizationOwnerCarTest, locations = &apos;{}&apos;, classes = &apos;{class com.everhomes.test.core.base.BaseServerConfig, class com.everhomes.test.core.persist.PersistConfig, class com.everhomes.test.core.redis.RedisConfig}&apos;, contextInitializerClasses = &apos;[]&apos;, activeProfiles = &apos;{}&apos;, contextLoader = &apos;org.springframework.test.context.support.AnnotationConfigContextLoader&apos;, parent = [null]]]
+13:14:43.514 [main] DEBUG o.springframework.test.context.cache - Spring test ApplicationContext cache statistics: [ContextCache@5d8445d7 size = 1, hitCount = 404, missCount = 1, parentContextCount = 0]
+13:14:43.515 [main] DEBUG o.s.b.f.annotation.InjectionMetadata - Processing injected method of bean &apos;com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest&apos;: AutowiredFieldElement for protected com.everhomes.test.core.http.HttpClientService com.everhomes.test.core.base.BaseLoginAuthTestCase.httpClientService
+13:14:43.515 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory - Creating instance of bean &apos;httpClientServiceImpl&apos;
+13:14:43.515 [main] DEBUG o.s.b.f.annotation.InjectionMetadata - Processing injected method of bean &apos;httpClientServiceImpl&apos;: AutowiredFieldElement for private java.lang.String com.everhomes.test.core.http.HttpClientServiceImpl.serverContextPath
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.contextPath:&apos; in [environmentProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.contextPath:&apos; in [systemProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.contextPath:&apos; in [systemEnvironment]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.contextPath:&apos; in [class path resource [config/ehcore.properties]]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Could not find key &apos;server.contextPath:&apos; in any property source. Returning [null]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.contextPath:&apos; in [localProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Could not find key &apos;server.contextPath:&apos; in any property source. Returning [null]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.contextPath&apos; in [environmentProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.contextPath&apos; in [systemProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.contextPath&apos; in [systemEnvironment]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.contextPath&apos; in [class path resource [config/ehcore.properties]]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Found key &apos;server.contextPath&apos; in [class path resource [config/ehcore.properties]] with type [String] and value &apos;/evh&apos;
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Found key &apos;server.contextPath&apos; in [environmentProperties] with type [String] and value &apos;/evh&apos;
+13:14:43.515 [main] DEBUG o.s.b.f.annotation.InjectionMetadata - Processing injected method of bean &apos;httpClientServiceImpl&apos;: AutowiredFieldElement for private java.lang.String com.everhomes.test.core.http.HttpClientServiceImpl.serverAddress
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.address:&apos; in [environmentProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.address:&apos; in [systemProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.address:&apos; in [systemEnvironment]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.address:&apos; in [class path resource [config/ehcore.properties]]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Could not find key &apos;server.address:&apos; in any property source. Returning [null]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.address:&apos; in [localProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Could not find key &apos;server.address:&apos; in any property source. Returning [null]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.address&apos; in [environmentProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.address&apos; in [systemProperties]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.address&apos; in [systemEnvironment]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Searching for key &apos;server.address&apos; in [class path resource [config/ehcore.properties]]
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Found key &apos;server.address&apos; in [class path resource [config/ehcore.properties]] with type [String] and value &apos;http://127.0.0.1:8080&apos;
+13:14:43.515 [main] DEBUG o.s.c.e.PropertySourcesPropertyResolver - Found key &apos;server.address&apos; in [environmentProperties] with type [String] and value &apos;http://127.0.0.1:8080&apos;
+13:14:43.515 [main] DEBUG o.s.c.a.CommonAnnotationBeanPostProcessor - Invoking init method on bean &apos;httpClientServiceImpl&apos;: private org.apache.http.impl.client.CloseableHttpClient com.everhomes.test.core.http.HttpClientServiceImpl.openHttpClient()
+13:14:43.516 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory - Finished creating instance of bean &apos;httpClientServiceImpl&apos;
+13:14:43.516 [main] DEBUG o.s.b.f.annotation.InjectionMetadata - Processing injected method of bean &apos;com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest&apos;: AutowiredFieldElement for protected com.everhomes.test.core.persist.DbProvider com.everhomes.test.core.base.BaseLoginAuthTestCase.dbProvider
+13:14:43.516 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory - Returning cached instance of singleton bean &apos;dbProviderImpl&apos;
+13:14:43.516 [main] DEBUG o.s.b.f.annotation.InjectionMetadata - Processing injected method of bean &apos;com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest&apos;: AutowiredFieldElement for protected com.everhomes.test.core.redis.RedisProvider com.everhomes.test.core.base.BaseLoginAuthTestCase.redisProvider
+13:14:43.516 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory - Returning cached instance of singleton bean &apos;redisProviderImpl&apos;
+13:14:43.516 [main] DEBUG o.s.b.f.annotation.InjectionMetadata - Processing injected method of bean &apos;com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest&apos;: AutowiredFieldElement for protected com.everhomes.test.core.api.ApiProvider com.everhomes.test.core.base.BaseLoginAuthTestCase.apiProvider
+13:14:43.516 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory - Returning cached instance of singleton bean &apos;apiProviderImpl&apos;
+13:14:43.516 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : select `information_schema`.`TABLES`.`TABLE_SCHEMA`, `information_schema`.`TABLES`.`TABLE_NAME`, `information_schema`.`TABLES`.`TABLE_ROWS` from `information_schema`.`TABLES` where `information_schema`.`TABLES`.`TABLE_SCHEMA` in (?)
+13:14:43.516 [main] DEBUG org.jooq.tools.LoggerListener - -&gt; with bind values      : select `information_schema`.`TABLES`.`TABLE_SCHEMA`, `information_schema`.`TABLES`.`TABLE_NAME`, `information_schema`.`TABLES`.`TABLE_ROWS` from `information_schema`.`TABLES` where `information_schema`.`TABLES`.`TABLE_SCHEMA` in (&apos;ehcore_test&apos;)
+13:14:43.516 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:43.516 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:43.528 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 11.68ms
+13:14:43.531 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:43.531 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener - Fetched result           : +------------+-----------------------+----------+
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener -                          : |TABLE_SCHEMA|TABLE_NAME             |TABLE_ROWS|
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener -                          : +------------+-----------------------+----------+
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener -                          : |ehcore_test |eh_acl_privileges      |        10|
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener -                          : |ehcore_test |eh_acl_role_assignments|         3|
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener -                          : |ehcore_test |eh_acl_roles           |         8|
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener -                          : |ehcore_test |eh_aclink_firmware     |         0|
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener -                          : |ehcore_test |eh_aclink_logs         |         0|
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener -                          : +------------+-----------------------+----------+
+13:14:43.531 [main] DEBUG org.jooq.tools.LoggerListener -                          : |...330 record(s) truncated...
+13:14:43.531 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 15.087ms, +3.407ms
+13:14:43.532 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:43.532 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:43.532 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:43.534 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:43.534 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.285ms
+13:14:43.537 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:43.537 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:43.537 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 4.972ms, +2.687ms
+13:14:43.537 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_acl_privileges
+13:14:43.537 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:43.537 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:43.855 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:43.855 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 318.615ms
+13:14:43.859 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:43.859 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:43.859 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 322.025ms, +3.409ms
+13:14:43.859 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:43.859 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:43.859 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:43.861 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:43.861 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.494ms
+13:14:43.864 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:43.864 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:43.864 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.204ms, +2.71ms
+13:14:43.864 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:43.864 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:43.864 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:43.866 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:43.866 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.501ms
+13:14:43.869 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:43.869 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:43.869 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.116ms, +2.614ms
+13:14:43.869 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_acl_role_assignments
+13:14:43.869 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:43.869 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:44.263 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:44.263 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 394.058ms
+13:14:44.266 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:44.266 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:44.266 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 396.614ms, +2.555ms
+13:14:44.266 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:44.266 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:44.266 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:44.268 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:44.268 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.494ms
+13:14:44.271 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:44.271 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:44.271 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.086ms, +2.591ms
+13:14:44.271 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:44.271 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:44.271 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:44.273 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:44.273 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.464ms
+13:14:44.275 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:44.275 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:44.275 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 4.112ms, +1.647ms
+13:14:44.275 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_acl_roles
+13:14:44.275 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:44.275 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:44.624 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:44.624 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 349.55ms
+13:14:44.627 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:44.627 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:44.627 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 352.291ms, +2.74ms
+13:14:44.627 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:44.627 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:44.627 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:44.630 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:44.630 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.801ms
+13:14:44.633 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:44.633 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:44.633 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.75ms, +2.949ms
+13:14:44.633 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:44.633 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:44.633 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:44.636 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:44.636 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.604ms
+13:14:44.638 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:44.638 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:44.638 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 4.988ms, +2.384ms
+13:14:44.638 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_acls
+13:14:44.638 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:44.638 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:45.082 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:45.083 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 444.45ms
+13:14:45.085 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:45.085 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:45.085 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 447.055ms, +2.604ms
+13:14:45.085 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:45.085 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:45.085 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:45.088 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:45.088 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.401ms
+13:14:45.090 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:45.090 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:45.090 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.124ms, +2.722ms
+13:14:45.090 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:45.090 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:45.090 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:45.093 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:45.093 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.922ms
+13:14:45.097 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:45.097 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:45.097 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 7.07ms, +4.148ms
+13:14:45.097 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_addresses
+13:14:45.097 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:45.097 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:45.594 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:45.594 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 496.859ms
+13:14:45.597 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:45.597 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:45.597 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 499.585ms, +2.725ms
+13:14:45.597 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:45.597 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:45.597 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:45.600 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:45.600 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.702ms
+13:14:45.602 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:45.602 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:45.602 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.448ms, +2.745ms
+13:14:45.602 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:45.603 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:45.603 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:45.605 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:45.605 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.488ms
+13:14:45.607 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:45.607 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:45.608 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.019ms, +2.531ms
+13:14:45.608 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_communities
+13:14:45.608 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:45.608 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:46.311 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:46.311 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 703.719ms
+13:14:46.317 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:46.317 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:46.317 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 709.368ms, +5.648ms
+13:14:46.317 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:46.317 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:46.317 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:46.321 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:46.321 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 3.876ms
+13:14:46.323 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:46.324 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:46.324 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 6.57ms, +2.694ms
+13:14:46.324 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:46.324 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:46.324 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:46.326 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:46.326 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.428ms
+13:14:46.328 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:46.328 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:46.329 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 4.963ms, +2.535ms
+13:14:46.329 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_configurations
+13:14:46.329 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:46.329 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:46.533 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:46.533 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 204.348ms
+13:14:46.535 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:46.535 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:46.535 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 206.634ms, +2.286ms
+13:14:46.535 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:46.535 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:46.535 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:46.538 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:46.539 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 3.299ms
+13:14:46.541 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:46.541 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:46.541 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 6.122ms, +2.823ms
+13:14:46.541 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:46.541 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:46.542 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:46.544 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:46.544 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.658ms
+13:14:46.546 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:46.546 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:46.546 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 4.231ms, +1.573ms
+13:14:46.546 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_locale_strings
+13:14:46.546 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:46.546 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:46.796 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:46.796 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 250.465ms
+13:14:46.798 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:46.798 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:46.799 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 252.869ms, +2.404ms
+13:14:46.799 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:46.799 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:46.799 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:46.801 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:46.801 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.56ms
+13:14:46.804 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:46.804 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:46.804 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.292ms, +2.731ms
+13:14:46.804 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:46.804 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:46.804 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:46.807 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:46.807 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.945ms
+13:14:46.809 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:46.810 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:46.810 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.692ms, +2.746ms
+13:14:46.810 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_organization_members
+13:14:46.810 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:46.810 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:47.130 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:47.130 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 320.208ms
+13:14:47.132 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:47.132 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:47.132 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 322.875ms, +2.667ms
+13:14:47.133 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:47.133 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:47.133 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:47.135 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:47.135 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.816ms
+13:14:47.138 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:47.138 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:47.138 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.631ms, +2.815ms
+13:14:47.138 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:47.138 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:47.138 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:47.141 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:47.141 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.758ms
+13:14:47.144 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:47.144 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:47.144 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.598ms, +2.84ms
+13:14:47.144 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_organization_owner_address
+13:14:47.144 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:47.144 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:47.350 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:47.350 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 206.598ms
+13:14:47.353 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:47.353 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:47.353 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 209.221ms, +2.623ms
+13:14:47.353 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:47.353 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:47.353 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:47.356 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:47.356 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.574ms
+13:14:47.358 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:47.358 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:47.358 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 4.918ms, +2.343ms
+13:14:47.358 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:47.358 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:47.358 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:47.361 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:47.361 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.658ms
+13:14:47.363 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:47.363 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:47.363 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.274ms, +2.615ms
+13:14:47.363 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_organization_owners
+13:14:47.363 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:47.363 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:47.745 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:47.745 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 381.251ms
+13:14:47.747 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:47.747 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:47.747 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 383.611ms, +2.359ms
+13:14:47.747 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:47.747 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:47.747 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:47.750 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:47.750 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.675ms
+13:14:47.754 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:47.754 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:47.754 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 6.647ms, +3.971ms
+13:14:47.754 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:47.754 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:47.754 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:47.756 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:47.756 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.558ms
+13:14:47.760 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:47.760 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:47.761 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 6.841ms, +4.282ms
+13:14:47.761 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_organizations
+13:14:47.761 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:47.761 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:48.257 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:48.257 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 496.544ms
+13:14:48.260 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:48.260 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:48.260 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 499.848ms, +3.303ms
+13:14:48.261 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:48.261 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:48.261 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:48.263 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:48.263 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 2.593ms
+13:14:48.266 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:48.266 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:48.266 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.452ms, +2.859ms
+13:14:48.266 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:48.266 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:48.266 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:48.269 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:48.269 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 3.419ms
+13:14:48.272 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:48.272 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:48.272 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 5.809ms, +2.389ms
+13:14:48.272 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_user_identifiers
+13:14:48.272 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:48.272 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:48.769 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:48.769 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 496.864ms
+13:14:48.772 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:48.772 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:48.772 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 500.621ms, +3.757ms
+13:14:48.772 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:48.772 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:48.772 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:48.776 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:48.776 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 3.295ms
+13:14:48.779 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:48.779 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:48.779 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 6.18ms, +2.884ms
+13:14:48.779 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 0
+13:14:48.779 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:48.779 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:48.783 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:48.783 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 4.137ms
+13:14:48.786 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:48.786 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:48.786 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 7.023ms, +2.885ms
+13:14:48.786 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : truncate table eh_users
+13:14:48.786 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:48.786 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:49.178 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:49.178 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 392.287ms
+13:14:49.182 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:49.182 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:49.182 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 396.644ms, +4.356ms
+13:14:49.182 [main] DEBUG org.jooq.tools.LoggerListener - Executing query          : SET foreign_key_checks = 1
+13:14:49.182 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:49.182 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;prepareStatement&apos;
+13:14:49.184 [main] DEBUG org.jooq.tools.LoggerListener - Affected row(s)          : 0
+13:14:49.184 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 1.806ms
+13:14:49.187 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:49.187 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:49.187 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 4.463ms, +2.657ms
+13:14:49.187 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:49.187 [main] INFO  o.s.jdbc.datasource.init.ScriptUtils - Executing SQL script from file [/Users/wuhan/workspace/ehnextgen/ehtest-integration/target/classes/data/tables/3.0.x_ehcore-system-init.sql]
+13:14:49.190 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 0 returned as updateCount for SQL: SET foreign_key_checks = 0
+13:14:49.232 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;db.init.timestamp&apos;, UTC_TIMESTAMP(), &apos;Database seeding timestamp&apos;)
+13:14:49.265 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;sms.handler.type&apos;,&apos;MW&apos;,&apos;sms handler&apos;)
+13:14:49.299 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;mw.port&apos;,&apos;9003&apos;,&apos;sms handler&apos;)
+13:14:49.338 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;mw.password&apos;,&apos;223651&apos;,&apos;mw password&apos;)
+13:14:49.374 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;mw.user&apos;,&apos;J02300&apos;,&apos;mw user&apos;)
+13:14:49.407 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;mw.host&apos;,&apos;61.145.229.29&apos;,&apos;mw host ,special line&apos;)
+13:14:49.441 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;etag.timeout&apos;, &apos;300&apos;, &apos;the timeout for etag&apos;)
+13:14:49.474 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;home.url&apos;, &apos;http://10.1.1.91:8080&apos;, &apos;the home url&apos;)
+13:14:49.508 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;user.score.url&apos;, &apos;/app/static/score/score.html&apos;, &apos;the relative path for user score&apos;)
+13:14:49.541 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;post.share.url&apos;, &apos;/mobile/static/share_post/share_post.html#&apos;, &apos;the relative path for sharing topic&apos;)
+13:14:49.575 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;yzx.vcode.templateid&apos;, &apos;9547&apos;, &apos;vcode sms template id&apos;)
+13:14:49.608 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;yzx.account.sid&apos;, &apos;b0b423e8f630d920aaba8aafe8f37701&apos;, NULL)
+13:14:49.642 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;yzx.token&apos;, &apos;1527ed4b1bb855fab12a5683bb3c7ead&apos;, NULL)
+13:14:49.680 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;yzx.appid&apos;, &apos;89f85f91ed974429992831fb662dbb83&apos;, NULL)
+13:14:49.741 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;yzx.version&apos;, &apos;2014-06-30&apos;, NULL)
+13:14:49.775 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;yzx.server&apos;, &apos;api.ucpaas.com&apos;, NULL)
+13:14:49.808 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;mw.vcode.template.content&apos;, &apos;??????????????????${vcode}???10???????????????????????????????????????&apos;, NULL)
+13:14:49.842 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;marketdata.item.version&apos;, &apos;2015080311&apos;, &apos;the version of all luanchpad items&apos;)
+13:14:49.881 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;app.agreements.url&apos;, &apos;/app/static/app_agreements/app_agreements.html&apos;, &apos;the relative path for app agreements&apos;)
+13:14:49.950 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;apply.shop.url&apos;, &apos;/app/static/apply_store/apply_store.html&apos;, &apos;the relative path for user shop apply&apos;)
+13:14:50.022 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;manage.shop.url&apos;, &apos;/app/static/my_store/my_store.html&apos;, &apos;the relative path for user shop manage&apos;)
+13:14:50.113 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;user.order.url&apos;, &apos;/app/static/indent/indent.html&apos;, &apos;the relative path for user order&apos;)
+13:14:50.164 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;user.coupon.url&apos;, &apos;/app/static/coupon/coupon.html&apos;, &apos;the relative path for user coupon&apos;)
+13:14:50.198 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;business.detail.url&apos;, &apos;/web/app/user/index.html#/store/details/&apos;, &apos;business details&apos;)
+13:14:50.239 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;business.image.url&apos;, &apos;http://121.199.69.107:8081/imageService/&apos;, &apos;business image url&apos;)
+13:14:50.273 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;biz.back.url&apos;, &apos;http://biz.zuolin.com/Zl-MallMgt/bizmgt/main/tokenlogin.ihtml&apos;, &apos;biz.back.url&apos;)
+13:14:50.315 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;user.avatar.male.url&apos;, &apos;cs://1/image/aW1hZ2UvTVRvME1qVTBZalpqT1dGa05USm1aVEE1WVRnMU9EWmhOVE0zTm1Nd1pXSTVZUQ&apos;,&apos;???????????????url&apos;)
+13:14:50.348 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;user.avatar.female.url&apos;, &apos;cs://1/image/aW1hZ2UvTVRvMU1EQTVZVEZrTkdVek9EQXhZbVE0WlRZd1l6UXdOVE0zWVdJNFkyTmlNUQ&apos;,&apos;???????????????url&apos;)
+13:14:50.382 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;user.def.pwd&apos;, &apos;123456&apos;,&apos;??????????????????&apos;)
+13:14:50.415 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, &apos;hotusers&apos;, &apos;&apos;, &apos;phone numbers split by ,&apos;)
+13:14:50.448 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_role_assignments`(`id`, `owner_type`, `owner_id`, `target_type`, `target_id`, `role_id`, `creator_uid`, `create_time`) VALUES(1, &apos;system&apos;, NULL, &apos;EhUsers&apos;, 1, 2, 1, &apos;2015-09-28 17:03:22&apos;)
+13:14:50.482 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acls`(`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) VALUES(1, &apos;system&apos;, NULL, 1, 1, 2, 0, 1, &apos;2015-09-28 17:03:23&apos;)
+13:14:50.516 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acls`(`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) VALUES(2, &apos;extension&apos;, NULL, 1, 2, 8, 0, 1, &apos;2015-09-28 17:03:23&apos;)
+13:14:50.560 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 0 returned as updateCount for SQL: ALTER TABLE `eh_acl_privileges` AUTO_INCREMENT = 4096
+13:14:50.591 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(1, 0, &apos;All&apos;)
+13:14:50.624 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(2, 0, &apos;Visible&apos;)
+13:14:50.658 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(3, 0, &apos;Read&apos;)
+13:14:50.691 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(4, 0, &apos;Create&apos;)
+13:14:50.727 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(5, 0, &apos;Write&apos;)
+13:14:50.758 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(6, 0, &apos;Delete&apos;)
+13:14:50.791 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(100, 2, &apos;forum.topic.new&apos;)
+13:14:50.844 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(101, 2, &apos;forum.topic.delete&apos;)
+13:14:50.876 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(102, 2, &apos;forum.reply.new&apos;)
+13:14:50.908 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(103, 2, &apos;forum.reply.delete&apos;)
+13:14:50.950 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 0 returned as updateCount for SQL: ALTER TABLE `eh_acl_roles` AUTO_INCREMENT = 4096
+13:14:50.978 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(1, 0, &apos;Anonymous&apos;)
+13:14:51.012 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(2, 0, &apos;SystemAdmin&apos;)
+13:14:51.045 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(3, 0, &apos;AuthenticatedUser&apos;)
+13:14:51.126 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(4, 0, &apos;ResourceCreator&apos;)
+13:14:51.161 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(5, 0, &apos;ResourceAdmin&apos;)
+13:14:51.195 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(6, 0, &apos;ResourceOperator&apos;)
+13:14:51.254 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(7, 0, &apos;ResourceUser&apos;)
+13:14:51.293 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(8, 0, &apos;SystemExtension&apos;)
+13:14:51.335 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 0 returned as updateCount for SQL: ALTER TABLE `eh_apps` AUTO_INCREMENT = 4096
+13:14:51.405 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 0 returned as updateCount for SQL: ALTER TABLE `eh_namespaces` AUTO_INCREMENT = 4096
+13:14:51.446 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (1, 0, UUID(), &apos;root&apos;, &apos;system user&apos;, 1, NOW(), &apos;3023538e14053565b98fdfb2050c7709&apos;, &apos;3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199&apos;, &apos;cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw&apos;)
+13:14:51.480 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (2, 0, UUID(), &apos;system assistant&apos;, &apos;???????????????&apos;, 1, NOW(), &apos;3023538e14053565b98fdfb2050c7709&apos;, &apos;3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199&apos;, &apos;cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw&apos;)
+13:14:51.513 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (3, 0, UUID(), &apos;business assistant&apos;, &apos;???????????????&apos;, 1, NOW(), &apos;3023538e14053565b98fdfb2050c7709&apos;, &apos;3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199&apos;, &apos;cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw&apos;)
+13:14:51.547 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 1 returned as updateCount for SQL: INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (11, 999995, UUID(), &apos;tt&apos;, &apos;?????????&apos;, 1, NOW(), &apos;3023538e14053565b98fdfb2050c7709&apos;, &apos;3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199&apos;, &apos;cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw&apos;)
+13:14:51.550 [main] DEBUG o.s.jdbc.datasource.init.ScriptUtils - 0 returned as updateCount for SQL: SET foreign_key_checks = 1
+13:14:51.550 [main] INFO  o.s.jdbc.datasource.init.ScriptUtils - Executed SQL script from file [/Users/wuhan/workspace/ehnextgen/ehtest-integration/target/classes/data/tables/3.0.x_ehcore-system-init.sql] in 2363 ms.
+13:14:51.550 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:51.551 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:51.551 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;createStatement&apos;
+13:14:51.551 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_users` (`gender`, `locale`, `uuid`, `points`, `community_id`, `reg_channel_id`, `account_name`, `password_hash`, `id`, `namespace_user_token`, `address`, `salt`, `create_time`, `level`, `address_id`, `namespace_id`, `nick_name`, `reg_ip`, `reg_city_id`, `status`) values (&apos;0&apos;, &apos;zh_CN&apos;, &apos;d31b44cc-9090-4509-a53b-46c30c151f5e&apos;, &apos;165&apos;, &apos;0&apos;, &apos;0&apos;, &apos;1001&apos;, &apos;3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199&apos;, &apos;1001&apos;, &apos;&apos;, &apos;&apos;, &apos;3023538e14053565b98fdfb2050c7709&apos;, &apos;2016-06-03 18:26:05&apos;, &apos;2&apos;, &apos;0&apos;, &apos;0&apos;, &apos;?????1&apos;, &apos;&apos;, &apos;0&apos;, &apos;1&apos;)
+13:14:51.551 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_users` (`gender`, `uuid`, `points`, `reg_channel_id`, `account_name`, `password_hash`, `id`, `namespace_user_token`, `salt`, `create_time`, `level`, `avatar`, `namespace_id`, `nick_name`, `reg_ip`, `reg_city_id`, `status`) values (&apos;0&apos;, &apos;ca501133-50fd-4d5a-86c7-bff8b172feec&apos;, &apos;0&apos;, &apos;0&apos;, &apos;1002&apos;, &apos;3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199&apos;, &apos;1002&apos;, &apos;&apos;, &apos;3023538e14053565b98fdfb2050c7709&apos;, &apos;2016-06-03 18:26:05&apos;, &apos;1&apos;, &apos;cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw&apos;, &apos;0&apos;, &apos;?????2&apos;, &apos;&apos;, &apos;0&apos;, &apos;1&apos;)
+13:14:51.551 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_user_identifiers` (`identifier_token`, `claim_status`, `create_time`, `namespace_id`, `owner_uid`, `identifier_type`, `id`) values (&apos;12900000001&apos;, &apos;3&apos;, &apos;2016-06-03 18:26:05&apos;, &apos;0&apos;, &apos;1001&apos;, &apos;0&apos;, &apos;0&apos;)
+13:14:51.551 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_user_identifiers` (`identifier_token`, `claim_status`, `create_time`, `namespace_id`, `owner_uid`, `identifier_type`, `id`) values (&apos;12900000001&apos;, &apos;3&apos;, &apos;2016-06-03 18:26:05&apos;, &apos;0&apos;, &apos;1002&apos;, &apos;0&apos;, &apos;1&apos;)
+13:14:51.551 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_acl_role_assignments` (`create_time`, `role_id`, `target_type`, `target_id`, `creator_uid`, `id`, `owner_type`) values (&apos;2015-09-29 17:24:44&apos;, &apos;2&apos;, &apos;EhUsers&apos;, &apos;1001&apos;, &apos;1025&apos;, &apos;1001&apos;, &apos;system&apos;)
+13:14:51.551 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_acl_role_assignments` (`create_time`, `role_id`, `target_type`, `target_id`, `creator_uid`, `id`, `owner_type`) values (&apos;2015-09-21 20:17:51&apos;, &apos;2&apos;, &apos;EhUsers&apos;, &apos;1002&apos;, &apos;1&apos;, &apos;1002&apos;, &apos;system&apos;)
+13:14:51.551 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `path`, `level`, `status`, `group_type`, `update_time`, `directly_enterprise_id`, `namespace_id`) values (&apos;1000001&apos;, &apos;0&apos;, &apos;GACW&apos;, &apos;???????&apos;, &apos;239825274387039452&apos;, &apos;/6&apos;, &apos;1&apos;, &apos;2&apos;, &apos;ENTERPRISE&apos;, &apos;2016-02-29 16:48:53&apos;, &apos;0&apos;, &apos;0&apos;)
+13:14:51.551 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_organization_members` (`id`, `organization_id`, `target_type`, `target_id`, `member_group`, `contact_name`, `contact_type`, `contact_token`, `status`, `group_id`, `gender`, `namespace_id`) values (&apos;1000001&apos;, &apos;1000001&apos;, &apos;USER&apos;, &apos;1001&apos;, &apos;manager&apos;, &apos;???&apos;, &apos;0&apos;, &apos;12900000001&apos;, &apos;3&apos;, &apos;0&apos;, &apos;0&apos;, &apos;0&apos;)
+13:14:51.822 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 270.866ms
+13:14:51.824 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:51.825 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:51.825 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 273.645ms, +2.778ms
+13:14:51.826 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+13:14:51.826 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Connecting to database for operation &apos;createStatement&apos;
+13:14:51.826 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_organization_owner_cars` (`id`, `namespace_id`, `brand`, `parking_space`, `parking_type`, `plate_number`, `contacts`, `contact_number`, `content_uri`, `color`, `status`, `create_time`, `update_time`, `update_uid`, `community_id`) values (&apos;1&apos;, &apos;0&apos;, &apos;Mercedes-G500&apos;, &apos;20F&apos;, &apos;1&apos;, &apos;?B77777&apos;, &apos;xiaoxiao&apos;, &apos;1111&apos;, null, &apos;white&apos;, &apos;1&apos;, &apos;2016-09-09 18:43:27&apos;, &apos;2016-09-09 18:43:27&apos;, &apos;1001&apos;, &apos;24206890946790405&apos;)
+13:14:51.826 [main] DEBUG org.jooq.tools.LoggerListener - Executing batch query    : insert into `eh_organization_owners` (`id`, `organization_id`, `contact_name`, `contact_type`, `contact_token`, `contact_description`, `address_id`, `address`, `creator_uid`, `namespace_id`, `community_id`) values (&apos;1&apos;, &apos;1000001&apos;, &apos;zuolin&apos;, &apos;1&apos;, &apos;13245678911&apos;, &apos;????&apos;, &apos;3&apos;, &apos;3 ????&apos;, &apos;44&apos;, &apos;0&apos;, &apos;111&apos;)
+13:14:51.897 [main] DEBUG org.jooq.tools.StopWatch - Query executed           : Total: 71.351ms
+13:14:51.901 [main] DEBUG o.s.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+13:14:51.901 [main] DEBUG o.s.j.d.LazyConnectionDataSourceProxy - Using existing database connection for operation &apos;close&apos;
+13:14:51.901 [main] DEBUG org.jooq.tools.StopWatch - Finishing                : Total: 74.766ms, +3.414ms
+13:14:51.901 [main] DEBUG o.s.d.r.core.RedisConnectionUtils - Opening RedisConnection
+13:14:51.931 [main] DEBUG o.s.d.r.core.RedisConnectionUtils - Closing Redis Connection
+13:14:51.931 [main] DEBUG o.a.h.c.protocol.RequestAddCookies - CookieSpec selected: best-match
+13:14:51.931 [main] DEBUG o.a.h.c.protocol.RequestAuthCache - Auth cache not set in the context
+13:14:51.931 [main] DEBUG o.a.h.i.c.PoolingHttpClientConnectionManager - Connection request: [route: {}-&gt;http://127.0.0.1:8080][total kept alive: 0; route allocated: 0 of 2; total allocated: 0 of 20]
+13:14:51.931 [main] DEBUG o.a.h.i.c.PoolingHttpClientConnectionManager - Connection leased: [id: 401][route: {}-&gt;http://127.0.0.1:8080][total kept alive: 0; route allocated: 1 of 2; total allocated: 1 of 20]
+13:14:51.931 [main] DEBUG o.a.h.impl.execchain.MainClientExec - Opening connection {}-&gt;http://127.0.0.1:8080
+13:14:51.931 [main] DEBUG o.a.h.i.c.HttpClientConnectionOperator - Connecting to /127.0.0.1:8080
+13:14:51.931 [main] DEBUG o.a.h.i.c.DefaultManagedHttpClientConnection - http-outgoing-401: Shutdown connection
+13:14:51.931 [main] DEBUG o.a.h.impl.execchain.MainClientExec - Connection discarded
+13:14:51.931 [main] DEBUG o.a.h.i.c.DefaultManagedHttpClientConnection - http-outgoing-401: Close connection
+13:14:51.931 [main] DEBUG o.a.h.i.c.PoolingHttpClientConnectionManager - Connection released: [id: 401][route: {}-&gt;http://127.0.0.1:8080][total kept alive: 0; route allocated: 0 of 2; total allocated: 0 of 20]
+13:14:51.932 [main] DEBUG o.s.t.c.s.DirtiesContextTestExecutionListener - After test method: context [DefaultTestContext@584ea55d testClass = UpdateOrganizationOwnerCarTest, testInstance = null(com.everhomes.test.junit.organization.pm.UpdateOrganizationOwnerCarTest), testMethod = testUpdateOrganizationOwnerCar@UpdateOrganizationOwnerCarTest, testException = java.lang.IllegalStateException: Failed to login before synchronizing sequence, user=root, error={&quot;version&quot;:&quot;1.0.0&quot;,&quot;errorScope&quot;:&quot;HTTP&quot;,&quot;errorCode&quot;:502,&quot;errorDescription&quot;:&quot;Connect to 127.0.0.1:8080 [/127.0.0.1] failed: Connection refused&quot;}, mergedContextConfiguration = [MergedContextConfiguration@36e550f2 testClass = UpdateOrganizationOwnerCarTest, locations = &apos;{}&apos;, classes = &apos;{class com.everhomes.test.core.base.BaseServerConfig, class com.everhomes.test.core.persist.PersistConfig, class com.everhomes.test.core.redis.RedisConfig}&apos;, contextInitializerClasses = &apos;[]&apos;, activeProfiles = &apos;{}&apos;, contextLoader = &apos;org.springframework.test.context.support.AnnotationConfigContextLoader&apos;, parent = [null]]], class dirties context [false], class mode [null], method dirties context [false].
+</system-out>
+  </testcase>
+</testsuite>

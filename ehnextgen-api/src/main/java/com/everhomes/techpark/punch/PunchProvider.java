@@ -277,6 +277,8 @@ public interface PunchProvider {
 
 	public PunchDayLog findPunchDayLog(Long userId, Long enterpriseId, Date punchDate);
 
+
+	List<PunchRuleOwnerMap> queryPunchRuleOwnerMapList(String ownerType, Long ownerId, String targetType, Long targetId, List<Long> userIds, CrossShardListingLocator locator, int i);
 	List<PunchRuleOwnerMap> queryPunchRuleOwnerMaps(String ownerType,
 			Long ownerId, String listType);
 

@@ -1,0 +1,32 @@
+{
+  "eh_forums": [
+    {
+      "update_time": "2015-09-28 06:09:03",
+      "modify_seq": "0",
+      "namespace_id": "0",
+      "create_time": "2015-09-28 06:09:03",
+      "owner_id": "0",
+      "name": "社区论坛",
+      "description": "",
+      "id": "1",
+      "post_count": "0",
+      "uuid": "6adbcbb7-65a7-11e5-adde-00163e005fce",
+      "app_id": "2",
+      "owner_type": ""
+    },
+    {
+      "update_time": "2015-09-28 06:09:03",
+      "modify_seq": "0",
+      "namespace_id": "0",
+      "create_time": "2015-09-28 06:09:03",
+      "owner_id": "0",
+      "name": "意见反馈论坛",
+      "description": "",
+      "id": "2",
+      "post_count": "0",
+      "uuid": "6add9b67-65a7-11e5-adde-00163e005fce",
+      "app_id": "2",
+      "owner_type": ""
+    }
+  ]
+}
