@@ -128,7 +128,7 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		entities.add(getFlowCaseEntity(documents[2], FlowCaseEntityType.MULTI_LINE.getCode(), record.getOrganizationPhone()));
 		
 		//认证反馈结果
-		entities.add(generateContent(zjgkResponses, documentflows));
+		entities.add(generateContent(zjgkResponses, documentflows,documents[3]));
 //		entities.addAll(generateContent(zjgkResponses,documentflows));
 		//地址
 //		generateAddressEntity(entities, zjgkResponses.getResponse(), documentflows);
@@ -152,7 +152,7 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		entities.add(getFlowCaseEntity(documents[7], FlowCaseEntityType.MULTI_LINE.getCode(), record.getCertificateNo()));
 		
 		//认证反馈结果
-		entities.add(generateContent(zjgkResponses, documentflows));
+		entities.add(generateContent(zjgkResponses, documentflows,documents[8]));
 //		entities.addAll(generateContent(zjgkResponses,documentflows));
 		
 		//地址
@@ -204,9 +204,9 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		return buffer.toString();
 	}
 	
-	public FlowCaseEntity generateContent(ZjgkJsonEntity<List<ZjgkResponse>> entity, String[] documentflows) {
+	public FlowCaseEntity generateContent(ZjgkJsonEntity<List<ZjgkResponse>> entity, String[] documentflows, String documents) {
 		FlowCaseEntity e = new FlowCaseEntity();
-		e.setKey(documentflows[3]);
+		e.setKey(documents);
 		e.setEntityType(FlowCaseEntityType.TEXT.getCode());
 		StringBuffer buffer = new StringBuffer();
 		if(entity.isMismatching()){
@@ -249,6 +249,7 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 			buffer.append(documentflows[5]).append(entity.getErrorCode()).append(" ");
 		}
 //		return buffer.toString();
+		e.setValue(buffer.toString());
 		return e;
 	}
 	
