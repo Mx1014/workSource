@@ -1,5 +1,6 @@
 
 ALTER TABLE `eh_service_modules` ADD `instance_config` text;
+ALTER TABLE `eh_service_modules` ADD `action_type` tinyint(4) DEFAULT NULL;
 ALTER TABLE `eh_service_modules` ADD `update_time` datetime DEFAULT NULL;
 ALTER TABLE `eh_service_modules` ADD `operator_uid` bigint(20) NOT NULL;
 ALTER TABLE `eh_service_modules` ADD `creator_uid` bigint(20) NOT NULL;

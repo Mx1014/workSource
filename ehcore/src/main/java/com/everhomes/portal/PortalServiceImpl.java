@@ -918,7 +918,7 @@ public class PortalServiceImpl implements PortalService {
 	public void publish(PublishCommand cmd) {
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId());
 		for (PortalLayout layout: layouts) {
-
+			publishLayout(layout);
 		}
 
 	}
@@ -1000,11 +1000,14 @@ public class PortalServiceImpl implements PortalService {
 				group.setInstanceConfig(StringHelper.toJsonString(config));
 			}
 			groups.add(group);
+
+			if(Widget.fromCode(group.getWidget()) == Widget.NAVIGATOR){
+				publishItem(itemGroup);
+			}
 		}
 		layoutJson.setGroups(groups);
 		String json = StringHelper.toJsonString(layoutJson);
 		LaunchPadLayout launchPadLayout = new LaunchPadLayout();
-		List<PortalLaunchPadMapping> mappings = new ArrayList<>();
 		if(portalLaunchPadMappings.size() > 0){
 			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
 				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
@@ -1033,9 +1036,10 @@ public class PortalServiceImpl implements PortalService {
 					mapping.setPortalContentId(layout.getId());
 					mapping.setCreatorUid(user.getId());
 					mapping.setLaunchPadContentId(launchPadLayout.getId());
-					mappings.add(mapping);
+					portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
 				}
 			}
+			launchPadProvider.createLaunchPadLayout(launchPadLayout);
 		}
 
 
@@ -1067,19 +1071,19 @@ public class PortalServiceImpl implements PortalService {
 					LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
 					if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.RESIDENTIAL.getCode());
-						item.setScopeId(scope.getContentId());
+						item.setScopeId(scope.getScopeId());
 						item.setSceneType(SceneType.DEFAULT.getCode());
 					}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.COMMUNITY.getCode());
-						item.setScopeId(scope.getContentId());
+						item.setScopeId(scope.getScopeId());
 						item.setSceneType(SceneType.PARK_TOURIST.getCode());
 					}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.PM.getCode());
-						item.setScopeId(scope.getContentId());
+						item.setScopeId(scope.getScopeId());
 						item.setSceneType(SceneType.PM_ADMIN.getCode());
 					}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.ORGANIZATION.getCode());
-						item.setScopeId(scope.getContentId());
+						item.setScopeId(scope.getScopeId());
 						item.setSceneType(SceneType.PARK_TOURIST.getCode());
 					}
 
@@ -1163,18 +1167,14 @@ public class PortalServiceImpl implements PortalService {
 				if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
 					itemCategory.setSceneType(SceneType.DEFAULT.getCode());
 				}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
-//					itemCategory.setScopeCode(ScopeType.COMMUNITY.getCode());
-//					itemCategory.setScopeId(scope.getContentId());
 					itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
 				}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
-//					itemCategory.setScopeCode(ScopeType.PM.getCode());
-//					itemCategory.setScopeId(scope.getContentId());
 					itemCategory.setSceneType(SceneType.PM_ADMIN.getCode());
 				}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
-//					itemCategory.setScopeCode(ScopeType.ORGANIZATION.getCode());
-//					itemCategory.setScopeId(scope.getContentId());
 					itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
 				}
+				itemCategory.setScopeType(scope.getScopeType());
+				itemCategory.setScopeId(scope.getScopeId());
 				itemCategory.setStatus(ItemServiceCategryStatus.ACTIVE.getCode());
 				itemCategory.setCreatorUid(user.getId());
 
