@@ -267,8 +267,8 @@ public class UniongroupServiceImpl implements UniongroupService {
         ListUniongroupMemberDetailResponse response = new ListUniongroupMemberDetailResponse();
 
         if (list != null && list.size() > 0) {
-            response.setPageAnchor(search_cmd.getPageAnchor());
-            response.setPageSize(search_cmd.getPageSize());
+            response.setPageAnchor(cmd.getPageAnchor());
+            response.setPageSize(cmd.getPageSize());
             response.setUniongroupMemberDetailList(list);
             return response;
         }
@@ -435,6 +435,38 @@ public class UniongroupServiceImpl implements UniongroupService {
         this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
         //2.删除搜索引擎中的失效索引
         this.uniongroupSearcher.deleteById(uniongroupMemberDetail.getId());
+    }
+
+    @Override
+    public void distributionUniongroupToDetail(Long organiztionId, Long detailId, Long groupId) {
+        OrganizationMemberDetails memberDetail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        //配置表
+        UniongroupConfigures unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(memberDetail.getNamespaceId(), detailId);
+        if(unc != null)
+            this.uniongroupConfigureProvider.deleteUniongroupConfigres(unc);
+        UniongroupConfigures uc = new UniongroupConfigures();
+        uc.setNamespaceId(memberDetail.getNamespaceId());
+        uc.setEnterpriseId(organiztionId);
+        uc.setGroupType(UniongroupType.SALARYGROUP.getCode());
+        uc.setGroupId(groupId);
+        uc.setCurrentType(UniongroupTargetType.MEMBERDETAIL.getCode());
+        uc.setCurrentId(detailId);
+        uc.setCurrentName(memberDetail.getContactName());
+        this.uniongroupConfigureProvider.createUniongroupConfigures(uc);
+
+        //关系表
+        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
+        UniongroupMemberDetail uniongroupMemberDetails = new UniongroupMemberDetail();
+        uniongroupMemberDetails.setGroupId(groupId);
+        uniongroupMemberDetails.setGroupType(UniongroupType.SALARYGROUP.getCode());
+        uniongroupMemberDetails.setDetailId(detailId);
+        uniongroupMemberDetails.setEnterpriseId(organiztionId);
+        uniongroupMemberDetails.setTargetType(memberDetail.getTargetType());
+        uniongroupMemberDetails.setTargetId(memberDetail.getTargetId());
+        uniongroupMemberDetails.setNamespaceId(memberDetail.getNamespaceId());
+        uniongroupMemberDetails.setContactName(memberDetail.getContactName());
+        uniongroupMemberDetails.setContactToken(memberDetail.getContactToken());
+        this.uniongroupConfigureProvider.createUniongroupMemberDetail(uniongroupMemberDetails);
     }
 
     /**

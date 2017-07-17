@@ -55,4 +55,7 @@ public interface UniongroupService {
 
     /**离职时薪酬组相关的改动**/
     void syncUniongroupAfterLeaveTheJob(Long detailId);
+
+    /**单独添加一个人进入薪酬组**/
+    void distributionUniongroupToDetail(Long organizationId, Long detailId, Long groupId);
 }
