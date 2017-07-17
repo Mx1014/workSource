@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.salary.SalaryGroupStatus;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -111,6 +112,7 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
 				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.in(detailIds))
 				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.in(periods))
+				.and(Tables.EH_SALARY_EMPLOYEES.STATUS.eq(SalaryGroupStatus.SENDED.getCode()))
 				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
 	}
