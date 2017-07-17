@@ -715,6 +715,8 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
 	    //  1.更新该员工在组织架构的关联及configure
+        this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(),cmd.getDetailId(),cmd.getSalaryGroupId());
+/*
         AddToOrganizationSalaryGroupCommand addCommand = new AddToOrganizationSalaryGroupCommand();
         List<UniongroupTarget> targets = new ArrayList<>();
         UniongroupTarget target = new UniongroupTarget();
@@ -725,7 +727,7 @@ public class SalaryServiceImpl implements SalaryService {
         addCommand.setOwnerType(cmd.getOwnerType());
         addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
         addCommand.setUsers(targets);
-        this.addToOrganizationSalaryGroup(addCommand);
+        this.addToOrganizationSalaryGroup(addCommand);*/
 
         // 2.删除原有的薪酬设定
         List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(),cmd.getOwnerType(),cmd.getOwnerId());
@@ -742,7 +744,8 @@ public class SalaryServiceImpl implements SalaryService {
         if(!cmd.getEmployeeOriginVal().isEmpty()){
 
             //  添加到组织架构的薪酬组中，没有增加有则覆盖
-            AddToOrganizationSalaryGroupCommand addCommand = new AddToOrganizationSalaryGroupCommand();
+            this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(),cmd.getUserDetailId(),cmd.getSalaryGroupId());
+/*            AddToOrganizationSalaryGroupCommand addCommand = new AddToOrganizationSalaryGroupCommand();
             List<UniongroupTarget> targets = new ArrayList<>();
             UniongroupTarget target = new UniongroupTarget();
             target.setId(cmd.getUserDetailId());
@@ -752,7 +755,7 @@ public class SalaryServiceImpl implements SalaryService {
             addCommand.setOwnerType(cmd.getOwnerType());
             addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
             addCommand.setUsers(targets);
-            this.addToOrganizationSalaryGroup(addCommand);
+            this.addToOrganizationSalaryGroup(addCommand);*/
 
             //  添加到薪酬组的个人设定中
             List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getUserDetailId(),cmd.getOwnerType(),cmd.getOwnerId());
