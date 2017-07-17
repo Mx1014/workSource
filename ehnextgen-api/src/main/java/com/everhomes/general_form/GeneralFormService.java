@@ -32,4 +32,9 @@ public interface GeneralFormService {
 	void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs);
 
 	List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd);
+
+	void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals,
+			List<GeneralFormFieldDTO> fieldDTOs, boolean showDefaultFields);
+
+	List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd, boolean showDefaultFields);
 }

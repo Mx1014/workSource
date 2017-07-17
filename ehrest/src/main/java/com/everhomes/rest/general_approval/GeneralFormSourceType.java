@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
  *
  */
 public enum GeneralFormSourceType {
-	LEASE_PROMOTION("EhLeasePromotions"), GENERAL_APPROVE("GENERAL_APPROVE"), BUILDING("EhBuildings");
+	LEASE_PROMOTION("EhLeasePromotions"), GENERAL_APPROVE("GENERAL_APPROVE"), BUILDING("EhBuildings"), TALENT("EhTalents");
 
 	private String code;
 
@@ -24,9 +24,11 @@ public enum GeneralFormSourceType {
 	}
 	
 	public static GeneralFormSourceType fromCode(String code) {
-		for(GeneralFormSourceType v : GeneralFormSourceType.values()) {
-			if(StringUtils.equals(v.getCode(), code))
-				return v;
+		if (code != null) {
+			for(GeneralFormSourceType v : GeneralFormSourceType.values()) {
+				if(v.getCode().equals(code))
+					return v;
+			}
 		}
 		return null;
 	}

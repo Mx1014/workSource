@@ -1471,6 +1471,17 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhSmsLogs.class, Tables.EH_USER_APPEAL_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_USER_APPEAL_LOGS.ID.max()).from(Tables.EH_USER_APPEAL_LOGS).fetchOne().value1();
+        
+        syncTableSequence(null, EhTalentMessageSenders.class, Tables.EH_TALENT_MESSAGE_SENDERS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_TALENT_MESSAGE_SENDERS.ID.max()).from(Tables.EH_TALENT_MESSAGE_SENDERS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhTalentRequests.class, Tables.EH_TALENT_REQUESTS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_TALENT_REQUESTS.ID.max()).from(Tables.EH_TALENT_REQUESTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhGeneralFormVals.class, Tables.EH_GENERAL_FORM_VALS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_GENERAL_FORM_VALS.ID.max()).from(Tables.EH_GENERAL_FORM_VALS).fetchOne().value1();
         });
     }
 

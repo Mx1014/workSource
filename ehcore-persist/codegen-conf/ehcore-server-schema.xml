@@ -163,7 +163,7 @@
         eh_energy_meter_price_config |
         eh_general_form_vals | eh_lease_configs2 | eh_lease_form_requests | eh_general_form_mappings |
         eh_warehouses | eh_warehouse_materials | eh_warehouse_material_categories | eh_warehouse_stocks | eh_warehouse_stock_logs | eh_warehouse_requests | eh_warehouse_request_materials | eh_warehouse_units | 
-        eh_talents | eh_talent_categories | eh_talent_query_histories |
+        eh_talents | eh_talent_categories | eh_talent_query_histories | eh_talent_requests | eh_talent_message_senders |
         eh_authorizations | eh_authorization_relations | eh_service_module_assignment_relations | eh_domains |
         eh_user_notification_settings | eh_group_member_logs | 
         eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat |
