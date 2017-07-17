@@ -171,6 +171,10 @@
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
         eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
             eh_sms_black_lists |
+            eh_stat_event_device_logs | eh_stat_event_upload_strategies | eh_stat_events | eh_stat_event_params | eh_stat_event_log_contents |
+            eh_stat_event_logs | eh_stat_event_param_logs | eh_stat_event_app_log_attachments | eh_stat_event_portal_configs | eh_stat_event_portal_statistics |
+            eh_stat_event_statistics | eh_stat_event_param_statistics | eh_portal_item_groups | eh_portal_items | eh_portal_navigation_bars |
+            eh_portal_layouts |
         </includes>
 
             <!-- All elements that are excluded from your schema
