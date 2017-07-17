@@ -5,13 +5,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.salary.*;
 import com.everhomes.rest.uniongroup.RefreshPeriodValsCommand;
-import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -229,7 +226,7 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("importSalaryGroup")
 	@RestReturn(ImportFileTaskDTO.class)
-	public RestResponse importSalaryGroup(ImportSalaryGroupCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+	public RestResponse importSalaryGroup(ImportSalaryInfoCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
         User user = UserContext.current().getUser();
         RestResponse response = new RestResponse(this.salaryService.importSalaryGroup(files[0], user.getId(),user.getNamespaceId(),cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -254,7 +251,7 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("importPeriodSalary")
 	@RestReturn(String.class)
-	public RestResponse importPeriodSalary(ImportSalaryGroupCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+	public RestResponse importPeriodSalary(ImportSalaryInfoCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
 		User user = UserContext.current().getUser();
 		RestResponse response = new RestResponse(this.salaryService.importPeriodSalary(files[0], user.getId(),user.getNamespaceId(),cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);

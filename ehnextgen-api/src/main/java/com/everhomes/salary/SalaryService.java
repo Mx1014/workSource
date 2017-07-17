@@ -4,12 +4,10 @@ package com.everhomes.salary;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.salary.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.text.ParseException;
 import java.util.List;
 
 public interface SalaryService {
@@ -56,13 +54,13 @@ public interface SalaryService {
 	public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse);
 
 
-	public ImportFileTaskDTO importSalaryGroup(MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryGroupCommand cmd);
+	public ImportFileTaskDTO importSalaryGroup(MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryInfoCommand cmd);
 
 
 	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpServletResponse);
 
 
-	public ImportFileTaskDTO importPeriodSalary(MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryGroupCommand cmd);
+	public ImportFileTaskDTO importPeriodSalary(MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryInfoCommand cmd);
 
 
 	public ImportFileResponse<ImportSalaryEmployeeOriginValDTO> getImportFileResult(GetImportFileResultCommand cmd);
