@@ -715,6 +715,8 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
 	    //  1.更新该员工在组织架构的关联及configure
+        this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(),cmd.getDetailId(),cmd.getSalaryGroupId());
+/*
         AddToOrganizationSalaryGroupCommand addCommand = new AddToOrganizationSalaryGroupCommand();
         List<UniongroupTarget> targets = new ArrayList<>();
         UniongroupTarget target = new UniongroupTarget();
@@ -725,7 +727,7 @@ public class SalaryServiceImpl implements SalaryService {
         addCommand.setOwnerType(cmd.getOwnerType());
         addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
         addCommand.setUsers(targets);
-        this.addToOrganizationSalaryGroup(addCommand);
+        this.addToOrganizationSalaryGroup(addCommand);*/
 
         // 2.删除原有的薪酬设定
         List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(),cmd.getOwnerType(),cmd.getOwnerId());
