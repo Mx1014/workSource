@@ -2682,6 +2682,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Override
     public DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd) {
+        
+        //first check is the phone is in black list
+        this.userService.checkSmsBlackList("doorVisitor", cmd.getPhone());
+        
         DoorAccessDriverType qrDriver = getQrDriverType(cmd.getNamespaceId());
         DoorAccessDriverType qrDriverExt = getQrDriverExt(cmd.getNamespaceId());
         if(qrDriver.equals(DoorAccessDriverType.LINGLING)) {

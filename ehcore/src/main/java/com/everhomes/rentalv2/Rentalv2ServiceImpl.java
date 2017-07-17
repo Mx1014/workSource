@@ -394,14 +394,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.rentalv2Provider.createRentalDefaultRule(defaultRule);
 
 			//time intervals
-			if(cmd.getRentalType().equals(RentalType.HOUR.getCode())&& null!=cmd.getTimeIntervals()) {
-				setRentalRuleTimeIntervals(EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId(), cmd.getTimeIntervals());
-			}
-
-			// set half day time intervals
-			if(cmd.getRentalType() == RentalType.HALFDAY.getCode() || cmd.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
-				setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getTimeIntervals());
-			}
+//			if(cmd.getRentalType().equals(RentalType.HOUR.getCode())&& null!=cmd.getTimeIntervals()) {
+//				setRentalRuleTimeIntervals(EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId(), cmd.getTimeIntervals());
+//			}
+//
+//			// set half day time intervals
+//			if(cmd.getRentalType() == RentalType.HALFDAY.getCode() || cmd.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
+//				setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getTimeIntervals());
+//			}
 
 			createPriceRules(PriceRuleType.DEFAULT, defaultRule.getId(), cmd.getPriceRules());
 			

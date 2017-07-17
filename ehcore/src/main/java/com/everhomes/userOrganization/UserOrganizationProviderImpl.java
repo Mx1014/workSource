@@ -5,22 +5,28 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhUserOrganizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhUserOrganizations;
+import com.everhomes.server.schema.tables.records.EhUserOrganizationsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.hibernate.loader.custom.ResultRowProcessor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/6/19.
@@ -84,5 +90,32 @@ public class UserOrganizationProviderImpl implements UserOrganizationProvider {
         dao.update(userOrganizations);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganizations.class, userOrganizations.getId());
         return userOrganizations;
+    }
+
+    @Override
+    public UserOrganizations rejectUserOrganizations(UserOrganizations userOrganizations) {
+        assert (userOrganizations.getId() == null);
+        userOrganizations.setStatus(UserOrganizationStatus.REJECT.getCode());
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserOrganizationsDao dao = new EhUserOrganizationsDao(context.configuration());
+        dao.update(userOrganizations);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganizations.class, userOrganizations.getId());
+        return userOrganizations;
+    }
+
+    @Override
+    public List<UserOrganizations> listUserOrganizationsByUserId(Integer namespaceId, Long userId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition condition = Tables.EH_USER_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId);
+        condition = condition.and(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId));
+        List<UserOrganizations> result = new ArrayList<>();
+        context.select().from(Tables.EH_USER_ORGANIZATIONS).where(condition).fetch().map(r ->{
+            result.add(ConvertHelper.convert(r, UserOrganizations.class));
+            return null;
+        });
+        if(result.size() > 0){
+            return result;
+        }
+        return null;
     }
 }

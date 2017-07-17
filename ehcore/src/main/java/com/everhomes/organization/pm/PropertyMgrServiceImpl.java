@@ -94,7 +94,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.Convert;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
@@ -225,6 +224,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+
+    @Autowired
+    private GroupMemberLogProvider groupMemberLogProvider;
     
     private String queueName = "property-mgr-push";
 
@@ -6006,11 +6008,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				return new GetRequestInfoResponse(groupMember.getMemberStatus());
 			}
 			// 新加了一个groupMemberLog表用来存储删除还是拒绝
-			GroupMemberLog groupMemberLog = groupProvider.findGroupMemberLogByGroupMemberId(requestId);
+			GroupMemberLog groupMemberLog = groupMemberLogProvider.findGroupMemberLogByGroupMemberId(requestId);
             if (LOGGER.isDebugEnabled())
                 LOGGER.debug("getRequestInfo groupMemberLog {}", groupMemberLog);
 			if (groupMemberLog != null) {
-				return new GetRequestInfoResponse(groupMemberLog.getStatus());
+				return new GetRequestInfoResponse(groupMemberLog.getMemberStatus());
 			}
 		}
         if (LOGGER.isDebugEnabled())

@@ -113,8 +113,8 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	@Override
 	public SearchEquipmentStandardsResponse query(
 			SearchEquipmentStandardsCommand cmd) {
-        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_LIST, 0L);
-        userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+//        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_LIST, 0L);
+//        userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {

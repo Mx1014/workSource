@@ -12,6 +12,15 @@ import com.everhomes.util.StringHelper;
 public class GetTemplateByFormIdCommand {
 	private Long formId;
 
+	public GetTemplateByFormIdCommand() {
+		super();
+	}
+
+	public GetTemplateByFormIdCommand(Long formId) {
+		super();
+		this.formId = formId;
+	}
+
 	public Long getFormId() {
 		return formId;
 	}

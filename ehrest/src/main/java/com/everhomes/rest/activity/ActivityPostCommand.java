@@ -46,6 +46,7 @@ import com.everhomes.util.StringHelper;
  * <li>chargeFlag: 是否收费：0-不收费， 1-收费  参考{@link com.everhomes.rest.activity.ActivityChargeFlag }</li>
  * <li>chargePrice: 收费价格</li>
  * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
+ * <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -106,6 +107,8 @@ public class ActivityPostCommand{
     private BigDecimal chargePrice;
     
     private Byte status;
+
+    private Byte wechatSignup;
 
 	public String getSignupEndTime() {
 		return signupEndTime;
@@ -430,7 +433,15 @@ public class ActivityPostCommand{
 		this.status = status;
 	}
 
-	@Override
+    public Byte getWechatSignup() {
+        return wechatSignup;
+    }
+
+    public void setWechatSignup(Byte wechatSignup) {
+        this.wechatSignup = wechatSignup;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -8,8 +8,8 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
@@ -27,6 +27,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 @ImportResource(value="classpath*:**/applicationContext.xml")
 @EnableWebSocket
 @EnableCaching
+@EnableAsync
 @EnableScheduling
 public class AppConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);

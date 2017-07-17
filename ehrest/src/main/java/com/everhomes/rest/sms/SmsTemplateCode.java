@@ -105,9 +105,9 @@ public interface SmsTemplateCode {
     int VIDEO_EXPIRATION_REMINDER = 51;
     int VIDEO_TRIAL_EXPIRATION_REMINDER = 52;
     
-     
-
     // 资源预约短信模板
     int RENTAL_PROCESSOR_SUCCESS_CODE = 50; // 正中会-预成功:【正在会】客户{客户姓名}（{客户联系方式}）完成支付，成功预约{使用时间}的{资源名称}，请提前做好相关准备工作。
- 
+
+    // 申诉修改手机号审核成功
+    int RESET_IDENTIFIER_APPEAL_SUCCESS_CODE = 51;// 申诉手机号：【深圳科技园】您的申诉已通过，账号手机已更新为{newIdentifier}，若非本人操作请联系客服，感谢您的使用。
 }

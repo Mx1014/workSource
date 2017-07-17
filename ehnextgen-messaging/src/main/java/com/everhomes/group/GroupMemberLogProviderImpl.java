@@ -1,0 +1,98 @@
+package com.everhomes.group;
+
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhGroupMemberLogsDao;
+import com.everhomes.server.schema.tables.pojos.EhGroupMemberLogs;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RecordHelper;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+/**
+ * Created by xq.tian on 2017/7/11.
+ */
+@Repository
+public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
+
+    @Autowired
+    private DbProvider dbProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
+    @Override
+    public GroupMemberLog findGroupMemberLogByGroupMemberId(Long groupMemberId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Result<Record> records = context.select().from(Tables.EH_GROUP_MEMBER_LOGS)
+                .where(Tables.EH_GROUP_MEMBER_LOGS.GROUP_MEMBER_ID.eq(groupMemberId))
+                .orderBy(Tables.EH_GROUP_MEMBER_LOGS.ID.desc())
+                .limit(1)
+                .fetch();
+        if (records != null && records.size() > 0) {
+            return ConvertHelper.convert(records.get(0), GroupMemberLog.class);
+        }
+        return null;
+    }
+
+    @Override
+    public void createGroupMemberLog(GroupMemberLog groupMemberLog) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGroupMemberLogs.class));
+        groupMemberLog.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMemberLogs.class, groupMemberLog.getId()));
+        EhGroupMemberLogsDao dao = new EhGroupMemberLogsDao(context.configuration());
+        dao.insert(groupMemberLog);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhGroupMemberLogs.class, id);
+    }
+
+    @Override
+    public List<GroupMemberLog> queryGroupMemberLog(String userInfoKeyword, String communityKeyword, List<Long> communityIds, Byte status, CrossShardListingLocator locator, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<Record> query = context.select(Tables.EH_GROUP_MEMBER_LOGS.fields())
+                .from(Tables.EH_GROUP_MEMBER_LOGS).getQuery();
+
+        query.addSelect(Tables.EH_USERS.NICK_NAME);
+        query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBER_LOGS.MEMBER_ID.eq(Tables.EH_USERS.ID));
+        query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+
+        query.addSelect(Tables.EH_COMMUNITIES.NAME);
+        query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_GROUP_MEMBER_LOGS.COMMUNITY_ID.eq(Tables.EH_COMMUNITIES.ID));
+
+        query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.COMMUNITY_ID.in(communityIds));
+        query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.MEMBER_STATUS.eq(status));
+        if (StringUtils.isNotBlank(userInfoKeyword)) {
+            String keyword = "%" + userInfoKeyword + "%";
+            query.addConditions(Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword)));
+        }
+        if (StringUtils.isNotBlank(communityKeyword)) {
+            String keyword = "%" + communityKeyword + "%";
+            query.addConditions(Tables.EH_COMMUNITIES.NAME.like(keyword));
+        }
+
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.ID.gt(locator.getAnchor()));
+        }
+
+        query.addLimit(pageSize + 1);
+        query.addOrderBy(Tables.EH_GROUP_MEMBER_LOGS.ID.desc());
+
+        List<GroupMemberLog> logList = query.fetch().map((r) -> RecordHelper.convert(r, GroupMemberLog.class));
+
+        if (logList != null && logList.size() > pageSize) {
+            locator.setAnchor(logList.get(logList.size() - 1).getId());
+            logList = logList.subList(0, pageSize);
+        }
+        return logList;
+    }
+}

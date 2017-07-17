@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <li>ownerType：所属对象类型organization/user</li>
  * <li>ownerId：所属对象id</li>
+ * <li>organizationId：过滤目标为人员的时候通过organizationId过滤</li>
  * <li>targetType：映射目标类型(规则是设置给谁的) organization/user</li>
  * <li>targetId：映射目标 id</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
@@ -21,7 +22,8 @@ public class ListPunchRuleMapsCommand {
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
-	
+
+	private Long organizationId;
 	private String targetType;
 	private Long targetId;
 
@@ -80,6 +82,13 @@ public class ListPunchRuleMapsCommand {
 	public void setTargetId(Long targetId) {
 		this.targetId = targetId;
 	}
- 
 
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 }

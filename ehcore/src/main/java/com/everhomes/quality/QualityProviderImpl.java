@@ -816,7 +816,6 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		return result.get(0);
 	}
-
 	@Caching(evict={@CacheEvict(value="listRecordsByOperatorId", key="#record.operatorId")})
 	@Override
 	public void createQualityInspectionTaskRecords(QualityInspectionTaskRecords record) {
@@ -2098,19 +2097,26 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public Set<Long> listRecordsTaskIdByOperatorId(Long operatorId, Timestamp beginTime) {
+	public Set<Long> listRecordsTaskIdByOperatorId(Long operatorId, Timestamp beginTime, Long targetId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
+		SelectQuery<Record> query = context.selectQuery();
+		query.addFrom(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.OPERATOR_ID.eq(operatorId));
 
 		if(beginTime != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.ge(beginTime));
 		}
+		Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.ID.eq(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID);
+		if(targetId != null) {
+			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.eq(targetId));
+		}
+
+		query.addJoin(Tables.EH_QUALITY_INSPECTION_TASKS, con);
 		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.desc());
 
 		Set<Long> result = new HashSet<Long>();
 		query.fetch().map((r) -> {
-			result.add(r.getTaskId());
+			result.add(r.getValue(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID));
 			return null;
 		});
 

@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.activity.*;
+import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -78,6 +79,20 @@ public class ActivityController extends ControllerBase {
     public RestResponse createSignupOrder(@Valid CreateSignupOrderCommand cmd) {
     	CommonOrderDTO dto = activityService.createSignupOrder(cmd);
     	RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/createWechatJsSignupOrder</b>
+     * <p>创建微信公众号活动报名收费订单</p>
+     */
+    @RequestMapping("createWechatJsSignupOrder")
+    @RestReturn(value=CreateWechatJsPayOrderResp.class)
+    public RestResponse createWechatJsSignupOrder(@Valid CreateWechatJsSignupOrderCommand cmd) {
+        CreateWechatJsPayOrderResp dto = activityService.createWechatJsSignupOrder(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

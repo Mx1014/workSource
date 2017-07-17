@@ -45,6 +45,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
@@ -61,6 +62,7 @@ import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -73,6 +75,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
@@ -83,10 +86,7 @@ import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
@@ -97,6 +97,7 @@ import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
 import com.everhomes.util.*;
@@ -108,6 +109,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -119,6 +121,11 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.constraints.Size;
+import javax.validation.metadata.ConstraintDescriptor;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -134,6 +141,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * 
@@ -153,7 +161,9 @@ public class UserServiceImpl implements UserService {
 
 	private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
 
-	@Autowired
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+    @Autowired
 	private DbProvider dbProvider;
 
 	@Autowired
@@ -274,6 +284,15 @@ public class UserServiceImpl implements UserService {
     private GroupProvider groupProvider;
 
     @Autowired
+    private UserIdentifierLogProvider userIdentifierLogProvider;
+
+    @Autowired
+    private UserAppealLogProvider userAppealLogProvider;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    @Autowired
     private SmsBlackListProvider smsBlackListProvider;
 
 	private static final String DEVICE_KEY = "device_login";
@@ -288,7 +307,7 @@ public class UserServiceImpl implements UserService {
 		final IdentifierType identifierType = IdentifierType.fromString(cmd.getType());
 		if(identifierType == null) {
 			LOGGER.error("Invalid or unsupported identifier type, cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid or unsupported identifier type");
 		}
 
@@ -313,7 +332,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("User identifier token has already been claimed, cmd=" + cmd + ", identifierId=" + existingClaimedIdentifier.getId() 
 					+ ", ownerUid=" + existingClaimedIdentifier.getOwnerUid() + ", identifierType=" + existingClaimedIdentifier.getIdentifierType() 
 					+ ", identifierToken=" + existingClaimedIdentifier.getIdentifierToken());
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFIER_ALREADY_CLAIMED, 
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFIER_ALREADY_CLAIMED,
 					"User identifier token has already been claimed");
 		}
 
@@ -418,7 +437,7 @@ public class UserServiceImpl implements UserService {
             if (t >= smsTimesPhoneForADay) {
                 createSmsBlackList(smsAction, identifierToken);
                 LOGGER.error("Verification code request is too frequent with phone, please try again after 24 hours. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
                         "Verification code request is too frequent, please try again after 24 hours");
             }
         }
@@ -436,7 +455,7 @@ public class UserServiceImpl implements UserService {
                 Integer t = Integer.valueOf((String) times);
                 if (t >= smsTimesDeviceForADay) {
                     LOGGER.error("Verification code request is too frequent with device, please try again after 24 hours. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
-                    throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
+                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
                             "Verification code request is too frequent, please try again after 24 hours");
                 }
             }
@@ -452,7 +471,7 @@ public class UserServiceImpl implements UserService {
             Integer t = Integer.valueOf((String) times);
             if (t >= smsTimesPhoneForAnHour) {
                 LOGGER.error("Verification code request is too frequent with phone, please 1 hour to try again. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
                         "Verification code request is too frequent, please 1 hour to try again");
             }
         }
@@ -468,7 +487,7 @@ public class UserServiceImpl implements UserService {
                 Integer t = Integer.valueOf((String) times);
                 if (t >= smsTimesDeviceForAnHour) {
                     LOGGER.error("Verification code request is too frequent with device, please 1 hour to try again. phone={}, deviceId={}, times={}", identifierToken, deviceId, t);
-                    throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
+                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
                             "Verification code request is too frequent, please 1 hour to try again");
                 }
             }
@@ -483,7 +502,7 @@ public class UserServiceImpl implements UserService {
                 op.set(minDurationKey, String.valueOf(0), smsMinDuration, TimeUnit.SECONDS);
             } else {
                 LOGGER.error("The time for sending the verification code shall not be less than {}s, phone={}, deviceId={}.", smsMinDuration, identifierToken, deviceId);
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_MIN_DURATION,
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_MIN_DURATION,
                         "The time for sending the verification code shall not be less than %s s", smsMinDuration);
             }
         }
@@ -513,7 +532,7 @@ public class UserServiceImpl implements UserService {
         SmsBlackList blackList = smsBlackListProvider.findByContactToken(identifierToken);
         if (blackList != null && Objects.equals(blackList.getStatus(), SmsBlackListStatus.BLOCK.getCode())) {
             LOGGER.info("sms black list user try to send sms, smsAction = {}, contactToken = {}", smsAction, identifierToken);
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_BLACK_LIST,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_BLACK_LIST,
                     "Hi guys, you are black list user.");
         }
     }
@@ -588,7 +607,7 @@ public class UserServiceImpl implements UserService {
 		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
 		if(identifier == null) {
 			LOGGER.error("User identifier not found in db, signupToken=" + signupToken);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
 		}
 
 		if(identifier.getClaimStatus() == IdentifierClaimStatus.CLAIMING.getCode() ||
@@ -622,7 +641,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("Token status is not claiming or verifying, signupToken=" + signupToken + ", identifierId=" + identifier.getId() 
 					+ ", ownerUid=" + identifier.getOwnerUid() + ", identifierType=" + identifier.getIdentifierType() 
 					+ ", identifierToken=" + identifier.getIdentifierToken() + ", identifierStatus=" + identifier.getClaimStatus());
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
 		}
 	}
 
@@ -632,12 +651,12 @@ public class UserServiceImpl implements UserService {
 		if(signupToken == null) {
 			cmd.setInitialPassword("");
 			LOGGER.error("Signup token is empty, cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, 
+			throw errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
 		}
 		if(StringUtils.isEmpty(cmd.getInitialPassword())){
 			LOGGER.error("password cannot be empty, cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "password cannot be empty");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "password cannot be empty");
 		}
 
 		String verificationCode = cmd.getVerificationCode();
@@ -647,7 +666,7 @@ public class UserServiceImpl implements UserService {
 		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
 		if(identifier == null) {
 			LOGGER.error("User identifier not found in db, signupToken=" + signupToken + ", cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, "Invalid signup token");
 		}
 
 		// make it idempotent in case client disconnects before it has received the successful return
@@ -679,7 +698,7 @@ public class UserServiceImpl implements UserService {
 					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",cmd.getInitialPassword(),salt)));
 				} catch (Exception e) {
 					LOGGER.error("encode password failed", e);
-					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
 
 				}
 				//update user invitation code
@@ -709,7 +728,7 @@ public class UserServiceImpl implements UserService {
 				+ ", identifierId=" + identifier.getId()  + ", ownerUid=" + identifier.getOwnerUid() 
 				+ ", identifierType=" + identifier.getIdentifierType() + ", identifierToken=" + identifier.getIdentifierToken() 
 				+ ", identifierStatus=" + identifier.getClaimStatus() + ", verificationCode=" + identifier.getVerificationCode());
-		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
+		throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
 	}
 
 	@Override
@@ -718,12 +737,12 @@ public class UserServiceImpl implements UserService {
 		if(identifiers.size() == 0) {
 			cmd.setInitialPassword("");
 			LOGGER.error("Unable to locate the account by specified identifier, cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN, 
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SIGNUP_TOKEN,
 					"Unable to locate the account by specified identifier");
 		}
 		if(StringUtils.isEmpty(cmd.getInitialPassword())) {
 			LOGGER.error("password cannot be empty, cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "password cannot be empty");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "password cannot be empty");
 		}
 
 		int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
@@ -758,7 +777,7 @@ public class UserServiceImpl implements UserService {
 					} catch (Exception e) {
 						cmd.setInitialPassword("");
 						LOGGER.error("Unable to create password hash, cmd=" + cmd, e);
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Unable to create password hash");
+						throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Unable to create password hash");
 					}
 					//verify invitation code
 					if(StringUtils.isNotEmpty(cmd.getInvitationCode())){
@@ -786,7 +805,7 @@ public class UserServiceImpl implements UserService {
 			isFirst = false;
 		}
 		LOGGER.error("Invalid verification code or claim status, cmd=" + cmd + ", identifiersInDb=[" + strBuilder.toString() + "]");
-		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
+		throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
 	}
 
 	private void createInvitationRecord(String invitationCode, UserIdentifier identifier, User user) {
@@ -852,31 +871,31 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserLogin logon(int namespaceId, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify) {
-		User user = null;
-		user = this.userProvider.findUserByAccountName(userIdentifierToken);
+	public UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify) {
+		User user = this.userProvider.findUserByAccountName(userIdentifierToken);
 		if(user == null) {
 			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
-			if(userIdentifier == null) {
-				LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}", 
-				        namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
-			} else {
-				user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
-				if(user == null) {
-					LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}", 
+			// 把regionCode的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
+			if(userIdentifier != null && Objects.equals(userIdentifier.getRegionCode(), regionCode)) {
+                user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
+                if(user == null) {
+                    LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
+                            namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
+                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+                }
+            } else {
+                LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                         namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
-				}
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
 			}
 		}
 
 		if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
 
 		if(!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash())) {
 			LOGGER.error("Password does not match for " + userIdentifierToken);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
 		}
 
 		if(deviceIdentifier != null && deviceIdentifier.isEmpty())
@@ -925,7 +944,7 @@ public class UserServiceImpl implements UserService {
 //		}
 
 		LOGGER.error("Invalid token or token has expired, userKey=" + userKey + ", loginToken=" + loginToken + ", userLogin=" + login);
-		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_LOGIN_TOKEN, 
+		throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_LOGIN_TOKEN,
 				"Invalid token or token has expired");
 	}
 
@@ -1500,13 +1519,21 @@ public class UserServiceImpl implements UserService {
 				info.setHometownName(category.getName());
 		}
 		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(user.getId());
-		List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
-				.map((r) -> { return r.getIdentifierToken(); })
-				.collect(Collectors.toList());
+
+        List<String> phones = identifiers.stream()
+                .filter((r) -> {return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE;})
+                .map(EhUserIdentifiers::getIdentifierToken)
+                .collect(Collectors.toList());
 		info.setPhones(phones);
 
+        List<Integer> regionCodes = identifiers.stream()
+                .filter((r) -> {return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE;})
+                .map(EhUserIdentifiers::getRegionCode)
+                .collect(Collectors.toList());
+        info.setRegionCodes(regionCodes);
+
 		List<String> emails = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL; })
-				.map((r) -> { return r.getIdentifierToken(); })
+				.map(EhUserIdentifiers::getIdentifierToken)
 				.collect(Collectors.toList());
 		info.setEmails(emails);
 
@@ -1536,7 +1563,7 @@ public class UserServiceImpl implements UserService {
 				SimpleDateFormat fromat = new SimpleDateFormat("yyyy-MM-dd");
 				user.setBirthday(new java.sql.Date(fromat.parse(birthdayString).getTime()));
 			} catch (Exception e) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Invalid birthday paramter");
 			}
 		}
@@ -1556,14 +1583,14 @@ public class UserServiceImpl implements UserService {
 	public void setUserAccountInfo(SetUserAccountInfoCommand cmd) {
 		if(cmd.getAccountName() == null || cmd.getAccountName().isEmpty() ||
 				cmd.getPassword() == null || cmd.getPassword().isEmpty())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"accountName and password can not be empty");
 
 		this.coordinationProvider.getNamedLock(CoordinationLocks.SETUP_ACCOUNT_NAME.getCode()).enter(()->{
 			User user = this.userProvider.findUserById(UserContext.current().getUser().getId());
 			User userOther = this.userProvider.findUserByAccountName(cmd.getAccountName());
 			if(userOther != null && userOther.getId() != user.getId())
-				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NAME_ALREADY_EXISTS,
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NAME_ALREADY_EXISTS,
 						"accountName is already used by others");
 
 			user.setAccountName(cmd.getAccountName());
@@ -1675,15 +1702,15 @@ public class UserServiceImpl implements UserService {
 
 		UserIdentifier identifier = this.userProvider.findIdentifierById(identifierId);
 		if(identifier == null)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Could not find the identifier");
 
 		if(identifier.getOwnerUid() != uid)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 					"Access denied");
 
 		if(user.getPasswordHash() == null || user.getPasswordHash().isEmpty())
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+			throw errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_ACCOUNT_PASSWORD_NOT_SET,
 					"Account password has not been properly setup yet");
 
@@ -1692,30 +1719,28 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request) {
-
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifier());
         if(userIdentifier==null){
             LOGGER.error("cannot find user identifierToken.identifierToken={}",cmd.getIdentifier());
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
         }
-        userIdentifier.setRegionCode(cmd.getRegionCode());
-
-		String verificationCode = RandomGenerator.getRandomDigitalString(6);
-		userIdentifier.setVerificationCode(verificationCode);
-		this.userProvider.updateIdentifier(userIdentifier);
-
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
-		//        String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
-		//        smmProvider.sendSms(userIdentifier.getIdentifierToken(), verificationCode,templateId);
 
         this.verifySmsTimes("fogotPasswd", userIdentifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
 
-		sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()),verificationCode);
-		userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		this.userProvider.updateIdentifier(userIdentifier);
+        String verificationCode = RandomGenerator.getRandomDigitalString(6);
+        userIdentifier.setVerificationCode(verificationCode);
+        userIdentifier.setRegionCode(cmd.getRegionCode());
+        userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()), verificationCode);
+
+        this.userProvider.updateIdentifier(userIdentifier);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
+        }
 	}
 
 	@Override
@@ -1727,7 +1752,7 @@ public class UserServiceImpl implements UserService {
 		List<UserIdentifier> indentifiers = userProvider.listUserIdentifiersOfUser(user.getId());
 		if(CollectionUtils.isEmpty(indentifiers)){
 			LOGGER.error("cannot find user");
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user");
 		}
 		ClaimedAddressInfo address=null;
 		try{
@@ -1783,7 +1808,7 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		LOGGER.error("cannot create invitation code");
-		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVITATION_CODE, "invitation code create failed");
+		throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVITATION_CODE, "invitation code create failed");
 	}
 
 	private void sendNotify(Long uid,String message){
@@ -1801,19 +1826,19 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void assumePortalRole(AssumePortalRoleCommand cmd) {
 		if(cmd.getRoleId() == null)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameter, roleId could not be empty");
 
 		Role role = this.aclProvider.getRoleById(cmd.getRoleId().longValue());
 		if(role == null)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameter, roleId should be a valid one");
 
 		PortalRoleResolver resolver = PlatformContext.getComponent(PortalRoleResolver.PORTAL_ROLE_RESOLVER_PREFIX + role.getAppId());
 		if(resolver == null)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Unable to find portal role resolver");
 
@@ -1844,7 +1869,7 @@ public class UserServiceImpl implements UserService {
 	public UserInfo getUserInfo(Long uid) {
 		if(uid==null){
 			LOGGER.error("invalid uid,cannot null");
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "uid cannot be null");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "uid cannot be null");
 		}
 		User user=UserContext.current().getUser();
 		if(user.getId().longValue()==uid.longValue()){
@@ -1853,7 +1878,7 @@ public class UserServiceImpl implements UserService {
 		User queryUser=userProvider.findUserById(uid);
 		if(queryUser==null){
 			LOGGER.error("cannot find user any information.uid={}",uid);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user information");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user information");
 		}
 		List<FamilyDTO> currentUserFamilies=familyProvider.getUserFamiliesByUserId(user.getId());
 		List<FamilyDTO> queryUserFamilies=familyProvider.getUserFamiliesByUserId(queryUser.getId());
@@ -1876,7 +1901,7 @@ public class UserServiceImpl implements UserService {
 		//        currentUserFamilies.retainAll(queryUserFamilies);
 		if(CollectionUtils.isEmpty(currUserFamilies)){
 			LOGGER.error("cannot find user information ,because the current user and to lookup user in diff family.current_uid={},uid={}",user.getId(),uid);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PERMISSION, "permission denied");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PERMISSION, "permission denied");
 		}
 		UserInfo info=ConvertHelper.convert(queryUser, UserInfo.class);
 		// 把用户头像的处理独立到一个方法中 by lqs 20151211
@@ -2374,7 +2399,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("user is exist.could not add.id="+user.getId()+", namespaceId=" + namespaceId
 					+ ", namespaceUserToken=" + namespaceUserToken);
 			if(isThrowExcep){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"user is exist,could not add.");
 			}
 		}
@@ -2384,22 +2409,22 @@ public class UserServiceImpl implements UserService {
 	private void checkIsNull(SynThridUserCommand cmd) {
 		if(cmd.getRandomNum() == null || cmd.getRandomNum().equals("")){
 			LOGGER.error("randomNum not be null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"randomNum not be null");
 		}
 		if(cmd.getTimestamp() == null || cmd.getTimestamp().equals("")){
 			LOGGER.error("timestamp not be null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"timestamp not be null");
 		}
 		if(cmd.getNamespaceUserToken() == null || cmd.getNamespaceUserToken().equals("")){
 			LOGGER.error("siteUserToken not be null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"siteUserToken not be null");
 		}
 		if(cmd.getNamespaceId() == null){
 			LOGGER.error("Namespace is null, namespaceId=" + cmd.getNamespaceId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Namespace is null");
 		}
 	}
@@ -2408,12 +2433,12 @@ public class UserServiceImpl implements UserService {
 	public GetSignatureCommandResponse getThirdSignature(GetBizSignatureCommand cmd) {
 		if(cmd.getNamespaceId() == null){
 			LOGGER.error("Namespace is null, namespaceId=" + cmd.getNamespaceId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Namespace is null");
 		}
 		if(cmd.getNamespaceUserToken() == null || cmd.getNamespaceUserToken().equals("")){
 			LOGGER.error("Namespace user token is null, token=" + cmd.getNamespaceUserToken());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"siteUserToken not be null");
 		}
 
@@ -2439,7 +2464,7 @@ public class UserServiceImpl implements UserService {
 		App app = appProvider.findAppByKey(appKey);
 		if(app==null){
 			LOGGER.error("app not found.appKey="+appKey);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"app not found.");
 		}
 		String signature = cmd.getZlSignature();
@@ -2452,7 +2477,7 @@ public class UserServiceImpl implements UserService {
 		String nsignature = SignatureHelper.computeSignature(map, app.getSecretKey());
 		if(!nsignature.equals(signature)){
 			LOGGER.error("check signature fail.nsign="+nsignature+",sign="+signature);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"check signature fail.");
 		}
 	}
@@ -2460,17 +2485,17 @@ public class UserServiceImpl implements UserService {
 		//2016-07-29:modify by liujinwne,parameter name don't be signed.
 		if(StringUtils.isEmpty(cmd.getZlSignature())||StringUtils.isEmpty(cmd.getZlAppKey())){
 			LOGGER.error("zlSignature or zlAppKey is null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"zlSignature or zlAppKey is null.");
 		}
 		if(cmd.getId()==null){
 			LOGGER.error("id is null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"id is null.");
 		}
 		if(cmd.getRandomNum()==null||cmd.getTimeStamp()==null){
 			LOGGER.error("randomNum or timeStamp is null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"randomNum or timeStamp is null.");
 		}
 	}
@@ -2532,14 +2557,14 @@ public class UserServiceImpl implements UserService {
 		String targetPhone = cmd.getTargetPhone();
 		if(targetPhone == null || targetPhone.trim().length() == 0) {
 			LOGGER.error("User not found for the phone, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "User not found for the phone");
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "User not found for the phone");
 		}
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getTargetNamespaceId());
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, targetPhone);
 		if(userIdentifier == null) {
 			LOGGER.error("User not found for the phone(identifier), cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "User not found for the phone");
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "User not found for the phone");
 		}
 
 		String targetUserId = String.valueOf(userIdentifier.getOwnerUid());
@@ -2914,27 +2939,27 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch(Exception e) {
 			LOGGER.error("Invalid scene token, userId=" + userId + ", sceneToken=" + sceneToken, e);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN, 
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN,
 					"Invalid scene token");
 		}
 
 		if(sceneTokenDto == null) {
 			LOGGER.error("Scene token is null, userId=" + userId + ", sceneToken=" + sceneToken);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN, 
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN,
 					"Invalid scene token");
 		}
 
 		SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
 		if(sceneType == null) {
 			LOGGER.error("Scene type is null, userId=" + userId + ", sceneToken=" + sceneToken + ", sceneTokenDto=" + sceneTokenDto);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN, 
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN,
 					"Invalid scene token");
 		}
 
 		UserCurrentEntityType userEntityType = UserCurrentEntityType.fromCode(sceneTokenDto.getEntityType());
 		if(userEntityType == null) {
 			LOGGER.error("User entity type is null, userId=" + userId + ", sceneToken=" + sceneToken + ", sceneTokenDto=" + sceneTokenDto);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN, 
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_SCENE_TOKEN,
 					"Invalid scene token");
 		}
 
@@ -2950,14 +2975,14 @@ public class UserServiceImpl implements UserService {
 		Long communityId = cmd.getCommunityId();
 		if(communityId == null) {
 			LOGGER.error("Community id may not be null, userId={}, namespaceId={}, cmd={}", userId, namespaceId, cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Community id may not be null");
 		}
 
 		Community community = communityProvider.findCommunityById(communityId);
 		if(community == null) {
 			LOGGER.error("Community not found, userId={}, namespaceId={}, cmd={}", userId, namespaceId, cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Community not found");
 		}
 
@@ -3454,12 +3479,12 @@ public class UserServiceImpl implements UserService {
 		List<User> userList = this.userProvider.findThirdparkUserByTokenAndType(namespaceId, userType, userToken);
 		if(userList == null || userList.size() == 0) {
 			LOGGER.error("Unable to find the thridpark user, namespaceId={}, userType={}, userToken={}", namespaceId, userType, userToken);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
 		}
 
 		User user = userList.get(0);
 		if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, 
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED,
 					"User account has not been activated yet");
 		}
 
@@ -3523,18 +3548,18 @@ public class UserServiceImpl implements UserService {
 	public Boolean validateUserPass(ValidatePassCommand cmd) {
 		if(cmd.getUserId() == null) {
 			LOGGER.error("userId is null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"userId is null");
 		}
 		if(StringUtils.isEmpty(cmd.getPassword())) {
 			LOGGER.error("password is null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"password is null");
 		}
 		User user = userProvider.findUserById(cmd.getUserId());
 		if(user == null) {
 			LOGGER.error("user not found.userId=" + cmd.getUserId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
 					"user not found");
 		}
 		if(!EncryptionUtils.validateHashPassword(cmd.getPassword(), user.getSalt(), user.getPasswordHash())) {
@@ -3597,7 +3622,7 @@ public class UserServiceImpl implements UserService {
 			// 没登录 检查场景是否是游客
 			if(sceneType == SceneType.FAMILY || sceneType == SceneType.PM_ADMIN  || sceneType == SceneType.ENTERPRISE || sceneType == SceneType.ENTERPRISE_NOAUTH ){
 				LOGGER.error("Not logged in.Cannot access this scene. sceneType = {}", sceneType.getCode());
-				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
 						"Not logged in.Cannot access this scene");
 			}
 		}
@@ -3653,12 +3678,12 @@ public class UserServiceImpl implements UserService {
 	private void validateInitBizInfoCommand(InitBizInfoCommand cmd) {
 		if(StringUtils.isEmpty(cmd.getLabel())){
 			LOGGER.error("label is null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"label is null.");
 		}
 		if(cmd.getNamespaceId() == null) {
 			LOGGER.error("namespaceId is null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"namespaceId is null.");
 		}
 	}
@@ -3816,6 +3841,261 @@ public class UserServiceImpl implements UserService {
         return dto;
     }
 
+    @Override
+    public void sendVerificationCodeByResetIdentifier(SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request) {
+        User currUser = UserContext.current().getUser();
+        if (currUser == null) return;
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(currUser.getId(), IdentifierType.MOBILE.getCode());
+
+        final Long    halfAnHour = 30 * 60 * 1000L;
+        final Long    currUserId = currUser.getId();
+        final Integer newRegionCode = cmd.getRegionCode();
+        final String  newIdentifier = cmd.getIdentifier();
+        final String  oldIdentifier = userIdentifier.getIdentifierToken();
+        final Integer oldRegionCode = userIdentifier.getRegionCode();
+        final Integer namespaceId = UserContext.getCurrentNamespaceId();
+        final String  verificationCode = RandomGenerator.getRandomDigitalString(6);
+
+        // 给原来手机号发送短信验证码
+        if (newIdentifier == null) {
+            // this.verifySmsTimes("resetIdentifier", oldIdentifier, request.getHeader(X_EVERHOMES_DEVICE));
+
+            UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(currUserId, oldRegionCode, oldIdentifier);
+            // 如果半个小时没有完成整个过程，需要从头开始执行整个流程
+            if (log != null && log.notExpire(halfAnHour) && log.getClaimStatus() == IdentifierClaimStatus.CLAIMING.getCode()) {
+                log.setVerificationCode(verificationCode);
+                log.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                userIdentifierLogProvider.updateUserIdentifierLog(log);
+            } else {
+                log = new UserIdentifierLog();
+                log.setClaimStatus(IdentifierClaimStatus.CLAIMING.getCode());
+                log.setVerificationCode(verificationCode);
+                log.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                log.setRegionCode(oldRegionCode);
+                log.setNamespaceId(namespaceId);
+                log.setIdentifierToken(oldIdentifier);
+                log.setOwnerUid(currUserId);
+                userIdentifierLogProvider.createUserIdentifierLog(log);
+            }
+            this.sendVerificationCodeSms(namespaceId, getYzxRegionPhoneNumber(oldIdentifier, oldRegionCode), verificationCode);
+        }
+        // 给新手机号发送短信验证码
+        else {
+            // this.verifySmsTimes("resetIdentifier", newIdentifier, request.getHeader(X_EVERHOMES_DEVICE));
+
+            UserIdentifierLog log = userIdentifierLogProvider.findByUserId(currUserId);
+            // 如果半个小时没有完成整个过程，需要从头开始执行整个流程
+            if (log != null && log.notExpire(halfAnHour)
+                    && (log.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()
+                        || log.getClaimStatus() == IdentifierClaimStatus.CLAIMED.getCode())) {
+                log.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+                log.setVerificationCode(verificationCode);
+                log.setIdentifierToken(newIdentifier);
+                log.setRegionCode(newRegionCode);
+                log.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                userIdentifierLogProvider.updateUserIdentifierLog(log);
+            } else {
+                LOGGER.error("it is not atomic to reset newIdentifier, userId = {}, newIdentifier={}",
+                        currUser.getId(), newIdentifier);
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PLEASE_TRY_AGAIN_TO_FIRST_STEP,
+                        "please try again to the first step");
+            }
+
+            this.sendVerificationCodeSms(namespaceId, getYzxRegionPhoneNumber(newIdentifier, newRegionCode), verificationCode);
+        }
+    }
+
+    @Override
+    public void verifyResetIdentifierCode(VerifyResetIdentifierCodeCommand cmd) {
+        User currUser = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (currUser == null) return;
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(currUser.getId(), IdentifierType.MOBILE.getCode());
+        UserIdentifierLog log = userIdentifierLogProvider.findByUserId(currUser.getId());
+
+        // 如果半个小时没有完成整个过程，需要从头开始执行整个流程
+        final Long halfAnHour = 30 * 60 * 1000L;
+        if (log != null && log.notExpire(halfAnHour)) {
+            IdentifierClaimStatus claimStatus = IdentifierClaimStatus.fromCode(log.getClaimStatus());
+            switch (claimStatus) {
+                case CLAIMING:
+                    if (log.checkVerificationCode(cmd.getVerificationCode())) {
+                        log.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+                        userIdentifierLogProvider.updateUserIdentifierLog(log);
+                    } else {
+                        LOGGER.error("verification code incorrect or expired {}", cmd.getVerificationCode());
+                        throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_VERIFICATION_CODE_INCORRECT_OR_EXPIRED,
+                                "verification code incorrect or expired %s", cmd.getVerificationCode());
+                    }
+                    break;
+                case CLAIMED:
+                    // 检查新手机号是否已经是注册用户
+                    UserIdentifier newIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, log.getIdentifierToken());
+                    if (newIdentifier != null) {
+                        LOGGER.error("the new identifier are already exist {}", log.getIdentifierToken());
+                        throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NEW_IDENTIFIER_USER_EXIST,
+                                "the new identifier are already exist %s", log.getIdentifierToken());
+                    }
+                    if (log.checkVerificationCode(cmd.getVerificationCode())) {
+                        log.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
+                        // 加个事务
+                        dbProvider.execute(r -> {
+                            userIdentifierLogProvider.updateUserIdentifierLog(log);
+                            UserResetIdentifierVo vo = new UserResetIdentifierVo(
+                                    log.getOwnerUid(), userIdentifier.getIdentifierToken(),
+                                    userIdentifier.getRegionCode(), log.getIdentifierToken(), log.getRegionCode());
+                            resetUserIdentifier(currUser, vo);
+                            return true;
+                        });
+                    } else {
+                        LOGGER.error("verification code incorrect or expired {}", cmd.getVerificationCode());
+                        throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_VERIFICATION_CODE_INCORRECT_OR_EXPIRED,
+                                "verification code incorrect or expired %s", cmd.getVerificationCode());
+                    }
+                    break;
+                default:
+                    LOGGER.error("it is not atomic to reset newIdentifier, userId = {}, newIdentifier={}",
+                            currUser.getId(), log.getIdentifierToken());
+                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PLEASE_TRY_AGAIN_TO_FIRST_STEP,
+                            "please try again to the first step");
+            }
+        } else {
+            LOGGER.error("it is not atomic to reset newIdentifier, userId = {}, log = {}",
+                    currUser.getId(), log);
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PLEASE_TRY_AGAIN_TO_FIRST_STEP,
+                    "please try again to the first step");
+        }
+    }
+
+    private void resetUserIdentifier(User user, UserResetIdentifierVo vo) {
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+        userIdentifier.setIdentifierToken(vo.getNewIdentifier());
+        userIdentifier.setRegionCode(vo.getNewRegionCode());
+        userProvider.updateIdentifier(userIdentifier);
+        // 发布修改手机号事件
+        applicationEventPublisher.publishEvent(new ResetUserIdentifierEvent(vo));
+    }
+
+    @Override
+    public UserAppealLogDTO createResetIdentifierAppeal(CreateResetIdentifierAppealCommand cmd) {
+        validate(cmd);
+        UserAppealLog log = new UserAppealLog();
+        log.setNamespaceId(UserContext.getCurrentNamespaceId());
+        log.setName(cmd.getName());
+        log.setEmail(cmd.getEmail());
+        log.setNewIdentifier(cmd.getNewIdentifier());
+        log.setNewRegionCode(cmd.getNewRegionCode());
+        log.setOldIdentifier(cmd.getOldIdentifier());
+        log.setOldRegionCode(cmd.getOldRegionCode());
+        log.setOwnerUid(UserContext.current().getUser().getId());
+        log.setRemarks(cmd.getRemarks());
+        log.setStatus(UserAppealLogStatus.WAITING_FOR_APPROVAL.getCode());
+
+        userAppealLogProvider.createUserAppealLog(log);
+        return toUserAppealLogDTO(log);
+    }
+
+    @Override
+    public ListUserAppealLogsResponse listUserAppealLogs(ListUserAppealLogsCommand cmd) {
+	    validate(cmd);
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getAnchor());
+
+        List<UserAppealLog> logList = userAppealLogProvider.listUserAppealLog(locator, cmd.getStatus(), pageSize);
+
+        List<UserAppealLogDTO> dtoList = logList.stream().map(this::toUserAppealLogDTO).collect(Collectors.toList());
+
+        ListUserAppealLogsResponse response = new ListUserAppealLogsResponse();
+        response.setAppealLogs(dtoList);
+        response.setNextPageAnchor(locator.getAnchor());
+        return response;
+    }
+
+    @Override
+    public UserAppealLogDTO updateUserAppealLog(UpdateUserAppealLogCommand cmd) {
+        validate(cmd);
+        UserAppealLogStatus status = UserAppealLogStatus.fromCode(cmd.getStatus());
+        if (status != null) {
+            Tuple<UserAppealLog, Boolean> tuple = coordinationProvider.getNamedLock(
+                    CoordinationLocks.USER_APPEAL_LOG.getCode() + cmd.getId()).enter(() -> {
+                UserAppealLog log = userAppealLogProvider.findUserAppealLogById(cmd.getId());
+                if (log != null && !Objects.equals(log.getStatus(), cmd.getStatus())) {
+                    // 如果是通过，则重置用户手机号
+                    if (status == UserAppealLogStatus.ACTIVE) {
+                        Integer namespaceId = UserContext.getCurrentNamespaceId();
+                        // 检查申诉新手机号是否已经是注册用户
+                        UserIdentifier newIdentifier = userProvider.findClaimedIdentifierByToken(log.getNamespaceId(), log.getNewIdentifier());
+                        if (newIdentifier != null) {
+                            LOGGER.error("the new identifier are already exist {}", log.getNewIdentifier());
+                            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NEW_IDENTIFIER_USER_EXIST,
+                                    "the new identifier are already exist %s", log.getNewIdentifier());
+                        }
+                        User user = userProvider.findUserById(log.getOwnerUid());
+                        UserResetIdentifierVo vo = new UserResetIdentifierVo(
+                                log.getOwnerUid(), log.getOldIdentifier(),
+                                log.getOldRegionCode(), log.getNewIdentifier(), log.getNewRegionCode());
+                        resetUserIdentifier(user, vo);
+                        // 把当前用户退出登录
+                        List<UserLogin> userLogins = listUserLogins(user.getId());
+                        userLogins.forEach(this::logoff);
+                    }
+                    log.setStatus(status.getCode());
+                    userAppealLogProvider.updateUserAppealLog(log);
+                } else {
+                    return null;
+                }
+                return log;
+            });
+            if (tuple.second() && tuple.first() != null) {
+                // 发消息或者发短信
+                sendMessageOrSmsByResetIdentifier(status, tuple.first());
+                return toUserAppealLogDTO(tuple.first());
+            }
+        }
+        LOGGER.error("update user appeal log failed, cmd = {}", cmd);
+        throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UPDATE_USER_APPEAL_LOG,
+                "update user appeal log failed");
+    }
+
+    @Override
+    public UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd) {
+	    UserIdentifierLog log = userIdentifierLogProvider.findByIdentifier(cmd.getIdentifier());
+        if (log != null) {
+            return toUserIdentifierLogDTO(log);
+        }
+        return new UserIdentifierLogDTO();
+    }
+
+    private UserIdentifierLogDTO toUserIdentifierLogDTO(UserIdentifierLog log) {
+        return ConvertHelper.convert(log, UserIdentifierLogDTO.class);
+    }
+
+    private void sendMessageOrSmsByResetIdentifier(UserAppealLogStatus status, UserAppealLog log) {
+        User user = UserContext.current().getUser();
+        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+        if (user != null) {
+            locale = user.getLocale();
+        }
+        switch (status) {
+            case ACTIVE:
+                List<Tuple<String, Object>> variables = smsProvider.toTupleList("newIdentifier", log.getNewIdentifier());
+                String templateScope = SmsTemplateCode.SCOPE;
+                int templateId = SmsTemplateCode.RESET_IDENTIFIER_APPEAL_SUCCESS_CODE;
+                smsProvider.sendSms(log.getNamespaceId(), getYzxRegionPhoneNumber(log.getNewIdentifier(), log.getNewRegionCode()), templateScope, templateId, locale, variables);
+                break;
+            case INACTIVE:
+                String messageBody = localeStringService.getLocalizedString(UserLocalStringCode.SCOPE, UserLocalStringCode.REJECT_APPEAL_IDENTIFIER_CODE, locale, "");
+                sendMessageToUser(log.getOwnerUid(), messageBody, MessagingConstants.MSG_FLAG_STORED_PUSH);
+                break;
+        }
+    }
+
+    private UserAppealLogDTO toUserAppealLogDTO(UserAppealLog log) {
+        return ConvertHelper.convert(log, UserAppealLogDTO.class);
+    }
+
     private String parseUri(String uri, String ownerType, Long ownerId) {
         String avatar = null;
         try {
@@ -3895,9 +4175,41 @@ public class UserServiceImpl implements UserService {
 		resp.setDtos(new ArrayList<>());
 		for(User u : users) {
 			UserDTO dto = ConvertHelper.convert(u, UserDTO.class);
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(u.getId());
 			dto.setName(dto.getNickName());
+			if(members.size() > 0)
+				dto.setName(members.get(0).getContactName());
 			resp.getDtos().add(dto);
 		}
 		return resp;
 	}
+
+    // 参数校验方法
+    // 可以校验带bean validation 注解的对象
+    // 校验失败, 抛出异常, 异常信息附带参数值信息
+    private void validate(Object o) {
+        Set<ConstraintViolation<Object>> result = validator.validate(o);
+
+        for (ConstraintViolation<Object> v : result) {
+            ConstraintDescriptor<?> constraintDescriptor = v.getConstraintDescriptor();
+            String constraintAnnotationClassName = constraintDescriptor.getAnnotation().annotationType().getName();
+            switch (constraintAnnotationClassName) {
+                // 参数长度检查
+                case "javax.validation.constraints.Size":
+                    Size size = (Size) constraintDescriptor.getAnnotation();
+                    int max = size.max();
+                    if (max > 0) {
+                        LOGGER.error("Parameter over length: [ {} ]", v.getPropertyPath());
+                        throw errorWith(ParamErrorCodes.SCOPE, ParamErrorCodes.ERROR_OVER_LENGTH,
+                                "Parameter over length: [ %s ]", v.getPropertyPath());
+                    }
+                    break;
+                // 其他参数检查
+                default:
+                    LOGGER.error("Invalid parameter {} [ {} ]", v.getPropertyPath(), v.getInvalidValue());
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            "Invalid parameter %s [ %s ]", v.getPropertyPath(), v.getInvalidValue());
+            }
+        }
+    }
 }
