@@ -4720,7 +4720,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<Record> query = context.selectQuery();
-					query.addSelect(Tables.EH_USER_ORGANIZATIONS.USER_ID,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS,
+					query.addSelect(Tables.EH_USERS.ID,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS,
 							Tables.EH_USERS.NICK_NAME,Tables.EH_USERS.GENDER,Tables.EH_USERS.CREATE_TIME,Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID,
 							Tables.EH_USERS.EXECUTIVE_TAG,Tables.EH_USERS.POSITION_TAG,Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
 					query.addFrom(Tables.EH_USERS);
@@ -4739,7 +4739,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					LOGGER.debug("query sql:{}", query.getSQL());
 					query.fetch().map((r) -> {
 						UserOrganizations userOrganizations = new UserOrganizations();
-						userOrganizations.setUserId(r.getValue(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+						userOrganizations.setUserId(r.getValue(Tables.EH_USERS.ID));
 						userOrganizations.setOrganizationId(r.getValue(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID));
 						userOrganizations.setStatus(r.getValue(Tables.EH_USER_ORGANIZATIONS.STATUS));
 						userOrganizations.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
