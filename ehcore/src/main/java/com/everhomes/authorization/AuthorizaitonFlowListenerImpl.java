@@ -128,9 +128,10 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		entities.add(getFlowCaseEntity(documents[2], FlowCaseEntityType.MULTI_LINE.getCode(), record.getOrganizationPhone()));
 		
 		//认证反馈结果
-		entities.addAll(generateContent(zjgkResponses,documentflows));
+		entities.add(generateContent(zjgkResponses, documentflows));
+//		entities.addAll(generateContent(zjgkResponses,documentflows));
 		//地址
-		generateAddressEntity(entities, zjgkResponses.getResponse(), documentflows);
+//		generateAddressEntity(entities, zjgkResponses.getResponse(), documentflows);
 		return entities;
 	}
 
@@ -151,10 +152,11 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		entities.add(getFlowCaseEntity(documents[7], FlowCaseEntityType.MULTI_LINE.getCode(), record.getCertificateNo()));
 		
 		//认证反馈结果
-		entities.addAll(generateContent(zjgkResponses,documentflows));
+		entities.add(generateContent(zjgkResponses, documentflows));
+//		entities.addAll(generateContent(zjgkResponses,documentflows));
 		
 		//地址
-		generateAddressEntity(entities, zjgkResponses.getResponse(),documentflows);
+//		generateAddressEntity(entities, zjgkResponses.getResponse(),documentflows);
 		return entities;
 	
 	}
@@ -183,52 +185,71 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		}
 	}
 	
-	public List<FlowCaseEntity> generateContent(ZjgkJsonEntity<List<ZjgkResponse>> entity, String[] documentflows) {
-		List<FlowCaseEntity> entities = new ArrayList<FlowCaseEntity>();
+	public String getAddressString(List<ZjgkResponse> list, String[] documentflows) {
+		if(CollectionUtils.isEmpty(list)){
+			return "";
+		}
+		
+		StringBuffer buffer = new StringBuffer();
+		for (int i = 0; i < list.size(); i++) {
+			ZjgkResponse zjgkResponse =list.get(i);
+			if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.EXIST_COMMUNITY){
+				buffer.append(zjgkResponse.getCommunityName()).append(zjgkResponse.getBuildingName()).append('-').append(zjgkResponse.getApartmentName());
+			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.NOT_EXIST_COMMUNITY){
+				buffer.append(documentflows[6]).append(zjgkResponse.getCommunityName()).append(documentflows[7]).append("\n");
+			}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.MULTI_COMMUNITY){
+				buffer.append(documentflows[8]).append(zjgkResponse.getCommunityName()).append(documentflows[9]).append("\n");
+			}
+		}
+		return buffer.toString();
+	}
+	
+	public FlowCaseEntity generateContent(ZjgkJsonEntity<List<ZjgkResponse>> entity, String[] documentflows) {
 		FlowCaseEntity e = new FlowCaseEntity();
-//		StringBuffer buffer = new StringBuffer();
+		e.setKey(documentflows[3]);
+		e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+		StringBuffer buffer = new StringBuffer();
 		if(entity.isMismatching()){
-			entities.add(getFlowCaseEntity(documentflows[0], FlowCaseEntityType.TEXT.getCode()));
-			entities.add(getFlowCaseEntity(documentflows[1], FlowCaseEntityType.TEXT.getCode()));
-			entities.add(getFlowCaseEntity(documentflows[2], FlowCaseEntityType.TEXT.getCode()));
-//			buffer//.append("\n")
-//			.append(documentflows[0])
-//			.append("\n")
-//			.append(documentflows[1])
-//			.append("\n")
-//			.append(documentflows[2])
-//			.append("\n");
+//			entities.add(getFlowCaseEntity(documentflows[0], FlowCaseEntityType.TEXT.getCode()));
+//			entities.add(getFlowCaseEntity(documentflows[1], FlowCaseEntityType.TEXT.getCode()));
+//			entities.add(getFlowCaseEntity(documentflows[2], FlowCaseEntityType.TEXT.getCode()));
+			buffer//.append("\n")
+			.append(documentflows[0])
+			.append("\n")
+			.append(documentflows[1])
+			.append("\n")
+			.append(documentflows[2])
+			.append("\n");
 		}
 		else if(entity.isUnrent()){
-			entities.add(getFlowCaseEntity(documentflows[3], FlowCaseEntityType.TEXT.getCode()));
-//			buffer.append("")
-//			.append(documentflows[3])
-//			.append("\n");
+//			entities.add(getFlowCaseEntity(documentflows[3], FlowCaseEntityType.TEXT.getCode()));
+			buffer
+			.append(documentflows[3])
+			.append("\n");
 		}
 		else if(entity.isRequestFail()){
-			entities.add(getFlowCaseEntity(documentflows[11], FlowCaseEntityType.TEXT.getCode()));
-//			buffer.append("")
-//			.append(documentflows[11])
-//			.append("\n");
+//			entities.add(getFlowCaseEntity(documentflows[11], FlowCaseEntityType.TEXT.getCode()));
+			buffer
+			.append(documentflows[11])
+			.append("\n");
 		}
 		else if(entity.isNotPassInZuolin()){
-			entities.add(getFlowCaseEntity(documentflows[12], FlowCaseEntityType.TEXT.getCode()));
-//			buffer.append("")
-//			.append(documentflows[12])
-//			.append("\n");
+//			entities.add(getFlowCaseEntity(documentflows[12], FlowCaseEntityType.TEXT.getCode()));
+			buffer
+			.append(documentflows[12])
+			.append("\n");
 		}
 		else if(entity.isSuccess())
 		{
-			entities.add(getFlowCaseEntity(documentflows[4], FlowCaseEntityType.TEXT.getCode()));
-//			buffer.append("\n").append(documentflows[4]).append("\n");
+//			entities.add(getFlowCaseEntity(documentflows[4], FlowCaseEntityType.TEXT.getCode()));
+			buffer.append(documentflows[4]).append("\n").append(getAddressString(entity.getResponse(), documentflows));
 		}
 		else{
-			entities.add(getFlowCaseEntity(documentflows[5], FlowCaseEntityType.TEXT.getCode()));
-//			buffer.append("\n").append(documentflows[5]).append(entity.getErrorCode()).append(" ");
+//			entities.add(getFlowCaseEntity(documentflows[5], FlowCaseEntityType.TEXT.getCode()));
+			buffer.append(documentflows[5]).append(entity.getErrorCode()).append(" ");
 		}
 //		return buffer.toString();
-		return entities;
-		
+		return e;
 	}
 	
 	public FlowCaseEntity getFlowCaseEntity(String key,String entityType,String value){
