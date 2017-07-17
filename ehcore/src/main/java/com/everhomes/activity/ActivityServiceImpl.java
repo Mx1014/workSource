@@ -3911,7 +3911,12 @@ public class ActivityServiceImpl implements ActivityService {
                     activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
                 }
 			}
-        }
+        }else{
+			//默认categoryId为1  edit by yanjun 20170712
+			activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(1L));
+		}
+
+
         //增加活动主题分类，add by tt, 20170109
         if (cmd.getContentCategoryId() != null) {
         	//老版本用id作为标识，新版本id无意义，使用entryId和namespaceId作为标识。此处弃用findActivityCategoriesById  add by yanjun 20170524
@@ -3946,7 +3951,9 @@ public class ActivityServiceImpl implements ActivityService {
         if(visibleCondition != null) {
             condition = condition.and(visibleCondition);
         }
-        condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+
+		//删除官方标志  使用CATEGORY_ID， 不传默认使用CATEGORY_ID为1，详见前面condition条件 edit by yanjun 20170712
+        //condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
 
         // 添加活动状态筛选     add by xq.tian  2017/01/24
         if (cmd.getActivityStatusList() != null) {
@@ -3955,6 +3962,11 @@ public class ActivityServiceImpl implements ActivityService {
                 condition = condition.and(statusCondition);
             }
         }
+
+		//支持标签搜索  add by yanjun 20170712
+		if(!StringUtils.isEmpty(cmd.getTag())){
+			condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+		}
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         // TODO: Locator里设置系统论坛ID存在着分区的风险，因为上面的条件是多个论坛，需要后面理顺  by lqs 20160730
