@@ -3992,6 +3992,14 @@ public class UserServiceImpl implements UserService {
         log.setStatus(UserAppealLogStatus.WAITING_FOR_APPROVAL.getCode());
 
         userAppealLogProvider.createUserAppealLog(log);
+
+        SendUserTestMailCommand mailCmd = new SendUserTestMailCommand();
+        mailCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        mailCmd.setBody(String.format("User \"%s(%s)\" has send a appeal, please check out.", cmd.getName(), cmd.getOldIdentifier()));
+        mailCmd.setSubject("User Appeal");
+        mailCmd.setTo("jinlan.wang@zuolin.com");
+        sendUserTestMail(mailCmd);
+
         return toUserAppealLogDTO(log);
     }
 
