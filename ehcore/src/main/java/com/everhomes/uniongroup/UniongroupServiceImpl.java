@@ -445,7 +445,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         if(unc != null)
             this.uniongroupConfigureProvider.deleteUniongroupConfigres(unc);
         UniongroupConfigures uc = new UniongroupConfigures();
-        uc.setNamespaceId(memberDetail.getNamespaceId());
+        uc.setNamespaceId(·.getNamespaceId());
         uc.setEnterpriseId(organiztionId);
         uc.setGroupType(UniongroupType.SALARYGROUP.getCode());
         uc.setGroupId(groupId);

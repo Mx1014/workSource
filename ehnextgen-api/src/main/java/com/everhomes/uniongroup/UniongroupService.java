@@ -57,5 +57,5 @@ public interface UniongroupService {
     void syncUniongroupAfterLeaveTheJob(Long detailId);
 
     /**单独添加一个人进入薪酬组**/
-    void distributionUniongroupToDetail(Long organizationId, Long detailId, Long groupId);
+    void distributionUniongroupToDetail(Long organiztionId, Long detailId, Long groupId);
 }
