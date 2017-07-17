@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * organization member 对于用户修改手机号的监听器，一旦用户修改了手机号，就会触发这个监听器
@@ -33,6 +34,15 @@ public class OrganizationMemberResetIdentifierListener implements ApplicationLis
                 r.setContactToken(vo.getNewIdentifier());
                 organizationProvider.updateOrganizationMember(r);
             });
+
+            List<Long> detailIds = members.stream().map(OrganizationMember::getDetailId).collect(Collectors.toList());
+            List<OrganizationMemberDetails> details = organizationProvider.findDetailInfoListByIdIn(detailIds);
+            if (details != null) {
+                details.forEach(r -> {
+                    r.setContactToken(vo.getNewIdentifier());
+                    organizationProvider.updateOrganizationMemberDetails(r, r.getId());
+                });
+            }
         }
     }
 }
