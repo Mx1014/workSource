@@ -12,4 +12,6 @@ public class SalaryServiceErrorCode {
 
     public static final int ERROR_SHIFA_ISNULL =  100004;   //   没有实发工资
 
+    public static final int ERROR_USER_IS_WRONG = 100005;   //   人员不属于本次核算范围
+
 }
