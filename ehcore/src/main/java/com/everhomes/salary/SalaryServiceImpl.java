@@ -14,6 +14,7 @@ import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.salary.*;
+import com.everhomes.rest.salary.GetImportFileResultCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -1196,6 +1197,14 @@ public class SalaryServiceImpl implements SalaryService {
         //TODO: 存入period数据
 
     }
+
+
+    @Override
+    public ImportFileResponse<ImportSalaryEmployeeOriginValDTO> getImportFileResult(GetImportFileResultCommand cmd) {
+        return importFileService.getImportFileResult(cmd.getTaskId());
+    }
+
+
 	@Override
 	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd) {
 		Integer abnormalNumber = 0;

@@ -2,6 +2,7 @@
 package com.everhomes.salary;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
@@ -22,6 +23,7 @@ import com.everhomes.rest.RestResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -255,6 +257,19 @@ public class SalaryController extends ControllerBase {
 	public RestResponse importPeriodSalary(ImportSalaryGroupCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
 		User user = UserContext.current().getUser();
 		RestResponse response = new RestResponse(this.salaryService.importPeriodSalary(files[0], user.getId(),user.getNamespaceId(),cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <p>6.查询导入的文件结果</p>
+	 * <b>URL: /admin/org/getImportFileResult</b>
+	 */
+	@RequestMapping("getImportFileResult")
+	@RestReturn(value = ImportFileResponse.class)
+	public RestResponse getImportFileResult(@Valid GetImportFileResultCommand cmd) {
+		RestResponse response = new RestResponse(this.salaryService.getImportFileResult(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

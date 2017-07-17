@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
@@ -62,6 +63,9 @@ public interface SalaryService {
 
 
 	public ImportFileTaskDTO importPeriodSalary(MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryGroupCommand cmd);
+
+
+	public ImportFileResponse<ImportSalaryEmployeeOriginValDTO> getImportFileResult(GetImportFileResultCommand cmd);
 
 
 	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd);
