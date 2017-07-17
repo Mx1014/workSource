@@ -63,9 +63,19 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     }
 
     @Override
-    public void feedDoc(UniongroupMemberDetail uniongroupMemberDetail) {
-        XContentBuilder source = createDoc(uniongroupMemberDetail);
-        feedDoc(uniongroupMemberDetail.getId().toString(), source);
+    public void feedDoc(UniongroupMemberDetail detail) {
+        OrganizationMemberDetails member_detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detail.getDetailId());
+        if(member_detail != null)
+            detail.setEmployeeNo(member_detail.getEmployeeNo());
+        Map depart_map = this.organizationProvider.listOrganizationsOfDetail(detail.getNamespaceId(), detail.getDetailId(), OrganizationGroupType.DEPARTMENT.getCode());
+        if (depart_map != null)
+            detail.setDepartment(depart_map);
+        Map jobp_map = this.organizationProvider.listOrganizationsOfDetail(detail.getNamespaceId(), detail.getDetailId(), OrganizationGroupType.JOB_POSITION.getCode());
+        if (jobp_map != null) {
+            detail.setJobPosition(jobp_map);
+        }
+        XContentBuilder source = createDoc(detail);
+        feedDoc(detail.getId().toString(), source);
     }
 
 

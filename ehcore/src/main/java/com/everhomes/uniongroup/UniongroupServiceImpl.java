@@ -439,6 +439,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public void distributionUniongroupToDetail(Long organiztionId, Long detailId, Long groupId) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             OrganizationMemberDetails memberDetail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
             //配置表
@@ -456,6 +457,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             this.uniongroupConfigureProvider.createUniongroupConfigures(uc);
 
             //关系表
+            UniongroupMemberDetail uniongroupMemberDetail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId);
             this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
             UniongroupMemberDetail uniongroupMemberDetails = new UniongroupMemberDetail();
             uniongroupMemberDetails.setGroupId(groupId);
@@ -468,6 +470,11 @@ public class UniongroupServiceImpl implements UniongroupService {
             uniongroupMemberDetails.setContactName(memberDetail.getContactName());
             uniongroupMemberDetails.setContactToken(memberDetail.getContactToken());
             this.uniongroupConfigureProvider.createUniongroupMemberDetail(uniongroupMemberDetails);
+
+
+            //同步搜索引擎
+            this.uniongroupSearcher.deleteById(uniongroupMemberDetail.getId());
+            this.uniongroupSearcher.feedDoc(uniongroupMemberDetail);
             return null;
         });
     }
