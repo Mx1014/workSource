@@ -6,14 +6,17 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
- * <li>salaryGroupId: 薪酬批次id</li>
+ * <li>id: 薪酬批次id(salaryGroup表)</li>
+ * <li>salaryGroupId: 薪酬批次id(Organization表)</li>
  * <li>organizationId: 公司id</li>
  * <li>attachment: 文件</li>
  * <li>ownerType: 'organization'</li>
  * <li>owernId: organizationId</li>
  * </ul>
  */
-public class ImportSalaryGroupCommand {
+public class ImportSalaryInfoCommand {
+
+	private Long id;
 
 	private Long salaryGroupId;
 
@@ -23,17 +26,25 @@ public class ImportSalaryGroupCommand {
 
 	private Long ownerId;
 
-	public ImportSalaryGroupCommand() {
+	public ImportSalaryInfoCommand() {
 
 	}
 
-	public ImportSalaryGroupCommand(Long salaryGroupId, Long organizationId) {
+	public ImportSalaryInfoCommand(Long salaryGroupId, Long organizationId) {
 		super();
 		this.salaryGroupId = salaryGroupId;
 		this.organizationId = organizationId;
 	}
 
-	public Long getSalaryGroupId() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getSalaryGroupId() {
 		return salaryGroupId;
 	}
 

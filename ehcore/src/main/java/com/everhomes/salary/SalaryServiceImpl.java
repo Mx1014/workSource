@@ -14,6 +14,7 @@ import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.salary.*;
+import com.everhomes.rest.salary.GetImportFileResultCommand;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -892,7 +893,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public ImportFileTaskDTO importSalaryGroup(
-	        MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryGroupCommand cmd) {
+	        MultipartFile mfile, Long userId, Integer namespaceId, ImportSalaryInfoCommand cmd) {
 
         ImportFileTask task = new ImportFileTask();
         try {
@@ -922,7 +923,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 	//  启用线程做 excel 的解析与导入
     private void executeTask(
-            ImportFileTask task, List resultList, ImportSalaryGroupCommand cmd,
+            ImportFileTask task, List resultList, ImportSalaryInfoCommand cmd,
             Long userId, Integer namespaceId, List<SalaryGroupEntity> salaryGroupEntities, String type){
         this.importFileService.executeTask(new ExecuteImportTaskCallback() {
             @Override
@@ -972,7 +973,7 @@ public class SalaryServiceImpl implements SalaryService {
 
     private List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> importSalaryFiles(
             List<ImportSalaryEmployeeOriginValDTO> datas, List<SalaryGroupEntity> salaryGroupEntities,
-            Long operatorId, ImportSalaryGroupCommand cmd, Integer namespaceId, String type) {
+            Long operatorId, ImportSalaryInfoCommand cmd, Integer namespaceId, String type) {
 
         ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
         List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> errorDataLogs = new ArrayList<>();
@@ -1159,7 +1160,7 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public ImportFileTaskDTO importPeriodSalary(
 	        MultipartFile mfile, Long userId,
-            Integer namespaceId, ImportSalaryGroupCommand cmd) {
+            Integer namespaceId, ImportSalaryInfoCommand cmd) {
 
         ImportFileTask task = new ImportFileTask();
         try {
@@ -1177,8 +1178,12 @@ public class SalaryServiceImpl implements SalaryService {
             task.setType(ImportFileTaskType.SALARY_GROUP.getCode());
             task.setCreatorUid(userId);
 
-            //  提前获取批次的字段便于后面方法的调用
-            List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listPeriodSalaryWithExportRegular(cmd.getSalaryGroupId());
+            //  根据 id 查找出需要的薪酬组 id
+            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
+            //  更改为薪酬组 id
+            List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listPeriodSalaryWithExportRegular(salaryGroup.getOrganizationGroupId());
+            cmd.setSalaryGroupId(salaryGroup.getOrganizationGroupId());
+
             this.executeTask(task,resultList,cmd,userId,namespaceId,salaryGroupEntities,"period");
         }catch (Exception e){
             LOGGER.error("File can not be resolved...");
@@ -1196,6 +1201,14 @@ public class SalaryServiceImpl implements SalaryService {
         //TODO: 存入period数据
 
     }
+
+
+    @Override
+    public ImportFileResponse<ImportSalaryEmployeeOriginValDTO> getImportFileResult(GetImportFileResultCommand cmd) {
+        return importFileService.getImportFileResult(cmd.getTaskId());
+    }
+
+
 	@Override
 	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd) {
 		Integer abnormalNumber = 0;
