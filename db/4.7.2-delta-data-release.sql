@@ -69,11 +69,11 @@ delete from `eh_web_menu_privileges` where menu_id in (40730, 40731, 40732, 4073
 delete from `eh_web_menu_scopes` where menu_id in (40730, 40731, 40732, 40733, 40734) and owner_id = 999990;
 
 -- 菜单，add by tt, 20170527
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40730, '企业人才', 40000, NULL, 'react:/enterprise-management/talent', 1, 2, '/40000/40730', 'park', 498, 40730);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40731, '人才管理', 40730, NULL, 'react:/enterprise-management/talent-list', 1, 2, '/40000/40730/40731', 'park', 499, 40730);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40732, '申请设置', 40730, NULL, 'react:/enterprise-management/apply-setting', 1, 2, '/40000/40730/40732', 'park', 500, 40730);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40733, '消息推送', 40730, NULL, 'react:/enterprise-management/message-push', 1, 2, '/40000/40730/40733', 'park', 501, 40730);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40734, '申请记录', 40730, NULL, 'react:/enterprise-management/apply-record', 1, 2, '/40000/40730/40734', 'park', 502, 40730);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) VALUES (40730, '企业人才', 40000, NULL, 'react:/enterprise-management/talent', 1, 2, '/40000/40730', 'park', 498, 40730,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) VALUES (40731, '人才管理', 40730, NULL, 'react:/enterprise-management/talent-list', 1, 2, '/40000/40730/40731', 'park', 499, 40730,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) VALUES (40732, '申请设置', 40730, NULL, 'react:/enterprise-management/apply-setting', 1, 2, '/40000/40730/40732', 'park', 500, 40730,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) VALUES (40733, '消息推送', 40730, NULL, 'react:/enterprise-management/message-push', 1, 2, '/40000/40730/40733', 'park', 501, 40730,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `category`) VALUES (40734, '申请记录', 40730, NULL, 'react:/enterprise-management/apply-record', 1, 2, '/40000/40730/40734', 'park', 502, 40730,'module');
 
 -- 权限，add by tt, 20170527
 select max(id) into @pri_id from `eh_acl_privileges`;
