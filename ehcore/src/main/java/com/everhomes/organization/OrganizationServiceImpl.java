@@ -5509,7 +5509,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
             List<Long> orgIds = Collections.singletonList(cmd.getOrganizationId());
             List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getKeywords(), null, locator, pageSize);
-            if (memberLogList != null) organizationMembers = memberLogList.parallelStream()
+            if (memberLogList != null) organizationMembers = memberLogList.stream()
                     .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
                     .map(r -> {
                         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());

@@ -2897,7 +2897,7 @@ public class CommunityServiceImpl implements CommunityService {
         if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
             List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), locator, pageSize);
             if (memberLogList != null) {
-                organizationMembers = memberLogList.parallelStream()
+                organizationMembers = memberLogList.stream()
                         .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
                         .map(r -> {
                             OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
@@ -2929,8 +2929,8 @@ public class CommunityServiceImpl implements CommunityService {
                 if (c.getOperatorUid() != null) {
                     User operator = userProvider.findUserById(c.getOperatorUid());
                     UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
-                    dto.setOperatorName(operator.getNickName());
-                    dto.setOperatorPhone(operatorIdentifier.getIdentifierToken());
+                    dto.setOperatorName(operator != null ? operator.getNickName() : "");
+                    dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
                 }
                 if (dto.getOrganizationName() == null) {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
