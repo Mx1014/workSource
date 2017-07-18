@@ -606,5 +606,16 @@ public class PmProviderImpl implements PmTaskProvider{
 		}
 		return new ArrayList<PmTaskLog>();
 	}
-	
+
+	@Override
+	public List<PmTask> listTasksById(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+		SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+
+		if(null != ids)
+			query.addConditions(Tables.EH_PM_TASKS.ID.in(ids));
+
+		List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
+		return result;
+	}
 }

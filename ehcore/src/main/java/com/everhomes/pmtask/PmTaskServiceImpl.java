@@ -40,6 +40,7 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingFlowConstant;
@@ -104,11 +105,6 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
-import com.everhomes.rest.organization.OrgAddressDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -124,7 +120,8 @@ import com.everhomes.util.Tuple;
 
 @Component
 public class PmTaskServiceImpl implements PmTaskService {
-	
+	final String downloadDir ="\\download\\";
+
 	private static final String CATEGORY_SEPARATOR = "/";
 
 	private static final String HANDLER = "pmtask.handler-";
@@ -2321,52 +2318,125 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 		}
 		LOGGER.info("taskIds: {}", taskIds);
-//		List<EquipmentInspectionEquipments> equipments = equipmentProvider.listEquipmentsById(equipmentIds);
-//		List<EquipmentsDTO> dtos = equipments.stream().map(equipment -> {
-//			EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
-//			return dto;
-//		}).collect(Collectors.toList());
-//
-//		String filePath = cmd.getFilePath();
-//		if(StringUtils.isEmpty(cmd.getFilePath())) {
-//			URL rootPath = EquipmentServiceImpl.class.getResource("/");
-//			filePath = rootPath.getPath() + this.downloadDir ;
-//			File file = new File(filePath);
-//			if(!file.exists())
-//				file.mkdirs();
-//
-//		}
-//
-////		return download(filePath,response);
-//
-//		DocUtil docUtil=new DocUtil();
-//		List<String> files = new ArrayList<>();
-//
-//		for(int i = 0; i <dtos.size(); i++ ) {
-//			EquipmentsDTO dto1 = dtos.get(i);
-//			EquipmentsDTO dto2 = dtos.get(i+1);
-////			DocUtil docUtil=new DocUtil();
-//			Map<String, Object> dataMap=createTwoEquipmentCardDoc(dto1, dto2);
-//
-//			String savePath = filePath + dto1.getId()+ "-" + dto1.getName() +
-//					"-" + dto2.getId()+ "-" + dto2.getName() + ".doc";
-//
-//			docUtil.createDoc(dataMap, "shenye2", savePath);
-//			if(StringUtils.isEmpty(cmd.getFilePath())) {
-////				download(savePath,response);
-//				files.add(savePath);
-//			}
-//		}
-//		if(StringUtils.isEmpty(cmd.getFilePath())) {
-//			if(files.size() > 1) {
-//				String zipPath = filePath + System.currentTimeMillis() + "EquipmentCard.zip";
-//				LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
-//				DownloadUtils.writeZip(files, zipPath);
-//				download(zipPath,response);
-//			} else if(files.size() == 1) {
-//				download(files.get(0),response);
-//			}
-//
-//		}
+		List<PmTask> tasks = pmTaskProvider.listTasksById(taskIds);
+		List<PmTaskDTO> dtos = tasks.stream().map(task -> {
+			PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+
+		String filePath = cmd.getFilePath();
+		if(StringUtils.isEmpty(cmd.getFilePath())) {
+			URL rootPath = PmTaskServiceImpl.class.getResource("/");
+			filePath = rootPath.getPath() + this.downloadDir ;
+			File file = new File(filePath);
+			if(!file.exists())
+				file.mkdirs();
+
+		}
+
+		DocUtil docUtil=new DocUtil();
+		List<String> files = new ArrayList<>();
+
+		for(int i = 0; i <dtos.size(); i++ ) {
+			PmTaskDTO dto = dtos.get(i);
+			Map<String, Object> dataMap=createTaskCardDoc(dto);
+
+			String savePath = filePath + dto.getId() + ".doc";
+
+			docUtil.createDoc(dataMap, "zjgk", savePath);
+			if(StringUtils.isEmpty(cmd.getFilePath())) {
+				files.add(savePath);
+			}
+		}
+		if(StringUtils.isEmpty(cmd.getFilePath())) {
+			if(files.size() > 1) {
+				String zipPath = filePath + System.currentTimeMillis() + "TaskCard.zip";
+				LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+				DownloadUtils.writeZip(files, zipPath);
+				download(zipPath,response);
+			} else if(files.size() == 1) {
+				download(files.get(0),response);
+			}
+
+		}
+	}
+
+	private Map<String, Object> createTaskCardDoc(PmTaskDTO dto) {
+		Map<String, Object> dataMap=new HashMap<String, Object>();
+		dataMap.put("No", dto.getId());
+		dataMap.put("name", dto.getRequestorName());
+		dataMap.put("address", dto.getAddress());
+		dataMap.put("requestorName", dto.getRequestorName());
+		dataMap.put("requestorPhone", dto.getRequestorPhone());
+		dataMap.put("processingTime", dto.getProcessingTime());
+
+		Community community = communityProvider.findCommunityById(dto.getOwnerId());
+		Organization org = organizationProvider.findOrganizationByCommunityIdAndOrgType(dto.getOwnerId(), OrganizationType.PM.getCode());
+		if(community != null) {
+			dataMap.put("communityName", community.getName());
+		} else {
+			dataMap.put("communityName", "");
+		}
+
+		if(org != null) {
+			dataMap.put("organizationName", org.getName());
+		} else {
+			dataMap.put("organizationName", "");
+		}
+
+		Category category = categoryProvider.findCategoryById(dto.getTaskCategoryId());
+
+		if(category != null) {
+			dataMap.put("categoryName",category.getName());
+		} else {
+			dataMap.put("categoryName","");
+		}
+
+		dataMap.put("content",dto.getContent());
+
+		return dataMap;
+	}
+
+	public HttpServletResponse download(String path, HttpServletResponse response) {
+		try {
+			// path是指欲下载的文件的路径。
+			File file = new File(path);
+			if ( !file.isFile() ) {
+				LOGGER.info("filename:{} is not a file", path);
+			}
+			// 取得文件名。
+			String filename = file.getName();
+			// 取得文件的后缀名。
+			String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+			// 以流的形式下载文件。
+			InputStream fis = new BufferedInputStream(new FileInputStream(path));
+			byte[] buffer = new byte[fis.available()];
+			fis.read(buffer);
+			fis.close();
+			// 清空response
+			response.reset();
+			// 设置response的Header
+			response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+			response.addHeader("Content-Length", "" + file.length());
+			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+			response.setContentType("application/octet-stream");
+			toClient.write(buffer);
+			toClient.flush();
+			toClient.close();
+
+			// 读取完成删除文件
+			if (file.isFile() && file.exists()) {
+				file.delete();
+			}
+
+		} catch (IOException ex) {
+			LOGGER.error(ex.getMessage());
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,
+					PmTaskErrorCode.ERROR_DOWNLOAD,
+					ex.getLocalizedMessage());
+
+		}
+		return response;
 	}
 }
