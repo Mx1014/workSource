@@ -1733,4 +1733,19 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /org/leaveTheJob</b>
+     * <p>人事档案离职</p>
+     */
+    @RequestMapping("leaveTheJob")
+    @RestReturn(value = String.class)
+    public RestResponse leaveTheJob(@Valid LeaveTheJobCommand cmd) {
+        this.organizationService.leaveTheJob(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
