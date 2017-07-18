@@ -876,9 +876,9 @@ public class UserServiceImpl implements UserService {
 		if(user == null) {
 			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			// 把regionCode的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
-			if(userIdentifier != null && Objects.equals(userIdentifier.getRegionCode(), regionCode)) {
+            if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
                 user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
-                if(user == null) {
+                if (user == null) {
                     LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                             namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
                     throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
@@ -887,8 +887,8 @@ public class UserServiceImpl implements UserService {
                 LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                         namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
                 throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
-			}
-		}
+            }
+        }
 
 		if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
 			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
