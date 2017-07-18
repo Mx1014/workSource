@@ -444,7 +444,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             OrganizationMemberDetails memberDetail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
             //配置表
             UniongroupConfigures unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(memberDetail.getNamespaceId(), detailId);
-            if(unc != null)
+            if (unc != null)
                 this.uniongroupConfigureProvider.deleteUniongroupConfigres(unc);
             UniongroupConfigures uc = new UniongroupConfigures();
             uc.setNamespaceId(memberDetail.getNamespaceId());
@@ -457,7 +457,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             this.uniongroupConfigureProvider.createUniongroupConfigures(uc);
 
             //关系表
-            UniongroupMemberDetail uniongroupMemberDetail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId);
+            UniongroupMemberDetail old_detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId);
             this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
             UniongroupMemberDetail uniongroupMemberDetails = new UniongroupMemberDetail();
             uniongroupMemberDetails.setGroupId(groupId);
@@ -473,8 +473,9 @@ public class UniongroupServiceImpl implements UniongroupService {
 
 
             //同步搜索引擎
-            this.uniongroupSearcher.deleteById(uniongroupMemberDetail.getId());
-            this.uniongroupSearcher.feedDoc(uniongroupMemberDetail);
+            if (old_detail != null)
+                this.uniongroupSearcher.deleteById(old_detail.getId());
+            this.uniongroupSearcher.feedDoc(uniongroupMemberDetails);
             return null;
         });
     }
