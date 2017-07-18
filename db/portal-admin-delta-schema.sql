@@ -76,6 +76,7 @@ CREATE TABLE `eh_portal_item_groups` (
   `separator_flag` tinyint(4) DEFAULT 0,
   `separator_height` decimal(10,2) DEFAULT NULL,
   `widget` varchar(64) DEFAULT NULL,
+  `content_type` varchar(64) DEFAULT NULL,
   `style` varchar(64) DEFAULT NULL,
   `instance_config` text COMMENT '参数配置',
   `default_order` int(11) NOT NULL DEFAULT '0',

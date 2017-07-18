@@ -14,6 +14,7 @@ import java.math.BigDecimal;
  * <li>separatorFlag: 底部隔栏flag</li>
  * <li>separatorHeight: 底部隔栏高度</li>
  * <li>widget: 组件</li>
+ * <li>contentType: 组件内展示内容</li>
  * <li>style: 组件样式</li>
  * <li>instanceConfig: 组件的配置参数，具体参数具体定义</li>
  * </ul>
@@ -33,6 +34,8 @@ public class CreatePortalItemGroupCommand {
 	private String widget;
 
 	private String style;
+
+	private String contentType;
 
 	private String instanceConfig;
 
@@ -114,6 +117,14 @@ public class CreatePortalItemGroupCommand {
 
 	public void setInstanceConfig(String instanceConfig) {
 		this.instanceConfig = instanceConfig;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 
 	@Override

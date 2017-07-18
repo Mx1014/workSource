@@ -27,7 +27,11 @@ public enum PortalItemGroupWidgetStyle {
     NAVIGATOR_GLLERY("Gallery"),
     OPPUSH_LIST_VIEW("ListView"),
     OPPUSH_HORIZONTAL_SCROLL_VIEW("HorizontalScrollView"),
-    OPPUSH_LARGE_IMAGE_LIST_VIEW("LargeImageListView"),;
+    OPPUSH_LARGE_IMAGE_LIST_VIEW("LargeImageListView"),
+    PURE_TEXT("PureText"),
+    TEXT_WITH_BOARD("TextWithBoard"),
+    TEXT_WITH_ICON("TextWithIcon"),
+    TEXT_WITH_IMAGE("TextWithImage");
 
     private String code;
 

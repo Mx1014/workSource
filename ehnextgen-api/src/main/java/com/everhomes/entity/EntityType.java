@@ -63,6 +63,7 @@ public enum EntityType {
     PORTAL_ITEM_CATEGORY(EhPortalItemCategories.class.getSimpleName()),
     PORTAL_LAYOUT(EhPortalLayouts.class.getSimpleName()),
     SERVICE_MODULE_APP(EhServiceModuleApps.class.getSimpleName()),
+    BIZ("EhBizs"),
     CHILD_PROJECT("child_project");
 
     private String code;
