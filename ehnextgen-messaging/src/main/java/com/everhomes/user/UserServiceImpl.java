@@ -3951,7 +3951,7 @@ public class UserServiceImpl implements UserService {
         //  设置公司
         Organization directlyEnterprise = this.organizationProvider.findOrganizationById(organizationId);
         OrganizationDetail directlyEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
-        if (!StringUtils.isEmpty(directlyEnterpriseDetail.getDisplayName()))
+        if (directlyEnterpriseDetail != null)
             dto.setEnterpriseName(directlyEnterpriseDetail.getDisplayName());
         else
             dto.setEnterpriseName(directlyEnterprise.getName());
