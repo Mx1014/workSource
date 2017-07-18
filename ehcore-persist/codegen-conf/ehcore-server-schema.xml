@@ -172,7 +172,7 @@
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
         eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
             eh_sms_black_lists |
-        eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |
+        eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve
 
 
         </includes>
