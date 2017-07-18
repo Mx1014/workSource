@@ -3942,34 +3942,32 @@ public class UserServiceImpl implements UserService {
 	}
 
     private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
-        Long orgId;
-        Organization org = this.organizationProvider.findOrganizationById(organizationId);
-        if (org != null) {
-            if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
-                orgId = org.getDirectlyEnterpriseId();
-            } else {
-                orgId = org.getId();
-            }
-            Long directlyOrgId = orgId;
 
-            List<String> groupTypes = new ArrayList<>();
-            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-            groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
 
-            Organization directlyEnterprise = this.organizationProvider.findOrganizationById(directlyOrgId);
-			OrganizationDetail directlyEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(directlyOrgId);
-			// 公司
-			if (!StringUtils.isEmpty(directlyEnterpriseDetail.getDisplayName()))
-				dto.setEnterpriseName(directlyEnterpriseDetail.getDisplayName());
-			else
-				dto.setEnterpriseName(directlyEnterprise.getName());
-			// 部门
-            dto.setDepartments(this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath()));
-            // 岗位
-            dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
+        //  设置公司
+        Organization directlyEnterprise = this.organizationProvider.findOrganizationById(organizationId);
+        OrganizationDetail directlyEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
+        if (!StringUtils.isEmpty(directlyEnterpriseDetail.getDisplayName()))
+            dto.setEnterpriseName(directlyEnterpriseDetail.getDisplayName());
+        else
+            dto.setEnterpriseName(directlyEnterprise.getName());
 
+        //  设置部门
+        List<OrganizationDTO> departments = this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath());
+        //  设置父部门名称
+        for(int i=0; i<departments.size(); i++){
+            if(departments.get(i).getParentId().equals(0))
+                continue;
+            departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
         }
+        dto.setDepartments(departments);
+
+        //  设置岗位
+        dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
+
     }
 }
