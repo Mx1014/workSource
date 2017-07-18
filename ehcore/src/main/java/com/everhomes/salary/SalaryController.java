@@ -206,10 +206,28 @@ public class SalaryController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse addToOrganizationSalaryGroup(AddToOrganizationSalaryGroupCommand cmd){
 		salaryService.addToOrganizationSalaryGroup(cmd);
-		return new RestResponse();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
 	}
 
-	/**
+    /**
+     * <p>3-6.检查异常人数</p>
+     * <b>URL: /salary/countAbnormalSalaryEmployees</b>
+     */
+    @RequestMapping("countAbnormalSalaryEmployees")
+    @RestReturn(String.class)
+    public RestResponse countAbnormalSalaryEmployees(CountAbnormalSalaryEmployees cmd){
+        String res = this.salaryService.countAbnormalSalaryEmployees(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
 	 * <p>4-1.导出某个薪酬组excel</p>
 	 * <b>URL: /salary/exportSalaryGroup</b>
 	 */

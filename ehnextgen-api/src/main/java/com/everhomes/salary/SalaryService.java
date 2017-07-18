@@ -51,6 +51,9 @@ public interface SalaryService {
 	public void addToOrganizationSalaryGroup(AddToOrganizationSalaryGroupCommand cmd);
 
 
+    public String countAbnormalSalaryEmployees(CountAbnormalSalaryEmployees cmd);
+
+
 	public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse);
 
 

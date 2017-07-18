@@ -503,6 +503,41 @@ public class SalaryServiceImpl implements SalaryService {
         return response;
     }*/
 
+    //  计算异常人数
+    @Override
+    public String countAbnormalSalaryEmployees(CountAbnormalSalaryEmployees cmd){
+        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationMemberByPathHavingDetailId("", null, cmd.getOwnerId(), 100000);
+
+        //  存储公司下所有用户的 detailId
+        List<Long> userDetailIds = response.getMembers().stream().map(r ->{
+            Long id = r.getDetailId();
+            return id;
+        }).collect(Collectors.toList());
+        int count = userDetailIds.size();
+
+        //  存储所有设置了薪酬组的 detailId
+        List<Object[]> groups = this.uniongroupService.listUniongroupMemberGroupIds(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
+        List<Long> groupDetails = groups.stream().map(r ->{
+            Long id = (Long) r[0];
+            return id;
+        }).collect(Collectors.toList());
+
+        //  存储所有设置了实发工资的 detailId
+        List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails();
+        List<Long> wageDetailIds = wages.stream().map(r ->{
+            Long id = (Long) r[0];
+            return id;
+        }).collect(Collectors.toList());
+
+        for(int i=0; i<userDetailIds.size(); i++){
+            if(groupDetails.contains(userDetailIds.get(i)) && wageDetailIds.contains(userDetailIds.get(i))) {
+                count--;
+                continue;
+            }
+        }
+        return String.valueOf(count);
+    }
+
     @Override
     public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
         ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
@@ -836,7 +871,10 @@ public class SalaryServiceImpl implements SalaryService {
         this.uniongroupService.saveUniongroupConfigures(command);
     }
 
+
+
     //  数字转换(1-A,2-B...)
+    //  接下来会是很长的导入导出代码
     private static String GetExcelLetter(int n) {
         String s = "";
         while (n > 0) {
