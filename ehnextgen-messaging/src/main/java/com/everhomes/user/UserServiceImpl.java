@@ -3959,10 +3959,12 @@ public class UserServiceImpl implements UserService {
         //  设置部门
         List<OrganizationDTO> departments = this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath());
         //  设置父部门名称
-        for(int i=0; i<departments.size(); i++){
-            if(departments.get(i).getParentId().equals(0))
-                continue;
-            departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
+        if (departments != null && departments.size() > 0) {
+            for (int i = 0; i < departments.size(); i++) {
+                if (departments.get(i).getParentId().equals(0))
+                    continue;
+                departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
+            }
         }
         dto.setDepartments(departments);
 

@@ -9538,8 +9538,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationContactDTO> members = organizationMembers.stream().map(r -> {
             OrganizationContactDTO dto = ConvertHelper.convert(r, OrganizationContactDTO.class);
 
-            //added by R 20120713, 获取岗位与 detailId
-            List<OrganizationDTO> positionList = this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, r.getContactToken(), org.getPath());
+            //  added by R 20120713, 获取岗位与 detailId
+            //  取总公司的 path ，查出所有职位
+            String[] path = org.getPath().split("/");
+            List<OrganizationDTO> positionList = this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, r.getContactToken(), "/"+path[1]);
             String position = "";
             if(positionList !=null && positionList.size()>0) {
                 for (OrganizationDTO sonList : positionList) {
