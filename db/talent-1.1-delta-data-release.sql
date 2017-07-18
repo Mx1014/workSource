@@ -31,7 +31,7 @@ INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `
 
 -- 权限赋予超管，add by tt, 20170527
 select max(id) into @id from `eh_acls`;
-INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`) VALUES (@id+1, 'EhOrganizations', NULL, 1, @pri_id, 1001, 0, 1, '2017-06-05 09:41:07', 0, 'EhAclRoles', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`) VALUES ((@id := @id + 1), 999990, 'EhOrganizations', NULL, 1,  @pri_id, 1001, 'EhAclRoles', 0, 1, NOW());
 
 -- 显示菜单，add by tt, 20170527
 select max(id) into @id from `eh_web_menu_scopes`;
