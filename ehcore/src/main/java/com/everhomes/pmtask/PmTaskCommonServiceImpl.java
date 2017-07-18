@@ -484,7 +484,8 @@ class PmTaskCommonServiceImpl {
     void handoverTaskToTrd(PmTask task) {
         String handlerPrefix = HandoverTaskHandler.HANDOVER_VENDOR_PREFIX;
         HandoverTaskHandler handler = PlatformContext.getComponent(handlerPrefix + task.getNamespaceId());
-        handler.handoverTaskToTrd(task);
+        if(handler != null)
+            handler.handoverTaskToTrd(task);
     }
 
 }
