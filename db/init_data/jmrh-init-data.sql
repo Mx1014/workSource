@@ -81,6 +81,10 @@ SET @role_assignment_id = (SELECT MAX(id) FROM eh_acl_role_assignments);
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', 1034291, 'EhUsers', 319545  , 1001, 1, UTC_TIMESTAMP());
 
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`) 
+VALUES((@acl_id := @acl_id + 1),'EhOrganizations','1034291','1','10','319545','0','319545','2017-07-05 16:04:09','999972','EhUsers','admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 	VALUES(191580, UUID(), 999972, 2, 'EhGroups', 0,'军民融合论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
@@ -335,6 +339,16 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999972, 'sms.default.yzx', 52, 'zh_CN', '视测会-军民', '90352');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999972, 'sms.default.yzx', 53, 'zh_CN', '申诉-军民', '90348');
 
+-- 缺少数据导致 园区入驻、招租管理出错。20170710 add by dengs
+SET @eh_lease_configs_id = (SELECT MAX(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`, `display_name_str`, `display_order_str`) VALUES((@eh_lease_configs_id := @eh_lease_configs_id + 1),'999972','1','1','1','1','1','1','园区介绍, 虚位以待', '1,2');
+
+-- 20170718 add by dengs
+SET @eh_rentalv2_resource_types_id = (SELECT MAX(id) FROM `eh_rentalv2_resource_types`);
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@eh_rentalv2_resource_types_id := @eh_rentalv2_resource_types_id+1), '会议室预订', 0, NULL, 0, 999972);
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@eh_rentalv2_resource_types_id := @eh_rentalv2_resource_types_id+1), '电子屏预订', 0, NULL, 0, 999972);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
 
