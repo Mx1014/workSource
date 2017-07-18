@@ -10579,8 +10579,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
             this.addProfileJobChangeLogs(cmd.getDetailId(), PersonChangeType.LEAVE.getCode(), "eh_organization_member_details", cmd.getRemarks(), null);
-            //离职时薪酬组相关的改动
-            this.uniongroupService.syncUniongroupAfterLeaveTheJob(cmd.getDetailId());
         }
     }
 
@@ -12163,6 +12161,25 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setNextPageAnchor(locator.getAnchor());
         response.setMembers(this.convertDTO(organizationMembers, org));
         return response;
+    }
+
+    @Override
+    public void leaveTheJob(LeaveTheJobCommand cmd) {
+        OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        //组织架构删除
+        DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
+        deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(cmd.getOrganizationId());
+        deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
+        deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
+        deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
+        //更新人事管理状态
+        UpdateOrganizationEmployeeStatusCommand updateOrganizationEmployeeStatusCommand = new UpdateOrganizationEmployeeStatusCommand();
+        updateOrganizationEmployeeStatusCommand.setDetailId(cmd.getDetailId());
+        updateOrganizationEmployeeStatusCommand.setEmployeeStatus(EmployeeStatus.LEAVETHEJOB.getCode());
+        updateOrganizationEmployeeStatusCommand.setRemarks(cmd.getRemarks());
+        updateOrganizationEmployeeStatus(updateOrganizationEmployeeStatusCommand);
+        //离职时薪酬组相关的改动
+        this.uniongroupService.syncUniongroupAfterLeaveTheJob(cmd.getDetailId());
     }
 }
 
