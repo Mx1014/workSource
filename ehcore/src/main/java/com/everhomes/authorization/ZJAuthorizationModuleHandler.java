@@ -60,7 +60,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	
 	private String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
 	
-	private static final String[] communites = {"深业花园","岭秀名苑","抗日战争"};
+	private static final String[] communites = {"深业花园","岭秀名苑"};
 	
     @Autowired
     private CommunityProvider communityProvider;
