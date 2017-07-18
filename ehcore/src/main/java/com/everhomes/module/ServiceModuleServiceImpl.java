@@ -13,6 +13,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -487,7 +488,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     public List<ServiceModuleDTO> treeServiceModules(TreeServiceModuleCommand cmd) {
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
-        Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
         List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
 
@@ -740,15 +741,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     private List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {
-        List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, ownerType, ownerId, ServiceModuleScopeApplyPolicy.REVERT.getCode());
-
-        if (null == scopes || scopes.size() == 0) {
-            scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
-        }
-
         List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
-        if (scopes.size() != 0)
-            list = filterList(list, scopes);
+
+        if(namespaceId != Namespace.DEFAULT_NAMESPACE){
+            List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, ownerType, ownerId, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+            if (null == scopes || scopes.size() == 0) {
+                scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+            }
+            if (scopes.size() != 0)
+                list = filterList(list, scopes);
+        }
 
         List<ServiceModuleDTO> temp = list.stream().map(r -> {
             ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
