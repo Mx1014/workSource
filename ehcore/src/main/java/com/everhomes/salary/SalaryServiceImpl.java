@@ -1357,8 +1357,9 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 
 	private SalaryPeriodEmployeeDTO processSalaryPeriodEmployeeDTO(SalaryEmployee r) {
-		SalaryPeriodEmployeeDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeDTO.class);
-		//岗位 
+        SalaryPeriodEmployeeDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeDTO.class);
+        dto.setCheckFlag(r.getStatus().equals(SalaryGroupStatus.UNCHECK.getCode())?SalaryGroupStatus.UNCHECK.getCode():SalaryGroupStatus.CHECKED.getCode());
+        //岗位
         // TODO: 2017/7/6 这里和荣楠的实现重叠了,重构一下
         SalaryEmployeeDTO detailDTO = getPersonnelInfoByDetailIdForSalary(r.getUserDetailId());
         dto.setJobPositions(detailDTO.getJobPosition());
