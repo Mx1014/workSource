@@ -3993,9 +3993,11 @@ public class UserServiceImpl implements UserService {
 
         userAppealLogProvider.createUserAppealLog(log);
 
+        String home = configProvider.getValue(ConfigConstants.HOME_URL, "");
         SendUserTestMailCommand mailCmd = new SendUserTestMailCommand();
         mailCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        mailCmd.setBody(String.format("User \"%s(%s)\" has send a appeal, please check out.", cmd.getName(), cmd.getOldIdentifier()));
+        mailCmd.setBody(String.format("User \"%s(%s)\" has send a appeal, server is \"%s\", please check out.",
+                cmd.getName(), cmd.getOldIdentifier(), home));
         mailCmd.setSubject("User Appeal");
         mailCmd.setTo("jinlan.wang@zuolin.com");
         sendUserTestMail(mailCmd);
