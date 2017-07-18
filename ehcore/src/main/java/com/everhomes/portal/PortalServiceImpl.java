@@ -353,6 +353,14 @@ public class PortalServiceImpl implements PortalService {
 		PortalItemGroupDTO dto = ConvertHelper.convert(portalItemGroup, PortalItemGroupDTO.class);
 		dto.setCreateTime(portalItemGroup.getCreateTime().getTime());
 		dto.setUpdateTime(portalItemGroup.getUpdateTime().getTime());
+		InstanceConfig config = (InstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), InstanceConfig.class);
+		if(null != config){
+			if(!StringUtils.isEmpty(config.getTitleUri())){
+				String url = contentServerService.parserUri(config.getTitleUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+				config.setTitleUrl(url);
+				dto.setInstanceConfig(StringHelper.toJsonString(config));
+			}
+		}
 		return dto;
 	}
 
@@ -1005,11 +1013,20 @@ public class PortalServiceImpl implements PortalService {
 				config.setNewsSize(instanceConfig.getNewsSize());
 //				config.setDescriptionHeight();
 //				config.setSubjectHeight();
-				//应用入口的应用不明
-				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
-				if(null != moduleApp){
+				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.ACTIVITY){
+					itemGroup.setName("OPPushActivity");
+					publishOPPushItem(itemGroup);
+				}
+
+				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.SERVICE_ALLIANCE){
 
 				}
+
+				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
+					itemGroup.setName("OPPushBiz");
+					publishOPPushItem(itemGroup);
+				}
+				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(StringHelper.toJsonString(config));
 			}else if(Widget.fromCode(group.getWidget()) == Widget.TAB){
 				TabInstanceConfig config = new TabInstanceConfig();
@@ -1060,7 +1077,38 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	public void publishItem(PortalItemGroup itemGroup){
+
+	private void publishOPPushItem(PortalItemGroup itemGroup){
+		LaunchPadItem item = new LaunchPadItem();
+		ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
+		item.setAppId(AppConstants.APPID_DEFAULT);
+		item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+		item.setMinVersion(1L);
+		item.setItemGroup(itemGroup.getName());
+		item.setItemLabel(instanceConfig.getTitle());
+		item.setItemName(instanceConfig.getTitle());
+		item.setDeleteFlag(DeleteFlagType.YES.getCode());
+		item.setScaleType(ScaleType.TAILOR.getCode());
+		item.setScopeCode(ScopeType.ALL.getCode());
+		item.setScopeId(0L);
+		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+		if(null != moduleApp){
+			item.setActionType(moduleApp.getActionType());
+			item.setActionData(moduleApp.getInstanceConfig());
+		}
+		for (SceneType sceneType: SceneType.values()) {
+			if(sceneType == SceneType.PARK_TOURIST ||
+					sceneType == SceneType.PM_ADMIN){
+				item.setSceneType(sceneType.getCode());
+				launchPadProvider.createLaunchPadItem(item);
+			}
+		}
+
+
+
+	}
+
+	private void publishItem(PortalItemGroup itemGroup){
 		User user = UserContext.current().getUser();
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId());
 		Map<Long, Long> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId());

@@ -15,6 +15,7 @@ public class InstanceConfig {
 	private String newsSize;
 	private Long moduleAppId;
 	private String timeWidgetStyle;
+	private String titleUrl;
 
 	public String getColumnCount() {
 		return columnCount;
@@ -94,6 +95,14 @@ public class InstanceConfig {
 
 	public void setTimeWidgetStyle(String timeWidgetStyle) {
 		this.timeWidgetStyle = timeWidgetStyle;
+	}
+
+	public String getTitleUrl() {
+		return titleUrl;
+	}
+
+	public void setTitleUrl(String titleUrl) {
+		this.titleUrl = titleUrl;
 	}
 
 	@Override
