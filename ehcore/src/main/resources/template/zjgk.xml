@@ -48,7 +48,7 @@
                 <w:sz w:val="36"/>
                 <w:szCs w:val="36"/>
               </w:rPr>
-              <w:t>张江高科</w:t>
+              <w:t>${namespaceName}</w:t>
             </w:r>
             <w:r w:rsidRPr="00011DDD">
               <w:rPr>

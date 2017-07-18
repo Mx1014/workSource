@@ -35,19 +35,15 @@ import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
-import com.everhomes.parking.ParkingCardRequest;
+import com.everhomes.namespace.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
-import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.schema.tables.pojos.EhApps;
 import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.lang.StringUtils;
@@ -90,15 +86,11 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceDetail;
-import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -181,6 +173,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private ServiceModuleService serviceModuleService;
 	@Autowired
 	private AppProvider appProvider;
+	@Autowired
+	private NamespaceProvider namespaceProvider;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -2363,6 +2357,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private Map<String, Object> createTaskCardDoc(PmTaskDTO dto) {
 		Map<String, Object> dataMap=new HashMap<String, Object>();
+		Namespace namespace = namespaceProvider.findNamespaceById(dto.getNamespaceId());
+		if(namespace != null) {
+			dataMap.put("namespaceName", namespace.getName());
+		} else {
+			dataMap.put("namespaceName", "");
+		}
+
 		dataMap.put("No", dto.getId());
 		dataMap.put("name", dto.getRequestorName());
 		dataMap.put("address", dto.getAddress());
