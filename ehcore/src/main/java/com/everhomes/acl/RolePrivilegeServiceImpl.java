@@ -2933,7 +2933,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	private List<Role> getRoleManageByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId){
 		List<Authorization> authorizations =  authorizationProvider.listManageAuthorizationsByTarget(ownerType, ownerId, targetType, targetId , authType, authId);
 		List<Role> roles = new ArrayList<>();
-		if(null == authorizations){
+		if(null == authorizations || authorizations.size() == 0){
 			return null;
 		}
 		for (Authorization authorization: authorizations) {
