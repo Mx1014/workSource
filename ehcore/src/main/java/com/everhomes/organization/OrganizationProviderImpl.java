@@ -3530,12 +3530,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (locator.getAnchor() != null) {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.le(locator.getAnchor()));
         }
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
         query.addLimit(pageSize + 1);
 
         List<OrganizationMemberLog> list = query.fetchInto(OrganizationMemberLog.class);
         if (list != null && list.size() > pageSize) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list = list.subList(0, pageSize);
+        } else {
+            locator.setAnchor(null);
         }
         return list;
     }
