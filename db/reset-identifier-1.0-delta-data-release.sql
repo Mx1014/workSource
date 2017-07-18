@@ -12,6 +12,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@locale_max_id := @locale_max_id + 1), 'user', '300008', 'zh_CN', '该手机号码已被注册');
 
 -- 申诉短信模板 add by xq.tian  2017/07/12
+SET @max_template_id = (SELECT max(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
   VALUES ((@max_template_id := @max_template_id + 1), 'sms.default.yzx', 51, 'zh_CN', '申诉-科技园', '90012', 1000000);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
