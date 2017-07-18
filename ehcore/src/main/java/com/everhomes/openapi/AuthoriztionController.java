@@ -29,6 +29,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.DisclaimAddressCommand;
 import com.everhomes.rest.user.UnrentFeedbackCommand;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
@@ -71,6 +73,9 @@ public class AuthoriztionController extends ControllerBase {
 		
 		AuthorizationThirdPartyRecord record = authorizationThirdPartyRecordProvider.findAuthorizationThirdPartyRecordByPhone(cmd.getPhone(),cmd.getType(),mapping.getNamespaceId());
 		
+		UserContext.current().setUser(new User());
+		UserContext.current().getUser().setId(record.getCreatorUid());
+		UserContext.current().setNamespaceId(mapping.getNamespaceId());
 		if(record != null && record.getResultJson() != null){
 			ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 			List<ZjgkResponse> list = entity.getResponse();
