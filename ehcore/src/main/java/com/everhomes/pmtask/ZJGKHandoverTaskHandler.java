@@ -12,11 +12,11 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
     @Autowired
     private ConfigurationProvider configProvider;
 
-//    String url = configProvider.getValue("pmtask.zjgk.url", "");
+
 //    String HANDOVER_TASK = "";
 
     @Override
     public void handoverTaskToTrd(PmTask task) {
-
+        String url = configProvider.getValue("pmtask.zjgk.url", "");
     }
 }
