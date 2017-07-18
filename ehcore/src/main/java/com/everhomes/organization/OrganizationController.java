@@ -1688,11 +1688,8 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /org/getProfileIntegrity</b>
-     * <p>查看档案完整度</p>
-     */
-    @RequestMapping("getProfileIntegrity")
+    //  查看档案完整度接口暂时舍弃
+/*    @RequestMapping("getProfileIntegrity")
     @RestReturn(value = OrganizationMemberProfileIntegrity.class)
     public RestResponse getProfileIntegrity(@Valid GetProfileIntegrityCommand cmd) {
         OrganizationMemberProfileIntegrity res = this.organizationService.getProfileIntegrity(cmd);
@@ -1700,7 +1697,7 @@ public class OrganizationController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /org/importOrganizationPersonnelFiles</b>

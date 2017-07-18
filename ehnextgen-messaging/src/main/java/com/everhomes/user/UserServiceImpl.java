@@ -81,10 +81,7 @@ import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
@@ -3903,10 +3900,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
 		if (org.springframework.util.StringUtils.isEmpty(cmd.getDetailId())) {
-			//	没有 detaild 则获取当前用户信息
+			//	没有 detailiId 则获取当前用户信息
 			SceneContactV2DTO dto = this.getCurrentContactRealInfo(cmd.getOrganizationId());
 			return dto;
 		} else {
+		    //  有 detailID 则获取详细信息
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
 			if (detail == null)
 				return null;
@@ -3955,6 +3953,7 @@ public class UserServiceImpl implements UserService {
             Long directlyOrgId = orgId;
 
             List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
             groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
             groupTypes.add(OrganizationGroupType.GROUP.getCode());

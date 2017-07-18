@@ -10373,11 +10373,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //  计算档案完整度
-        GetProfileIntegrityCommand integrity = new GetProfileIntegrityCommand();
+/*        GetProfileIntegrityCommand integrity = new GetProfileIntegrityCommand();
         integrity.setDetailId(memberDTO.getDetailId());
         this.getProfileIntegrity(integrity);
+        ;*/
         return memberDTO;
-
     }
 
     @Override
@@ -10840,7 +10840,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return null;
     }
 
-    public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd) {
+/*    public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd) {
         OrganizationMemberProfileIntegrity result = new OrganizationMemberProfileIntegrity(0, 0, 0, 0);
         PersonnelsDetailsV2Response response = this.getOrganizationPersonnelDetailsV2(ConvertHelper.convert(cmd, GetPersonnelDetailsV2Command.class));
 
@@ -10864,7 +10864,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
         this.organizationProvider.updateProfileIntegrity(cmd.getDetailId(), result.getProfileIntegrity());
         return result;
-    }
+    }*/
 
     private Integer checkBasicIntegrity(OrganizationMemberBasicDTO basic) {
         if (StringUtils.isEmpty(basic.getContactName()))
@@ -11264,9 +11264,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
 
                 //  计算档案完整度
-                GetProfileIntegrityCommand integrity = new GetProfileIntegrityCommand();
+/*                GetProfileIntegrityCommand integrity = new GetProfileIntegrityCommand();
                 integrity.setDetailId(detailId);
-                this.getProfileIntegrity(integrity);
+                this.getProfileIntegrity(integrity);*/
             }
         }
         return errorDataLogs;
