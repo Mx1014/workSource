@@ -73,6 +73,7 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         result[0] = context.select().from(Tables.EH_GENERAL_APPROVALS)
             .where(Tables.EH_GENERAL_APPROVALS.ID.eq(id))
             .fetchAny().map((r) -> {
+
                 return ConvertHelper.convert(r, GeneralApproval.class);
             });
 

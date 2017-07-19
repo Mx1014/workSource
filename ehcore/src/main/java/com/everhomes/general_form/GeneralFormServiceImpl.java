@@ -491,6 +491,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
 						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
 								.getOwnerType()));
+						if (cmd.getModuleId()!=null)
+							query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()));
+						if (cmd.getModuleType()!=null)
+							query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType()));
 						query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
 								.ne(GeneralFormStatus.INVALID.getCode()));
 						return query;
