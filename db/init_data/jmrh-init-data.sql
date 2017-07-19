@@ -139,9 +139,6 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES (35749, 1034291, 240111044331050361, @address_id, '下沉式广场101', '0');
 
-INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES (10929, '会议室预订', 0, NULL, 0, 999972);
-
-	
 -- 园区管理员  
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
     VALUES (204875, 999972, 0, '/home', 'Default', '0', '0', '/home', 'Default', 'cs://1/image/aW1hZ2UvTVRvNE5qQXpabVkzTkRFNFpXUXhZV1JtWVRReE1tVXlaVFkzT1dFNFpqVTJPUQ', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
@@ -345,8 +342,7 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issui
 
 -- 20170718 add by dengs
 SET @eh_rentalv2_resource_types_id = (SELECT MAX(id) FROM `eh_rentalv2_resource_types`);
-INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@eh_rentalv2_resource_types_id := @eh_rentalv2_resource_types_id+1), '会议室预订', 0, NULL, 0, 999972);
-INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@eh_rentalv2_resource_types_id := @eh_rentalv2_resource_types_id+1), '电子屏预订', 0, NULL, 0, 999972);
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@eh_rentalv2_resource_types_id := @eh_rentalv2_resource_types_id+1), '会议室预订', 0, NULL, 2, 999972);
 
 SET FOREIGN_KEY_CHECKS = 1;
 
