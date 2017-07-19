@@ -268,7 +268,7 @@ public class SalaryController extends ControllerBase {
 	 * <b>URL: /salary/importPeriodSalary</b>
 	 */
 	@RequestMapping("importPeriodSalary")
-	@RestReturn(String.class)
+	@RestReturn(ImportFileTaskDTO.class)
 	public RestResponse importPeriodSalary(ImportSalaryInfoCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
 		User user = UserContext.current().getUser();
 		RestResponse response = new RestResponse(this.salaryService.importPeriodSalary(files[0], user.getId(),user.getNamespaceId(),cmd));
@@ -279,7 +279,7 @@ public class SalaryController extends ControllerBase {
 
 	/**
 	 * <p>6.查询导入的文件结果</p>
-	 * <b>URL: /admin/org/getImportFileResult</b>
+	 * <b>URL: /salary/getImportFileResult</b>
 	 */
 	@RequestMapping("getImportFileResult")
 	@RestReturn(value = ImportFileResponse.class)
@@ -289,6 +289,18 @@ public class SalaryController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <p>7.导出薪酬组对应的人员核算信息</p>
+	 * <b>URL: /salary/exportPeriodSalaryEmployees</b>
+	 */
+	@RequestMapping("exportPeriodSalaryEmployees")
+	@RestReturn(value = String.class)
+	public RestResponse exportPeriodSalaryEmployees(@Valid ExportPeriodSalaryEmployeesCommand cmd, HttpServletResponse httpResponse) {
+        salaryService.exportPeriodSalaryEmployees(cmd,httpResponse);
+        return new RestResponse();
+	}
+
 
 	/**
 	 * <p>12.查询异常员工人数</p>

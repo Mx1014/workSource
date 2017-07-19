@@ -1193,6 +1193,12 @@ public class SalaryServiceImpl implements SalaryService {
         return importFileService.getImportFileResult(cmd.getTaskId());
     }
 
+    //  导出薪酬组对应的人员核算信息
+    @Override
+    public void exportPeriodSalaryEmployees(ExportPeriodSalaryEmployeesCommand cmd, HttpServletResponse httpResponse){
+
+    }
+
 
 	@Override
 	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd) {

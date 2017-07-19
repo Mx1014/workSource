@@ -69,6 +69,9 @@ public interface SalaryService {
 	public ImportFileResponse<ImportSalaryEmployeeOriginValDTO> getImportFileResult(GetImportFileResultCommand cmd);
 
 
+	public void exportPeriodSalaryEmployees(ExportPeriodSalaryEmployeesCommand cmd, HttpServletResponse httpResponse);
+
+
 	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd);
 
 
