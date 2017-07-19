@@ -5645,6 +5645,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Organization org = checkOrganization(cmd.getOrganizationId());
 
+        //检查org是否为总公司，如果不是，则不允许创建管理员
+        if(org != null && org.getParentId() != 0l){
+            LOGGER.error("org is not allowed. organizationId = {}", cmd.getOrganizationId());
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "org is not allowed. ");
+        }
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
@@ -9187,7 +9194,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             /**modify by lei.lv*/
             //总公司和分公司的ID集合
-            enterpriseIds.add(org.getId());
+//            enterpriseIds.add(org.getId());
 
             if (null != departmentIds) {
                 for (Long departmentId : departmentIds) {
@@ -9196,11 +9203,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                         if (!enterpriseIds.contains(o.getId())) {
                             //直属场景
                             direct_under_enterpriseIds.add(o.getId());
+                            //企业级记录
                             enterpriseIds.add(o.getId());
                         }
                     } else {
                         if (!enterpriseIds.contains(o.getDirectlyEnterpriseId())) {
-                            //挂靠场景
+                            //添加企业级记录
                             enterpriseIds.add(o.getDirectlyEnterpriseId());
                         }
                     }
