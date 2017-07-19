@@ -40,8 +40,8 @@ INSERT INTO `eh_version_realm` VALUES (126, 'iOS_JunMinRongHe', null, UTC_TIMEST
 
 -- eh_version_upgrade_rules ： 我加20 你加40
 -- eh_version_upgrade_rules 现在是 397
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(417,125,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(418,126,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(517,125,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(518,126,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 	
 -- 军民融合域空间
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999972, '军民融合');
