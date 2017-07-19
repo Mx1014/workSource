@@ -347,7 +347,7 @@ public class SalaryServiceImpl implements SalaryService {
                     break;
                 }
                 i++;
-                salaryGroupName = salaryGroupName + " (" + i + ")";
+                salaryGroupName = cmd.getSalaryGroupName() + " (" + i + ")";
             }
             addCommand.setSalaryGroupName(salaryGroupName);
             addCommand.setOwnerId(ownerId);
