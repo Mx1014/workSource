@@ -2292,7 +2292,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
 		stepDTO.setFlowCaseId(flowCase.getId());
 		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-		stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
+		stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
 		dbProvider.execute((TransactionStatus status) -> {
 			LOGGER.info("stepDTO: {}", stepDTO);
 			flowService.processAutoStep(stepDTO);
