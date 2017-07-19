@@ -10818,7 +10818,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd) {
         if (cmd.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())) {
-            this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), java.sql.Date.valueOf(cmd.getRemarks()));
+            this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), cmd.getDate());
+            if(!StringUtils.isEmpty(cmd.getRemarks()))
+                this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.PROBATION.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
             this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.POSITIVE.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
@@ -10885,7 +10887,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.organizationProvider.updateProfileIntegrity(cmd.getDetailId(), result.getProfileIntegrity());
         return result;
     }*/
-
+/*
     private Integer checkBasicIntegrity(OrganizationMemberBasicDTO basic) {
         if (StringUtils.isEmpty(basic.getContactName()))
             return 0;
@@ -10953,7 +10955,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             return 0;
         else
             return 15;
-    }
+    }*/
 
     private OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member) {
         return getDetailFromOrganizationMember(member, true, null);
