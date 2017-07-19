@@ -416,5 +416,11 @@ public interface OrganizationProvider {
 	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
 
 	List<OrganizationMember> listOrganizationMemberByPathHavingDetailId(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
+
+	/**
+	 * 查询非离职状态下所有员工的 detailId
+	 * added by R, 20170719
+	 */
+	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId);
 }
 

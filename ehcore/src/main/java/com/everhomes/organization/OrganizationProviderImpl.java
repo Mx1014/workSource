@@ -4708,12 +4708,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-//		onvertHelper.convert(getReadOnlyDao().findById(id), SalaryGroupEntity.class)
 		List<OrganizationMemberDetails> results =  context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
 				.where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId))
 				.fetchInto(OrganizationMemberDetails.class);
-//				.fetchInto(OrganizationMemberDetails.class);
-//		.fetchOne(OrganizationMemberDetails.class);
 		if(null == results || results.size() == 0)
 			return  null ;
 		return results.get(0);
@@ -4776,4 +4773,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		return result;
 	}
+
+	/**
+	 * 查询非离职状态下所有员工的 detailId
+	 * added by R, 20170719
+	 */
+	@Override
+	public List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId){
+	    DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+	    return context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
+                .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
+                .fetchInto(Long.class);
+    }
 }

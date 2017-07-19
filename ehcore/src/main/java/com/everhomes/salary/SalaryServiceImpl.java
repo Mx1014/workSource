@@ -326,28 +326,34 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void copySalaryGroup(CopySalaryGroupCommand cmd) {
         List<SalaryGroupEntity> origin = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-        AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
-        addCommand.setSalaryGroupEntity(origin.stream().map(r -> {
-            SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
-            return dto;
-        }).collect(Collectors.toList()));
-        addCommand.setOwnerId(origin.get(0).getOwnerId());
-        addCommand.setOwnerType(origin.get(0).getOwnerType());
+        if (origin != null && origin.size()>0) {
+            AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
+            addCommand.setSalaryGroupEntity(origin.stream().map(r -> {
+                SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+            Long ownerId = origin.get(0).getOwnerId();
+            String ownerType = origin.get(0).getOwnerType();
+            Integer namepspaceId = origin.get(0).getNamespaceId();
 
-        //  判断名字
-        String salaryGroupName = cmd.getSalaryGroupName();
-        int i = 1;
-        boolean flag = true;
-        //  从数据库获取已经存在的名字
-        Organization organization = this.organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
-        while (flag) {
-            salaryGroupName = salaryGroupName + " (" + i + ")";
-            if (!salaryGroupName.equals(organization.getName()))
-                flag = false;
-            i++;
+            //  判断名字
+            int i = 1;
+            String salaryGroupName = cmd.getSalaryGroupName() + " (" + i + ")";
+            while (true) {
+                //  查询名字是否已经存在
+                Organization organization = this.organizationProvider.findOrganizationByName(salaryGroupName,
+                        UniongroupType.SALARYGROUP.getCode(), ownerId, namepspaceId);
+                if (organization == null) {
+                    break;
+                }
+                i++;
+                salaryGroupName = salaryGroupName + " (" + i + ")";
+            }
+            addCommand.setSalaryGroupName(salaryGroupName);
+            addCommand.setOwnerId(ownerId);
+            addCommand.setOwnerType(ownerType);
+            this.addSalaryGroup(addCommand);
         }
-        addCommand.setSalaryGroupName(salaryGroupName);
-        this.addSalaryGroup(addCommand);
     }
 
     @Override
@@ -426,93 +432,17 @@ public class SalaryServiceImpl implements SalaryService {
         return response;
     }
 
-
-   /* @Override
-    public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
-
-	    //  1.将前端信息传递给组织架构的接口获取相关信息
-        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-        command.setOrganizationId(cmd.getOwnerId());
-        command.setPageSize(cmd.getPageSize());
-
-        //  2.查询所有人员
-        ListOrganizationMemberCommandResponse results = this.organizationService.listOrganizationPersonnels(command,false);
-
-        //  3.查询所有批次
-        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
-
-        List<Long> uniongroupDetailIds = new ArrayList<>();
-
-        //将前端信息传递给组织架构的接口获取相关信息
-        ListUniongroupMemberDetailsWithConditionCommand uniongroup_command = new ListUniongroupMemberDetailsWithConditionCommand();
-        //如果传了groupId，默认查询规定薪酬组的信息，若果没传，则默认查询全部薪酬组的信息
-        if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-            uniongroup_command.setGroupId(cmd.getSalaryGroupId());
-        }
-        if (!StringUtils.isEmpty(cmd.getKeywords()))
-            uniongroup_command.setKeywords(cmd.getKeywords());
-        if (!StringUtils.isEmpty(cmd.getDepartmentId()))
-            uniongroup_command.setDepartmentId(cmd.getDepartmentId());
-        uniongroup_command.setGroupType(UniongroupType.SALARYGROUP.getCode());
-        uniongroup_command.setOwnerId(cmd.getOwnerId());
-        uniongroup_command.setPageAnchor(Long.valueOf("0"));
-        uniongroup_command.setPageSize(cmd.getPageSize());
-
-        //  查询关联的人员
-        List<UniongroupMemberDetail> uniongroupMemberDetails = this.uniongroupService.listUniongroupMemberDetailsWithCondition(uniongroup_command);
-
-        // 获取关联人员detailId的集合
-        uniongroupDetailIds.addAll(uniongroupMemberDetails.stream().map(r -> {
-            return r.getDetailId();
-        }).collect(Collectors.toList()));
-
-
-        //过滤
-        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
-
-        List<OrganizationMemberDTO> dtos = new ArrayList<>();
-        if (!StringUtils.isEmpty(results)) {
-            if(cmd.getSalaryGroupId() != null) {
-                dtos = results.getMembers().stream().filter(r -> {
-                    return uniongroupDetailIds.contains(r.getDetailId());
-                }).collect(Collectors.toList());
-            } else {
-                dtos = results.getMembers();
-            }
-
-            response.setSalaryEmployeeDTO(dtos.stream().map(r -> {
-                SalaryEmployeeDTO dto = new SalaryEmployeeDTO();
-                dto.setUserId(r.getTargetId());
-                dto.setDetailId(r.getDetailId());
-                dto.setContactName(r.getContactName());
-                Long _groupId = UniongroupMemberDetail.getGroupIdByDetailId(uniongroupMemberDetails, r.getDetailId());
-                if (_groupId != null){
-                    r.setSalaryGroupId(_groupId);
-                    dto.setSalaryGroupId(_groupId);
-                }
-                //  拼接薪酬组名称
-                if (!StringUtils.isEmpty(organizations)) {
-                    organizations.forEach(s -> {
-                        if (s.getId().equals(r.getGroupId()))
-                            dto.setSalaryGroupName(s.getName());
-                    });
-                }
-                return dto;
-            }).collect(Collectors.toList()));
-        }
-        return response;
-    }*/
-
     //  计算异常人数
     @Override
     public String countAbnormalSalaryEmployees(CountAbnormalSalaryEmployees cmd){
-        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationMemberByPathHavingDetailId("", null, cmd.getOwnerId(), 100000);
+//        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationMemberByPathHavingDetailId("", null, cmd.getOwnerId(), 100000);
 
         //  存储公司下所有用户的 detailId
-        List<Long> userDetailIds = response.getMembers().stream().map(r ->{
+/*        List<Long> userDetailIds = response.getMembers().stream().map(r ->{
             Long id = r.getDetailId();
             return id;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList());*/
+        List<Long> userDetailIds = this.organizationProvider.listOrganizationMemberDetailIdsInActiveStatus(cmd.getOwnerId());
         int count = userDetailIds.size();
 
         //  存储所有设置了薪酬组的 detailId
