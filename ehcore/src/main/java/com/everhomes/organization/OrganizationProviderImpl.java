@@ -4240,14 +4240,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         final List<OrganizationMemberDetails> response = new ArrayList<>();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberDetails.class),
                 null, (DSLContext context, Object reducingContext) -> {
-                    Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(detailIds);
-                    List<OrganizationMemberDetails> list = context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.PROFILE_INTEGRITY,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME)
+                    List<OrganizationMemberDetails> list = context.select()
                             .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
-                            .where(condition)
+                            .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(detailIds))
                             .fetchInto(OrganizationMemberDetails.class);
                     if (list != null)
                         response.addAll(list);
@@ -4255,7 +4250,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 });
         return response;
     }
-
 
     public Long createOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
         if (organizationMemberDetails.getNamespaceId() == null) {
