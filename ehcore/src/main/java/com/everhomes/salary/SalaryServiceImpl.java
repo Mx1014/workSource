@@ -453,7 +453,7 @@ public class SalaryServiceImpl implements SalaryService {
         }).collect(Collectors.toList());
 
         //  存储所有设置了实发工资的 detailId
-        List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails();
+        List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
         List<Long> wageDetailIds = wages.stream().map(r ->{
             Long id = (Long) r[0];
             return id;
@@ -474,7 +474,7 @@ public class SalaryServiceImpl implements SalaryService {
         //  保存所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), cmd.getOwnerId());
         //  保存所有员工工资明细情况
-        List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails();
+        List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
 
         if (StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
@@ -496,7 +496,7 @@ public class SalaryServiceImpl implements SalaryService {
             }
             if (!StringUtils.isEmpty(cmd.getKeywords()))
                 command.setKeywords(cmd.getKeywords());
-            command.setPageAnchor(Long.valueOf("0"));
+            command.setPageAnchor(0L);
             if (!StringUtils.isEmpty(cmd.getPageAnchor()))
                 command.setPageAnchor(cmd.getPageAnchor());
             command.setPageSize(20);

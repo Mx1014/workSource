@@ -125,11 +125,13 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 	}
 
 	@Override
-	public List<Object[]> listSalaryEmployeeWagesDetails(){
+	public List<Object[]> listSalaryEmployeeWagesDetails(Integer namespaceId, Long ownerId){
         List<Object[]> objects = getReadOnlyContext().select(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_DETAIL_ID,
                 Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE)
                 .from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
                 .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORIGIN_ENTITY_ID.eq(Long.valueOf("98")))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.NAMESPACE_ID.eq(namespaceId))
                 .fetchInto(Object[].class);
         return objects;
     }
