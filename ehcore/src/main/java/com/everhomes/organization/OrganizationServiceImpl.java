@@ -10319,27 +10319,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 detailIds.add(r.getDetailId());
             });
             List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
-
-            /*response.setMembers(res.getMembers().stream().filter(r ->{
-                return !StringUtils.isEmpty(r.getDetailId());
-            }).map(r -> {
-                    OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
-                    //  设置合同到期时间
-                    if (endTimeList != null) {
-                        endTimeList.forEach(rr -> {
-
-                            if (rr[0].equals(dto.getDetailId())) {
-                                dto.setEndTime((java.sql.Date) rr[1]);
-                            }
-                        });
-                    }
-                    return dto;
-            }).collect(Collectors.toList()));*/
             List<OrganizationMemberV2DTO> responseMembers = new ArrayList<>();
-            for(int i=0; i<responseMembers.size(); i++){
 
+            for(int i=0; i<responseMembers.size(); i++){
                 //  过滤没有 detailId 的人员
-                if(!StringUtils.isEmpty(responseMembers.get(i).getDetailId()))
+                if(StringUtils.isEmpty(responseMembers.get(i).getDetailId()))
                     continue;
                 OrganizationMemberV2DTO dto = ConvertHelper.convert(responseMembers.get(i), OrganizationMemberV2DTO.class);
                 //  设置合同到期时间
