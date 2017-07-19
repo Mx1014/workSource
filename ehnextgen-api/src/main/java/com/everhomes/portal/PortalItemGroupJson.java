@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.everhomes.rest.portal.ItemGroupInstanceConfig;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
@@ -13,7 +14,7 @@ public class PortalItemGroupJson {
 	private BigDecimal separatorHeight;
 	private String widget;
 	private String style;
-	private InstanceConfig instanceConfig;
+	private ItemGroupInstanceConfig instanceConfig;
 	private Integer defaultOrder;
 	private String description;
 
@@ -57,11 +58,11 @@ public class PortalItemGroupJson {
 		this.style = style;
 	}
 
-	public InstanceConfig getInstanceConfig() {
+	public ItemGroupInstanceConfig getInstanceConfig() {
 		return instanceConfig;
 	}
 
-	public void setInstanceConfig(InstanceConfig instanceConfig) {
+	public void setInstanceConfig(ItemGroupInstanceConfig instanceConfig) {
 		this.instanceConfig = instanceConfig;
 	}
 

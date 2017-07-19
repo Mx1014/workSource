@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>timeWidgetStyle: 时间样式</li>
  * <li>moduleAppId: 入口id</li>
  * <li>rowCount: 行高度</li>
+ * <li>bizUrl: 电商url</li>
  * </ul>
  */
 public class ItemGroupInstanceConfig {
@@ -35,6 +36,8 @@ public class ItemGroupInstanceConfig {
 
 	private String titleUri;
 
+	private String titleUrl;
+
 	private Integer newsSize;
 
 	private String timeWidgetStyle;
@@ -42,6 +45,8 @@ public class ItemGroupInstanceConfig {
 	private Long moduleAppId;
 
 	private Integer rowCount;
+
+	private String bizUrl;
 
 	public Integer getColumnCount() {
 		return columnCount;
@@ -129,6 +134,22 @@ public class ItemGroupInstanceConfig {
 
 	public void setRowCount(Integer rowCount) {
 		this.rowCount = rowCount;
+	}
+
+	public String getTitleUrl() {
+		return titleUrl;
+	}
+
+	public void setTitleUrl(String titleUrl) {
+		this.titleUrl = titleUrl;
+	}
+
+	public String getBizUrl() {
+		return bizUrl;
+	}
+
+	public void setBizUrl(String bizUrl) {
+		this.bizUrl = bizUrl;
 	}
 
 	@Override

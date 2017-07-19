@@ -13,6 +13,8 @@ public class ListServiceModuleAppsCommand {
 
 	private Integer namespaceId;
 
+	private Long moduleId;
+
 	public ListServiceModuleAppsCommand() {
 
 	}
@@ -28,6 +30,14 @@ public class ListServiceModuleAppsCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override

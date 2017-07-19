@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,9 +57,12 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 	
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId) {
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId) {
+		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
+		if(null != moduleId)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
 		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
-				.where(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId))
+				.where(cond)
 				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));

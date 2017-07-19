@@ -35,9 +35,7 @@ public class PortalPublishLogProviderImpl implements PortalPublishLogProvider {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalPublishLogs.class));
 		portalPublishLog.setId(id);
 		portalPublishLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalPublishLog.setCreatorUid(UserContext.current().getUser().getId());
 		portalPublishLog.setUpdateTime(portalPublishLog.getCreateTime());
-		portalPublishLog.setOperatorUid(portalPublishLog.getCreatorUid());
 		getReadWriteDao().insert(portalPublishLog);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalPublishLogs.class, null);
 	}
@@ -46,7 +44,6 @@ public class PortalPublishLogProviderImpl implements PortalPublishLogProvider {
 	public void updatePortalPublishLog(PortalPublishLog portalPublishLog) {
 		assert (portalPublishLog.getId() != null);
 		portalPublishLog.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		portalPublishLog.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(portalPublishLog);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPortalPublishLogs.class, portalPublishLog.getId());
 	}

@@ -29,6 +29,16 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>1.根据模块id查询模块应用列表</p>
+	 * <b>URL: /portal/listServiceModuleAppsByModuleId</b>
+	 */
+	@RequestMapping("listServiceModuleAppsByModuleId")
+	@RestReturn(ListServiceModuleAppsResponse.class)
+	public RestResponse listServiceModuleAppsByModuleId(ListServiceModuleAppsCommand cmd){
+		return new RestResponse(portalService.listServiceModuleApps(cmd));
+	}
+
+	/**
 	 * <p>2.创建模块应用</p>
 	 * <b>URL: /portal/createServiceModuleApp</b>
 	 */

@@ -34,6 +34,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.elasticsearch.common.geo.GeoHashUtils;
@@ -105,9 +106,12 @@ public class PortalServiceImpl implements PortalService {
 	@Autowired
 	private PortalLaunchPadMappingProvider portalLaunchPadMappingProvider;
 
+	@Autowired
+	private PortalPublishLogProvider portalPublishLogProvider;
+
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
-		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId());
+		List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(cmd.getNamespaceId(), cmd.getModuleId());
 		return new ListServiceModuleAppsResponse(moduleApps.stream().map(r ->{
 			return processServiceModuleAppDTO(r);
 		}).collect(Collectors.toList()));
@@ -353,7 +357,7 @@ public class PortalServiceImpl implements PortalService {
 		PortalItemGroupDTO dto = ConvertHelper.convert(portalItemGroup, PortalItemGroupDTO.class);
 		dto.setCreateTime(portalItemGroup.getCreateTime().getTime());
 		dto.setUpdateTime(portalItemGroup.getUpdateTime().getTime());
-		InstanceConfig config = (InstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), InstanceConfig.class);
+		ItemGroupInstanceConfig config = (ItemGroupInstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
 		if(null != config){
 			if(!StringUtils.isEmpty(config.getTitleUri())){
 				String url = contentServerService.parserUri(config.getTitleUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
@@ -925,19 +929,44 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public void publish(PublishCommand cmd) {
+		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId());
+		PortalPublishLog portalPublishLog = new PortalPublishLog();
+		portalPublishLog.setNamespaceId(namespaceId);
+		portalPublishLog.setStatus(PortalPublishLogStatus.PUBLISHING.getCode());
+		portalPublishLog.setCreatorUid(user.getId());
+		portalPublishLog.setOperatorUid(user.getId());
+		portalPublishLogProvider.createPortalPublishLog(portalPublishLog);
 
-		this.dbProvider.execute((status) -> {
-			//发布item分类
-			publishItemCategory(namespaceId);
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				try{
+					dbProvider.execute((status) -> {
 
-			for (PortalLayout layout: layouts) {
-				//发布layout
-				publishLayout(layout);
+						//发布item分类
+						publishItemCategory(namespaceId);
+
+						for (PortalLayout layout: layouts) {
+							//发布layout
+							publishLayout(layout);
+						}
+
+						portalPublishLog.setStatus(PortalPublishLogStatus.SUCCESS.getCode());
+						portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
+						return null;
+					});
+				}catch (Exception e){
+					portalPublishLog.setStatus(PortalPublishLogStatus.FAILING.getCode());
+					portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
+				}finally {
+					LOGGER.debug("publish end...");
+				}
+
 			}
-			return null;
 		});
+
 	}
 
 	private void publishLayout(PortalLayout layout){
@@ -962,7 +991,7 @@ public class PortalServiceImpl implements PortalService {
 			if(TitleFlag.TRUE == TitleFlag.fromCode(instanceConfig.getTitleFlag())){
 				group.setTitle(instanceConfig.getTitle());
 				if(!StringUtils.isEmpty(instanceConfig.getTitleUri())){
-					String url = contentServerService.parserUri(instanceConfig.getTitleUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+					String url = contentServerService.parserUri(instanceConfig.getTitleUri(), EntityType.USER.getCode(), user.getId());
 					group.setIconUrl(url);
 				}
 			}
@@ -1019,7 +1048,7 @@ public class PortalServiceImpl implements PortalService {
 				}
 
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.SERVICE_ALLIANCE){
-
+					publishOPPushItem(itemGroup);
 				}
 
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
@@ -1079,6 +1108,7 @@ public class PortalServiceImpl implements PortalService {
 
 
 	private void publishOPPushItem(PortalItemGroup itemGroup){
+		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(itemGroup.getLayoutId());
 		LaunchPadItem item = new LaunchPadItem();
 		ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
 		item.setAppId(AppConstants.APPID_DEFAULT);
@@ -1091,10 +1121,20 @@ public class PortalServiceImpl implements PortalService {
 		item.setScaleType(ScaleType.TAILOR.getCode());
 		item.setScopeCode(ScopeType.ALL.getCode());
 		item.setScopeId(0L);
-		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
-		if(null != moduleApp){
-			item.setActionType(moduleApp.getActionType());
-			item.setActionData(moduleApp.getInstanceConfig());
+		if(null != layout){
+			item.setItemLocation(getItemLocation(layout.getName()));
+		}
+		if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
+			item.setActionType(ActionType.OFFICIAL_URL.getCode());
+			UrlActionData data = new UrlActionData();
+			data.setUrl(instanceConfig.getBizUrl());
+			item.setActionData(StringHelper.toJsonString(data));
+		}else{
+			ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+			if(null != moduleApp){
+				item.setActionType(moduleApp.getActionType());
+				item.setActionData(moduleApp.getInstanceConfig());
+			}
 		}
 		for (SceneType sceneType: SceneType.values()) {
 			if(sceneType == SceneType.PARK_TOURIST ||
@@ -1103,9 +1143,6 @@ public class PortalServiceImpl implements PortalService {
 				launchPadProvider.createLaunchPadItem(item);
 			}
 		}
-
-
-
 	}
 
 	private void publishItem(PortalItemGroup itemGroup){
