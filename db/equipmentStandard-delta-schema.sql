@@ -1,0 +1,2 @@
+ALTER TABLE eh_equipment_inspection_standards ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, etc';
+ALTER TABLE eh_equipment_inspection_standards ADD COLUMN `target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to the id of who own the standard';
