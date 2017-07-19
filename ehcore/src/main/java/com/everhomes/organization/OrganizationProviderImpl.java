@@ -4240,9 +4240,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         final List<OrganizationMemberDetails> response = new ArrayList<>();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberDetails.class),
                 null, (DSLContext context, Object reducingContext) -> {
-                    List<OrganizationMemberDetails> list = context.select()
+                    Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(detailIds);
+                    List<OrganizationMemberDetails> list = context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID,
+                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS,
+                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME,
+                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.PROFILE_INTEGRITY,
+                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME)
                             .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
-                            .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(detailIds))
+                            .where(condition)
                             .fetchInto(OrganizationMemberDetails.class);
                     if (list != null)
                         response.addAll(list);
@@ -4250,6 +4255,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 });
         return response;
     }
+
 
     public Long createOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
         if (organizationMemberDetails.getNamespaceId() == null) {
@@ -4734,6 +4740,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					query.addOrderBy(Tables.EH_USERS.ID.desc());
 					query.addLimit(size);
 					LOGGER.debug("query sql:{}", query.getSQL());
+					LOGGER.debug("query param:{}", query.getBindValues());
 					query.fetch().map((r) -> {
 						UserOrganizations userOrganizations = new UserOrganizations();
 						userOrganizations.setUserId(r.getValue(Tables.EH_USERS.ID));
