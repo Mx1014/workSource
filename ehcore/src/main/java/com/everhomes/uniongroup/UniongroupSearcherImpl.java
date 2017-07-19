@@ -169,7 +169,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
                         jobPositionMap.put(Long.valueOf(r.get("job_position_id").toString()), r.get("job_position_name").toString());
                     });
                 }
-                detail.setDepartment(jobPositionMap);
+                detail.setJobPosition(jobPositionMap);
             }
             SimpleDateFormat simpleDateFormat  = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             TimeZone utcZone = TimeZone.getTimeZone("UTC");
