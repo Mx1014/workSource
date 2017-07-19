@@ -10,11 +10,9 @@ import java.sql.Timestamp;
  * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
  * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
  * <li>approveName:审批名称</li>
- * <li>status:启用状态 0:不启用 1:启用</li>
+ * <li>status:启用状态 1:不启用 2:启用</li>
  * <li>formOriginId:表单id</li>
  * <li>formVersion:表单版本</li>
- * <li>flowMainId:工作流id</li>
- * <li>flowVersion:工作流版本</li>
  * </ul>
  *
  */
@@ -30,8 +28,8 @@ public class CommunityApproveDTO {
     private Byte status;
     private Long formOriginId;
     private Integer formVersion;
-    private Long flowMainId;
-    private Integer flowVersion;
+    private String formName;
+    private String flowName;
     private Timestamp updateTime;
     private Integer     namespaceId;
     private Timestamp     createTime;
@@ -116,22 +114,6 @@ public class CommunityApproveDTO {
         this.formVersion = formVersion;
     }
 
-    public Long getFlowMainId() {
-        return flowMainId;
-    }
-
-    public void setFlowMainId(Long flowMainId) {
-        this.flowMainId = flowMainId;
-    }
-
-    public Integer getFlowVersion() {
-        return flowVersion;
-    }
-
-    public void setFlowVersion(Integer flowVersion) {
-        this.flowVersion = flowVersion;
-    }
-
     public Timestamp getUpdateTime() {
         return updateTime;
     }
@@ -154,5 +136,21 @@ public class CommunityApproveDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public String getFormName() {
+        return formName;
+    }
+
+    public void setFormName(String formName) {
+        this.formName = formName;
+    }
+
+    public String getFlowName() {
+        return flowName;
+    }
+
+    public void setFlowName(String flowName) {
+        this.flowName = flowName;
     }
 }

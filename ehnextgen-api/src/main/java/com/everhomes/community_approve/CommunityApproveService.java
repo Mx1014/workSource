@@ -1,4 +1,4 @@
-package com.everhomes;
+package com.everhomes.community_approve;
 
 import com.everhomes.rest.community_approve.*;
 
@@ -14,4 +14,8 @@ public interface CommunityApproveService {
     void deleteCommunityApprove(CommunityApproveIdCommand cmd);
 
     CommunityApproveDTO createCommunityApprove(CreateCommunityApproveCommand cmd);
+
+    void enableCommunityApprove(CommunityApproveIdCommand cmd);
+
+    void disableCommunityApprove(CommunityApproveIdCommand cmd);
 }

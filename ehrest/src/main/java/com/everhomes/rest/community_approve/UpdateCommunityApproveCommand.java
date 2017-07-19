@@ -5,7 +5,6 @@ package com.everhomes.rest.community_approve;
  * <li>approveName:审批名称</li>
  * <li>status:启用状态 0:不启用 1:启用</li>
  * <li>formOriginId:表单id</li>
- * <li>flowMainId:工作流id</li>
  * </ul>
  *
  */
@@ -15,7 +14,6 @@ public class UpdateCommunityApproveCommand {
     private String approveName;
     private Byte status;
     private Long formOriginId;
-    private Long flowMainId;
 
 
     public Long getId() {
@@ -50,12 +48,5 @@ public class UpdateCommunityApproveCommand {
         this.formOriginId = formOriginId;
     }
 
-    public Long getFlowMainId() {
-        return flowMainId;
-    }
-
-    public void setFlowMainId(Long flowMainId) {
-        this.flowMainId = flowMainId;
-    }
 
 }

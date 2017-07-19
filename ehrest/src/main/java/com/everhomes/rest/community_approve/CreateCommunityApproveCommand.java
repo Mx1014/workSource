@@ -10,9 +10,8 @@ import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
  * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
  * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
  * <li>approveName:审批名称</li>
- * <li>status:启用状态 0:不启用 1:启用</li>
+ * <li>status:启用状态 1:不启用 2:启用</li>
  * <li>formOriginId:表单id</li>
- * <li>flowMainId:工作流id</li>
  * </ul>
  *
  */
@@ -26,7 +25,6 @@ public class CreateCommunityApproveCommand {
     private String approveName;
     private Byte status;
     private Long formOriginId;
-    private Long flowMainId;
 
     public Long getOwnerId() {
         return ownerId;
@@ -92,12 +90,5 @@ public class CreateCommunityApproveCommand {
         this.formOriginId = formOriginId;
     }
 
-    public Long getFlowMainId() {
-        return flowMainId;
-    }
-
-    public void setFlowMainId(Long flowMainId) {
-        this.flowMainId = flowMainId;
-    }
 
 }
