@@ -570,7 +570,17 @@
                   <w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/>
                   <w:vAlign w:val="center"/>
                 </w:tcPr>
-                <w:p w:rsidR="00000000" w:rsidRPr="00011DDD" w:rsidRDefault="008B137A"/>
+                <w:p w:rsidR="00A45E02" w:rsidRPr="00011DDD" w:rsidRDefault="00F42F2E" w:rsidP="00C67BD1">
+                  <w:pPr>
+                    <w:ind w:firstLineChars="50" w:firstLine="105"/>
+                  </w:pPr>
+                  <w:r>
+                    <w:rPr>
+                      <w:rFonts w:hint="eastAsia"/>
+                    </w:rPr>
+                    <w:t>${reserveTime}</w:t>
+                  </w:r>
+                </w:p>
               </w:tc>
             </w:tr>
             <w:tr w:rsidR="00000000" w:rsidRPr="00011DDD">

@@ -345,6 +345,7 @@ class PmTaskCommonServiceImpl {
             case "PROCESSING": return PmTaskFlowStatus.PROCESSING.getCode();
             case "COMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
             case "HANDOVER": return PmTaskFlowStatus.PROCESSING.getCode();
+            case "FLOWCOMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
             default: return null;
         }
     }

@@ -7,6 +7,7 @@ import java.util.List;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.flow.*;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -15,6 +16,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 
+import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +25,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowEntitySel;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -146,6 +140,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 			}else if ("PROCESSING".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
 				pmTaskProvider.updateTask(task);
 			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
@@ -155,6 +150,15 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				pmTaskProvider.updateTask(task);
 				//通知第三方 config表中配置api请求地址
 				pmTaskCommonService.handoverTaskToTrd(task);
+			}else if ("FLOWCOMPLETED".equals(nodeType)) {
+				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+				stepDTO.setFlowCaseId(flowCase.getId());
+				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+				stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
+				flowService.processAutoStep(stepDTO);
+
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				pmTaskProvider.updateTask(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
