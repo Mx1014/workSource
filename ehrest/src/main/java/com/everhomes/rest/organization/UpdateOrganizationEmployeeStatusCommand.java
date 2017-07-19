@@ -18,7 +18,7 @@ public class UpdateOrganizationEmployeeStatusCommand {
 
     private Byte employeeStatus;
 
-    private Date date;
+    private String date;
 
     private String remarks;
 
@@ -38,11 +38,11 @@ public class UpdateOrganizationEmployeeStatusCommand {
         this.employeeStatus = employeeStatus;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

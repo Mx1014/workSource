@@ -10306,19 +10306,21 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd) {
         ListPersonnelsV2CommandResponse response = new ListPersonnelsV2CommandResponse();
+        if(cmd.getPageSize() == null)
+            cmd.setPageSize(20);
         ListOrganizationMemberCommandResponse res = this.listOrganizationPersonnels(ConvertHelper.convert(cmd, ListOrganizationContactCommand.class), false);
-
         if (res.getMembers() == null || res.getMembers().isEmpty()) {
             return response;
         } else {
+            List<OrganizationMemberDTO> originMembers = res.getMembers();
             //  查找合同到期时间
             List<Long> detailIds = new ArrayList<>();
-            res.getMembers().forEach(r -> {
+            originMembers.forEach(r -> {
                 detailIds.add(r.getDetailId());
             });
             List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
 
-            response.setMembers(res.getMembers().stream().filter(r ->{
+            /*response.setMembers(res.getMembers().stream().filter(r ->{
                 return !StringUtils.isEmpty(r.getDetailId());
             }).map(r -> {
                     OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
@@ -10332,8 +10334,34 @@ public class OrganizationServiceImpl implements OrganizationService {
                         });
                     }
                     return dto;
-            }).collect(Collectors.toList()));
+            }).collect(Collectors.toList()));*/
+            List<OrganizationMemberV2DTO> responseMembers = new ArrayList<>();
+            for(int i=0; i<responseMembers.size(); i++){
 
+                //  过滤没有 detailId 的人员
+                if(!StringUtils.isEmpty(responseMembers.get(i).getDetailId()))
+                    continue;
+                OrganizationMemberV2DTO dto = ConvertHelper.convert(responseMembers.get(i), OrganizationMemberV2DTO.class);
+                //  设置合同到期时间
+                if (endTimeList != null) {
+                    for(int j=0; j<endTimeList.size(); j++) {
+                        if (endTimeList.get(j)[0].equals(dto.getDetailId())) {
+                            dto.setEndTime((java.sql.Date) endTimeList.get(j)[1]);
+                            break;
+                        }
+                    }
+                }
+
+                //  根据选择"试用,在职"状态来过滤数据
+                if(cmd.getEmployeeStatus()!=null){
+                    if(responseMembers.get(i).getEmployeeStatus().equals(cmd.getEmployeeStatus())){
+                        responseMembers.add(dto);
+                        continue;
+                    }
+                }
+                responseMembers.add(dto);
+            }
+            response.setMembers(responseMembers);
             response.setNextPageOffset(res.getNextPageOffset());
             response.setNextPageAnchor(res.getNextPageAnchor());
             return response;
@@ -10818,7 +10846,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd) {
         if (cmd.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())) {
-            this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), cmd.getDate());
+            this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), java.sql.Date.valueOf(cmd.getDate()));
             if(!StringUtils.isEmpty(cmd.getRemarks()))
                 this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.PROBATION.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB.getCode())) {
