@@ -2290,6 +2290,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 
 		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+		stepDTO.setFlowCaseId(flowCase.getId());
 		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
 		stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
 		dbProvider.execute((TransactionStatus status) -> {
