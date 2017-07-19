@@ -10308,24 +10308,24 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListPersonnelsV2CommandResponse response = new ListPersonnelsV2CommandResponse();
         if(cmd.getPageSize() == null)
             cmd.setPageSize(20);
-        ListOrganizationMemberCommandResponse res = this.listOrganizationPersonnels(ConvertHelper.convert(cmd, ListOrganizationContactCommand.class), false);
-        if (res.getMembers() == null || res.getMembers().isEmpty()) {
+        ListOrganizationMemberCommandResponse originResponse = this.listOrganizationPersonnels(ConvertHelper.convert(cmd, ListOrganizationContactCommand.class), false);
+        if (originResponse.getMembers() == null || originResponse.getMembers().isEmpty()) {
             return response;
         } else {
-            List<OrganizationMemberDTO> originMembers = res.getMembers();
+            List<OrganizationMemberDTO> results = originResponse.getMembers();
             //  查找合同到期时间
             List<Long> detailIds = new ArrayList<>();
-            originMembers.forEach(r -> {
+            results.forEach(r -> {
                 detailIds.add(r.getDetailId());
             });
             List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
             List<OrganizationMemberV2DTO> responseMembers = new ArrayList<>();
 
-            for(int i=0; i<responseMembers.size(); i++){
+            for(int i=0; i<results.size(); i++){
                 //  过滤没有 detailId 的人员
-                if(StringUtils.isEmpty(responseMembers.get(i).getDetailId()))
+                if(StringUtils.isEmpty(results.get(i).getDetailId()))
                     continue;
-                OrganizationMemberV2DTO dto = ConvertHelper.convert(responseMembers.get(i), OrganizationMemberV2DTO.class);
+                OrganizationMemberV2DTO dto = ConvertHelper.convert(results.get(i), OrganizationMemberV2DTO.class);
                 //  设置合同到期时间
                 if (endTimeList != null) {
                     for(int j=0; j<endTimeList.size(); j++) {
@@ -10338,7 +10338,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 //  根据选择"试用,在职"状态来过滤数据
                 if(cmd.getEmployeeStatus()!=null){
-                    if(responseMembers.get(i).getEmployeeStatus().equals(cmd.getEmployeeStatus())){
+                    if(dto.getEmployeeStatus().equals(cmd.getEmployeeStatus())){
                         responseMembers.add(dto);
                         continue;
                     }
@@ -10346,8 +10346,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 responseMembers.add(dto);
             }
             response.setMembers(responseMembers);
-            response.setNextPageOffset(res.getNextPageOffset());
-            response.setNextPageAnchor(res.getNextPageAnchor());
+            response.setNextPageOffset(originResponse.getNextPageOffset());
+            response.setNextPageAnchor(originResponse.getNextPageAnchor());
             return response;
         }
     }
