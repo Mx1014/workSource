@@ -889,6 +889,8 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		PortalNavigationBar portalNavigationBar = ConvertHelper.convert(cmd, PortalNavigationBar.class);
+		if(null != EntityType.fromCode(cmd.getOwnerType())){
+		}
 		portalNavigationBar.setOperatorUid(user.getId());
 		portalNavigationBar.setCreatorUid(user.getId());
 		portalNavigationBar.setNamespaceId(namespaceId);
