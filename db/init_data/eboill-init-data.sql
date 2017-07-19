@@ -532,6 +532,8 @@ update eh_launch_pad_items set display_flag = '0' where id in (116472, 116460) a
 -- 园区简介icon 问题显示和action——data问题   20170719 add by yanjun
 UPDATE  eh_launch_pad_items SET item_width = '1', action_data = CONCAT('{\"url\":\"http://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1&rtToken=hWSzn3doJ6_e63mZYCLlP5mastXzHbcObCnDX-T4k4bldRIx0sYCQBBcejQ3UYgfP66cwBnE9XIFMSICI4b1CwHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-flUIy8QPY_kfYuTL2u5dHRE"}')  WHERE  id in (116545, 116546) and namespace_id = 999973;
 
+-- 更新 任务管理icon图标  20170719 add by yanjun
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbU5tSXlZekl6TldGaVl6YzJOMkpsWmpsa05EQmlZbU5qTXprMU4yUXhaQQ' WHERE id IN (116547, 116548) AND namespace_id = 999973;
 
 
 
