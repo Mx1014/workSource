@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.entity.EntityType;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -114,7 +115,11 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	public SearchEquipmentStandardsResponse query(
 			SearchEquipmentStandardsCommand cmd) {
         Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_LIST, 0L);
-        userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+        if(cmd.getTargetId() != null) {
+            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+        } else {
+            userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+        }
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -137,6 +142,13 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
 //    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        if(cmd.getTargetId() != null) {
+            FilterBuilder tfb = FilterBuilders.termFilter("targetId", cmd.getTargetId());
+            tfb = FilterBuilders.orFilter(tfb, FilterBuilders.termFilter("targetId", ""));
+
+            fb = FilterBuilders.andFilter(fb, tfb);
+        }
+
         if(cmd.getStandardType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));
         
@@ -208,6 +220,12 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             b.field("inspectionCategoryId", standard.getInspectionCategoryId());
             b.field("status", standard.getStatus());
             b.field("namespaceId", standard.getNamespaceId());
+
+            if(standard.getTargetId() != null && standard.getTargetId() != 0L) {
+                b.field("targetId", standard.getTargetId());
+            } else {
+                b.field("targetId", "");
+            }
 
             b.endObject();
             return b;
