@@ -2,11 +2,14 @@
 package com.everhomes.portal;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +29,9 @@ import com.everhomes.util.DateHelper;
 @Component
 public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceModuleAppProviderImpl.class);
+
+
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -41,6 +47,26 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		getReadWriteDao().insert(serviceModuleApp);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleApps.class, null);
 	}
+
+	@Override
+	public void createServiceModuleApps(List<ServiceModuleApp> serviceModuleApps) {
+		LOGGER.debug("create service module app size = {}", serviceModuleApps.size());
+		if(serviceModuleApps.size() == 0){
+			return;
+		}
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleApps.class), (long)serviceModuleApps.size());
+		List<EhServiceModuleApps> moduleApps = new ArrayList<>();
+		for (ServiceModuleApp moduleApp: serviceModuleApps) {
+			id ++;
+			moduleApp.setId(id);
+			moduleApp.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			moduleApp.setUpdateTime(moduleApp.getCreateTime());
+			moduleApps.add(ConvertHelper.convert(moduleApp, EhServiceModuleApps.class));
+		}
+		getReadWriteDao().insert(moduleApps);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleApps.class, null);
+	}
+
 
 	@Override
 	public void updateServiceModuleApp(ServiceModuleApp serviceModuleApp) {

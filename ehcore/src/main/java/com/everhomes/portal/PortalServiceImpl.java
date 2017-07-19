@@ -135,6 +135,33 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
+	public List<ServiceModuleAppDTO> batchCreateServiceModuleApp(BatchCreateServiceModuleAppCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+		if(null == cmd.getModuleApps() || cmd.getModuleApps().size() == 0){
+
+		}
+
+		List<ServiceModuleApp> serviceModuleApps = new ArrayList<>();
+
+		for (CreateServiceModuleApp createModuleApp: cmd.getModuleApps()) {
+			ServiceModuleApp moduleApp = ConvertHelper.convert(createModuleApp, ServiceModuleApp.class);
+			ServiceModule serviceModule = checkServiceModule(createModuleApp.getModuleId());
+			moduleApp.setInstanceConfig(serviceModule.getInstanceConfig());
+			moduleApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
+			moduleApp.setCreatorUid(UserContext.current().getUser().getId());
+			moduleApp.setOperatorUid(moduleApp.getCreatorUid());
+			moduleApp.setActionType(serviceModule.getActionType());
+			moduleApp.setNamespaceId(namespaceId);
+			serviceModuleApps.add(moduleApp);
+		}
+		serviceModuleAppProvider.createServiceModuleApps(serviceModuleApps);
+		return serviceModuleApps.stream().map(r ->{
+			return processServiceModuleAppDTO(r);
+		}).collect(Collectors.toList());
+	}
+
+	@Override
 	public ServiceModuleAppDTO updateServiceModuleApp(UpdateServiceModuleAppCommand cmd) {
 		ServiceModuleApp moduleApp = checkServiceModuleApp(cmd.getId());
 		moduleApp.setOperatorUid(UserContext.current().getUser().getId());

@@ -13,6 +13,7 @@ public interface PortalService {
 
 	public ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd);
 
+	List<ServiceModuleAppDTO> batchCreateServiceModuleApp(BatchCreateServiceModuleAppCommand cmd);
 
 	public ServiceModuleAppDTO updateServiceModuleApp(UpdateServiceModuleAppCommand cmd);
 

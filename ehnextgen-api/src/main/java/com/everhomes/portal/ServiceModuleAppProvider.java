@@ -13,4 +13,5 @@ public interface ServiceModuleAppProvider {
 
 	List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId);
 
+	void createServiceModuleApps(List<ServiceModuleApp> serviceModuleApps);
 }

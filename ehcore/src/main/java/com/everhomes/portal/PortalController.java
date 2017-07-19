@@ -53,9 +53,9 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/batchCreateServiceModuleApp</b>
 	 */
 	@RequestMapping("batchCreateServiceModuleApp")
-	@RestReturn(ServiceModuleAppDTO.class)
+	@RestReturn(value = ServiceModuleAppDTO.class, collection = true)
 	public RestResponse batchCreateServiceModuleApp(BatchCreateServiceModuleAppCommand cmd){
-		return new RestResponse();
+		return new RestResponse(portalService.batchCreateServiceModuleApp(cmd));
 	}
 
 	/**
