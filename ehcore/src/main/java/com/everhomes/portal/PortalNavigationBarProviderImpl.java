@@ -57,11 +57,14 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
 	}
 	
 	@Override
-	public List<PortalNavigationBar> listPortalNavigationBar(Integer namespaceId) {
+	public List<PortalNavigationBar> listPortalNavigationBar(String ownerType, Long ownerId, Integer namespaceId) {
 		Condition cond = Tables.EH_PORTAL_NAVIGATION_BARS.STATUS.ne(PortalNavigationBarStatus.INACTIVE.getCode());
+		cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.OWNER_TYPE.eq(ownerType));
+		cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.OWNER_ID.eq(ownerId));
 		if(null != namespaceId){
 			cond = cond.and(Tables.EH_PORTAL_NAVIGATION_BARS.NAMESPACE_ID.eq(namespaceId));
 		}
+
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)
 				.where(cond)
 				.orderBy(Tables.EH_PORTAL_NAVIGATION_BARS.ID.asc())

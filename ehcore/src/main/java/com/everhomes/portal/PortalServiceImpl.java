@@ -878,7 +878,11 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public ListPortalNavigationBarsResponse listPortalNavigationBars(ListPortalNavigationBarsCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(namespaceId);
+		if(null != EntityType.fromCode(cmd.getOwnerType())){
+			cmd.setOwnerType(EntityType.ALL.getCode());
+			cmd.setOwnerId(0L);
+		}
+		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(cmd.getOwnerType(), cmd.getOwnerId(), namespaceId);
 		return new ListPortalNavigationBarsResponse(portalNavigationBars.stream().map(r ->{
 			return processPortalNavigationBarDTO(r);
 		}).collect(Collectors.toList()));
@@ -890,6 +894,8 @@ public class PortalServiceImpl implements PortalService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		PortalNavigationBar portalNavigationBar = ConvertHelper.convert(cmd, PortalNavigationBar.class);
 		if(null != EntityType.fromCode(cmd.getOwnerType())){
+			portalNavigationBar.setOwnerType(EntityType.ALL.getCode());
+			portalNavigationBar.setOwnerId(0L);
 		}
 		portalNavigationBar.setOperatorUid(user.getId());
 		portalNavigationBar.setCreatorUid(user.getId());

@@ -11,6 +11,6 @@ public interface PortalNavigationBarProvider {
 
 	PortalNavigationBar findPortalNavigationBarById(Long id);
 
-	List<PortalNavigationBar> listPortalNavigationBar(Integer namespaceId);
+	List<PortalNavigationBar> listPortalNavigationBar(String ownerType, Long ownerId, Integer namespaceId);
 
 }

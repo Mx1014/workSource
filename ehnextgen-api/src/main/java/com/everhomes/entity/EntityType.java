@@ -62,6 +62,7 @@ public enum EntityType {
     PORTAL_ITEM(EhPortalItems.class.getSimpleName()),
     PORTAL_ITEM_CATEGORY(EhPortalItemCategories.class.getSimpleName()),
     PORTAL_LAYOUT(EhPortalLayouts.class.getSimpleName()),
+    PORTAL_ITEM_GROUP(EhPortalItemGroups.class.getSimpleName()),
     SERVICE_MODULE_APP(EhServiceModuleApps.class.getSimpleName()),
     SERVICE_ALLIANCE(EhServiceAlliances.class.getSimpleName()),
     BIZ("EhBizs"),
