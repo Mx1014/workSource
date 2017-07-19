@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>keywords: 搜索关键词</li>
- * <li>organizationId: 部门id</li>
+ * <li>departmentId: 部门id</li>
  * <li>salaryGroupId: 薪酬批次id</li>
  * <li>isException: 是否筛选异常员工: 0-否 1-是</li>
  * <li>ownerType: 'organization'</li>
