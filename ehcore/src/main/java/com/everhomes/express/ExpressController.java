@@ -15,19 +15,37 @@ import com.everhomes.rest.express.CreateExpressOrderCommand;
 import com.everhomes.rest.express.CreateExpressOrderResponse;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
+import com.everhomes.rest.express.CreateOrUpdateExpressHotlineCommand;
+import com.everhomes.rest.express.CreateOrUpdateExpressHotlineResponse;
 import com.everhomes.rest.express.DeleteExpressAddressCommand;
+import com.everhomes.rest.express.DeleteExpressHotlineCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
+import com.everhomes.rest.express.GetExpressBusinessNoteCommand;
+import com.everhomes.rest.express.GetExpressBusinessNoteResponse;
+import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagCommand;
+import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagResponse;
+import com.everhomes.rest.express.GetExpressInsuredDocumentsCommand;
+import com.everhomes.rest.express.GetExpressInsuredDocumentsResponse;
 import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.rest.express.GetExpressOrderDetailCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailResponse;
+import com.everhomes.rest.express.GetExpressParamSettingResponse;
 import com.everhomes.rest.express.ListExpressAddressCommand;
 import com.everhomes.rest.express.ListExpressAddressResponse;
 import com.everhomes.rest.express.ListExpressCompanyCommand;
 import com.everhomes.rest.express.ListExpressCompanyResponse;
+import com.everhomes.rest.express.ListExpressHotlinesCommand;
+import com.everhomes.rest.express.ListExpressHotlinesResponse;
 import com.everhomes.rest.express.ListExpressOrderCommand;
 import com.everhomes.rest.express.ListExpressOrderResponse;
+import com.everhomes.rest.express.ListExpressPackageTypesCommand;
+import com.everhomes.rest.express.ListExpressPackageTypesResponse;
 import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
+import com.everhomes.rest.express.ListExpressSendModesCommand;
+import com.everhomes.rest.express.ListExpressSendModesResponse;
+import com.everhomes.rest.express.ListExpressSendTypesCommand;
+import com.everhomes.rest.express.ListExpressSendTypesResponse;
 import com.everhomes.rest.express.ListExpressUserCommand;
 import com.everhomes.rest.express.ListExpressUserResponse;
 import com.everhomes.rest.express.ListPersonalExpressOrderCommand;
@@ -36,6 +54,8 @@ import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
+import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
+import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
 import com.everhomes.rest.express.UpdatePaySummaryCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 
@@ -242,5 +262,124 @@ public class ExpressController extends ControllerBase {
 		expressService.clearExpressQueryHistory();
 		return new RestResponse();
 	}
+	
+	/**
+	 * <p>20.查询参数设置tab的显示标签(后台)</p>
+	 * <b>URL: /express/getExpressParamSetting</b>
+	 */
+	@RequestMapping("getExpressParamSetting")
+	@RestReturn(GetExpressParamSettingResponse.class)
+	public RestResponse getExpressParamSetting(){
+		return new RestResponse();
+	}
 
+	/**
+	 * <p>21.查询业务说明</p>
+	 * <b>URL: /express/getExpressBusinessNote</b>
+	 */
+	@RequestMapping("getExpressBusinessNote")
+	@RestReturn(GetExpressBusinessNoteResponse.class)
+	public RestResponse getExpressBusinessNote(GetExpressBusinessNoteCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>22.更新 业务说明</p>
+	 * <b>URL: /express/updateExpressBusinessNote</b>
+	 */
+	@RequestMapping("updateExpressBusinessNote")
+	@RestReturn(String.class)
+	public RestResponse updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>23.查询热线</p>
+	 * <b>URL: /express/listExpressHotlines</b>
+	 */
+	@RequestMapping("listExpressHotlines")
+	@RestReturn(ListExpressHotlinesResponse.class)
+	public RestResponse listExpressHotlines(ListExpressHotlinesCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>24.更新热线是否在app端显示标志</p>
+	 * <b>URL: /express/updateExpressHotlineFlag</b>
+	 */
+	@RequestMapping("updateExpressHotlineFlag")
+	@RestReturn(String.class)
+	public RestResponse updateExpressHotlineFlag(UpdateExpressHotlineFlagCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>25.创建or更新热线</p>
+	 * <b>URL: /express/createOrUpdateExpressHotline</b>
+	 */
+	@RequestMapping("createOrUpdateExpressHotline")
+	@RestReturn(CreateOrUpdateExpressHotlineResponse.class)
+	public RestResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>26.删除热线</p>
+	 * <b>URL: /express/deleteExpressHotline</b>
+	 */
+	@RequestMapping("deleteExpressHotline")
+	@RestReturn(String.class)
+	public RestResponse deleteExpressHotline(DeleteExpressHotlineCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>27.查询寄件类型列表(后台，app)</p>
+	 * <b>URL: /express/listExpressSendTypes</b>
+	 */
+	@RequestMapping("listExpressSendTypes")
+	@RestReturn(ListExpressSendTypesResponse.class)
+	public RestResponse listExpressSendTypes(ListExpressSendTypesCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>28.查询 热线和业务说明在app端是否显示(app)</p>
+	 * <b>URL: /express/getExpressHotlineAndBusinessNoteFlag</b>
+	 */
+	@RequestMapping("getExpressHotlineAndBusinessNoteFlag")
+	@RestReturn(GetExpressHotlineAndBusinessNoteFlagResponse.class)
+	public RestResponse getExpressHotlineAndBusinessNoteFlag(GetExpressHotlineAndBusinessNoteFlagCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>29.查询寄件方式列表 （app）</p>
+	 * <b>URL: /express/listExpressSendModes</b>
+	 */
+	@RequestMapping("listExpressSendModes")
+	@RestReturn(ListExpressSendModesResponse.class)
+	public RestResponse listExpressSendModes(ListExpressSendModesCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>30.查询封装类型列表 （app）</p>
+	 * <b>URL: /express/listExpressPackageTypes</b>
+	 */
+	@RequestMapping("listExpressPackageTypes")
+	@RestReturn(ListExpressPackageTypesResponse.class)
+	public RestResponse listExpressPackageTypes(ListExpressPackageTypesCommand cmd){
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>31.查询封装文案 （app）</p>
+	 * <b>URL: /express/getExpressInsuredDocuments</b>
+	 */
+	@RequestMapping("getExpressInsuredDocuments")
+	@RestReturn(GetExpressInsuredDocumentsResponse.class)
+	public RestResponse getExpressInsuredDocuments(GetExpressInsuredDocumentsCommand cmd){
+		return new RestResponse();
+	}
 }

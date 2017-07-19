@@ -479,7 +479,7 @@ public class ExpressServiceImpl implements ExpressService {
 			}
 			if (checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId())) {
 				ExpressOrderStatus status = ExpressOrderStatus.fromCode(expressOrder.getStatus());
-				if (status != ExpressOrderStatus.PAID && status != ExpressOrderStatus.FINISHED) {
+				if (status != ExpressOrderStatus.PAID && status != ExpressOrderStatus.PRINTED) {
 					throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be paid or printed");
 				}
 				if (expressOrder.getBillNo() == null) {
@@ -490,7 +490,7 @@ public class ExpressServiceImpl implements ExpressService {
 						String billNo = handler.getBillNo(expressOrder);
 						expressOrder.setBillNo(billNo);
 					}
-					expressOrder.setStatus(ExpressOrderStatus.FINISHED.getCode());
+					expressOrder.setStatus(ExpressOrderStatus.PRINTED.getCode());
 					expressOrderProvider.updateExpressOrder(expressOrder);
 				}
 				createExpressOrderLog(owner, ExpressActionEnum.PRINT, expressOrder, null);

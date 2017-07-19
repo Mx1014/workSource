@@ -6,12 +6,12 @@ package com.everhomes.rest.express;
  * <ul>
  * <li>WAITING_FOR_PAY: 1，待支持</li>
  * <li>PAID: 2，已支付</li>
- * <li>FINISHED: 3，已完成</li>
+ * <li>PRINTED: 3，已出单/已完成</li>
  * <li>CANCELLED: 4，已取消</li>
  * </ul>
  */
 public enum ExpressOrderStatus {
-	WAITING_FOR_PAY((byte)1), PAID((byte)2), FINISHED((byte)3), CANCELLED((byte)4);
+	WAITING_FOR_PAY((byte)1), PAID((byte)2), PRINTED((byte)3), CANCELLED((byte)4);
 	
 	private byte code;
 	

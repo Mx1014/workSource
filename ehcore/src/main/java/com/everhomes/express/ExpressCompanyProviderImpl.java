@@ -68,6 +68,7 @@ public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
 	
 	@Override
 	public List<ExpressCompany> listExpressCompanyByOwner(ExpressOwner owner) {
+		// TODO 这里根据namespace_id获取快递公司
 		if (owner != null) {
 			return getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANIES)
 					.where(Tables.EH_EXPRESS_COMPANIES.NAMESPACE_ID.eq(owner.getNamespaceId()))
