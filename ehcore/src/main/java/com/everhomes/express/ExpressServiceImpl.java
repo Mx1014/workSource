@@ -19,6 +19,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
@@ -33,7 +34,10 @@ import com.everhomes.rest.express.CreateExpressOrderResponse;
 import com.everhomes.rest.express.CreateExpressUserDTO;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
+import com.everhomes.rest.express.CreateOrUpdateExpressHotlineCommand;
+import com.everhomes.rest.express.CreateOrUpdateExpressHotlineResponse;
 import com.everhomes.rest.express.DeleteExpressAddressCommand;
+import com.everhomes.rest.express.DeleteExpressHotlineCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
 import com.everhomes.rest.express.ExpressActionEnum;
 import com.everhomes.rest.express.ExpressAddressDTO;
@@ -46,18 +50,33 @@ import com.everhomes.rest.express.ExpressQueryHistoryDTO;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
 import com.everhomes.rest.express.ExpressServiceErrorCode;
 import com.everhomes.rest.express.ExpressUserDTO;
+import com.everhomes.rest.express.GetExpressBusinessNoteCommand;
+import com.everhomes.rest.express.GetExpressBusinessNoteResponse;
+import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagCommand;
+import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagResponse;
+import com.everhomes.rest.express.GetExpressInsuredDocumentsCommand;
+import com.everhomes.rest.express.GetExpressInsuredDocumentsResponse;
 import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.rest.express.GetExpressOrderDetailCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailResponse;
+import com.everhomes.rest.express.GetExpressParamSettingResponse;
 import com.everhomes.rest.express.ListExpressAddressCommand;
 import com.everhomes.rest.express.ListExpressAddressResponse;
 import com.everhomes.rest.express.ListExpressCompanyCommand;
 import com.everhomes.rest.express.ListExpressCompanyResponse;
+import com.everhomes.rest.express.ListExpressHotlinesCommand;
+import com.everhomes.rest.express.ListExpressHotlinesResponse;
 import com.everhomes.rest.express.ListExpressOrderCommand;
 import com.everhomes.rest.express.ListExpressOrderCondition;
 import com.everhomes.rest.express.ListExpressOrderResponse;
+import com.everhomes.rest.express.ListExpressPackageTypesCommand;
+import com.everhomes.rest.express.ListExpressPackageTypesResponse;
 import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
+import com.everhomes.rest.express.ListExpressSendModesCommand;
+import com.everhomes.rest.express.ListExpressSendModesResponse;
+import com.everhomes.rest.express.ListExpressSendTypesCommand;
+import com.everhomes.rest.express.ListExpressSendTypesResponse;
 import com.everhomes.rest.express.ListExpressUserCommand;
 import com.everhomes.rest.express.ListExpressUserCondition;
 import com.everhomes.rest.express.ListExpressUserResponse;
@@ -67,6 +86,8 @@ import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
+import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
+import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
 import com.everhomes.rest.express.UpdatePaySummaryCommand;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -86,6 +107,15 @@ import com.everhomes.util.StringHelper;
 public class ExpressServiceImpl implements ExpressService {
 	
 	private static final int ORDER_NO_LENGTH = 18;
+	
+	@Autowired
+	private ExpressParamSettingProvider expressParamSettingProvider;
+	
+	@Autowired
+	private ExpressHotlineProvider expressHotlineProvider;
+	
+	@Autowired
+	private ExpressCompanyBusinessProvider expressCompanyBusinessProvider;
 	
 	@Autowired
 	private ExpressServiceAddressProvider expressServiceAddressProvider;
@@ -701,6 +731,10 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrder.setInsuredPrice(cmd.getInsuredPrice());
 		expressOrder.setStatus(ExpressOrderStatus.WAITING_FOR_PAY.getCode());
 		expressOrder.setPaidFlag(TrueOrFalseFlag.FALSE.getCode());
+		// add by dengs,invoice add!
+		expressOrder.setInvoiceFlag(cmd.getInvoiceFlag());
+		expressOrder.setInvoiceHead(cmd.getInvoiceHead());
+		expressOrder.setPackageType(cmd.getPackageType());
 		expressOrderProvider.createExpressOrder(expressOrder);
 		return expressOrder;
 	}
@@ -747,6 +781,7 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderDTO.setReceiveName(expressOrder.getReceiveName());
 		expressOrderDTO.setCreateTime(expressOrder.getUpdateTime());
 		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
+		expressOrderDTO.setSendType(expressOrder.getSendType());//加上业务类别
 		expressOrderDTO.setExpressLogoUrl(getUrl(getExpressCompanyLogo(expressOrder.getExpressCompanyId())));
 		return expressOrderDTO;
 	}
@@ -852,6 +887,83 @@ public class ExpressServiceImpl implements ExpressService {
 			Integer namespaecId = UserContext.getCurrentNamespaceId();
 			expressQueryHistoryProvider.clearExpressQueryHistory(namespaecId, user.getId());
 		}
+	}
+
+	@Override
+	public GetExpressParamSettingResponse getExpressParamSetting() {
+		int ownerId = UserContext.getCurrentNamespaceId();
+		int namespaceId = ownerId;
+		String ownerType = EntityType.NAMESPACE.getCode();
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(namespaceId,ownerType,ownerId);
+		return ConvertHelper.convert(setting, GetExpressParamSettingResponse.class);
+	}
+
+	@Override
+	public GetExpressBusinessNoteResponse getExpressBusinessNote(GetExpressBusinessNoteCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(owner.getNamespaceId(),owner.getOwnerType().getCode(),owner.getOwnerId());
+		return ConvertHelper.convert(setting, GetExpressBusinessNoteResponse.class);
+	}
+
+	@Override
+	public String updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ListExpressHotlinesResponse listExpressHotlines(ListExpressHotlinesCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String updateExpressHotlineFlag(UpdateExpressHotlineFlagCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CreateOrUpdateExpressHotlineResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String deleteExpressHotline(DeleteExpressHotlineCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ListExpressSendTypesResponse listExpressSendTypes(ListExpressSendTypesCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public GetExpressHotlineAndBusinessNoteFlagResponse getExpressHotlineAndBusinessNoteFlag(
+			GetExpressHotlineAndBusinessNoteFlagCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ListExpressSendModesResponse listExpressSendModes(ListExpressSendModesCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ListExpressPackageTypesResponse listExpressPackageTypes(ListExpressPackageTypesCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public GetExpressInsuredDocumentsResponse getExpressInsuredDocuments(GetExpressInsuredDocumentsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

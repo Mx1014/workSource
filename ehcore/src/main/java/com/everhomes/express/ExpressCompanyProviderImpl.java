@@ -79,7 +79,7 @@ public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
 					.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));
 		}
 		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANIES)
-				.where(Tables.EH_EXPRESS_COMPANIES.PARENT_ID.eq(0L))
+				.where(Tables.EH_EXPRESS_COMPANIES.PARENT_ID.eq(999985L))
 				.and(Tables.EH_EXPRESS_COMPANIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_EXPRESS_COMPANIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));

@@ -13,4 +13,6 @@ public interface ExpressParamSettingProvider {
 
 	List<ExpressParamSetting> listExpressParamSetting();
 
+	ExpressParamSetting getExpressParamSettingByOwner(int namespaceId, String ownerType, long ownerId);
+
 }

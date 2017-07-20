@@ -270,7 +270,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("getExpressParamSetting")
 	@RestReturn(GetExpressParamSettingResponse.class)
 	public RestResponse getExpressParamSetting(){
-		return new RestResponse();
+		return new RestResponse(expressService.getExpressParamSetting());
 	}
 
 	/**
@@ -280,7 +280,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("getExpressBusinessNote")
 	@RestReturn(GetExpressBusinessNoteResponse.class)
 	public RestResponse getExpressBusinessNote(GetExpressBusinessNoteCommand cmd){
-		return new RestResponse();
+		return new RestResponse(expressService.getExpressBusinessNote(cmd));
 	}
 	
 	/**

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -13,6 +14,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressParamSettingsDao;
@@ -62,6 +64,21 @@ public class ExpressParamSettingProviderImpl implements ExpressParamSettingProvi
 		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_PARAM_SETTINGS)
 				.orderBy(Tables.EH_EXPRESS_PARAM_SETTINGS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressParamSetting.class));
+	}
+	
+	@Override
+	@Cacheable(value = "getExpressParamSettingByOwner", key = "{#namespaceId,#ownerType,#ownerId}", unless = "#result == null")
+	public ExpressParamSetting getExpressParamSettingByOwner(int namespaceId, String ownerType, long ownerId) {
+		List<ExpressParamSetting> list = getReadOnlyContext().select().from(Tables.EH_EXPRESS_PARAM_SETTINGS)
+		.where(Tables.EH_EXPRESS_PARAM_SETTINGS.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_EXPRESS_PARAM_SETTINGS.OWNER_TYPE.eq(ownerType))
+		.and(Tables.EH_EXPRESS_PARAM_SETTINGS.OWNER_ID.eq(ownerId))
+		.and(Tables.EH_EXPRESS_PARAM_SETTINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+		.fetch().map(r -> ConvertHelper.convert(r, ExpressParamSetting.class));
+		if(list != null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
 	}
 	
 	private EhExpressParamSettingsDao getReadWriteDao() {
