@@ -1331,13 +1331,15 @@ public class NewsServiceImpl implements NewsService {
 			if(StringUtils.isEmpty(highlight.getString("title"))){
 				dto.setSubject(source.getString("title"));
 			} else {
-				dto.setSubject(highlight.getString("title"));
+				String subject = getFromHighlight(highlight, "title");
+				dto.setSubject(subject);
 			}
 			
 			if(StringUtils.isEmpty(highlight.getString("content"))){
 				dto.setContent(source.getString("content"));
 			} else {
-				dto.setContent(highlight.getString("content"));
+				String content = getFromHighlight(highlight, "content");
+				dto.setContent(content);
 			}
 			
 			dto.setPostUrl(source.getString("coverUri"));
@@ -1355,7 +1357,8 @@ public class NewsServiceImpl implements NewsService {
 			if(StringUtils.isEmpty(highlight.getString("sourceDesc"))){
 				footNote.setSourceDesc(source.getString("sourceDesc"));
 			} else {
-				footNote.setSourceDesc(highlight.getString("sourceDesc"));
+				String sourceDesc = getFromHighlight(highlight, "sourceDesc");
+				footNote.setSourceDesc(sourceDesc);
 			}
 			
 			dto.setFootnoteJson(StringHelper.toJsonString(footNote));
@@ -1366,6 +1369,17 @@ public class NewsServiceImpl implements NewsService {
 		response.setDtos(dtos);
 		response.setNextPageAnchor(nextPageAnchor);
 		return response;
+	}
+
+	// 原来直接使用getString，若是数据则会前后多出"[]"。此处先当jsonArray处理，有异常则使用原始的方式。 edit by yanjun 20170720
+	private String getFromHighlight(JSONObject highlight, String key){
+		try{
+			JSONArray jsonarr  = JSONArray.parseArray(highlight.getString(key));
+			return  jsonarr.getString(0);
+		}catch (Exception ex){
+			return highlight.getString(key);
+		}
+
 	}
 	
 	private String timeToStr(Timestamp time) {
