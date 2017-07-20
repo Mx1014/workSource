@@ -5512,19 +5512,22 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (memberLogList != null) {
                 organizationMembers = memberLogList.stream()
                         .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
-                        .flatMap(r -> {
+                        .map(r -> {
                             List<OrganizationMember> list = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
-                            if (list != null) {
-                                return list.stream().filter(Objects::nonNull)
+                            if (list != null && list.size() > 0) {
+                                list = list.stream()
                                         .filter(member -> OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE)
+                                        // .limit(1)
                                         .map(member -> {
                                             member.setOperatorUid(r.getOperatorUid());
                                             member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
                                             member.setContactName(r.getContactName());
                                             member.setContactToken(r.getContactToken());
                                             return member;
-                                        })
-                                        .limit(1);
+                                        }).collect(Collectors.toList());
+                                if (list.size() > 0) {
+                                    return list.get(0);
+                                }
                             }
                             return null;
                         })
@@ -5549,14 +5552,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                 dto.setOperatorName(operator != null ? operator.getNickName() : "");
                 dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
             }
-            // if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
-            if (c.getTargetId() != null) {
-                User user = userProvider.findUserById(c.getTargetId());
-                if (user != null) {
-                    dto.setNickName(user.getNickName());
+            if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
+                if (c.getTargetId() != null && c.getTargetId() != 0) {
+                    User user = userProvider.findUserById(c.getTargetId());
+                    if (user != null) {
+                        dto.setNickName(user.getNickName());
+                    }
                 }
             }
-            // }
             if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                 Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                 if (organization != null) {
