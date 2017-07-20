@@ -3698,7 +3698,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			command.setNamespaceId(dto.getNamespaceId());
 			command.setOsType(OSType.Android.getCode());
 			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
-			appUrlDTO.setLogoUrl("http://content-1.zuolin.com/image/aW1hZ2UvTVRveVpETXpaamMxTldReE0yTmpOREpsWmpnME5qTmlPV1V3TmpBd1lXUm1Zdw?ownerType=EhUsers&ownerId=274001&token=sQKk7fL3_cYNG_PRaqq_0k4CYM7BYosYLrm0No1IVJPjMI4d-k-ojAcYN94N3b31je_LMI7geEo_B_IYnzhwyvtngnBGdtiCoN_RlcoMrIE7AQaRlTtG1dfNzMTsm3Tb&pxw=165&pxh=165&config=100_100");
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("app logo url : {}", appUrlDTO.getLogoUrl());
+			}
 			if(appUrlDTO.getLogoUrl() != null) {
 				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
 			}

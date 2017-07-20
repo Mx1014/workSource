@@ -2371,8 +2371,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 		dataMap.put("address", dto.getAddress());
 		dataMap.put("requestorName", dto.getRequestorName());
 		dataMap.put("requestorPhone", dto.getRequestorPhone());
-		dataMap.put("processingTime", datetimeSF.format(dto.getProcessingTime()));
-		dataMap.put("reserveTime", datetimeSF.format(dto.getReserveTime()));
+		if(dto.getProcessingTime() != null) {
+			dataMap.put("processingTime", datetimeSF.format(dto.getProcessingTime()));
+		} else {
+			dataMap.put("processingTime", "");
+		}
+
+		if(dto.getReserveTime() != null) {
+			dataMap.put("reserveTime", datetimeSF.format(dto.getReserveTime()));
+		} else {
+			dataMap.put("reserveTime", "");
+		}
+
 
 		Community community = communityProvider.findCommunityById(dto.getOwnerId());
 		Organization org = organizationProvider.findOrganizationByCommunityIdAndOrgType(dto.getOwnerId(), OrganizationType.PM.getCode());
