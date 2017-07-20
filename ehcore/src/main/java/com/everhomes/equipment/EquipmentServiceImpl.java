@@ -3698,6 +3698,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			command.setNamespaceId(dto.getNamespaceId());
 			command.setOsType(OSType.Android.getCode());
 			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+			appUrlDTO.setLogoUrl("cs://1/image/aW1hZ2UvTVRveVpETXpaamMxTldReE0yTmpOREpsWmpnME5qTmlPV1V3TmpBd1lXUm1Zdw");
 			if(appUrlDTO.getLogoUrl() != null) {
 				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
 			}
