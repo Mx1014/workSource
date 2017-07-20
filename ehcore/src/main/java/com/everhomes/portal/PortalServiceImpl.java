@@ -974,7 +974,10 @@ public class PortalServiceImpl implements PortalService {
 				dto.setContentName(moduleAppTitle + "-" + serviceModuleApp.getName());
 			}
 		}
-
+		if(!StringUtils.isEmpty(portalNavigationBar.getIconUri())){
+			String url = contentServerService.parserUri(portalNavigationBar.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+			dto.setIconUrl(url);
+		}
 		return dto;
 	}
 
