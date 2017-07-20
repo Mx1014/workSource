@@ -417,4 +417,6 @@ public interface OrganizationProvider {
 
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
+	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
+
 }

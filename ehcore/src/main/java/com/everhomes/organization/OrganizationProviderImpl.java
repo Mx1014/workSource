@@ -4827,7 +4827,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return false;
 	}
 
-    @Override
+	@Override
     public List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds) {
         List<OrganizationCommunityRequest> results = new ArrayList<OrganizationCommunityRequest>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -4841,4 +4841,25 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         });
         return results;
     }
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId, List<String> groupTypes) {
+		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> query = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
+		query = query.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		if(groupTypes != null && groupTypes.size()>0){
+			query = query.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+		}
+		List<Record> records = query.fetch();
+
+		if (records != null && !records.isEmpty()) {
+			for (Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationMember.class));
+		}
+
+		return list;
+	}
+
 }

@@ -763,7 +763,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         resp.setNextPageAnchor(rlt.getPageAnchor());
 		return resp;
 	}
-	
+
 	@Override
 	public ListEnterprisesCommandResponse listEnterprises(
 			ListEnterprisesCommand cmd) {
@@ -890,10 +890,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("dto : {}", organizationDetailDTO);
 			throw e;
 		}
-		
+
 		return exportDetailDTO;
 	}
-	
+
 	private String toAdminString(OrganizationContactDTO organizationContactDTO) {
 		return organizationContactDTO.getContactName()+"("+organizationContactDTO.getContactToken()+")";
 	}
@@ -1189,7 +1189,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void updateEnterprise(UpdateEnterpriseCommand cmd) {
         updateEnterprise(cmd, true);
     }
-	
+
 	public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());
@@ -5104,7 +5104,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private List<OrganizationMember> listOrganizationMemberByOrganizationPathAndContactToken(String path, String contactToken) {
         return organizationProvider.listOrganizationMemberByPath(path, null, contactToken);
     }
-	
+
 	@Override
 	public List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
@@ -6231,11 +6231,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
 		for(int i = 1; i < list.size(); i++) {
 			RowResult r = (RowResult)list.get(i);
-			if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) || 
-					org.apache.commons.lang.StringUtils.isNotBlank(r.getC()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getD()) || 
-					org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) || 
-					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) || 
-					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) || 
+			if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) ||
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getC()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getD()) ||
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) ||
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) ||
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
 			ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
 			if(null != r.getA())
@@ -6331,7 +6331,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		// 业务太复杂，导入企业时如果本身系统里面已存在，要覆盖掉，如果是本次导入了同一企业多行，要合并门牌及管理员
 		Map<Long, List<Long>> orgAddressIds = new HashMap<>();
 		Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
-		
+
         for (ImportEnterpriseDataDTO data : list) {
             CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
             ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
@@ -9155,8 +9155,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationDTO> jobPositions = new ArrayList<OrganizationDTO>();
         List<OrganizationDTO> jobLevels = new ArrayList<OrganizationDTO>();
         List<Long> enterpriseIds = new ArrayList<>();
-        List<Long> memberDetailIds = new ArrayList<>();
-        List<Long> current_detailId = new ArrayList<>();
+//        List<Long> current_detailId = new ArrayList<>();
         // 需要添加直属的企业ID集合
         List<Long> direct_under_enterpriseIds = new ArrayList<>();
 
@@ -9257,6 +9256,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
 
+            Long new_detail_id = 0L;
+
 			//加入到公司
             for (Long enterpriseId : enterpriseIds) {
                 OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), enterpriseId);
@@ -9266,7 +9267,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationMember.setGroupPath(enterprise.getPath());
 
                 //获取detailId
-                Long new_detail_id = getEnableDetailOfOrganizationMember(organizationMember, enterpriseId);
+                new_detail_id = getEnableDetailOfOrganizationMember(organizationMember, enterpriseId);
 
                 if (null == desOrgMember) {
                     // 记录一下，成员是新加入公司的
@@ -9275,11 +9276,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
-                    memberDetailIds.add(new_detail_id);
                     //保存当前企业关联的detailId,用于多个返回值时进行比对
-                    if(enterpriseId.equals(org.getId())){
-                        current_detailId.add(new_detail_id);
-                    }
+//                    if(enterpriseId.equals(org.getId())){
+//                        current_detailId.add(new_detail_id);
+//                    }
                     //新增userOrganization表记录
                     //仅当target为user且grouptype为企业时添加
                     if(organizationMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && organizationMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
@@ -9293,11 +9293,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     desOrgMember.setGroupType(organizationMember.getGroupType());
                     desOrgMember.setGroupPath(organizationMember.getGroupPath());
                     organizationProvider.updateOrganizationMember(desOrgMember);
-                    memberDetailIds.add(new_detail_id);
                     //保存当前企业关联的detailId,用于多个返回值时进行比对
-                    if (enterpriseId.equals(org.getId())) {
-                        current_detailId.add(new_detail_id);
-                    }
+//                    if (enterpriseId.equals(org.getId())) {
+//                        current_detailId.add(new_detail_id);
+//                    }
                     //更新userOrganization表记录
                     //仅当target为user且grouptype为企业时添加
                     if (desOrgMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && desOrgMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())) {
@@ -9321,9 +9320,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             dto.setJobLevels(jobLevels);
 
-            dto.setMemberDetailIds(memberDetailIds);
+            dto.setMemberDetailIds(Collections.singletonList(new_detail_id));
 
-            dto.setDetailId(current_detailId.get(0));
+            dto.setDetailId(new_detail_id);
 
             return null;
         });
@@ -9351,7 +9350,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setRequestType(RequestType.ADMIN.getCode());
                 orgLog.setOperatorUid(UserContext.current().getUser().getId());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
-				
+
 				//自动加入公司
 				this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), enterpriseId, organizationMember.getTargetId());
             }
@@ -10447,7 +10446,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         if (memberDetails != null) {
-            OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
+//            OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
+            List<String> types = new ArrayList<>();
+            types.add(OrganizationGroupType.ENTERPRISE.getCode());
+            List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByDetailId(cmd.getDetailId(), types);
+            OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(members.get(0), OrganizationMemberBasicDTO.class);
 
             //  计算在职天数
             Long workingDays = ((new Timestamp(DateHelper.currentGMTTime().getTime()).getTime() - memberDetails.getCheckInTime().getTime()) / (24 * 60 * 60 * 1000));
@@ -11088,11 +11091,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     /**Modify BY lei.lv cause MemberDetail**/
                     if (OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(group.getGroupType())) {
+
+                        Long enterpriseId = getTopEnterpriserIdOfOrganization(oId);
                         //找到部门对应的资料表记录
-                        OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(group.getDirectlyEnterpriseId(), contact_token);
+                        OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(enterpriseId, contact_token);
                         if (old_detail == null) {
                             LOGGER.error("Cannot find memberDetail of DirectlyEnterpriseId for this org。orgId={}", oId);
-                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE,
+                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
                                     "Cannot find memberDetail of DirectlyEnterpriseId for this org");
                         }
                         member.setDetailId(old_detail.getId());
@@ -12276,18 +12281,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private Long getEnableDetailOfOrganizationMember(OrganizationMember organizationMember, Long organizationId){
 
         //因为organizationId传入的可能是分工司的id，所以在此出要重新定向为总公司的id
-        Organization org = checkOrganization(organizationId);
-        //如果是分公司
-        if(org != null && org.getParentId() != 0){
-            Organization enterprise =  checkOrganization(org.getParentId());
-            if(enterprise != null && enterprise.getParentId() == 0){
-                organizationId = enterprise.getId();
-            }else{
-                LOGGER.error("Enterprise is not found or error. orgId = {}", organizationId);
-                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-                        "Enterprise is not found or error");
-            }
-        }
+        organizationId = getTopOrganizationId(organizationId);
 
         //更新或创建detail记录
         OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, organizationMember.getContactToken());
@@ -12414,6 +12408,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 //            organizationProvider.createOrganizationMember(organizationMember);
         }
         return organizationMember;// add by xq.tian 2017/07/05
+    }
+
+
+    /**获取一个组织的总公司ID**/
+    private Long getTopEnterpriserIdOfOrganization(Long organizationId){
+        Organization org = checkOrganization(organizationId);
+        //判断是总公司
+        if(org != null && org.getParentId() == 0L && org.getGroupType() == OrganizationGroupType.ENTERPRISE.getCode()){
+            return organizationId;
+        }
+        //不是总公司
+        if(org != null && !StringUtils.isEmpty(org.getPath())){
+            return Long.valueOf(org.getPath().split("/")[1]);
+        }else{
+            return null;
+        }
+
     }
 }
 
