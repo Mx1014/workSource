@@ -47,6 +47,7 @@ public interface PortalService {
 
 	public ListPortalItemsResponse listPortalItems(ListPortalItemsCommand cmd);
 
+	List<PortalItemDTO> listPortalItemsByItemGroupId(ListPortalItemsCommand cmd);
 
 	public PortalItemDTO createPortalItem(CreatePortalItemCommand cmd);
 

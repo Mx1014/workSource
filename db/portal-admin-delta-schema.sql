@@ -36,8 +36,6 @@ CREATE TABLE `eh_service_module_apps` (
 CREATE TABLE `eh_portal_navigation_bars` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `owner_type` varchar(64) NOT NULL,
-  `owner_id` bigint(20) NOT NULL,
   `label` varchar(64) DEFAULT NULL,
   `target_type` varchar(64) NOT NULL,
   `target_id` bigint(20) NOT NULL,

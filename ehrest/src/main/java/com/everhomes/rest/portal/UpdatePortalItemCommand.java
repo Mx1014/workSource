@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>label: 门户itemGroup名称</li>
  * <li>description: 门户itemGroup描述</li>
  * <li>iconUri: icon图片的uri</li>
+ * <li>selectedIconUri: 被选中icon图片的uri</li>
  * <li>status: 状态</li>
  * <li>actionType: 跳转类型</li>
  * <li>actionData: 跳转参数，无：无参数，门户：门户id(例如：{'layoutId':1})，业务应用：应用id(例如：{'moduleAppId':1})，电商：还未定义，更多/全部：类型(例如：{'type':'more'}或者{'type':'all'}</li>
@@ -28,6 +29,8 @@ public class UpdatePortalItemCommand {
 	private String description;
 
 	private String iconUri;
+
+	private String selectedIconUri;
 
 	private Byte status;
 
@@ -116,6 +119,14 @@ public class UpdatePortalItemCommand {
 
 	public void setScopes(List<PortalScope> scopes) {
 		this.scopes = scopes;
+	}
+
+	public String getSelectedIconUri() {
+		return selectedIconUri;
+	}
+
+	public void setSelectedIconUri(String selectedIconUri) {
+		this.selectedIconUri = selectedIconUri;
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>description: 门户item描述</li>
  * <li>itemWidth: 栏目占列比</li>
  * <li>iconUri: icon图片的uri</li>
+ * <li>selectedIconUri: 被选中icon图片的uri</li>
  * <li>bgcolor: 底版颜色</li>
  * <li>status: 状态</li>
  * <li>actionType: 跳转类型</li>
@@ -34,6 +35,8 @@ public class CreatePortalItemCommand {
 	private String bgcolor;
 
 	private String iconUri;
+
+	private String selectedIconUri;
 
 	private Byte status;
 
@@ -148,6 +151,14 @@ public class CreatePortalItemCommand {
 
 	public void setScopes(List<PortalScope> scopes) {
 		this.scopes = scopes;
+	}
+
+	public String getSelectedIconUri() {
+		return selectedIconUri;
+	}
+
+	public void setSelectedIconUri(String selectedIconUri) {
+		this.selectedIconUri = selectedIconUri;
 	}
 
 	@Override

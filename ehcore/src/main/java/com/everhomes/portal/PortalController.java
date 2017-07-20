@@ -290,6 +290,16 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>19.查询item group下的item</p>
+	 * <b>URL: /portal/getPortalItemsByItemGroupId</b>
+	 */
+	@RequestMapping("getPortalItemsByItemGroupId")
+	@RestReturn(value = PortalItemDTO.class, collection = true)
+	public RestResponse getPortalItemsByItemGroupId(ListPortalItemsCommand cmd){
+		return new RestResponse(portalService.listPortalItemsByItemGroupId(cmd));
+	}
+
+	/**
 	 * <p>20.门户item分类列表</p>
 	 * <b>URL: /portal/listPortalItemCategories</b>
 	 */

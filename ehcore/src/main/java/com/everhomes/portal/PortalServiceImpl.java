@@ -441,6 +441,16 @@ public class PortalServiceImpl implements PortalService {
 		return response;
 	}
 
+
+	@Override
+	public List<PortalItemDTO> listPortalItemsByItemGroupId(ListPortalItemsCommand cmd) {
+		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(cmd.getItemGroupId());
+		return portalItems.stream().map(r ->{
+			return processPortalItemDTO(r);
+		}).collect(Collectors.toList());
+	}
+
+
 	@Override
 	public PortalItemDTO createPortalItem(CreatePortalItemCommand cmd) {
 		PortalItemGroup portalItemGroup = checkPortalItemGroup(cmd.getItemGroupId());
@@ -485,6 +495,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItem.setActionData(cmd.getActionData());
 		portalItem.setDescription(cmd.getDescription());
 		portalItem.setIconUri(cmd.getIconUri());
+		portalItem.setSelectedIconUri(cmd.getSelectedIconUri());
 		this.dbProvider.execute((status) -> {
 			portalItemProvider.updatePortalItem(portalItem);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
@@ -527,6 +538,11 @@ public class PortalServiceImpl implements PortalService {
 			dto.setIconUrl(url);
 		}
 
+		if(!StringUtils.isEmpty(portalItem.getSelectedIconUri())){
+			String url = contentServerService.parserUri(portalItem.getSelectedIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+			dto.setSelectediconUrl(url);
+		}
+
 		if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
 			if(AllOrMoreType.ALL == AllOrMoreType.fromCode(actionData.getType())){
@@ -557,6 +573,11 @@ public class PortalServiceImpl implements PortalService {
 
 		List<PortalContentScope> portalContentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
 		dto.setScopes(processListPortalContentScopeDTO(portalContentScopes));
+
+		User user = userProvider.findUserById(portalItem.getOperatorUid());
+		if(null != user){
+			dto.setOperatorUName(user.getNickName());
+		}
 
 		return dto;
 	}
@@ -878,11 +899,7 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public ListPortalNavigationBarsResponse listPortalNavigationBars(ListPortalNavigationBarsCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		if(null != EntityType.fromCode(cmd.getOwnerType())){
-			cmd.setOwnerType(EntityType.ALL.getCode());
-			cmd.setOwnerId(0L);
-		}
-		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(cmd.getOwnerType(), cmd.getOwnerId(), namespaceId);
+		List<PortalNavigationBar> portalNavigationBars = portalNavigationBarProvider.listPortalNavigationBar(namespaceId);
 		return new ListPortalNavigationBarsResponse(portalNavigationBars.stream().map(r ->{
 			return processPortalNavigationBarDTO(r);
 		}).collect(Collectors.toList()));
@@ -893,10 +910,6 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		PortalNavigationBar portalNavigationBar = ConvertHelper.convert(cmd, PortalNavigationBar.class);
-		if(null != EntityType.fromCode(cmd.getOwnerType())){
-			portalNavigationBar.setOwnerType(EntityType.ALL.getCode());
-			portalNavigationBar.setOwnerId(0L);
-		}
 		portalNavigationBar.setOperatorUid(user.getId());
 		portalNavigationBar.setCreatorUid(user.getId());
 		portalNavigationBar.setNamespaceId(namespaceId);
@@ -1079,21 +1092,18 @@ public class PortalServiceImpl implements PortalService {
 //				config.setSubjectHeight();
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.ACTIVITY){
 					itemGroup.setName("OPPushActivity");
-					publishOPPushItem(itemGroup);
 				}
-
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.SERVICE_ALLIANCE){
-					publishOPPushItem(itemGroup);
 				}
-
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
 					itemGroup.setName("OPPushBiz");
-					publishOPPushItem(itemGroup);
 				}
+				publishOPPushItem(itemGroup);
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(StringHelper.toJsonString(config));
 			}else if(Widget.fromCode(group.getWidget()) == Widget.TAB){
 				TabInstanceConfig config = new TabInstanceConfig();
+				publishTabItem(itemGroup);
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(StringHelper.toJsonString(config));
 			}
@@ -1142,6 +1152,35 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
+	private void publishTabItem(PortalItemGroup itemGroup){
+		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId());
+		for (PortalItem portalItem: portalItems) {
+			LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
+			if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
+				setItemLayoutActionData(item, portalItem.getActionData());
+			}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){
+				setItemModuleAppActionData(item, portalItem.getActionData());
+			}
+
+			item.setAppId(AppConstants.APPID_DEFAULT);
+			item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+			item.setMinVersion(1L);
+			item.setItemGroup(portalItem.getGroupName());
+			item.setItemLabel(portalItem.getLabel());
+			item.setItemName(portalItem.getName());
+			item.setDeleteFlag(DeleteFlagType.YES.getCode());
+			item.setScaleType(ScaleType.TAILOR.getCode());
+
+			for (SceneType sceneType: SceneType.values()) {
+				if(sceneType == SceneType.PARK_TOURIST ||
+						sceneType == SceneType.PM_ADMIN){
+					item.setSceneType(sceneType.getCode());
+					launchPadProvider.createLaunchPadItem(item);
+				}
+			}
+		}
+	}
+
 	private void publishOPPushItem(PortalItemGroup itemGroup){
 		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(itemGroup.getLayoutId());
 		LaunchPadItem item = new LaunchPadItem();
@@ -1153,6 +1192,7 @@ public class PortalServiceImpl implements PortalService {
 		item.setItemLabel(instanceConfig.getTitle());
 		item.setItemName(instanceConfig.getTitle());
 		item.setDeleteFlag(DeleteFlagType.YES.getCode());
+		item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
 		item.setScaleType(ScaleType.TAILOR.getCode());
 		item.setScopeCode(ScopeType.ALL.getCode());
 		item.setScopeId(0L);
@@ -1217,28 +1257,9 @@ public class PortalServiceImpl implements PortalService {
 					}
 
 					if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
-						item.setActionType(ActionType.NAVIGATION.getCode());
-						LayoutActionData data = (LayoutActionData)StringHelper.fromJsonString(portalItem.getActionData(), LayoutActionData.class);
-						PortalLayout layout = portalLayoutProvider.findPortalLayoutById(data.getLayoutId());
-						if(null != layout){
-							NavigationActionData actionData = new NavigationActionData();
-							actionData.setItemLocation(getItemLocation(layout.getName()));
-							actionData.setLayoutName(layout.getName());
-							actionData.setTitle(layout.getLabel());
-							item.setActionData(StringHelper.toJsonString(actionData));
-						}else{
-							LOGGER.error("Unable to find the portal layout.id = {}, actionData = {}", data.getLayoutId(), portalItem.getActionData());
-							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-									"Unable to find the portal layout.");
-						}
-
+						setItemLayoutActionData(item, portalItem.getActionData());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){
-						ModuleAppActionData data = (ModuleAppActionData)StringHelper.fromJsonString(portalItem.getActionData(), ModuleAppActionData.class);
-						ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(data.getModuleAppId());
-						if(null != moduleApp){
-							item.setActionType(moduleApp.getActionType());
-							item.setActionData(moduleApp.getInstanceConfig());
-						}
+						setItemModuleAppActionData(item, portalItem.getActionData());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ZUOLINURL){
 						item.setActionType(ActionType.OFFICIAL_URL.getCode());
 						item.setActionData(portalItem.getActionData());
@@ -1280,6 +1301,31 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
+	private void setItemLayoutActionData(LaunchPadItem item, String actionData){
+		item.setActionType(ActionType.NAVIGATION.getCode());
+		LayoutActionData data = (LayoutActionData)StringHelper.fromJsonString(actionData, LayoutActionData.class);
+		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(data.getLayoutId());
+		if(null != layout){
+			NavigationActionData navigationActionData = new NavigationActionData();
+			navigationActionData.setItemLocation(getItemLocation(layout.getName()));
+			navigationActionData.setLayoutName(layout.getName());
+			navigationActionData.setTitle(layout.getLabel());
+			item.setActionData(StringHelper.toJsonString(actionData));
+		}else{
+			LOGGER.error("Unable to find the portal layout.id = {}, actionData = {}", data.getLayoutId(), actionData);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the portal layout.");
+		}
+	}
+
+	private void setItemModuleAppActionData(LaunchPadItem item, String actionData){
+		ModuleAppActionData data = (ModuleAppActionData)StringHelper.fromJsonString(actionData, ModuleAppActionData.class);
+		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(data.getModuleAppId());
+		if(null != moduleApp){
+			item.setActionType(moduleApp.getActionType());
+			item.setActionData(moduleApp.getInstanceConfig());
+		}
+	}
 
 	public void publishItemCategory(Integer namespaceId){
 		User user = UserContext.current().getUser();

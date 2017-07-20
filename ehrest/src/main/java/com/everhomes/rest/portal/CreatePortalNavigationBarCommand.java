@@ -7,8 +7,6 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>namespaceId: 域空间</li>
- * <li>ownerType: 所属实体类型, 目前只有 EhPortalItemGroups, 没有则不填</li>
- * <li>ownerId: 所属实体id</li>
  * <li>label: 门户导航栏名称</li>
  * <li>description: 门户itemGroup描述</li>
  * <li>targetType: 对象类型</li>
@@ -21,9 +19,6 @@ public class CreatePortalNavigationBarCommand {
 
 	private Integer namespaceId;
 
-	private String ownerType;
-
-	private Long ownerId;
 
 	private String label;
 
@@ -106,21 +101,6 @@ public class CreatePortalNavigationBarCommand {
 		this.selectedIconUri = selectedIconUri;
 	}
 
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
 
 	@Override
 	public String toString() {
