@@ -12275,6 +12275,20 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     private Long getEnableDetailOfOrganizationMember(OrganizationMember organizationMember, Long organizationId){
 
+        //因为organizationId传入的可能是分工司的id，所以在此出要重新定向为总公司的id
+        Organization org = checkOrganization(organizationId);
+        //如果是分公司
+        if(org != null && org.getParentId() != 0){
+            Organization enterprise =  checkOrganization(org.getParentId());
+            if(enterprise != null && enterprise.getParentId() == 0){
+                organizationId = enterprise.getId();
+            }else{
+                LOGGER.error("Enterprise is not found or error. orgId = {}", organizationId);
+                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+                        "Enterprise is not found or error");
+            }
+        }
+
         //更新或创建detail记录
         OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, organizationMember.getContactToken());
         Long new_detail_id = 0L;
