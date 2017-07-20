@@ -11021,6 +11021,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setEmployeeType(member.getEmployeeType());
             detail.setEmployeeNo(member.getEmployeeNo() != null ? member.getEmployeeNo() : "");
             detail.setCheckInTime(member.getCheckInTime());
+
+            // changed by R, 20170720
+            detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
+            if(member.getEmployeeStatus() != null)
+                detail.setEmployeeStatus(member.getEmployeeStatus());
+            if(member.getEmploymentTime() != null)
+                detail.setEmploymentTime(member.getEmploymentTime());
         }
         return detail;
     }
