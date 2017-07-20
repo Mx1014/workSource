@@ -9300,7 +9300,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //更新userOrganization表记录
                     //仅当target为user且grouptype为企业时添加
                     if (desOrgMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && desOrgMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())) {
-                        createOrUpdateUserOrganization(organizationMember);
+                        createOrUpdateUserOrganization(desOrgMember);
                     }
                 }
             }
@@ -12327,7 +12327,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @param organizationMember
      */
     private void commonSetUserOrganization(UserOrganizations userOrganizations, OrganizationMember organizationMember){
-        if(organizationMember.getGroupType() == OrganizationGroupType.ENTERPRISE.getCode()){
+        if(organizationMember.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){
             userOrganizations.setUserId(organizationMember.getTargetId());
             userOrganizations.setOrganizationId(organizationMember.getOrganizationId());
             userOrganizations.setGroupPath(organizationMember.getGroupPath());
