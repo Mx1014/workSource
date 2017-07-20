@@ -10,6 +10,7 @@ import java.sql.Date;
  * <li>employeeStatus：新增员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * <li>date: 日期</li>
  * <li>remarks: 备注</li>
+ * <li>personChangeType: 操作类型，0: 入职 1: 转正 2: 部门变动 3: 岗位变动 4: 职级变动 5: 离职 6: 设置试用 参考{@link com.everhomes.rest.organization.PersonChangeType}</li>
  * </ul>
  */
 public class UpdateOrganizationEmployeeStatusCommand {
@@ -21,6 +22,8 @@ public class UpdateOrganizationEmployeeStatusCommand {
     private String date;
 
     private String remarks;
+
+    private Byte personChangeType;
 
     public Long getDetailId() {
         return detailId;
@@ -52,6 +55,14 @@ public class UpdateOrganizationEmployeeStatusCommand {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+    public Byte getPersonChangeType() {
+        return personChangeType;
+    }
+
+    public void setPersonChangeType(Byte personChangeType) {
+        this.personChangeType = personChangeType;
     }
 
     public UpdateOrganizationEmployeeStatusCommand() {
