@@ -77,11 +77,11 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
 
 
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES(@group_id, UUID(), '张江高科物业公司', '张江高科物业公司', 1, 1, @organization_id, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), @forum_id, 1, @eh_namespace_id); 
+	VALUES(@group_id, UUID(), '上海张江高科技园区开发股份有限公司', '上海张江高科技园区开发股份有限公司', 1, 1, @organization_id, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), @forum_id, 1, @eh_namespace_id); 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(@forum_id, UUID(), @eh_namespace_id, 2, 'EhGroups', @group_id,'张江高科物业公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());	
+	VALUES(@forum_id, UUID(), @eh_namespace_id, 2, 'EhGroups', @group_id,'上海张江高科技园区开发股份有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());	
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
-	VALUES(@organization_id, 0, 'PM', '张江高科物业公司', 0, '', CONCAT("/",@organization_id), 1, 2, 'ENTERPRISE', @eh_namespace_id, @group_id);
+	VALUES(@organization_id, 0, 'PM', '上海张江高科技园区开发股份有限公司', 0, '', CONCAT("/",@organization_id), 1, 2, 'ENTERPRISE', @eh_namespace_id, @group_id);
 
 
 SET @organization_community_request_id = (SELECT MAX(id) FROM `eh_organization_community_requests`); 	
@@ -115,9 +115,9 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 	VALUES(@namespace_resource_id, @eh_namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());
 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(@community_forum_id, UUID(), @eh_namespace_id, 2, 'EhGroups', 0,'张江高科运营管理公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+	VALUES(@community_forum_id, UUID(), @eh_namespace_id, 2, 'EhGroups', 0,'上海张江高科技园区开发股份有限公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(@feedback_forum_id, UUID(), @eh_namespace_id, 2, 'EhGroups', 0,'张江高科运营管理公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+	VALUES(@feedback_forum_id, UUID(), @eh_namespace_id, 2, 'EhGroups', 0,'上海张江高科技园区开发股份有限公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
 
 
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
@@ -129,9 +129,9 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES(@community_id, UUID(), @shi_id, '上海市',  @qu_id, '浦东新区', '张江高科', '张江高科', '', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 214, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', @forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @eh_namespace_id);
+	VALUES(@community_id, UUID(), @shi_id, '上海市',  @qu_id, '浦东新区', '上海张江高科技园区开发股份有限公司', '张江高科', '松涛路560号8楼', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 214, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', @forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @eh_namespace_id);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
-	VALUES(@community_geopoint_id, @community_id, '', 113.900261, 22.964468, 'ws0fxue9srn7');
+	VALUES(@community_geopoint_id, @community_id, '', 121.5912, 31.211962, 'wtw3wcunb76j');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(@organization_id, @community_id);
 
