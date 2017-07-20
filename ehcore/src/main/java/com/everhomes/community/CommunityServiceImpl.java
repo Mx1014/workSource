@@ -94,6 +94,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.member;
+
 @Component
 public class CommunityServiceImpl implements CommunityService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CommunityServiceImpl.class);
@@ -2895,15 +2897,20 @@ public class CommunityServiceImpl implements CommunityService {
             if (memberLogList != null) {
                 organizationMembers = memberLogList.stream()
                         .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
-                        .map(r -> {
-                            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
-                            if (member != null) {
-                                member.setOperatorUid(r.getOperatorUid());
-                                member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
-                                member.setContactName(r.getContactName());
-                                member.setContactToken(r.getContactToken());
+                        .flatMap(r -> {
+                            List<OrganizationMember> list = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
+                            if (list != null) {
+                                return list.stream().filter(Objects::nonNull)
+                                        .filter(member -> OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE)
+                                        .map(member -> {
+                                            member.setOperatorUid(r.getOperatorUid());
+                                            member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
+                                            member.setContactName(r.getContactName());
+                                            member.setContactToken(r.getContactToken());
+                                            return member;
+                                        });
                             }
-                            return member;
+                            return null;
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
