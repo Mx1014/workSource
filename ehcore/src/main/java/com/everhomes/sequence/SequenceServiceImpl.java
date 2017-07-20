@@ -1403,43 +1403,43 @@ public class SequenceServiceImpl implements SequenceService {
 
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_PORTAL_LAYOUTS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPortalLayouts.class, Tables.EH_PORTAL_LAYOUTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_LAYOUTS.ID.max()).from(Tables.EH_PORTAL_LAYOUTS).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_PORTAL_ITEMS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPortalItems.class, Tables.EH_PORTAL_ITEMS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_ITEMS.ID.max()).from(Tables.EH_PORTAL_ITEMS).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_PORTAL_ITEM_GROUPS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPortalItemGroups.class, Tables.EH_PORTAL_ITEM_GROUPS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_ITEM_GROUPS.ID.max()).from(Tables.EH_PORTAL_ITEM_GROUPS).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_PORTAL_ITEM_CATEGORIES.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPortalItemCategories.class, Tables.EH_PORTAL_ITEM_CATEGORIES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_ITEM_CATEGORIES.ID.max()).from(Tables.EH_PORTAL_ITEM_CATEGORIES).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_PORTAL_CONTENT_SCOPES.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPortalContentScopes.class, Tables.EH_PORTAL_CONTENT_SCOPES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_CONTENT_SCOPES.ID.max()).from(Tables.EH_PORTAL_CONTENT_SCOPES).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_PORTAL_LAYOUT_TEMPLATES.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPortalLayoutTemplates.class, Tables.EH_PORTAL_LAYOUT_TEMPLATES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_LAYOUT_TEMPLATES.ID.max()).from(Tables.EH_PORTAL_LAYOUT_TEMPLATES).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_PORTAL_NAVIGATION_BARS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPortalNavigationBars.class, Tables.EH_PORTAL_NAVIGATION_BARS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_NAVIGATION_BARS.ID.max()).from(Tables.EH_PORTAL_NAVIGATION_BARS).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPortalLaunchPadMappings.class, Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.ID.max()).from(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_PORTAL_PUBLISH_LOGS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPortalPublishLogs.class, Tables.EH_PORTAL_PUBLISH_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_PUBLISH_LOGS.ID.max()).from(Tables.EH_PORTAL_PUBLISH_LOGS).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_SERVICE_MODULE_APPS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhServiceModuleApps.class, Tables.EH_SERVICE_MODULE_APPS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SERVICE_MODULE_APPS.ID.max()).from(Tables.EH_SERVICE_MODULE_APPS).fetchOne().value1();
         });
     }

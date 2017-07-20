@@ -52,6 +52,8 @@ public class ServiceModuleDTO implements Serializable {
 
 	private String instanceConfig;
 
+	private Byte multipleFlag;
+
 	public Long getId() {
 		return id;
 	}
@@ -162,5 +164,13 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setInstanceConfig(String instanceConfig) {
 		this.instanceConfig = instanceConfig;
+	}
+
+	public Byte getMultipleFlag() {
+		return multipleFlag;
+	}
+
+	public void setMultipleFlag(Byte multipleFlag) {
+		this.multipleFlag = multipleFlag;
 	}
 }

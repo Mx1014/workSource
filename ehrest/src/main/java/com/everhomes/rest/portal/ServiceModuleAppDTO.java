@@ -14,7 +14,7 @@ public class ServiceModuleAppDTO {
     private Long id;
     private String name;
     private Long moduleId;
-    private Long moduleName;
+    private String moduleName;
     private String instanceConfig;
 
     public Long getId() {
@@ -41,11 +41,11 @@ public class ServiceModuleAppDTO {
         this.moduleId = moduleId;
     }
 
-    public Long getModuleName() {
+    public String getModuleName() {
         return moduleName;
     }
 
-    public void setModuleName(Long moduleName) {
+    public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
     }
 

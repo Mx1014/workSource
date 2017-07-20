@@ -137,9 +137,10 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public List<ServiceModuleAppDTO> batchCreateServiceModuleApp(BatchCreateServiceModuleAppCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-
 		if(null == cmd.getModuleApps() || cmd.getModuleApps().size() == 0){
-
+			LOGGER.error("params moduleApps is null.cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"params moduleApps is null.");
 		}
 
 		List<ServiceModuleApp> serviceModuleApps = new ArrayList<>();
@@ -226,6 +227,8 @@ public class PortalServiceImpl implements PortalService {
 
 	private ServiceModuleAppDTO processServiceModuleAppDTO(ServiceModuleApp moduleApp){
 		ServiceModuleAppDTO dto = ConvertHelper.convert(moduleApp, ServiceModuleAppDTO.class);
+		ServiceModule serviceModule = checkServiceModule(moduleApp.getModuleId());
+		dto.setModuleName(serviceModule.getName());
 		return dto;
 	}
 
