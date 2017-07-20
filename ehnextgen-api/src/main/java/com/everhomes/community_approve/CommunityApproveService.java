@@ -18,4 +18,8 @@ public interface CommunityApproveService {
     void enableCommunityApprove(CommunityApproveIdCommand cmd);
 
     void disableCommunityApprove(CommunityApproveIdCommand cmd);
+
+    //void getTemplateByApprovalId(GetTemplateByApprovalIdCommand cmd);
+
+    GetTemplateByCommunityApproveIdResponse postApprovalForm(PostCommunityApproveFormCommand cmd);
 }

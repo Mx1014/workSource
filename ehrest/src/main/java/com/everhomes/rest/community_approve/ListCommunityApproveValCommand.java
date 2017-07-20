@@ -1,7 +1,18 @@
 package com.everhomes.rest.community_approve;
 
 /**
- * Created by Administrator on 2017/7/19.
+ * <ul>
+ * <li>ownerType: 目前默认是： EhOrganizations</li>
+ * <li>ownerId: 目前是 organizationId </li>
+ * <li>moduleId: 模块id</li>
+ * <li>moduleType: 模块类型,模块类型 默认"any-module",参考 {@link com.everhomes.rest.flow.FlowModuleType} </li>
+ * <li>orgnizationId:属于的公司</li>
+ * <li>timeStart:搜索起始时间</li>
+ * <li>timeEnd:搜索结束时间</li>
+ * <li>approveName:审批名称</li>
+ * <li>keyWord:关键字</li>
+ * </ul>
+ *
  */
 public class ListCommunityApproveValCommand {
     private Long     ownerId;

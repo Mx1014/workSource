@@ -22,6 +22,8 @@ public class CreateCommunityApproveCommand {
     private Long     moduleId;
     private String     moduleType;
     private Long     organizationId;
+    private String     projectType;
+    private Long     projectId;
     private String approveName;
     private Byte status;
     private Long formOriginId;
@@ -90,5 +92,19 @@ public class CreateCommunityApproveCommand {
         this.formOriginId = formOriginId;
     }
 
+    public String getProjectType() {
+        return projectType;
+    }
 
+    public void setProjectType(String projectType) {
+        this.projectType = projectType;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
 }

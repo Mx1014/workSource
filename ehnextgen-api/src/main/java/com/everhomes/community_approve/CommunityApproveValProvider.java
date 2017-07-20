@@ -18,6 +18,8 @@ public interface CommunityApproveValProvider {
 
     CommunityApproveVal getCommunityApproveValById(Long id);
 
+    CommunityApproveVal getCommunityApproveValByFlowCaseId(Long id);
+
     List<CommunityApproveVal> queryCommunityApproves(ListingLocator locator,
                                                   int count, ListingQueryBuilderCallback queryBuilderCallback);
 }
