@@ -18,6 +18,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
@@ -259,7 +260,23 @@ public class NewsServiceImpl implements NewsService {
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		// 读取Excel数据
 		List<News> newsList = getNewsFromExcel(userId, namespaceId, cmd, files);
-		newsProvider.createNewsList(newsList);
+
+		dbProvider.execute(s -> {
+			newsProvider.createNewsList(newsList);
+			//导入时，默认全部园区可见
+			List<OrganizationCommunity> organizationCommunities = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+			newsList.forEach(n -> {
+				if (null != organizationCommunities) {
+					organizationCommunities.forEach(m -> {
+						NewsCommunity newsCommunity = new NewsCommunity();
+						newsCommunity.setNewsId(n.getId());
+						newsCommunity.setCommunityId(m.getCommunityId());
+						newsProvider.createNewsCommunity(newsCommunity);
+					});
+				}
+			});
+			return null;
+		});
 
 		newsList.forEach(n -> syncNews(n.getId()));
 	}

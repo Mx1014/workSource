@@ -86,7 +86,10 @@ import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
@@ -3994,13 +3997,19 @@ public class UserServiceImpl implements UserService {
         userAppealLogProvider.createUserAppealLog(log);
 
         String home = configProvider.getValue(ConfigConstants.HOME_URL, "");
-        SendUserTestMailCommand mailCmd = new SendUserTestMailCommand();
-        mailCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        mailCmd.setBody(String.format("User \"%s(%s)\" has send a appeal, server is \"%s\", please check out.",
-                cmd.getName(), cmd.getOldIdentifier(), home));
-        mailCmd.setSubject("User Appeal");
-        mailCmd.setTo("jinlan.wang@zuolin.com");
-        sendUserTestMail(mailCmd);
+
+        // ------------------------------------------------------------------------
+        String wjl = "jinlan.wang@zuolin.com";
+        String xqt = "xq.tian@zuolin.com";
+        String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+        String account = configurationProvider.getValue(0,"mail.smtp.account", "zuolin@zuolin.com");
+
+        String body = String.format("User \"%s(%s)\" has send a appeal, server is \"%s\", please check out. \n[%s]",
+                cmd.getName(), cmd.getOldIdentifier(), home, log.toString());
+        handler.sendMail(0, account, wjl, "User Appeal", body);
+        handler.sendMail(0, account, xqt, "User Appeal", body);
+        // ------------------------------------------------------------------------
 
         return toUserAppealLogDTO(log);
     }

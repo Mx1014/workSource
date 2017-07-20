@@ -137,3 +137,6 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	VALUES ('parking.zijing.appkey', 'qyruirxn20145601739', NULL, '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('parking.zijing.parkingid', '0755000120170301000000000003', NULL, '0', NULL);
+
+-- 资源预约 add by sw 20170720
+UPDATE eh_rentalv2_orders set organization_id = NULL;

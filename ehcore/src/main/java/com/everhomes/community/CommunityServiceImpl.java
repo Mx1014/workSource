@@ -2895,15 +2895,21 @@ public class CommunityServiceImpl implements CommunityService {
             if (memberLogList != null) {
                 organizationMembers = memberLogList.stream()
                         .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
-                        .map(r -> {
-                            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
-                            if (member != null) {
-                                member.setOperatorUid(r.getOperatorUid());
-                                member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
-                                member.setContactName(r.getContactName());
-                                member.setContactToken(r.getContactToken());
+                        .flatMap(r -> {
+                            List<OrganizationMember> list = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
+                            if (list != null) {
+                                return list.stream().filter(Objects::nonNull)
+                                        .filter(member -> OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE)
+                                        .map(member -> {
+                                            member.setOperatorUid(r.getOperatorUid());
+                                            member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
+                                            member.setContactName(r.getContactName());
+                                            member.setContactToken(r.getContactToken());
+                                            return member;
+                                        })
+                                        .limit(1);
                             }
-                            return member;
+                            return null;
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
