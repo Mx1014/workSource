@@ -5523,7 +5523,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                                             member.setContactName(r.getContactName());
                                             member.setContactToken(r.getContactToken());
                                             return member;
-                                        });
+                                        })
+                                        .limit(1);
                             }
                             return null;
                         })
@@ -5548,12 +5549,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                 dto.setOperatorName(operator != null ? operator.getNickName() : "");
                 dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
             }
-            if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
+            // if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
+            if (c.getTargetId() != null) {
                 User user = userProvider.findUserById(c.getTargetId());
                 if (user != null) {
                     dto.setNickName(user.getNickName());
                 }
             }
+            // }
             if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                 Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                 if (organization != null) {
