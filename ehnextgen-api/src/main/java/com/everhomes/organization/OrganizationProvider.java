@@ -407,7 +407,5 @@ public interface OrganizationProvider {
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
-	//added by R 20170713, for ui info
-	OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId);
 }
 
