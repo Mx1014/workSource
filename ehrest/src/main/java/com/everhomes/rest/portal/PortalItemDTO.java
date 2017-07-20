@@ -33,6 +33,7 @@ public class PortalItemDTO {
     private Long itemGroupId;
     private String label;
     private String contentName;
+    private String iconUri;
     private String iconUrl;
     private Integer itemWidth;
     private Integer itemHeight;
@@ -41,6 +42,7 @@ public class PortalItemDTO {
     private String actionData;
     private Integer defaultOrder;
     private Byte displayFlag;
+    private String selectediconUri;
     private String selectediconUrl;
     private Integer moreOrder;
     private Long itemCategryId;
@@ -230,6 +232,22 @@ public class PortalItemDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
+    }
+
+    public String getSelectediconUri() {
+        return selectediconUri;
+    }
+
+    public void setSelectediconUri(String selectediconUri) {
+        this.selectediconUri = selectediconUri;
     }
 
     public List<PortalContentScopeDTO> getScopes() {

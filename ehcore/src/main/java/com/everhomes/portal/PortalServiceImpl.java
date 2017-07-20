@@ -978,6 +978,10 @@ public class PortalServiceImpl implements PortalService {
 			String url = contentServerService.parserUri(portalNavigationBar.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 			dto.setIconUrl(url);
 		}
+		if(!StringUtils.isEmpty(portalNavigationBar.getSelectedIconUri())){
+			String url = contentServerService.parserUri(portalNavigationBar.getSelectedIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+			dto.setSelectedIconUrl(url);
+		}
 		return dto;
 	}
 

@@ -24,7 +24,9 @@ public class PortalNavigationBarDTO {
     private Long targetId;
     private String targetType;
     private String iconUrl;
+    private String iconUri;
     private String selectedIconUrl;
+    private String selectedIconUri;
     private Long createTime;
     private Long updateTime;
     private Long operatorUid;
@@ -142,5 +144,21 @@ public class PortalNavigationBarDTO {
 
     public void setSelectedIconUrl(String selectedIconUrl) {
         this.selectedIconUrl = selectedIconUrl;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
+    }
+
+    public String getSelectedIconUri() {
+        return selectedIconUri;
+    }
+
+    public void setSelectedIconUri(String selectedIconUri) {
+        this.selectedIconUri = selectedIconUri;
     }
 }

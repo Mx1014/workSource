@@ -17,6 +17,7 @@ public class PortalItemCategoryDTO {
 
     private Long id;
     private String name;
+    private String iconUri;
     private String iconUrl;
     private Integer defaultOrder;
     private String align;
@@ -73,6 +74,14 @@ public class PortalItemCategoryDTO {
 
     public void setItems(List<PortalItemDTO> items) {
         this.items = items;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
     }
 
     public List<PortalContentScopeDTO> getScopes() {
