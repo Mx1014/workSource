@@ -1,13 +1,17 @@
 // @formatter:off
-package com.everhomes.parking;
+package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.parking.*;
 import com.everhomes.parking.jinyi.JinyiCard;
 import com.everhomes.parking.jinyi.JinyiJsonEntity;
 import com.everhomes.rest.parking.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -33,20 +37,23 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	private static final String CREATE_ORDER = "parkingjet.open.s2s.parkingfee.month.order.create";
 	private static final String NOTIFY = "parkingjet.open.s2s.parkingfee.month.payresult.notify";
 
+	//金溢初始一个月
+	private static final int MONTH_COUNT = 1;
+
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-	static String url = "http://tgd.poapi.parkingjet.cn:8082/CommonOpenApi/default.ashx";
-	static String appid = "201706221000";
-	static String appkey = "qyruirxn20145601739";
-	static String parkingid = "0755000120170301000000000003";
+//	static String url = "http://tgd.poapi.parkingjet.cn:8082/CommonOpenApi/default.ashx";
+//	static String appid = "201706221000";
+//	static String appkey = "qyruirxn20145601739";
+//	static String parkingid = "0755000120170301000000000003";
 
 	@Autowired
 	private ParkingProvider parkingProvider;
-	
 	@Autowired
     private ConfigurationProvider configProvider;
-	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
 	@Override
     public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
@@ -108,6 +115,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 
 		Map<String, String> params = createGeneralParam(GET_CARD, createGetCardParam(plateNumber));
 
+		String url = configProvider.getValue("parking.zijing.url", "");
 		String responseJson = Utils.post(url, params);
 
 
@@ -121,6 +129,10 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
     }
 
     private Map<String, String> createGeneralParam(String methodName, JSONObject json) {
+
+		String appid = configProvider.getValue("parking.zijing.appid", "");
+		String appkey = configProvider.getValue("parking.zijing.appkey", "");
+
 		Map<String, String> params = new HashMap<>();
 		params.put("methodname", methodName);
 		params.put("appid", appid);
@@ -161,6 +173,9 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	private JSONObject createGetCardParam(String plateNo) {
+
+		String parkingid = configProvider.getValue("parking.zijing.parkingid", "");
+
 		JSONObject json = new JSONObject();
 		json.put("parkingid", parkingid);
 		json.put("plateno", plateNo);
@@ -169,6 +184,9 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	private JSONObject createRechargeParam(ParkingRechargeOrder order) {
+
+		String parkingid = configProvider.getValue("parking.zijing.parkingid", "");
+
 		JSONObject json = new JSONObject();
 		json.put("parkingid", parkingid);
 		json.put("orderid", order.getOrderToken());
@@ -186,14 +204,16 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	private JSONObject createOrderParam(ParkingRechargeOrder order) {
+
+		String parkingid = configProvider.getValue("parking.zijing.parkingid", "");
+
 		JSONObject json = new JSONObject();
 		json.put("parkingid", parkingid);
 		json.put("plateno", order.getPlateNumber());
 		json.put("receivable", order.getPrice());
 		json.put("calcid", order.getOrderToken());
 		json.put("paymenttype", 1209);
-//        json.put("openid", "1");
-//        json.put("receivable", "1");
+
 		return json;
 	}
 
@@ -205,6 +225,8 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
+
+		String url = configProvider.getValue("parking.zijing.url", "");
 
 		JinyiCard card = getCardInfo(order.getPlateNumber());
 
@@ -286,31 +308,40 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
     	}else{
     		JinyiCard card = getCardInfo(plateNumber);
 
-			ParkingRechargeRateDTO rate = new ParkingRechargeRateDTO();
-			rate.setOwnerId(ownerId);
-			rate.setOwnerType(ownerType);
-			rate.setParkingLotId(parkingLotId);
-			rate.setRateToken("");
-			rate.setRateName("一个月");
+    		if (null != card) {
+				ParkingRechargeRateDTO rate = new ParkingRechargeRateDTO();
+				rate.setOwnerId(ownerId);
+				rate.setOwnerType(ownerType);
+				rate.setParkingLotId(parkingLotId);
+				rate.setRateToken("");
 
-			ParkingCardType parkingCardType = createDefaultCardType();
-			rate.setCardType(parkingCardType.getTypeName());
-			rate.setMonthCount(new BigDecimal(1));
-			rate.setPrice(card.getPaidin());
+				Map<String, Object> map = new HashMap<>();
+				map.put("count", MONTH_COUNT);
+				String scope = ParkingNotificationTemplateCode.SCOPE;
+				int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
+				String locale = getLocale();
+				String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				rate.setRateName(rateName);
 
-    		parkingRechargeRateList.add(rate);
+				ParkingCardType parkingCardType = createDefaultCardType();
+				rate.setCardType(parkingCardType.getTypeName());
+				rate.setMonthCount(new BigDecimal(MONTH_COUNT));
+				rate.setPrice(card.getPaidin());
+
+				parkingRechargeRateList.add(rate);
+			}
     	}
-
-//    	List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
-//			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
-//			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
-//			dto.setRateToken(r.getId().toString());
-//			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
-//			return dto;
-//		}).collect(Collectors.toList());
 
 		return parkingRechargeRateList;
     }
+
+	private String getLocale() {
+		User user = UserContext.current().getUser();
+		if(user != null && user.getLocale() != null)
+			return user.getLocale();
+
+		return Locale.SIMPLIFIED_CHINESE.toString();
+	}
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {

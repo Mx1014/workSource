@@ -768,7 +768,7 @@ public class ForumProviderImpl implements ForumProvider {
                 // if there are still more records in db
                 if(postList.size() > count) {
                     maxIndex = postList.size() - 2;
-                    pageAnchor = postList.get(postList.size() - 2).getId();
+                    pageAnchor = postList.get(postList.size() - 2).getCreateTime().getTime();
                 } else {
                     // no more record in db
                     maxIndex = postList.size() - 1;

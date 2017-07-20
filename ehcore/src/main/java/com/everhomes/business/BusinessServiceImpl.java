@@ -2198,7 +2198,7 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
-        String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "/zl-ec/rest/openapi/commodity/listRecommend");
+        String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "zl-ec/rest/openapi/commodity/listRecommend");
 
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
 

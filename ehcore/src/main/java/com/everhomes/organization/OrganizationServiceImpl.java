@@ -5509,20 +5509,27 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
             List<Long> orgIds = Collections.singletonList(cmd.getOrganizationId());
             List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getKeywords(), null, locator, pageSize);
-            if (memberLogList != null) organizationMembers = memberLogList.stream()
-                    .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
-                    .map(r -> {
-                        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
-                        if (member != null) {
-                            member.setOperatorUid(r.getOperatorUid());
-                            member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
-                            member.setContactName(r.getContactName());
-                            member.setContactToken(r.getContactToken());
-                        }
-                        return member;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+            if (memberLogList != null) {
+                organizationMembers = memberLogList.stream()
+                        .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
+                        .flatMap(r -> {
+                            List<OrganizationMember> list = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
+                            if (list != null) {
+                                return list.stream().filter(Objects::nonNull)
+                                        .filter(member -> OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE)
+                                        .map(member -> {
+                                            member.setOperatorUid(r.getOperatorUid());
+                                            member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
+                                            member.setContactName(r.getContactName());
+                                            member.setContactToken(r.getContactToken());
+                                            return member;
+                                        });
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            }
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, cmd.getIsSignedup(), null, locator, pageSize);
         }
