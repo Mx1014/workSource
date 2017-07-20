@@ -10826,23 +10826,24 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
-
     @Override
     public void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd) {
         if (cmd.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())) {
             this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), java.sql.Date.valueOf(cmd.getDate()));
             //  判断是否为 设置试用 的情况
-            if(cmd.getPersonChangeType().equals(PersonChangeType.PROBATION.getCode())){
-                this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
-                this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.PROBATION.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
+            if (!StringUtils.isEmpty(cmd.getPersonChangeType())) {
+                if (cmd.getPersonChangeType().equals(PersonChangeType.PROBATION.getCode())) {
+                    this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
+                    this.addProfileJobChangeLogs(cmd.getDetailId(), PersonChangeType.PROBATION.getCode(), "eh_organization_member_details", cmd.getRemarks(), null);
+                }
             }
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
-            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.POSITIVE.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
+            this.addProfileJobChangeLogs(cmd.getDetailId(), PersonChangeType.POSITIVE.getCode(), "eh_organization_member_details", cmd.getRemarks(), null);
 
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
-            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.LEAVE.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
+            this.addProfileJobChangeLogs(cmd.getDetailId(), PersonChangeType.LEAVE.getCode(), "eh_organization_member_details", cmd.getRemarks(), null);
         }
     }
 

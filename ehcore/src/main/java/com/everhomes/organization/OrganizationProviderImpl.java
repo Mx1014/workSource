@@ -4743,17 +4743,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 	//added by R 20170713, for ui info
-	@Override
+/*	@Override
 	public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		/*EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
+		*//*EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
 		EhOrganizationMemberDetails memberDetails = dao.findById(detailId);
 		if(memberDetails == null)
 			return null;
-		return ConvertHelper.convert(memberDetails,OrganizationMemberDetails.class);*/
+		return ConvertHelper.convert(memberDetails,OrganizationMemberDetails.class);*//*
 		return context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
 				.where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId))
 				.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
 				.fetchOneInto(OrganizationMemberDetails.class);
-	}
+	}*/
 }

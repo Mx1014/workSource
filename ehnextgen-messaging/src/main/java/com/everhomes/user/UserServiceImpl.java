@@ -3929,10 +3929,15 @@ public class UserServiceImpl implements UserService {
 
 	private SceneContactV2DTO getCurrentContactRealInfo(Long organizationId) {
 		User user = UserContext.current().getUser();
-		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), organizationId);
-		if (detail == null)
+        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(user.getId(), organizationId);
+//		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), organizationId);
+
+		if (members == null)
 			return null;
 		else {
+		    OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(members.get(0).getDetailId());
+		    if(detail == null)
+		        return null;
 			SceneContactV2DTO dto = new SceneContactV2DTO();
 			dto.setUserId(user.getId());
 			dto.setContactName(detail.getContactName());
