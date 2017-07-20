@@ -1240,7 +1240,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return context.selectFrom(Tables.EH_ORGANIZATION_MEMBERS)
                 .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
-                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.asc())
+                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc())
                 .fetchInto(OrganizationMember.class);
     }
 

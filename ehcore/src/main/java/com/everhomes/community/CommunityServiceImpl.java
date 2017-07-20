@@ -75,7 +75,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.elasticsearch.common.collect.Lists;
 import org.jooq.Condition;
 import org.jooq.JoinType;
 import org.jooq.Record;
@@ -2957,15 +2956,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 		return response;
 	}
-
-    public static void main(String[] args) {
-        ArrayList<Integer> list = Lists.newArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        List<Integer> collect = list.stream().flatMap(r -> {
-            ArrayList<Integer> list1 = Lists.newArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-            return list1.stream().filter(r1 -> r1 > 5).limit(1);
-        }).collect(Collectors.toList());
-        System.out.println(collect);
-    }
 
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) { 
