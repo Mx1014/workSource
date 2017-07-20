@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.launchpad.ItemGroup;
 import com.everhomes.rest.launchpad.ItemServiceCategryStatus;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
-import com.everhomes.server.schema.tables.pojos.EhItemServiceCategries;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -29,9 +31,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadItemsDao;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadLayoutsDao;
 import com.everhomes.server.schema.tables.daos.EhUserLaunchPadItemsDao;
-import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
-import com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts;
-import com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -40,11 +39,16 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
+
 	@Override
 	public void createLaunchPadItem(LaunchPadItem item) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhLaunchPadItems.class));
+		item.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-		EhLaunchPadItemsDao dao = new EhLaunchPadItemsDao(context.configuration()); 
+		EhLaunchPadItemsDao dao = new EhLaunchPadItemsDao(context.configuration());
 		dao.insert(item); 
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLaunchPadItems.class, null); 
 
@@ -116,10 +120,16 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 	@Override
 	public void createLaunchPadItems(List<LaunchPadItem> items) {
+		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhLaunchPadItems.class), (long)items.size());
+		List<EhLaunchPadItems> padItems = new ArrayList<>();
+		for (LaunchPadItem item: items) {
+			id ++;
+			item.setId(id);
+			padItems.add(ConvertHelper.convert(item, EhLaunchPadItems.class));
+		}
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-		EhLaunchPadItemsDao dao = new EhLaunchPadItemsDao(context.configuration()); 
-		dao.insert(items.stream().map(r->ConvertHelper.convert(r, EhLaunchPadItems.class)).collect(Collectors.toList()));
+		EhLaunchPadItemsDao dao = new EhLaunchPadItemsDao(context.configuration());
+		dao.insert(padItems);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLaunchPadItems.class, null); 
 
 	}
@@ -127,9 +137,11 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	@Override
 	public void createLaunchPadLayout(LaunchPadLayout launchPadLayout){
 		assert(launchPadLayout != null);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-		EhLaunchPadLayoutsDao dao = new EhLaunchPadLayoutsDao(context.configuration()); 
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhLaunchPadLayouts.class));
+		launchPadLayout.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhLaunchPadLayoutsDao dao = new EhLaunchPadLayoutsDao(context.configuration());
 		dao.insert(launchPadLayout);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLaunchPadLayouts.class, null); 
 	}
@@ -503,6 +515,8 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	
 	@Override
 	public void createUserLaunchPadItem(UserLaunchPadItem userItem) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserLaunchPadItems.class));
+		userItem.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhUserLaunchPadItemsDao dao = new EhUserLaunchPadItemsDao(context.configuration()); 
 		dao.insert(userItem); 
@@ -536,6 +550,8 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 	@Override
 	public void createItemServiceCategry(ItemServiceCategry itemServiceCategry) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhItemServiceCategries.class));
+		itemServiceCategry.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhItemServiceCategriesDao dao = new EhItemServiceCategriesDao(context.configuration());
 		dao.insert(itemServiceCategry);

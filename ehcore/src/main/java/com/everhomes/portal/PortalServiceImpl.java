@@ -1001,6 +1001,7 @@ public class PortalServiceImpl implements PortalService {
 			@Override
 			public void run() {
 				try{
+					UserContext.setCurrentUser(user);
 					dbProvider.execute((status) -> {
 
 						//发布item分类
@@ -1044,8 +1045,11 @@ public class PortalServiceImpl implements PortalService {
 		for (PortalItemGroup itemGroup: itemGroups) {
 			LaunchPadLayoutGroupDTO group = ConvertHelper.convert(itemGroup, LaunchPadLayoutGroupDTO.class);
 			group.setGroupName(itemGroup.getLabel());
-			ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
-			group.setColumnCount(instanceConfig.getColumnCount());
+			ItemGroupInstanceConfig instanceConfig = new ItemGroupInstanceConfig();
+			if(!StringUtils.isEmpty(itemGroup.getInstanceConfig())){
+				instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
+				group.setColumnCount(instanceConfig.getColumnCount());
+			}
 			if(TitleFlag.TRUE == TitleFlag.fromCode(instanceConfig.getTitleFlag())){
 				group.setTitle(instanceConfig.getTitle());
 				if(!StringUtils.isEmpty(instanceConfig.getTitleUri())){
