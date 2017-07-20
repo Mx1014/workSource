@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>enterpriseName: 公司名 </li>
  * <li>enterpriseId: 公司id </li>
- * <li>address: 地址-楼栋门牌 </li>
+ * <li>addresses: 地址-楼栋门牌列表 </li>
  * <li>addressIds: 地址表ids</li>
  * <li>contactName: 联系人 </li>
  * <li>contactNumber: 联系方式 </li> 
@@ -21,7 +21,8 @@ import com.everhomes.util.StringHelper;
 public class PostApprovalFormContactValue {
 	private String enterpriseName;
 	private Long enterpriseId;
-	private String address;
+	@ItemType(String.class)
+	private List<String> addresses;
 	@ItemType(Long.class)
 	private List<Long> addressIds;
 	private String contactName;
@@ -41,16 +42,6 @@ public class PostApprovalFormContactValue {
 
 	public void setEnterpriseName(String enterpriseName) {
 		this.enterpriseName = enterpriseName;
-	}
- 
-
-	public String getAddress() {
-		return address;
-	}
-
-
-	public void setAddress(String address) {
-		this.address = address;
 	}
 
 
@@ -90,5 +81,17 @@ public class PostApprovalFormContactValue {
 
 	public void setEnterpriseId(Long enterpriseId) {
 		this.enterpriseId = enterpriseId;
+	}
+
+
+
+	public List<String> getAddresses() {
+		return addresses;
+	}
+
+
+
+	public void setAddresses(List<String> addresses) {
+		this.addresses = addresses;
 	} 
 }
