@@ -28,14 +28,13 @@ CREATE TABLE `eh_community_approve_vals` (
   `module_type` varchar(64) DEFAULT NULL,
   `flow_case_id` bigint(20) DEFAULT '0',
   `approve_id` bigint(20) DEFAULT '0',
-  `source_id` bigint(20) NOT NULL DEFAULT '0',
-  `source_type` varchar(64) NOT NULL DEFAULT 'EhCommunityApprove',
   `approve_name` varchar(64) DEFAULT NULL,
-  `name` varchar(45) DEFAULT NULL,
-  `phone` bigint(20) DEFAULT '0',
-  `company` varchar(45) DEFAULT NULL,
+  `name_value` varchar(64) DEFAULT NULL,
+  `phone_value` varchar(64) DEFAULT NULL,
+  `company_value` varchar(64) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 
