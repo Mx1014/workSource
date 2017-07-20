@@ -23,7 +23,7 @@ public class UpdateOrganizationEmployeeStatusCommand {
 
     private String remarks;
 
-    private Byte personChangeType;
+    private String personChangeType;
 
     public Long getDetailId() {
         return detailId;
@@ -57,11 +57,11 @@ public class UpdateOrganizationEmployeeStatusCommand {
         this.remarks = remarks;
     }
 
-    public Byte getPersonChangeType() {
+    public String getPersonChangeType() {
         return personChangeType;
     }
 
-    public void setPersonChangeType(Byte personChangeType) {
+    public void setPersonChangeType(String personChangeType) {
         this.personChangeType = personChangeType;
     }
 
