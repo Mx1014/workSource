@@ -9070,7 +9070,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setOperatorUid(user.getId());
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
-        java.util.Date nDate = DateHelper.currentGMTTime();
+/*        java.util.Date nDate = DateHelper.currentGMTTime();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String sDate = sdf.format(nDate);
         java.sql.Date now = java.sql.Date.valueOf(sDate);
@@ -9086,7 +9086,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         } else {
             organizationMember.setEmploymentTime(checkInTime);
-        }
+        }*/
+        if (cmd.getCheckInTime() != null)
+            organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
+        if (cmd.getEmploymentTime() != null)
+            organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
 
         //手机号已注册，就把user id 跟通讯录关联起来
         if (null != userIdentifier) {
@@ -10399,11 +10403,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.ENTRY.getCode(),
                     "eh_organization_member_details","",DateUtil.parseTimestamp(cmd.getCheckInTime()));
         }else{
-            //  对于新增的时候，若找到原有档案，则需要将原有档案的状态进行修改
-            if(cmd.getEmployeeStatus() != null){
-
-            }
-
             //  记录部门、职位、职级变化
             if(!StringUtils.isEmpty(cmd.getUpdateLogs())){
                 if(!StringUtils.isEmpty(cmd.getUpdateLogs().getDepartment()))
