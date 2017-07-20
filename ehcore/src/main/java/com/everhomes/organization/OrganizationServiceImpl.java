@@ -1470,6 +1470,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setOperationType(OperationType.JOIN.getCode());
                 orgLog.setRequestType(RequestType.ADMIN.getCode());
                 orgLog.setOperatorUid(UserContext.current().getUser().getId());
+                orgLog.setContactDescription(departmentMember.getContactDescription());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
             }
         } else {//添加未注册用户为管理员。
@@ -1489,6 +1490,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             orgLog.setOperationType(OperationType.JOIN.getCode());
             orgLog.setOperatorUid(UserContext.current().getUser().getId());
+            orgLog.setContactDescription(departmentMember.getContactDescription());
             this.organizationProvider.createOrganizationMemberLog(orgLog);
         }
 
@@ -2872,6 +2874,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             orgLog.setOperationType(OperationType.JOIN.getCode());
             orgLog.setRequestType(RequestType.USER.getCode());
             orgLog.setOperatorUid(UserContext.current().getUser().getId());
+            orgLog.setContactDescription(communityPmMember.getContactDescription());
             this.organizationProvider.createOrganizationMemberLog(orgLog);
 
             return status;
@@ -5033,6 +5036,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         orgLog.setOperationType(OperationType.JOIN.getCode());
                         orgLog.setRequestType(RequestType.USER.getCode());
                         orgLog.setOperatorUid(UserContext.current().getUser().getId());
+                        orgLog.setContactDescription(member.getContactDescription());
                         this.organizationProvider.createOrganizationMemberLog(orgLog);
                     }
                 } else {
@@ -5263,6 +5267,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setOperationType(OperationType.QUIT.getCode());
                 orgLog.setRequestType(RequestType.ADMIN.getCode());
                 orgLog.setOperatorUid(UserContext.current().getUser().getId());
+                orgLog.setContactDescription(m.getContactDescription());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
 
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -5523,6 +5528,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                             member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
                                             member.setContactName(r.getContactName());
                                             member.setContactToken(r.getContactToken());
+                                            member.setContactDescription(r.getContactDescription());
                                             return member;
                                         }).collect(Collectors.toList());
                                 if (list.size() > 0) {
@@ -5749,6 +5755,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         orgLog.setOperationType(OperationType.JOIN.getCode());
         orgLog.setRequestType(RequestType.USER.getCode());
         orgLog.setOperatorUid(UserContext.current().getUser().getId());
+        orgLog.setContactDescription(organizationMember.getContactDescription());
         this.organizationProvider.createOrganizationMemberLog(orgLog);
 
         if (OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER) {
@@ -9362,6 +9369,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setOperationType(OperationType.JOIN.getCode());
                 orgLog.setRequestType(RequestType.ADMIN.getCode());
                 orgLog.setOperatorUid(UserContext.current().getUser().getId());
+                orgLog.setContactDescription(organizationMember.getContactDescription());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
 				
 				//自动加入公司

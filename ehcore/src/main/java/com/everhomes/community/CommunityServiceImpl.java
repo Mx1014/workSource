@@ -2906,6 +2906,7 @@ public class CommunityServiceImpl implements CommunityService {
                                             member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
                                             member.setContactName(r.getContactName());
                                             member.setContactToken(r.getContactToken());
+                                            member.setContactDescription(r.getContactDescription());
                                             return member;
                                         }).collect(Collectors.toList());
                                 if (list.size() > 0) {
