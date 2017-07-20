@@ -11755,23 +11755,28 @@ public class OrganizationServiceImpl implements OrganizationService {
         memberCommand.setGender(gender);
 
         //  获取部门
-        String[] deptStrArr = data.getOrgnaizationPath().split(",");
-        List<Long> departmentIds = new ArrayList<>();
-        for (String deptName : deptStrArr) {
-            Organization dept = deptMap.get(deptName.trim());
-            departmentIds.add(dept.getId());
+        if (!StringUtils.isEmpty(data.getOrgnaizationPath())) {
+            String[] deptStrArr = data.getOrgnaizationPath().split(",");
+            List<Long> departmentIds = new ArrayList<>();
+            for (String deptName : deptStrArr) {
+                Organization dept = deptMap.get(deptName.trim());
+                if (dept != null)
+                    departmentIds.add(dept.getId());
+            }
+            memberCommand.setDepartmentIds(departmentIds);
         }
-        memberCommand.setDepartmentIds(departmentIds);
 
         //  获取岗位
-        String[] jobPositionStrArr = data.getJobPosition().split(",");
-        List<Long> jobPositionIds = new ArrayList<>();
-        for (String jobPositionName : jobPositionStrArr) {
-            Organization jobPosition = jobPositionMap.get(jobPositionName.trim());
-            jobPositionIds.add(jobPosition.getId());
+        if (!StringUtils.isEmpty(data.getJobPosition())) {
+            String[] jobPositionStrArr = data.getJobPosition().split(",");
+            List<Long> jobPositionIds = new ArrayList<>();
+            for (String jobPositionName : jobPositionStrArr) {
+                Organization jobPosition = jobPositionMap.get(jobPositionName.trim());
+                if (jobPosition != null)
+                    jobPositionIds.add(jobPosition.getId());
+            }
+            memberCommand.setJobPositionIds(jobPositionIds);
         }
-        memberCommand.setJobPositionIds(jobPositionIds);
-
         //  入职日期
         memberCommand.setCheckInTime(data.getCheckInTime());
 
