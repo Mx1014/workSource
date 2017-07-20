@@ -1310,7 +1310,7 @@ public class NewsServiceImpl implements NewsService {
 			ContentBriefDTO dto = new ContentBriefDTO();
 			JSONObject highlight = result.getJSONObject(i).getJSONObject("highlight");
 			JSONObject source = result.getJSONObject(i).getJSONObject("_source");
-			
+
 			if(StringUtils.isEmpty(highlight.getString("title"))){
 				dto.setSubject(source.getString("title"));
 			} else {
@@ -1332,6 +1332,8 @@ public class NewsServiceImpl implements NewsService {
 			footNote.setAuthor(source.getString("author"));
 			footNote.setCreateTime(timeToStr(source.getTimestamp("publishTime")));
 			footNote.setNewsToken(WebTokenGenerator.getInstance().toWebToken(source.getLong("id")));
+
+			dto.setNewsToken(footNote.getNewsToken());
 			
 			if(StringUtils.isEmpty(highlight.getString("sourceDesc"))){
 				footNote.setSourceDesc(source.getString("sourceDesc"));
