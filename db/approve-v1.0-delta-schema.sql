@@ -6,6 +6,8 @@
   `owner_type` varchar(64) NOT NULL,
   `module_id` bigint(20) DEFAULT NULL,
   `module_type` varchar(64) DEFAULT NULL,
+  `project_id` bigint(20) DEFAULT '0',
+  `project_type` varchar(64) DEFAULT NULL,
   `approve_name` varchar(64) DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '1',
   `form_origin_id` bigint(20) DEFAULT NULL,
@@ -14,6 +16,7 @@
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE `eh_community_approve_vals` (
   `id` bigint(20) NOT NULL,
