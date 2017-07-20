@@ -7491,12 +7491,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 //       includeList.add(member.getTargetId());
 //       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
+        //发消息给客户端 lei.lv
+        includeList.add(member.getTargetId());
+        QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
+        sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
+        includeList.clear();
+
         // send notification to all the other members in the enterprise
         notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER);
 
         //消息只发给公司的管理人员  by sfyan 20170213
         includeList = this.includeOrgList(org, member.getTargetId());
         sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
+
+
     }
 
     /**
