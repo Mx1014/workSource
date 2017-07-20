@@ -126,7 +126,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- merge from activity-3.4.0 end 20170719  by yanjun
 
 -- 电商首页运营API  add by xq.tian  2017/07/20
-UPDATE `eh_configurations` SET VALUE = '/zl-ec/rest/openapi/commodity/listRecommend' WHERE `name` = 'biz.business.promotion.api';
+UPDATE `eh_configurations` SET VALUE = 'zl-ec/rest/openapi/commodity/listRecommend' WHERE `name` = 'biz.business.promotion.api';
 
 -- 清华信息港初始数据 停车充值  add by sw 20170720
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
