@@ -1,4 +1,4 @@
-package com.everhomes.parking;
+package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.parking.bosigao.BosigaoTempFee;
