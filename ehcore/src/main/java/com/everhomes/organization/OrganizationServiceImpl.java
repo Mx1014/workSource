@@ -10391,6 +10391,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.ENTRY.getCode(),
                     "eh_organization_member_details","",DateUtil.parseTimestamp(cmd.getCheckInTime()));
         }else{
+            //  对于新增的时候，若找到原有档案，则需要将原有档案的状态进行修改
+            if(cmd.getEmployeeStatus() != null){
+
+            }
+
+            //  记录部门、职位、职级变化
             if(!StringUtils.isEmpty(cmd.getUpdateLogs())){
                 if(!StringUtils.isEmpty(cmd.getUpdateLogs().getDepartment()))
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.DEPCHANGE.getCode(),
@@ -11340,7 +11346,17 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
             return log;
         }else{
-            if (!AccountValidatorUtil.isMobile(data.getContactToken())) {
+            //  暂时去除手机号校验changed by R, 20170720
+            /*if (!AccountValidatorUtil.isMobile(data.getContactToken())) {
+                LOGGER.warn("Wrong contactToken format. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Wrong contactToken format");
+                log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_FORMAT);
+                return log;
+            }*/
+            //  规则为第一位为 1 总长为 11 位
+            if(data.getContactToken().charAt(0) != '1' || data.getContactToken().length() != 11)
+            {
                 LOGGER.warn("Wrong contactToken format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Wrong contactToken format");
@@ -11369,7 +11385,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             return log;
         }
 
-        if (!StringUtils.isEmpty(data.getJobPosition())) {
+        //  暂时去掉职位的校验 changed by R, 20170720
+        /*if (!StringUtils.isEmpty(data.getJobPosition())) {
             String[] jobPositionStrArr = data.getJobPosition().split(",");
             for (String jobPositionName : jobPositionStrArr) {
                 Organization jobPosition = jobPositionMap.get(jobPositionName.trim());
@@ -11387,7 +11404,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member jobPosition is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_JOBPOSITION_ISNULL);
             return log;
-        }
+        }*/
 
         if (StringUtils.isEmpty(data.getCheckInTime())) {
             LOGGER.warn("Organization member checkInTime is null. data = {}", data);
@@ -11451,7 +11468,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
         if (!StringUtils.isEmpty(data.getEmergencyContact())) {
-            if (!AccountValidatorUtil.isMobile(data.getEmergencyContact())) {
+            if(data.getEmergencyContact().charAt(0) != '1' || data.getEmergencyContact().length() != 11)
+            {
                 LOGGER.warn("Wrong emergencyContact format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Wrong emergencyContact format");
