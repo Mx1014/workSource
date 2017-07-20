@@ -2107,7 +2107,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 if(PriceCalculationType.BLOCK_TARIFF.equals(
                         PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
-                    realCost = calculateBlockTariff(manager,priceSetting,realAmount, costFormula);
+                    realCost = calculateBlockTariff(manager,priceSetting,amount, costFormula);
                 }
 
                 //删除昨天的记录（手工刷的时候）
@@ -2123,7 +2123,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dayStat.setMeterPrice(priceSetting.getSettingValue());
                 dayStat.setLastReading(dayLastReading);
                 dayStat.setCurrentReading(dayCurrReading);
-                dayStat.setCurrentAmount(realAmount);
+                dayStat.setCurrentAmount(amount);
                 dayStat.setCurrentCost(realCost);
                 dayStat.setResetMeterFlag(resetFlag);
                 dayStat.setChangeMeterFlag(changeFlag);
