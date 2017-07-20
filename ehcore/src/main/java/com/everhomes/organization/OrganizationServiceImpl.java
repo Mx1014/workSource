@@ -12327,13 +12327,19 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @param organizationMember
      */
     private void commonSetUserOrganization(UserOrganizations userOrganizations, OrganizationMember organizationMember){
-        userOrganizations.setUserId(organizationMember.getTargetId());
-        userOrganizations.setOrganizationId(organizationMember.getOrganizationId());
-        userOrganizations.setGroupPath(organizationMember.getGroupPath());
-        userOrganizations.setGroupType(organizationMember.getGroupType());
-        userOrganizations.setStatus(UserOrganizationStatus.ACTIVE.getCode());
-        userOrganizations.setNamespaceId(organizationMember.getNamespaceId());
-        userOrganizations.setVisibleFlag(organizationMember.getVisibleFlag());
+        if(organizationMember.getGroupType() == OrganizationGroupType.ENTERPRISE.getCode()){
+            userOrganizations.setUserId(organizationMember.getTargetId());
+            userOrganizations.setOrganizationId(organizationMember.getOrganizationId());
+            userOrganizations.setGroupPath(organizationMember.getGroupPath());
+            userOrganizations.setGroupType(organizationMember.getGroupType());
+            userOrganizations.setStatus(UserOrganizationStatus.ACTIVE.getCode());
+            userOrganizations.setNamespaceId(organizationMember.getNamespaceId());
+            userOrganizations.setVisibleFlag(organizationMember.getVisibleFlag());
+        }else{
+            LOGGER.error("User_organization is not right.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "User_organization is not right.");
+        }
     }
 
     /**
