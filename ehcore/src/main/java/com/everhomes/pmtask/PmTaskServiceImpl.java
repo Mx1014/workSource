@@ -630,7 +630,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
-		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		User user = UserContext.current().getUser();
+		if(!resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE)) {
+			LOGGER.error("Not privilege", cmd);
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
+					"Not privilege");
+		}
+//		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PMTASK_AGENCY_SERVICE);
 		//黑名单权限校验 by sfyan20161213
 		checkBlacklist(null, null);
 		String requestorPhone = cmd.getRequestorPhone();
