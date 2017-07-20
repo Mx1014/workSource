@@ -17,7 +17,6 @@
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
 CREATE TABLE `eh_community_approve_vals` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
@@ -27,6 +26,8 @@ CREATE TABLE `eh_community_approve_vals` (
   `module_id` bigint(20) DEFAULT NULL,
   `module_type` varchar(64) DEFAULT NULL,
   `flow_case_id` bigint(20) DEFAULT '0',
+  `form_origin_id` bigint(20) DEFAULT NULL,
+  `form_version` bigint(20) DEFAULT NULL,
   `approve_id` bigint(20) DEFAULT '0',
   `approve_name` varchar(64) DEFAULT NULL,
   `name_value` varchar(64) DEFAULT NULL,
