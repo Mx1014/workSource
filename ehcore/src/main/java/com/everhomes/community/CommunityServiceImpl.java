@@ -94,8 +94,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.member;
-
 @Component
 public class CommunityServiceImpl implements CommunityService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CommunityServiceImpl.class);
@@ -2908,7 +2906,8 @@ public class CommunityServiceImpl implements CommunityService {
                                             member.setContactName(r.getContactName());
                                             member.setContactToken(r.getContactToken());
                                             return member;
-                                        });
+                                        })
+                                        .limit(1);
                             }
                             return null;
                         })
