@@ -11427,7 +11427,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         if (!StringUtils.isEmpty(data.getEmployeeStatus())) {
-            if (data.getEmployeeStatus().equals("否")) {
+            if (data.getEmployeeStatus().equals("是")) {
                 if (StringUtils.isEmpty(data.getEmploymentTime())) {
                     LOGGER.warn("Organization member employeeTime is null. data = {}", data);
                     log.setData(data);
