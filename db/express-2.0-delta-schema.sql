@@ -61,6 +61,10 @@ CREATE TABLE `eh_express_param_settings` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_express_companies` ADD COLUMN `description` VARCHAR(512) COMMENT '快递公司描述信息，比如华润ems和国贸ems需要区别一下，描述给后来的人看懂' AFTER `logo`;
+ALTER TABLE `eh_express_companies` ADD COLUMN `authorization` VARCHAR(512) COMMENT '授权码' AFTER `description`;
+ALTER TABLE `eh_express_companies` ADD COLUMN `app_secret` VARCHAR(512) COMMENT '' AFTER `description`;
+ALTER TABLE `eh_express_companies` ADD COLUMN `app_key` VARCHAR(512) COMMENT '' AFTER `description`;
+ALTER TABLE `eh_express_companies` ADD COLUMN `url` VARCHAR(512) COMMENT '快递公司服务器地址' AFTER `description`;
 
 ALTER TABLE `eh_express_orders`	ADD COLUMN `package_type` TINYINT COMMENT '封装类型，参考 ExpressPackageType.class' AFTER `internal`;
 ALTER TABLE `eh_express_orders`	ADD COLUMN `invoice_flag` TINYINT COMMENT '需要发票选项,0:不需要 1：需要手撕发票 2：需要税票 ExpressInvoiceFlagType.class' AFTER `internal` ;
