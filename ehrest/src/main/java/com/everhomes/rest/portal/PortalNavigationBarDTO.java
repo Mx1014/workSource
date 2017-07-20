@@ -17,7 +17,7 @@ package com.everhomes.rest.portal;
  * </ul>
  */
 public class PortalNavigationBarDTO {
-    private String id;
+    private Long id;
     private String label;
     private String contentName;
     private String description;
@@ -32,11 +32,11 @@ public class PortalNavigationBarDTO {
     private String creatorUName;
     private String operatorUName;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
