@@ -19,6 +19,9 @@ import com.everhomes.util.StringHelper;
  * <li>payType: 1寄付现结，参考{@link com.everhomes.rest.express.ExpressPayType}</li>
  * <li>internal: 内件物品</li>
  * <li>insuredPrice: 保价金额</li>
+ * <li>packageType: 封装类型，参考{@link com.everhomes.rest.express.ExpressPackageType}</li>
+ * <li>invoiceHead: 发票抬头</li>
+ * <li>invoiceFlag: 需要发票，参考{@link com.everhomes.rest.express.ExpressInvoiceFlagType}</li>
  * </ul>
  */
 public class CreateExpressOrderCommand {
@@ -44,6 +47,12 @@ public class CreateExpressOrderCommand {
 	private String internal;
 
 	private BigDecimal insuredPrice;
+	
+	private Byte packageType;
+	
+	private String invoiceHead;
+	
+	private Byte invoiceFlag;
 
 	public CreateExpressOrderCommand() {
 
@@ -150,6 +159,30 @@ public class CreateExpressOrderCommand {
 
 	public void setInsuredPrice(BigDecimal insuredPrice) {
 		this.insuredPrice = insuredPrice;
+	}
+
+	public Byte getPackageType() {
+		return packageType;
+	}
+
+	public void setPackageType(Byte packageType) {
+		this.packageType = packageType;
+	}
+
+	public String getInvoiceHead() {
+		return invoiceHead;
+	}
+
+	public void setInvoiceHead(String invoiceHead) {
+		this.invoiceHead = invoiceHead;
+	}
+
+	public Byte getInvoiceFlag() {
+		return invoiceFlag;
+	}
+
+	public void setInvoiceFlag(Byte invoiceFlag) {
+		this.invoiceFlag = invoiceFlag;
 	}
 
 	@Override
