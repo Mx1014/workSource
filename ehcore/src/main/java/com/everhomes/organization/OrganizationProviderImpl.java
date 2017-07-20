@@ -1235,12 +1235,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId) {
+    public List<OrganizationMember> findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ORGANIZATION_MEMBERS)
                 .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
-                .fetchAnyInto(OrganizationMember.class);
+                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.asc())
+                .fetchInto(OrganizationMember.class);
     }
 
     /**
