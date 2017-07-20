@@ -512,3 +512,29 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 -- 服务联盟模块-加审批表单  20170714 add by yanjun
 SET @jump_module_id = (SELECT MAX(id) FROM `eh_service_alliance_jump_module`);
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ((@jump_module_id := @jump_module_id + 1), 999973, '审批', 'zl://approval/create?approvalId={}&sourceId={}', 0);
+
+-- 增加园区简介和任务管理item   20170719 add by yanjun
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+    VALUES (116545,999973,'0','0','0','/home','Bizs','园区简介','园区简介','cs://1/image/aW1hZ2UvTVRwaVpXTmxNR0prTW1FMllqSXhOekF3TW1ReE5HUXpNakkzTTJFNE1ETXlOUQ','1','1','13','{\"url\":\"http://core.zuolin.com/web/lib/html/rich_text_review.html?id=56&banner=1\"}',50,'0','1','1','','0',NULL,NULL,NULL,'0','park_tourist','0',NULL,NULL,'0',NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+    VALUES (116546,999973,'0','0','0','/home','Bizs','园区简介','园区简介','cs://1/image/aW1hZ2UvTVRwaVpXTmxNR0prTW1FMllqSXhOekF3TW1ReE5HUXpNakkzTTJFNE1ETXlOUQ','1','1','13','{\"url\":\"http://core.zuolin.com/web/lib/html/rich_text_review.html?id=56&banner=1\"}',50,'0','1','1','','0',NULL,NULL,NULL,'0','pm_admin','0',NULL,NULL,'0',NULL);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+    VALUES (116547, 999973, '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRwbU5tSXlZekl6TldGaVl6YzJOMkpsWmpsa05EQmlZbU5q', '1', '1', '56', '', 40, '0', '1', '0', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+    VALUES (116548, 999973, '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRwbU5tSXlZekl6TldGaVl6YzJOMkpsWmpsa05EQmlZbU5q', '1', '1', '56', '', 40, '0', '1', '0', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
+
+-- 更新排序问题   20170719 add by yanjun
+update eh_launch_pad_items set display_flag = '1', default_order = 60 where id in (116466, 116478) and namespace_id = 999973;
+update eh_launch_pad_items set display_flag = '0' where id in (116471, 116459) and namespace_id = 999973;
+update eh_launch_pad_items set display_flag = '0' where id in (116472, 116460) and namespace_id = 999973;
+
+-- 园区简介icon 问题显示和action——data问题   20170719 add by yanjun
+UPDATE  eh_launch_pad_items SET item_width = '1', action_data = CONCAT('{\"url\":\"http://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1&rtToken=hWSzn3doJ6_e63mZYCLlP5mastXzHbcObCnDX-T4k4bldRIx0sYCQBBcejQ3UYgfP66cwBnE9XIFMSICI4b1CwHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-flUIy8QPY_kfYuTL2u5dHRE"}')  WHERE  id in (116545, 116546) and namespace_id = 999973;
+
+-- 更新 任务管理icon图标  20170719 add by yanjun
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbU5tSXlZekl6TldGaVl6YzJOMkpsWmpsa05EQmlZbU5qTXprMU4yUXhaQQ' WHERE id IN (116547, 116548) AND namespace_id = 999973;
+
+
+
+

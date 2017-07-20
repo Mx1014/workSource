@@ -5515,7 +5515,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
                         if (member != null) {
                             member.setOperatorUid(r.getOperatorUid());
-                            member.setApproveTime(r.getOperateTime().getTime());
+                            member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
                             member.setContactName(r.getContactName());
                             member.setContactToken(r.getContactToken());
                         }
@@ -5538,8 +5538,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (c.getOperatorUid() != null) {
                 User operator = userProvider.findUserById(c.getOperatorUid());
                 UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
-                dto.setOperatorName(operator.getNickName());
-                dto.setOperatorPhone(operatorIdentifier.getIdentifierToken());
+                dto.setOperatorName(operator != null ? operator.getNickName() : "");
+                dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
             }
             if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
                 User user = userProvider.findUserById(c.getTargetId());
@@ -5547,7 +5547,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     dto.setNickName(user.getNickName());
                 }
             }
-            if (dto.getOrganizationName() == null) {
+            if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                 Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                 if (organization != null) {
                     dto.setOrganizationName(organization.getName());

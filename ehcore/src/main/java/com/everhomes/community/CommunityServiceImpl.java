@@ -18,10 +18,6 @@ import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupProvider;
 import com.everhomes.group.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -2023,7 +2019,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 
 				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
-					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.ACTIVE.getCode()));
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.ACTIVE.getCode()).or(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull()));
 				}
 				query.addConditions();
 
@@ -2903,7 +2899,7 @@ public class CommunityServiceImpl implements CommunityService {
                             OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(r.getOrganizationId(), r.getUserId());
                             if (member != null) {
                                 member.setOperatorUid(r.getOperatorUid());
-                                member.setApproveTime(r.getOperateTime().getTime());
+                                member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
                                 member.setContactName(r.getContactName());
                                 member.setContactToken(r.getContactToken());
                             }
@@ -2932,13 +2928,13 @@ public class CommunityServiceImpl implements CommunityService {
                     dto.setOperatorName(operator != null ? operator.getNickName() : "");
                     dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
                 }
-                if (dto.getOrganizationName() == null) {
+                if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                     if (organization != null) {
                         dto.setOrganizationName(organization.getName());
                     }
                 }
-                if (dto.getNickName() == null) {
+                if (dto.getNickName() == null || dto.getNickName().isEmpty()) {
                     User user = userProvider.findUserById(dto.getTargetId());
                     if (user != null) {
                         dto.setNickName(user.getNickName());

@@ -277,7 +277,6 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40530,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40600,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40750,'', 'EhNamespaces', 999972,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40700,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40800,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40810,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40830,'', 'EhNamespaces', 999972,2);
@@ -343,6 +342,21 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issui
 -- 20170718 add by dengs
 SET @eh_rentalv2_resource_types_id = (SELECT MAX(id) FROM `eh_rentalv2_resource_types`);
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@eh_rentalv2_resource_types_id := @eh_rentalv2_resource_types_id+1), '会议室预订', 0, NULL, 2, 999972);
+-- 20170719 add by dengs,增加俱乐部分类
+set @eh_categories_id = (select max(id) FROM eh_categories);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'亲子与教育','兴趣/亲子与教育', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'运动与音乐','兴趣/运动与音乐', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'美食与厨艺','兴趣/美食与厨艺', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'美容化妆','兴趣/美容化妆', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'家庭装饰','兴趣/家庭装饰', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'名牌汇','兴趣/名牌汇', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'宠物汇','兴趣/宠物汇', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'旅游摄影','兴趣/旅游摄影', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'老乡群','兴趣/老乡群', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'同事群','兴趣/同事群', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'同学群','兴趣/同学群', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'二手交易','兴趣/二手交易', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'其他','兴趣/其他', 0, 2, UTC_TIMESTAMP(), 999972);
 
 SET FOREIGN_KEY_CHECKS = 1;
 
