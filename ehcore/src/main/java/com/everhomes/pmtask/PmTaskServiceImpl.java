@@ -1886,6 +1886,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 					result.add(r);
 				}
 			});
+			if(0 == result.size()) {
+				LOGGER.error("Not privilege", cmd);
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
+						"Not privilege");
+			}
 			response.setCommunities(result);
 
 		}else{

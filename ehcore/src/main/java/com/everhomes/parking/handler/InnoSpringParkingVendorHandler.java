@@ -1,16 +1,19 @@
 // @formatter:off
-package com.everhomes.parking;
+package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.parking.*;
 import com.everhomes.parking.innospring.InnoSpringCardInfo;
 import com.everhomes.parking.innospring.InnoSpringCardRate;
 import com.everhomes.parking.innospring.InnoSpringCardType;
 import com.everhomes.parking.innospring.InnoSpringTempFee;
 import com.everhomes.rest.parking.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -115,7 +118,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		    map.put("count", monthCount);
 			String scope = ParkingNotificationTemplateCode.SCOPE;
 			int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
-			String locale = "zh_CN";
+			String locale = getLocale();
 			String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			dto.setRateName(rateName);
 			dto.setCardType(cardType.getCardTypeName());
@@ -127,6 +130,14 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 
 		return result;
     }
+
+	private String getLocale() {
+		User user = UserContext.current().getUser();
+		if(user != null && user.getLocale() != null)
+			return user.getLocale();
+
+		return Locale.SIMPLIFIED_CHINESE.toString();
+	}
 
     private Integer convertCardType(String cardType) {
 		switch (cardType) {
@@ -205,8 +216,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	private InnoSpringCardType createDefaultCardType() {
 		//创源停车 没有月卡类型，默认一个月卡类型
 		InnoSpringCardType cardType = new InnoSpringCardType();
-		cardType.setCardTypeId("默认月卡");
-		cardType.setCardTypeName("默认月卡");
+		cardType.setCardTypeId("月卡");
+		cardType.setCardTypeName("月卡");
 
 		return cardType;
 	}
@@ -419,8 +430,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 			List<InnoSpringTempFee> list = JSONArray.parseArray(entityJson, InnoSpringTempFee.class);
 			tempFee = list.get(0);
 		}
-        return tempFee;
-    }
+		return tempFee;
+	}
 
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
