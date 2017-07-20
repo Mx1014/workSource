@@ -10338,8 +10338,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 //  根据选择"试用,在职"状态来过滤数据
                 if(cmd.getEmployeeStatus()!=null){
-                    if(dto.getEmployeeStatus().equals(cmd.getEmployeeStatus())){
-                        responseMembers.add(dto);
+                    if(!dto.getEmployeeStatus().equals(cmd.getEmployeeStatus())){
+//                        responseMembers.add(dto);
                         continue;
                     }
                 }
