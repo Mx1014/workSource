@@ -127,3 +127,13 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- 电商首页运营API  add by xq.tian  2017/07/20
 UPDATE `eh_configurations` SET VALUE = '/zl-ec/rest/openapi/commodity/listRecommend' WHERE `name` = 'biz.business.promotion.api';
+
+-- 清华信息港初始数据 停车充值  add by sw 20170720
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('parking.zijing.url', 'http://tgd.poapi.parkingjet.cn:8082/CommonOpenApi/default.ashx', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('parking.zijing.appid', '201706221000', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('parking.zijing.appkey', 'qyruirxn20145601739', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('parking.zijing.parkingid', '0755000120170301000000000003', NULL, '0', NULL);
