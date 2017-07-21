@@ -98,7 +98,7 @@ CREATE TABLE `eh_portal_items` (
   `item_location` varchar(2048) DEFAULT NULL COMMENT '/eh_portal_item_groups  name 对应eh_launch_pad_items里的item_location',
   `group_name` varchar(64) DEFAULT NULL  COMMENT 'eh_portal_item_groups  name 对应eh_launch_pad_layouts里面的layout_json里面item_group的 groups[x].instanceConfig.itemGroup 和 eh_launch_pad_items里的item_group',
   `name` varchar(64) DEFAULT NULL  COMMENT 'item_${id}',
-  `icon_uri` varchar(64) DEFAULT NULL,
+  `icon_uri` varchar(1024) DEFAULT NULL,
   `item_width` int(11) NOT NULL DEFAULT '1',
   `item_height` int(11) NOT NULL DEFAULT '1',
   `bgcolor` int(11) NOT NULL DEFAULT '0',

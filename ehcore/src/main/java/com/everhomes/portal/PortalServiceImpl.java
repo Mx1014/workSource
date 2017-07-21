@@ -600,15 +600,17 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		List<PortalContentScope> scopes = new ArrayList<>();
 		for (PortalScope scope: portalScopes) {
-			for (Long scopeId: scope.getScopeIds()) {
-				PortalContentScope contentScope = new PortalContentScope();
-				contentScope.setContentType(contentType);
-				contentScope.setContentId(contentId);
-				contentScope.setOperatorUid(user.getId());
-				contentScope.setCreatorUid(user.getId());
-				contentScope.setScopeType(scope.getScopeType());
-				contentScope.setScopeId(scopeId);
-				scopes.add(contentScope);
+			if(null != scope.getScopeIds()){
+				for (Long scopeId: scope.getScopeIds()) {
+					PortalContentScope contentScope = new PortalContentScope();
+					contentScope.setContentType(contentType);
+					contentScope.setContentId(contentId);
+					contentScope.setOperatorUid(user.getId());
+					contentScope.setCreatorUid(user.getId());
+					contentScope.setScopeType(scope.getScopeType());
+					contentScope.setScopeId(scopeId);
+					scopes.add(contentScope);
+				}
 			}
 		}
 		portalContentScopeProvider.createPortalContentScopes(scopes);
