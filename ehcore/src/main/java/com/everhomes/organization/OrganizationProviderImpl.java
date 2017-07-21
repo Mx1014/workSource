@@ -4720,7 +4720,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<Record> query = context.selectQuery();
-					query.addSelect(Tables.EH_USERS.ID,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS,
+					query.addSelect(Tables.EH_USERS.ID,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS.as(Tables.EH_USER_ORGANIZATIONS.STATUS.getName()),
 							Tables.EH_USERS.NICK_NAME,Tables.EH_USERS.GENDER,Tables.EH_USERS.CREATE_TIME,Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID,
 							Tables.EH_USERS.EXECUTIVE_TAG,Tables.EH_USERS.POSITION_TAG,Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
 					query.addFrom(Tables.EH_USERS);
@@ -4767,11 +4767,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus){
-		List<Integer> result = new ArrayList<>();
+		List<Long> result = new ArrayList<>();
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<Record> query = context.selectQuery();
-					query.addSelect(Tables.EH_USERS.ID.count());
+					query.addSelect(Tables.EH_USERS.ID);
 					query.addFrom(Tables.EH_USERS);
 					query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
 					query.addJoin(Tables.EH_USER_ORGANIZATIONS,
@@ -4788,16 +4788,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					LOGGER.debug("query sql:{}", query.getSQL());
 					LOGGER.debug("query param:{}", query.getBindValues());
 					query.fetch().map((r) -> {
-						result.add(Integer.valueOf(r.getValue(0).toString()));
+						result.add(Long.valueOf(r.getValue(0).toString()));
 						return null;
 					});
 					return true;
 				});
-
-		if(result.size() > 0){
-			return result.get(0);
-		}
-		return 0;
+		return result.size();
 	}
 
 	@Override

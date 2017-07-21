@@ -2017,11 +2017,11 @@ public class CommunityServiceImpl implements CommunityService {
 				query.addGroupBy(Tables.EH_USERS.ID);
 
 				if(AuthFlag.YES == AuthFlag.fromCode(cmd.getIsAuth())){
-					query.addHaving(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+					query.addHaving(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()));
 				}
 
 				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
-					query.addHaving(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.ACTIVE.getCode()).or(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull()));
+					query.addHaving(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(UserOrganizationStatus.ACTIVE.getCode()).or(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull()));
 				}
 				return query;
 			}
