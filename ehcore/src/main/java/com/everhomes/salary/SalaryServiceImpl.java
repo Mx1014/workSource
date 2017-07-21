@@ -1241,7 +1241,7 @@ public class SalaryServiceImpl implements SalaryService {
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, results.size()));
         rowTitle.setRowStyle(titleStyle);
         rowTitle.createCell(0).setCellValue(new XSSFRichTextString("工资批次：" + salaryGroupName
-                + "\r\n" + "工资月份：" + salaryGroupYear + "年" + salaryGroupMonth + "月"));
+                + "；工资月份：" + salaryGroupYear + "年" + salaryGroupMonth + "月"));
 
         //  创建字段栏
         XSSFRow rowNote = sheet.createRow(rowNum++);
