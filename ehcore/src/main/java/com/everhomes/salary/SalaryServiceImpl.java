@@ -1215,39 +1215,35 @@ public class SalaryServiceImpl implements SalaryService {
         Font font = wb.createFont();
         font.setFontHeightInPoints((short) 20);
         font.setFontName("Courier New");
-
         style.setFont(font);
 
         XSSFCellStyle titleStyle = wb.createCellStyle();
         titleStyle.setFont(font);
         titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
         this.createXSSFPeriodSalaryEmployeesHead(sheet,titleStyle,response.getSalaryGroupEntities());
-
         return wb;
     }
 
-    private void createXSSFPeriodSalaryEmployeesHead(XSSFSheet sheet, XSSFCellStyle titleStyle, List<SalaryGroupEntityDTO> results){
-
+    private void createXSSFPeriodSalaryEmployeesHead(
+            XSSFSheet sheet, XSSFCellStyle titleStyle,
+            List<SalaryGroupEntityDTO> results){
 
         int rowNum = 0;
-
         //  创建标题
         XSSFRow rowTitle = sheet.createRow(rowNum++);
-//        rowTitle.createCell(0).setCellValue(name);
         for(int i=0; i<results.size(); i++){
             rowTitle.createCell(i).setCellValue(results.get(i).getName());
         }
         rowTitle.setRowStyle(titleStyle);
+    }
 
-/*        XSSFRow row = sheet.createRow(rowNum++);
-        row.setRowStyle(style);
-
-        row.createCell(0).setCellValue("姓名(必填项)");
-        row.createCell(1).setCellValue("手机号(必填项)");
-        //  创建模板标题
-        for (int i = 0; i < results.size(); i++) {
-            row.createCell(i+2).setCellValue(results.get(i).getName());
-        }*/
+    private void createXSSFPeriodSalaryEmployeesRows(
+            XSSFSheet sheet, List<SalaryGroupEntityDTO> entities,
+            List<SalaryPeriodEmployeeDTO> employees){
+        for(int i=0; i<entities.size(); i++){
+            Row row = sheet.createRow(sheet.getLastRowNum()+1);
+            row.createCell(i).setCellValue(employees.get(i).getPeriodEmployeeEntities().get(i).getSalaryValue());
+        }
     }
 
 
