@@ -2797,7 +2797,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
 
         if (bimg != null) {
-            graphics.drawImage(bimg, 0, 0, null);
+            graphics.drawImage(bimg, 60, 0, null);
         }
         graphics.dispose();
 
