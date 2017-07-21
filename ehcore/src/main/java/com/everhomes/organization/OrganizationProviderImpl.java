@@ -4647,7 +4647,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentOrgId));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
 		List<EhOrganizationsRecord> records = query.fetch();
-		if(records != null){
+		if(records != null && records.size() > 0){
 			return ConvertHelper.convert(records.get(0), Organization.class);
 		}
         return null;

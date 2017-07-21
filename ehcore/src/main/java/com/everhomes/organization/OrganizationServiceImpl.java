@@ -5931,27 +5931,28 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
 
         return this.dbProvider.execute((TransactionStatus status) -> {
-            OrganizationMember m = member;
+//            OrganizationMember m = member;
 
-            if (null == m) {
-                CreateOrganizationMemberCommand memberCmd = new CreateOrganizationMemberCommand();
-                memberCmd.setContactName(cmd.getAccountName());
-                memberCmd.setContactToken(cmd.getAccountPhone());
-                memberCmd.setOrganizationId(cmd.getOrganizationId());
-                memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
-                m = this.createOrganizationPersonnel(memberCmd);
-            } else {
-				List<OrganizationMember> members = listOrganizationMemberByOrganizationPathAndContactToken(org.getPath(), cmd.getAccountPhone());
-				for (OrganizationMember organizationMember: members) {
-					organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-					organizationMember.setContactName(cmd.getAccountName());
-					organizationProvider.updateOrganizationMember(organizationMember);
-                }
-            }
+//            if (null == m) {
+//                CreateOrganizationMemberCommand memberCmd = new CreateOrganizationMemberCommand();
+//                memberCmd.setContactName(cmd.getAccountName());
+//                memberCmd.setContactToken(cmd.getAccountPhone());
+//                memberCmd.setOrganizationId(cmd.getOrganizationId());
+//                memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
+//                m = this.createOrganizationPersonnel(memberCmd);
+//            } else {
+//				List<OrganizationMember> members = listOrganizationMemberByOrganizationPathAndContactToken(org.getPath(), cmd.getAccountPhone());
+//				for (OrganizationMember organizationMember: members) {
+//					organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+//					organizationMember.setContactName(cmd.getAccountName());
+//					organizationProvider.updateOrganizationMember(organizationMember);
+//                }
+//            }
+
 
             //创建用户
             UserIdentifier userIdentifier = null;
-            userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, m.getContactToken());
+            userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getAccountPhone());
 
             if (null == userIdentifier) {
                 User newuser = new User();
@@ -5982,23 +5983,23 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
 
             //循环更新
-            List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhoneAndNamespaceId(m.getContactToken(), namespaceId);
-            for(OrganizationMember _m :members){
-                if (_m.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())) {
-                    _m.setContactName(cmd.getAccountName());
-                    _m.setTargetType(OrganizationMemberTargetType.USER.getCode());
-                    _m.setTargetId(userIdentifier.getOwnerUid());
-                    _m.setNamespaceId(namespaceId);
-                    organizationProvider.updateOrganizationMember(_m);
-
-                    //创建管理员的同时会同时创建一个用户，因此需要在user_organization中添加一条记录 modify at 17/6/20
-                    //仅当target为user且grouptype为企业时添加
-                    if(_m.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && _m.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
-                        createOrUpdateUserOrganization(_m);
-                    }
-                    m = _m;
-                }
-            }
+//            List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhoneAndNamespaceId(m.getContactToken(), namespaceId);
+//            for(OrganizationMember _m :members){
+//                if (_m.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())) {
+//                    _m.setContactName(cmd.getAccountName());
+//                    _m.setTargetType(OrganizationMemberTargetType.USER.getCode());
+//                    _m.setTargetId(userIdentifier.getOwnerUid());
+//                    _m.setNamespaceId(namespaceId);
+//                    organizationProvider.updateOrganizationMember(_m);
+//
+//                    //创建管理员的同时会同时创建一个用户，因此需要在user_organization中添加一条记录 modify at 17/6/20
+//                    //仅当target为user且grouptype为企业时添加
+//                    if(_m.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && _m.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
+//                        createOrUpdateUserOrganization(_m);
+//                    }
+//                    m = _m;
+//                }
+//            }
 
 
             //刷新企业通讯录
@@ -6027,7 +6028,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationProvider.updateOrganizationDetail(detail);
                 }
             }
-            return m;
+            return member;
         });
     }
 
@@ -7030,6 +7031,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId){
         OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken,organizationId);
+        if(member == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter, organizationId cannot be found");
         List<Object> result = new ArrayList<>();
         result.add(member.getId());
         Byte visibleFlag;
