@@ -1220,7 +1220,8 @@ public class SalaryServiceImpl implements SalaryService {
         XSSFCellStyle titleStyle = wb.createCellStyle();
         titleStyle.setFont(font);
         titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
-        this.createXSSFPeriodSalaryEmployeesHead(sheet,titleStyle,response.getSalaryGroupEntities());
+        createXSSFPeriodSalaryEmployeesHead(sheet,titleStyle,response.getSalaryGroupEntities());
+        createXSSFPeriodSalaryEmployeesRows(sheet,response.getSalaryPeriodEmployees());
         return wb;
     }
 
@@ -1238,12 +1239,16 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     private void createXSSFPeriodSalaryEmployeesRows(
-            XSSFSheet sheet, List<SalaryGroupEntityDTO> entities,
-            List<SalaryPeriodEmployeeDTO> employees) {
-        for (int i = 0; i < entities.size(); i++) {
+            XSSFSheet sheet, List<SalaryPeriodEmployeeDTO> employees) {
+/*        for (int i = 0; i < entities.size(); i++) {
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
             for (int j = 0; j < employees.get(i).getPeriodEmployeeEntities().size(); j++)
-                row.createCell(i).setCellValue(employees.get(i).getPeriodEmployeeEntities().get(j).getSalaryValue());
+                row.createCell(j).setCellValue(employees.get(i).getPeriodEmployeeEntities().get(j).getSalaryValue());
+        }*/
+        for(int i=0; i<employees.size(); i++){
+            Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+            for (int j = 0; j < employees.get(i).getPeriodEmployeeEntities().size(); j++)
+                row.createCell(j).setCellValue(employees.get(i).getPeriodEmployeeEntities().get(j).getSalaryValue());
         }
     }
 
