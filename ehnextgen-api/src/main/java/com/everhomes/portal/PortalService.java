@@ -70,6 +70,7 @@ public interface PortalService {
 
 	public PortalItemDTO getPortalItemById(GetPortalItemByIdCommand cmd);
 
+	PortalItemCategoryDTO getPortalItemCategoryById(GetPortalItemCategoryCommand cmd);
 
 	public ListPortalItemCategoriesResponse listPortalItemCategories(ListPortalItemCategoriesCommand cmd);
 

@@ -310,6 +310,17 @@ public class PortalController extends ControllerBase {
 	}
 
 	/**
+	 * <p>获取门户item分类</p>
+	 * <b>URL: /portal/getPortalItemCategory</b>
+	 */
+	@RequestMapping("getPortalItemCategory")
+	@RestReturn(PortalItemCategoryDTO.class)
+	public RestResponse getPortalItemCategory(GetPortalItemCategoryCommand cmd){
+		return new RestResponse(portalService.getPortalItemCategoryById(cmd));
+	}
+
+
+	/**
 	 * <p>21.创建item分类</p>
 	 * <b>URL: /portal/createPortalItemCategory</b>
 	 */

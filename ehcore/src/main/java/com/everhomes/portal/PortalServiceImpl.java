@@ -715,6 +715,21 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
+	public PortalItemCategoryDTO getPortalItemCategoryById(GetPortalItemCategoryCommand cmd) {
+		PortalItemCategory portalItemCategory = checkPortalItemCategory(cmd.getId());
+		PortalItemCategoryDTO dto = processPortalItemCategoryDTO(portalItemCategory);
+		List<PortalItem> portalItems = portalItemProvider.listPortalItemByCategoryId(portalItemCategory.getId());
+
+		List<PortalItemDTO> items = portalItems.stream().map(i ->{
+			return processPortalItemDTO(i);
+		}).collect(Collectors.toList());
+
+		dto.setItems(items);
+		return dto;
+	}
+
+
+	@Override
 	public ListPortalItemCategoriesResponse listPortalItemCategories(ListPortalItemCategoriesCommand cmd) {
 		Integer namespaceId= UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalItemCategory> portalItemCategories = portalItemCategoryProvider.listPortalItemCategory(namespaceId);
