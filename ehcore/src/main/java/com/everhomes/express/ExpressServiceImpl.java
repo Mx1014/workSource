@@ -4,6 +4,7 @@ package com.everhomes.express;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONArray;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -47,7 +49,10 @@ import com.everhomes.rest.express.ExpressOrderDTO;
 import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressOwner;
 import com.everhomes.rest.express.ExpressOwnerType;
+import com.everhomes.rest.express.ExpressPackageTypeDTO;
 import com.everhomes.rest.express.ExpressQueryHistoryDTO;
+import com.everhomes.rest.express.ExpressSendModeDTO;
+import com.everhomes.rest.express.ExpressSendTypeDTO;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
 import com.everhomes.rest.express.ExpressServiceErrorCode;
 import com.everhomes.rest.express.ExpressShowType;
@@ -187,7 +192,8 @@ public class ExpressServiceImpl implements ExpressService {
 	public ListExpressCompanyResponse listExpressCompany(ListExpressCompanyCommand cmd) {
 		//如果是查快递接口过来的，不需要传owner
 		//ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		ExpressOwner owner = null;
+		ExpressOwner owner = new ExpressOwner();
+		owner.setNamespaceId(UserContext.getCurrentNamespaceId());
 		if (!StringUtils.isEmpty(cmd.getOwnerType())) {
 			owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		}
@@ -982,38 +988,89 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void deleteExpressHotline(DeleteExpressHotlineCommand cmd) {
-		// TODO Auto-generated method stub
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		expressHotlineProvider.updateExpressHotlineStatus(owner,cmd.getId());
 	}
 
 	@Override
 	public ListExpressSendTypesResponse listExpressSendTypes(ListExpressSendTypesCommand cmd) {
-		// TODO Auto-generated method stub
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		int namespaceId = UserContext.getCurrentNamespaceId(); // TODO
+		String ownerType = EntityType.NAMESPACE.getCode();
+		Long ownerId = Long.valueOf(namespaceId);
+		//这里需要找到顶层快递公司id
+		Long expressCompanyId = cmd.getExpressCompanyId();
+		if(expressCompanyId != null){
+			expressCompanyId = findTopExpressCompany(expressCompanyId).getId();
+		}
+//		owner.setNamespaceId(23456);
+		List<ExpressCompany> expressCompany = expressCompanyProvider.listExpressCompanyByOwner(owner);
+		List<ExpressCompanyBusiness> list = expressCompanyBusinessProvider.listExpressSendTypesByOwner(namespaceId,ownerType,ownerId,expressCompanyId);
+		return new ListExpressSendTypesResponse(list.stream().map(r->{
+			ExpressSendTypeDTO dto = ConvertHelper.convert(r, ExpressSendTypeDTO.class);
+			dto.setExpressCompanyId(cmd.getExpressCompanyId());
+			if(cmd.getExpressCompanyId() == null){
+				//如果没有传快递公司id，那么需要通过顶层r.getId()和园区所有快递公司的parentId做对比，查出快递公司在园区的id
+				dto.setExpressCompanyId(getExpressCompanyId(expressCompany, r));
+			}
+			return dto;
+		}).collect(Collectors.toList()));
+	}
+	/**
+	 * expressCompanies:当前园区下的快递公司
+	 * business：配置顶层快递公司的业务对象
+	 */
+	public Long getExpressCompanyId(List<ExpressCompany> expressCompanies,ExpressCompanyBusiness business){
+		for (ExpressCompany expressCompany : expressCompanies) {
+			ExpressCompany company = findTopExpressCompany(expressCompany.getId());
+			if(company.getId().longValue() == business.getExpressCompanyId().longValue()){
+				return expressCompany.getId();
+			}
+		}
 		return null;
 	}
 
 	@Override
 	public GetExpressHotlineAndBusinessNoteFlagResponse getExpressHotlineAndBusinessNoteFlag(
 			GetExpressHotlineAndBusinessNoteFlagCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(owner.getNamespaceId(), owner.getOwnerType().getCode(), owner.getOwnerId());
+		return ConvertHelper.convert(setting, GetExpressHotlineAndBusinessNoteFlagResponse.class);
 	}
 
 	@Override
 	public ListExpressSendModesResponse listExpressSendModes(ListExpressSendModesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ListExpressSendModesResponse response = new ListExpressSendModesResponse(new ArrayList<ExpressSendModeDTO>());
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(UserContext.getCurrentNamespaceId(),
+				EntityType.NAMESPACE.getCode(), UserContext.getCurrentNamespaceId());
+		response.getExpressSendModeDTO().add(ConvertHelper.convert(setting, ExpressSendModeDTO.class));
+		return response;
 	}
-
+	
 	@Override
 	public ListExpressPackageTypesResponse listExpressPackageTypes(ListExpressPackageTypesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		int namespaceId = UserContext.getCurrentNamespaceId(); // TODO
+		String ownerType = EntityType.NAMESPACE.getCode();
+		Long ownerId = Long.valueOf(namespaceId);
+		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId,cmd.getSendType());
+		List<ExpressPackageTypeDTO> list = new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(business.getPackageTypes()).toArray())).stream().map(r->{
+			ExpressPackageTypeDTO dto = new ExpressPackageTypeDTO();
+			dto.setPackageType(Byte.valueOf(r.toString()));
+			return dto;
+		}).collect(Collectors.toList());
+		return new ListExpressPackageTypesResponse(list);
 	}
 
 	@Override
 	public GetExpressInsuredDocumentsResponse getExpressInsuredDocuments(GetExpressInsuredDocumentsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		int namespaceId = UserContext.getCurrentNamespaceId(); // TODO
+		String ownerType = EntityType.NAMESPACE.getCode();
+		Long ownerId = Long.valueOf(namespaceId);
+		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId,cmd.getSendType());
+		return new GetExpressInsuredDocumentsResponse(business == null?null:business.getInsuredDocuments());
 	}
 
 }

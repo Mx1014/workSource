@@ -18,6 +18,15 @@ public class ListExpressSendTypesResponse {
 	@ItemType(ExpressSendTypeDTO.class)
 	private List<ExpressSendTypeDTO> sendTypeDTO;
 	
+	public ListExpressSendTypesResponse() {
+		super();
+	}
+
+	public ListExpressSendTypesResponse(List<ExpressSendTypeDTO> sendTypeDTO) {
+		super();
+		this.sendTypeDTO = sendTypeDTO;
+	}
+
 	public List<ExpressSendTypeDTO> getSendTypeDTO() {
 		return sendTypeDTO;
 	}

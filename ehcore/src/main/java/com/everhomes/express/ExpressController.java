@@ -332,6 +332,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("deleteExpressHotline")
 	@RestReturn(String.class)
 	public RestResponse deleteExpressHotline(DeleteExpressHotlineCommand cmd){
+		expressService.deleteExpressHotline(cmd);
 		return new RestResponse();
 	}
 	
@@ -342,7 +343,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("listExpressSendTypes")
 	@RestReturn(ListExpressSendTypesResponse.class)
 	public RestResponse listExpressSendTypes(ListExpressSendTypesCommand cmd){
-		return new RestResponse();
+		return new RestResponse(expressService.listExpressSendTypes(cmd));
 	}
 	
 	/**
@@ -352,7 +353,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("getExpressHotlineAndBusinessNoteFlag")
 	@RestReturn(GetExpressHotlineAndBusinessNoteFlagResponse.class)
 	public RestResponse getExpressHotlineAndBusinessNoteFlag(GetExpressHotlineAndBusinessNoteFlagCommand cmd){
-		return new RestResponse();
+		return new RestResponse(expressService.getExpressHotlineAndBusinessNoteFlag(cmd));
 	}
 	
 	/**
@@ -362,7 +363,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("listExpressSendModes")
 	@RestReturn(ListExpressSendModesResponse.class)
 	public RestResponse listExpressSendModes(ListExpressSendModesCommand cmd){
-		return new RestResponse();
+		return new RestResponse(expressService.listExpressSendModes(cmd));
 	}
 	
 	/**
@@ -372,7 +373,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("listExpressPackageTypes")
 	@RestReturn(ListExpressPackageTypesResponse.class)
 	public RestResponse listExpressPackageTypes(ListExpressPackageTypesCommand cmd){
-		return new RestResponse();
+		return new RestResponse(expressService.listExpressPackageTypes(cmd));
 	}
 	
 	/**
@@ -382,6 +383,6 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("getExpressInsuredDocuments")
 	@RestReturn(GetExpressInsuredDocumentsResponse.class)
 	public RestResponse getExpressInsuredDocuments(GetExpressInsuredDocumentsCommand cmd){
-		return new RestResponse();
+		return new RestResponse(expressService.getExpressInsuredDocuments(cmd));
 	}
 }

@@ -14,6 +14,15 @@ import com.everhomes.util.StringHelper;
 public class GetExpressInsuredDocumentsResponse {
 	private String insuredDocuments;
 
+	public GetExpressInsuredDocumentsResponse() {
+		super();
+	}
+
+	public GetExpressInsuredDocumentsResponse(String insuredDocuments) {
+		super();
+		this.insuredDocuments = insuredDocuments;
+	}
+
 	public String getInsuredDocuments() {
 		return insuredDocuments;
 	}

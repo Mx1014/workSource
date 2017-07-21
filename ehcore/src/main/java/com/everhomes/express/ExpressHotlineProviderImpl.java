@@ -105,4 +105,11 @@ public class ExpressHotlineProviderImpl implements ExpressHotlineProvider {
 		return query.orderBy(Tables.EH_EXPRESS_HOTLINES.ID.desc()).limit(pageSize)
 		.fetch().map(r -> ConvertHelper.convert(r, ExpressHotline.class));
 	}
+
+	@Override
+	public void updateExpressHotlineStatus(ExpressOwner owner, Long id) {
+		getReadWriteContext().update(Tables.EH_EXPRESS_HOTLINES)
+		.set(Tables.EH_EXPRESS_HOTLINES.STATUS,CommonStatus.INACTIVE.getCode())
+		.where(Tables.EH_EXPRESS_HOTLINES.ID.eq(id)).execute();
+	}
 }

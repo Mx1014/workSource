@@ -18,6 +18,14 @@ public class ListExpressSendModesResponse {
 	@ItemType(ExpressSendModeDTO.class)
 	private List<ExpressSendModeDTO> expressSendModeDTO;
 	
+	public ListExpressSendModesResponse() {
+	}
+
+	public ListExpressSendModesResponse(List<ExpressSendModeDTO> expressSendModeDTO) {
+		super();
+		this.expressSendModeDTO = expressSendModeDTO;
+	}
+
 	public List<ExpressSendModeDTO> getExpressSendModeDTO() {
 		return expressSendModeDTO;
 	}

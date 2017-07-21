@@ -18,6 +18,15 @@ public class ListExpressPackageTypesResponse {
 	@ItemType(ExpressPackageTypeDTO.class)
 	private List<ExpressPackageTypeDTO> expressPackageTypeDTO;
 
+	public ListExpressPackageTypesResponse() {
+		super();
+	}
+
+	public ListExpressPackageTypesResponse(List<ExpressPackageTypeDTO> expressPackageTypeDTO) {
+		super();
+		this.expressPackageTypeDTO = expressPackageTypeDTO;
+	}
+
 	public List<ExpressPackageTypeDTO> getExpressPackageTypeDTO() {
 		return expressPackageTypeDTO;
 	}

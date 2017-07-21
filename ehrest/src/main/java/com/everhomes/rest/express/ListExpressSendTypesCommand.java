@@ -4,7 +4,7 @@ package com.everhomes.rest.express;
 import com.everhomes.util.StringHelper;
 /**
  * 
- * <ul>参数，如果三个参数都不传，那么可以查询当前域空间的所有sendTypes
+ * <ul>参数，如果expressCompanyId 为空，查询所有sendTypes
  * <li>ownerType: 所属者类型，参考{@link com.everhomes.rest.express.ExpressOwnerType}</li>
  * <li>ownerId: 所属者id</li>
  * <li>expressCompanyId : 公司id</li>

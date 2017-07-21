@@ -5,7 +5,7 @@ package com.everhomes.rest.express;
  * 
  * <ul>
  * <li>SELF: 1，服务点自寄</li>
- * <li>VISIT: 2，快递员上门取件</li>
+ * <li>VISIT: 2，快递员上门收件</li>
  * </ul>
  */
 public enum ExpressSendMode {

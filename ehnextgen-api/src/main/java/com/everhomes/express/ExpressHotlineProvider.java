@@ -17,4 +17,6 @@ public interface ExpressHotlineProvider {
 
 	List<ExpressHotline> listHotLinesByOwner(ExpressOwner owner, int pageSize, Long pageAnchor);
 
+	void updateExpressHotlineStatus(ExpressOwner owner, Long id);
+
 }

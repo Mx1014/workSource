@@ -5,7 +5,7 @@ package com.everhomes.rest.express;
  * 
  * <ul>
  * <li>EXPRESS_LETTER : 1, 快递封</li>
- * <li>PACKING_BOX : 2, 包装袋</li>
+ * <li>PACKING_BOX : 2, 包装箱</li>
  * <li>EXPRESS_BAG : 3, 快递袋</li>
  * <li>SIX_YUAN_EXPRESS_LETTER : 6, 6元快递封</li>
  * <li>EIGHT_YUAN_EXPRESS_LETTER : 8, 8元快递封</li>

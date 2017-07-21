@@ -69,7 +69,7 @@ public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
 	@Override
 	public List<ExpressCompany> listExpressCompanyByOwner(ExpressOwner owner) {
 		// TODO 这里根据namespace_id获取快递公司
-		if (owner != null) {
+		if (owner.getOwnerType() != null && owner.getOwnerId() != null) {
 			return getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANIES)
 					.where(Tables.EH_EXPRESS_COMPANIES.NAMESPACE_ID.eq(owner.getNamespaceId()))
 					.and(Tables.EH_EXPRESS_COMPANIES.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
@@ -79,7 +79,8 @@ public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
 					.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));
 		}
 		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANIES)
-				.where(Tables.EH_EXPRESS_COMPANIES.PARENT_ID.eq(999985L))
+				.where(Tables.EH_EXPRESS_COMPANIES.PARENT_ID.eq(0L))
+				.and(Tables.EH_EXPRESS_COMPANIES.NAMESPACE_ID.eq(owner.getNamespaceId()))
 				.and(Tables.EH_EXPRESS_COMPANIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_EXPRESS_COMPANIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));
