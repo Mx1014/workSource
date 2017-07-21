@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>targetIdFlag: 要不要取没有targetId的数据 参考{@link com.everhomes.rest.equipment.TargetIdFlag}</li>
  * </ul>
  */
 public class SearchEquipmentStandardsCommand {
@@ -41,6 +42,16 @@ public class SearchEquipmentStandardsCommand {
 	private Integer pageSize;
 
 	private Long inspectionCategoryId;
+
+	private Byte targetIdFlag;
+
+	public Byte getTargetIdFlag() {
+		return targetIdFlag;
+	}
+
+	public void setTargetIdFlag(Byte targetIdFlag) {
+		this.targetIdFlag = targetIdFlag;
+	}
 
 	public Long getTargetId() {
 		return targetId;

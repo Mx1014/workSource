@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.entity.EntityType;
+import com.everhomes.rest.equipment.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -27,12 +28,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
-import com.everhomes.rest.equipment.EquipmentStandardStatus;
-import com.everhomes.rest.equipment.EquipmentStandardsDTO;
-import com.everhomes.rest.equipment.EquipmentStatus;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
-import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EquipmentStandardSearcher;
@@ -144,11 +139,10 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null) {
             FilterBuilder tfb = FilterBuilders.termFilter("targetId", cmd.getTargetId());
-            tfb = FilterBuilders.orFilter(tfb, FilterBuilders.termFilter("targetId", 0));
-
+            if(TargetIdFlag.YES.equals(TargetIdFlag.fromStatus(cmd.getTargetIdFlag()))) {
+                tfb = FilterBuilders.orFilter(tfb, FilterBuilders.termFilter("targetId", 0));
+            }
             fb = FilterBuilders.andFilter(fb, tfb);
-        } else {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", 0));
         }
 
         if(cmd.getStandardType() != null)
