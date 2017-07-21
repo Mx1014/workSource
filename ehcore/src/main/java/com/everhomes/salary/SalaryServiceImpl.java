@@ -1239,10 +1239,11 @@ public class SalaryServiceImpl implements SalaryService {
 
     private void createXSSFPeriodSalaryEmployeesRows(
             XSSFSheet sheet, List<SalaryGroupEntityDTO> entities,
-            List<SalaryPeriodEmployeeDTO> employees){
-        for(int i=0; i<entities.size(); i++){
-            Row row = sheet.createRow(sheet.getLastRowNum()+1);
-            row.createCell(i).setCellValue(employees.get(i).getPeriodEmployeeEntities().get(i).getSalaryValue());
+            List<SalaryPeriodEmployeeDTO> employees) {
+        for (int i = 0; i < entities.size(); i++) {
+            Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+            for (int j = 0; j < employees.get(i).getPeriodEmployeeEntities().size(); j++)
+                row.createCell(i).setCellValue(employees.get(i).getPeriodEmployeeEntities().get(j).getSalaryValue());
         }
     }
 
