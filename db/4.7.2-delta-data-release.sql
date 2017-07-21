@@ -162,5 +162,5 @@ update `eh_web_menus` set `module_id` = 52000 where path like '/50000/52000%';
 update `eh_web_menus` set `module_id` = 60100 where path like '/60000/60100%';
 update `eh_web_menus` set `module_id` = 60200 where path like '/60000/60200%';
 
-
-
+-- fix bug 12536 by xiongying20170721
+update `eh_locale_strings` set text = '抱歉你没有代发权限' where scope = 'pmtask' and code = '10012';
