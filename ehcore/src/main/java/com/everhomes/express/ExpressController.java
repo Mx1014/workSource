@@ -290,6 +290,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("updateExpressBusinessNote")
 	@RestReturn(String.class)
 	public RestResponse updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd){
+		expressService.updateExpressBusinessNote(cmd);
 		return new RestResponse();
 	}
 	
@@ -300,7 +301,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("listExpressHotlines")
 	@RestReturn(ListExpressHotlinesResponse.class)
 	public RestResponse listExpressHotlines(ListExpressHotlinesCommand cmd){
-		return new RestResponse();
+		return new RestResponse(expressService.listExpressHotlines(cmd));
 	}
 	
 	/**
@@ -310,6 +311,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("updateExpressHotlineFlag")
 	@RestReturn(String.class)
 	public RestResponse updateExpressHotlineFlag(UpdateExpressHotlineFlagCommand cmd){
+		expressService.updateExpressHotlineFlag(cmd);
 		return new RestResponse();
 	}
 	
@@ -320,7 +322,7 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("createOrUpdateExpressHotline")
 	@RestReturn(CreateOrUpdateExpressHotlineResponse.class)
 	public RestResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd){
-		return new RestResponse();
+		return new RestResponse(expressService.createOrUpdateExpressHotline(cmd));
 	}
 	
 	/**

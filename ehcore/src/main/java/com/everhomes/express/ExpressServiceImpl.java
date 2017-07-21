@@ -42,6 +42,7 @@ import com.everhomes.rest.express.DeleteExpressUserCommand;
 import com.everhomes.rest.express.ExpressActionEnum;
 import com.everhomes.rest.express.ExpressAddressDTO;
 import com.everhomes.rest.express.ExpressCompanyDTO;
+import com.everhomes.rest.express.ExpressHotlineDTO;
 import com.everhomes.rest.express.ExpressOrderDTO;
 import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressOwner;
@@ -49,6 +50,7 @@ import com.everhomes.rest.express.ExpressOwnerType;
 import com.everhomes.rest.express.ExpressQueryHistoryDTO;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
 import com.everhomes.rest.express.ExpressServiceErrorCode;
+import com.everhomes.rest.express.ExpressShowType;
 import com.everhomes.rest.express.ExpressUserDTO;
 import com.everhomes.rest.express.GetExpressBusinessNoteCommand;
 import com.everhomes.rest.express.GetExpressBusinessNoteResponse;
@@ -906,33 +908,81 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 
 	@Override
-	public String updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+	public void updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		if(cmd.getBusinessNote() != null){
+			expressParamSettingProvider.updateExpressBusinessNoteByOwner(owner,cmd.getBusinessNote());
+		}
+		if(cmd.getBusinessNoteFlag() != null){
+			checkShowFlag(cmd.getBusinessNoteFlag());
+			expressParamSettingProvider.updateExpressBusinessNoteFlagByOwner(owner,cmd.getBusinessNoteFlag());
+		}
+	}
+
+	private void checkShowFlag(Byte showFlag) {
+		ExpressShowType showFlagType = ExpressShowType.fromCode(showFlag);
+		if(showFlagType == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unKnown showFlag = "+showFlag);
+		}
 	}
 
 	@Override
 	public ListExpressHotlinesResponse listExpressHotlines(ListExpressHotlinesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<ExpressHotline> hotlineList = expressHotlineProvider.listHotLinesByOwner(owner,pageSize+1,cmd.getPageAnchor());
+		Long nextPageAnchor = null;
+		if (hotlineList.size() > pageSize) {
+			hotlineList.remove(hotlineList.size()-1);
+			nextPageAnchor = hotlineList.get(hotlineList.size()-1).getId();
+		}
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(owner.getNamespaceId(),owner.getOwnerType().getCode(),owner.getOwnerId());
+		return new ListExpressHotlinesResponse(setting.getHotlineFlag(), nextPageAnchor, hotlineList.stream().map(r -> ConvertHelper.convert(r, ExpressHotlineDTO.class)).collect(Collectors.toList()));
 	}
 
 	@Override
-	public String updateExpressHotlineFlag(UpdateExpressHotlineFlagCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+	public void updateExpressHotlineFlag(UpdateExpressHotlineFlagCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		checkShowFlag(cmd.getHotlineFlag());
+		expressParamSettingProvider.updateExpressHotlineFlagByOwner(owner, cmd.getHotlineFlag());
 	}
 
 	@Override
 	public CreateOrUpdateExpressHotlineResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressHotline hotline = generateHotline(owner,cmd);
+		if(cmd.getId() != null){
+			expressHotlineProvider.updateExpressHotline(hotline);
+		}
+		else{
+			expressHotlineProvider.createExpressHotline(hotline);
+		}
+		return ConvertHelper.convert(hotline, CreateOrUpdateExpressHotlineResponse.class);
+	}
+
+	private ExpressHotline generateHotline(ExpressOwner owner, CreateOrUpdateExpressHotlineCommand cmd) {
+		if(cmd.getId() != null){
+			ExpressHotline hotline = expressHotlineProvider.findExpressHotlineById(cmd.getId());
+			if(hotline == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unKnown hotline id = "+cmd.getId());
+			}
+			if(cmd.getOwnerId().longValue() != hotline.getOwnerId().longValue() || !cmd.getOwnerType().equals(hotline.getOwnerType())){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "mismatching hotline ownerType = "+cmd.getOwnerType()+","
+						+ " or ownerId = "+cmd.getOwnerId());
+			}
+			hotline.setServiceName(cmd.getServiceName());
+			hotline.setHotline(cmd.getHotline());
+			return hotline;
+		}
+		ExpressHotline hotline = ConvertHelper.convert(cmd, ExpressHotline.class);
+		hotline.setNamespaceId(owner.getNamespaceId());
+		hotline.setStatus(CommonStatus.ACTIVE.getCode());
+		return hotline;
 	}
 
 	@Override
-	public String deleteExpressHotline(DeleteExpressHotlineCommand cmd) {
+	public void deleteExpressHotline(DeleteExpressHotlineCommand cmd) {
 		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

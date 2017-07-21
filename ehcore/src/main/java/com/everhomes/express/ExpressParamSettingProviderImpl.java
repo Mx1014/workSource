@@ -6,7 +6,9 @@ import java.util.List;
 
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -15,6 +17,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.express.ExpressOwner;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressParamSettingsDao;
@@ -43,8 +46,11 @@ public class ExpressParamSettingProviderImpl implements ExpressParamSettingProvi
 		getReadWriteDao().insert(expressParamSetting);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhExpressParamSettings.class, null);
 	}
-
 	@Override
+	@Caching(evict = {
+			@CacheEvict(value = "getExpressParamSettingByOwner",
+					key = "{#expressParamSetting.namespaceId, #expressParamSetting.ownerType, #expressParamSetting.ownerId}")
+	})
 	public void updateExpressParamSetting(ExpressParamSetting expressParamSetting) {
 		assert (expressParamSetting.getId() != null);
 		expressParamSetting.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -103,5 +109,51 @@ public class ExpressParamSettingProviderImpl implements ExpressParamSettingProvi
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	@Caching(evict = {
+			@CacheEvict(value = "getExpressParamSettingByOwner",
+					key = "{#owner.namespaceId, #owner.ownerType.code, #owner.ownerId}")
+	})
+	public void updateExpressBusinessNoteByOwner(ExpressOwner owner, String businessNote) {
+		if(businessNote != null){
+			getReadWriteContext().update(Tables.EH_EXPRESS_PARAM_SETTINGS)
+			.set(Tables.EH_EXPRESS_PARAM_SETTINGS.BUSINESS_NOTE, businessNote)
+			.where(Tables.EH_EXPRESS_PARAM_SETTINGS.NAMESPACE_ID.eq(owner.getNamespaceId()))
+			.and(Tables.EH_EXPRESS_PARAM_SETTINGS.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
+			.and(Tables.EH_EXPRESS_PARAM_SETTINGS.OWNER_ID.eq(owner.getOwnerId())).execute();
+		}
+	}
+
+	@Override
+	@Caching(evict = {
+			@CacheEvict(value = "getExpressParamSettingByOwner",
+					key = "{#owner.namespaceId, #owner.ownerType.code, #owner.ownerId}")
+	})
+	public void updateExpressBusinessNoteFlagByOwner(ExpressOwner owner, Byte businessNoteFlag) {
+		if(businessNoteFlag != null){
+			getReadWriteContext().update(Tables.EH_EXPRESS_PARAM_SETTINGS)
+			.set(Tables.EH_EXPRESS_PARAM_SETTINGS.BUSINESS_NOTE_FLAG, businessNoteFlag)
+			.where(Tables.EH_EXPRESS_PARAM_SETTINGS.NAMESPACE_ID.eq(owner.getNamespaceId()))
+			.and(Tables.EH_EXPRESS_PARAM_SETTINGS.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
+			.and(Tables.EH_EXPRESS_PARAM_SETTINGS.OWNER_ID.eq(owner.getOwnerId())).execute();
+		}
+		
+	}
+
+	@Override
+	@Caching(evict = {
+			@CacheEvict(value = "getExpressParamSettingByOwner",
+					key = "{#owner.namespaceId, #owner.ownerType.code, #owner.ownerId}")
+	})
+	public void updateExpressHotlineFlagByOwner(ExpressOwner owner, Byte hotlineFlag) {
+		if(hotlineFlag != null){
+			getReadWriteContext().update(Tables.EH_EXPRESS_PARAM_SETTINGS)
+			.set(Tables.EH_EXPRESS_PARAM_SETTINGS.HOTLINE_FLAG, hotlineFlag)
+			.where(Tables.EH_EXPRESS_PARAM_SETTINGS.NAMESPACE_ID.eq(owner.getNamespaceId()))
+			.and(Tables.EH_EXPRESS_PARAM_SETTINGS.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
+			.and(Tables.EH_EXPRESS_PARAM_SETTINGS.OWNER_ID.eq(owner.getOwnerId())).execute();
+		}		
 	}
 }

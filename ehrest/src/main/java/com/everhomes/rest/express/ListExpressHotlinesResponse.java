@@ -22,6 +22,17 @@ public class ListExpressHotlinesResponse {
 	@ItemType(ExpressHotlineDTO.class)
 	private List<ExpressHotlineDTO> hotlineDTO;
 	
+	public ListExpressHotlinesResponse() {
+		super();
+	}
+
+	public ListExpressHotlinesResponse(Byte hotlineFlag, Long nextPageAnchor, List<ExpressHotlineDTO> hotlineDTO) {
+		super();
+		this.hotlineFlag = hotlineFlag;
+		this.nextPageAnchor = nextPageAnchor;
+		this.hotlineDTO = hotlineDTO;
+	}
+
 	public Byte getHotlineFlag() {
 		return hotlineFlag;
 	}

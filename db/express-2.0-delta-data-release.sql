@@ -5,8 +5,15 @@ INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_i
 INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('3', @namespaceId, '', '0', '0', '中国邮政', 'cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw', '国贸项目，中国邮政快递公司', NULL, NULL, NULL, NULL, '2', '0', '2017-07-21 00:45:35', '2017-07-21 00:45:35', '0');
 
 -- 华润的EMS的namespace改成 华润namespaceid 999985
-  UPDATE `eh_express_companies` SET `namespace_id`=999985 WHERE `id`= 1;
+UPDATE `eh_express_companies` SET `namespace_id`=999985 WHERE `id`= 1;
   
 -- 标签的基本设置
 INSERT INTO `ehcore`.`eh_express_param_settings` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_user_setting_show_flag`, `business_note_setting_show_flag`, `hotline_setting_show_flag`, `hotline_flag`, `business_note`, `business_note_flag`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (1, 999985, 'EhNamespaces', 999985, 1, 1, 1, NULL, NULL, NULL, 2, 0, NOW(), NOW(), 0);
 INSERT INTO `ehcore`.`eh_express_param_settings` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_user_setting_show_flag`, `business_note_setting_show_flag`, `hotline_setting_show_flag`, `hotline_flag`, `business_note`, `business_note_flag`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (2, @namespaceId, 'EhNamespaces', @namespaceId, 0, 1, 1, NULL, NULL, NULL, 2, 0, NOW(), NOW(), 0);
+
+-- 国贸 热线与业务说明的初始化数据
+
+INSERT INTO `ehcore`.`eh_express_param_settings` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_user_setting_show_flag`, `business_note_setting_show_flag`, `hotline_setting_show_flag`, `hotline_flag`, `business_note`, `business_note_flag`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (3, 999985, 'community',240111044331055035, 0, 1, 1, 0, '', 0, 2, 0, NOW(), NOW(), 0);
+INSERT INTO `ehcore`.`eh_express_param_settings` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_user_setting_show_flag`, `business_note_setting_show_flag`, `hotline_setting_show_flag`, `hotline_flag`, `business_note`, `business_note_flag`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (4, 999985, 'community', 240111044331055036, 0, 1, 1, 0, '', 0, 2, 0, NOW(), NOW(), 0);
+set @community_id = 23456789;
+INSERT INTO `ehcore`.`eh_express_param_settings` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_user_setting_show_flag`, `business_note_setting_show_flag`, `hotline_setting_show_flag`, `hotline_flag`, `business_note`, `business_note_flag`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (5, @namespaceId, 'community', @community_id, 0, 1, 1, 0, '', 0, 2, 0, NOW(), NOW(), 0);

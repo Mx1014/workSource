@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.express.ExpressOwner;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressHotlinesDao;
@@ -86,5 +90,19 @@ public class ExpressHotlineProviderImpl implements ExpressHotlineProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<ExpressHotline> listHotLinesByOwner(ExpressOwner owner, int pageSize, Long pageAnchor) {
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_EXPRESS_HOTLINES)
+		.where(Tables.EH_EXPRESS_HOTLINES.NAMESPACE_ID.eq(owner.getNamespaceId()))
+		.and(Tables.EH_EXPRESS_HOTLINES.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
+		.and(Tables.EH_EXPRESS_HOTLINES.OWNER_ID.eq(owner.getOwnerId()))
+		.and(Tables.EH_EXPRESS_HOTLINES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		if(pageAnchor!=null){
+			query.and(Tables.EH_EXPRESS_HOTLINES.ID.lt(pageAnchor));
+		}
+		return query.orderBy(Tables.EH_EXPRESS_HOTLINES.ID.desc()).limit(pageSize)
+		.fetch().map(r -> ConvertHelper.convert(r, ExpressHotline.class));
 	}
 }

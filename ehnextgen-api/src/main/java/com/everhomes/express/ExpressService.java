@@ -124,15 +124,15 @@ public interface ExpressService {
 
 	GetExpressBusinessNoteResponse getExpressBusinessNote(GetExpressBusinessNoteCommand cmd);
 
-	String updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd);
+	void updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd);
 
 	ListExpressHotlinesResponse listExpressHotlines(ListExpressHotlinesCommand cmd);
 
-	String updateExpressHotlineFlag(UpdateExpressHotlineFlagCommand cmd);
+	void updateExpressHotlineFlag(UpdateExpressHotlineFlagCommand cmd);
 
 	CreateOrUpdateExpressHotlineResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd);
 
-	String deleteExpressHotline(DeleteExpressHotlineCommand cmd);
+	void deleteExpressHotline(DeleteExpressHotlineCommand cmd);
 
 	ListExpressSendTypesResponse listExpressSendTypes(ListExpressSendTypesCommand cmd);
 
