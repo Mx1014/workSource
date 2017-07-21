@@ -5471,6 +5471,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (null == RoleDTOs) {
                     continue;
                 }
+                User user = this.userProvider.findUserById(organizationMemberDTO.getTargetId());
+                if(user != null)
+                    organizationMemberDTO.setNickName(user.getNickName());
                 List<RoleDTO> dtos = new ArrayList<RoleDTO>();
                 for (RoleDTO dto : RoleDTOs) {
                     if (null != dto && cmd.getRoleIds().contains(dto.getId())) {
@@ -9315,6 +9318,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     desOrgMember.setOrganizationId(organizationMember.getOrganizationId());
                     desOrgMember.setGroupType(organizationMember.getGroupType());
                     desOrgMember.setGroupPath(organizationMember.getGroupPath());
+                    desOrgMember.setContactName(organizationMember.getContactName());
                     organizationProvider.updateOrganizationMember(desOrgMember);
                     memberDetailIds.add(new_detail_id);
                     //保存当前企业关联的detailId,用于多个返回值时进行比对
