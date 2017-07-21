@@ -168,8 +168,14 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
-        
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("EquipmentStandardSearcherImpl query builder ："+builder);
+
         SearchResponse rsp = builder.execute().actionGet();
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("EquipmentStandardSearcherImpl query rsp ："+rsp);
 
         List<Long> ids = getIds(rsp);
         
