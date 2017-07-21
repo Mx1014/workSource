@@ -11463,7 +11463,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         verifyCommand.setNamespaceId(namespaceId);
         verifyCommand.setPhone(data.getContactToken());
         try {
-            this.verifyPersonnelByPhone(verifyCommand);
+            VerifyPersonnelByPhoneCommandResponse res = this.verifyPersonnelByPhone(verifyCommand);
         } catch (RuntimeErrorException e) {
             LOGGER.debug(e.getMessage());
             log.setData(data);
