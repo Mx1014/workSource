@@ -983,6 +983,12 @@ SET @eh_banners_id = (SELECT MAX(id) FROM `eh_banners`);
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
     VALUES ((@eh_banners_id:=@eh_banners_id+1), @eh_namespace_id, 0, '/home', 'Default', '0', '0', '/home', 'Default', 'cs://1/image/aW1hZ2UvTVRvMlpqSmpNekpsWWpSaU1XTXpaR1ptWVdGbVpUbGxPRFZpTWpreVlUbGtZZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
 
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
+    VALUES ((@eh_banners_id:=@eh_banners_id+1), @eh_namespace_id, 0, '/home', 'Default', '0', '0', '/home', 'Default', 'cs://1/image/aW1hZ2UvTVRvMlpqSmpNekpsWWpSaU1XTXpaR1ptWVdGbVpUbGxPRFZpTWpreVlUbGtZZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'park_tourist');
+
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
+    VALUES ((@eh_banners_id:=@eh_banners_id+1), @eh_namespace_id, 0, '/home', 'Default', '0', '0', '/home', 'Default', 'cs://1/image/aW1hZ2UvTVRvMlpqSmpNekpsWWpSaU1XTXpaR1ptWVdGbVpUbGxPRFZpTWpreVlUbGtZZw', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'default');
+
 SET @category_id = (SELECT MAX(id) FROM eh_service_alliance_categories);
 -- 园区食堂、园区商业、家园卡
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
