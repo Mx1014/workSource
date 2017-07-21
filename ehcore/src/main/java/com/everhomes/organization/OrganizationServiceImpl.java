@@ -9320,7 +9320,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //更新userOrganization表记录
                     //仅当target为user且grouptype为企业时添加
                     if (desOrgMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && desOrgMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())) {
-                        createOrUpdateUserOrganization(organizationMember);
+                        createOrUpdateUserOrganization(desOrgMember);
                     }
                 }
             }
