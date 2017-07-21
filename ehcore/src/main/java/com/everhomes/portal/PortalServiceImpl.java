@@ -553,6 +553,11 @@ public class PortalServiceImpl implements PortalService {
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
 			if(AllOrMoreType.ALL == AllOrMoreType.fromCode(actionData.getType())){
 				dto.setContentName(configurationProvider.getValue(ConfigConstants.PORTAL_ITEM_ALL_TITLE, "全部"));
+				if(!StringUtils.isEmpty(actionData.getDefUri())){
+					String url = contentServerService.parserUri(portalItem.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+					actionData.setDefUrl(url);
+				}
+				portalItem.setActionData(StringHelper.toJsonString(actionData));
 			}else if(AllOrMoreType.MORE == AllOrMoreType.fromCode(actionData.getType())){
 				dto.setContentName(configurationProvider.getValue(ConfigConstants.PORTAL_ITEM_MORE_TITLE, "更多"));
 			}

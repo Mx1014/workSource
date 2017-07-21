@@ -19,6 +19,8 @@ public class AllOrMoreActionData {
 
 	private String defUri;
 
+	private String defUrl;
+
 	public String getType() {
 		return type;
 	}
@@ -41,6 +43,14 @@ public class AllOrMoreActionData {
 
 	public void setDefUri(String defUri) {
 		this.defUri = defUri;
+	}
+
+	public String getDefUrl() {
+		return defUrl;
+	}
+
+	public void setDefUrl(String defUrl) {
+		this.defUrl = defUrl;
 	}
 
 	@Override
