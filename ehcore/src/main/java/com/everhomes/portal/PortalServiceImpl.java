@@ -557,7 +557,7 @@ public class PortalServiceImpl implements PortalService {
 					String url = contentServerService.parserUri(portalItem.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 					actionData.setDefUrl(url);
 				}
-				portalItem.setActionData(StringHelper.toJsonString(actionData));
+				dto.setActionData(StringHelper.toJsonString(actionData));
 			}else if(AllOrMoreType.MORE == AllOrMoreType.fromCode(actionData.getType())){
 				dto.setContentName(configurationProvider.getValue(ConfigConstants.PORTAL_ITEM_MORE_TITLE, "更多"));
 			}

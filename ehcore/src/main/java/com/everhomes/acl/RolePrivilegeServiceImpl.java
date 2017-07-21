@@ -2389,7 +2389,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			List<Role> roles = getRoleManageByTarget(cmd.getOwnerType(), cmd.getOwnerId(), dto.getTargetType(), dto.getTargetId(), EntityType.ROLE.getCode(), null);
 
-			if(roles.size() > 0){
+			if(null != roles && roles.size() > 0){
 				dto.setRoles(roles.stream().map((r) ->{
 					return ConvertHelper.convert(r, RoleDTO.class);
 				}).collect(Collectors.toList()));
