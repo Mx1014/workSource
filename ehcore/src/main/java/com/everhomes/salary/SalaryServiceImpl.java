@@ -36,10 +36,7 @@ import freemarker.template.Template;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1220,31 +1217,41 @@ public class SalaryServiceImpl implements SalaryService {
         XSSFCellStyle titleStyle = wb.createCellStyle();
         titleStyle.setFont(font);
         titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
-        createXSSFPeriodSalaryEmployeesHead(sheet,titleStyle,response.getSalaryGroupEntities());
-        createXSSFPeriodSalaryEmployeesRows(sheet,response.getSalaryPeriodEmployees());
+        titleStyle.setWrapText(true);
+        if(response.getSalaryGroupEntities()!=null && response.getSalaryPeriodEmployees() != null) {
+            createXSSFPeriodSalaryEmployeesHead(sheet, titleStyle,
+                    response.getSalaryGroupEntities(), response.getSalaryPeriodEmployees().get(0));
+            createXSSFPeriodSalaryEmployeesRows(sheet, response.getSalaryPeriodEmployees());
+        }
         return wb;
     }
 
     private void createXSSFPeriodSalaryEmployeesHead(
             XSSFSheet sheet, XSSFCellStyle titleStyle,
-            List<SalaryGroupEntityDTO> results){
+            List<SalaryGroupEntityDTO> results, SalaryPeriodEmployeeDTO dto) {
+
+        String salaryGroupName = dto.getSalaryGroupName();
+        String salaryGroupYear = dto.getSalaryPeriod().substring(0, 4);
+        String salaryGroupMonth = dto.getSalaryPeriod().substring(4, 6);
 
         int rowNum = 0;
+
         //  创建标题
         XSSFRow rowTitle = sheet.createRow(rowNum++);
-        for(int i=0; i<results.size(); i++){
-            rowTitle.createCell(i).setCellValue(results.get(i).getName());
-        }
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, results.size()));
         rowTitle.setRowStyle(titleStyle);
+        rowTitle.createCell(0).setCellValue(new XSSFRichTextString("工资批次：" + salaryGroupName
+                + "\r\n" + "工资月份：" + salaryGroupYear + "年" + salaryGroupMonth + "月"));
+
+        //  创建字段栏
+        XSSFRow rowNote = sheet.createRow(rowNum++);
+        for (int i = 0; i < results.size(); i++) {
+            rowNote.createCell(i).setCellValue(results.get(i).getName());
+        }
     }
 
     private void createXSSFPeriodSalaryEmployeesRows(
             XSSFSheet sheet, List<SalaryPeriodEmployeeDTO> employees) {
-/*        for (int i = 0; i < entities.size(); i++) {
-            Row row = sheet.createRow(sheet.getLastRowNum() + 1);
-            for (int j = 0; j < employees.get(i).getPeriodEmployeeEntities().size(); j++)
-                row.createCell(j).setCellValue(employees.get(i).getPeriodEmployeeEntities().get(j).getSalaryValue());
-        }*/
         for(int i=0; i<employees.size(); i++){
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
             for (int j = 0; j < employees.get(i).getPeriodEmployeeEntities().size(); j++)
