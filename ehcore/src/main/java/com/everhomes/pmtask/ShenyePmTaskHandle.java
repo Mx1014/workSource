@@ -309,9 +309,13 @@ class ShenyePmTaskHandle implements PmTaskHandle {
     			PmTask task = pmTaskProvider.findTaskById(t.getId());
     			PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
     			if(task != null) {
-					Category taskCategory = checkCategory(task.getTaskCategoryId());
-					dto.setTaskCategoryId(taskCategory.getId());
-					dto.setTaskCategoryName(taskCategory.getName());
+					Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+//					Category taskCategory = checkCategory(task.getTaskCategoryId());
+					if(taskCategory != null) {
+						dto.setTaskCategoryId(taskCategory.getId());
+						dto.setTaskCategoryName(taskCategory.getName());
+					}
+
 				}
 
     			return dto;
