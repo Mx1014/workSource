@@ -417,6 +417,6 @@ public interface OrganizationProvider {
 
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
-	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatu);
+	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 
 }
