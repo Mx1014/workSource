@@ -407,6 +407,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject json = new JSONObject();
 		json.put("parkingid", parkingid);
 		json.put("plateno", log.getPlateNumber());
+		json.put("thirddataid", log.getId());
 		Timestamp clearanceTime = log.getClearanceTime();
 		LocalDateTime start = clearanceTime.toLocalDateTime();
 

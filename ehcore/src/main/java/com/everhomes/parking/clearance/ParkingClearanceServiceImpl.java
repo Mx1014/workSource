@@ -25,6 +25,7 @@ import com.everhomes.parking.jinyi.JinyiClearance;
 import com.everhomes.parking.jinyi.JinyiJsonEntity;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -551,8 +552,19 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         if (null == log) {
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
         }
-        log.setStatus(ParkingClearanceLogStatus.INACTIVE.getCode());
-        clearanceLogProvider.updateClearanceLog(log);
+        dbProvider.execute(s -> {
+            log.setStatus(ParkingClearanceLogStatus.INACTIVE.getCode());
+            clearanceLogProvider.updateClearanceLog(log);
+
+            FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(log.getId(), EntityType.PARKING_CLEARANCE_LOG.getCode(), MODULE_ID);
+            if (null != flowCase) {
+                flowCase.setStatus(FlowCaseStatus.INVALID.getCode());
+                flowCaseProvider.updateFlowCase(flowCase);
+            }
+
+            return null;
+        });
+
     }
 
     @Override
