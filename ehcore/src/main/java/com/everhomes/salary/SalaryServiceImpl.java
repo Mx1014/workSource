@@ -1195,8 +1195,59 @@ public class SalaryServiceImpl implements SalaryService {
 
     //  导出薪酬组对应的人员核算信息
     @Override
-    public void exportPeriodSalaryEmployees(ExportPeriodSalaryEmployeesCommand cmd, HttpServletResponse httpResponse){
+    public void exportPeriodSalaryEmployees(ExportPeriodSalaryEmployeesCommand cmd, HttpServletResponse httpServletResponse){
+        ListPeriodSalaryEmployeesCommand periodCommand = new ListPeriodSalaryEmployeesCommand();
+        periodCommand.setOwnerId(cmd.getOwnerId());
+        periodCommand.setOwnerType(cmd.getOwnerType());
+        periodCommand.setSalaryPeriodGroupId(cmd.getSalaryPeriodGroupId());
+        ListPeriodSalaryEmployeesResponse response = this.listPeriodSalaryEmployees(periodCommand);
+        ByteArrayOutputStream out = null;
+        XSSFWorkbook workbook = this.createXSSFPeriodSalaryEmployees(response);
+        createOutPutSteam(workbook, out, httpServletResponse);
+    }
 
+    private XSSFWorkbook createXSSFPeriodSalaryEmployees(ListPeriodSalaryEmployeesResponse response){
+        XSSFWorkbook wb = new XSSFWorkbook();
+        String sheetName ="PeriodSalaryEmployees";
+        XSSFSheet sheet = wb.createSheet(sheetName);
+//        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, response.getSalaryGroupEntities().size()));
+        XSSFCellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short) 20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+        this.createXSSFPeriodSalaryEmployeesHead(sheet,titleStyle,response.getSalaryGroupEntities());
+
+        return wb;
+    }
+
+    private void createXSSFPeriodSalaryEmployeesHead(XSSFSheet sheet, XSSFCellStyle titleStyle, List<SalaryGroupEntityDTO> results){
+
+
+        int rowNum = 0;
+
+        //  创建标题
+        XSSFRow rowTitle = sheet.createRow(rowNum++);
+//        rowTitle.createCell(0).setCellValue(name);
+        for(int i=0; i<results.size(); i++){
+            rowTitle.createCell(i).setCellValue(results.get(i).getName());
+        }
+        rowTitle.setRowStyle(titleStyle);
+
+/*        XSSFRow row = sheet.createRow(rowNum++);
+        row.setRowStyle(style);
+
+        row.createCell(0).setCellValue("姓名(必填项)");
+        row.createCell(1).setCellValue("手机号(必填项)");
+        //  创建模板标题
+        for (int i = 0; i < results.size(); i++) {
+            row.createCell(i+2).setCellValue(results.get(i).getName());
+        }*/
     }
 
 
