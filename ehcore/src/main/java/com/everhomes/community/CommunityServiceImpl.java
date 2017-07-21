@@ -1991,7 +1991,6 @@ public class CommunityServiceImpl implements CommunityService {
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
 				query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
-
 				if(null != cmd.getOrganizationId()){
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
@@ -2013,16 +2012,18 @@ public class CommunityServiceImpl implements CommunityService {
 				if(null != cmd.getExecutiveFlag()){
 					query.addConditions(Tables.EH_USERS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
 				}
-
 				query.addGroupBy(Tables.EH_USERS.ID);
-
+				Condition cond = Tables.EH_USERS.ID.isNotNull();
 				if(AuthFlag.YES == AuthFlag.fromCode(cmd.getIsAuth())){
-					query.addHaving(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()));
+					cond = cond.and("`eh_user_organizations`.`status` = " + UserOrganizationStatus.ACTIVE.getCode());
 				}
 
 				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
-					query.addHaving(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(UserOrganizationStatus.ACTIVE.getCode()).or(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull()));
+					cond = cond.and("`eh_user_organizations`.`status` <> " + UserOrganizationStatus.ACTIVE.getCode() + "or `eh_user_organizations`.`status` is not null");
 				}
+
+				query.addHaving(cond);
+
 				return query;
 			}
 		});
