@@ -175,4 +175,9 @@ public interface UserService {
      * @param identifierToken   手机号
      */
     void checkSmsBlackList(String smsAction, String identifierToken);
+
+    //added by R 20170713, 通讯录2.4增加
+//    SceneContactV2DTO getCurrentContactRealInfo(GetCurrentContactRealInfoCommand cmd);
+    SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
+
 }
