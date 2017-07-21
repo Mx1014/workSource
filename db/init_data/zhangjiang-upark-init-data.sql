@@ -1097,4 +1097,25 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `modu
 SELECT (@module_id := @module_id + 1), owner_id, menu_id, '', NULL, '2' FROM eh_web_menu_scopes WHERE 
 menu_id IN (SELECT id FROM eh_service_modules) AND `owner_id` = @eh_namespace_id;
  
-  
+ -- 短信模板
+ 
+ 
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(@eh_namespace_id, 'sms.default.yzx', 1, 'zh_CN', '验证码-upark', '103991');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(@eh_namespace_id, 'sms.default.yzx', 4, 'zh_CN', '派单-upark', '103992');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(@eh_namespace_id, 'sms.default.yzx', 5, 'zh_CN', '	任务-upark', '103996');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(@eh_namespace_id, 'sms.default.yzx', 6, 'zh_CN', '	任务2-upark', '103997');
+
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(@eh_namespace_id, 'sms.default.yzx', 7, 'zh_CN', '新报修-upark', '104003');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(@eh_namespace_id, 'sms.default.yzx', 15, 'zh_CN', '物业任务3-upark', '104001');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(@eh_namespace_id, 'sms.default.yzx', 51, 'zh_CN', '视频会-upark', '103998');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(@eh_namespace_id, 'sms.default.yzx', 52, 'zh_CN', '视测会-upark', '103999');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(@eh_namespace_id, 'sms.default.yzx', 53, 'zh_CN', '申诉-upark', '104000'); 
