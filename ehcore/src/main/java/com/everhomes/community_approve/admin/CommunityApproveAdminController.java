@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
@@ -119,6 +120,37 @@ public class CommunityApproveAdminController extends ControllerBase{
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
 
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/Community_approve/listCommunityApproveVals</b>
+     * <p> 获取申请记录 </p>
+     * @return
+     */
+    @RequestMapping("listCommunityApproveVals")
+    @RestReturn(value=String.class)
+    public RestResponse listCommunityApproveVals(@Valid ListCommunityApproveValCommand cmd) {
+        ListCommunityApproveValResponse result = communityApproveService.listCommunityApproveVals(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/Community_approve/exportApproveVals</b>
+     * <p>导出申请记录/p>
+     */
+    @RequestMapping("exportApproveVals")
+    @RestReturn(value=String.class)
+    public RestResponse exportApproveVals(@Valid ListCommunityApproveValCommand cmd, HttpServletResponse resp) {
+        this.communityApproveService.exportCommunityApproveValWithForm(cmd,resp);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
         return response;
     }
 }

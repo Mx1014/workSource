@@ -9,10 +9,12 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCommunityApproveValsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunityApproveVals;
+import com.everhomes.server.schema.tables.records.EhCommunityApproveValsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,7 +80,27 @@ public class CommunityApproveValProviderImpl implements CommunityApproveValProvi
     }
 
     @Override
-    public List<CommunityApproveVal> queryCommunityApproves(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        return null;
+    public List<CommunityApproveVal> queryCommunityApproves(ListingLocator locator, int count,
+                                                            ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunityApproveVals.class));
+        SelectQuery<EhCommunityApproveValsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_APPROVE_VALS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.ID.gt(locator.getAnchor()));
+        }
+        query.addLimit(count);
+        List<CommunityApproveVal> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, CommunityApproveVal.class);
+        });
+
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return objs;
     }
 }

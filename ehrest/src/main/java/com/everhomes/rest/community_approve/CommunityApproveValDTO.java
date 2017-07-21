@@ -12,8 +12,6 @@ import java.sql.Timestamp;
  * <li>approveName:审批名称</li>
  * <li>flowCaseId:工作流id</li>
  * <li>approveId:审批模板id</li>
- * <li>sourceId:业务id</li>
- * <li>sourceType:业务类型</li>
  * <li>name:客户姓名</li>
  * <li>phone:客户手机号</li>
  * <li>company:公司</li>
@@ -30,11 +28,11 @@ public class CommunityApproveValDTO {
     private Long     organizationId;
     private Long flowCaseId;
     private Long approveId;
-    private Long sourceId;
-    private String sourceType;
+    private Long     formOriginId;
+    private Long formVersion;
     private String approveName;
     private String name;
-    private Long phone;
+    private String phone;
     private String company;
     private Timestamp createTime;
 
@@ -110,22 +108,6 @@ public class CommunityApproveValDTO {
         this.approveId = approveId;
     }
 
-    public Long getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
-    }
-
-    public String getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(String sourceType) {
-        this.sourceType = sourceType;
-    }
-
     public String getApproveName() {
         return approveName;
     }
@@ -142,11 +124,11 @@ public class CommunityApproveValDTO {
         this.name = name;
     }
 
-    public Long getPhone() {
+    public String getPhone() {
         return phone;
     }
 
-    public void setPhone(Long phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 
@@ -164,5 +146,21 @@ public class CommunityApproveValDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Long getFormOriginId() {
+        return formOriginId;
+    }
+
+    public void setFormOriginId(Long formOriginId) {
+        this.formOriginId = formOriginId;
+    }
+
+    public Long getFormVersion() {
+        return formVersion;
+    }
+
+    public void setFormVersion(Long formVersion) {
+        this.formVersion = formVersion;
     }
 }

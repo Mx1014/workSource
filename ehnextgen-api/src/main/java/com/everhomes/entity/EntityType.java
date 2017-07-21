@@ -61,6 +61,7 @@ public enum EntityType {
     LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
     ORGANIZATION_FILE("EhOrganizationFiles"),
+    COMMUNITY_APPROVE(EhCommunityApprove.class.getSimpleName()),
     CHILD_PROJECT("child_project");
 
     private String code;

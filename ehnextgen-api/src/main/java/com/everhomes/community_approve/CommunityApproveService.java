@@ -2,6 +2,8 @@ package com.everhomes.community_approve;
 
 import com.everhomes.rest.community_approve.*;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Created by Administrator on 2017/7/18.
  */
@@ -19,7 +21,10 @@ public interface CommunityApproveService {
 
     void disableCommunityApprove(CommunityApproveIdCommand cmd);
 
-    //void getTemplateByApprovalId(GetTemplateByApprovalIdCommand cmd);
+    public void exportCommunityApproveValWithForm(ListCommunityApproveValCommand cmd
+            , HttpServletResponse httpResponse);
+
+    ListCommunityApproveValResponse listCommunityApproveVals(ListCommunityApproveValCommand cmd);
 
     GetTemplateByCommunityApproveIdResponse postApprovalForm(PostCommunityApproveFormCommand cmd);
 }
