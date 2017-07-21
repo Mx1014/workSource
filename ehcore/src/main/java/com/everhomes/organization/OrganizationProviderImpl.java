@@ -4647,7 +4647,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentOrgId));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
 		List<EhOrganizationsRecord> records = query.fetch();
-		if(records != null){
+		if(records != null && records.size() > 0){
 			return ConvertHelper.convert(records.get(0), Organization.class);
 		}
         return null;
@@ -4720,7 +4720,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<Record> query = context.selectQuery();
-					query.addSelect(Tables.EH_USERS.ID,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS.as(Tables.EH_USER_ORGANIZATIONS.STATUS.getName()),
+					query.addSelect(Tables.EH_USERS.ID,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS,
 							Tables.EH_USERS.NICK_NAME,Tables.EH_USERS.GENDER,Tables.EH_USERS.CREATE_TIME,Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID,
 							Tables.EH_USERS.EXECUTIVE_TAG,Tables.EH_USERS.POSITION_TAG,Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
 					query.addFrom(Tables.EH_USERS);
@@ -4735,6 +4735,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						query.addConditions(Tables.EH_USERS.ID.lt(locator.getAnchor()));
 
 					query.addOrderBy(Tables.EH_USERS.ID.desc());
+					query.addOrderBy(Tables.EH_USER_ORGANIZATIONS.STATUS.desc());
 					query.addLimit(size);
 					LOGGER.debug("query sql:{}", query.getSQL());
 					LOGGER.debug("query param:{}", query.getBindValues());
