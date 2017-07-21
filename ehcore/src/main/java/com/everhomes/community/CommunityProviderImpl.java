@@ -1060,8 +1060,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 	            (DSLContext context, Object reducingContext)-> {
 	            	
 	            	//增加分页 by sfyan 20160524
-	            	Condition cond = Tables.EH_COMMUNITIES.ID.in(communityIds);
-	        		cond = cond.and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+	            	Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
+                    if(null != communityIds && communityIds.size() > 0)
+	        		    cond = cond.and(Tables.EH_COMMUNITIES.ID.in(communityIds));
 	        		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
 	        		if(null != communityType){
 	        			cond = cond.and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));

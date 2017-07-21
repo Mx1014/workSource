@@ -24,7 +24,10 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.MoreActionData;
 import com.everhomes.rest.common.NavigationActionData;
 import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.portal.*;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.widget.*;
@@ -706,12 +709,30 @@ public class PortalServiceImpl implements PortalService {
 	public ListPortalItemCategoriesResponse listPortalItemCategories(ListPortalItemCategoriesCommand cmd) {
 		Integer namespaceId= UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalItemCategory> portalItemCategories = portalItemCategoryProvider.listPortalItemCategory(namespaceId);
+		PortalItemCategory category = new PortalItemCategory();
+		category.setId(0L);
+		category.setName("未分组");
+		portalItemCategories.add(category);
 		List<PortalItemCategoryDTO> dtos = portalItemCategories.stream().map(r ->{
 			PortalItemCategoryDTO dto = processPortalItemCategoryDTO(r);
 			List<PortalItem> portalItems = portalItemProvider.listPortalItemByCategoryId(r.getId());
-			dto.setItems(portalItems.stream().map(i ->{
+
+			List<PortalItemDTO> items = portalItems.stream().map(i ->{
 				return processPortalItemDTO(i);
-			}).collect(Collectors.toList()));
+			}).collect(Collectors.toList());
+
+			Collections.sort(items, new Comparator<PortalItemDTO>() {
+				@Override
+				public int compare(PortalItemDTO o1, PortalItemDTO o2) {
+					Integer order1 = 0;
+					if(null != o1.getMoreOrder()) order1 = o1.getMoreOrder();
+
+					Integer order2 = 0;
+					if(null != o2.getMoreOrder()) order2 = o2.getMoreOrder();
+					return order1 - order2;
+				}
+			});
+			dto.setItems(items);
 			return dto;
 		}).collect(Collectors.toList());
 		Collections.sort(dtos, new Comparator<PortalItemCategoryDTO>() {
@@ -988,7 +1009,48 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public void publish(PublishCommand cmd) {
+	public List<ScopeDTO> listScopes(ListScopeCommand cmd){
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+		List<ScopeDTO> dtos = new ArrayList<>();
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		OrganizationType oType = null;
+		if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.PM){
+			oType = OrganizationType.PM;
+		}else if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.ORGANIZATION){
+			oType = OrganizationType.ENTERPRISE;
+		}
+		if(null != oType){
+			List<String> groupTypes = new ArrayList<>();
+			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, oType.getCode(), locator, 10000);
+			for (Organization organization: organizations) {
+				dtos.add(ConvertHelper.convert(organization, ScopeDTO.class));
+			}
+			return dtos;
+		}
+
+		CommunityType cType = null;
+		if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.COMMERCIAL){
+			cType = CommunityType.COMMERCIAL;
+		}else if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.RESIDENTIAL){
+			cType = CommunityType.RESIDENTIAL;
+		}
+		if(null != cType){
+			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+			for (Community community: communities) {
+				if(CommunityType.fromCode(community.getCommunityType()) == cType){
+					dtos.add(ConvertHelper.convert(community, ScopeDTO.class));
+				}
+			}
+		}
+
+		return dtos;
+	}
+
+	@Override
+	public PortalPublishLog publish(PublishCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId());
@@ -1027,7 +1089,7 @@ public class PortalServiceImpl implements PortalService {
 
 			}
 		});
-
+		return portalPublishLog;
 	}
 
 	private void publishLayout(PortalLayout layout){

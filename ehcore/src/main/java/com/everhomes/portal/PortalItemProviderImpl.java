@@ -76,7 +76,10 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	public List<PortalItem> listPortalItem(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId) {
 		Condition cond = Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode());
 		if(null != itemCategoryId){
-			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.eq(itemCategoryId));
+			if(0L == itemCategoryId)
+				cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.eq(itemCategoryId).or(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.isNull()));
+			else
+				cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.eq(itemCategoryId));
 		}
 		if(null != namespaceId){
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.NAMESPACE_ID.eq(namespaceId));

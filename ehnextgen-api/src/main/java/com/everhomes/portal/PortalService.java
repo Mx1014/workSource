@@ -104,10 +104,12 @@ public interface PortalService {
 	public void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd);
 
 
-	public void publish(PublishCommand cmd);
+	public PortalPublishLog publish(PublishCommand cmd);
 
 	List<PortalLayoutTemplateDTO> listPortalLayoutTemplates();
 
 	void setItemCategoryDefStyle(SetItemCategoryDefStyleCommand cmd);
+
+	List<ScopeDTO> listScopes(ListScopeCommand cmd);
 
 }
