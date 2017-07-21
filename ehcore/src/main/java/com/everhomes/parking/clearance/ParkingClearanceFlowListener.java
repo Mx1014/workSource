@@ -145,7 +145,9 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
                 }
                 return null;
             }
-            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != ParkingClearanceLogStatus.COMPLETED) {
+            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.fromCode(log.getStatus());
+            if (status != ParkingClearanceLogStatus.COMPLETED
+                    && status != ParkingClearanceLogStatus.CANCELLED) {
                 log.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
                 clearanceLogProvider.updateClearanceLog(log);
             }
