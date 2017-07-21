@@ -162,5 +162,13 @@ update `eh_web_menus` set `module_id` = 52000 where path like '/50000/52000%';
 update `eh_web_menus` set `module_id` = 60100 where path like '/60000/60100%';
 update `eh_web_menus` set `module_id` = 60200 where path like '/60000/60200%';
 
+
 -- fix bug 12536 by xiongying20170721
 update `eh_locale_strings` set text = '抱歉你没有代发权限' where scope = 'pmtask' and code = '10012';
+
+-- 给所有域空间配上内部管理模块以及管理模块  add by sfyan 20170721
+delete from eh_service_module_scopes where module_id in (select module_id from eh_web_menus where path like '%/50000/%' or id in (42100, 41400, 50000, 60000, 60100, 60200) group by module_id having module_id is not null);
+SET @service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) select (@service_module_scopes_id := @service_module_scopes_id + 1), ewms.owner_id, ewm.module_id,2 from eh_web_menu_scopes ewms left join eh_web_menus ewm on ewms.menu_id = ewm.id where owner_type = 'EhNamespaces' and (ewm.path like '%/50000/%' or ewm.id in (42100, 41400, 50000, 60000, 60100, 60200)) group by ewm.module_id,ewms.owner_id having ewm.module_id is not null;
+
+
