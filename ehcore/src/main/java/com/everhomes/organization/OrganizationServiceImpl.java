@@ -10348,13 +10348,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                     }
                 }
 
-                //  根据选择"试用,在职"状态来过滤数据
-                if(cmd.getEmployeeStatus()!=null){
+                //  暂时去除过滤
+/*                if(cmd.getEmployeeStatus()!=null){
                     if(!dto.getEmployeeStatus().equals(cmd.getEmployeeStatus())){
 //                        responseMembers.add(dto);
                         continue;
                     }
-                }
+                }*/
                 responseMembers.add(dto);
             }
             response.setMembers(responseMembers);
@@ -12100,7 +12100,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         row.createCell(5).setCellValue(String.valueOf(member.getCheckInTime()));
         row.createCell(6).setCellValue(member.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode()) ? "是" : "否");
-        row.createCell(7).setCellValue(String.valueOf(member.getEmploymentTime()));
+        row.createCell(7).setCellValue(member.getEmploymentTime() == null? "" : String.valueOf(member.getEmploymentTime()));
 
         //  职级
         List<OrganizationDTO> jobLevels = member.getJobLevels();
