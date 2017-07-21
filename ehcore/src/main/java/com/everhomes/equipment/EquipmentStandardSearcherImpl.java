@@ -144,9 +144,11 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null) {
             FilterBuilder tfb = FilterBuilders.termFilter("targetId", cmd.getTargetId());
-            tfb = FilterBuilders.orFilter(tfb, FilterBuilders.termFilter("targetId", ""));
+            tfb = FilterBuilders.orFilter(tfb, FilterBuilders.termFilter("targetId", 0));
 
             fb = FilterBuilders.andFilter(fb, tfb);
+        } else {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", 0));
         }
 
         if(cmd.getStandardType() != null)
@@ -227,10 +229,10 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             b.field("status", standard.getStatus());
             b.field("namespaceId", standard.getNamespaceId());
 
-            if(standard.getTargetId() != null && standard.getTargetId() != 0L) {
+            if(standard.getTargetId() != null) {
                 b.field("targetId", standard.getTargetId());
             } else {
-                b.field("targetId", "");
+                b.field("targetId", 0);
             }
 
             b.endObject();
