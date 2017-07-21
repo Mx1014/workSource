@@ -123,12 +123,16 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 			item.setActionType(r.getValue(Tables.EH_PORTAL_ITEMS.ACTION_TYPE));
 			item.setActionData(r.getValue(Tables.EH_PORTAL_ITEMS.ACTION_DATA));
 			item.setStatus(r.getValue(Tables.EH_PORTAL_ITEMS.STATUS));
+			item.setDisplayFlag(r.getValue(Tables.EH_PORTAL_ITEMS.DISPLAY_FLAG));
 			item.setOperatorUid(r.getValue(Tables.EH_PORTAL_ITEMS.OPERATOR_UID));
 			item.setCreatorUid(r.getValue(Tables.EH_PORTAL_ITEMS.CREATOR_UID));
 			item.setCreateTime(r.getValue(Tables.EH_PORTAL_ITEMS.CREATE_TIME));
 			item.setUpdateTime(r.getValue(Tables.EH_PORTAL_ITEMS.UPDATE_TIME));
 			item.setIconUri(r.getValue(Tables.EH_PORTAL_ITEMS.ICON_URI));
+			item.setSelectedIconUri(r.getValue(Tables.EH_PORTAL_ITEMS.SELECTED_ICON_URI));
 			item.setDefaultOrder(r.getValue(Tables.EH_PORTAL_ITEMS.DEFAULT_ORDER));
+			item.setMoreOrder(r.getValue(Tables.EH_PORTAL_ITEMS.MORE_ORDER));
+			item.setItemCategoryId(r.getValue(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID));
 			item.setDescription(r.getValue(Tables.EH_PORTAL_ITEMS.DESCRIPTION));
 			item.setItemHeight(r.getValue(Tables.EH_PORTAL_ITEMS.ITEM_HEIGHT));
 			item.setItemWidth(r.getValue(Tables.EH_PORTAL_ITEMS.ITEM_WIDTH));

@@ -546,7 +546,7 @@ public class PortalServiceImpl implements PortalService {
 
 		if(!StringUtils.isEmpty(portalItem.getSelectedIconUri())){
 			String url = contentServerService.parserUri(portalItem.getSelectedIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-			dto.setSelectediconUrl(url);
+			dto.setSelectedIconUrl(url);
 		}
 
 		if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
@@ -653,6 +653,10 @@ public class PortalServiceImpl implements PortalService {
 			if(null != community){
 				dto.setScopeName(community.getName());
 			}
+		}
+
+		if(portalContentScope.getScopeId() == 0L){
+			dto.setScopeName("全部");
 		}
 		return dto;
 	}

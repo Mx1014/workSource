@@ -41,11 +41,11 @@ public class PortalItemDTO {
     private String actionType;
     private String actionData;
     private Integer defaultOrder;
-    private Byte displayFlag;
-    private String selectediconUri;
-    private String selectediconUrl;
+    private String selectedIconUri;
+    private String selectedIconUrl;
     private Integer moreOrder;
     private Long itemCategryId;
+    private Byte displayFlag;
     private String description;
     private Long createTime;
     private Long updateTime;
@@ -146,12 +146,20 @@ public class PortalItemDTO {
         this.displayFlag = displayFlag;
     }
 
-    public String getSelectediconUrl() {
-        return selectediconUrl;
+    public String getSelectedIconUri() {
+        return selectedIconUri;
     }
 
-    public void setSelectediconUrl(String selectediconUrl) {
-        this.selectediconUrl = selectediconUrl;
+    public void setSelectedIconUri(String selectedIconUri) {
+        this.selectedIconUri = selectedIconUri;
+    }
+
+    public String getSelectedIconUrl() {
+        return selectedIconUrl;
+    }
+
+    public void setSelectedIconUrl(String selectedIconUrl) {
+        this.selectedIconUrl = selectedIconUrl;
     }
 
     public Integer getMoreOrder() {
@@ -242,13 +250,6 @@ public class PortalItemDTO {
         this.iconUri = iconUri;
     }
 
-    public String getSelectediconUri() {
-        return selectediconUri;
-    }
-
-    public void setSelectediconUri(String selectediconUri) {
-        this.selectediconUri = selectediconUri;
-    }
 
     public List<PortalContentScopeDTO> getScopes() {
         return scopes;
