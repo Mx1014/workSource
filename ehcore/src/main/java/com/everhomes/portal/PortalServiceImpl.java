@@ -462,8 +462,8 @@ public class PortalServiceImpl implements PortalService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(portalItemGroup.getNamespaceId());
 		PortalItem portalItem = ConvertHelper.convert(cmd, PortalItem.class);
 		portalItem.setNamespaceId(namespaceId);
-		if(null == PortalItemGroupStatus.fromCode(cmd.getStatus())){
-			portalItem.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
+		if(null == PortalItemStatus.fromCode(cmd.getStatus())){
+			portalItem.setStatus(PortalItemStatus.ACTIVE.getCode());
 		}
 		portalItem.setCreatorUid(user.getId());
 		portalItem.setOperatorUid(user.getId());
@@ -486,8 +486,8 @@ public class PortalServiceImpl implements PortalService {
 	public PortalItemDTO updatePortalItem(UpdatePortalItemCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalItem portalItem = checkPortalItem(cmd.getId());
-		if(null == PortalItemGroupStatus.fromCode(cmd.getStatus())){
-			portalItem.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
+		if(null == PortalItemStatus.fromCode(cmd.getStatus())){
+			portalItem.setStatus(PortalItemStatus.ACTIVE.getCode());
 		}else{
 			portalItem.setStatus(cmd.getStatus());
 		}
