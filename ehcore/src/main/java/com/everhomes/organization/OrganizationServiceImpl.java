@@ -10334,9 +10334,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             List<OrganizationMemberV2DTO> responseMembers = new ArrayList<>();
 
             for(int i=0; i<results.size(); i++){
-                //  过滤没有 detailId 的人员
-                if(StringUtils.isEmpty(results.get(i).getDetailId()))
-                    continue;
+                //  解除过滤，对于没有 detailId 的人员做出提示
+/*                if(StringUtils.isEmpty(results.get(i).getDetailId()))
+                    continue;*/
                 OrganizationMemberV2DTO dto = ConvertHelper.convert(results.get(i), OrganizationMemberV2DTO.class);
                 //  设置合同到期时间
                 if (endTimeList != null) {
@@ -10367,6 +10367,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
         PersonnelsDetailsV2Response response = new PersonnelsDetailsV2Response();
+        if(cmd.getDetailId() == null)
+            return response;
         OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
 
 
