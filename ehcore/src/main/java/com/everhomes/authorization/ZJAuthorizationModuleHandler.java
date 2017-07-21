@@ -49,7 +49,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 
-@Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+999992)
+@Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+999971)
 public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler {
 //	private static final Logger LOGGER = LoggerFactory.getLogger(ZJAuthorizationModuleHandler.class);
 	   

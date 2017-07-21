@@ -1,6 +1,6 @@
 -- 表单 by dengs,20170711
 set @eh_general_forms_id = (select max(id) from eh_general_forms);
-set @namespace_id = 0; -- 此处应该修改为张江的namespace
+set @namespace_id = 999971; -- 此处应该修改为张江的namespace
 set @appKey = '7757a75f-b79a-42fd-896e-107f4b59';
 set @secretKey = 'nM9PpqGaV2Qe5QqmNSHfW';
 -- appkey
