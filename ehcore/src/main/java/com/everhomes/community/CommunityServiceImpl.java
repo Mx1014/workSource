@@ -75,7 +75,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.elasticsearch.common.collect.Lists;
 import org.jooq.Condition;
 import org.jooq.JoinType;
 import org.jooq.Record;
@@ -1992,7 +1991,6 @@ public class CommunityServiceImpl implements CommunityService {
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
 				query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
-
 				if(null != cmd.getOrganizationId()){
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
@@ -2014,17 +2012,18 @@ public class CommunityServiceImpl implements CommunityService {
 				if(null != cmd.getExecutiveFlag()){
 					query.addConditions(Tables.EH_USERS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
 				}
-
+				query.addGroupBy(Tables.EH_USERS.ID);
+				Condition cond = Tables.EH_USERS.ID.isNotNull();
 				if(AuthFlag.YES == AuthFlag.fromCode(cmd.getIsAuth())){
-					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+					cond = cond.and("`eh_user_organizations`.`status` = " + UserOrganizationStatus.ACTIVE.getCode());
 				}
 
 				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
-					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.ACTIVE.getCode()).or(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull()));
+					cond = cond.and("`eh_user_organizations`.`status` <> " + UserOrganizationStatus.ACTIVE.getCode() + " or `eh_user_organizations`.`status` is null");
 				}
-				query.addConditions();
 
-				query.addGroupBy(Tables.EH_USERS.ID);
+				query.addHaving(cond);
+
 				return query;
 			}
 		});
@@ -2151,7 +2150,7 @@ public class CommunityServiceImpl implements CommunityService {
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		int communityUserCount  = 0;
 		List<Long> orgIds  = new ArrayList<Long>();
-		
+
 		if(cmd.getCommunityId() != null) {
 			Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 			
@@ -2197,59 +2196,30 @@ public class CommunityServiceImpl implements CommunityService {
 				resp.setNotAuthUsers(allCount - authCount);
 				
 				return resp;
+			}else{
+
 			}
 		}
-		
+		int authUserCount = 0;
 		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
 			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
 				LOGGER.error("organizationId and communityId All are empty");
 				throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"organizationId and communityId All are empty");
 			}
-			
-			//获取园区或者机构所管辖的所有园区下的所有企业，包括自己的机构id
-			orgIds = this.getAllOrganizationIds(cmd.getCommunityId(), cmd.getOrganizationId());
-			
-			//获取所有机构集的所有注册用户
-			Condition cond = Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode());
-			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
-			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(orgIds, cond);
-			
-			List<Long> userIds = new ArrayList<Long>();
-			if(null != members){
-				for (OrganizationMember member : members) {
-					if(!userIds.contains(member.getTargetId())){
-						userIds.add(member.getTargetId());
-					}
-				}
-			}
-			
-			communityUserCount = userIds.size();
-			
+			communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
+
 		}else{
 			// 如果是其他域的情况，则获取域下面所有的公司
-			communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
-			List<Organization> orgs = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, null ,new CrossShardListingLocator(), 1000000);
-			for (Organization organization : orgs) {
-				orgIds.add(organization.getId());
-			}
+			if(null == cmd.getCommunityId())
+				communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
+			else
+				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
+
+			authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
+
 		}
-		
-		// 获取所有机构集的所有认证用户
-		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode());
-		cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
-		List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(orgIds, cond);
-		List<Long> userIds = new ArrayList<Long>();
-		if(null != members){
-			for (OrganizationMember member : members) {
-				if(!userIds.contains(member.getTargetId())){
-					userIds.add(member.getTargetId());
-				}
-			}
-		}
-		
-		int authUserCount = userIds.size();
-		
+
 		//总注册用户-认证用户 = 非认证用户
 		int notAuthUsers = communityUserCount - authUserCount;
 		
@@ -2907,6 +2877,7 @@ public class CommunityServiceImpl implements CommunityService {
                                             member.setApproveTime(r.getOperateTime() != null ? r.getOperateTime().getTime() : null);
                                             member.setContactName(r.getContactName());
                                             member.setContactToken(r.getContactToken());
+                                            member.setContactDescription(r.getContactDescription());
                                             return member;
                                         }).collect(Collectors.toList());
                                 if (list.size() > 0) {
@@ -2957,15 +2928,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 		return response;
 	}
-
-    public static void main(String[] args) {
-        ArrayList<Integer> list = Lists.newArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        List<Integer> collect = list.stream().flatMap(r -> {
-            ArrayList<Integer> list1 = Lists.newArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-            return list1.stream().filter(r1 -> r1 > 5).limit(1);
-        }).collect(Collectors.toList());
-        System.out.println(collect);
-    }
 
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) { 

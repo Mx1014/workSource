@@ -137,3 +137,6 @@ CREATE TABLE `eh_talent_requests` (
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 给organization_member_log添加描述字段 add by xq.tian  2017/07/20
+ALTER TABLE `eh_organization_member_logs` ADD COLUMN `contact_description` TEXT;
