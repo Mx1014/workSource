@@ -1097,7 +1097,7 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `modu
 SELECT (@module_id := @module_id + 1), owner_id, menu_id, '', NULL, '2' FROM eh_web_menu_scopes WHERE 
 menu_id IN (SELECT id FROM eh_service_modules) AND `owner_id` = @eh_namespace_id;
  
- -- 短信模板
+-- 短信模板
  
  
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
