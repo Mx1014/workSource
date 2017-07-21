@@ -2019,7 +2019,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 
 				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
-					cond = cond.and("`eh_user_organizations`.`status` <> " + UserOrganizationStatus.ACTIVE.getCode() + " or `eh_user_organizations`.`status` is not null");
+					cond = cond.and("`eh_user_organizations`.`status` <> " + UserOrganizationStatus.ACTIVE.getCode() + " or `eh_user_organizations`.`status` is null");
 				}
 
 				query.addHaving(cond);
