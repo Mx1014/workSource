@@ -140,3 +140,27 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 -- 资源预约 add by sw 20170720
 UPDATE eh_rentalv2_orders set organization_id = NULL;
+
+
+
+-- 开放内部管理和管理员管理的模块权限分配 add by sfyan 20170721
+update `eh_service_modules` set type = 1 where id in (42100, 41400, 50000, 60000, 60100, 60200) or path like '/50000/%';
+update `eh_service_modules` set path = '/50000/52000' where id = 52000;
+update `eh_service_modules` set name = '责任部门配置' where id = 60200;
+
+update `eh_web_menus` set `module_id` = 50100 where path like '/50000/50100%';
+update `eh_web_menus` set `module_id` = 50200 where path like '/50000/50200%';
+update `eh_web_menus` set `module_id` = 50300 where path like '/50000/50300%';
+update `eh_web_menus` set `module_id` = 50400 where path like '/50000/50400%';
+update `eh_web_menus` set `module_id` = 50500 where path like '/50000/50500%';
+update `eh_web_menus` set `module_id` = 50600 where path like '/50000/50600%';
+update `eh_web_menus` set `module_id` = 50700 where path like '/50000/50700%';
+update `eh_web_menus` set `module_id` = 50800 where path like '/50000/50800%';
+update `eh_web_menus` set `module_id` = 50900 where path like '/50000/50900%';
+update `eh_web_menus` set `module_id` = 51000 where path like '/50000/51000%';
+update `eh_web_menus` set `module_id` = 52000 where path like '/50000/52000%';
+update `eh_web_menus` set `module_id` = 60100 where path like '/60000/60100%';
+update `eh_web_menus` set `module_id` = 60200 where path like '/60000/60200%';
+
+
+
