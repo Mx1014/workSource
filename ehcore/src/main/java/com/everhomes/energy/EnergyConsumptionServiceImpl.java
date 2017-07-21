@@ -2054,6 +2054,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 //计算当天走了多少字 量程+昨天最后一次读数-锚点
                 amount = amount.add(dayCurrReading.subtract(readingAnchor));
+                dayStat.setCurrentAmount(amount);
 
                 //获取公式,计算当天的费用
                 EnergyMeterSettingLog priceSetting  = meterSettingLogProvider
@@ -2123,7 +2124,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dayStat.setMeterPrice(priceSetting.getSettingValue());
                 dayStat.setLastReading(dayLastReading);
                 dayStat.setCurrentReading(dayCurrReading);
-                dayStat.setCurrentAmount(amount);
                 dayStat.setCurrentCost(realCost);
                 dayStat.setResetMeterFlag(resetFlag);
                 dayStat.setChangeMeterFlag(changeFlag);
