@@ -2149,7 +2149,7 @@ public class CommunityServiceImpl implements CommunityService {
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		int communityUserCount  = 0;
 		List<Long> orgIds  = new ArrayList<Long>();
-		
+
 		if(cmd.getCommunityId() != null) {
 			Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 			
@@ -2195,59 +2195,30 @@ public class CommunityServiceImpl implements CommunityService {
 				resp.setNotAuthUsers(allCount - authCount);
 				
 				return resp;
+			}else{
+
 			}
 		}
-		
+		int authUserCount = 0;
 		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
 			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
 				LOGGER.error("organizationId and communityId All are empty");
 				throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"organizationId and communityId All are empty");
 			}
-			
-			//获取园区或者机构所管辖的所有园区下的所有企业，包括自己的机构id
-			orgIds = this.getAllOrganizationIds(cmd.getCommunityId(), cmd.getOrganizationId());
-			
-			//获取所有机构集的所有注册用户
-			Condition cond = Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode());
-			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
-			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(orgIds, cond);
-			
-			List<Long> userIds = new ArrayList<Long>();
-			if(null != members){
-				for (OrganizationMember member : members) {
-					if(!userIds.contains(member.getTargetId())){
-						userIds.add(member.getTargetId());
-					}
-				}
-			}
-			
-			communityUserCount = userIds.size();
-			
+			communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
+
 		}else{
 			// 如果是其他域的情况，则获取域下面所有的公司
-			communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
-			List<Organization> orgs = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, null ,new CrossShardListingLocator(), 1000000);
-			for (Organization organization : orgs) {
-				orgIds.add(organization.getId());
-			}
+			if(null == cmd.getCommunityId())
+				communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
+			else
+				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
+
+			authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
+
 		}
-		
-		// 获取所有机构集的所有认证用户
-		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode());
-		cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
-		List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(orgIds, cond);
-		List<Long> userIds = new ArrayList<Long>();
-		if(null != members){
-			for (OrganizationMember member : members) {
-				if(!userIds.contains(member.getTargetId())){
-					userIds.add(member.getTargetId());
-				}
-			}
-		}
-		
-		int authUserCount = userIds.size();
-		
+
 		//总注册用户-认证用户 = 非认证用户
 		int notAuthUsers = communityUserCount - authUserCount;
 		

@@ -24,6 +24,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -4762,6 +4763,41 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		return result;
+	}
+
+	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus){
+		List<Integer> result = new ArrayList<>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null,
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<Record> query = context.selectQuery();
+					query.addSelect(Tables.EH_USERS.ID.count());
+					query.addFrom(Tables.EH_USERS);
+					query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+					query.addJoin(Tables.EH_USER_ORGANIZATIONS,
+							JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+					query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
+					query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+					if(null != userOrganizationStatus)
+						query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(userOrganizationStatus));
+					query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
+					if(null != communityId){
+						query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+					}
+					query.addGroupBy(Tables.EH_USERS.ID);
+					LOGGER.debug("query sql:{}", query.getSQL());
+					LOGGER.debug("query param:{}", query.getBindValues());
+					query.fetch().map((r) -> {
+						result.add(Integer.valueOf(r.getValue(0).toString()));
+						return null;
+					});
+					return true;
+				});
+
+		if(result.size() > 0){
+			return result.get(0);
+		}
+		return 0;
 	}
 
 	@Override
