@@ -302,7 +302,7 @@ class ShenyePmTaskHandle implements PmTaskHandle {
 		SearchTasksResponse response = new SearchTasksResponse();
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
 				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), 
-				cmd.getPageAnchor(), pageSize);
+				cmd.getPageAnchor(), pageSize+1);
 		int listSize = list.size();
 		if (listSize > 0) {
     		response.setRequests(list.stream().map(t -> {
@@ -320,10 +320,11 @@ class ShenyePmTaskHandle implements PmTaskHandle {
 
     			return dto;
     		}).collect(Collectors.toList()));
-    		if(listSize != pageSize){
-        		response.setNextPageAnchor(null);
+    		if(response.getRequests() != null && response.getRequests().size() > pageSize){
+				response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
+				response.getRequests().remove(list.get(listSize-1));
         	}else{
-        		response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
+				response.setNextPageAnchor(null);
         	}
     	}
 		
