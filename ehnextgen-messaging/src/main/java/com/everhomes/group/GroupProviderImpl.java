@@ -463,8 +463,8 @@ public class GroupProviderImpl implements GroupProvider {
             queryBuilderCallback.buildCondition(locator, query);
             
         if(locator.getAnchor() != null)
-            query.addConditions(Tables.EH_GROUP_MEMBERS.ID.lt(locator.getAnchor()));
-        query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.desc());
+            query.addConditions(Tables.EH_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
+        query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.asc());
         query.addLimit(count);
         
         query.fetch().map((r) -> {
