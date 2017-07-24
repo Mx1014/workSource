@@ -1394,7 +1394,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
-		namespaceId = UserContext.getCurrentNamespaceId();
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
 		Long roleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
 
@@ -1406,7 +1405,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		organizationService.createOrganizationAccount(command, roleId, namespaceId);
 
 
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(org.getNamespaceId(), cmd.getContactToken());
 
 
 		/**
