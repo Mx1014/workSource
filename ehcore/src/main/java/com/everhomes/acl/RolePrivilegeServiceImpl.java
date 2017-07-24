@@ -1401,12 +1401,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
-		OrganizationMember member = organizationService.createOrganizationAccount(command, roleId, namespaceId);
+		//创建管理员不再返回member
+		organizationService.createOrganizationAccount(command, roleId, namespaceId);
+
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
 
 		/**
 		 * 分配权限
 		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
+		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),userIdentifier.getOwnerUid(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
 	}
 
 	@Override
