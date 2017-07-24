@@ -558,9 +558,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue(dto.getStandardNumber());
 		row.createCell(++i).setCellValue(dto.getName());
 		row.createCell(++i).setCellValue(StandardType.fromStatus(dto.getStandardType()).getName());
-		row.createCell(++i).setCellValue(repeatService.getExecutionFrequency(dto.getRepeat()));
-		row.createCell(++i).setCellValue(repeatService.getExecuteStartTime(dto.getRepeat()));
-		row.createCell(++i).setCellValue(repeatService.getlimitTime(dto.getRepeat()));
+		if(dto.getRepeat() != null) {
+			row.createCell(++i).setCellValue(repeatService.getExecutionFrequency(dto.getRepeat()));
+			row.createCell(++i).setCellValue(repeatService.getExecuteStartTime(dto.getRepeat()));
+			row.createCell(++i).setCellValue(repeatService.getlimitTime(dto.getRepeat()));
+		} else {
+			row.createCell(++i).setCellValue("");
+			row.createCell(++i).setCellValue("");
+			row.createCell(++i).setCellValue("");
+		}
+
 		row.createCell(++i).setCellValue(dto.getUpdateTime().toString());
 		row.createCell(++i).setCellValue(dto.getStandardSource());
 		if(EquipmentStandardStatus.INACTIVE.equals(EquipmentStandardStatus.fromStatus(dto.getStatus())))
