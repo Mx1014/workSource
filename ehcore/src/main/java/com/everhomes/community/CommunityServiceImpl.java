@@ -2092,7 +2092,7 @@ public class CommunityServiceImpl implements CommunityService {
 		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("姓名");
+		row.createCell(0).setCellValue("昵称");
 		row.createCell(1).setCellValue("性别");
 		row.createCell(2).setCellValue("手机号");
 		row.createCell(3).setCellValue("注册时间");

@@ -2056,5 +2056,5 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- 2017-7-20 by wh  活动配置成有直播开关
 	
 UPDATE `eh_configurations` SET VALUE = '2' WHERE  `name`= 'video.official.support' AND namespace_id = '999979' ;
-	
-	
+
+
