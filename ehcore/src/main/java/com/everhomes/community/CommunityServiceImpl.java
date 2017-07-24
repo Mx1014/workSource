@@ -2051,7 +2051,7 @@ public class CommunityServiceImpl implements CommunityService {
 				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
 				for (OrganizationMember member : members) {
-					if (OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE) {
+					if (member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()) && member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
 						dto.setOrganizationMemberName(member.getContactName());
 						ms.add(member);
 						dto.setIsAuth(AuthFlag.YES.getCode());
