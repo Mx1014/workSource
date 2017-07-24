@@ -2492,7 +2492,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
-			dbProvider.execute((TransactionStatus status) -> {
+//			dbProvider.execute((TransactionStatus status) -> {
 				EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
 				equipment.setCustomNumber(s[1]);
 				equipment.setName(s[2]);
@@ -2524,8 +2524,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				LOGGER.info("add equipment");
 				equipmentProvider.creatEquipmentInspectionEquipment(equipment);
 				equipmentSearcher.feedDoc(equipment);
-				return null;
-			});
+//				return null;
+//			});
 		}
 		return errorDataLogs;
 		
