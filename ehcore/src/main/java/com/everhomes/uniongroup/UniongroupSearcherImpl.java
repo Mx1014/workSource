@@ -60,20 +60,27 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     @Override
     public void bulkUpdate(List<UniongroupMemberDetail> uniongroupMemberDetails) {
         BulkRequestBuilder brb = getClient().prepareBulk();
+
         //  查询所有关联了薪酬组的用户
-        List<Long> groupDetailIds = this.uniongroupService.listUniongroupMemberGroupIds(uniongroupMemberDetails.get(0).getNamespaceId(), uniongroupMemberDetails.get(0).getEnterpriseId()).stream().map(r ->{
-            Long id = (Long)r[0];
-            return id;
-        }).collect(Collectors.toList());
+        List<Long> groupDetailIds = new ArrayList<>();
+        List<Object[]> groupResults = this.uniongroupService.listUniongroupMemberGroupIds(uniongroupMemberDetails.get(0).getNamespaceId(), uniongroupMemberDetails.get(0).getEnterpriseId());
+        if (groupResults != null)
+            groupDetailIds = groupResults.stream().map(r -> {
+                Long id = (Long) r[0];
+                return id;
+            }).collect(Collectors.toList());
 
         //  查询所有员工工资明细情况
-        List<Long> wageDetailIds = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(uniongroupMemberDetails.get(0).getNamespaceId(), uniongroupMemberDetails.get(0).getEnterpriseId()).stream().map(r ->{
-            Long id = (Long)r[0];
-            return id;
-        }).collect(Collectors.toList());
+        List<Long> wageDetailIds = new ArrayList<>();
+        List<Object[]> wageResults = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(uniongroupMemberDetails.get(0).getNamespaceId(), uniongroupMemberDetails.get(0).getEnterpriseId());
+        if (wageResults != null)
+            wageDetailIds = wageResults.stream().map(r -> {
+                Long id = (Long) r[0];
+                return id;
+            }).collect(Collectors.toList());
 
         for (UniongroupMemberDetail detail : uniongroupMemberDetails) {
-            XContentBuilder source = createDoc(detail,groupDetailIds,wageDetailIds);
+            XContentBuilder source = createDoc(detail, groupDetailIds, wageDetailIds);
             if (null != source) {
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType()).id(detail.getId().toString()).source(source));
             }
@@ -86,7 +93,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     @Override
     public void feedDoc(UniongroupMemberDetail detail) {
         OrganizationMemberDetails member_detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detail.getDetailId());
-        if(member_detail != null)
+        if (member_detail != null)
             detail.setEmployeeNo(member_detail.getEmployeeNo());
         Map depart_map = this.organizationProvider.listOrganizationsOfDetail(detail.getNamespaceId(), detail.getDetailId(), OrganizationGroupType.DEPARTMENT.getCode());
         if (depart_map != null)
@@ -97,18 +104,24 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         }
 
         //  查询所有关联了薪酬组的用户
-        List<Long> groupDetailIds = this.uniongroupService.listUniongroupMemberGroupIds(detail.getNamespaceId(), detail.getEnterpriseId()).stream().map(r ->{
-            Long id = (Long)r[0];
-            return id;
-        }).collect(Collectors.toList());
+        List<Long> groupDetailIds = new ArrayList<>();
+        List<Object[]> groupResults = this.uniongroupService.listUniongroupMemberGroupIds(detail.getNamespaceId(), detail.getEnterpriseId());
+        if (groupResults != null)
+            groupDetailIds = groupResults.stream().map(r -> {
+                Long id = (Long) r[0];
+                return id;
+            }).collect(Collectors.toList());
 
         //  查询所有员工工资明细情况
-        List<Long> wageDetailIds = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(detail.getNamespaceId(), detail.getEnterpriseId()).stream().map(r ->{
-            Long id = (Long)r[0];
+        List<Long> wageDetailIds = new ArrayList<>();
+        List<Object[]> wageResults = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(detail.getNamespaceId(), detail.getEnterpriseId());
+        if (wageResults != null)
+            wageDetailIds = wageResults.stream().map(r -> {
+            Long id = (Long) r[0];
             return id;
         }).collect(Collectors.toList());
 
-        XContentBuilder source = createDoc(detail,groupDetailIds,wageDetailIds);
+        XContentBuilder source = createDoc(detail, groupDetailIds, wageDetailIds);
         feedDoc(detail.getId().toString(), source);
     }
 
@@ -131,7 +144,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             //查询部门和岗位和工号
             for (UniongroupMemberDetail detail : details) {
                 OrganizationMemberDetails member_detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detail.getDetailId());
-                if(member_detail != null)
+                if (member_detail != null)
                     detail.setEmployeeNo(member_detail.getEmployeeNo());
                 Map depart_map = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(), detail.getDetailId(), OrganizationGroupType.DEPARTMENT.getCode());
                 if (depart_map != null)
@@ -161,7 +174,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         if (cmd.getGroupId() != null && cmd.getGroupId() != 0L) {
             bqb = bqb.must(QueryBuilders.termQuery("groupId", cmd.getGroupId()));
         }
-        if (cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()){
+        if (cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
             bqb = bqb.must(QueryBuilders.matchQuery("contactName", cmd.getKeyword()));
 //            bqb = bqb.should(QueryBuilders.matchQuery("employeeNo", cmd.getKeyword()));
         }
@@ -186,34 +199,34 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             detail.setContactName(m.get("contactName").toString());
             detail.setContactToken(m.get("contactToken").toString());
 //            detail.set...(detaild);
-            if (m.get("department") != null){
+            if (m.get("department") != null) {
                 List<Map> department = (List<Map>) m.get("department");
-                Map<Long,String> departmentMap = new HashMap<>();
-                if(department.size() > 0){
-                    department.forEach(r ->{
+                Map<Long, String> departmentMap = new HashMap<>();
+                if (department.size() > 0) {
+                    department.forEach(r -> {
                         departmentMap.put(Long.valueOf(r.get("department_id").toString()), r.get("department_name").toString());
                     });
                 }
                 detail.setDepartment(departmentMap);
             }
-            if (m.get("job_position") != null){
+            if (m.get("job_position") != null) {
                 List<Map> jobPosition = (List<Map>) m.get("job_position");
-                Map<Long,String> jobPositionMap = new HashMap<>();
-                if(jobPosition.size() > 0){
-                    jobPosition.forEach(r ->{
+                Map<Long, String> jobPositionMap = new HashMap<>();
+                if (jobPosition.size() > 0) {
+                    jobPosition.forEach(r -> {
                         jobPositionMap.put(Long.valueOf(r.get("job_position_id").toString()), r.get("job_position_name").toString());
                     });
                 }
                 detail.setJobPosition(jobPositionMap);
             }
-            SimpleDateFormat simpleDateFormat  = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             TimeZone utcZone = TimeZone.getTimeZone("UTC");
             if (!StringUtils.isEmpty(m.get("employeeNo")))
                 detail.setEmployeeNo(m.get("employeeNo").toString());
             simpleDateFormat.setTimeZone(utcZone);
             try {
                 Date myDate = simpleDateFormat.parse(m.get("updateTime").toString());
-                SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 detail.setUpdateTime(Timestamp.valueOf(sdf.format(myDate)));
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -231,12 +244,12 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
     private Byte checkSalaryEmployeeIsNormal(Long detailId, List<Long> groupDetailIds, List<Long> wageDetailIds) {
 
-        if(!groupDetailIds.contains(detailId))
+        if (!groupDetailIds.contains(detailId))
             return SalaryEmployeeNormalType.ABNORMAL.getCode();
-        if(!wageDetailIds.contains(detailId))
+        if (!wageDetailIds.contains(detailId))
             return SalaryEmployeeNormalType.ABNORMAL.getCode();
         return SalaryEmployeeNormalType.NORMAL.getCode();
-     }
+    }
 
     @Override
     public String getIndexType() {
@@ -260,7 +273,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             b.field("updateTime", uniongroupMemberDetail.getUpdateTime());
             b.field("operatorUid", uniongroupMemberDetail.getOperatorUid());
             b.field("employeeNo", uniongroupMemberDetail.getEmployeeNo());
-            b.field("isNormal",checkSalaryEmployeeIsNormal(uniongroupMemberDetail.getDetailId(), groupDetailIds, wageDetailIds));
+            b.field("isNormal", checkSalaryEmployeeIsNormal(uniongroupMemberDetail.getDetailId(), groupDetailIds, wageDetailIds));
             Map<Long, String> department = uniongroupMemberDetail.getDepartment();
             if (department != null && department.size() > 0) {
                 b.startArray("department");
