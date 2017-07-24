@@ -123,5 +123,19 @@ public class ExpressCompanyBusinessProviderImpl implements ExpressCompanyBusines
 		return null;
 	}
 
+	@Override
+	public ExpressCompanyBusiness getExpressCompanyBusinessByOwner(int namespaceId, String ownerType, Long ownerId) {
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANY_BUSINESSES)
+				.where(Tables.EH_EXPRESS_COMPANY_BUSINESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_EXPRESS_COMPANY_BUSINESSES.NAMESPACE_ID.eq(namespaceId));
+		query.and(Tables.EH_EXPRESS_COMPANY_BUSINESSES.OWNER_TYPE.eq(ownerType));
+		query.and(Tables.EH_EXPRESS_COMPANY_BUSINESSES.OWNER_ID.eq(ownerId));
+		List list = query.fetch();
+		if(list != null && list.size()>0){
+			return ConvertHelper.convert(list.get(0),ExpressCompanyBusiness.class);
+		}
+		return null;
+	}
+
 
 }

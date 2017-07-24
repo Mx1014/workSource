@@ -144,4 +144,6 @@ public interface ExpressService {
 
 	GetExpressInsuredDocumentsResponse getExpressInsuredDocuments(GetExpressInsuredDocumentsCommand cmd);
 
+	Object listExpressOrderStatus();
+
 }

@@ -21,4 +21,6 @@ public interface ExpressCompanyBusinessProvider {
 	ExpressCompanyBusiness getExpressCompanyBusinessByOwner(int namespaceId, String ownerType, Long ownerId,
 			Byte sendType);
 
+	ExpressCompanyBusiness getExpressCompanyBusinessByOwner(int namespaceId, String ownerType, Long ownerId);
+
 }

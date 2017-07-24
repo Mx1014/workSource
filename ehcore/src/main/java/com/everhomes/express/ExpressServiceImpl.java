@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -47,10 +49,12 @@ import com.everhomes.rest.express.ExpressCompanyDTO;
 import com.everhomes.rest.express.ExpressHotlineDTO;
 import com.everhomes.rest.express.ExpressOrderDTO;
 import com.everhomes.rest.express.ExpressOrderStatus;
+import com.everhomes.rest.express.ExpressOrderStatusDTO;
 import com.everhomes.rest.express.ExpressOwner;
 import com.everhomes.rest.express.ExpressOwnerType;
 import com.everhomes.rest.express.ExpressPackageTypeDTO;
 import com.everhomes.rest.express.ExpressQueryHistoryDTO;
+import com.everhomes.rest.express.ExpressSendMode;
 import com.everhomes.rest.express.ExpressSendModeDTO;
 import com.everhomes.rest.express.ExpressSendTypeDTO;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
@@ -77,6 +81,7 @@ import com.everhomes.rest.express.ListExpressHotlinesResponse;
 import com.everhomes.rest.express.ListExpressOrderCommand;
 import com.everhomes.rest.express.ListExpressOrderCondition;
 import com.everhomes.rest.express.ListExpressOrderResponse;
+import com.everhomes.rest.express.ListExpressOrderStatusResponse;
 import com.everhomes.rest.express.ListExpressPackageTypesCommand;
 import com.everhomes.rest.express.ListExpressPackageTypesResponse;
 import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
@@ -1044,10 +1049,19 @@ public class ExpressServiceImpl implements ExpressService {
 		ListExpressSendModesResponse response = new ListExpressSendModesResponse(new ArrayList<ExpressSendModeDTO>());
 		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(UserContext.getCurrentNamespaceId(),
 				EntityType.NAMESPACE.getCode(), UserContext.getCurrentNamespaceId());
-		response.getExpressSendModeDTO().add(ConvertHelper.convert(setting, ExpressSendModeDTO.class));
+		response.getExpressSendModeDTO().add(convertSendModeDTO(setting));
 		return response;
 	}
 	
+	private ExpressSendModeDTO convertSendModeDTO(ExpressParamSetting setting) {
+		ExpressSendModeDTO dto = ConvertHelper.convert(setting, ExpressSendModeDTO.class);
+		ExpressSendMode mode = ExpressSendMode.fromCode(dto.getSendMode());
+		if(mode != null){
+			dto.setSendModeName(mode.getDesc());
+		}
+		return dto;
+	}
+
 	@Override
 	public ListExpressPackageTypesResponse listExpressPackageTypes(ListExpressPackageTypesCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -1056,9 +1070,7 @@ public class ExpressServiceImpl implements ExpressService {
 		Long ownerId = Long.valueOf(namespaceId);
 		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId,cmd.getSendType());
 		List<ExpressPackageTypeDTO> list = new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(business.getPackageTypes()).toArray())).stream().map(r->{
-			ExpressPackageTypeDTO dto = new ExpressPackageTypeDTO();
-			dto.setPackageType(Byte.valueOf(r.toString()));
-			return dto;
+			return JSONObject.parseObject(r.toString(), new TypeReference<ExpressPackageTypeDTO>(){});
 		}).collect(Collectors.toList());
 		return new ListExpressPackageTypesResponse(list);
 	}
@@ -1071,6 +1083,18 @@ public class ExpressServiceImpl implements ExpressService {
 		Long ownerId = Long.valueOf(namespaceId);
 		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId,cmd.getSendType());
 		return new GetExpressInsuredDocumentsResponse(business == null?null:business.getInsuredDocuments());
+	}
+
+	@Override
+	public ListExpressOrderStatusResponse listExpressOrderStatus() {
+		int namespaceId = UserContext.getCurrentNamespaceId(); // TODO
+		String ownerType = EntityType.NAMESPACE.getCode();
+		Long ownerId = Long.valueOf(namespaceId);
+		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId);
+		List<ExpressOrderStatusDTO> list = new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(business.getOrderStatusCollections()).toArray())).stream().map(r->{
+			return JSONObject.parseObject(r.toString(), new TypeReference<ExpressOrderStatusDTO>(){});
+		}).collect(Collectors.toList());
+		return new ListExpressOrderStatusResponse(list);
 	}
 
 }
