@@ -3023,7 +3023,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 
 			//设置姓名
-			if(null != member){//如果是该公司的成员
+			if(null != member && member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){//如果是该公司的成员
 				dto.setIdentifierToken(member.getContactToken());
 				dto.setTargetName(member.getContactName());
 			}
