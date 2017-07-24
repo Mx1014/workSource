@@ -1069,6 +1069,9 @@ public class ExpressServiceImpl implements ExpressService {
 		String ownerType = EntityType.NAMESPACE.getCode();
 		Long ownerId = Long.valueOf(namespaceId);
 		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId,cmd.getSendType());
+		if(business == null || business.getPackageTypes() == null || business.getPackageTypes().length() == 0){
+			return new ListExpressPackageTypesResponse();
+		}
 		List<ExpressPackageTypeDTO> list = new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(business.getPackageTypes()).toArray())).stream().map(r->{
 			return JSONObject.parseObject(r.toString(), new TypeReference<ExpressPackageTypeDTO>(){});
 		}).collect(Collectors.toList());
@@ -1091,6 +1094,10 @@ public class ExpressServiceImpl implements ExpressService {
 		String ownerType = EntityType.NAMESPACE.getCode();
 		Long ownerId = Long.valueOf(namespaceId);
 		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId);
+		
+		if(business == null || business.getOrderStatusCollections() == null || business.getOrderStatusCollections().length() == 0){
+			return new ListExpressOrderStatusResponse();
+		}
 		List<ExpressOrderStatusDTO> list = new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(business.getOrderStatusCollections()).toArray())).stream().map(r->{
 			return JSONObject.parseObject(r.toString(), new TypeReference<ExpressOrderStatusDTO>(){});
 		}).collect(Collectors.toList());
