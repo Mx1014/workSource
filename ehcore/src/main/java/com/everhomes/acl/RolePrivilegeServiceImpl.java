@@ -1394,6 +1394,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
+		namespaceId = UserContext.getCurrentNamespaceId();
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
 		Long roleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
 
@@ -1406,8 +1407,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
-		if(userIdentifier == null)
-			LOGGER.debug("111111111111 privileges is null");
+
 
 		/**
 		 * 分配权限
