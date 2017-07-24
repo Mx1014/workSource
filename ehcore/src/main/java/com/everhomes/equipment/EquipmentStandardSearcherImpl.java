@@ -182,19 +182,20 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
          } 
         
         List<EquipmentStandardsDTO> eqStandards = new ArrayList<EquipmentStandardsDTO>();
-//        for(Long id : ids) {
-//        	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
-//        	if(standard != null) {
-//        		processRepeatSetting(standard);
-//        		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
-//        		if(null != standard.getRepeat()) {
-//    	    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-//    	    		dto.setRepeat(rs);
-//        		}
-//        		eqStandards.add(dto);
-//        	}
-//
-//        }
+        for(Long id : ids) {
+        	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(id);
+        	if(standard != null) {
+        		processRepeatSetting(standard);
+        		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+                dto.setDescription("");
+        		if(null != standard.getRepeat()) {
+    	    		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+    	    		dto.setRepeat(rs);
+        		}
+        		eqStandards.add(dto);
+        	}
+
+        }
         
         return new SearchEquipmentStandardsResponse(nextPageAnchor, eqStandards);
 	}
