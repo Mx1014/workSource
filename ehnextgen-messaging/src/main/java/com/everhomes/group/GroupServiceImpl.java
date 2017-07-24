@@ -50,6 +50,8 @@ import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
@@ -669,7 +671,132 @@ public class GroupServiceImpl implements GroupService {
         
         return groupDtoList;
     }
-    
+
+    @Override
+    public List<GroupDTO> listUserGroups() {
+        long startTime = System.currentTimeMillis();
+
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        List<GroupDTO> groupDtoList = new ArrayList<GroupDTO>();
+
+        List<UserGroup> userGroupList = userProvider.listUserGroups(userId, null);
+        int size = (userGroupList == null) ? 0 : userGroupList.size();
+        Group tmpGroup = null;
+        if(size > 0) {
+            for(UserGroup userGroup : userGroupList) {
+                // 应客户端要求，过滤掉成员状态为非active的group，因为在客户端那边拿到该group后，group active成员没有本人
+                GroupMemberStatus status = GroupMemberStatus.fromCode(userGroup.getMemberStatus());
+                if(status != GroupMemberStatus.ACTIVE) {
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("The group is filtered for not in active member status, userId=" + userId
+                                + ", groupId=" + userGroup.getGroupId() + ", memberStatus=" + status);
+                    }
+                    continue;
+                }
+                tmpGroup = groupProvider.findGroupById(userGroup.getGroupId());
+                //加上域空间限制，否则跨域的也会查出来, add by tt, 20161101
+                if (tmpGroup != null && tmpGroup.getNamespaceId().intValue() != namespaceId.intValue()) {
+                    continue;
+                }
+
+                //若是group类型，只要的私有组，即群聊。  add by yanjun 20170724
+                if(tmpGroup.getDiscriminator() != null
+                        && GroupDiscriminator.fromCode(tmpGroup.getDiscriminator()) == GroupDiscriminator.GROUP
+                        && tmpGroup.getPrivateFlag() != null
+                        && tmpGroup.getPrivateFlag() == GroupPrivacy.PRIVATE.getCode()){
+
+                    continue;
+                }
+                if(tmpGroup != null && !tmpGroup.getStatus().equals(GroupAdminStatus.INACTIVE.getCode())) {
+                    GroupDTO dto = toGroupDTO(userId, tmpGroup);
+
+                    //群聊名称为空时填充群聊别名  edit by yanjun 20170724
+                    if(StringUtils.isEmpty(dto.getName())){
+                        populateAlias(dto);
+                    }
+                    groupDtoList.add(dto);
+                } else {
+                    LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + userGroup.getGroupId());
+                }
+
+            }
+        }
+
+
+        //添加公司group  add by yanjun 20170721
+        List<OrganizationDTO> listOrg = organizationService.listUserRelateOrganizations(namespaceId, userId, OrganizationGroupType.ENTERPRISE);
+        if(listOrg != null){
+            for(OrganizationDTO org : listOrg){
+                if(org.getGroupId() != null){
+
+                    tmpGroup = groupProvider.findGroupById(org.getGroupId());
+                    //加上域空间限制，否则跨域的也会查出来, add by tt, 20161101
+                    if (tmpGroup != null && tmpGroup.getNamespaceId().intValue() != namespaceId.intValue()) {
+                        continue;
+                    }
+                    if(tmpGroup != null && !tmpGroup.getStatus().equals(GroupAdminStatus.INACTIVE.getCode())) {
+                        groupDtoList.add(toGroupDTO(userId, tmpGroup));
+                    } else {
+                        LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + org.getGroupId());
+                    }
+                }
+
+            }
+        }
+
+        //排序：第一企业，第二家庭，第三群聊  add by yanjun 20170724
+        if(groupDtoList != null && groupDtoList.size() >0){
+            groupDtoList.sort(new Comparator<GroupDTO>() {
+                @Override
+                public int compare(GroupDTO o1, GroupDTO o2) {
+                    if(o2.getDiscriminator() == null ){
+                        return -1;
+                    }
+                    if(o1.getDiscriminator() == null ){
+                        return 1;
+                    }
+
+                    if(GroupDiscriminator.fromCode(o2.getDiscriminator()) == GroupDiscriminator.ENTERPRISE && GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.ENTERPRISE){
+                        return 1;
+                    }else if(o2.getDiscriminator() == GroupDiscriminator.FAMILY.getCode()
+                            && (GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.ENTERPRISE && GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.FAMILY)){
+                        return 1;
+                    }else{
+                        return -1;
+                    }
+                }
+            });
+        }
+
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("List user groups, userId=" + userId + ", size=" + size
+                    + ", elapse=" + (endTime - startTime));
+        }
+
+        return groupDtoList;
+    }
+
+    //填充群聊别名
+    private void populateAlias(GroupDTO groupDTO){
+        ListMemberInStatusCommand cmd = new ListMemberInStatusCommand();
+        cmd.setGroupId(groupDTO.getId());
+        cmd.setStatus(GroupMemberStatus.ACTIVE.getCode());
+        cmd.setPageSize(5);
+        ListMemberCommandResponse commandResponse = this.listMembersInStatus(cmd);
+        if(commandResponse.getMembers() != null && commandResponse.getMembers().size() > 0){
+            String  alias = "";
+            for(int i = 0; i< commandResponse.getMembers().size(); i++){
+                alias += commandResponse.getMembers().get(i).getMemberNickName();
+                alias += "、";
+            }
+            alias = alias.substring(0, alias.length()-1);
+            groupDTO.setAlias(alias);
+        }
+    }
     
     
     @Override
@@ -1473,7 +1600,25 @@ public class GroupServiceImpl implements GroupService {
             break;
         }
     }
-    
+
+
+    @Override
+    public void revokeGroupMemberList(RevokeGroupMemberListCommand cmd) {
+        dbProvider.execute((status -> {
+            RevokeGroupMemberCommand cmdOne = new RevokeGroupMemberCommand();
+            cmdOne.setGroupId(cmd.getGroupId());
+            cmdOne.setRevokeText(cmd.getRevokeText());
+
+            if(cmd.getUserIds() != null && cmd.getUserIds().size() > 0){
+                for(int i = 0; i< cmd.getUserIds().size(); i++){
+                    cmdOne.setUserId(cmd.getUserIds().get(i));
+                    this.revokeGroupMember(cmdOne);
+                }
+            }
+            return null;
+        }));
+    }
+
     @Override
     public List<GroupMemberDTO> listGroupWaitingAcceptances() {
         long startTime = System.currentTimeMillis();
