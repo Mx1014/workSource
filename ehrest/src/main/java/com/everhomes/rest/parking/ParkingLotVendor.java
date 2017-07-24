@@ -4,15 +4,18 @@ package com.everhomes.rest.parking;
 /**
  * <p>停车场厂商</p>
  * <ul>
- * <li>BOSIGAO("BOSIGAO"): 博思高</li>
- * <li>BOSIGAO2("BOSIGAO2"): 博思高新接口</li>
- * <li>ETCP("ETCP"): ETCP</li>
- * <li>KETUO("KETUO"): 科拓</li>
+ * <li>BOSIGAO("BOSIGAO"): 博思高（科技园）</li>
+ * <li>BOSIGAO2("BOSIGAO2"): 博思高新接口(深业)</li>
+ * <li>KETUO("KETUO"): 科拓（科兴）</li>
+ * <li>KETUO2("KETUO"): 科拓（储能）</li>
+ * <li>WANKE("WANKE"): 万科()</li>
+ * <li>INNOSPRING("INNOSPRING"): 创源</li>
+ * <li>JIN_YI("JIN_YI"): 金溢(清华信息港)</li>
  * </ul>
  */
 public enum ParkingLotVendor {
-    BOSIGAO("BOSIGAO"), ETCP("ETCP"), BOSIGAO2("BOSIGAO2"), KETUO("KETUO"), KETUO2("KETUO2"), WANKE("WANKE"),
-    INNOSPRING("INNOSPRING");
+    BOSIGAO("BOSIGAO"), BOSIGAO2("BOSIGAO2"), KETUO("KETUO"), KETUO2("KETUO2"), WANKE("WANKE"),
+    INNOSPRING("INNOSPRING"), JIN_YI("JIN_YI");
     
     private String code;
     private ParkingLotVendor(String code) {

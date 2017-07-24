@@ -394,14 +394,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.rentalv2Provider.createRentalDefaultRule(defaultRule);
 
 			//time intervals
-			if(cmd.getRentalType().equals(RentalType.HOUR.getCode())&& null!=cmd.getTimeIntervals()) {
-				setRentalRuleTimeIntervals(EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId(), cmd.getTimeIntervals());
-			}
-
-			// set half day time intervals
-			if(cmd.getRentalType() == RentalType.HALFDAY.getCode() || cmd.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
-				setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getTimeIntervals());
-			}
+//			if(cmd.getRentalType().equals(RentalType.HOUR.getCode())&& null!=cmd.getTimeIntervals()) {
+//				setRentalRuleTimeIntervals(EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId(), cmd.getTimeIntervals());
+//			}
+//
+//			// set half day time intervals
+//			if(cmd.getRentalType() == RentalType.HALFDAY.getCode() || cmd.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
+//				setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getTimeIntervals());
+//			}
 
 			createPriceRules(PriceRuleType.DEFAULT, defaultRule.getId(), cmd.getPriceRules());
 			
@@ -1439,7 +1439,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			java.util.Date reserveTime = new java.util.Date();
 			List<RentalCell> rentalSiteRules = new ArrayList<>();
 
+			//解析场景信息
+			SceneTokenDTO sceneTokenDTO = null;
+			if (null != cmd.getSceneToken()) {
+				User user = UserContext.current().getUser();
+				sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+			}
+
+			Long orgId = resolveOrganizationId(sceneTokenDTO);
+
 			RentalOrder rentalBill = ConvertHelper.convert(rs, RentalOrder.class);
+			//设置当前场景公司id
+			rentalBill.setOrganizationId(orgId);
 			if(null== rs.getCancelTime())
 				rentalBill.setCancelTime(new Timestamp(0));
 			else
@@ -1558,12 +1569,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				 
 				if(rs.getNeedPay().equals(NormalFlag.NEED.getCode())){
 
-					//解析场景信息
-					SceneTokenDTO sceneTokenDTO = null;
-					if (null != cmd.getSceneToken()) {
-						User user = UserContext.current().getUser();
-						sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-					}
 					BigDecimal amount = null == rentalSiteRule.getPrice() ? new java.math.BigDecimal(0) : rentalSiteRule.getPrice();
 					BigDecimal halfPrice = null == rentalSiteRule.getHalfresourcePrice()?new java.math.BigDecimal(0):rentalSiteRule.getHalfresourcePrice();
 					if (null != sceneTokenDTO) {
@@ -1812,6 +1817,37 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 		return billDTO;
 	}
+
+	private Long resolveOrganizationId(SceneTokenDTO sceneTokenDTO) {
+		Long orgId = null;
+		if (null == sceneTokenDTO) {
+			return orgId;
+		}
+
+		SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+
+		switch(sceneType) {
+			case DEFAULT:
+			case PARK_TOURIST:
+
+				break;
+			case FAMILY:
+
+				break;
+			case PM_ADMIN:// 无小区ID
+			case ENTERPRISE: // 增加两场景，与园区企业保持一致
+			case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致
+				orgId = sceneTokenDTO.getEntityId();
+
+				break;
+			default:
+				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDTO);
+				break;
+		}
+
+		return orgId;
+	}
+
 
 	@Override
 	public CommonOrderDTO getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd) {

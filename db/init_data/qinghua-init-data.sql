@@ -2672,3 +2672,9 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 
 INSERT INTO `eh_organization_communities`(organization_id, community_id)
 	VALUES(1008218, @community_id);
+	
+-- 补充紫荆数据 add by sfyan 20170714
+SET @namespace_resource_id = (select max(id) from eh_namespace_resources) + 1; 
+SET @community_id = (select id from eh_communities where name = '南海科技园' and namespace_id = 999984); 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES(@namespace_resource_id, 999984, 'COMMUNITY', @community_id, UTC_TIMESTAMP());

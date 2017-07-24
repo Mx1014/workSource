@@ -1905,3 +1905,6 @@ INSERT INTO `eh_namespaces` (`id`, `name`) VALUES ('999978', '康利');
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
         VALUES((@menu_scope_id := @menu_scope_id + 1), 50660,'', 'EhNamespaces', 999978,2);
+		
+-- 康利item url修改 add by sfyan 20170714
+update `eh_launch_pad_items` set `action_data` = '{"url":"http://alpha.vrbrowserextern.bqlnv.com.cn/vreditor/view/64997823126520945"}' where `item_label` = '园区3D图' and namespace_id = 999978;

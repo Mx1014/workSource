@@ -6,26 +6,20 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.pmtask.PmTaskSearch;
-import com.everhomes.pmtask.PmTaskService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.pmtask.*;
-import com.everhomes.rest.sms.ListSmsLogsCommand;
-import com.everhomes.rest.sms.ListSmsLogsResponse;
-import com.everhomes.rest.sms.SmsLogDTO;
+import com.everhomes.rest.sms.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,10 +28,16 @@ import java.util.stream.Collectors;
 @RequestMapping("/sms")
 public class SmsController extends ControllerBase {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmsController.class);
+
 	@Autowired
 	private SmsLogProvider smsLogProvider;
+
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private SmsService smsService;
 
 	/**
      * <b>URL: /sms/listSmsLogs</b>
@@ -61,6 +61,34 @@ public class SmsController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-	
 
+    /**
+     * <b>URL: /sms/yzx/listReportLogs</b>
+     * <p>云之讯短信状态报告列表</p>
+     */
+    @RequestMapping("yzx/listReportLogs")
+    @RestReturn(value=YzxListSmsReportLogResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listReportLogs(YzxListReportLogCommand cmd) {
+        YzxListSmsReportLogResponse resp = smsService.yzxListReportLogs(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+	/**
+     * <b>URL: /sms/yzx/report</b>
+     * <p>云之讯短信状态报告</p>
+     */
+    @RequestMapping("yzx/report")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse yzxReport(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        smsService.yzxSmsReport(httpServletRequest, httpServletResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

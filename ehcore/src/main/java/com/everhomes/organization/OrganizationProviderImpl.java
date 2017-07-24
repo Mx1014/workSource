@@ -24,6 +24,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -54,6 +55,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+ 
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationProviderImpl.class);
@@ -1233,6 +1235,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return null;
     }
 
+    @Override
+    public List<OrganizationMember> findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc())
+                .fetchInto(OrganizationMember.class);
+    }
+
     /**
      * modify cause member_detail by lei lv
      **/
@@ -1820,7 +1832,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
-        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+        List<OrganizationMember> result = new ArrayList<>();
         /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
         TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
@@ -2254,6 +2266,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return organizationDetails.get(0);
     }
+
+
 
 
     @Override
@@ -3498,6 +3512,40 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String orgNameKeyword, CrossShardListingLocator locator, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.in(organizationIds));
+        if (userInfoKeyword != null) {
+            String keyword = "%" + userInfoKeyword + "%";
+            query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_NAME.like(keyword)
+                    .or(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_TOKEN.like(keyword))
+                    .or(Tables.EH_USERS.NICK_NAME.like(keyword))
+            );
+        }
+        if (orgNameKeyword != null) {
+            String keyword = "%" + orgNameKeyword + "%";
+            query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.JOIN, Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword));
+        }
+        if (locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.le(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
+        query.addLimit(pageSize + 1);
+
+        List<OrganizationMemberLog> list = query.fetchInto(OrganizationMemberLog.class);
+        if (list != null && list.size() > pageSize) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list = list.subList(0, pageSize);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
+    }
+
+	@Override
 	public List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId,List<Long> organizationIds,Byte operationType) {
 		List<OrganizationMemberLog> results = new ArrayList<OrganizationMemberLog>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -3514,7 +3562,67 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		return results;
 	}
-	public void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap){
+
+
+    @Override
+    public List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword, String orgNameKeyword, List<Long> orgIds,
+                              Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        pageSize = pageSize + 1;
+        List<OrganizationMember> result  = new ArrayList<>();
+
+        SelectQuery<Record> query = context.select(Tables.EH_ORGANIZATION_MEMBERS.fields()).from(Tables.EH_ORGANIZATION_MEMBERS).getQuery();
+
+        query.addSelect(Tables.EH_ORGANIZATIONS.NAME);
+        query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.JOIN, Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+
+        query.addSelect(Tables.EH_USERS.NICK_NAME);
+        query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID));
+
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(orgIds));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(memberStatus));
+
+        if (!StringUtils.isEmpty(userInfoKeyword)) {
+            String keyword = "%" + userInfoKeyword + "%";
+
+            Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(keyword);
+
+            cond = cond.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like(keyword)).or(Tables.EH_USERS.NICK_NAME.like(keyword));
+            query.addConditions(cond);
+        }
+
+        if (!StringUtils.isEmpty(orgNameKeyword)) {
+            String keyword = "%" + orgNameKeyword + "%";
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword));
+        }
+
+        if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
+        }
+
+        if (null != locator.getAnchor()) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            OrganizationMember member = RecordHelper.convert(r, OrganizationMember.class);
+            member.setOrganizationName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
+            member.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            result.add(member);
+            return member;
+        });
+        locator.setAnchor(null);
+
+        if(result.size() >= pageSize) {
+            result.remove(result.size() - 1);
+            locator.setAnchor(result.get(result.size() - 1).getId());
+        }
+        return result;
+    }
+
+    public void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationJobPositionMapsDao dao = new EhOrganizationJobPositionMapsDao(context.configuration());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationJobPositionMaps.class));
@@ -4135,12 +4243,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberDetails.class),
                 null, (DSLContext context, Object reducingContext) -> {
                     Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(detailIds);
-                    List<OrganizationMemberDetails> list = context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.PROFILE_INTEGRITY,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME)
-                            .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                    List<OrganizationMemberDetails> list = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                             .where(condition)
                             .fetchInto(OrganizationMemberDetails.class);
                     if (list != null)
@@ -4543,7 +4646,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
         query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentOrgId));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
-        return ConvertHelper.convert(query.fetchOne(), Organization.class);
+		List<EhOrganizationsRecord> records = query.fetch();
+		if(records != null && records.size() > 0){
+			return ConvertHelper.convert(records.get(0), Organization.class);
+		}
+        return null;
     }
 
     @Override
@@ -4568,7 +4675,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return null;
     }
-	
+
 	@Override
 	public List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId) {
 		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
@@ -4613,9 +4720,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<Record> query = context.selectQuery();
+					query.addSelect(Tables.EH_USERS.ID,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS,
+							Tables.EH_USERS.NICK_NAME,Tables.EH_USERS.GENDER,Tables.EH_USERS.CREATE_TIME,Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID,
+							Tables.EH_USERS.EXECUTIVE_TAG,Tables.EH_USERS.POSITION_TAG,Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
 					query.addFrom(Tables.EH_USERS);
 					query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
-					query.addJoin(Tables.EH_USER_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+					query.addJoin(context.select().from(Tables.EH_USER_ORGANIZATIONS).where(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()).or(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()))).asTable(Tables.EH_USER_ORGANIZATIONS.getName()),
+							JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
 					query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
 					if(null != callback){
 						callback.buildCondition(locator, query);
@@ -4624,11 +4735,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						query.addConditions(Tables.EH_USERS.ID.lt(locator.getAnchor()));
 
 					query.addOrderBy(Tables.EH_USERS.ID.desc());
+					query.addOrderBy(Tables.EH_USER_ORGANIZATIONS.STATUS.desc());
 					query.addLimit(size);
 					LOGGER.debug("query sql:{}", query.getSQL());
+					LOGGER.debug("query param:{}", query.getBindValues());
 					query.fetch().map((r) -> {
 						UserOrganizations userOrganizations = new UserOrganizations();
-						userOrganizations.setUserId(r.getValue(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+						userOrganizations.setUserId(r.getValue(Tables.EH_USERS.ID));
 						userOrganizations.setOrganizationId(r.getValue(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID));
 						userOrganizations.setStatus(r.getValue(Tables.EH_USER_ORGANIZATIONS.STATUS));
 						userOrganizations.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
@@ -4651,6 +4764,37 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		return result;
+	}
+
+	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus){
+		List<Long> result = new ArrayList<>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null,
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<Record> query = context.selectQuery();
+					query.addSelect(Tables.EH_USERS.ID);
+					query.addFrom(Tables.EH_USERS);
+					query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+					query.addJoin(Tables.EH_USER_ORGANIZATIONS,
+							JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+					query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
+					query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+					if(null != userOrganizationStatus)
+						query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(userOrganizationStatus));
+					query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
+					if(null != communityId){
+						query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+					}
+					query.addGroupBy(Tables.EH_USERS.ID);
+					LOGGER.debug("query sql:{}", query.getSQL());
+					LOGGER.debug("query param:{}", query.getBindValues());
+					query.fetch().map((r) -> {
+						result.add(Long.valueOf(r.getValue(0).toString()));
+						return null;
+					});
+					return true;
+				});
+		return result.size();
 	}
 
 	@Override
@@ -4717,6 +4861,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
     @Override
+    public List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds) {
+        List<OrganizationCommunityRequest> results = new ArrayList<OrganizationCommunityRequest>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
+        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.in(communityIds));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, OrganizationCommunityRequest.class));
+            return null;
+        });
+        return results;
+    }
+	
+	@Override
     public Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType) {
         Map<Long, String> orgMap = new HashMap<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -4741,19 +4900,4 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return null;
     }
-
-	//added by R 20170713, for ui info
-/*	@Override
-	public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		*//*EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
-		EhOrganizationMemberDetails memberDetails = dao.findById(detailId);
-		if(memberDetails == null)
-			return null;
-		return ConvertHelper.convert(memberDetails,OrganizationMemberDetails.class);*//*
-		return context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
-				.where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId))
-				.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
-				.fetchOneInto(OrganizationMemberDetails.class);
-	}*/
 }

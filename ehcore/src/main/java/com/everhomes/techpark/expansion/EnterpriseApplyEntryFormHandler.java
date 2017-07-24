@@ -8,24 +8,15 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
 import com.everhomes.rest.techpark.expansion.LeasePromotionFormDataSourceType;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "EhLeasePromotions")
@@ -111,6 +102,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         cmd2.setNamespaceId(cmd.getNamespaceId());
         cmd2.setCommunityId(cmd.getOwnerId());
         cmd2.setFormValues(cmd.getValues());
+        cmd2.setEnterpriseId(cmd.getCurrentOrganizationId());
 
         ApplyEntryResponse response = enterpriseApplyEntryService.applyEntry(cmd2);
         PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
