@@ -17,6 +17,7 @@ import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.community_approve.*;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -156,13 +157,13 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_ID.eq(cmd.getOwnerId()));
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_TYPE.eq(cmd.getOwnerType()));
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.MODULE_ID.eq(cmd.getModuleId()));
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.MODULE_TYPE.eq(cmd.getOwnerType()));
+                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.MODULE_TYPE.eq(cmd.getModuleType()));
 
                         if (null!=cmd.getApproveName())
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.APPROVE_NAME.eq(cmd.getApproveName()));
                         if (null!=cmd.getKeyWord())
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.NAME_VALUE.like(cmd.getKeyWord()).or(
-                                Tables.EH_COMMUNITY_APPROVE_VALS.PHONE_VALUE.like(cmd.getKeyWord())
+                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.NAME_VALUE.like("%"+cmd.getKeyWord()+"%").or(
+                                Tables.EH_COMMUNITY_APPROVE_VALS.PHONE_VALUE.like("%"+cmd.getKeyWord()+"%")
                         ));
                         if (null!=cmd.getTimeStart() && null!=cmd.getTimeEnd())
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.CREATE_TIME.between(
@@ -295,8 +296,9 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                 Map<String,Integer> keyColumnMap = new HashMap<>();
                 for (GeneralFormFieldDTO fieldDTO:formFields)
                     if (!defaultFields.contains(fieldDTO.getFieldName())){
-                    row1.createCell(column++).setCellValue(fieldDTO.getFieldDisplayName());
+                    row1.createCell(column).setCellValue(fieldDTO.getFieldDisplayName());
                     keyColumnMap.put(fieldDTO.getFieldName(),column);
+                    column++;
                     }
                 keyColumMaps.put(dto.getApproveId()+""+dto.getFormOriginId(),keyColumnMap);
             }
@@ -307,11 +309,11 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             Map keyColumMap = keyColumMaps.get(dto.getApproveId()+""+dto.getFormOriginId());
             XSSFRow row = sheet.createRow(rowNum++);
             rows.put(dto.getApproveId()+""+dto.getFormOriginId(),rowNum);
-            row.createCell(0).setCellValue(rowNum);
+            row.createCell(0).setCellValue(rowNum-1);
             row.createCell(1).setCellValue(dto.getName());
             row.createCell(2).setCellValue(dto.getPhone());
             row.createCell(3).setCellValue(dto.getCompany());
-            row.createCell(4).setCellValue(dto.getCreateTime());
+            row.createCell(4).setCellValue(dto.getCreateTime().toString());
             for (PostApprovalFormItem item:items){
                 if (null==keyColumMap.get(item.getFieldName()))
                     continue;
@@ -367,6 +369,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
             cmd2.setSourceId(dto.getId());
             cmd2.setSourceType(dto.getModuleType());
+            cmd2.setOriginFieldFlag(NormalFlag.NEED.getCode());
             List<PostApprovalFormItem> entities = generalFormService.getGeneralFormValues(cmd2);
             response.setItems(entities);
             list.add(response);
