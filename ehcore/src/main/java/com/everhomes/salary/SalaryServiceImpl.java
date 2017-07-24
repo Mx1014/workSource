@@ -153,20 +153,25 @@ public class SalaryServiceImpl implements SalaryService {
             return response;
         else {
             ListOrganizationContactCommandResponse results = this.organizationService.listOrganizationContacts(cmd);
-            response.setMembers(results.getMembers().stream().filter(r -> {
-                return !StringUtils.isEmpty(r.getDetailId());
-            }).map(r -> {
-                OrganizationContactDTO dto = r;
-                return dto;
-            }).collect(Collectors.toList()));
-            response.setNamespaceId(results.getNamespaceId());
-            if (!StringUtils.isEmpty(results.getNextPageAnchor()))
-                response.setNextPageAnchor(results.getNextPageAnchor());
-            if (!StringUtils.isEmpty(results.getTotalCount()))
-                response.setTotalCount(results.getTotalCount());
-            if (!StringUtils.isEmpty(results.getNextPageOffset()))
-                response.setNextPageOffset(results.getNextPageOffset());
-            return response;
+            if (results != null) {
+                response.setMembers(results.getMembers().stream().filter(r -> {
+                    return !StringUtils.isEmpty(r.getDetailId());
+                }).map(r -> {
+                    OrganizationContactDTO dto = r;
+                    return dto;
+                }).collect(Collectors.toList()));
+                response.setNamespaceId(results.getNamespaceId());
+                if (!StringUtils.isEmpty(results.getNextPageAnchor()))
+                    response.setNextPageAnchor(results.getNextPageAnchor());
+                if (!StringUtils.isEmpty(results.getTotalCount()))
+                    response.setTotalCount(results.getTotalCount());
+                if (!StringUtils.isEmpty(results.getNextPageOffset()))
+                    response.setNextPageOffset(results.getNextPageOffset());
+                return response;
+            } else {
+                //  未查询到人的时候直接返回空，避免空指针错误
+                return response;
+            }
         }
     }
 
