@@ -117,27 +117,27 @@ SET @address_id = (SELECT MAX(id) FROM `eh_addresses`);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'A座101','A座','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35745, 1034291, 240111044331050361, @address_id, 'A座101', '0');
+	VALUES (36900, 1034291, 240111044331050361, @address_id, 'A座101', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'B座101','B座','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35746, 1034291, 240111044331050361, @address_id, 'B座101', '0');
+	VALUES (36901, 1034291, 240111044331050361, @address_id, 'B座101', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'C座101','D座','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35747, 1034291, 240111044331050361, @address_id, 'C座101', '0');
+	VALUES (36902, 1034291, 240111044331050361, @address_id, 'C座101', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'D座101','D座','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35748, 1034291, 240111044331050361, @address_id, 'D座101', '0');
+	VALUES (36903, 1034291, 240111044331050361, @address_id, 'D座101', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'下沉式广场','下沉式广场','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35749, 1034291, 240111044331050361, @address_id, '下沉式广场101', '0');
+	VALUES (36904, 1034291, 240111044331050361, @address_id, '下沉式广场101', '0');
 
 -- 园区管理员  
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
