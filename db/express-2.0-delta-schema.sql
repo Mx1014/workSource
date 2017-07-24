@@ -8,9 +8,9 @@ CREATE TABLE `eh_express_company_businesses` (
   `express_company_id` BIGINT COMMENT 'id of the express company id,是parent_id = 0 的快递公司的id',
   `send_type` BIGINT COMMENT '业务类型id',
   `send_type_name` VARCHAR(128) COMMENT '业务类型名称(/（华润）标准快递/（国贸）EMS标准快递/（国贸）邮政快递包裹/（国贸）同城信筒快件)',
-  `package_types` VARCHAR(1024) COMMENT '封装类型，参考 ExpressPackageType.class,json数组',
+  `package_types` TEXT COMMENT '封装类型，参考 ExpressPackageType.class,json数组',
   `insured_documents` VARCHAR(1024) COMMENT '保价文案，目前只有国贸ems和国贸邮政的邮政快递包裹有保价文案，所以跟着业务走',
-  `order_status_collections` VARCHAR(1024) COMMENT '订单状态集合, [1,2,3,4],[1,2,5,4] 参考 ExpressOrderStatus.class'
+  `order_status_collections` TEXT COMMENT '订单状态集合, [1,2,3,4],[1,2,5,4] 参考 ExpressOrderStatus.class'
   `status` TINYINT NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
