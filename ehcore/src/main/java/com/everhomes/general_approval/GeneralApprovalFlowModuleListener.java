@@ -307,7 +307,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
 						String addresses = "";
 						
-						if(null != contactValue.getAddresses() && contactValue.getAddresses().size()>1)
+						if(null != contactValue.getAddresses() && contactValue.getAddresses().size()>0)
 							addresses = StringUtils.join(contactValue.getAddresses(),",");
 						e.setValue(addresses);
 						entities.add(e);
