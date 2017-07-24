@@ -1142,7 +1142,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     /**
-     * modify cause member_detail by lei lv 7.24
+     * modify cause member_detail by lei lv 7.224
      **/
     @Override
     public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId) {
@@ -2353,7 +2353,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //                    return true;
 //                }
 //            });
-//        
+//
 //        return result[0];
 
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
@@ -2710,7 +2710,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		final OrganizationAddress[] result = new OrganizationAddress[1];
 
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
-        // this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationAddresses.class), result, 
+        // this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationAddresses.class), result,
         this.dbProvider.mapReduce(AccessSpec.readOnly(), result,
             (DSLContext context, Object reducingContext) -> {
            	 context.select().from(Tables.EH_ORGANIZATION_ADDRESSES)
@@ -4868,6 +4868,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		return list;
+	}
+
+	@Override
+	public void updatePressTest() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ORGANIZATION_MEMBERS_TEST).set(Tables.EH_ORGANIZATION_MEMBERS.GROUP_ID, 100000L);
+	}
+
+	@Override
+	public void deletePressTest() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_ORGANIZATION_MEMBERS_TEST).where(Tables.EH_ORGANIZATION_MEMBERS.GROUP_ID.eq(100000L));
 	}
 
 	private Long getTopOrganizationId(Long organizationId) {

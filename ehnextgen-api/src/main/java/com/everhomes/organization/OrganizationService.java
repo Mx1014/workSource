@@ -522,4 +522,7 @@ public interface OrganizationService {
 			Long userId);
 	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
 
+	void updatePressTest();
+
+	void deletePressTest();
 }

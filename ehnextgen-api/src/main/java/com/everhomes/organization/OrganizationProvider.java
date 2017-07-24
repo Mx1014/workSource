@@ -419,4 +419,8 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
 
+	void updatePressTest();
+
+	void deletePressTest();
+
 }

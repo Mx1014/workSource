@@ -5140,6 +5140,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         return "0";
     }
 
+    @Override
+    public void updatePressTest() {
+        this.organizationProvider.updatePressTest();
+    }
+
+    @Override
+    public void deletePressTest() {
+        this.organizationProvider.deletePressTest();
+    }
+
     /**
      * 根据contactToken退出删除organization path路径下的所有机构
      *
