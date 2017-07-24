@@ -19,6 +19,7 @@ public class SearchUniongroupDetailCommand {
     private Long departmentId;
     private Long groupId;
     private String keyword;
+    private String isNormal;
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -77,6 +78,14 @@ public class SearchUniongroupDetailCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getIsNormal() {
+        return isNormal;
+    }
+
+    public void setIsNormal(String isNormal) {
+        this.isNormal = isNormal;
     }
 
     @Override

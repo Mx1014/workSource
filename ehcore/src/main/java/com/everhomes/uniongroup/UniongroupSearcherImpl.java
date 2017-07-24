@@ -178,6 +178,9 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             bqb = bqb.must(QueryBuilders.matchQuery("contactName", cmd.getKeyword()));
 //            bqb = bqb.should(QueryBuilders.matchQuery("employeeNo", cmd.getKeyword()));
         }
+        if(cmd.getIsNormal() != null && !cmd.getIsNormal().isEmpty()){
+            bqb = bqb.must(QueryBuilders.matchQuery("isNormal", cmd.getIsNormal()));
+        }
 
         builder.setFrom(cmd.getPageAnchor().intValue() * cmd.getPageSize()).setSize(cmd.getPageSize() + 1);
         builder.setQuery(bqb);
@@ -198,7 +201,6 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             detail.setEnterpriseId(Long.valueOf(m.get("enterpriseId").toString()));
             detail.setContactName(m.get("contactName").toString());
             detail.setContactToken(m.get("contactToken").toString());
-//            detail.set...(detaild);
             if (m.get("department") != null) {
                 List<Map> department = (List<Map>) m.get("department");
                 Map<Long, String> departmentMap = new HashMap<>();
