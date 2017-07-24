@@ -160,6 +160,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             detail.setEnterpriseId(Long.valueOf(m.get("enterpriseId").toString()));
             detail.setContactName(m.get("contactName").toString());
             detail.setContactToken(m.get("contactToken").toString());
+//            detail.set...(detaild);
             if (m.get("department") != null){
                 List<Map> department = (List<Map>) m.get("department");
                 Map<Long,String> departmentMap = new HashMap<>();
@@ -203,18 +204,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         return list;
     }
 
-    private Byte checkSalaryEmployeeIsNormal(Long detailId, Integer namespaceId, Long ownerId) {
-        //  查询所有关联了薪酬组的用户
-        List<Long> groupDetailIds = this.uniongroupService.listUniongroupMemberGroupIds(namespaceId, ownerId).stream().map(r ->{
-            Long id = (Long)r[0];
-            return id;
-        }).collect(Collectors.toList());
-
-        //  查询所有员工工资明细情况
-        List<Long> wageDetailIds = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(namespaceId,ownerId).stream().map(r ->{
-            Long id = (Long)r[0];
-            return id;
-        }).collect(Collectors.toList());
+    private Byte checkSalaryEmployeeIsNormal(Long detailId, List<Long> groupDetailIds, List<Long> wageDetailIds) {
 
         if(!groupDetailIds.contains(detailId))
             return SalaryEmployeeNormalType.ABNORMAL.getCode();
