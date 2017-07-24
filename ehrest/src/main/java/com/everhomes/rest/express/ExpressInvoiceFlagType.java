@@ -4,13 +4,13 @@ package com.everhomes.rest.express;
 /**
 * 
 * <ul>
-* <li>NOT_NEED_INVOICE: 0，不需要发票</li>
-* <li>NEED_TEAR_INVOICE: 1，需要手撕发票</li>
-* <li>NEED_TAX_INVOIE: 2，需要税票</li>
+* <li>NOT_NEED_INVOICE: 1，不需要发票</li>
+* <li>NEED_TEAR_INVOICE: 2，需要手撕发票</li>
+* <li>NEED_TAX_INVOIE: 3，需要税票</li>
 * </ul>
 */
 public enum ExpressInvoiceFlagType {
-	NOT_NEED_INVOICE((byte)0), NEED_TEAR_INVOICE((byte)1), NEED_TAX_INVOIE((byte)2);
+	NOT_NEED_INVOICE((byte)1), NEED_TEAR_INVOICE((byte)2), NEED_TAX_INVOIE((byte)3);
 	
 	private byte code;
 	
