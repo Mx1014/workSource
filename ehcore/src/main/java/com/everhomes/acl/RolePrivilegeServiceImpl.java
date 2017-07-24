@@ -1404,7 +1404,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		//创建管理员不再返回member
 		organizationService.createOrganizationAccount(command, roleId, namespaceId);
 
+
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
+		if(userIdentifier == null)
+			LOGGER.debug("111111111111 privileges is null");
 
 		/**
 		 * 分配权限
