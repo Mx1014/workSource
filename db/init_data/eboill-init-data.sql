@@ -535,6 +535,9 @@ UPDATE  eh_launch_pad_items SET item_width = '1', action_data = CONCAT('{\"url\"
 -- 更新 任务管理icon图标  20170719 add by yanjun
 UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbU5tSXlZekl6TldGaVl6YzJOMkpsWmpsa05EQmlZbU5qTXprMU4yUXhaQQ' WHERE id IN (116547, 116548) AND namespace_id = 999973;
 
+-- 更新服务协议  20170724 add by yanjun
+UPDATE eh_configurations SET `value` = REPLACE(`value`, 'ns=1', 'ns=999973'), `description` =  'the relative path for eboill app agreements' WHERE id = 1599 AND namespace_id = 999973;
+UPDATE eh_configurations SET `description` =  'biz access url for eboill' WHERE id = 1600 AND namespace_id = 999973;
 
 
 
