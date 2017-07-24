@@ -11568,6 +11568,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
+        //  判断手机是否存在
         VerifyPersonnelByPhoneCommand verifyCommand = new VerifyPersonnelByPhoneCommand();
         verifyCommand.setEnterpriseId(org.getId());
         verifyCommand.setNamespaceId(namespaceId);
@@ -11582,7 +11583,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setScope(e.getErrorScope());
             return log;
         }
-        //
         return null;
     }
 
