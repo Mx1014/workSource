@@ -1559,6 +1559,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				if(EntityType.fromCode(roleassignment.getTargetType()) == EntityType.USER && roleassignment.getRoleId().equals(roleId)){
 					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(roleassignment.getTargetId(), organizationId);
 					if (null != member) {
+						User user = this.userProvider.findUserById(member.getTargetId());
+						if(user != null){
+							member.setNickName(user.getNickName());
+						}
 						if (keywords != null && !(member.getContactName().contains(keywords) || member.getContactToken().contains(keywords))) {
 							continue;
 						}
