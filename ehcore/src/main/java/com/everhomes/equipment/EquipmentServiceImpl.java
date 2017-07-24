@@ -2477,6 +2477,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 				standard.setOwnerType(cmd.getOwnerType());
 				standard.setOwnerId(cmd.getOwnerId());
+				standard.setTargetId(cmd.getTargetId());
+				standard.setTargetType(cmd.getTargetType());
 				standard.setInspectionCategoryId(cmd.getInspectionCategoryId());
 				standard.setStatus(EquipmentStandardStatus.NOT_COMPLETED.getCode());
 				standard.setNamespaceId(namespaceId);
