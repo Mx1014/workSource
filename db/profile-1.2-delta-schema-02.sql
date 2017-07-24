@@ -430,6 +430,9 @@ ALTER TABLE `eh_group_member_logs` ADD COLUMN `string_tag5` VARCHAR(128) NULL DE
 ALTER TABLE `eh_group_member_logs` CHANGE COLUMN `status` `member_status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive; 1: waitingForApproval; 2: waitingForAcceptance 3: active';
 ALTER TABLE `eh_group_member_logs` DROP COLUMN `process_message`;
 
+-- 给organization_member_log添加描述字段 add by xq.tian  2017/07/20
+ALTER TABLE `eh_organization_member_logs` ADD COLUMN `contact_description` TEXT;
+
 -- 企业人才消息推送者， add by tt, 20170705
 -- DROP TABLE IF EXISTS `eh_talent_message_senders`;
 CREATE TABLE `eh_talent_message_senders` (
@@ -471,6 +474,4 @@ CREATE TABLE `eh_talent_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 给organization_member_log添加描述字段 add by xq.tian  2017/07/20
-ALTER TABLE `eh_organization_member_logs` ADD COLUMN `contact_description` TEXT;
 

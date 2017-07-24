@@ -10552,7 +10552,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             Long directlyOrgId = orgId;
 
             List<String> groupTypes = new ArrayList<>();
-            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+//            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
             groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
             groupTypes.add(OrganizationGroupType.GROUP.getCode());
 
