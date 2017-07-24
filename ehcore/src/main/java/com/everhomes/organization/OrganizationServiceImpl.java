@@ -11807,19 +11807,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //  员工类型
-        Byte employeeType;
-        if(!StringUtils.isEmpty(data.getEmployeeType())){
-            if(data.getEmployeeType().equals("兼职")){
-                employeeType = 1;
-            }else if(data.getEmployeeType().equals("实习")){
-                employeeType = 2;
-            }else if(data.getEmployeeType().equals("劳动派遣")){
-                employeeType = 3;
-            }else{
-                employeeType = 0;
-            }
-            memberCommand.setEmployeeType(employeeType);
+        if(!StringUtils.isEmpty(data.getEmployeeType())) {
+            memberCommand.setEmployeeType(transEmployeeType(data.getEmployeeType()));
         }
+
         if(!StringUtils.isEmpty(data.getEmployeeNo()))
             memberCommand.setEmployeeNo(data.getEmployeeNo());
 
@@ -11839,6 +11830,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         //  新增人员并返回detailId
         OrganizationMemberDTO member = this.addOrganizationPersonnelV2(memberCommand);
         return member.getDetailId();
+    }
+
+    private Byte transEmployeeType(String employeeType) {
+        if (employeeType.equals("兼职")) {
+            return 1;
+        } else if (employeeType.equals("实习")) {
+            return 2;
+        } else if (employeeType.equals("劳动派遣")) {
+            return 3;
+        } else {
+            return 0;
+        }
     }
 
     private void saveOrganizationMemberDetails(ImportOrganizationPersonnelFilesDTO data, Long detailId){
@@ -11894,18 +11897,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         workExperiences.setEnterpriseName(data.getEnterpriseName());
         workExperiences.setPosition(data.getPosition());
         //  工作类型
-        Byte jobType;
-        if(!StringUtils.isEmpty(data.getJobType())){
-            if(data.getEmployeeType().equals("兼职")){
-                jobType = 1;
-            }else if(data.getEmployeeType().equals("实习")){
-                jobType = 2;
-            }else if(data.getEmployeeType().equals("劳动派遣")){
-                jobType = 3;
-            }else{
-                jobType = 0;
-            }
-            workExperiences.setJobType(jobType);
+        if(!StringUtils.isEmpty(data.getJobType())) {
+            workExperiences.setJobType(transEmployeeType(data.getJobType()));
         }
         workExperiences.setEntryTime(data.getEntryTime());
         workExperiences.setDepartureTime(data.getDepartureTime());
