@@ -60,8 +60,20 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     @Override
     public void bulkUpdate(List<UniongroupMemberDetail> uniongroupMemberDetails) {
         BulkRequestBuilder brb = getClient().prepareBulk();
+        //  查询所有关联了薪酬组的用户
+        List<Long> groupDetailIds = this.uniongroupService.listUniongroupMemberGroupIds(uniongroupMemberDetails.get(0).getNamespaceId(), uniongroupMemberDetails.get(0).getEnterpriseId()).stream().map(r ->{
+            Long id = (Long)r[0];
+            return id;
+        }).collect(Collectors.toList());
+
+        //  查询所有员工工资明细情况
+        List<Long> wageDetailIds = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(uniongroupMemberDetails.get(0).getNamespaceId(), uniongroupMemberDetails.get(0).getEnterpriseId()).stream().map(r ->{
+            Long id = (Long)r[0];
+            return id;
+        }).collect(Collectors.toList());
+
         for (UniongroupMemberDetail detail : uniongroupMemberDetails) {
-            XContentBuilder source = createDoc(detail);
+            XContentBuilder source = createDoc(detail,groupDetailIds,wageDetailIds);
             if (null != source) {
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType()).id(detail.getId().toString()).source(source));
             }
@@ -83,7 +95,20 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         if (jobp_map != null) {
             detail.setJobPosition(jobp_map);
         }
-        XContentBuilder source = createDoc(detail);
+
+        //  查询所有关联了薪酬组的用户
+        List<Long> groupDetailIds = this.uniongroupService.listUniongroupMemberGroupIds(detail.getNamespaceId(), detail.getEnterpriseId()).stream().map(r ->{
+            Long id = (Long)r[0];
+            return id;
+        }).collect(Collectors.toList());
+
+        //  查询所有员工工资明细情况
+        List<Long> wageDetailIds = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(detail.getNamespaceId(), detail.getEnterpriseId()).stream().map(r ->{
+            Long id = (Long)r[0];
+            return id;
+        }).collect(Collectors.toList());
+
+        XContentBuilder source = createDoc(detail,groupDetailIds,wageDetailIds);
         feedDoc(detail.getId().toString(), source);
     }
 
@@ -219,7 +244,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     }
 
 
-    private XContentBuilder createDoc(UniongroupMemberDetail uniongroupMemberDetail) {
+    private XContentBuilder createDoc(UniongroupMemberDetail uniongroupMemberDetail, List<Long> groupDetailIds, List<Long> wageDetailIds) {
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("id", uniongroupMemberDetail.getId());
@@ -235,6 +260,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             b.field("updateTime", uniongroupMemberDetail.getUpdateTime());
             b.field("operatorUid", uniongroupMemberDetail.getOperatorUid());
             b.field("employeeNo", uniongroupMemberDetail.getEmployeeNo());
+            b.field("isNormal",checkSalaryEmployeeIsNormal(uniongroupMemberDetail.getDetailId(), groupDetailIds, wageDetailIds));
             Map<Long, String> department = uniongroupMemberDetail.getDepartment();
             if (department != null && department.size() > 0) {
                 b.startArray("department");
