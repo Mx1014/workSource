@@ -68,6 +68,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             ca.setApproveName(cmd.getApproveName());
         if (null!=cmd.getFormOriginId())
             ca.setFormOriginId(cmd.getFormOriginId());
+        ca.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         this.communityApproveProvider.updateCommunityApprove(ca);
         return this.processApprove(ca);
     }
