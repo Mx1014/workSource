@@ -11582,7 +11582,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setScope(e.getErrorScope());
             return log;
         }
-
+        //
         return null;
     }
 
