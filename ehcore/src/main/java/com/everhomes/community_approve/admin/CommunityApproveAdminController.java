@@ -61,13 +61,13 @@ public class CommunityApproveAdminController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /admin/Community_approve/updateCommunitityApprove</b>
+     * <b>URL: /admin/Community_approve/updateCommunityApprove</b>
      * <p> 更新园区审批  </p>
      * @return
      */
-    @RequestMapping("updateCommunitityApprove")
+    @RequestMapping("updateCommunityApprove")
     @RestReturn(value=CommunityApproveDTO.class)
-    public RestResponse updateCommunitityApprove(@Valid UpdateCommunityApproveCommand cmd){
+    public RestResponse updateCommunityApprove(@Valid UpdateCommunityApproveCommand cmd){
         CommunityApproveDTO result = communityApproveService.updateCommunityApprove(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -76,13 +76,13 @@ public class CommunityApproveAdminController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /admin/Community_approve/deleteCommunitityApprove</b>
+     * <b>URL: /admin/Community_approve/deleteCommunityApprove</b>
      * <p> 删除园区审批  </p>
      * @return
      */
-    @RequestMapping("deleteCommunitityApprove")
+    @RequestMapping("deleteCommunityApprove")
     @RestReturn(value=String.class)
-    public RestResponse deleteCommunitityApprove(@Valid CommunityApproveIdCommand cmd){
+    public RestResponse deleteCommunityApprove(@Valid CommunityApproveIdCommand cmd){
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -92,13 +92,13 @@ public class CommunityApproveAdminController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /admin/Community_approve/enableCommunitityApproval</b>
+     * <b>URL: /admin/Community_approve/enableCommunityApproval</b>
          * <p> 启用园区审批 </p>
      * @return
      */
-    @RequestMapping("enableCommunitityApproval")
+    @RequestMapping("enableCommunityApproval")
     @RestReturn(value=String.class)
-    public RestResponse enableCommunitityApproval(@Valid CommunityApproveIdCommand cmd) {
+    public RestResponse enableCommunityApproval(@Valid CommunityApproveIdCommand cmd) {
         communityApproveService.enableCommunityApprove(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -108,13 +108,13 @@ public class CommunityApproveAdminController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /admin/Community_approve/disableCommunitityApproval</b>
+     * <b>URL: /admin/Community_approve/disableCommunityApproval</b>
      * <p> 不启用园区审批 </p>
      * @return
      */
-    @RequestMapping("disableCommunitityApproval")
+    @RequestMapping("disableCommunityApproval")
     @RestReturn(value=String.class)
-    public RestResponse disableCommunitityApproval(@Valid CommunityApproveIdCommand cmd) {
+    public RestResponse disableCommunityApproval(@Valid CommunityApproveIdCommand cmd) {
         communityApproveService.disableCommunityApprove(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
