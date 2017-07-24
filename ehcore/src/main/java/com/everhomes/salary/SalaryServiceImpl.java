@@ -636,6 +636,7 @@ public class SalaryServiceImpl implements SalaryService {
         response.setSalaryEmployeeDTO(dtos);
         return response;
     }
+
     @Override
     public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {
 
