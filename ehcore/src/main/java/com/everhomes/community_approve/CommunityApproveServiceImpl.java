@@ -129,8 +129,8 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                             communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
                             Condition conditionOR = null;
                             for (OrganizationCommunity organizationCommunity : communityList) {
-                                Condition condition = Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
-                                        .and(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+                                Condition condition = Tables.EH_COMMUNITY_APPROVE.OWNER_ID.eq(organizationCommunity.getCommunityId())
+                                        .and(Tables.EH_COMMUNITY_APPROVE.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
                                 if(conditionOR==null){
                                     conditionOR = condition;
                                 }else{
