@@ -126,7 +126,7 @@ public interface EquipmentProvider {
 	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
 	void populateStandardGroups(EquipmentInspectionStandards standard);
 
-	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime);
+	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime, Byte groupType);
 	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
 
 
