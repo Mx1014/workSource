@@ -11102,9 +11102,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     /**Modify BY lei.lv cause MemberDetail**/
                     if (OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(group.getGroupType())) {
 
-                        Long enterpriseId = getTopEnterpriserIdOfOrganization(oId);
                         //找到部门对应的资料表记录
-                        OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(enterpriseId, contact_token);
+                        OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(oId, contact_token);
                         if (old_detail == null) {
                             LOGGER.error("Cannot find memberDetail of DirectlyEnterpriseId for this org。orgId={}", oId);
                             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
@@ -12290,19 +12289,16 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     private Long getEnableDetailOfOrganizationMember(OrganizationMember organizationMember, Long organizationId){
 
-        //因为organizationId传入的可能是分工司的id，所以在此出要重新定向为总公司的id
-        organizationId = getTopOrganizationId(organizationId);
-
         //更新或创建detail记录
         OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, organizationMember.getContactToken());
         Long new_detail_id = 0L;
         if (old_detail == null) { /**如果档案表中无记录**/
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, true, null);
-            organizationMemberDetail.setOrganizationId(organizationId);
+            organizationMemberDetail.setOrganizationId(getTopOrganizationId(organizationId));
             new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
         } else { /**如果档案表中有记录**/
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, false, old_detail);
-            organizationMemberDetail.setOrganizationId(organizationId);
+            organizationMemberDetail.setOrganizationId(old_detail.getOrganizationId());
             organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
             new_detail_id = organizationMemberDetail.getId();
         }
