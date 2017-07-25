@@ -61,8 +61,8 @@ import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
-import com.everhomes.organization.*;
-import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.*; 
+import com.everhomes.organization.OrganizationMember; 
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
@@ -4197,7 +4197,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return resp;
 	}
-
+ 
     // 参数校验方法
     // 可以校验带bean validation 注解的对象
     // 校验失败, 抛出异常, 异常信息附带参数值信息
@@ -4274,7 +4274,7 @@ public class UserServiceImpl implements UserService {
 			dto.setContactToken(detail.getContactToken());
 			return dto;
 		}
-	}
+	} 
 
     private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
 

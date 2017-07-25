@@ -174,7 +174,7 @@ public interface UserService {
      * @param identifierToken   手机号
      */
     void checkSmsBlackList(String smsAction, String identifierToken);
-
+ 
     /**
      * 用户修改手机号时发送短信验证码，两步短信验证码都是这个接口
      * @param cmd
@@ -217,6 +217,7 @@ public interface UserService {
     UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd);
 	
 	//added by R 20170713, 通讯录2.4增加
+ 
     SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
 
 }

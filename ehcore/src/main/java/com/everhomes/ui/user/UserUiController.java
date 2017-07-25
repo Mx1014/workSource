@@ -29,6 +29,9 @@ import com.everhomes.rest.family.ListNeighborUsersCommand;
 import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+ 
+import com.everhomes.rest.user.ListUserOpPromotionsRespose;
+ 
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
 import com.everhomes.util.WebTokenGenerator;
@@ -286,7 +289,7 @@ public class UserUiController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
+ 
 /*
     @RequestMapping("getCurrentContactRealInfo")
     @RestReturn(value=SceneContactV2DTO.class)
@@ -311,6 +314,6 @@ public class UserUiController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    } 
 
 }
