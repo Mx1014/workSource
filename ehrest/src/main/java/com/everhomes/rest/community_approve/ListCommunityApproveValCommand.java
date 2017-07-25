@@ -1,5 +1,7 @@
 package com.everhomes.rest.community_approve;
 
+import java.sql.Timestamp;
+
 /**
  * <ul>
  * <li>ownerType: 目前默认是： EhOrganizations</li>
@@ -20,8 +22,8 @@ public class ListCommunityApproveValCommand {
     private Long     moduleId;
     private String     moduleType;
     private Long     organizationId;
-    private String timeStart;
-    private String timeEnd;
+    private Timestamp timeStart;
+    private Timestamp timeEnd;
     private String approveName;
     private String keyWord;
     private Long pageAnchor;
@@ -67,19 +69,19 @@ public class ListCommunityApproveValCommand {
         this.organizationId = organizationId;
     }
 
-    public String getTimeStart() {
+    public Timestamp getTimeStart() {
         return timeStart;
     }
 
-    public void setTimeStart(String timeStart) {
+    public void setTimeStart(Timestamp timeStart) {
         this.timeStart = timeStart;
     }
 
-    public String getTimeEnd() {
+    public Timestamp getTimeEnd() {
         return timeEnd;
     }
 
-    public void setTimeEnd(String timeEnd) {
+    public void setTimeEnd(Timestamp timeEnd) {
         this.timeEnd = timeEnd;
     }
 
