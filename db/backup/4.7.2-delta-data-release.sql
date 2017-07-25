@@ -57,6 +57,7 @@ VALUES ((@max_template_id := @max_template_id + 1), 'sms.default.yzx', 53, 'zh_C
 --
 UPDATE `eh_web_menus` SET `data_type` = 'react:/identification-management/user-identification' WHERE `id` = 35000;
 UPDATE `eh_web_menus` SET `name` = '员工认证', `data_type` = 'react:/identification-management/employee-identification' WHERE `id` = 50500;
+UPDATE `eh_web_menus` SET `name` = '员工认证', `data_type` = 'react:/identification-management/employee-identification' WHERE `id` = 505000;
 
 -- 企业人才申请的发消息，add by tt, 20170710
 select max(id) into @id from `eh_locale_templates`;
