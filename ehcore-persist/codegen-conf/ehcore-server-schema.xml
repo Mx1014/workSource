@@ -175,7 +175,7 @@
         eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |
         eh_sms_black_lists | eh_yzx_sms_logs |
         eh_user_identifier_logs | eh_user_appeal_logs |
-
+        eh_authorization_third_party_forms | eh_authorization_third_party_records | eh_authorization_third_party_buttons |
         </includes>
 
             <!-- All elements that are excluded from your schema
