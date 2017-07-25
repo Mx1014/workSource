@@ -363,12 +363,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
 		//验证redis中存的identifierToken
-        String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken();
+        String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken().trim();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         
         RestResponse printResponse = new RestResponse();
         User user = UserContext.current().getUser();
-        if(null != valueOperations.get(key)){
+        boolean trueflag = false;
+        if(valueOperations.get(key) != null && valueOperations.get(key).length()>0){
+        	trueflag = true;
         	User logonUser  = new User();
         	//这里设置accoutname 为用户id-namespaceid-拥有者id，因为在jobLogNotification
         	//中计算价格的时候，不知道所在的园区，所以只能依靠
@@ -400,7 +402,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	});
 		}
        
-        return new InformPrintResponse(PrintLogonStatusType.LOGON_SUCCESS.getCode());
+        if(trueflag)
+        	return new InformPrintResponse(PrintLogonStatusType.LOGON_SUCCESS.getCode());
+        return new InformPrintResponse(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode());
     
 	}
 
