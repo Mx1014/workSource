@@ -71,3 +71,7 @@ CREATE TABLE `eh_authorization_third_party_buttons` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- by dengs,车辆放行
+ALTER TABLE eh_parking_clearance_logs ADD COLUMN `log_token` VARCHAR(1024) DEFAULT NULL COMMENT 'The info from third';
+ALTER TABLE eh_parking_clearance_logs ADD COLUMN `log_json` TEXT DEFAULT NULL COMMENT 'The info from third';
