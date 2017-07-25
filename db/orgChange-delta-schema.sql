@@ -1,5 +1,4 @@
-
---DROP TABLE IF EXISTS `eh_organization_members_test`;
+-- DROP TABLE IF EXISTS `eh_organization_members_test`;
 CREATE TABLE `eh_organization_members_test` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `organization_id` BIGINT NOT NULL,
@@ -39,7 +38,7 @@ CREATE TABLE `eh_organization_members_test` (
   KEY `i_eh_corg_group` (`member_group`),
   KEY `i_target_id` (`target_id`),
   KEY `i_contact_token` (`contact_token`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE = INNODB DEFAULT CHARSET=utf8mb4;
 
 -- identifier修改记录  add by xq.tian  2017/06/26
 -- DROP TABLE IF EXISTS `eh_user_identifier_logs`;
