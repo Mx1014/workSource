@@ -35,7 +35,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'family_detail', 'zh_CN', '家庭信息|您还未加入任何家庭，快去加入吧!|添加住址');
 
 --
--- eh_user_activities 数据处理 add by xq.tian 2017/07/25
+-- eh_user_activities 数据处理(这些表的数据比较多，可能会比较费时) add by xq.tian 2017/07/25
 --
 UPDATE `eh_terminal_app_version_actives` AS t, `eh_user_activities` AS u
 SET t.`imei_number` = u.`uid`
