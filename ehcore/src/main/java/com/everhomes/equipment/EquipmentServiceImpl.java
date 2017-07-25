@@ -2083,6 +2083,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					int code = EquipmentNotificationTemplateCode.GENERATE_EQUIPMENT_TASK_NOTIFY;
 					if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(groupType))) {
 						code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_DELAY;
+						map.put("taskName", task.getTaskName());
 					}
 
 					String scope = EquipmentNotificationTemplateCode.SCOPE;
