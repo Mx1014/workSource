@@ -2125,6 +2125,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dayStat.setMeterPrice(priceSetting.getSettingValue());
                 dayStat.setLastReading(dayLastReading);
                 dayStat.setCurrentReading(dayCurrReading);
+//                dayStat.setCurrentAmount(amount);
                 dayStat.setCurrentCost(realCost);
                 dayStat.setResetMeterFlag(resetFlag);
                 dayStat.setChangeMeterFlag(changeFlag);
