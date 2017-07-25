@@ -257,6 +257,8 @@ public class UniongroupServiceImpl implements UniongroupService {
             search_cmd.setKeyword(cmd.getKeywords());
         if (cmd.getGroupId() != null)
             search_cmd.setGroupId(cmd.getGroupId());
+        if(cmd.getIsNormal() !=null )
+            search_cmd.setIsNormal(String.valueOf(cmd.getIsNormal()));
 
         search_cmd.setNamespaceId(namespaceId);
         search_cmd.setPageAnchor(cmd.getPageAnchor());

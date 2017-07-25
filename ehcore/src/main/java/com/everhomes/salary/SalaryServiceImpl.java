@@ -490,7 +490,7 @@ public class SalaryServiceImpl implements SalaryService {
             //  当传递了薪酬组 id 的时候选择 lei.lv 的新接口
             ListUniongroupMemberDetailsWithConditionCommand command = new ListUniongroupMemberDetailsWithConditionCommand();
             command.setOwnerId(cmd.getOwnerId());
-            if (!StringUtils.isEmpty(cmd.getDepartmentId()))
+            if (!cmd.getDepartmentId().equals(cmd.getOwnerId()))
                 command.setDepartmentId(cmd.getDepartmentId());
             if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
                 command.setGroupId(cmd.getSalaryGroupId());
@@ -498,10 +498,12 @@ public class SalaryServiceImpl implements SalaryService {
             }
             if (!StringUtils.isEmpty(cmd.getKeywords()))
                 command.setKeywords(cmd.getKeywords());
-            command.setPageAnchor(0L);
             if (!StringUtils.isEmpty(cmd.getPageAnchor()))
                 command.setPageAnchor(cmd.getPageAnchor());
             command.setPageSize(20);
+            if(cmd.getIsException().equals(SalaryEmployeeNormalType.ABNORMAL.getCode()))
+                command.setIsNormal(cmd.getIsException());
+
             ListUniongroupMemberDetailResponse results = this.uniongroupService.listUniongroupMemberDetailsWithCondition(command);
             if (results != null && results.getUniongroupMemberDetailList().size() > 0) {
                 //  拼接字段
@@ -621,7 +623,7 @@ public class SalaryServiceImpl implements SalaryService {
                         }
                     }
                 }
-                //  拼接"是否异常员工
+/*                //  拼接"是否异常员工
                 //  判定规则为未关联薪酬组&未设置工资明细
                 if (StringUtils.isEmpty(dto.getSalaryGroupName())
                         || dto.getIsConfirmed().equals(SalaryEmployeeConfirmedType.NOTCONFIRMED.getCode()))
@@ -629,7 +631,7 @@ public class SalaryServiceImpl implements SalaryService {
 
                 //  根据前端“只显示异常员工”条件来判断是否将该员工添加至 response
                 if (isException.equals(SalaryEmployeeNormalType.ABNORMAL.getCode()) && dto.getIsNormal().equals(SalaryEmployeeNormalType.NORMAL.getCode()))
-                    continue;
+                    continue;*/
                 dtos.add(dto);
             }
         }

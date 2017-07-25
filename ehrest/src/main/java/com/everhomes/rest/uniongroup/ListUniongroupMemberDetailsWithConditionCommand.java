@@ -2,9 +2,6 @@ package com.everhomes.rest.uniongroup;
 
 import com.everhomes.util.StringHelper;
 
-/**
- * Created by Administrator on 2017/7/4.
- */
 public class ListUniongroupMemberDetailsWithConditionCommand {
     private Long ownerId;
     private String keywords;
@@ -13,6 +10,7 @@ public class ListUniongroupMemberDetailsWithConditionCommand {
     private String groupType;
     private Long pageAnchor;
     private Integer pageSize;
+    private Byte isNormal;
 
     public Long getOwnerId() {
         return ownerId;
@@ -68,6 +66,14 @@ public class ListUniongroupMemberDetailsWithConditionCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Byte getIsNormal() {
+        return isNormal;
+    }
+
+    public void setIsNormal(Byte isNormal) {
+        this.isNormal = isNormal;
     }
 
     @Override
