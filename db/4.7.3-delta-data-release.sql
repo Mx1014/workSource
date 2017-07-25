@@ -54,4 +54,4 @@ update eh_service_modules set level = 3 where id = 20811;
 update eh_service_modules set path = '/20000/20800/20811' where id = 20811;
 
 SET @template_id = (SELECT MAX(id) FROM `eh_locale_templates`); 
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('163', 'equipment.notification', '6', 'zh_CN', '通知过期任务', '“${taskName}”过期未执行，请到后台查看详情', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@template_id := @template_id + 1), 'equipment.notification', '6', 'zh_CN', '通知过期任务', '“${taskName}”过期未执行，请到后台查看详情', '0');
