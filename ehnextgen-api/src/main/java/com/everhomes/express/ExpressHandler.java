@@ -11,4 +11,14 @@ public interface ExpressHandler {
 
 	GetExpressLogisticsDetailResponse getExpressLogisticsDetail(ExpressCompany expressCompany, String billNo);
 	
+	/**
+	 *  国贸项目直接创建订单，不获取订单号
+	 */
+	void createOrder(ExpressOrder expressOrder);
+	
+	/**
+	 *  国贸项目更新订单
+	 */
+	void updateOrderStatus(ExpressOrder expressOrder);
+	
 }

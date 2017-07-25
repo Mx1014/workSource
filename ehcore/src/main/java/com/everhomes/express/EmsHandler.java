@@ -347,6 +347,18 @@ public class EmsHandler implements ExpressHandler {
 	private String uncapFirst(String string) {
 		return string.substring(0, 1).toLowerCase() + string.substring(1);
 	}
+
+	@Override
+	public void createOrder(ExpressOrder expressOrder) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateOrderStatus(ExpressOrder expressOrder) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 	
