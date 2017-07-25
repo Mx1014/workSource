@@ -2119,7 +2119,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 							}
 						}
 					}
-
+					//审阅的要通知超管和模块管理员
 					if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(groupType))) {
 						ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
 						command.setOrganizationId(task.getOwnerId());
