@@ -2186,7 +2186,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 member.setOperatorUid(user.getId());
                 member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
                 organizationProvider.updateOrganizationMember(member);
-                //解除门禁权限
+                //
                 doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
             }
             //把user_organization表中的相应记录更新为失效
