@@ -19,6 +19,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.MoreActionData;
@@ -38,6 +39,7 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -46,6 +48,7 @@ import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.elasticsearch.common.geo.GeoHashUtils;
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -421,11 +424,37 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItem> portalItems = portalItemProvider.listPortalItem(locator, pageSize, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(cmd.getItemGroupId()));
+				Condition cond = Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(cmd.getItemGroupId());
 				if(null != PortalScopeType.fromCode(cmd.getScopeType())){
-					query.addConditions(Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_TYPE.eq(cmd.getScopeType()));
-					query.addConditions(Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_ID.eq(cmd.getScopeId()));
+					Condition cond1 = Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_TYPE.eq(cmd.getScopeType());
+					Condition cond2 = Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_ID.eq(cmd.getScopeId());
+
+					//如果是选择具体场景的实体 则要合上具体场景的 全部条件
+					if(0 != cmd.getScopeId()){
+						cond2 = cond2.or(Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_ID.eq(0L));
+					}
+					cond1 = cond1.and(cond2);
+
+					//如果选择的场景是管理公司或者普通公司，则需要合上园区场景条件
+					if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.PM || PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.ORGANIZATION){
+						Condition cond3 = Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_TYPE.eq(PortalScopeType.COMMERCIAL.getCode());
+
+						//合上园区场景的 全部条件
+						Condition cond4 = Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_ID.eq(0L);
+
+						//合上公司所入住的园区场景具体实体条件
+						if(0 != cmd.getScopeId()){
+							OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getScopeId());
+							if(null != request){
+								cond4 = cond4.or(Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_ID.eq(request.getCommunityId()));
+							}
+						}
+						cond3 = cond3.and(cond4);
+						cond1 = cond1.or(cond3);
+					}
+					cond = cond.and(cond1);
 				}
+				query.addConditions(cond);
 				return query;
 			}
 		});
@@ -1197,10 +1226,9 @@ public class PortalServiceImpl implements PortalService {
 
 		List<PortalLaunchPadMapping> portalLaunchPadMappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_LAYOUT.getCode(), layout.getId(), null);
 
-		Long versionCode = 0L;
-
+		String now = DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH);
+		Long versionCode = Long.valueOf(now + "01");
 		LaunchPadLayoutJson layoutJson = new LaunchPadLayoutJson();
-		layoutJson.setVersionCode(versionCode.toString());
 		layoutJson.setDisplayName(layout.getLabel());
 		layoutJson.setLayoutName(layout.getName());
 		List<LaunchPadLayoutGroupDTO> groups = new ArrayList<>();
@@ -1292,16 +1320,25 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}
 		layoutJson.setGroups(groups);
-		String json = StringHelper.toJsonString(layoutJson);
 		LaunchPadLayout launchPadLayout = new LaunchPadLayout();
 		if(portalLaunchPadMappings.size() > 0){
 			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
 				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
-				launchPadLayout.setVersionCode(versionCode);
-				launchPadLayout.setLayoutJson(json);
-				launchPadProvider.updateLaunchPadLayout(launchPadLayout);
+				if(null != launchPadLayout){
+					if(launchPadLayout.getVersionCode().toString().indexOf(now) != -1){
+						versionCode = launchPadLayout.getVersionCode() + 1;
+					}
+					launchPadLayout.setVersionCode(versionCode);
+					layoutJson.setVersionCode(versionCode.toString());
+					String json = StringHelper.toJsonString(layoutJson);
+					launchPadLayout.setLayoutJson(json);
+					launchPadProvider.updateLaunchPadLayout(launchPadLayout);
+
+				}
 			}
 		}else{
+			layoutJson.setVersionCode(versionCode.toString());
+			String json = StringHelper.toJsonString(layoutJson);
 			launchPadLayout.setNamespaceId(layout.getNamespaceId());
 			launchPadLayout.setName(layout.getName());
 			launchPadLayout.setVersionCode(versionCode);
