@@ -9,7 +9,6 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.parking.JinyiParkingVendorHandler;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingVendorHandler;

@@ -212,8 +212,10 @@ public class UserActivityServiceImpl implements UserActivityService {
         activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
         activity.setNamespaceId(UserContext.getCurrentNamespaceId());
         activity.setVersionRealm(UserContext.current().getVersionRealm());
-        if (user != null)
-        	userActivityProvider.addActivity(activity, user.getId());
+
+        // @see com.everhomes.statistics.terminal.BorderRegisterListener comment by xq.tian 2017/07/14
+        // if (user != null)
+        // 	userActivityProvider.addActivity(activity, user.getId());
 
         // 增加版本号 用于运营统计 by sfyan 20170117
         String type = OSType.fromCode(activity.getOsType().toString()).name().toLowerCase();

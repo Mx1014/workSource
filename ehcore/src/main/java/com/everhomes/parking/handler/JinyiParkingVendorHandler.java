@@ -49,10 +49,10 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-//	static String url = "http://tgd.poapi.parkingjet.cn:8082/CommonOpenApi/default.ashx";
-//	static String appid = "201706221000";
-//	static String appkey = "qyruirxn20145601739";
-//	static String parkingid = "0755000120170301000000000003";
+	static String url = "http://tgd.poapi.parkingjet.cn:8082/CommonOpenApi/default.ashx";
+	static String appid = "201706221000";
+	static String appkey = "qyruirxn20145601739";
+	static String parkingid = "0755000120170301000000000003";
 
 	@Autowired
 	private ParkingProvider parkingProvider;

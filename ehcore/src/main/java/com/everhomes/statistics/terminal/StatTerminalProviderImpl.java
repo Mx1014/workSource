@@ -8,7 +8,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.user.UserActivity;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
@@ -357,7 +356,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
             condition = condition.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
         }
         SelectConditionStep<Record1<Integer>> step = context.select(
-                Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct() )
+                Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_USER_ACTIVITIES)
                 .where(condition)
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
