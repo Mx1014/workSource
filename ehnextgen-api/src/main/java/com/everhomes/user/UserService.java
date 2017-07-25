@@ -165,7 +165,7 @@ public interface UserService {
      * @return
      */
     MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
-
+    
     SearchUsersResponse searchUsers(SearchUsersCommand cmd);
 
     /**
@@ -220,4 +220,8 @@ public interface UserService {
  
     SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
 
+
+    ListAuthFormsResponse listAuthForms();
+
+	GetFamilyButtonStatusResponse getFamilyButtonStatus();
 }
