@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -384,12 +385,20 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         String subject = PRINT_SUBJECT;
 
         // 必须重启一个线程来发布通知，通知二维码扫描成功，跳转到成功页面
-        ExecutorUtil.submit(new Runnable() {
-            @Override
-            public void run() {
-                localBus.publish(null, subject + "." + cmd.getIdentifierToken(), printResponse);
-            }
-        });
+        for (int i = 0; i < 5; i++) {
+        	ExecutorUtil.submit(new Runnable() {
+        		@Override
+        		public void run() {
+        			try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+        			localBus.publish(null, subject + "." + cmd.getIdentifierToken(), printResponse);
+        		}
+        	});
+		}
        
         return new InformPrintResponse(PrintLogonStatusType.LOGON_SUCCESS.getCode());
     
