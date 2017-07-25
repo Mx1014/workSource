@@ -2638,6 +2638,8 @@ public class GroupServiceImpl implements GroupService {
 		}
         
         groupDto.setShareUrl(getShareUrl(group));
+        
+        groupDto.setQrUrl(getQrUrl(group));
         //groupDto.setBehaviorTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"),
         //    group.getBehaviorTime().getTime()));
         //groupDto.setCreatorUid(group.getCreatorUid());
@@ -2666,6 +2668,20 @@ public class GroupServiceImpl implements GroupService {
 			return homeUrl + shareUrl + "?namespaceId=" + group.getNamespaceId()+"&groupId="+group.getId()+"&realm=";
 		}
 	}
+
+	private String getQrUrl(Group group){
+        String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
+
+        return  homeUrl + "/xxx/sldgjdflksgjslrjgrgjdsgjroigjr";
+//        String qrUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.CLUB_SHARE_URL, "");
+//        if (homeUrl.length() == 0 || qrUrl.length() == 0) {
+//            LOGGER.error("Invalid home url or share url, homeUrl=" + homeUrl + ", qrUrl=" + qrUrl);
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+//                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or qr url");
+//        } else {
+//            return homeUrl + qrUrl + "?namespaceId=" + group.getNamespaceId()+"&groupId="+group.getId()+"&realm=";
+//        }
+    }
 
 	private void memberInfoToGroupDTO(Long uid, GroupDTO groupDto, Group group) {
         //
