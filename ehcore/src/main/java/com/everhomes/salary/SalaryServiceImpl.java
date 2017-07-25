@@ -498,6 +498,7 @@ public class SalaryServiceImpl implements SalaryService {
             }
             if (!StringUtils.isEmpty(cmd.getKeywords()))
                 command.setKeywords(cmd.getKeywords());
+            command.setPageAnchor(0L);
             if (!StringUtils.isEmpty(cmd.getPageAnchor()))
                 command.setPageAnchor(cmd.getPageAnchor());
             command.setPageSize(20);
