@@ -616,20 +616,21 @@ public class SalaryServiceImpl implements SalaryService {
                 if (!StringUtils.isEmpty(wages)) {
                     for (int j = 0; j < wages.size(); j++) {
                         if (wages.get(j)[0].equals(results.get(i).getDetailId())) {
-                            if (org.apache.commons.lang.StringUtils.isNumeric((String) wages.get(j)[1])) {
+                            //  判断是否数字
+                            if (((String) wages.get(j)[1]).matches("-?[0-9]+.*[0-9]*")) {
                                 dto.setIsConfirmed(SalaryEmployeeConfirmedType.CONFIRMED.getCode());
                                 break;
                             }
                         }
                     }
                 }
-/*                //  拼接"是否异常员工
+                //  拼接"是否异常员工
                 //  判定规则为未关联薪酬组&未设置工资明细
                 if (StringUtils.isEmpty(dto.getSalaryGroupName())
                         || dto.getIsConfirmed().equals(SalaryEmployeeConfirmedType.NOTCONFIRMED.getCode()))
                     dto.setIsNormal(SalaryEmployeeNormalType.ABNORMAL.getCode());
 
-                //  根据前端“只显示异常员工”条件来判断是否将该员工添加至 response
+               /*  //  根据前端“只显示异常员工”条件来判断是否将该员工添加至 response
                 if (isException.equals(SalaryEmployeeNormalType.ABNORMAL.getCode()) && dto.getIsNormal().equals(SalaryEmployeeNormalType.NORMAL.getCode()))
                     continue;*/
                 dtos.add(dto);
