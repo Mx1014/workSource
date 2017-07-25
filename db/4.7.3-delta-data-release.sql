@@ -33,3 +33,18 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'work_flow_content', 'zh_CN', '组织机构代码|企业联系人|企业联系电话|认证反馈结果|手机号|姓名|证件类型|证件号码|认证反馈结果|身份证|未知证件类型');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
 	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'family_detail', 'zh_CN', '家庭信息|您还未加入任何家庭，快去加入吧!|添加住址');
+
+--
+-- eh_user_activities 数据处理 add by xq.tian 2017/07/25
+--
+UPDATE `eh_terminal_app_version_actives` AS t, `eh_user_activities` AS u
+SET t.`imei_number` = u.`uid`
+WHERE t.`imei_number` = u.`imei_number` AND u.`uid` <> 0;
+
+UPDATE `eh_terminal_app_version_cumulatives` AS t, `eh_user_activities` AS u
+SET t.`imei_number` = u.uid
+WHERE t.`imei_number` = u.`imei_number` AND u.uid <> 0;
+
+DELETE FROM `eh_user_activities` WHERE `uid` = 0;
+
+UPDATE `eh_user_activities` AS u SET u.`imei_number` = u.`uid`;
