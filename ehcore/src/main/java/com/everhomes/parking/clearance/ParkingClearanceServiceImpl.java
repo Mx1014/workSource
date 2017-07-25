@@ -1,7 +1,9 @@
 // @formatter:off
 package com.everhomes.parking.clearance;
 
-import com.everhomes.acl.RolePrivilegeService;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -14,12 +16,16 @@ import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.parking.JinyiParkingVendorHandler;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
+import com.everhomes.parking.ParkingVendorHandler;
+import com.everhomes.parking.jinyi.JinyiClearance;
+import com.everhomes.parking.jinyi.JinyiJsonEntity;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -31,6 +37,8 @@ import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.clearance.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.*;
@@ -38,9 +46,11 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
@@ -51,6 +61,8 @@ import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -77,16 +89,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     private ParkingClearanceLogProvider clearanceLogProvider;
 
     @Autowired
-    private OrganizationProvider organizationProvider;
-
-    @Autowired
     private OrganizationService organizationService;
 
     @Autowired
     private UserProvider userProvider;
-
-    @Autowired
-    private RolePrivilegeService rolePrivilegeService;
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
@@ -115,10 +121,12 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private ScheduleProvider scheduleProvider;
+
     @Override
     public void createClearanceOperator(CreateClearanceOperatorCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         if (cmd.getUserIds() != null && cmd.getUserIds().size() > 0) {
             int alreadyInsertUserCount = 0;
@@ -140,8 +148,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                 newOperator.setStatus(ParkingCommonStatus.ACTIVE.getCode());
                 dbProvider.execute(status -> {
                     clearanceOperatorProvider.createClearanceOperator(newOperator);
-                    this.addFlowProcessor(cmd, userId);
-                    this.assignmentPrivileges(cmd.getOperatorType(), cmd.getParkingLotId(), userId);
                     return true;
                 });
             }
@@ -152,51 +158,23 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         }
     }
 
-    // 添加工作流处理人员
-    private void addFlowProcessor(CreateClearanceOperatorCommand cmd, Long userId) {
-        if (ParkingClearanceOperatorType.fromCode(cmd.getOperatorType()) == ParkingClearanceOperatorType.PROCESSOR) {
-            Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, cmd.getParkingLotId(), FlowOwnerType.PARKING.getCode());
-            if (flow == null) {
-                LOGGER.error("There is no workflow enabled.");
-                throw errorWith(ParkingErrorCode.SCOPE_CLEARANCE, ParkingErrorCode.ERROR_NO_WORK_FLOW_ENABLED, "There is no workflow enabled.");
-            }
-            flowService.addSnapshotProcessUser(flow.getFlowMainId(), userId);
-        }
-    }
-
     // 校验当前用户是否有申请放行权限
-    private void checkApplicantAuthority(CreateClearanceLogCommand cmd) {
-//        userPrivilegeMgr.checkUserAuthority(
-//                currUserId(),
-//                EntityType.PARKING_LOT.getCode(),
-//                cmd.getParkingLotId(),
-//                cmd.getOrganizationId(),
-//                APPLY_PRIVILEGE_ID
-//        );
-        // 上面的权限检查会放过超级管理员, 但是需求是不放过
-        checkUserNotInOperatorList(cmd.getParkingLotId(), ParkingClearanceOperatorType.APPLICANT);
+    private void checkApplicantAuthority(Long orgId, Long parkingLotId) {
+        if (!userPrivilegeMgr.checkSuperAdmin(currUserId(), orgId) &&
+                !checkApplyUser(parkingLotId, ParkingClearanceOperatorType.APPLICANT)) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+
     }
 
-    private void checkUserNotInOperatorList(Long parkingLotId, ParkingClearanceOperatorType operatorType) {
+    private boolean checkApplyUser(Long parkingLotId, ParkingClearanceOperatorType operatorType) {
         ParkingClearanceOperator applicant = clearanceOperatorProvider
                 .findByParkingLotIdAndUid(parkingLotId, currUserId(), operatorType.getCode());
         if (applicant == null) {
-            LOGGER.error("Current user is not in operator list");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Current user is not in operator list");
+            return false;
         }
-    }
-
-    // 给用户添加权限
-    // 申请放行权限或者处理放行任务权限
-    private void assignmentPrivileges(String operatorType,Long parkingLotId, Long userId) {
-        rolePrivilegeService.assignmentPrivileges(EntityType.PARKING_LOT.getCode(),
-                parkingLotId, EntityType.USER.getCode(), userId, operatorType, Collections.singletonList(this.getPrivilegeId(operatorType)));
-    }
-
-    private long getPrivilegeId(String operatorType) {
-        return (ParkingClearanceOperatorType.fromCode(operatorType) == ParkingClearanceOperatorType.APPLICANT) ?
-                APPLY_PRIVILEGE_ID : PROCESS_PRIVILEGE_ID;
+        return true;
     }
 
     private ParkingClearanceOperatorDTO toClearanceOperatorDTO(ParkingClearanceOperator operator) {
@@ -218,7 +196,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         dto.setStatus(statusStr);
         dto.setIdentifierToken(this.findUserIdentifierByUserId(log.getOperatorId()).getIdentifierToken());
         dto.setApplicant(this.findUserById(log.getOperatorId()).getNickName());
-        if (log.getRemarks() == null) {
+        if (StringUtils.isBlank(log.getRemarks())) {
             String remarksNoneValue = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.NONE_CODE, currLocale(), "");
             dto.setRemarks(remarksNoneValue);
@@ -230,26 +208,51 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         return dto;
     }
 
+    @Scheduled(cron="0 1 0 * * ?")
+    public void sychnLogs(){
+
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+
+            this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG_STATISTICS.getCode()).tryEnter(() -> {
+
+                ParkingClearanceLogQueryObject qo = new ParkingClearanceLogQueryObject();
+
+                Calendar start = Calendar.getInstance();
+                start.set(Calendar.HOUR_OF_DAY, 0);
+                start.set(Calendar.MINUTE, 0);
+                start.set(Calendar.SECOND, 0);
+                start.set(Calendar.MILLISECOND, 0);
+                qo.setStartTime(start.getTimeInMillis());
+                start.set(Calendar.HOUR_OF_DAY, 23);
+                start.set(Calendar.MINUTE, 59);
+                start.set(Calendar.SECOND, 59);
+                start.set(Calendar.MILLISECOND, 999);
+                qo.setEndTime(start.getTimeInMillis());
+                qo.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
+                List<ParkingClearanceLog> logs = clearanceLogProvider.searchClearanceLog(qo);
+
+                logs.forEach(r -> {
+                    ParkingLot parkingLot = parkingProvider.findParkingLotById(r.getParkingLotId());
+
+                    String vendorName = parkingLot.getVendorName();
+                    JinyiParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+                    List<JinyiClearance> actualLogs = handler.getTempCardLogs(r);
+                    clearanceLogProvider.updateClearanceLog(r);
+                });
+
+            });
+        }
+    }
+
     @Override
     public void deleteClearanceOperator(DeleteClearanceOperatorCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_OPERATOR.getCode() + cmd.getId()).tryEnter(() -> {
             ParkingClearanceOperator operator = clearanceOperatorProvider.findById(cmd.getId());
             if (operator != null) {
                 boolean success = dbProvider.execute(status -> {
-                    long privilegeId = this.getPrivilegeId(operator.getOperatorType());
-                    // 删除工作流处理人员
-                    this.deleteFlowProcessor(operator);
-                    // 删除权限
-                    rolePrivilegeService.deleteAcls(
-                            EntityType.PARKING_LOT.getCode(),//
-                            operator.getParkingLotId(),//
-                            EntityType.USER.getCode(),//
-                            operator.getOperatorId(),//
-                            new ArrayList<>(Collections.singletonList(privilegeId))
-                    );
+
                     clearanceOperatorProvider.deleteClearanceOperator(operator);
                     return true;
                 });
@@ -264,20 +267,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         });
     }
 
-    private void deleteFlowProcessor(ParkingClearanceOperator operator) {
-        if (ParkingClearanceOperatorType.fromCode(operator.getOperatorType()) == ParkingClearanceOperatorType.PROCESSOR) {
-            Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, operator.getParkingLotId(), FlowOwnerType.PARKING.getCode());
-            // 删除当前工作流的处理人员
-            if (flow != null) {
-                flowService.deleteSnapshotProcessUser(flow.getFlowMainId(), operator.getOperatorId());
-            }
-        }
-    }
-
     @Override
     public ListClearanceOperatorResponse listClearanceOperator(ListClearanceOperatorCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
         ListClearanceOperatorResponse response = new ListClearanceOperatorResponse();
 
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -295,12 +287,11 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     @Override
     public ParkingClearanceLogDTO createClearanceLog(CreateClearanceLogCommand cmd) {
         this.validate(cmd);
-        this.checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        this.checkApplicantAuthority(cmd);
+        this.checkApplicantAuthority(cmd.getOrganizationId(), cmd.getParkingLotId());
 
         ParkingClearanceLog log = new ParkingClearanceLog();
         log.setNamespaceId(currNamespaceId());
-        log.setStatus(ParkingClearanceLogStatus.PENDING.getCode());
+        log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
         log.setParkingLotId(cmd.getParkingLotId());
         log.setCommunityId(cmd.getCommunityId());
         log.setApplicantId(currUserId());
@@ -314,13 +305,31 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             long logId = clearanceLogProvider.createClearanceLog(log);
             log.setId(logId);
             this.createFlowCase(log, cmd.getOrganizationId());
+
+            notifyParkingLot(log);
             return true;
         });
         if (!success) {
             LOGGER.error("some error.");
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "some error.");
         }
+
         return toClearanceLogDTO(log);
+    }
+
+    private void notifyParkingLot(ParkingClearanceLog log) {
+        //通知第三方，向停车系统申请放行资格
+        ParkingLot parkingLot = parkingProvider.findParkingLotById(log.getParkingLotId());
+
+        String vendorName = parkingLot.getVendorName();
+        JinyiParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+        String logToken = handler.applyTempCard(log);
+        if (null == logToken) {
+            LOGGER.error("some error.");
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "some error.");
+        }
+        log.setLogToken(logToken);
+        clearanceLogProvider.updateClearanceLog(log);
     }
 
     private Long createFlowCase(ParkingClearanceLog log, Long organizationId) {
@@ -356,7 +365,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     @Override
     public SearchClearanceLogsResponse searchClearanceLog(SearchClearanceLogCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
         SearchClearanceLogsResponse response = new SearchClearanceLogsResponse();
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ParkingClearanceLogQueryObject qo = ConvertHelper.convert(cmd, ParkingClearanceLogQueryObject.class);
@@ -385,9 +393,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     		logs.forEach(this::formatToExport);
     		String fileName = String.format("车辆放行记录_%s", DateUtil.dateToStr(new Date(), DateUtil.DATE_TIME_NO_SLASH));
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "车辆放行记录");
-			List<String> propertyNames = new ArrayList<String>(Arrays.asList("applicant", "identifierToken", "applyTimeString", "plateNumber", "clearanceTimeString", "status", "remarks"));
-			List<String> titleNames = new ArrayList<String>(Arrays.asList("发起人", "手机号", "发起时间", "来访车辆", "预计来访时间", "任务状态", "备注"));
-			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 20, 20, 20, 20, 30));
+			List<String> propertyNames = new ArrayList<String>(Arrays.asList("applicant", "identifierToken", "applyTimeString", "plateNumber", "clearanceTimeString", "status", "remarks", "logJson"));
+			List<String> titleNames = new ArrayList<String>(Arrays.asList("发起人", "手机号", "发起时间", "来访车辆", "预计来访日期", "任务状态", "备注", "实际来访记录"));
+			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 20, 20, 20, 20, 30, 30));
 			excelUtils.setNeedSequenceColumn(true);
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, logs);
 		}else {
@@ -399,12 +407,25 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     private void formatToExport(ParkingClearanceLogDTO log) {
     	log.setApplyTimeString(DateUtil.dateToStr(log.getApplyTime(), DateUtil.DATE_TIME_LINE));
     	log.setClearanceTimeString(DateUtil.dateToStr(log.getClearanceTime(), DateUtil.YMR_SLASH));
+
+    	if (StringUtils.isNotBlank(log.getLogJson())) {
+    	    StringBuilder sb = new StringBuilder();
+            JinyiJsonEntity<List<JinyiClearance>> jsonEntity = JSONObject.parseObject(log.getLogJson(), new TypeReference<JinyiJsonEntity<List<JinyiClearance>>>(){});
+            List<JinyiClearance> list = jsonEntity.getData();
+            Integer[] i = {1};
+            list.forEach(r -> {
+                sb.append(i[0]).append(",").append(r.getEntrytime()).append("进场").append("\n");
+                i[0] = i[0] + 1;
+                sb.append(i[0]).append(",").append(r.getExittime()).append("出场").append("\n");
+                i[0] = i[0] + 1;
+            });
+            log.setLogJson(sb.toString());
+    	}
     }
 
 	@Override
     public CheckAuthorityResponse checkAuthority(CheckAuthorityCommand cmd) {
         validate(cmd);
-        // checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         ActionType actionType = ActionType.fromCode(cmd.getActionType());
 
@@ -418,10 +439,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             message = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_MESSAGE_CODE, currLocale(), "");
         } else if (actionType == ActionType.PARKING_CLEARANCE_TASK){
-            privilegeId = PROCESS_PRIVILEGE_ID;
-            operatorType = ParkingClearanceOperatorType.PROCESSOR;
-            message = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
-                    ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_TASK_MESSAGE_CODE, currLocale(), "");
+
         }
 
         List<ParkingLot> parkingLots = new ArrayList<>();
@@ -438,11 +456,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
             for (ParkingLot parkingLot : parkingLots) {
                 try {
-                    userPrivilegeMgr.checkUserAuthority(currUserId(), EntityType.PARKING_LOT.getCode(), parkingLot.getId(),
-                             cmd.getOrganizationId(), privilegeId);
 
-                    // 上面的权限检查会放过超级管理员, 但是需求是不放过
-                    checkUserNotInOperatorList(parkingLot.getId(), operatorType);
+                    checkApplicantAuthority(cmd.getOrganizationId(), parkingLot.getId());
 
                     status = CheckAuthorityStatus.SUCCESS;
                     message = null;
@@ -483,21 +498,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         }
         LOGGER.error("User is not exist, userId = {}", userId);
         throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User is not exist userId = %s", userId);
-    }
-
-    private void checkCurrentUserNotInOrg(Long orgId) {
-        /*if (orgId == null) {
-            LOGGER.error("Invalid parameter organizationId [ null ]");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid parameter organizationId [ null ]");
-        }
-        Long userId = currUserId();
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
-        if (member == null) {
-            LOGGER.error("User is not in the organization.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "User is not in the organization.");
-        }*/
     }
 
     // 参数校验方法
@@ -543,5 +543,67 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                 throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
             });
         }*/
+    }
+
+    @Override
+    public void deleteClearanceLog(DeleteClearanceLogCommand cmd) {
+        ParkingClearanceLog log = clearanceLogProvider.findById(cmd.getId());
+
+        if (null == log) {
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
+        }
+        dbProvider.execute(s -> {
+            log.setStatus(ParkingClearanceLogStatus.INACTIVE.getCode());
+            clearanceLogProvider.updateClearanceLog(log);
+
+            FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(log.getId(), EntityType.PARKING_CLEARANCE_LOG.getCode(), MODULE_ID);
+            if (null != flowCase) {
+                flowCase.setStatus(FlowCaseStatus.INVALID.getCode());
+                flowCaseProvider.updateFlowCase(flowCase);
+            }
+
+            return null;
+        });
+
+    }
+
+    @Override
+    public List<ParkingActualClearanceLogDTO> getActualClearanceLog(GetActualClearanceLogCommand cmd) {
+
+        List<ParkingActualClearanceLogDTO> result = new ArrayList<>();
+        ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
+
+        ParkingClearanceLog log = clearanceLogProvider.findById(cmd.getId());
+        String vendorName = parkingLot.getVendorName();
+        JinyiParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+        List<JinyiClearance> actualLogs = handler.getTempCardLogs(log);
+        if (null != actualLogs) {
+            result = actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
+        }
+        return result;
+    }
+
+    private ParkingActualClearanceLogDTO convertActualClearanceLogDTO(JinyiClearance jinyiClearance) {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        ParkingActualClearanceLogDTO dto = new ParkingActualClearanceLogDTO();
+        LocalDateTime entryTime = LocalDateTime.parse(jinyiClearance.getEntrytime(), dtf);
+        LocalDateTime exitTime = LocalDateTime.parse(jinyiClearance.getExittime(), dtf);
+
+        dto.setEntryTime(Timestamp.valueOf(entryTime));
+        dto.setExitTime(Timestamp.valueOf(exitTime));
+
+        return dto;
+    }
+
+    private JinyiParkingVendorHandler getParkingVendorHandler(String vendorName) {
+        JinyiParkingVendorHandler handler = null;
+
+        if(vendorName != null && vendorName.length() > 0) {
+            String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
+        }
+
+        return handler;
     }
 }
