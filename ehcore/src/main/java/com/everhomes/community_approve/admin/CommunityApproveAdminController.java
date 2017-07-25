@@ -129,7 +129,7 @@ public class CommunityApproveAdminController extends ControllerBase{
      * @return
      */
     @RequestMapping("listCommunityApproveVals")
-    @RestReturn(value=String.class)
+    @RestReturn(value=ListCommunityApproveValResponse.class)
     public RestResponse listCommunityApproveVals(@Valid ListCommunityApproveValCommand cmd) {
         ListCommunityApproveValResponse result = communityApproveService.listCommunityApproveVals(cmd);
         RestResponse response = new RestResponse(result);

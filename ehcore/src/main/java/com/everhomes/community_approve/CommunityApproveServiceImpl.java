@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.community_approve.CommunityApprove;
 import com.everhomes.community_approve.CommunityApproveProvider;
 import com.everhomes.community_approve.CommunityApproveService;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
@@ -22,6 +23,7 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.yellowPage.ServiceAllianceRequestInfoSearcherImpl;
@@ -68,6 +70,8 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
     @Autowired
     private OrganizationProvider organizationProvider;
 
+    @Autowired
+    private ConfigurationProvider configProvider;
     @Override
     public CommunityApproveDTO updateCommunityApprove(UpdateCommunityApproveCommand cmd) {
         CommunityApprove ca = this.communityApproveProvider.getCommunityApproveById(cmd.getId());
@@ -176,8 +180,11 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
     @Override
     public ListCommunityApproveValResponse listCommunityApproveVals(ListCommunityApproveValCommand cmd) {
 
-        List<CommunityApproveVal>  cas = this.communityApproveValProvider.queryCommunityApproves(new ListingLocator(),
-                Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        List<CommunityApproveVal>  cas = this.communityApproveValProvider.queryCommunityApproves(locator,
+                pageSize, new ListingQueryBuilderCallback() {
 
                     @Override
                     public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -222,6 +229,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                 });
 
         ListCommunityApproveValResponse response = new ListCommunityApproveValResponse();
+        response.setNextPageAnchor(locator.getAnchor());
         response.setDtos(cas.stream().map((r)->{
             return processApproveVal(r);
         }).collect(Collectors.toList()));
