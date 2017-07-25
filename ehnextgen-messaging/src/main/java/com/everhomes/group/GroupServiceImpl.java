@@ -557,9 +557,14 @@ public class GroupServiceImpl implements GroupService {
     
     @Override
     public GroupDTO getGroup(GetGroupCommand cmd) {
-        User user = UserContext.current().getUser();
-        Long userId = user != null ? user.getId() : 0;
-        
+
+        //优先使用前端传来的userId。消息2.1的扫码入群是没有登录的，但是要判断该用户是否已经加入群  add by yanjun 20170725
+        Long userId = cmd.getUserId();
+        if(userId == null){
+            User user = UserContext.current().getUser();
+            userId = user != null ? user.getId() : 0;
+        }
+
         Long groupId = cmd.getGroupId();
         // 改成通过UUID获取，不需要进行权限校验
         //checkGroupPrivilege(userId, groupId, PrivilegeConstants.Visible);
