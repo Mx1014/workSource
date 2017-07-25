@@ -1,6 +1,41 @@
 // @formatter:off
 package com.everhomes.parking.clearance;
 
+import static com.everhomes.rest.parking.ParkingLocalStringCode.SCOPE_STRING_STATUS;
+import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.APPLY_PRIVILEGE_ID;
+import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.MODULE_ID;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.constraints.Size;
+import javax.validation.metadata.ConstraintDescriptor;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.bootstrap.PlatformContext;
@@ -17,10 +52,10 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.parking.JinyiParkingVendorHandler;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingVendorHandler;
+import com.everhomes.parking.handler.JinyiParkingVendorHandler;
 import com.everhomes.parking.jinyi.JinyiClearance;
 import com.everhomes.parking.jinyi.JinyiJsonEntity;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
@@ -34,42 +69,38 @@ import com.everhomes.rest.parking.ParkingCommonStatus;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
-import com.everhomes.rest.parking.clearance.*;
+import com.everhomes.rest.parking.clearance.CheckAuthorityCommand;
+import com.everhomes.rest.parking.clearance.CheckAuthorityResponse;
+import com.everhomes.rest.parking.clearance.CheckAuthorityStatus;
+import com.everhomes.rest.parking.clearance.CreateClearanceLogCommand;
+import com.everhomes.rest.parking.clearance.CreateClearanceOperatorCommand;
+import com.everhomes.rest.parking.clearance.DeleteClearanceLogCommand;
+import com.everhomes.rest.parking.clearance.DeleteClearanceOperatorCommand;
+import com.everhomes.rest.parking.clearance.GetActualClearanceLogCommand;
+import com.everhomes.rest.parking.clearance.ListClearanceOperatorCommand;
+import com.everhomes.rest.parking.clearance.ListClearanceOperatorResponse;
+import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
+import com.everhomes.rest.parking.clearance.ParkingClearanceLogDTO;
+import com.everhomes.rest.parking.clearance.ParkingClearanceLogStatus;
+import com.everhomes.rest.parking.clearance.ParkingClearanceOperatorDTO;
+import com.everhomes.rest.parking.clearance.ParkingClearanceOperatorType;
+import com.everhomes.rest.parking.clearance.SearchClearanceLogCommand;
+import com.everhomes.rest.parking.clearance.SearchClearanceLogsResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
-import com.everhomes.user.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.constraints.Size;
-import javax.validation.metadata.ConstraintDescriptor;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.everhomes.rest.parking.ParkingLocalStringCode.SCOPE_STRING_STATUS;
-import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.*;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 /**
