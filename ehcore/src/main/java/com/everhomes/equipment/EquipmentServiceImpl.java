@@ -2062,7 +2062,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 //				LOGGER.info("sendTaskMsg, zero = " + current);
 //			}
 
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(startTime, endTime);
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(startTime, endTime, groupType);
 //		CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
 
 		if (tasks != null && tasks.size() > 0) {
