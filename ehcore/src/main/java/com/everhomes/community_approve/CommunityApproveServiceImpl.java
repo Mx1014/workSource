@@ -121,10 +121,30 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                 Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
                     @Override
                     public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE.OWNER_ID.eq(cmd
-                                .getOwnerId()));
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE.OWNER_TYPE.eq(cmd
-                                .getOwnerType()));
+
+                        List<OrganizationCommunity> communityList = null;
+                        //如果OwnerType是 organaization，则转成所管理的  community做查询
+                        ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
+                        if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+                            communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+                            Condition conditionOR = null;
+                            for (OrganizationCommunity organizationCommunity : communityList) {
+                                Condition condition = Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
+                                        .and(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+                                if(conditionOR==null){
+                                    conditionOR = condition;
+                                }else{
+                                    conditionOR.or(condition);
+                                }
+                            }
+                            if(conditionOR!=null)
+                                query.addConditions(conditionOR);
+                        }else {
+                            query.addConditions(Tables.EH_COMMUNITY_APPROVE.OWNER_ID.eq(cmd
+                                    .getOwnerId()));
+                            query.addConditions(Tables.EH_COMMUNITY_APPROVE.OWNER_TYPE.eq(cmd
+                                    .getOwnerType()));
+                        }
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE.MODULE_ID.eq(cmd
                                 .getModuleId()));
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE.MODULE_TYPE.eq(cmd
