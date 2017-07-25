@@ -416,8 +416,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public void deleteEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
 		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_DELETE, 0L);
-		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
-		
+		if(cmd.getTargetId() != null) {
+			userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getTargetId(), cmd.getOwnerId(), privilegeId);
+		} else {
+			userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+		}
+
 		User user = UserContext.current().getUser();
 
 		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId());
