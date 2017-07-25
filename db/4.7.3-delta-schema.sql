@@ -75,3 +75,7 @@ CREATE TABLE `eh_authorization_third_party_buttons` (
 -- by dengs,车辆放行
 ALTER TABLE eh_parking_clearance_logs ADD COLUMN `log_token` VARCHAR(1024) DEFAULT NULL COMMENT 'The info from third';
 ALTER TABLE eh_parking_clearance_logs ADD COLUMN `log_json` TEXT DEFAULT NULL COMMENT 'The info from third';
+
+-- by xiongying
+ALTER TABLE eh_equipment_inspection_standards ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, etc';
+ALTER TABLE eh_equipment_inspection_standards ADD COLUMN `target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to the id of who own the standard';
