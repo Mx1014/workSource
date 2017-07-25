@@ -90,13 +90,13 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 	VALUES((@organization_community_request_id := @organization_community_request_id + 1), @community_id, 'organization', @organization_id, 3, 0, UTC_TIMESTAMP());
 
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
-	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316636  , 'manager', '傅晨', 0, '13535570575', 3, @eh_namespace_id);	
+	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316636  , 'manager', '傅晨', 0, '13601820627', 3, @eh_namespace_id);	
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
-	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316641 , 'manager', '方靖', 0, '13535570575', 3, @eh_namespace_id);	
+	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316641 , 'manager', '方靖', 0, '13801631605', 3, @eh_namespace_id);	
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
-	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316647 , 'manager', '陈承祖', 0, '13535570575', 3, @eh_namespace_id);	
+	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316647 , 'manager', '陈承祖', 0, '13501985965', 3, @eh_namespace_id);	
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
-	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316630 , 'manager', '陈安娜', 0, '13535570575', 3, @eh_namespace_id);	
+	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316630 , 'manager', '陈安娜', 0, '13916591882', 3, @eh_namespace_id);	
 
 SET @organization_community_request_id = (SELECT MAX(id) FROM `eh_acl_role_assignments`); 	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
