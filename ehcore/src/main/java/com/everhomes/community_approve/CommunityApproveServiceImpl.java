@@ -13,11 +13,14 @@ import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.community_approve.*;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -27,6 +30,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -60,6 +64,9 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
     @Autowired
     private GeneralFormService generalFormService;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Override
     public CommunityApproveDTO updateCommunityApprove(UpdateCommunityApproveCommand cmd) {
@@ -155,8 +162,28 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                     @Override
                     public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                                                                         SelectQuery<? extends Record> query) {
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_ID.eq(cmd.getOwnerId()));
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_TYPE.eq(cmd.getOwnerType()));
+                        List<OrganizationCommunity> communityList = null;
+                        //如果OwnerType是 organaization，则转成所管理的  community做查询
+                        ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
+                        if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+                            communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+                            Condition conditionOR = null;
+                            for (OrganizationCommunity organizationCommunity : communityList) {
+                                Condition condition = Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
+                                        .and(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+                                if(conditionOR==null){
+                                    conditionOR = condition;
+                                }else{
+                                    conditionOR.or(condition);
+                                }
+                            }
+                            if(conditionOR!=null)
+                                query.addConditions(conditionOR);
+                        }else {
+                            query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_ID.eq(cmd.getOwnerId()));
+                            query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_TYPE.eq(cmd.getOwnerType()));
+                        }
+
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.MODULE_ID.eq(cmd.getModuleId()));
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.MODULE_TYPE.eq(cmd.getModuleType()));
 
