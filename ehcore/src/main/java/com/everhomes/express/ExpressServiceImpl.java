@@ -52,6 +52,7 @@ import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressOrderStatusDTO;
 import com.everhomes.rest.express.ExpressOwner;
 import com.everhomes.rest.express.ExpressOwnerType;
+import com.everhomes.rest.express.ExpressPackageType;
 import com.everhomes.rest.express.ExpressPackageTypeDTO;
 import com.everhomes.rest.express.ExpressQueryHistoryDTO;
 import com.everhomes.rest.express.ExpressSendMode;
@@ -1073,7 +1074,10 @@ public class ExpressServiceImpl implements ExpressService {
 			return new ListExpressPackageTypesResponse();
 		}
 		List<ExpressPackageTypeDTO> list = new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(business.getPackageTypes()).toArray())).stream().map(r->{
-			return JSONObject.parseObject(r.toString(), new TypeReference<ExpressPackageTypeDTO>(){});
+			ExpressPackageTypeDTO dto = JSONObject.parseObject(r.toString(), new TypeReference<ExpressPackageTypeDTO>(){});
+			ExpressPackageType packageType = ExpressPackageType.fromCode(dto.getPackageType());
+			dto.setPackageTypeName(packageType == null? "":packageType.getDescription());
+			return dto;
 		}).collect(Collectors.toList());
 		return new ListExpressPackageTypesResponse(list);
 	}
@@ -1099,7 +1103,10 @@ public class ExpressServiceImpl implements ExpressService {
 			return new ListExpressOrderStatusResponse();
 		}
 		List<ExpressOrderStatusDTO> list = new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(business.getOrderStatusCollections()).toArray())).stream().map(r->{
-			return JSONObject.parseObject(r.toString(), new TypeReference<ExpressOrderStatusDTO>(){});
+			ExpressOrderStatusDTO dto = JSONObject.parseObject(r.toString(), new TypeReference<ExpressOrderStatusDTO>(){});
+			ExpressOrderStatus status = ExpressOrderStatus.fromCode(dto.getStatus());
+			dto.setStatusName(status == null? "":status.getDescription());
+			return dto;
 		}).collect(Collectors.toList());
 		return new ListExpressOrderStatusResponse(list);
 	}

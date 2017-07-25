@@ -10,16 +10,22 @@ package com.everhomes.rest.express;
 * </ul>
 */
 public enum ExpressInvoiceFlagType {
-	NOT_NEED_INVOICE((byte)1), NEED_TEAR_INVOICE((byte)2), NEED_TAX_INVOIE((byte)3);
+	NOT_NEED_INVOICE((byte)1,"不需要发票"), NEED_TEAR_INVOICE((byte)2,"需要手撕发票"), NEED_TAX_INVOIE((byte)3,"需要税票");
 	
 	private byte code;
+	private String description;
 	
-	private ExpressInvoiceFlagType(byte code) {
+	private ExpressInvoiceFlagType(byte code, String description) {
 		this.code = code;
+		this.description = description;
 	}
 	
 	public Byte getCode() {
 		return code;
+	}
+	
+	public String getDescription() {
+		return description;
 	}
 	
 	public static ExpressInvoiceFlagType fromCode(Byte code) {
