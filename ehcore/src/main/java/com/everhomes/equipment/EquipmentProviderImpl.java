@@ -157,16 +157,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //			});
 		}
 
-		//五分钟后启动通知
-		Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
-		if(notifyFlag) {
-			Long notifyTime = System.currentTimeMillis() + 300000;
-			String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-			String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
-			String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
-					notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
-		}
+		Long notifyTime = System.currentTimeMillis() + 300000;
+		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
+		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
+				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
 
 
 	}

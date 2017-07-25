@@ -7,6 +7,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
 import com.everhomes.equipment.EquipmentService;
+import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.util.CronDateUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -47,7 +48,8 @@ public class EquipmentInspectionTaskNotifyScheduleJob extends QuartzJobBean {
             //默认提前十分钟通知
             long executiveStartTime = System.currentTimeMillis()+(configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
 
-            equipmentService.sendTaskMsg(executiveStartTime, executiveStartTime+60000);
+            equipmentService.sendTaskMsg(executiveStartTime, executiveStartTime+60000, QualityGroupType.EXECUTIVE_GROUP.getCode());
+            equipmentService.sendTaskMsg(executiveStartTime, executiveStartTime+60000, QualityGroupType.REVIEW_GROUP.getCode());
 
             EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(executiveStartTime+60000);
             //没有新任务时，等到零点生成任务之后再发通知
