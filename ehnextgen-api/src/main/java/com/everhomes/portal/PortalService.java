@@ -111,6 +111,7 @@ public interface PortalService {
 
 	void setItemCategoryDefStyle(SetItemCategoryDefStyleCommand cmd);
 
-	List<ScopeDTO> listScopes(ListScopeCommand cmd);
+	ListScopeResponse listScopes(ListScopeCommand cmd);
 
+	ListScopeResponse searchScopes(ListScopeCommand cmd);
 }

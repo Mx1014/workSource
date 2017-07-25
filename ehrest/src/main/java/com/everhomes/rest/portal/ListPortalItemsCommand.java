@@ -20,6 +20,8 @@ public class ListPortalItemsCommand {
 
 	private String scopeType;
 
+	private Long scopeId;
+
 	public ListPortalItemsCommand() {
 
 	}
@@ -60,6 +62,14 @@ public class ListPortalItemsCommand {
 
 	public void setScopeType(String scopeType) {
 		this.scopeType = scopeType;
+	}
+
+	public Long getScopeId() {
+		return scopeId;
+	}
+
+	public void setScopeId(Long scopeId) {
+		this.scopeId = scopeId;
 	}
 
 	@Override

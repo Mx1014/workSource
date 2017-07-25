@@ -24,13 +24,18 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.MoreActionData;
 import com.everhomes.rest.common.NavigationActionData;
 import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.portal.*;
+import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.widget.*;
+import com.everhomes.search.CommunitySearcher;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -111,6 +116,12 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private PortalPublishLogProvider portalPublishLogProvider;
+
+	@Autowired
+	private CommunitySearcher communitySearcher;
+
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -413,6 +424,7 @@ public class PortalServiceImpl implements PortalService {
 				query.addConditions(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(cmd.getItemGroupId()));
 				if(null != PortalScopeType.fromCode(cmd.getScopeType())){
 					query.addConditions(Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_TYPE.eq(cmd.getScopeType()));
+					query.addConditions(Tables.EH_PORTAL_CONTENT_SCOPES.SCOPE_ID.eq(cmd.getScopeId()));
 				}
 				return query;
 			}
@@ -920,7 +932,7 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		this.dbProvider.execute((status) -> {
 			for (PortalItemCategoryRank portalItemCategoryRank : cmd.getRanks()) {
-				PortalItemCategory portalItemCategory = portalItemCategoryProvider.findPortalItemCategoryById(portalItemCategoryRank.getItemCategoryId());
+				PortalItemCategory portalItemCategory = checkPortalItemCategory(portalItemCategoryRank.getItemCategoryId());
 				if(null != portalItemCategoryRank.getItems() && portalItemCategoryRank.getItems().size() > 0){
 					for (PortalItemReorder item: portalItemCategoryRank.getItems()) {
 						PortalItem portalItem = checkPortalItem(item.getItemId());
@@ -1033,12 +1045,13 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public List<ScopeDTO> listScopes(ListScopeCommand cmd){
-
+	public ListScopeResponse listScopes(ListScopeCommand cmd){
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-
+		ListScopeResponse response = new ListScopeResponse();
 		List<ScopeDTO> dtos = new ArrayList<>();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getAnchor());
 		OrganizationType oType = null;
 		if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.PM){
 			oType = OrganizationType.PM;
@@ -1048,11 +1061,13 @@ public class PortalServiceImpl implements PortalService {
 		if(null != oType){
 			List<String> groupTypes = new ArrayList<>();
 			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, oType.getCode(), locator, 10000);
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, cmd.getKeywords(), oType.getCode(), locator, pageSize);
 			for (Organization organization: organizations) {
 				dtos.add(ConvertHelper.convert(organization, ScopeDTO.class));
 			}
-			return dtos;
+			response.setDtos(dtos);
+			response.setNextPageAnchor(locator.getAnchor());
+			return response;
 		}
 
 		CommunityType cType = null;
@@ -1061,16 +1076,76 @@ public class PortalServiceImpl implements PortalService {
 		}else if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.RESIDENTIAL){
 			cType = CommunityType.RESIDENTIAL;
 		}
-		if(null != cType){
-			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-			for (Community community: communities) {
-				if(CommunityType.fromCode(community.getCommunityType()) == cType){
-					dtos.add(ConvertHelper.convert(community, ScopeDTO.class));
+		CommunityType communityType = cType;
+		if(null != communityType){
+			List<Community> communities = communityProvider.listCommunities(namespaceId, locator, pageSize, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType.getCode()));
+					if(!StringUtils.isEmpty(cmd.getKeywords())){
+						query.addConditions(Tables.EH_COMMUNITIES.NAME.like(cmd.getKeywords() + "%").or(Tables.EH_COMMUNITIES.ALIAS_NAME.like(cmd.getKeywords() + "%")));
+
+					}
+					return query;
 				}
+			});
+			for (Community community: communities) {
+				dtos.add(ConvertHelper.convert(community, ScopeDTO.class));
 			}
 		}
+		response.setDtos(dtos);
+		response.setNextPageAnchor(locator.getAnchor());
+		return response;
+	}
 
-		return dtos;
+
+	@Override
+	public ListScopeResponse searchScopes(ListScopeCommand cmd){
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+		if(null != cmd.getAnchor()){
+			cmd.setAnchor(0L);
+		}
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		ListScopeResponse response = new ListScopeResponse();
+		List<ScopeDTO> dtos = new ArrayList<>();
+		OrganizationType oType = null;
+		if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.PM){
+			oType = OrganizationType.PM;
+		}else if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.ORGANIZATION){
+			oType = OrganizationType.ENTERPRISE;
+		}
+		if(null != oType){
+			SearchOrganizationCommand command = new SearchOrganizationCommand();
+			command.setNamespaceId(namespaceId);
+			command.setOrganizationType(oType.getCode());
+			command.setPageAnchor(cmd.getAnchor());
+			command.setPageSize(pageSize);
+			OrganizationQueryResult result = organizationSearcher.queryOrganization(command);
+			response.setDtos(result.getDtos().stream().map(r ->{
+				return ConvertHelper.convert(r, ScopeDTO.class);
+			}).collect(Collectors.toList()));
+			response.setNextPageAnchor(result.getPageAnchor());
+			return response;
+		}
+
+		CommunityType cType = null;
+		if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.COMMERCIAL){
+			cType = CommunityType.COMMERCIAL;
+		}else if(PortalScopeType.fromCode(cmd.getScopeType()) == PortalScopeType.RESIDENTIAL){
+			cType = CommunityType.RESIDENTIAL;
+		}
+		CommunityType communityType = cType;
+		if(null != communityType){
+			List<CommunityDoc> communities = communitySearcher.searchDocs(cmd.getKeywords(), cType.getCode(), null, null, cmd.getAnchor().intValue(), cmd.getPageSize());
+			for (CommunityDoc communityDoc: communities) {
+				dtos.add(ConvertHelper.convert(communityDoc, ScopeDTO.class));
+			}
+		}
+		response.setDtos(dtos);
+		response.setNextPageAnchor(cmd.getAnchor() + 1);
+		return response;
 	}
 
 	@Override

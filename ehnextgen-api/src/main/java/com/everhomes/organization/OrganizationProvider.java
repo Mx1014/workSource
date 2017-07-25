@@ -333,5 +333,7 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize);
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(
 			Long organizationId, Long buildId);
+
+	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String keywords, String organizationType,CrossShardListingLocator locator,Integer pageSize);
 }
 

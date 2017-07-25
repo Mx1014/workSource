@@ -50,7 +50,6 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
-import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -64,7 +63,6 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationTaskStatus;
 import com.everhomes.rest.organization.OrganizationTaskType;
-import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
@@ -316,15 +314,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return result;
 	}
+
+	@Override
+	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,CrossShardListingLocator locator,Integer pageSize) {
+		return listEnterpriseByNamespaceIds(namespaceId, null, organizationType, locator, pageSize);
+	}
 	
 	@Override
-	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize) {
+	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String keywords, String organizationType,CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<Organization> result  = new ArrayList<Organization>();
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 		if(null != namespaceId){
 			query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		}
+
+		if(!StringUtils.isEmpty(keywords)){
+			query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keywords + "%"));
 		}
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));

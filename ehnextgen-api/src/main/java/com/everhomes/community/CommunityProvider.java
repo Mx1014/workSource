@@ -106,4 +106,7 @@ public interface CommunityProvider {
     void deleteResourceCategoryById(Long id);
 
     List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId, String resourceType, List<Long> resourceIds);
+
+    List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
+                                    ListingQueryBuilderCallback queryBuilderCallback);
 }

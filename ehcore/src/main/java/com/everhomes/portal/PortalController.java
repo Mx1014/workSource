@@ -439,9 +439,18 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/listScopes</b>
 	 */
 	@RequestMapping("listScopes")
-	@RestReturn(value = ScopeDTO.class, collection = true)
+	@RestReturn(ListScopeResponse.class)
 	public RestResponse listScopes(ListScopeCommand cmd){
 		return new RestResponse(portalService.listScopes(cmd));
 	}
 
+	/**
+	 * <p>根据场景 搜索物业公司普通公司园区小区列表</p>
+	 * <b>URL: /portal/searchScopes</b>
+	 */
+	@RequestMapping("searchScopes")
+	@RestReturn(ListScopeResponse.class)
+	public RestResponse searchScopes(ListScopeCommand cmd){
+		return new RestResponse(portalService.listScopes(cmd));
+	}
 }

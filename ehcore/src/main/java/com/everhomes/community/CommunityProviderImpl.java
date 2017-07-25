@@ -14,7 +14,6 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Component;
 
 import ch.hsr.geohash.GeoHash;
 
-import com.everhomes.address.Address;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.AccessSpec;
@@ -39,13 +37,9 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.CommunityGeoPointDTO;
-import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.ResourceCategoryStatus;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -55,24 +49,18 @@ import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhBuildingsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
-import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhResourceCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhResourceCategoryAssignmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
-import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhResourceCategories;
 import com.everhomes.server.schema.tables.pojos.EhResourceCategoryAssignments;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhResourceCategoryAssignmentsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -509,6 +497,38 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         
         return results;
+    }
+
+    @Override
+    public List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
+                                                   ListingQueryBuilderCallback queryBuilderCallback) {
+        pageSize = pageSize +1;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        final List<Community> communities = new ArrayList<Community>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_COMMUNITIES.ID.lt(locator.getAnchor()));
+
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addOrderBy(Tables.EH_COMMUNITIES.ID.desc());
+        query.addLimit(pageSize);
+
+        query.fetch().map((r) -> {
+            communities.add(ConvertHelper.convert(r, Community.class));
+            return null;
+        });
+
+        locator.setAnchor(null);
+        if(communities.size() == pageSize) {
+            communities.remove(communities.size() - 1);
+            locator.setAnchor(communities.get(communities.size() -1).getId());
+        }
+        return communities;
     }
 
     @Override
