@@ -2070,6 +2070,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 				Boolean notifyFlag = configurationProvider.getBooleanValue(task.getNamespaceId(), ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
 				if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(groupType))) {
 					notifyFlag = configurationProvider.getBooleanValue(task.getNamespaceId(), ConfigConstants.EQUIPMENT_TASK_NOTIFY_DALAY, false);
+					//只有过期未执行的要通知
+					if(!EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(task.getStatus())) {
+						notifyFlag = false;
+					}
 				}
 
 				//五分钟后启动通知
