@@ -2903,7 +2903,7 @@ public class CommunityServiceImpl implements CommunityService {
         List<ComOrganizationMemberDTO> dtoList = organizationMembers.stream()
             .map((c) -> {
                 ComOrganizationMemberDTO dto = ConvertHelper.convert(c, ComOrganizationMemberDTO.class);
-                if (c.getOperatorUid() != null) {
+                if (c.getOperatorUid() != null && c.getOperatorUid() > 0) {
                     User operator = userProvider.findUserById(c.getOperatorUid());
                     UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                     dto.setOperatorName(operator != null ? operator.getNickName() : "");

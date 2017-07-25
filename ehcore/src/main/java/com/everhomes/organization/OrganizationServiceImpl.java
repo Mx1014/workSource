@@ -5573,7 +5573,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		response.setMembers(organizationMembers.stream().map((c) ->{
             OrganizationMemberDTO dto = ConvertHelper.convert(c, OrganizationMemberDTO.class);
-            if (c.getOperatorUid() != null) {
+            if (c.getOperatorUid() != null && c.getOperatorUid() > 0) {
                 User operator = userProvider.findUserById(c.getOperatorUid());
                 UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                 dto.setOperatorName(operator != null ? operator.getNickName() : "");
