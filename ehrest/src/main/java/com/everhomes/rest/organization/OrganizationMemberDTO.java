@@ -112,6 +112,8 @@ public class OrganizationMemberDTO {
     private Integer profileIntegrity;
     private Date checkInTime;
 
+    private Long salaryGroupId;
+
     private Timestamp createTime;
     private Long approveTime;
     private String operatorName;
@@ -473,5 +475,13 @@ public class OrganizationMemberDTO {
 
     public void setEmployeeNo(String employeeNo) {
         this.employeeNo = employeeNo;
+    }
+
+    public Long getSalaryGroupId() {
+        return salaryGroupId;
+    }
+
+    public void setSalaryGroupId(Long salaryGroupId) {
+        this.salaryGroupId = salaryGroupId;
     }
 }

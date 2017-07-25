@@ -24,6 +24,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -4781,10 +4782,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		//added by wh 2016-10-13 把被拒绝的过滤掉
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(big_path);
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(big_path+"%");
 		if (small_path != null) {
 			for (String p : small_path) {
-				cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.notLike(p));
+				cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.notLike(p+"%"));
 			}
 		}
 		query.addConditions(cond);
@@ -4892,4 +4893,139 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return null;
 	}
+	
+	@Override
+	public Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType) {
+		Map<Long, String> orgMap = new HashMap<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATIONS.as("t2");
+		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("organization_id").eq(t2.field("id")));
+		Condition condition = t1.field("namespace_id").eq(namespaceId);
+		condition = condition.and(t2.field("namespace_id").eq(namespaceId));
+		condition = condition.and(t1.field("detail_id").eq(detailId));
+		condition = condition.and(t2.field("group_type").eq(OrganizationGroupType.fromCode(organizationGroupType).getCode()));
+		condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
+				.and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
+		Result result = step.where(condition).fetch();
+		if (result != null) {
+			result.map(r -> {
+				orgMap.put(Long.valueOf(r.getValue(t1.field("organization_id")).toString()), r.getValue(t2.field("name")).toString());
+				return null;
+			});
+		}
+		if (orgMap.size() > 0) {
+			return orgMap;
+		}
+		return null;
+	}
+	
+	@Override
+	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+		if(null != organizationId)
+			step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
+		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+	}
+
+	@Override
+	public Integer countOrganizationMemberDetailsByOrgId(Integer namespaceId, Long organizationId) {
+		Organization org = this.findOrganizationById(organizationId);
+		if(org == null){
+			LOGGER.error("org is not matched, orgId={},", organizationId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"org is not matched");
+		}
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId);
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath()+"%"));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		return context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).groupBy(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).fetchCount();
+	}
+
+	@Override
+	public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMemberDetails> results =  context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+				.where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId))
+				.fetchInto(OrganizationMemberDetails.class);
+		if(null == results || results.size() == 0)
+			return  null ;
+		return results.get(0);
+	}
+
+	@Override
+	public List<Organization> listHeadEnterprises() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+		step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
+		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+	}
+
+	@Override
+		public void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.EMAIL_CONTENT, emailContent)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(UniongroupType.SALARYGROUP.getCode()))
+				.and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(ownerId)).execute();
+	}
+
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByPathHavingDetailId(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+		/**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+		SelectJoinStep step = context.select().from(t1).join(t2).on(t1.field("detail_id").eq(t2.field("id")));
+		Condition condition = t1.field("group_path").like(path + "%");
+		if (null != groupTypes && groupTypes.size() > 0)
+			condition = condition.and(t1.field("group_type").in(groupTypes));
+		if (!StringUtils.isEmpty(keywords)) {
+			condition = condition.and(t2.field("contact_token").eq(keywords).or(t2.field("contact_name").like(keywords + "%")));
+		}
+
+		if (null != visibleFlag) {
+			condition = condition.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
+		}
+
+		if (null != locator.getAnchor()) {
+			condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+		}
+		condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		List<OrganizationMember> records = step.where(condition).groupBy(t2.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
+		if (records != null) {
+			records.stream().map(r -> {
+				result.add(ConvertHelper.convert(r, OrganizationMember.class));
+				return null;
+			}).collect(Collectors.toList());
+		}
+		locator.setAnchor(null);
+		if (result.size() > pageSize) {
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+
+		return result;
+	}
+
+	/**
+	 * 查询非离职状态下所有员工的 detailId
+	 * added by R, 20170719
+	 */
+	@Override
+	public List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId){
+	    DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+	    return context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
+                .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
+                .fetchInto(Long.class);
+    }
 }

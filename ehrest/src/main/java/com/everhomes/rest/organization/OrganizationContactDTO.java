@@ -36,6 +36,8 @@ public class OrganizationContactDTO {
 
     private String targetType;
 
+    private Long detailId;
+
     public OrganizationContactDTO() {
     }
 
@@ -167,10 +169,17 @@ public class OrganizationContactDTO {
         this.targetType = targetType;
     }
 
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
 
 }

@@ -525,4 +525,9 @@ public interface OrganizationService {
 	void updatePressTest();
 
 	void deletePressTest();
+	// added by R, for salaryGroup 20170630
+	public Organization createSalaryGroupOrganization(Long organizationId, String name);
+	public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
+
+	public void leaveTheJob(LeaveTheJobCommand cmd);
 }
