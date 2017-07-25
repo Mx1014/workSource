@@ -1,5 +1,5 @@
 
-DROP TABLE IF EXISTS `eh_organization_members_test`;
+--DROP TABLE IF EXISTS `eh_organization_members_test`;
 CREATE TABLE `eh_organization_members_test` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `organization_id` BIGINT NOT NULL,
