@@ -22,8 +22,8 @@ public class ListCommunityApproveValCommand {
     private Long     moduleId;
     private String     moduleType;
     private Long     organizationId;
-    private Timestamp timeStart;
-    private Timestamp timeEnd;
+    private Long timeStart;
+    private Long timeEnd;
     private String approveName;
     private String keyWord;
     private Long pageAnchor;
@@ -69,19 +69,19 @@ public class ListCommunityApproveValCommand {
         this.organizationId = organizationId;
     }
 
-    public Timestamp getTimeStart() {
+    public Long getTimeStart() {
         return timeStart;
     }
 
-    public void setTimeStart(Timestamp timeStart) {
+    public void setTimeStart(Long timeStart) {
         this.timeStart = timeStart;
     }
 
-    public Timestamp getTimeEnd() {
+    public Long getTimeEnd() {
         return timeEnd;
     }
 
-    public void setTimeEnd(Timestamp timeEnd) {
+    public void setTimeEnd(Long timeEnd) {
         this.timeEnd = timeEnd;
     }
 

@@ -222,7 +222,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                         ));
                         if (null!=cmd.getTimeStart() && null!=cmd.getTimeEnd())
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.CREATE_TIME.between(
-                                cmd.getTimeStart(),cmd.getTimeEnd()));
+                                new Timestamp(cmd.getTimeStart()),new Timestamp(cmd.getTimeEnd())));
 
                         return query;
                     }
