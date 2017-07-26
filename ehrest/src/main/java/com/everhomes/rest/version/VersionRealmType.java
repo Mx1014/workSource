@@ -66,7 +66,7 @@ public enum VersionRealmType {
     IOS_HWPARK("iOS_Hwpark"), 
     ANDROID_ISERVICE("Android_IService"), 
     IOS_ISERVICE("iOS_IService"), 
-    ANDROID_SHUNICOM("Android_ShUnicom"), 
+    ANDROID_SHUNICOM("Android_ShUnicom"),
     IOS_SHUNICOM("iOS_ShUnicom"), 
     ANDROID_JYJY("Android_JYJY"), 
     IOS_JYJY("iOS_JYJY"),
@@ -118,6 +118,10 @@ public enum VersionRealmType {
     IOS_RONGCHAO("iOS_Rongchao"),
     ANDROID_TEEC("Android_TEEC"),
     IOS_TEEC("iOS_TEEC"),
+    ANDROID_JUNMINRONGHE("Android_JunMinRongHe"),
+    IOS_JUNMINRONGHE("iOS_JunMinRongHe"),
+    ANDROID_BAOJIEZHIGU("Android_BaoJiEZhiGu"),
+    IOS_BAOJIEZHIGU("iOS_BaoJiEZhiGu"),
     ANDROID_UPARK("Android_UPark"),
     IOS_UPARK("iOS_UPark");
     
