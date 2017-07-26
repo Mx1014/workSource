@@ -686,10 +686,41 @@ public class GroupServiceImpl implements GroupService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         List<GroupDTO> groupDtoList = new ArrayList<GroupDTO>();
-
-        List<UserGroup> userGroupList = userProvider.listUserGroups(userId, null);
-        int size = (userGroupList == null) ? 0 : userGroupList.size();
         Group tmpGroup = null;
+
+        //添加公司group  add by yanjun 20170721
+        List<OrganizationDTO> listOrg = organizationService.listUserRelateOrganizations(namespaceId, userId, OrganizationGroupType.ENTERPRISE);
+        if(listOrg != null){
+            for(OrganizationDTO org : listOrg){
+                if(org.getGroupId() != null){
+
+                    tmpGroup = groupProvider.findGroupById(org.getGroupId());
+                    //加上域空间限制，否则跨域的也会查出来, add by tt, 20161101
+                    if (tmpGroup != null && tmpGroup.getNamespaceId().intValue() != namespaceId.intValue()) {
+                        continue;
+                    }
+                    if(tmpGroup != null && !tmpGroup.getStatus().equals(GroupAdminStatus.INACTIVE.getCode())) {
+                        GroupDTO dto = toGroupDTO(userId, tmpGroup);
+                        dto.setMemberOf((byte)1);
+                        groupDtoList.add(dto);
+                    } else {
+                        LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + org.getGroupId());
+                    }
+                }
+
+            }
+        }
+
+        //添加家庭群
+        List<UserGroup> userGroupList = new ArrayList<UserGroup>();
+        List<UserGroup> userGroupListFamily = userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
+        userGroupList.addAll(userGroupListFamily);
+        //添加普通群
+        List<UserGroup> userGroupListGroup = userProvider.listUserGroups(userId, GroupDiscriminator.GROUP.getCode());
+        userGroupList.addAll(userGroupListGroup);
+
+        int size = (userGroupList == null) ? 0 : userGroupList.size();
+
         if(size > 0) {
             for(UserGroup userGroup : userGroupList) {
                 // 应客户端要求，过滤掉成员状态为非active的group，因为在客户端那边拿到该group后，group active成员没有本人
@@ -711,7 +742,7 @@ public class GroupServiceImpl implements GroupService {
                 if(tmpGroup.getDiscriminator() != null
                         && GroupDiscriminator.fromCode(tmpGroup.getDiscriminator()) == GroupDiscriminator.GROUP
                         && tmpGroup.getPrivateFlag() != null
-                        && tmpGroup.getPrivateFlag() == GroupPrivacy.PRIVATE.getCode()){
+                        && tmpGroup.getPrivateFlag() != GroupPrivacy.PRIVATE.getCode()){
 
                     continue;
                 }
@@ -731,50 +762,31 @@ public class GroupServiceImpl implements GroupService {
         }
 
 
-        //添加公司group  add by yanjun 20170721
-        List<OrganizationDTO> listOrg = organizationService.listUserRelateOrganizations(namespaceId, userId, OrganizationGroupType.ENTERPRISE);
-        if(listOrg != null){
-            for(OrganizationDTO org : listOrg){
-                if(org.getGroupId() != null){
 
-                    tmpGroup = groupProvider.findGroupById(org.getGroupId());
-                    //加上域空间限制，否则跨域的也会查出来, add by tt, 20161101
-                    if (tmpGroup != null && tmpGroup.getNamespaceId().intValue() != namespaceId.intValue()) {
-                        continue;
-                    }
-                    if(tmpGroup != null && !tmpGroup.getStatus().equals(GroupAdminStatus.INACTIVE.getCode())) {
-                        groupDtoList.add(toGroupDTO(userId, tmpGroup));
-                    } else {
-                        LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + org.getGroupId());
-                    }
-                }
-
-            }
-        }
-
-        //排序：第一企业，第二家庭，第三群聊  add by yanjun 20170724
-        if(groupDtoList != null && groupDtoList.size() >0){
-            groupDtoList.sort(new Comparator<GroupDTO>() {
-                @Override
-                public int compare(GroupDTO o1, GroupDTO o2) {
-                    if(o2.getDiscriminator() == null ){
-                        return -1;
-                    }
-                    if(o1.getDiscriminator() == null ){
-                        return 1;
-                    }
-
-                    if(GroupDiscriminator.fromCode(o2.getDiscriminator()) == GroupDiscriminator.ENTERPRISE && GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.ENTERPRISE){
-                        return 1;
-                    }else if(o2.getDiscriminator() == GroupDiscriminator.FAMILY.getCode()
-                            && (GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.ENTERPRISE && GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.FAMILY)){
-                        return 1;
-                    }else{
-                        return -1;
-                    }
-                }
-            });
-        }
+//
+//        //排序：第一企业，第二家庭，第三群聊  add by yanjun 20170724
+//        if(groupDtoList != null && groupDtoList.size() >0){
+//            groupDtoList.sort(new Comparator<GroupDTO>() {
+//                @Override
+//                public int compare(GroupDTO o1, GroupDTO o2) {
+//                    if(o2.getDiscriminator() == null ){
+//                        return -1;
+//                    }
+//                    if(o1.getDiscriminator() == null ){
+//                        return 1;
+//                    }
+//
+//                    if(GroupDiscriminator.fromCode(o2.getDiscriminator()) == GroupDiscriminator.ENTERPRISE && GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.ENTERPRISE){
+//                        return 1;
+//                    }else if(o2.getDiscriminator() == GroupDiscriminator.FAMILY.getCode()
+//                            && (GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.ENTERPRISE && GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.FAMILY)){
+//                        return 1;
+//                    }else{
+//                        return -1;
+//                    }
+//                }
+//            });
+//        }
 
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
