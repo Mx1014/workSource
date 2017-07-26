@@ -1401,6 +1401,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
+
 		//创建管理员不再返回member
 		organizationService.createOrganizationAccount(command, roleId, namespaceId);
 
