@@ -583,9 +583,18 @@ public class GroupServiceImpl implements GroupService {
     	            throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_MEMBER_NOT_FOUND, "Unable to find the group organization");
         		}
         		group.setName(organization.getName());
+
             }
         	
-            return this.toGroupDTO(userId, group);
+            GroupDTO  dto = this.toGroupDTO(userId, group);
+
+            //群聊名称为空时填充群聊别名  edit by yanjun 20170724
+            if(StringUtils.isEmpty(dto.getName())){
+                populateAlias(dto);
+            }
+
+            return dto;
+
         }
     }
     
@@ -2745,6 +2754,10 @@ public class GroupServiceImpl implements GroupService {
             groupDto.setMemberForumPrivileges(memberForumPrivileges);
         } else {
             groupDto.setMemberOf((byte)0);
+            User user = userProvider.findUserById(uid);
+            if(user != null){
+                groupDto.setMemberNickName(user.getAccountName());
+            }
         }
     }
     
