@@ -69,7 +69,6 @@ public enum CoordinationLocks {
     ENERGY_METER_PRICE_CONFIG("energyMeter.price.config"),
  
     UPDATE_EXPRESS_ORDER("update.express.order"),
-    CREATE_EXPRESS_ORDER("create.express.order"),
 
     USER_NOTIFICATION_SETTING("user.notification.setting"),
     UPDATE_WAREHOUSE("warehouse.update"),

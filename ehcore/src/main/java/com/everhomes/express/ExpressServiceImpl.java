@@ -694,7 +694,7 @@ public class ExpressServiceImpl implements ExpressService {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder expressOrder = createExpressOrder(owner, cmd);
 		// by dengs, 创建订单，这里就直接丢给邮政和国贸EMS
-		coordinationProvider.getNamedLock(CoordinationLocks.CREATE_EXPRESS_ORDER.getCode() + UserContext.current().getUser().getId()).enter(() -> {
+		dbProvider.execute(status -> {
 			expressOrderProvider.createExpressOrder(expressOrder);
 			ExpressHandler handler = getExpressHandler(cmd.getExpressCompanyId());
 			handler.createOrder(expressOrder);

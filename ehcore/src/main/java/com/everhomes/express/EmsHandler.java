@@ -37,7 +37,7 @@ import com.everhomes.rest.express.TrackBillResponse;
 import com.everhomes.util.MD5Utils;
 import com.everhomes.util.RuntimeErrorException;
 
-//后面的1为表eh_express_companies中父id为0的行的id
+//后面的1为表eh_express_companies中父id为0的行的id, 华润 EMS
 @Component(ExpressHandler.EXPRESS_HANDLER_PREFIX+"1")
 public class EmsHandler implements ExpressHandler {
 
