@@ -65,7 +65,7 @@ public interface OrganizationProvider {
 	OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,String organizationType);
 	OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
 
-    OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId);
+    List<OrganizationMember> findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId);
 
     List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
@@ -418,6 +418,8 @@ public interface OrganizationProvider {
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
+	
+	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 
 	void updatePressTest();
 

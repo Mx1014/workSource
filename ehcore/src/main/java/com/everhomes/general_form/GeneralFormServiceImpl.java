@@ -470,15 +470,18 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 						ErrorCodes.ERROR_INVALID_PARAMETER, "form not found");
 			form.setFormName(cmd.getFormName());
-			form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
 			form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-				// 如果是config状态的直接改
+				// 如果是config状态的直接改,
+				//这里更新老的form之后才把表单内容，才把内容设置到新表单里面 by dengs issue:12817
+				form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
 				this.generalFormProvider.updateGeneralForm(form);
 			} else if (form.getStatus().equals(GeneralFormStatus.RUNNING.getCode())) {
 				// 如果是RUNNING状态的,置原form为失效,重新create一个版本+1的config状态的form
 				form.setStatus(GeneralFormStatus.INVALID.getCode());
+				//这里更新老的form之后才把表单内容，才把内容设置到新表单里面 by dengs issue:12817
 				this.generalFormProvider.updateGeneralForm(form);
+				form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
 				form.setFormVersion(form.getFormVersion() + 1);
 				form.setStatus(GeneralFormStatus.CONFIG.getCode());
 				this.generalFormProvider.createGeneralForm(form);

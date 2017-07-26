@@ -25,6 +25,7 @@ import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.uniongroup.UniongroupType;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -1244,12 +1245,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId) {
+    public List<OrganizationMember> findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ORGANIZATION_MEMBERS)
                 .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
-                .fetchAnyInto(OrganizationMember.class);
+                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc())
+                .fetchInto(OrganizationMember.class);
     }
 
     /**
@@ -3539,12 +3541,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (locator.getAnchor() != null) {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.le(locator.getAnchor()));
         }
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
         query.addLimit(pageSize + 1);
 
         List<OrganizationMemberLog> list = query.fetchInto(OrganizationMemberLog.class);
         if (list != null && list.size() > pageSize) {
             locator.setAnchor(list.get(list.size() - 1).getId());
             list = list.subList(0, pageSize);
+        } else {
+            locator.setAnchor(null);
         }
         return list;
     }
@@ -4247,12 +4252,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberDetails.class),
                 null, (DSLContext context, Object reducingContext) -> {
                     Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(detailIds);
-                    List<OrganizationMemberDetails> list = context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.PROFILE_INTEGRITY,
-                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME)
-                            .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                    List<OrganizationMemberDetails> list = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                             .where(condition)
                             .fetchInto(OrganizationMemberDetails.class);
                     if (list != null)
@@ -4745,8 +4745,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						query.addConditions(Tables.EH_USERS.ID.lt(locator.getAnchor()));
 
 					query.addOrderBy(Tables.EH_USERS.ID.desc());
+					query.addOrderBy(Tables.EH_USER_ORGANIZATIONS.STATUS.desc());
 					query.addLimit(size);
 					LOGGER.debug("query sql:{}", query.getSQL());
+					LOGGER.debug("query param:{}", query.getBindValues());
 					query.fetch().map((r) -> {
 						UserOrganizations userOrganizations = new UserOrganizations();
 						userOrganizations.setUserId(r.getValue(Tables.EH_USERS.ID));
@@ -4772,6 +4774,37 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		return result;
+	}
+
+	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus){
+		List<Long> result = new ArrayList<>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null,
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<Record> query = context.selectQuery();
+					query.addSelect(Tables.EH_USERS.ID);
+					query.addFrom(Tables.EH_USERS);
+					query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+					query.addJoin(Tables.EH_USER_ORGANIZATIONS,
+							JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+					query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
+					query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+					if(null != userOrganizationStatus)
+						query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(userOrganizationStatus));
+					query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
+					if(null != communityId){
+						query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+					}
+					query.addGroupBy(Tables.EH_USERS.ID);
+					LOGGER.debug("query sql:{}", query.getSQL());
+					LOGGER.debug("query param:{}", query.getBindValues());
+					query.fetch().map((r) -> {
+						result.add(Long.valueOf(r.getValue(0).toString()));
+						return null;
+					});
+					return true;
+				});
+		return result.size();
 	}
 
 	@Override
@@ -5028,4 +5061,5 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
                 .fetchInto(Long.class);
     }
+	
 }

@@ -4244,10 +4244,39 @@ DROP TABLE IF EXISTS `eh_group_member_logs`;
 CREATE TABLE `eh_group_member_logs` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `group_member_id` BIGINT,
-  `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'the same as group member status',
+  `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive; 1: waitingForApproval; 2: waitingForAcceptance 3: active',
   `creator_uid` BIGINT,
-  `process_message` TEXT,
-  `create_time` DATETIME(3),
+  `create_time` datetime(3),
+  `uuid` VARCHAR(128) NOT NULL DEFAULT '',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `community_id` BIGINT NOT NULL,
+  `address_id` BIGINT NOT NULL,
+  `group_id` BIGINT NOT NULL,
+  `member_type` VARCHAR(32) NOT NULL COMMENT 'member object type; for example; type could be User; Group; etc',
+  `member_id` BIGINT,
+  `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',
+  `member_avatar` VARCHAR(128) COMMENT 'avatar image identifier in storage sub-system',
+  `member_nick_name` VARCHAR(128) COMMENT 'member nick name within the group',
+  `operator_uid` BIGINT COMMENT 'redundant auditing info',
+  `process_code` TINYINT,
+  `process_details` TEXT,
+  `proof_resource_uri` VARCHAR(1024),
+  `approve_time` DATETIME COMMENT 'redundant auditing info',
+  `requestor_comment` TEXT,
+  `operation_type` TINYINT COMMENT '1: request to join; 2: invite to join',
+  `inviter_uid` BIGINT COMMENT 'record inviter user id',
+  `invite_time` DATETIME COMMENT 'the time the member is invited',
+  `update_time` DATETIME NOT NULL,
+  `integral_tag1` BIGINT,
+  `integral_tag2` BIGINT,
+  `integral_tag3` BIGINT,
+  `integral_tag4` BIGINT,
+  `integral_tag5` BIGINT,
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
+  `string_tag4` VARCHAR(128),
+  `string_tag5` VARCHAR(128),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -5729,6 +5758,7 @@ CREATE TABLE `eh_organization_member_logs` (
   `request_type` TINYINT DEFAULT 0 COMMENT '0-管理员操作 1-用户操作',
   `operate_time` DATETIME,
   `operator_uid` BIGINT NOT NULL,
+  `contact_description` TEXT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -9592,7 +9622,7 @@ CREATE TABLE `eh_siyin_print_settings` (
 
 DROP TABLE IF EXISTS `eh_sms_black_lists`;
 
-DROP TABLE IF EXISTS `eh_sms_black_lists`;
+
 CREATE TABLE `eh_sms_black_lists` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -9915,6 +9945,24 @@ CREATE TABLE `eh_talent_categories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_talent_message_senders`;
+
+
+CREATE TABLE `eh_talent_message_senders` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT,
+  `organization_member_id` BIGINT NOT NULL,
+  `user_id` BIGINT,
+  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_talent_query_histories`;
 
 CREATE TABLE `eh_talent_query_histories` (
@@ -9931,7 +9979,32 @@ CREATE TABLE `eh_talent_query_histories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_talent_requests`;
+
+
+CREATE TABLE `eh_talent_requests` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT,
+  `requestor` VARCHAR(64),
+  `phone` VARCHAR(64),
+  `organization_name` VARCHAR(128),
+  `content` TEXT,
+  `talent_id` BIGINT,
+  `form_origin_id` BIGINT,
+  `flow_case_id` BIGINT,
+  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_talents`;
+
+
 CREATE TABLE `eh_talents` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -10145,13 +10218,33 @@ CREATE TABLE `eh_user_activities` (
   KEY `user_activitie_user_id` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_user_appeal_logs`;
 
---
--- member of global parition
--- shared among namespaces, no application module specific information
---
-DROP TABLE IF EXISTS  `eh_user_behaviors`;
-CREATE TABLE `eh_user_behaviors`(
+
+CREATE TABLE `eh_user_appeal_logs` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+  `identifier_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+  `old_identifier` VARCHAR(128),
+  `old_region_code` INTEGER DEFAULT '86' COMMENT 'region code 86 852',
+  `new_identifier` VARCHAR(128),
+  `new_region_code` INTEGER DEFAULT '86' COMMENT 'region code 86 852',
+  `name` VARCHAR(128) COMMENT 'user name',
+  `email` VARCHAR(128) COMMENT 'user email',
+  `remarks` VARCHAR(512) COMMENT 'remarks',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
+  `creator_uid` BIGINT,
+  `create_time` datetime(3),
+  `update_uid` BIGINT,
+  `update_time` datetime(3),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_user_behaviors`;
+
+
+CREATE TABLE `eh_user_behaviors` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `uid` BIGINT NOT NULL DEFAULT 0,
   `content_type` TINYINT NOT NULL DEFAULT 0,
@@ -10332,9 +10425,23 @@ CREATE TABLE `eh_user_groups` (
   KEY `i_eh_usr_grp_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- member of eh_users partition
---
+DROP TABLE IF EXISTS `eh_user_identifier_logs`;
+
+
+CREATE TABLE `eh_user_identifier_logs` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+  `identifier_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+  `identifier_token` VARCHAR(128),
+  `verification_code` VARCHAR(16),
+  `claim_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: free standing, 1: claiming, 2: claim verifying, 3: claimed',
+  `region_code` INTEGER NOT NULL DEFAULT '86' COMMENT 'region code 86 852',
+  `notify_time` datetime(3),
+  `create_time` datetime(3),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_user_identifiers`;
 CREATE TABLE `eh_user_identifiers` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -11099,5 +11206,29 @@ CREATE TABLE `eh_yzb_devices` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_yzx_sms_logs`;
+
+
+CREATE TABLE `eh_yzx_sms_logs` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `scope` VARCHAR(64),
+  `code` INTEGER,
+  `locale` VARCHAR(16),
+  `mobile` VARCHAR(128),
+  `text` TEXT,
+  `variables` VARCHAR(512),
+  `resp_code` VARCHAR(32),
+  `failure` TINYINT,
+  `create_date` VARCHAR(32),
+  `sms_id` VARCHAR(128),
+  `type` TINYINT COMMENT '1:状态报告，2：上行',
+  `status` TINYINT COMMENT '0:成功；1：提交失败，4：失败，5：关键字（keys），6：黑/白名单，7：超频（overrate），8：unknown',
+  `desc` TEXT,
+  `report_time` DATETIME,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_contact_token` (`sms_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET FOREIGN_KEY_CHECKS = 1;

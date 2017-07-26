@@ -3,9 +3,9 @@ package com.everhomes.rest.organization;
 /**
  * <p>员工类型</p>
  * <ul>
- * <li>PROBATION: 试用期</li>
- * <li>ONTHEJOB: 在职</li>
- * <li>LEAVETHEJOB: 离职</li>
+ * <li>PROBATION(0): 试用期</li>
+ * <li>ONTHEJOB(1): 在职</li>
+ * <li>LEAVETHEJOB(2): 离职</li>
  * </ul>
  */
 public enum EmployeeStatus {
