@@ -702,6 +702,7 @@ public class GroupServiceImpl implements GroupService {
                     if(tmpGroup != null && !tmpGroup.getStatus().equals(GroupAdminStatus.INACTIVE.getCode())) {
                         GroupDTO dto = toGroupDTO(userId, tmpGroup);
                         dto.setMemberOf((byte)1);
+                        dto.setMemberStatus(org.getMemberStatus());
                         groupDtoList.add(dto);
                     } else {
                         LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + org.getGroupId());
