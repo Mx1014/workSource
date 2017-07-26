@@ -26,7 +26,7 @@ SET @eh_namespace_details = (SELECT MAX(id) FROM `eh_namespace_details`) ;
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(@eh_namespace_id, '张江高科');
 
 INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
-	VALUES((@eh_namespace_details := @eh_namespace_details + 1), @eh_namespace_id, 'community_commercial', UTC_TIMESTAMP()); 
+	VALUES((@eh_namespace_details := @eh_namespace_details + 1), @eh_namespace_id, 'community_mix', UTC_TIMESTAMP()); 
 
 INSERT INTO `eh_version_realm` VALUES ((@version_realm_id := @version_realm_id + 1), 'Android_UPark', NULL, UTC_TIMESTAMP(), @eh_namespace_id);
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
