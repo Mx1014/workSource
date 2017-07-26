@@ -173,3 +173,45 @@ CREATE TABLE `eh_uniongroup_member_details` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE eh_organizations ADD COLUMN `email_content` TEXT COMMENT '工资条发送邮件内容';
+
+-- DROP TABLE IF EXISTS `eh_organization_members_test`;
+CREATE TABLE `eh_organization_members_test` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `organization_id` BIGINT NOT NULL,
+  `target_type` VARCHAR(32) COMMENT 'untrack, user',
+  `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
+  `member_group` VARCHAR(32) COMMENT 'pm group the member belongs to',
+  `contact_name` VARCHAR(64),
+  `contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+  `contact_token` VARCHAR(128) COMMENT 'phone number or email address',
+  `contact_description` TEXT,
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: confirming, 2: active',
+  `group_id` BIGINT DEFAULT 0 COMMENT 'refer to the organization id',
+  `employee_no` VARCHAR(128),
+  `avatar` VARCHAR(128),
+  `group_path` VARCHAR(128) COMMENT 'refer to the organization path',
+  `gender` TINYINT DEFAULT 0 COMMENT '0: undisclosured, 1: male, 2: female',
+  `update_time` DATETIME,
+  `create_time` DATETIME,
+  `integral_tag1` BIGINT,
+  `integral_tag2` BIGINT,
+  `integral_tag3` BIGINT,
+  `integral_tag4` BIGINT,
+  `integral_tag5` BIGINT,
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
+  `string_tag4` VARCHAR(128),
+  `string_tag5` VARCHAR(128),
+  `namespace_id` INTEGER DEFAULT 0,
+  `visible_flag` TINYINT DEFAULT 0 COMMENT '0 show 1 hide',
+  `group_type` VARCHAR(64) COMMENT 'ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER',
+  `creator_uid` BIGINT,
+  `operator_uid` BIGINT,
+  `detail_id` BIGINT COMMENT 'id for detail records',
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_orgm_owner` (`organization_id`),
+  KEY `i_eh_corg_group` (`member_group`),
+  KEY `i_target_id` (`target_id`),
+  KEY `i_contact_token` (`contact_token`)
+) ENGINE = INNODB DEFAULT CHARSET=utf8mb4;
