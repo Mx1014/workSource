@@ -23,6 +23,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
 import com.everhomes.aclink.huarun.AclinkGetSimpleQRCodeResp;
 import com.everhomes.aclink.huarun.AclinkHuarunService;
+import com.everhomes.aclink.huarun.AclinkHuarunSyncUser;
+import com.everhomes.aclink.huarun.AclinkHuarunSyncUserResp;
 import com.everhomes.aclink.huarun.AclinkHuarunVerifyUser;
 import com.everhomes.aclink.huarun.AclinkHuarunVerifyUserResp;
 import com.everhomes.bigcollection.Accessor;
@@ -155,24 +157,23 @@ public class FlowUserTest extends LoginAuthTestCase {
     
     @Test
     public void testTls() throws NoSuchAlgorithmException {
-    	String phone = "13811138111";
+    	String phone = "13811138117";
     	AclinkHuarunVerifyUser user = new AclinkHuarunVerifyUser();
     	user.setPhone(phone);
     	AclinkHuarunVerifyUserResp resp = aclinkHuarunService.verifyUser(user);
-    	LOGGER.info("resp=" + resp);
+    	LOGGER.info("resp1=" + resp);
+    	
+    	AclinkHuarunSyncUser syncUser = new AclinkHuarunSyncUser();
+    	syncUser.setOrganization("调试人员4");
+    	syncUser.setUsername("敢哥测试专用7");
+    	syncUser.setPhone(phone);
+    	AclinkHuarunSyncUserResp resp2 = aclinkHuarunService.syncUser(syncUser);
+    	LOGGER.info("resp2=" + resp2);
     	
     	AclinkGetSimpleQRCode getCode = new AclinkGetSimpleQRCode();
-//    	getCode.setAuth("1235");
-//    	getCode.setPhone(phone);
-//    	MessageDigest md = MessageDigest.getInstance("MD5");
-//    	String md5 = "SA" + getCode.getAuth(); 
-//    	md.update(md5.getBytes());
-//    	getCode.setType("0");
-//    	String rlt = StringHelper.toHexString(md.digest()).toUpperCase();
-//    	getCode.setMd5(rlt);
-    	
-    	AclinkGetSimpleQRCodeResp resp2 = aclinkHuarunService.getSimpleQRCode(getCode);
-    	LOGGER.info("resp2=" + resp2);
+    	getCode.setPhone(phone);
+    	AclinkGetSimpleQRCodeResp resp3 = aclinkHuarunService.getSimpleQRCode(getCode);
+    	LOGGER.info("resp3=" + resp3);
     }
     
 }

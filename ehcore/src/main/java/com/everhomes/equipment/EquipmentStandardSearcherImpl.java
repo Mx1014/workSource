@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -51,6 +52,9 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	
 	@Autowired
 	private RepeatService repeatService;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -109,6 +113,8 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 	@Override
 	public SearchEquipmentStandardsResponse query(
 			SearchEquipmentStandardsCommand cmd) {
+//        Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_STANDARD_LIST, 0L);
+//        userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {

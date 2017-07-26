@@ -10,6 +10,10 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
+import java.util.List;
+
 /**
  * <ul>
  * <li>detailId: 关联detail表，唯一的员工序列号</li>
@@ -37,6 +41,10 @@ import com.everhomes.util.StringHelper;
  * <li>profileIntegrity: 档案完整度,0-100%</li>
  * <li>checkInTime: 入职日期</li>
  * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>
+ * <li>createTime: 创建时间</li>
+ * <li>approveTime: 审核时间</li>
+ * <li>operatorName: 审核人</li>
+ * <li>operatorPhone: 审核人电话</li>
  * </ul>
  */
 public class OrganizationMemberDTO {
@@ -48,7 +56,7 @@ public class OrganizationMemberDTO {
 	private String   organizationName;
 	private String targetType;
     @NotNull
-	private Long   targetId;
+    private Long targetId;
 
 	private String memberGroup;
 	private String contactName;
@@ -72,14 +80,12 @@ public class OrganizationMemberDTO {
 	
 	private Long creatorUid;
 	
-	private String  employeeNo;
+	private String   employeeNo;
 	private Byte   gender;
 
     private Byte visibleFlag;
-
-    @ItemType(Long.class)
+	@ItemType(Long.class)
     private List<Long> memberDetailIds;
-	
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> groups;
 	
@@ -107,8 +113,13 @@ public class OrganizationMemberDTO {
     private Date checkInTime;
 
     private Long salaryGroupId;
-	 
-	public OrganizationMemberDTO() {
+
+    private Timestamp createTime;
+    private Long approveTime;
+    private String operatorName;
+    private String operatorPhone;
+
+    public OrganizationMemberDTO() {
     }
 
     public Long getDetailId() {
@@ -120,30 +131,30 @@ public class OrganizationMemberDTO {
     }
 
     public Byte getExecutiveFlag() {
-		return executiveFlag;
-	}
+        return executiveFlag;
+    }
 
-	public void setExecutiveFlag(Byte executiveFlag) {
-		this.executiveFlag = executiveFlag;
-	}
+    public void setExecutiveFlag(Byte executiveFlag) {
+        this.executiveFlag = executiveFlag;
+    }
 
-	public String getPosition() {
-		return position;
-	}
+    public String getPosition() {
+        return position;
+    }
 
-	public void setPosition(String position) {
-		this.position = position;
-	}
+    public void setPosition(String position) {
+        this.position = position;
+    }
 
-	public String getIdNumber() {
-		return idNumber;
-	}
+    public String getIdNumber() {
+        return idNumber;
+    }
 
-	public void setIdNumber(String idNumber) {
-		this.idNumber = idNumber;
-	}
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
+    }
 
-	public Long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -231,16 +242,47 @@ public class OrganizationMemberDTO {
         this.status = status;
     }
 
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    public Long getApproveTime() {
+        return approveTime;
+    }
+
+    public void setApproveTime(Long approveTime) {
+        this.approveTime = approveTime;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
+
+    public String getOperatorPhone() {
+        return operatorPhone;
+    }
+
+    public void setOperatorPhone(String operatorPhone) {
+        this.operatorPhone = operatorPhone;
+    }
 
     public List<RoleDTO> getRoles() {
-		return roles;
-	}
+        return roles;
+    }
 
-	public void setRoles(List<RoleDTO> roles) {
-		this.roles = roles;
-	}
+    public void setRoles(List<RoleDTO> roles) {
+        this.roles = roles;
+    }
 
-	public Long getGroupId() {
+    public Long getGroupId() {
         return groupId;
     }
 

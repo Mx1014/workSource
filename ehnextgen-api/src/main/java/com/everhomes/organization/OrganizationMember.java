@@ -9,7 +9,9 @@ import java.sql.Date;
 public class OrganizationMember extends EhOrganizationMembers implements Comparable<OrganizationMember> {
 
     private static final long serialVersionUID = -4420904659870582839L;
-	private java.lang.String   nickName;
+
+    private java.lang.String nickName;
+    private java.lang.String organizationName;
     // private java.lang.String   avatar;
 
     private String initial;
@@ -19,9 +21,11 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     private java.lang.Long creatorUid;
 
-	private boolean isCreate;
+    private Boolean isCreate;
 
-	private String applyDescription;// 申请加入公司时填写的描述信息   add by xq.tian  2017/05/02
+    // private String applyDescription;// 申请加入公司时填写的描述信息   add by xq.tian  2017/05/02
+
+    // private Long approveTime;// 审核时间
 
     private Byte employeeStatus;
 
@@ -29,15 +33,16 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     private Integer profileIntegrity;
 
-    private Date CheckInTime;
+    private Date checkInTime;
 
 	private String employeeNo;
 
 	private Byte employeeType;
 
-	public OrganizationMember() {
-    }
+    private Long enterpriserId;
 
+    public OrganizationMember() {
+    }
 
     public java.lang.String getNickName() {
         return nickName;
@@ -64,12 +69,20 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     }
 
 
-    public String getApplyDescription() {
-        return applyDescription;
+    /*public String getApplyDescription() {
+        return OrganizationMemberCustomField.APPLY_DESCRIPTION.getStringValue(this);
     }
 
     public void setApplyDescription(String applyDescription) {
-        this.applyDescription = applyDescription;
+        OrganizationMemberCustomField.APPLY_DESCRIPTION.setStringValue(this, applyDescription);
+    }*/
+
+    public Long getApproveTime() {
+        return OrganizationMemberCustomField.APPROVE_TIME.getIntegralValue(this);
+    }
+
+    public void setApproveTime(Long approveTime) {
+        OrganizationMemberCustomField.APPROVE_TIME.setIntegralValue(this, approveTime);
     }
 
     public void setInitial(String initial) {
@@ -102,15 +115,22 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     }
 
 
-    public boolean isCreate() {
-        return isCreate;
+    public Boolean isCreate() {
+        return isCreate != null ? isCreate : false;
     }
 
 
-    public void setCreate(boolean isCreate) {
+    public void setCreate(Boolean isCreate) {
         this.isCreate = isCreate;
     }
 
+    public String getOrganizationName() {
+        return organizationName;
+    }
+
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
+    }
 
     public Byte getEmployeeStatus() {
         return employeeStatus;
@@ -135,13 +155,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
         this.profileIntegrity = profileIntegrity;
     }
 
-    public Date getCheckInTime() {
-        return CheckInTime;
-    }
-
-    public void setCheckInTime(Date checkInTime) {
-        CheckInTime = checkInTime;
-    }
 
 	public String getEmployeeNo() {
 		return employeeNo;
@@ -159,9 +172,24 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 		this.employeeType = employeeType;
 	}
 
+    public Date getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(Date checkInTime) {
+        this.checkInTime = checkInTime;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
+    public Long getEnterpriserId() {
+        return enterpriserId;
+    }
+
+    public void setEnterpriserId(Long enterpriserId) {
+        this.enterpriserId = enterpriserId;
+    }
 }

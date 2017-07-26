@@ -22,6 +22,7 @@ import java.util.List;
  * <li>categoryId: 活动类型id</li>
  * <li>contentCategoryId: 活动主题分类id</li>
  * <li>needTemporary: 0-不需要， 1-需要， 是否需要查询暂存的活动，用于后台查询时把暂存的贴子也查出来。 不填默认0</li>
+ * <li>tag: 标签</li>
  * </ul>
  */
 public class QueryOrganizationTopicCommand {
@@ -49,7 +50,9 @@ public class QueryOrganizationTopicCommand {
     private List<Integer> activityStatusList;
     
     private Byte needTemporary;
-    
+
+    private String tag;
+
     public QueryOrganizationTopicCommand() {
     }
 
@@ -213,7 +216,15 @@ public class QueryOrganizationTopicCommand {
 		this.needTemporary = needTemporary;
 	}
 
-	@Override
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -394,14 +394,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.rentalv2Provider.createRentalDefaultRule(defaultRule);
 
 			//time intervals
-			if(cmd.getRentalType().equals(RentalType.HOUR.getCode())&& null!=cmd.getTimeIntervals()) {
-				setRentalRuleTimeIntervals(EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId(), cmd.getTimeIntervals());
-			}
-
-			// set half day time intervals
-			if(cmd.getRentalType() == RentalType.HALFDAY.getCode() || cmd.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
-				setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getTimeIntervals());
-			}
+//			if(cmd.getRentalType().equals(RentalType.HOUR.getCode())&& null!=cmd.getTimeIntervals()) {
+//				setRentalRuleTimeIntervals(EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId(), cmd.getTimeIntervals());
+//			}
+//
+//			// set half day time intervals
+//			if(cmd.getRentalType() == RentalType.HALFDAY.getCode() || cmd.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
+//				setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getTimeIntervals());
+//			}
 
 			createPriceRules(PriceRuleType.DEFAULT, defaultRule.getId(), cmd.getPriceRules());
 			
@@ -3937,7 +3937,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 					
 					// 多种模式的情况下，一种模式下关闭的其它模式下对应的时间段也要关闭
-					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && rentalSiteRules.size() > 1) {
+					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
 						calculateCurrentStatus(dto, rs, rsr, priceRules);
 					}
 					

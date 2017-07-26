@@ -86,7 +86,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	}
 
 	@Override
-	public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
+	public GeneralFormDTO   getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
 		GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
 
 		return handler.getTemplateBySourceId(cmd);
@@ -287,6 +287,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 	@Override
 	public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd) {
+		return getGeneralFormFlowEntities(cmd, false);
+	}
+		
+	@Override
+	public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd, boolean showDefaultFields) {
 
 		List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
 
@@ -298,23 +303,28 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
 					GeneralFormFieldDTO.class);
 
-			processFlowEntities(entities, vals, fieldDTOs);
+			processFlowEntities(entities, vals, fieldDTOs, showDefaultFields);
 		}
 		return entities;
 	}
 
 	@Override
 	public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs) {
+		processFlowEntities(entities, vals, fieldDTOs, false);
+	}
+	
+	@Override
+	public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs, boolean showDefaultFields) {
 
 		List<String> defaultFields = Arrays.stream(GeneralFormDataSourceType.values()).map(GeneralFormDataSourceType::getCode)
 				.collect(Collectors.toList());
 
 		for (GeneralFormVal val : vals) {
 			try{
-				if (!defaultFields.contains(val.getFieldName())) {
+				if (showDefaultFields || !defaultFields.contains(val.getFieldName())) {
 					// 不在默认fields的就是自定义字符串，组装这些
 					GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					if(null == dto ){
+					if(null == dto || GeneralFormDataVisibleType.fromCode(dto.getVisibleType()) == GeneralFormDataVisibleType.HIDDEN){
 						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
 						continue;
 					}

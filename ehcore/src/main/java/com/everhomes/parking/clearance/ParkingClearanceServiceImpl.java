@@ -14,7 +14,6 @@ import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.parking.ParkingLot;
@@ -59,6 +58,7 @@ import java.util.stream.Collectors;
 import static com.everhomes.rest.parking.ParkingLocalStringCode.SCOPE_STRING_STATUS;
 import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.*;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
+
 
 /**
  * Parking clearance service
@@ -166,13 +166,13 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     // 校验当前用户是否有申请放行权限
     private void checkApplicantAuthority(CreateClearanceLogCommand cmd) {
-        userPrivilegeMgr.checkUserAuthority(
-                currUserId(),
-                EntityType.PARKING_LOT.getCode(),
-                cmd.getParkingLotId(),
-                cmd.getOrganizationId(),
-                APPLY_PRIVILEGE_ID
-        );
+//        userPrivilegeMgr.checkUserAuthority(
+//                currUserId(),
+//                EntityType.PARKING_LOT.getCode(),
+//                cmd.getParkingLotId(),
+//                cmd.getOrganizationId(),
+//                APPLY_PRIVILEGE_ID
+//        );
         // 上面的权限检查会放过超级管理员, 但是需求是不放过
         checkUserNotInOperatorList(cmd.getParkingLotId(), ParkingClearanceOperatorType.APPLICANT);
     }
@@ -248,7 +248,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                             operator.getParkingLotId(),//
                             EntityType.USER.getCode(),//
                             operator.getOperatorId(),//
-                            null,//
                             new ArrayList<>(Collections.singletonList(privilegeId))
                     );
                     clearanceOperatorProvider.deleteClearanceOperator(operator);
@@ -440,7 +439,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             for (ParkingLot parkingLot : parkingLots) {
                 try {
                     userPrivilegeMgr.checkUserAuthority(currUserId(), EntityType.PARKING_LOT.getCode(), parkingLot.getId(),
-                            cmd.getOrganizationId(), privilegeId);
+                             cmd.getOrganizationId(), privilegeId);
 
                     // 上面的权限检查会放过超级管理员, 但是需求是不放过
                     checkUserNotInOperatorList(parkingLot.getId(), operatorType);
@@ -487,7 +486,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     }
 
     private void checkCurrentUserNotInOrg(Long orgId) {
-        if (orgId == null) {
+        /*if (orgId == null) {
             LOGGER.error("Invalid parameter organizationId [ null ]");
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter organizationId [ null ]");
@@ -498,7 +497,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             LOGGER.error("User is not in the organization.");
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "User is not in the organization.");
-        }
+        }*/
     }
 
     // 参数校验方法

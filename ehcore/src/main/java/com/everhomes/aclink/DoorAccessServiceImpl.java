@@ -52,6 +52,7 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -76,6 +77,7 @@ import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Security;
@@ -1829,6 +1831,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return profile.getItemValue();
     }
     
+    private void updateLinglingExtraStorey(DoorLinglingExtraKeyDTO extra) {
+        List<DoorLinglingAuthStoreyInfo> storeyInfos = new ArrayList<>();
+        for(Long storey : extra.getStoreyAuthList()) {
+            DoorLinglingAuthStoreyInfo info = new DoorLinglingAuthStoreyInfo();
+            info.setStorey(storey);
+            if(storey.equals(44l)) {
+                info.setDisplayName("45A");
+            } else if(storey.equals(57l)) {
+                info.setDisplayName("56A");
+            } else if(storey.equals(58l)) {
+                info.setDisplayName("56B");
+            } else if(storey.equals(59l)) {
+                info.setDisplayName("57");
+            } else if(storey.equals(60l)) {
+                info.setDisplayName("58");
+            }
+            storeyInfos.add(info);
+        }
+        extra.setStoreyInfos(storeyInfos);
+    }
+    
     private void doLinglingQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         List<String> hardwares = new ArrayList<String>();
@@ -1946,6 +1969,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
                 extra.setAuthStorey(storeyAuthList.get(0));
                 extra.setStoreyAuthList(storeyAuthList);
+                updateLinglingExtraStorey(extra);
             }
         } catch(Exception ex) {
             LOGGER.error("storeyAuth failed", ex);
@@ -2658,6 +2682,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Override
     public DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd) {
+        
+        //first check is the phone is in black list
+        this.userService.checkSmsBlackList("doorVisitor", cmd.getPhone());
+        
         DoorAccessDriverType qrDriver = getQrDriverType(cmd.getNamespaceId());
         DoorAccessDriverType qrDriverExt = getQrDriverExt(cmd.getNamespaceId());
         if(qrDriver.equals(DoorAccessDriverType.LINGLING)) {
@@ -3677,7 +3705,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             vo.setNickName(r.getNickname());
             vo.setPhone(r.getPhone());
             vo.setOrganization(r.getOrganization());
-            vo.setGoDoor(String.valueOf(r.getCurrStorey()));
+            vo.setGoDoor(r.getCurrStorey() != null ? String.valueOf(r.getCurrStorey()) : "");
             vo.setDescription(r.getDescription());
 
             Date d1 = new Date(r.getValidEndMs());
@@ -3688,11 +3716,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
             User u = userProvider.findUserById(r.getApproveUserId());
             if(u != null) {
-                if(u.getNickName() != null) {
-                    vo.setApproveUserName(u.getNickName());
-                } else {
-                    vo.setApproveUserName(u.getAccountName());
-                }
+                vo.setApproveUserName(getRealName(u));
             }
             return vo;
         }).collect(Collectors.toList());
@@ -3700,7 +3724,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         String[] propertyNames = {"nickName", "phone", "organization", "goDoor", "description", "availableTime", "approveUserName", "authTime"};
         String[] titleNames = {"姓名", "手机号", "来访单位", "所去楼层", "来访事由", "有效期", "授权人", "授权时间"};
         int[] columnSizes = {20, 20, 20, 20, 20, 20, 20, 20};
-        String fileName = String.format("访客授权_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        String fileName = String.format("visitor_auth_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
         ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, "访客授权");
         excelUtils.writeExcel(propertyNames, titleNames, columnSizes, voList);
     }

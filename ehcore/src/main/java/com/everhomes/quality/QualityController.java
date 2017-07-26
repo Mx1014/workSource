@@ -6,9 +6,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 
+import com.everhomes.rest.quality.*;
+
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.util.ConvertHelper;
 
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.rest.quality.*;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.user.UserContext;
@@ -38,6 +42,9 @@ public class QualityController extends ControllerBase {
 	
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Autowired
 	private QualityInspectionSampleSearcher sampleSearcher;
@@ -603,10 +610,10 @@ public class QualityController extends ControllerBase {
 	@RequestMapping("listUserRelatedProjectByModuleId")
 	@RestReturn(value = CommunityDTO.class, collection = true)
 	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
-		
-		List<CommunityDTO> communitydtos = rolePrivilegeService.listUserRelatedProjectByModuleId(cmd);
-		
-		RestResponse response = new RestResponse(communitydtos);
+
+		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
+
+		RestResponse response = new RestResponse(dtos);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

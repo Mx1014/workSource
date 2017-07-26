@@ -2,6 +2,7 @@ package com.everhomes.util;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 
 public class DateUtils {
@@ -30,12 +31,14 @@ public class DateUtils {
 			if(time2 == null) {
 				return time1;
 			}
-
 			if (time1.after(time2)){
 				return time1;
 			}
 		}
-
 		return time2;
+	}
+
+	public static Timestamp currentTimestamp() {
+		return Timestamp.from(Instant.now());
 	}
 }

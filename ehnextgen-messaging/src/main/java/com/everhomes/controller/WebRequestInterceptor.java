@@ -7,9 +7,15 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServer;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.domain.Domain;
+import com.everhomes.domain.DomainService;
 import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
+
+import com.everhomes.rest.common.PortalType;
+import com.everhomes.rest.domain.DomainDTO;
+import com.everhomes.rest.oauth2.CommonRestResponse;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
@@ -64,6 +70,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     @Autowired
     private ContentServerService contentServerService;
+
+    @Autowired
+    private DomainService domainService;
 
     public WebRequestInterceptor() {
     }
@@ -127,6 +136,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             setupNamespaceIdContext(userAgents);
             setupVersionContext(userAgents);
             setupScheme(userAgents);
+            setupDomain(request);
             if (isProtected(handler)) {
                 LoginToken token = userService.getLoginToken(request);
                 // isValid转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
@@ -215,6 +225,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //
 //		return this.userService.isValidLoginToken(token);
 //	}
+
+    private void setupDomain(HttpServletRequest request){
+        DomainDTO domain = domainService.getDomainInfo(null, request);
+        UserContext context = UserContext.current();
+        if(null != domain)
+            context.setDomain(ConvertHelper.convert(domain, Domain.class));
+    }
 
     private void setupScheme(Map<String, String> userAgents) {
         if (LOGGER.isDebugEnabled()) {

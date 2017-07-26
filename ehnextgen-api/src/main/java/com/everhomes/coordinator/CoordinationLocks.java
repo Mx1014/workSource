@@ -75,8 +75,14 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
-    FLOW_CASE_UPDATE("flowCase.update"), PUNCH_DAY_SCHEDULE("punch.day.schedule"),
-    SALARY_GROUP_LOCK("salary.group"),
+    FLOW_CASE_UPDATE("flowCase.update"),
+    PUNCH_DAY_SCHEDULE("punch.day.schedule"),
+
+    PRINT_ORDER_LOCK_FLAG("print.order.lock.flag"),
+    PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
+
+    USER_APPEAL_LOG("user.appeal.log"),
+	SALARY_GROUP_LOCK("salary.group"),
     ;
 
     private String code;

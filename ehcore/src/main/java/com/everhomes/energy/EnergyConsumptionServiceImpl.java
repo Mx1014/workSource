@@ -15,18 +15,15 @@ import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.appurl.AppUrlDTO;
-import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.energy.*;
-import com.everhomes.rest.equipment.EquipmentsDTO;
-import com.everhomes.rest.equipment.QRCodeFlag;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
@@ -35,7 +32,6 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
-import com.everhomes.user.OSType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -189,6 +185,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
 //    @Override
 //    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
@@ -2531,11 +2530,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
 
-        ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
-        listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
-        listUserRelatedProjectByModuleIdCommand.setModuleId(49100L);
+        ListUserRelatedProjectByModuleCommand listUserRelatedProjectByModuleCommand = new ListUserRelatedProjectByModuleCommand();
+        listUserRelatedProjectByModuleCommand.setOrganizationId(cmd.getOrganizationId());
+        listUserRelatedProjectByModuleCommand.setModuleId(49100L);
 
-        List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
+        List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(listUserRelatedProjectByModuleCommand);
 
         if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
             SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -2779,20 +2778,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private void graphicsGeneration(String name, String number, String qrcode, String savePath) {
-        int imageWidth = 200;//图片的宽度
-        int imageHeight = 250; //图片的高度
+        int imageWidth = 330;//图片的宽度
+        int imageHeight = 413; //图片的高度
         BufferedImage image = new BufferedImage(imageWidth, imageHeight,
                 BufferedImage.TYPE_INT_RGB);
 
         Graphics graphics = image.getGraphics();
-        graphics.setFont(new Font("宋体", Font.PLAIN, 15));
+        graphics.setFont(new Font("wqy-zenhei", Font.PLAIN, 14));
         graphics.setColor(Color.WHITE);
         graphics.fillRect(0, 0, imageWidth, imageHeight);
         graphics.setColor(Color.BLACK);
         BufferedImage bimg = null;
         try {
-            graphics.drawString(name, 30, 215);
-            graphics.drawString(number, 30, 240);
+            graphics.drawString(name, 30, 230);
+            graphics.drawString(number, 30, 270);
             bimg = QRCodeEncoder.createQrCode(Base64.encodeBase64String(qrcode.getBytes()), 200, 200, null);
         } catch (Exception e) {
         }
@@ -2816,13 +2815,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     private List<String> imageMosaic(List<String> files, String filePath) {
         List<String> images = new ArrayList<>();
-        //每张图包含72张二维码
-        int size = files.size()/72;
-        if(files.size()%72 != 0) {
+        //每张图包含56张二维码
+        int size = files.size()/56;
+        if(files.size()%56 != 0) {
             size = size + 1;
         }
-        int imageWidth = 1825;//图片的宽度
-        int imageHeight = 2500; //图片的高度
+        int imageWidth = 2480;//图片的宽度
+        int imageHeight = 3508; //图片的高度
         BufferedImage imageMosaic;
         try {
             for(int i =0; i < size; i++) {
@@ -2832,27 +2831,27 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 graphics.setColor(Color.WHITE);
                 graphics.fillRect(0, 0, imageWidth, imageHeight);
                 //72张二维码
-                int max = (files.size() > (i+1) * 72) ? 72 : files.size()- i*72;
+                int max = (files.size() > (i+1) * 56) ? 56 : files.size()- i*56;
                 int height = 0;
 
-                int maxRow = max/8;
-                if(max%8 != 0) {
+                int maxRow = max/7;
+                if(max%7 != 0) {
                     maxRow = maxRow + 1;
                 }
                 LOGGER.info("draw max : {}, maxRow: {}, size: {}" , max, maxRow, size);
                 for(int row = 0; row < maxRow; row++) {
-                    //每行8个
-                    for(int w = 0; w < 8; w++) {
+                    //每行7个
+                    for(int w = 0; w < 7; w++) {
                         LOGGER.info("draw w : {}, row: {}, file size: {}" , w, row, files.size());
-                        if(row * 8 +w < max) {
+                        if(row * 7 +w < max) {
 //                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
-                            LOGGER.info("draw page: {}, Width : {}, Height: {}" , i, w * 225, height);
-                            File file = new File(files.get(i*72 + row * 8 + w));
+                            LOGGER.info("draw page: {}, Width : {}, Height: {}" , i, w * 355, height);
+                            File file = new File(files.get(i*56 + row * 7 + w));
                             if ( !file.isFile() ) {
-                                LOGGER.info("filename:{} is not a file", files.get(i*72 + row * 8 + w));
+                                LOGGER.info("filename:{} is not a file", files.get(i*56 + row * 7 + w));
                                 continue;
                             }
-                            graphics.drawImage(ImageIO.read(file), w * 225, height, null);
+                            graphics.drawImage(ImageIO.read(file), w * 355, height, null);
 
                             // 读取完成删除文件
                             if (file.isFile() && file.exists()) {
@@ -2860,7 +2859,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             }
                         }
                     }
-                    height = (row+1) * 275;
+                    height = (row+1) * 435;
 
                 }
 
