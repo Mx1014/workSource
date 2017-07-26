@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>workdayRule: 排班规则{@link com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO}</li>
  * </ul>
  */
-public class UpdateTargetPunchAllRuleCommand {
+public class addPunchGroupCommand {
 
 	
 	@NotNull
