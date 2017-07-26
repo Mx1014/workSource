@@ -52,6 +52,7 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
@@ -576,17 +577,24 @@ public class GroupServiceImpl implements GroupService {
         	throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_NOT_FOUND, 
                 "Unable to find the group");
         } else {
+            GroupDTO  dto = this.toGroupDTO(userId, group);
+
         	if(GroupDiscriminator.ENTERPRISE == GroupDiscriminator.fromCode(group.getDiscriminator())){
         		Organization organization = organizationProvider.findOrganizationByGroupId(groupId);
         		if(null == organization){
         			LOGGER.error("Group organization not found, operatorUid = {}, groupId = {}", userId, groupId);
     	            throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_MEMBER_NOT_FOUND, "Unable to find the group organization");
         		}
-        		group.setName(organization.getName());
+                dto.setName(organization.getName());
+                dto.setMemberOf((byte)1);
 
+                OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
+                if (member != null && member.getStatus() != null)
+                    dto.setMemberStatus(member.getStatus());
+                else
+                    dto.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
             }
-        	
-            GroupDTO  dto = this.toGroupDTO(userId, group);
+
 
             //群聊名称为空时填充群聊别名  edit by yanjun 20170724
             if(StringUtils.isEmpty(dto.getName())){
