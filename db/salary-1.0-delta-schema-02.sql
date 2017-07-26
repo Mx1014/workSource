@@ -1,0 +1,35 @@
+CREATE TABLE `eh_acl_role_assignments` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_type` VARCHAR(32) NOT NULL COMMENT 'owner resource(i.e., forum) type',
+  `owner_id` BIGINT COMMENT 'owner resource(i.e., forum) id',
+  `target_type` VARCHAR(32) NOT NULL COMMENT 'target object(user/group) type',
+  `target_id` BIGINT COMMENT 'target object(user/group) id',
+  `role_id` BIGINT NOT NULL COMMENT 'role id that is assigned',
+  `creator_uid` BIGINT NOT NULL COMMENT 'assignment creator uid',
+  `create_time` DATETIME COMMENT 'record create time',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_acl_role_asgn_unique` (`owner_type`,`owner_id`,`target_type`,`target_id`,`role_id`),
+  KEY `i_eh_acl_role_asgn_owner` (`owner_type`,`owner_id`),
+  KEY `i_eh_acl_role_asgn_creator` (`creator_uid`),
+  KEY `i_eh_acl_role_asgn_create_time` (`create_time`),
+  KEY `i_eh_acl_role_asgn_namespace_id` (`namespace_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_acl_roles` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `app_id` BIGINT,
+  `name` VARCHAR(32) NOT NULL COMMENT 'name of hte operating role',
+  `description` VARCHAR(512),
+  `tag` VARCHAR(32),
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT,
+  `creator_uid` BIGINT DEFAULT 0 COMMENT 'creator uid',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'record create time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_acl_role_name` (`namespace_id`,`app_id`,`name`,`owner_type`,`owner_id`),
+  KEY `u_eh_acl_role_tag` (`tag`),
+  KEY `i_eh_ach_role_owner` (`namespace_id`,`app_id`,`owner_type`,`owner_id`),
+  KEY `i_eh_acl_role_creator_uid` (`creator_uid`),
+  KEY `i_eh_acl_role_create_time` (`create_time`)
