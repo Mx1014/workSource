@@ -509,6 +509,9 @@ public class PortalServiceImpl implements PortalService {
 		if(null == PortalItemStatus.fromCode(cmd.getStatus())){
 			portalItem.setStatus(PortalItemStatus.ACTIVE.getCode());
 		}
+		if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
+			portalItem.setDefaultOrder(10000);
+		}
 		portalItem.setCreatorUid(user.getId());
 		portalItem.setOperatorUid(user.getId());
 		portalItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
