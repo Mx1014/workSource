@@ -349,13 +349,13 @@ public class EmsHandler implements ExpressHandler {
 	}
 
 	@Override
-	public void createOrder(ExpressOrder expressOrder) {
+	public void createOrder(ExpressOrder expressOrder, ExpressCompany expressCompany) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void updateOrderStatus(ExpressOrder expressOrder) {
+	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
 		// TODO Auto-generated method stub
 		
 	}

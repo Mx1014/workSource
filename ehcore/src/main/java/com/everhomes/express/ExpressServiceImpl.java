@@ -692,12 +692,13 @@ public class ExpressServiceImpl implements ExpressService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		ExpressOrder expressOrder = createExpressOrder(owner, cmd);
+		ExpressOrder expressOrder = generateExpressOrder(owner, cmd);
 		// by dengs, 创建订单，这里就直接丢给邮政和国贸EMS
 		dbProvider.execute(status -> {
+			ExpressCompany expressCompany = findTopExpressCompany(cmd.getExpressCompanyId());
+			ExpressHandler handler = getExpressHandler(expressCompany.getId());
+			handler.createOrder(expressOrder, expressCompany);
 			expressOrderProvider.createExpressOrder(expressOrder);
-			ExpressHandler handler = getExpressHandler(cmd.getExpressCompanyId());
-			handler.createOrder(expressOrder);
 			return null;
 		});
 		createExpressOrderLog(owner, ExpressActionEnum.CREATE, expressOrder, null);
@@ -715,7 +716,7 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderLogProvider.createExpressOrderLog(expressOrderLog);
 	}
 	
-	private ExpressOrder createExpressOrder(ExpressOwner owner, CreateExpressOrderCommand cmd) {
+	private ExpressOrder generateExpressOrder(ExpressOwner owner, CreateExpressOrderCommand cmd) {
 		ExpressOrder expressOrder = new ExpressOrder();
 		expressOrder.setNamespaceId(owner.getNamespaceId());
 		expressOrder.setOwnerType(owner.getOwnerType().getCode());
@@ -836,7 +837,13 @@ public class ExpressServiceImpl implements ExpressService {
 				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying and express user has not confirmed money");
 			}
 			expressOrder.setStatus(ExpressOrderStatus.CANCELLED.getCode());
-			expressOrderProvider.updateExpressOrder(expressOrder);
+			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
+			ExpressHandler handler = getExpressHandler(expressCompany.getId());
+			dbProvider.execute(status->{
+				expressOrderProvider.updateExpressOrder(expressOrder);
+				handler.updateOrderStatus(expressOrder, expressCompany);
+				return null;
+			});
 			createExpressOrderLog(owner, ExpressActionEnum.CANCEL, expressOrder, null);
 			return null;
 		});

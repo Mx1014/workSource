@@ -26,21 +26,16 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	private static final Logger LOGGER = LoggerFactory.getLogger(GuoMaoChinaPostHandler.class);
 	
 	//创建订单
-	private static final String CREATE_ORDER_URL = "http://222.222.2.155:8001/express/createOrder";
+	private static final String CREATE_ORDER_CONTEXT = "/express/createOrder";
 	//创建订单
-	private static final String GET_ORDER_URL = "http://222.222.2.155:8001/express/getOrderDetail";
+	private static final String GET_ORDER_CONTEXT = "/express/getOrderDetail";
+	//创建订单
+	private static final String UPDATE_ORDER_CONTEXT = "/express/updateOrderStatus";
 	//跟踪运单信息
-	private static final String TRACK_BILL_URL = "http://211.156.193.140:8000/cotrackapi/api/track/mail/#{billno}"; 
-	// APP KEY
-	private static final String APP_KEY = "123";
-	private static final String SECRET_KEY = "FC480127D90D26DE382506EE5D409F46";
-	//获取数量
-	private static final String BILL_NO_AMOUNT = "1";
-	//打印类型，1:预制详情单	2:热敏标签式详情单，我们都是2
-	private static final String PRINT_KIND = "2";
+//	private static final String TRACK_BILL_URL = "http://211.156.193.140:8000/cotrackapi/api/track/mail/#{billno}"; 
 	
 	//java8新加的格式化时间类，是线程安全的
-	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
+//	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
 	
 
 	@Override
@@ -56,44 +51,53 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	}
 
 	@Override
-	public void createOrder(ExpressOrder expressOrder) {
+	public void createOrder(ExpressOrder expressOrder, ExpressCompany expressCompany) {
 		//生成 请求创建订单 参数
-		String paramsCreateOrder = getRequestCreateOrderJsonParam(expressOrder);
+		String paramsCreateOrder = getRequestCreateOrderJsonParam(expressOrder,expressCompany);
 		//发送 创建订单 请求
-		GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = request(paramsCreateOrder, CREATE_ORDER_URL);
+		GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = request(paramsCreateOrder, expressCompany.getOrderUrl()+CREATE_ORDER_CONTEXT);
 		//请求code失败
 		checkResponseEntity(entity);
-		//生成获取订单详情的参数
-		String paramsGetOrder = getRequestGetOrderJsonParam(entity.getResponse());
-		//发送获取订单详情请求
-		entity = request(paramsGetOrder, GET_ORDER_URL);
-		//验证订单是否生成 
-		checkResponseEntity(entity);
+		
+		expressOrder.setBillNo(entity.getResponse().getBillNo());
+		
+		//通过再次获取订单详情，判断订单是否创建成功。
+		getOrderDetail(entity.getResponse().getSendType(), entity.getResponse().getBillNo(), expressCompany);
 	
 	}
 	
-	private void checkResponseEntity(GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity){
-		if(entity.getErrorCode() != 200 || entity.getResponse() == null || entity.getResponse().getBillNo() == null){
-			LOGGER.error("response failed, entity = {}", entity);
+	@Override
+	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		//参数
+		String params = getRequestUpdateOrderJsonParam(expressOrder, expressCompany);
+		//发送 创建订单 请求
+		GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = request(params, expressCompany.getOrderUrl()+UPDATE_ORDER_CONTEXT);
+		//验证订单是否生成 
+		checkErrorCode(entity);
+		
+		entity = getOrderDetail(String.valueOf(expressOrder.getSendType()), expressOrder.getBillNo(), expressCompany);
+		
+		if(!entity.getResponse().getStatus().equals(String.valueOf(expressOrder.getStatus()))){
+			LOGGER.error("updateOrderStatus failed, reponse.status = {}, order.status = {}", entity.getResponse().getStatus(),expressOrder.getStatus());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"response failed, entity = {}"+ entity);
+					"updateOrderStatus failed, reponse.status = "+entity.getResponse().getStatus()+", order.status = "+expressOrder.getStatus());
 		}
 	}
 	
-	private String getRequestGetOrderJsonParam(GuoMaoChinaPostResponse response) {
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("appKey",APP_KEY);
-	    params.put("timestamp",String.valueOf(System.currentTimeMillis()));
-	    params.put("nonce", String.valueOf((int)(Math.random()*10000)));
-	    params.put("sendType",response.getSendType());
-	    params.put("billNo", response.getBillNo());
-	    params.put("signature", SignatureHelper.computeSignature(params, SECRET_KEY));
-		return JSONObject.toJSONString(params);
+	public GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> getOrderDetail(String sendType, String billNo, ExpressCompany expressCompany){
+		//生成获取订单详情的参数
+		String paramsGetOrder = getRequestGetOrderJsonParam(sendType,billNo,expressCompany);
+		//发送获取订单详情请求
+		GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = request(paramsGetOrder,expressCompany.getOrderUrl()+GET_ORDER_CONTEXT);
+		//验证订单是否生成 
+		checkResponseEntity(entity);
+		
+		return entity;
 	}
-
+	
 	private GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> request(String params, String url){
 		LOGGER.info("createOrder params = {};", params);
-		String resultJson = sendHttpRequest(params, url);
+		String resultJson = sendApplicationJsonRequest(params, url);
 		GuoMaoChinaPostResponseEntity entity = null;
 		try{
 			entity = JSONObject.parseObject(resultJson,new TypeReference<GuoMaoChinaPostResponseEntity<Object>>(){});
@@ -101,23 +105,54 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 			GuoMaoChinaPostResponse response = JSONObject.parseObject(stringResponse,new TypeReference<GuoMaoChinaPostResponse>(){});
 			entity.setResponse(response);
 		}catch(Exception e){
-			LOGGER.error("request {} exception. resultJson = {}", CREATE_ORDER_URL,resultJson);
+			LOGGER.error("request {} exception. resultJson = {}", url,resultJson);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"Exception occur. "+e);
 		}
 		return entity;
-		
 	}
 	
-	private String sendHttpRequest(String params, String url){
+	private String sendApplicationJsonRequest(String params, String url){
 		Map<String,String> heads = new HashMap<String,String>();
 		heads.put("Content-Type", "application/json");
 		return Utils.post(url, JSONObject.parseObject(params), heads);
 	}
-
-	private String getRequestCreateOrderJsonParam(ExpressOrder expressOrder) {
+		
+	private void checkResponseEntity(GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity){
+		checkErrorCode(entity);
+		checkResponse(entity);
+	}
+	
+	private void checkErrorCode(GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity){
+		if(entity.getErrorCode() != 200 ){
+			LOGGER.error("response failed, errorCode = {}, entity = {}", entity.getErrorCode(), entity);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"response failed, entity = {}"+ entity);
+		}
+	}
+	
+	private void checkResponse(GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity){
+		if(entity.getResponse() == null || entity.getResponse().getBillNo() == null){
+			LOGGER.error("response failed, entity = {}", entity);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"response failed, entity = {}"+ entity);
+		}
+	}
+	
+	private String getRequestGetOrderJsonParam(String sendType,String billNo, ExpressCompany expressCompany) {
 		Map<String, String> params = new HashMap<String, String>();
-		params.put("appKey",APP_KEY);
+		params.put("appKey",expressCompany.getAppKey());
+	    params.put("timestamp",String.valueOf(System.currentTimeMillis()));
+	    params.put("nonce", String.valueOf((int)(Math.random()*10000)));
+	    params.put("sendType",sendType);
+	    params.put("billNo", billNo);
+	    params.put("signature", SignatureHelper.computeSignature(params, expressCompany.getAppSecret()));
+		return JSONObject.toJSONString(params);
+	}
+
+	private String getRequestCreateOrderJsonParam(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("appKey",expressCompany.getAppKey());
 	    params.put("timestamp",String.valueOf(System.currentTimeMillis()));
 	    params.put("nonce", String.valueOf((int)(Math.random()*10000)));
 	    params.put("orderNo",expressOrder.getOrderNo());
@@ -142,14 +177,20 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	    params.put("invoiceCategory",String.valueOf(expressOrder.getInvoiceFlag()));
 	    params.put("invoiceHeader",expressOrder.getInvoiceHead());
 	    params.put("status",String.valueOf(expressOrder.getStatus()));
-	    params.put("signature", SignatureHelper.computeSignature(params, SECRET_KEY));
+	    params.put("signature", SignatureHelper.computeSignature(params, expressCompany.getAppSecret()));
 		return JSONObject.toJSONString(params);
 	}
 
-	@Override
-	public void updateOrderStatus(ExpressOrder expressOrder) {
-		// TODO Auto-generated method stub
-		
+	private String getRequestUpdateOrderJsonParam(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("appKey",expressCompany.getAppKey());
+	    params.put("timestamp",String.valueOf(System.currentTimeMillis()));
+	    params.put("nonce", String.valueOf((int)(Math.random()*10000)));
+	    params.put("billNo", expressOrder.getBillNo());
+	    params.put("sendType",String.valueOf(expressOrder.getSendType()));//文档中 没有，后面加上的
+	    params.put("status",String.valueOf(expressOrder.getStatus()));
+	    params.put("signature", SignatureHelper.computeSignature(params, expressCompany.getAppSecret()));
+		return JSONObject.toJSONString(params);
 	}
 
 }
