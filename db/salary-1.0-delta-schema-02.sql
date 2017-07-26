@@ -16,3 +16,4 @@ CREATE TABLE `eh_acl_roles` (
   KEY `i_eh_ach_role_owner` (`namespace_id`,`app_id`,`owner_type`,`owner_id`),
   KEY `i_eh_acl_role_creator_uid` (`creator_uid`),
   KEY `i_eh_acl_role_create_time` (`create_time`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
