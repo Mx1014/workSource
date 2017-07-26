@@ -64,7 +64,7 @@ public class RowResult {
 	public void setD(String d) {
 		D = d;
 	}
-	
+
 	public String getE()
 	{
 		return E;
@@ -233,14 +233,14 @@ public class RowResult {
     //	由新的 Map 来做处理(By R 13th June)
 	@Override
 	public String toString() {
-		
+
 /*		return "RowResult [A=" + A + ", B=" + B + ", C=" + C + ", D=" + D + ", E="+ E + ", F=" + F + ", G=" + G + ", H=" + H +
 				", I=" +I + ", J=" + J + ", K=" + K + ", L="+ L + ", M=" + M + ", N=" + N + ", O=" + O + ", P=" + P + ", Q=" + Q
 				 + ", R=" + R + ", S=" + S + ", T=" + T + ", U=" + U + ", V=" + V + ", W=" + W + ", X=" + X + ", Y=" + Y
 				 + ", Z=" + Z +"]";*/
 		return "RowResult: [" + cells.toString() + "]";
 	}
-	
+
 	public static String trimString(String str){
 		if(str != null && str.length() > 0)
 		{
@@ -251,5 +251,5 @@ public class RowResult {
 			return str;
 		}
 	}
-	
+
 }

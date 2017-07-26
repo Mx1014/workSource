@@ -82,6 +82,7 @@ public enum CoordinationLocks {
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
+	SALARY_GROUP_LOCK("salary.group"),
     ;
 
     private String code;

@@ -1747,5 +1747,29 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+	
+	    /**
+     * <b>URL: /org/updatePressTest</b>
+     * <p>更新數據壓力測試</p>
+     */
+    public RestResponse updatePressTest(){
+        organizationService.updatePressTest();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/updatePressTest</b>
+     * <p>刪除數據壓力測試</p>
+     */
+    public RestResponse deletePressTest(){
+        organizationService.deletePressTest();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

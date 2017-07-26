@@ -523,7 +523,15 @@ public interface OrganizationService {
 			Long userId);
 	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
 
+	void updatePressTest();
+
+	void deletePressTest();
+	
 	/**人事管理-离职**/
 	void leaveTheJob(LeaveTheJobCommand cmd);
-
+	
+	// added by R, for salaryGroup 20170630
+	public Organization createSalaryGroupOrganization(Long organizationId, String name);
+	public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
+	
 }
