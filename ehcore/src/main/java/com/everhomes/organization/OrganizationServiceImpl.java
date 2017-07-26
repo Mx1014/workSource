@@ -5173,24 +5173,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.organizationProvider.deletePressTest();
     }
 
-    @Override
-    public void leaveTheJob(LeaveTheJobCommand cmd) {
-        OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        //组织架构删除
-        DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
-        deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(cmd.getOrganizationId());
-        deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
-        deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
-        deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
-        //更新人事管理状态
-        UpdateOrganizationEmployeeStatusCommand updateOrganizationEmployeeStatusCommand = new UpdateOrganizationEmployeeStatusCommand();
-        updateOrganizationEmployeeStatusCommand.setDetailId(cmd.getDetailId());
-        updateOrganizationEmployeeStatusCommand.setEmployeeStatus(EmployeeStatus.LEAVETHEJOB.getCode());
-        updateOrganizationEmployeeStatusCommand.setRemarks(cmd.getRemarks());
-        updateOrganizationEmployeeStatus(updateOrganizationEmployeeStatusCommand);
-        //更新薪酬组（划掉）
-    }
-
     /**
      * 根据contactToken退出删除organization path路径下的所有机构
      *
