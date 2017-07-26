@@ -1178,7 +1178,7 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	@Override
-	public PortalPublishLog publish(PublishCommand cmd) {
+	public PortalPublishLogDTO publish(PublishCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId());
@@ -1217,8 +1217,13 @@ public class PortalServiceImpl implements PortalService {
 
 			}
 		});
-		return portalPublishLog;
+		return ConvertHelper.convert(portalPublishLog, PortalPublishLogDTO.class);
 	}
+
+	public PortalPublishLogDTO getPortalPublishLog(GetPortalPublishLogCommand cmd){
+		return ConvertHelper.convert(portalPublishLogProvider.findPortalPublishLogById(cmd.getId()), PortalPublishLogDTO.class);
+	}
+
 
 	private void publishLayout(PortalLayout layout){
 

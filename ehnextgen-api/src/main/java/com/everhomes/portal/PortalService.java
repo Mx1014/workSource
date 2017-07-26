@@ -5,107 +5,109 @@ import com.everhomes.rest.portal.*;
 
 import java.util.List;
 
-public interface PortalService {
+interface PortalService {
 
 
-	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
+	ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd);
 
 
-	public ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd);
+	ServiceModuleAppDTO createServiceModuleApp(CreateServiceModuleAppCommand cmd);
 
 	List<ServiceModuleAppDTO> batchCreateServiceModuleApp(BatchCreateServiceModuleAppCommand cmd);
 
-	public ServiceModuleAppDTO updateServiceModuleApp(UpdateServiceModuleAppCommand cmd);
+	ServiceModuleAppDTO updateServiceModuleApp(UpdateServiceModuleAppCommand cmd);
 
 
-	public void deleteServiceModuleApp(DeleteServiceModuleAppCommand cmd);
+	void deleteServiceModuleApp(DeleteServiceModuleAppCommand cmd);
 
 
-	public ListPortalLayoutsResponse listPortalLayouts(ListPortalLayoutsCommand cmd);
+	ListPortalLayoutsResponse listPortalLayouts(ListPortalLayoutsCommand cmd);
 
 
-	public PortalLayoutDTO createPortalLayout(CreatePortalLayoutCommand cmd);
+	PortalLayoutDTO createPortalLayout(CreatePortalLayoutCommand cmd);
 
 
-	public PortalLayoutDTO updatePortalLayout(UpdatePortalLayoutCommand cmd);
+	PortalLayoutDTO updatePortalLayout(UpdatePortalLayoutCommand cmd);
 
 
-	public void deletePortalLayout(DeletePortalLayoutCommand cmd);
+	void deletePortalLayout(DeletePortalLayoutCommand cmd);
 
 
-	public ListPortalItemGroupsResponse listPortalItemGroups(ListPortalItemGroupsCommand cmd);
+	ListPortalItemGroupsResponse listPortalItemGroups(ListPortalItemGroupsCommand cmd);
 
 
-	public PortalItemGroupDTO createPortalItemGroup(CreatePortalItemGroupCommand cmd);
+	PortalItemGroupDTO createPortalItemGroup(CreatePortalItemGroupCommand cmd);
 
 
-	public PortalItemGroupDTO updatePortalItemGroup(UpdatePortalItemGroupCommand cmd);
+	PortalItemGroupDTO updatePortalItemGroup(UpdatePortalItemGroupCommand cmd);
 
 
-	public void deletePortalItemGroup(DeletePortalItemGroupCommand cmd);
+	void deletePortalItemGroup(DeletePortalItemGroupCommand cmd);
 
 
-	public ListPortalItemsResponse listPortalItems(ListPortalItemsCommand cmd);
+	ListPortalItemsResponse listPortalItems(ListPortalItemsCommand cmd);
 
 	List<PortalItemDTO> listPortalItemsByItemGroupId(ListPortalItemsCommand cmd);
 
-	public PortalItemDTO createPortalItem(CreatePortalItemCommand cmd);
+	PortalItemDTO createPortalItem(CreatePortalItemCommand cmd);
 
 
-	public PortalItemDTO updatePortalItem(UpdatePortalItemCommand cmd);
+	PortalItemDTO updatePortalItem(UpdatePortalItemCommand cmd);
 
 
-	public void deletePortalItem(DeletePortalItemCommand cmd);
+	void deletePortalItem(DeletePortalItemCommand cmd);
 
 	void setPortalItemStatus(SetPortalItemStatusCommand cmd);
 
 	void setPortalItemActionData(SetPortalItemActionDataCommand cmd);
 
 
-	public void reorderPortalItem(ReorderPortalItemCommand cmd);
+	void reorderPortalItem(ReorderPortalItemCommand cmd);
 
 
-	public void reorderPortalItemGroup(ReorderPortalItemGroupCommand cmd);
+	void reorderPortalItemGroup(ReorderPortalItemGroupCommand cmd);
 
 
-	public PortalItemDTO getPortalItemById(GetPortalItemByIdCommand cmd);
+	PortalItemDTO getPortalItemById(GetPortalItemByIdCommand cmd);
 
 	PortalItemCategoryDTO getPortalItemCategoryById(GetPortalItemCategoryCommand cmd);
 
-	public ListPortalItemCategoriesResponse listPortalItemCategories(ListPortalItemCategoriesCommand cmd);
+	ListPortalItemCategoriesResponse listPortalItemCategories(ListPortalItemCategoriesCommand cmd);
 
 
-	public PortalItemCategoryDTO createPortalItemCategory(CreatePortalItemCategoryCommand cmd);
+	PortalItemCategoryDTO createPortalItemCategory(CreatePortalItemCategoryCommand cmd);
 
 
-	public PortalItemCategoryDTO updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd);
+	PortalItemCategoryDTO updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd);
 
 
-	public void deletePortalItemCategory(DeletePortalItemCategoryCommand cmd);
+	void deletePortalItemCategory(DeletePortalItemCategoryCommand cmd);
 
 
-	public void reorderPortalItemCategory(ReorderPortalItemCategoryCommand cmd);
+	void reorderPortalItemCategory(ReorderPortalItemCategoryCommand cmd);
 
 
-	public void rankPortalItemCategory(RankPortalItemCategoryCommand cmd);
+	void rankPortalItemCategory(RankPortalItemCategoryCommand cmd);
 
 
-	public PortalItemGroupDTO getPortalItemGroupById(GetPortalItemGroupByIdCommand cmd);
+	PortalItemGroupDTO getPortalItemGroupById(GetPortalItemGroupByIdCommand cmd);
 
 
-	public ListPortalNavigationBarsResponse listPortalNavigationBars(ListPortalNavigationBarsCommand cmd);
+	ListPortalNavigationBarsResponse listPortalNavigationBars(ListPortalNavigationBarsCommand cmd);
 
 
-	public PortalNavigationBarDTO createPortalNavigationBar(CreatePortalNavigationBarCommand cmd);
+	PortalNavigationBarDTO createPortalNavigationBar(CreatePortalNavigationBarCommand cmd);
 
 
-	public PortalNavigationBarDTO updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd);
+	PortalNavigationBarDTO updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd);
 
 
-	public void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd);
+	void deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd);
 
 
-	public PortalPublishLog publish(PublishCommand cmd);
+	PortalPublishLogDTO publish(PublishCommand cmd);
+
+	PortalPublishLogDTO getPortalPublishLog(GetPortalPublishLogCommand cmd);
 
 	List<PortalLayoutTemplateDTO> listPortalLayoutTemplates();
 

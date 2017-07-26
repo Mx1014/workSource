@@ -429,9 +429,19 @@ public class PortalController extends ControllerBase {
 	 * <b>URL: /portal/publish</b>
 	 */
 	@RequestMapping("publish")
-	@RestReturn(String.class)
+	@RestReturn(PortalPublishLogDTO.class)
 	public RestResponse publish(PublishCommand cmd){
 		return new RestResponse(portalService.publish(cmd));
+	}
+
+	/**
+	 * <p>获取发布状态</p>
+	 * <b>URL: /portal/getPortalPublishLog</b>
+	 */
+	@RequestMapping("getPortalPublishLog")
+	@RestReturn(PortalPublishLogDTO.class)
+	public RestResponse getPortalPublishLog(GetPortalPublishLogCommand cmd){
+		return new RestResponse(portalService.getPortalPublishLog(cmd));
 	}
 
 	/**
@@ -451,6 +461,6 @@ public class PortalController extends ControllerBase {
 	@RequestMapping("searchScopes")
 	@RestReturn(ListScopeResponse.class)
 	public RestResponse searchScopes(ListScopeCommand cmd){
-		return new RestResponse(portalService.listScopes(cmd));
+		return new RestResponse(portalService.searchScopes(cmd));
 	}
 }
