@@ -50,10 +50,7 @@ import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.ui.group.ListNearbyGroupBySceneCommand;
@@ -2762,10 +2759,16 @@ public class GroupServiceImpl implements GroupService {
             groupDto.setMemberForumPrivileges(memberForumPrivileges);
         } else {
             groupDto.setMemberOf((byte)0);
-            User user = userProvider.findUserById(uid);
-            if(user != null){
-                groupDto.setMemberNickName(user.getAccountName());
+            groupDto.setMemberNickName("");
+
+            Organization organization = organizationProvider.findOrganizationByGroupId(group.getId());
+            if(organization != null){
+                OrganizationMember orgmember = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, organization.getId());
+                if(orgmember != null && orgmember.getContactName() != null){
+                    groupDto.setMemberNickName(orgmember.getContactName());
+                }
             }
+
         }
     }
     
