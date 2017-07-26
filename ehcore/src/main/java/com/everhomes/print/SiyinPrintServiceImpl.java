@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -362,12 +363,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
 		//验证redis中存的identifierToken
-        String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken();
+        String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken().trim();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         
         RestResponse printResponse = new RestResponse();
         User user = UserContext.current().getUser();
-        if(null != valueOperations.get(key)){
+        boolean trueflag = false;
+        if(valueOperations.get(key) != null && valueOperations.get(key).length()>0){
+        	trueflag = true;
         	User logonUser  = new User();
         	//这里设置accoutname 为用户id-namespaceid-拥有者id，因为在jobLogNotification
         	//中计算价格的时候，不知道所在的园区，所以只能依靠
@@ -384,14 +387,24 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         String subject = PRINT_SUBJECT;
 
         // 必须重启一个线程来发布通知，通知二维码扫描成功，跳转到成功页面
-        ExecutorUtil.submit(new Runnable() {
-            @Override
-            public void run() {
-                localBus.publish(null, subject + "." + cmd.getIdentifierToken(), printResponse);
-            }
-        });
+        for (int i = 0; i < 5; i++) {
+        	ExecutorUtil.submit(new Runnable() {
+        		@Override
+        		public void run() {
+        			try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+        			localBus.publish(null, subject + "." + cmd.getIdentifierToken(), printResponse);
+        		}
+        	});
+		}
        
-        return new InformPrintResponse(PrintLogonStatusType.LOGON_SUCCESS.getCode());
+        if(trueflag)
+        	return new InformPrintResponse(PrintLogonStatusType.LOGON_SUCCESS.getCode());
+        return new InformPrintResponse(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode());
     
 	}
 

@@ -129,8 +129,37 @@ update `eh_web_menus` set `module_id` = 60200 where path like '/60000/60200%';
 update `eh_locale_strings` set text = '抱歉你没有代发权限' where scope = 'pmtask' and code = '10012';
 
 -- 给所有域空间配上内部管理模块以及管理模块  add by sfyan 20170721
-delete from eh_service_module_scopes where module_id in (select module_id from eh_web_menus where path like '%/50000/%' or id in (42100, 41400, 50000, 60000, 60100, 60200) group by module_id having module_id is not null) or module_id in (50000, 60000);
+delete from eh_service_module_scopes where module_id in (select module_id from eh_web_menus where path like '%/50000/%' or id in (42100, 41400, 50000, 60000, 60100) group by module_id having module_id is not null) or module_id in (50000, 60000);
 SET @service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) select (@service_module_scopes_id := @service_module_scopes_id + 1), ewms.owner_id, ifnull(ewm.module_id, ewm.id),2 from eh_web_menu_scopes ewms left join eh_web_menus ewm on ewms.menu_id = ewm.id where owner_type = 'EhNamespaces' and (ewm.path like '%/50000/%' or ewm.id in (42100, 41400, 50000, 60000, 60100, 60200)) group by ifnull(ewm.module_id, ewm.id),ewms.owner_id;
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) select (@service_module_scopes_id := @service_module_scopes_id + 1), ewms.owner_id, ifnull(ewm.module_id, ewm.id),2 from eh_web_menu_scopes ewms left join eh_web_menus ewm on ewms.menu_id = ewm.id where owner_type = 'EhNamespaces' and (ewm.path like '%/50000/%' or ewm.id in (42100, 41400, 50000, 60000, 60100)) group by ifnull(ewm.module_id, ewm.id),ewms.owner_id;
+
+-- 配置模块下的权限分类  add by sfyan 20170725
+SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(60110,'超级管理员',60100,'/60000/60100/60110','1','3','2','0',NOW()); 
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40007, '0', 'super.admin.list', '超级管理员列表查询', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60110','0',40007,'超级管理员列表查询','0',NOW());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40008, '0', 'super.admin.create', '超级管理员列表查询', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60110','0',40008,'创建修改超级管理员','0',NOW());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40010, '0', 'super.admin.delete', '超级管理员列表查询', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60110','0',40010,'删除超级管理员','0',NOW());
 
 
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(60120,'模块管理员',60100,'/60000/60100/60120','1','3','2','0',NOW()); 
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40019, '0', 'module.admin.list', '模块管理员列表查询', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60120','0',40019,'模块管理员列表查询','0',NOW());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40020, '0', 'module.admin.create', '创建模块超级管理员', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60120','0',40020,'创建模块超级管理员','0',NOW());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40021, '0', 'module.admin.update', '修改模块管理员', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60120','0',40021,'修改模块管理员','0',NOW());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40022, '0', 'module.admin.delete', '删除模块管理员', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60120','0',40022,'删除模块管理员','0',NOW());
+
+-- 暂时不开放业务责任部门分配的模块权限  add by sfyan 20170725
+delete from eh_service_module_scopes where module_id = 60200;	

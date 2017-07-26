@@ -2057,4 +2057,6 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	
 UPDATE `eh_configurations` SET VALUE = '2' WHERE  `name`= 'video.official.support' AND namespace_id = '999979' ;
 
-
+-- 配置业务模块 add by sfyan 20170126
+SET @service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) select (@service_module_scopes_id := @service_module_scopes_id + 1), ewms.owner_id, ifnull(ewm.module_id, ewm.id),2 from eh_web_menu_scopes ewms left join eh_web_menus ewm on ewms.menu_id = ewm.id where ewms.owner_type = 'EhNamespaces' and ewms.owner_id = 999979 and (ewm.path like '%/10000/%' or ewm.path like '%/20000/%' or ewm.path like '%/30000/%' or ewm.path like '%/40000/%' or ewm.id in (10000, 20000, 30000, 40000))  group by ifnull(ewm.module_id, ewm.id),ewms.owner_id;

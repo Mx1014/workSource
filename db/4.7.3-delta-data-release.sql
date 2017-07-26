@@ -55,3 +55,21 @@ update eh_service_modules set path = '/20000/20800/20811' where id = 20811;
 
 SET @template_id = (SELECT MAX(id) FROM `eh_locale_templates`); 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@template_id := @template_id + 1), 'equipment.notification', '6', 'zh_CN', '通知过期任务', '“${taskName}”过期未执行，请到后台查看详情', '0');
+
+
+
+-- 开放业务责任部门的模块权限分配 add by sfyan 20150725
+SET @service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) select (@service_module_scopes_id := @service_module_scopes_id + 1), ewms.owner_id, ifnull(ewm.module_id, ewm.id),2 from eh_web_menu_scopes ewms left join eh_web_menus ewm on ewms.menu_id = ewm.id where owner_type = 'EhNamespaces' and (ewm.id = 60200) group by ifnull(ewm.module_id, ewm.id),ewms.owner_id;
+
+SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(60210,'责任部门配置',60200,'/60000/60200/60210','1','3','2','0',NOW());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40023, '0', 'module.conf.relation.list', '责任部门配置列表查询', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60210','0',40023,'责任部门配置列表查询','0',NOW());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40024, '0', 'module.conf.relation.create', '创建修改责任部门配置', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60210','0',40024,'创建修改责任部门配置','0',NOW());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40026, '0', 'module.conf.relation.delete', '删除责任部门配置', NULL);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'60210','0',40026,'删除责任部门配置','0',NOW());
