@@ -161,7 +161,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
 
     @Override
-    public List query(SearchUniongroupDetailCommand cmd) {
+    public List  query(SearchUniongroupDetailCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         BoolQueryBuilder bqb = new BoolQueryBuilder();
 
