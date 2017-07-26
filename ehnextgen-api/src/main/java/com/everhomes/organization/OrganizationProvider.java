@@ -12,6 +12,7 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
 
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.userOrganization.UserOrganizations;
 import org.jooq.Condition;
 
@@ -24,6 +25,7 @@ import java.util.Set;
 public interface OrganizationProvider {
 	void createOrganization(Organization organization);
     void updateOrganization(Organization organization);
+	void updateOrganization(List<Long> ids, Byte status, Long uid, Timestamp now);
     void deleteOrganization(Organization organization);
     void deleteOrganizationById(Long id);
     Organization findOrganizationById(Long id);
@@ -39,6 +41,7 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize);
     void createOrganizationMember(OrganizationMember organizationMember);
     void updateOrganizationMember(OrganizationMember organizationMember);
+	void updateOrganizationMemberByOrgPaths(String path, Byte status, Long uid, Timestamp now);
     void deleteOrganizationMemberById(Long id);
     OrganizationMember findOrganizationMemberById(Long id);
     List<OrganizationMember> listOrganizationMembers(Long organizationId, Long memberUid, Long offset,Integer pageSize);
@@ -49,6 +52,7 @@ public interface OrganizationProvider {
     void updateOrganizationCommunity(OrganizationCommunity organizationCommunity);
     void deleteOrganizationCommunity(OrganizationCommunity organizationCommunity);
     void deleteOrganizationCommunityById(Long id);
+	void deleteOrganizationCommunityByOrgIds(List<Long> organizationIds);
     OrganizationCommunity findOrganizationCommunityById(Long id);
     OrganizationCommunity findOrganizationCommunityByOrgIdAndCmmtyId(Long orgId,Long cmmtyId);
     
@@ -152,6 +156,7 @@ public interface OrganizationProvider {
 	
 	void createOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest);
 	void updateOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest);
+	void updateOrganizationCommunityRequestByOrgIds(List<Long> orgIds,Byte status, Long uid, Timestamp now);
 	void deleteOrganizationCommunityRequestById(OrganizationCommunityRequest organizationCommunityRequest);
 	OrganizationCommunityRequest getOrganizationCommunityRequestById(Long id);
 	List<OrganizationCommunityRequest> queryOrganizationCommunityRequestByCommunityId(ListingLocator locator, Long comunityId
@@ -418,5 +423,6 @@ public interface OrganizationProvider {
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
-
+	
+	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 }

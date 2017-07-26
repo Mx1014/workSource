@@ -215,4 +215,8 @@ public interface UserService {
      * @return
      */
     UserIdentifierLogDTO listResetIdentifierCode(ListResetIdentifierCodeCommand cmd);
+	
+	//added by R 20170713, 通讯录2.4增加
+    SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
+
 }

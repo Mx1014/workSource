@@ -1401,12 +1401,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
-		OrganizationMember member = organizationService.createOrganizationAccount(command, roleId, namespaceId);
+
+		//创建管理员不再返回member
+		organizationService.createOrganizationAccount(command, roleId, namespaceId);
+
+
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(org.getNamespaceId(), cmd.getContactToken());
+
 
 		/**
 		 * 分配权限
 		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
+		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),userIdentifier.getOwnerUid(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
 	}
 
 	@Override
@@ -1500,10 +1506,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<OrganizationContactDTO> listOrganizationAdministrators(ListServiceModuleAdministratorsCommand cmd) {
-		List<OrganizationMember> members = this.getRoleMembers(cmd.getOrganizationId(), RoleConstants.ENTERPRISE_SUPER_ADMIN, cmd.getKeywords());
-		return members.stream().map(r -> {
-			return ConvertHelper.convert(r, OrganizationContactDTO.class);
-		}).collect(Collectors.toList());
+		return this.getRoleMembers(cmd.getOrganizationId(), RoleConstants.ENTERPRISE_SUPER_ADMIN, cmd.getKeywords());
 	}
 
 	/**
@@ -1548,23 +1551,37 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	/**
 	 * 获取角色人员, 可以根据关键字搜索的
 	 */
-	private List<OrganizationMember> getRoleMembers(Long organizationId, Long roleId, String keywords){
-		List<OrganizationMember> members = new ArrayList<>();
+	private List<OrganizationContactDTO> getRoleMembers(Long organizationId, Long roleId, String keywords){
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
 		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResource(EntityType.ORGANIZATIONS.getCode(), organizationId);
 		if(null != roleAssignments){
 			for (RoleAssignment roleassignment: roleAssignments) {
 				if(EntityType.fromCode(roleassignment.getTargetType()) == EntityType.USER && roleassignment.getRoleId().equals(roleId)){
+					OrganizationContactDTO dto = new OrganizationContactDTO();
+					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(roleassignment.getTargetId(), IdentifierType.MOBILE.getCode());
+					User user = userProvider.findUserById(roleassignment.getTargetId());
 					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(roleassignment.getTargetId(), organizationId);
-					if (null != member) {
-						if (keywords != null && !(member.getContactName().contains(keywords) || member.getContactToken().contains(keywords))) {
-							continue;
-						}
-						members.add(member);
+					if(user != null){
+						dto.setId(user.getId());
+						dto.setNickName(user.getNickName());
+						dto.setGender(user.getGender());
+						dto.setTargetId(user.getId());
 					}
+					if(userIdentifier != null){
+						dto.setContactToken(userIdentifier.getIdentifierToken());
+					}
+					if(member != null){
+						dto.setContactName(member.getContactName());
+						dto.setContactToken(member.getContactToken());
+						dto.setTargetType(PmMemberTargetType.USER.getCode());
+					}
+					dtos.add(dto);
 				}
 			}
 		}
-		return members;
+		if(dtos.size() > 0)
+			return dtos;
+		return null;
 	}
 
 	@Override

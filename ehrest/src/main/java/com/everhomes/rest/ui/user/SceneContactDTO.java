@@ -21,6 +21,8 @@ import com.everhomes.util.StringHelper;
  * <li>fullInitial: 名字全首字母</li>
  * <li>initial: 首字母</li>
  * <li>organizationPath: 机构path 路径，含层次关系，如/父亲id/第一层孩子id/第二层孩子id/...</li>
+ * <li>jobPosition: 用户岗位</li>
+ * <li>detailId: 用户档案id</li>
  * </ul>
  */
 public class SceneContactDTO {
@@ -41,8 +43,12 @@ public class SceneContactDTO {
     private String initial;
     private String fullPinyin;
     private String fullInitial;
-    
+
     private Byte neighborhoodRelation;
+
+    //added by R 20120713
+    private String jobPosition;
+    private Long detailId;
 
     public String getSceneType() {
         return sceneType;
@@ -177,7 +183,23 @@ public class SceneContactDTO {
 		this.fullInitial = fullInitial;
 	}
 
-	@Override
+    public String getJobPosition() {
+        return jobPosition;
+    }
+
+    public void setJobPosition(String jobPosition) {
+        this.jobPosition = jobPosition;
+    }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
