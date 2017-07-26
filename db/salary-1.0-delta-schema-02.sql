@@ -1,11 +1,4 @@
 
--- 添加索引 add by sfyan 20170703
-ALTER TABLE `eh_user_activities` ADD INDEX user_activitie_user_id ( `uid` );
-ALTER TABLE `eh_user_organizations` ADD INDEX user_organization_user_id (`user_id`);
-ALTER TABLE `eh_user_organizations` ADD INDEX user_organization_organization_id (`organization_id`);
-ALTER TABLE `eh_organization_details` ADD INDEX organization_detail_orgnaization_id (`organization_id`);
-ALTER TABLE `eh_organization_addresses` ADD INDEX organization_address_orgnaization_id (`organization_id`);
-
 -- identifier修改记录  add by xq.tian  2017/06/26
 -- DROP TABLE IF EXISTS `eh_user_identifier_logs`;
 CREATE TABLE `eh_user_identifier_logs` (
