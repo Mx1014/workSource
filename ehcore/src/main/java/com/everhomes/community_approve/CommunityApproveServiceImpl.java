@@ -261,18 +261,14 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         CommunityApproveVal obj = ConvertHelper.convert(ca, CommunityApproveVal.class);
         obj.setApproveId(ca.getId());
 
-        String nameDisplay = null;
-        String phoneDisplay = null;
         //取出姓名 手机号 公司信息
         for (PostApprovalFormItem val : cmd.getValues()) {
-            if (GeneralFormDataSourceType.USER_NAME.getCode().equals(val.getFieldName())) {
+            if (GeneralFormDataSourceType.USER_NAME.getCode().equals(val.getFieldName()))
                 obj.setNameValue(val.getFieldValue());
-                nameDisplay = val.getFieldDisplayName();
-            }
-            if (GeneralFormDataSourceType.USER_PHONE.getCode().equals(val.getFieldName())) {
+
+            if (GeneralFormDataSourceType.USER_PHONE.getCode().equals(val.getFieldName()))
                 obj.setPhoneValue(val.getFieldValue());
-                phoneDisplay = val.getFieldDisplayName();
-            }
+
             if (GeneralFormDataSourceType.USER_COMPANY.getCode().equals(val.getFieldName()))
                 obj.setCompanyValue(val.getFieldValue());
         }
@@ -286,10 +282,8 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
         cmd21.setProjectId(ca.getProjectId());
         cmd21.setProjectType(ca.getProjectType());
-        if (nameDisplay!=null)
-            cmd21.setContent(nameDisplay+":"+obj.getNameValue()+"\n");
-        if (phoneDisplay!=null)
-            cmd21.setContent(phoneDisplay+":"+obj.getPhoneValue()+"\n");
+        cmd21.setContent(CommunityApproveTranEnum.fromCode("USER_NAME")+":"+obj.getNameValue()+"\n");
+        cmd21.setContent(CommunityApproveTranEnum.fromCode("USER_PHONE")+":"+obj.getPhoneValue()+"\n");
 
         cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
         cmd21.setTitle(ca.getApproveName());
