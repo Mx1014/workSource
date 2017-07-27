@@ -651,7 +651,7 @@ public class PunchAdminController extends ControllerBase {
 //	}
 //	
 
-	//统计
+	//设置打卡规则
 	
 	/**
 	 * <b>URL: punch/addPunchGroup</b>
@@ -672,7 +672,7 @@ public class PunchAdminController extends ControllerBase {
 	/**
 	 * <b>URL: punch/listPunchGroups</b>
 	 * <p>
-	 * 新增打卡规则(考勤组)
+	 * 列出打卡规则(考勤组)
 	 * </p>
 	 */
 	@RequestMapping("addPunchGroup")
@@ -684,7 +684,39 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: punch/updatePunchGroup</b>
+	 * <p>
+	 * 更新打卡规则(考勤组)
+	 * </p>
+	 */
+	@RequestMapping("updatePunchGroup")
+	@RestReturn(value = PunchGroupDTO.class)
+	public RestResponse updatePunchGroup(@Valid PunchGroupDTO cmd) {
+		PunchGroupDTO commandResponse = punchService.updatePunchGroup(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
+
+	/**
+	 * <b>URL: punch/deletePunchGroup</b>
+	 * <p>
+	 * 删除打卡规则(考勤组)
+	 * </p>
+	 */
+	@RequestMapping("deletePunchGroup")
+	@RestReturn(value = String.class)
+	public RestResponse deletePunchGroup(@Valid DeleteCommonCommand cmd) {
+		punchService.deletePunchGroup(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	
 	//统计

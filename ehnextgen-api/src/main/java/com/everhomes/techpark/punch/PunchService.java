@@ -230,4 +230,8 @@ public interface PunchService {
 
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd);
 
+	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd);
+
+	public void deletePunchGroup(DeleteCommonCommand cmd);
+
 }

@@ -2982,10 +2982,10 @@ public class PunchServiceImpl implements PunchService {
 	PunchTimeRule convertPunchTimeRule(PunchTimeRuleDTO dto ){
 		PunchTimeRule punchTimeRule = ConvertHelper.convert(dto, PunchTimeRule.class);
 		punchTimeRule.setAfternoonArriveTime(convertTime(dto.getAfternoonArriveTime()));
-		punchTimeRule.setPunchTimesPerDay(dto.getPunchTimesPerDay());
+//		punchTimeRule.setPunchTimesPerDay(dto.getPunchTimesPerDay());
 		punchTimeRule.setNoonLeaveTime(convertTime(dto.getNoonLeaveTime())); 
 		punchTimeRule.setDaySplitTime(convertTime(dto.getDaySplitTime()));
-		convertTime(punchTimeRule, dto.getStartEarlyTime(), dto.getStartLateTime(), dto.getEndEarlyTime());
+//		convertTime(punchTimeRule, dto.getStartEarlyTime(), dto.getStartLateTime(), dto.getEndEarlyTime());
 		punchTimeRule.setCreatorUid( UserContext.current().getUser().getId());
 		punchTimeRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 				.getTime()));
@@ -3092,10 +3092,10 @@ public class PunchServiceImpl implements PunchService {
 		PunchTimeRuleDTO dto = ConvertHelper.convert(other, PunchTimeRuleDTO.class); 
 		dto.setAfternoonArriveTime(null!=other.getAfternoonArriveTimeLong()?other.getAfternoonArriveTimeLong():convertTimeToGMTMillisecond(other.getAfternoonArriveTime()));
 		dto.setNoonLeaveTime(null!=other.getNoonLeaveTimeLong()?other.getNoonLeaveTimeLong():convertTimeToGMTMillisecond(other.getNoonLeaveTime()));
-		dto.setStartEarlyTime(null!=other.getStartEarlyTimeLong()?other.getStartEarlyTimeLong():convertTimeToGMTMillisecond(other.getStartEarlyTime()));
-		dto.setStartLateTime(null!=other.getStartLateTimeLong()?other.getStartLateTimeLong():convertTimeToGMTMillisecond(other.getStartLateTime()));
-		
-		dto.setEndEarlyTime(dto.getStartEarlyTime() + (null!=other.getWorkTimeLong()?other.getWorkTimeLong():convertTimeToGMTMillisecond(other.getWorkTime())));
+//		dto.setStartEarlyTime(null!=other.getStartEarlyTimeLong()?other.getStartEarlyTimeLong():convertTimeToGMTMillisecond(other.getStartEarlyTime()));
+//		dto.setStartLateTime(null!=other.getStartLateTimeLong()?other.getStartLateTimeLong():convertTimeToGMTMillisecond(other.getStartLateTime()));
+//		
+//		dto.setEndEarlyTime(dto.getStartEarlyTime() + (null!=other.getWorkTimeLong()?other.getWorkTimeLong():convertTimeToGMTMillisecond(other.getWorkTime())));
 		dto.setDaySplitTime(null!=other.getDaySplitTimeLong()?other.getDaySplitTimeLong():convertTimeToGMTMillisecond(other.getDaySplitTime()));
 		return dto;
 	}
