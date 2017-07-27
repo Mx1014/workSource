@@ -249,7 +249,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         }
 
         Flow flow = flowService.getEnabledFlow(ca.getNamespaceId(), ca.getModuleId(),
-                ca.getModuleType(), ca.getId(), FlowOwnerType.COMMUNITY_APPROVE.getCode());
+                null, ca.getId(), FlowOwnerType.COMMUNITY_APPROVE.getCode());
         CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
         Long userId = UserContext.current().getUser().getId();
         cmd21.setApplyUserId(userId);
@@ -281,9 +281,9 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         for (PostApprovalFormItem val : cmd.getValues()) {
             if (GeneralFormDataSourceType.USER_NAME.getCode().equals(val.getFieldName()))
                 obj.setNameValue(val.getFieldValue());
-            if (GeneralFormDataSourceType.USER_PHONE.equals(val.getFieldName()))
+            if (GeneralFormDataSourceType.USER_PHONE.getCode().equals(val.getFieldName()))
                 obj.setPhoneValue(val.getFieldValue());
-            if (GeneralFormDataSourceType.USER_COMPANY.equals(val.getFieldName()))
+            if (GeneralFormDataSourceType.USER_COMPANY.getCode().equals(val.getFieldName()))
                 obj.setCompanyValue(val.getFieldValue());
         }
         Long communityApproveValId = this.communityApproveValProvider.createCommunityApproveVal(obj);
