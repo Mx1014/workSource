@@ -167,7 +167,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
     @Override
     public void enableCommunityApprove(CommunityApproveIdCommand cmd) {
         CommunityApprove ca = this.communityApproveProvider.getCommunityApproveById(cmd.getId());
-        if (ca.getFormVersion()==null||ca.getFormVersion()==0)
+        if (ca.getFormOriginId()==null||ca.getFormOriginId()==0)
             throw RuntimeErrorException.errorWith(CommunityApproveServiceErrorCode.SCOPE,
                     CommunityApproveServiceErrorCode.ERROR_NOT_SET_FORM,"Form Not SET");
         Flow flow = flowService.getEnabledFlow(ca.getNamespaceId(),ca.getModuleId(),null,ca.getId(),
