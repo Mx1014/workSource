@@ -40,6 +40,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 --
 -- 第一步
 ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, ADD INDEX i_eh_imei_number(imei_number);
+ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, ADD INDEX i_eh_create_time(create_time);
 ALTER TABLE eh_terminal_app_version_cumulatives ALGORITHM=inplace, LOCK=NONE, ADD INDEX i_eh_imei_number(imei_number);
 ALTER TABLE eh_terminal_app_version_actives ALGORITHM=inplace, LOCK=NONE, ADD INDEX i_eh_imei_number(imei_number);
 
@@ -56,10 +57,6 @@ DELETE FROM `eh_user_activities` WHERE `uid` = 0;
 
 UPDATE `eh_user_activities` AS u SET u.`imei_number` = u.`uid`;
 
--- 第三步
-ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, DROP INDEX i_eh_imei_number;
-ALTER TABLE eh_terminal_app_version_cumulatives ALGORITHM=inplace, LOCK=NONE, DROP INDEX i_eh_imei_number;
-ALTER TABLE eh_terminal_app_version_actives ALGORITHM=inplace, LOCK=NONE, DROP INDEX i_eh_imei_number;
 
 -- by xiongying
 update eh_service_modules set level = 3 where id = 20811;
