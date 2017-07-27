@@ -361,11 +361,13 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                 row1.setRowStyle(style);
                 row1.createCell(0).setCellValue("序号");
                 row1.createCell(1).setCellValue("姓名");
-                row1.createCell(2).setCellValue("手机号码");
+                row1.createCell(2).setCellValue("联系电话");
                 row1.createCell(3).setCellValue("企业");
-                row1.createCell(4).setCellValue("提交时间");
+                row1.createCell(4).setCellValue("审批名称");
+                row1.createCell(5).setCellValue("提交时间");
+
                 rows.put(dto.getApproveId()+""+dto.getFormOriginId(),1);
-                int column = 5;
+                int column = 6;
                 GeneralFormIdCommand cmd2 = new GeneralFormIdCommand();
                 cmd2.setFormOriginId(dto.getFormOriginId());
                 GeneralFormDTO formDTO = generalFormService.getGeneralForm(cmd2);
@@ -390,7 +392,8 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             row.createCell(1).setCellValue(dto.getName());
             row.createCell(2).setCellValue(dto.getPhone());
             row.createCell(3).setCellValue(dto.getCompany());
-            row.createCell(4).setCellValue(dto.getCreateTime().toString());
+            row.createCell(4).setCellValue(dto.getApproveName());
+            row.createCell(5).setCellValue(dto.getCreateTime().toString());
             for (PostApprovalFormItem item:items){
                 if (null==keyColumMap.get(item.getFieldName()))
                     continue;
@@ -430,7 +433,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         }else{
             GeneralForm gf = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(dto.getFormOriginId()
                     ,dto.getFormVersion());
-            sheet = wb.createSheet(gf.getFormName()+gf.getId());
+            sheet = wb.createSheet(ca.getApproveName()+gf.getId());
         }
         return sheet;
     }
