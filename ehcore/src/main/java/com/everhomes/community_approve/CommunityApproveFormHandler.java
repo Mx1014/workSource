@@ -64,7 +64,7 @@ public class CommunityApproveFormHandler  implements GeneralFormModuleHandler {
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(ca.getFormOriginId());
         if(form == null )
             throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
-                    CommunityApproveServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
+                    GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
         List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
         fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
