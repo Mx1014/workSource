@@ -1273,12 +1273,15 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd) {
 		Integer abnormalNumber = 0;
-		//查询异常员工人数
+		//查询异常员工人数 = 未关联的人+关联批次但实发工资没有的人
 		//异常员工判断1:未关联批次
-		//TODO: 组织架构提供未关联批次的
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
         //  获取公司总人数
-        Integer unLinkNumber = uniongroupService.countUnionGroupMemberDetailsByOrgId(org.getNamespaceId(),org.getId());
+        Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
+        // 获取已关联人数
+        Integer LinkedNumber = uniongroupService.countUnionGroupMemberDetailsByOrgId(org.getNamespaceId(),org.getId());
+        // 计算未关联人数
+        Integer unLinkNumber =allOrganizationInteger -  LinkedNumber;
 		abnormalNumber += unLinkNumber;
 		//判断2:关联了批次,但是实发工资为"-"
 		//查询eh_salary_employee_period_vals 本期 的 实发工资(entity_id=98)数据为null的记录数
