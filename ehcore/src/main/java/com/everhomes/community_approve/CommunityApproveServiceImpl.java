@@ -26,6 +26,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.yellowPage.ServiceAllianceRequestInfoSearcherImpl;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -98,7 +99,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
         // flow
         Flow flow = flowService.getEnabledFlow(r.getNamespaceId(), r.getModuleId(),
-                r.getModuleType(), r.getId(), FlowOwnerType.COMMUNITY_APPROVE.getCode());
+                null, r.getId(), FlowOwnerType.COMMUNITY_APPROVE.getCode());
 
         if (null != flow) {
             result.setFlowName(flow.getFlowName());
@@ -166,6 +167,14 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
     @Override
     public void enableCommunityApprove(CommunityApproveIdCommand cmd) {
         CommunityApprove ca = this.communityApproveProvider.getCommunityApproveById(cmd.getId());
+        if (ca.getFormVersion()==null||ca.getFormVersion()==0)
+            throw RuntimeErrorException.errorWith(CommunityApproveServiceErrorCode.SCOPE,
+                    CommunityApproveServiceErrorCode.ERROR_NOT_SET_FORM,"Form Not SET");
+        Flow flow = flowService.getEnabledFlow(ca.getNamespaceId(),ca.getModuleId(),null,ca.getId(),
+                FlowOwnerType.COMMUNITY_APPROVE.getCode());
+        if (flow == null)
+            throw RuntimeErrorException.errorWith(CommunityApproveServiceErrorCode.SCOPE,
+                    CommunityApproveServiceErrorCode.ERROR_NOT_SET_FLOW,"Flow Not SET");
         ca.setStatus(CommunityApproveStatus.RUNNING.getCode());
         this.communityApproveProvider.updateCommunityApprove(ca);
     }

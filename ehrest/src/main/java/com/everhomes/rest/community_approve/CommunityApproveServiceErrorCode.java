@@ -6,6 +6,6 @@ package com.everhomes.rest.community_approve;
 public interface CommunityApproveServiceErrorCode {
     static final String SCOPE = "community_approve";
 
-    static final int ERROR_FORM_NOTFOUND = 10001;  //查询年份出错
-    static final int ERROR_FORMULA_CHECK  = 10002;  //公式校验错误
+    static final int ERROR_NOT_SET_FORM = 10001;  //没有设置表单
+    static final int ERROR_NOT_SET_FLOW  = 10002;  //没有设置工作流
 }
