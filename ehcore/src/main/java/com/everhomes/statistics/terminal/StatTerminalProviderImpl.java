@@ -259,11 +259,12 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
         LOGGER.debug("statistical start number and active user number sql:{}", selectConditionStep1.getSQL());
-        if(null == selectConditionStep1.fetchOne()){
+        Record2<Integer, Integer> fetchAny = selectConditionStep1.fetchAny();
+        if(null == fetchAny){
             statistics.setStartNumber(0L);
             statistics.setActiveUserNumber(0L);
         }else{
-            selectConditionStep1.fetchOne().map(r ->{
+            fetchAny.map(r ->{
                 statistics.setStartNumber(Long.valueOf(r.getValue(0).toString()));
                 statistics.setActiveUserNumber(Long.valueOf(r.getValue(1).toString()));
                 return null;
@@ -292,10 +293,11 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
         LOGGER.debug("statistical new user number sql:{}", selectConditionStep2.getSQL());
-        if(null == selectConditionStep2.fetchOne()){
+        Record1<Integer> fetchAny1 = selectConditionStep2.fetchAny();
+        if(null == fetchAny1){
             statistics.setNewUserNumber(0L);
         }else {
-            selectConditionStep2.fetchOne().map(r -> {
+            fetchAny1.map(r -> {
                 statistics.setNewUserNumber(Long.valueOf(r.getValue(0).toString()));
                 return null;
             });
@@ -312,10 +314,11 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
         LOGGER.debug("statistical cumulative user number sql:{}", selectConditionStep3.getSQL());
-        if(null == selectConditionStep3.fetchOne()){
+        Record1<Integer> fetchAny2 = selectConditionStep3.fetchAny();
+        if(null == fetchAny2){
             statistics.setCumulativeUserNumber(0L);
         }else {
-            selectConditionStep3.fetchOne().map(r -> {
+            fetchAny2.map(r -> {
                 statistics.setCumulativeUserNumber(Long.valueOf(r.getValue(0).toString()));
                 return null;
             });
@@ -340,10 +343,11 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 .where(condition)
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
         LOGGER.debug("statistical active user number sql:{}", step.getSQL());
-        if(null == step.fetchOne()){
+        Record1<Integer> fetchAny = step.fetchAny();
+        if(null == fetchAny){
             return 0L;
         }
-        return step.fetchOne().map(r ->{
+        return fetchAny.map(r ->{
             return Long.valueOf(r.getValue(0).toString());
         });
     }
@@ -360,10 +364,11 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES)
                 .where(condition);
-        if(null == step.fetchOne()){
+        Record1<Integer> fetchAny = step.fetchAny();
+        if(null == fetchAny){
             return 0L;
         }
-        return step.fetchOne().map(r ->{
+        return fetchAny.map(r ->{
             return Long.valueOf(r.getValue(0).toString());
         });
     }
@@ -380,10 +385,11 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
                 .where(condition);
-        if(null == step.fetchOne()){
+        Record1<Integer> fetchAny = step.fetchAny();
+        if(null == fetchAny){
             return 0L;
         }
-        return step.fetchOne().map(r ->{
+        return fetchAny.map(r ->{
             return Long.valueOf(r.getValue(0).toString());
         });
     }
@@ -409,10 +415,11 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
                 .where(condition);
-        if(null == step.fetchOne()){
+        Record1<Integer> fetchAny = step.fetchAny();
+        if(null == fetchAny){
             return 0L;
         }
-        return step.fetchOne().map(r ->{
+        return fetchAny.map(r ->{
             return Long.valueOf(r.getValue(0).toString());
         });
     }
@@ -440,10 +447,11 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
         LOGGER.debug("statistical start number and active user number sql:{}", step.getSQL());
-        if(null == step.fetchOne()){
+        Record1<Integer> fetchAny = step.fetchAny();
+        if(null == fetchAny){
             return 0L;
         }
-        return step.fetchOne().map(r ->{
+        return fetchAny.map(r ->{
             return Long.valueOf(r.getValue(0).toString());
         });
     }
