@@ -89,4 +89,4 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) 
 VALUES ('20220', '任务列表', '20200', NULL, 'react:/repair-management/task-list/1', '0', '2', '/20000/20230/20220', 'park', '220', '20100', '3', NULL, 'module');
 
-update `eh_web_menu_scopes` set menu_id = 20220 where menu_id = 20210 and namespace_id = 999983;
+update `eh_web_menu_scopes` set menu_id = 20220 where menu_id = 20210 and owner_id = 999983;
