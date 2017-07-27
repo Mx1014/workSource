@@ -25,7 +25,7 @@ public class ListCommunityApproveValCommand {
     private Long timeStart;
     private Long timeEnd;
     private String approveName;
-    private String keyWord;
+    private String keywords;
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -93,12 +93,12 @@ public class ListCommunityApproveValCommand {
         this.approveName = approveName;
     }
 
-    public String getKeyWord() {
-        return keyWord;
+    public String getKeywords() {
+        return keywords;
     }
 
-    public void setKeyWord(String keyWord) {
-        this.keyWord = keyWord;
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
     }
 
     public Long getPageAnchor() {

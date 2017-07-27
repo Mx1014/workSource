@@ -225,9 +225,9 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
                         if (null!=cmd.getApproveName())
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.APPROVE_NAME.eq(cmd.getApproveName()));
-                        if (null!=cmd.getKeyWord())
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.NAME_VALUE.like("%"+cmd.getKeyWord()+"%").or(
-                                Tables.EH_COMMUNITY_APPROVE_VALS.PHONE_VALUE.like("%"+cmd.getKeyWord()+"%")
+                        if (null!=cmd.getKeywords())
+                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.NAME_VALUE.like("%"+cmd.getKeywords()+"%").or(
+                                Tables.EH_COMMUNITY_APPROVE_VALS.PHONE_VALUE.like("%"+cmd.getKeywords()+"%")
                         ));
                         if (null!=cmd.getTimeStart() && null!=cmd.getTimeEnd())
                         query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.CREATE_TIME.between(
