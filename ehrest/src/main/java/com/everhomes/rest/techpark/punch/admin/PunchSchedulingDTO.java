@@ -8,9 +8,10 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId：id</li>
  * <li>targetType: 填organization/user</li>
  * <li>targetId：对应设置目标的id比如机构比如人的id</li>
+ * <li>punchOriganizationId：考勤组id</li>
  * <li>ruleDate: 日期 时间戳</li>
  * <li>timeRuleId: 班次id --如果没有排班就是null ,休息日</li>
- * <li>timeRuleName: 班次名称</li>
+ * <li>timeRuleName: 班次名称 -- 如果没有timeRuleId 就通过name找</li>
  * <li>timeRuleDescription: 班次描述</li>
  * 
  * </ul>
@@ -21,6 +22,7 @@ public class PunchSchedulingDTO {
 	private Long ownerId;
 	private String targetType;
 	private Long targetId;
+	private Long punchOriganizationId;
 	private Long ruleDate;
 	private Long timeRuleId;
 	private String timeRuleName;
@@ -72,6 +74,12 @@ public class PunchSchedulingDTO {
 	}
 	public void setTimeRuleDescription(String timeRuleDescription) {
 		this.timeRuleDescription = timeRuleDescription;
+	}
+	public Long getPunchOriganizationId() {
+		return punchOriganizationId;
+	}
+	public void setPunchOriganizationId(Long punchOriganizationId) {
+		this.punchOriganizationId = punchOriganizationId;
 	}
 	
 	

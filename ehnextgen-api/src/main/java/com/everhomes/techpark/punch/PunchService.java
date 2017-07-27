@@ -10,9 +10,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.techpark.punch.*;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.approval.ApprovalRule;
+import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
@@ -22,6 +24,8 @@ import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchPointsCommand;
@@ -35,6 +39,7 @@ import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFisResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.PunchGroupDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
@@ -220,5 +225,9 @@ public interface PunchService {
 
 	//  punch 2.8 added by R 20170725
 	ListPunchSupportiveAddressCommandResponse listPunchSupportiveAddress(ListPunchSupportiveAddressCommand cmd);
+
+	public PunchGroupDTO addPunchGroup(AddPunchGroupCommand cmd);
+
+	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd);
 
 }
