@@ -2547,19 +2547,19 @@ public class EquipmentServiceImpl implements EquipmentService {
 				if(StringUtils.isNotBlank(s[3])) {
 					standard.setStandardSource(s[3]);
 				} else {
-					standard.setStandardSource(s[3]);
+					standard.setStandardSource("");
 				}
 
 				if(StringUtils.isNotBlank(s[4])) {
 					standard.setDescription(s[4]);
 				} else {
-					standard.setDescription(s[4]);
+					standard.setDescription("");
 				}
 
 				if(StringUtils.isNotBlank(s[5])) {
 					standard.setRemarks(s[5]);
 				} else {
-					standard.setRemarks(s[5]);
+					standard.setRemarks("");
 				}
 
 				standard.setOwnerType(cmd.getOwnerType());
