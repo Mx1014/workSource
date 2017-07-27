@@ -49,10 +49,10 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-	static String url = "http://tgd.poapi.parkingjet.cn:8082/CommonOpenApi/default.ashx";
-	static String appid = "201706221000";
-	static String appkey = "qyruirxn20145601739";
-	static String parkingid = "0755000120170301000000000003";
+//	static String url = "HTTP://TGD.POAPI.PARKINGJET.CN:8082/COMMONOPENAPI/DEFAULT.ASHX";
+//	STATIC STRING APPID = "201706221000";
+//	STATIC STRING APPKEY = "QYRUIRXN20145601739";
+//	STATIC STRING PARKINGID = "0755000120170301000000000003";
 
 	@Autowired
 	private ParkingProvider parkingProvider;
@@ -403,7 +403,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	public String applyTempCard(ParkingClearanceLog log) {
 
 		Map<String, String> params = createGeneralParam(APPLY_TEMP_CARD, createApplyTempCardParam(log));
-
+		String url = configProvider.getValue("parking.zijing.url", "");
 		String responseJson = Utils.post(url, params);
 
 
@@ -419,7 +419,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	public List<JinyiClearance> getTempCardLogs(ParkingClearanceLog log) {
 
 		Map<String, String> params = createGeneralParam(GET_TEMP_CARD_LOGS, createGetTempCardLogsParam(log.getLogToken()));
-
+		String url = configProvider.getValue("parking.zijing.url", "");
 		String responseJson = Utils.post(url, params);
 
 
@@ -436,6 +436,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 
 	private JSONObject createApplyTempCardParam(ParkingClearanceLog log) {
 		JSONObject json = new JSONObject();
+		String parkingid = configProvider.getValue("parking.zijing.parkingid", "");
 		json.put("parkingid", parkingid);
 		json.put("plateno", log.getPlateNumber());
 		json.put("thirddataid", log.getId());
