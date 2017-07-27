@@ -3,10 +3,10 @@ ALTER TABLE `eh_punch_rules` ADD COLUMN `punch_organization_id` BIGINT;
 ALTER TABLE `eh_punch_rules` ADD COLUMN `china_holiday_flag` TINYINT COMMENT '同步法定节假日0- no  ; 1- yes ';
 
 ALTER TABLE `eh_punch_holidays` ADD COLUMN `exchange_from_date` DATE DEFAULT NULL COMMENT '特殊上班日:上原本哪天的班次';
-ALTER TABLE `eh_punch_day_logs` ADD COLUMN status_list VARCHAR(20) COMMENT '多次打卡的状态用/分隔 example: 1 ; 1/13 ; 13/3/4 ',
+ALTER TABLE `eh_punch_day_logs` ADD COLUMN status_list VARCHAR(20) COMMENT '多次打卡的状态用/分隔 example: 1 ; 1/13 ; 13/3/4 ';
 
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `rule_type` TINYINT DEFAULT '0' COMMENT '0- 排班制 ; 1- 固定班次';
-ALTER TABLE `eh_punch_time_rules` ADD COLUMN `open_weekday` VARCHAR(7) DEFAULT NULL COMMENT '7位二进制，0000000每一位表示星期7123456',
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `open_weekday` VARCHAR(7) DEFAULT NULL COMMENT '7位二进制，0000000每一位表示星期7123456';
 
 -- 固定时间制:特殊日期
 CREATE TABLE `eh_punch_special_days` (
@@ -44,3 +44,4 @@ CREATE TABLE `eh_punch_time_intervals` (
   `operate_time` DATETIME ,
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
