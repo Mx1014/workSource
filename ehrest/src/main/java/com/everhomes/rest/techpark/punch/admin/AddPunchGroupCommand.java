@@ -19,7 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchGeoPoints: 地点规则 {@link com.everhomes.rest.techpark.punch.PunchGeoPointDTO}</li>
  * <li>wifis: wifi规则{@link com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO}</li>
  * <li>timeRule: 上班时间{@link com.everhomes.rest.techpark.punch.PunchTimeRuleDTO}</li>
- * <li>specialDay: 特殊日期列表 {@link com.everhomes.rest.techpark.punch.admin.PunchSpecialDayDTO}</li>
+ * <li>specialDays: 特殊日期列表 {@link com.everhomes.rest.techpark.punch.admin.PunchSpecialDayDTO}</li>
  * <li>schedulings: 排班列表{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO}</li>
  * <li>chinaHolidayFlag: 使用中国法定假日falg  0-否 1-是 </li>
  * </ul>
@@ -48,7 +48,7 @@ public class AddPunchGroupCommand {
 	private PunchTimeRuleDTO timeRule;
 	  
 	@ItemType(PunchSpecialDayDTO.class)
-	private List<PunchSpecialDayDTO> specialDay;
+	private List<PunchSpecialDayDTO> specialDays;
 	
 
 	@ItemType(PunchSchedulingDTO.class)
@@ -124,15 +124,7 @@ public class AddPunchGroupCommand {
 	public void setTimeRule(PunchTimeRuleDTO timeRule) {
 		this.timeRule = timeRule;
 	}
-
-	public PunchSpecialDayDTO getSpecialDay() {
-		return specialDay;
-	}
-
-	public void setSpecialDay(PunchSpecialDayDTO specialDay) {
-		this.specialDay = specialDay;
-	}
-
+ 
 	public Byte getChinaHolidayFlag() {
 		return chinaHolidayFlag;
 	}
@@ -147,6 +139,14 @@ public class AddPunchGroupCommand {
 
 	public void setSchedulings(List<PunchSchedulingDTO> schedulings) {
 		this.schedulings = schedulings;
+	}
+
+	public List<PunchSpecialDayDTO> getSpecialDays() {
+		return specialDays;
+	}
+
+	public void setSpecialDays(List<PunchSpecialDayDTO> specialDays) {
+		this.specialDays = specialDays;
 	}
 
  
