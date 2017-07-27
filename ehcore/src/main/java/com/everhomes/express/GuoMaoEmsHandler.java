@@ -17,15 +17,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.express.guomao.GuoMaoChinaPostResponseEntity;
+import com.everhomes.express.guomao.GuoMaoEMSResponseEntity;
+import com.everhomes.parking.Utils;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
+import com.everhomes.util.RuntimeErrorException;
 //后面的3为表eh_express_companies中父id为0的行的id， 国贸 EMS
 @Component(ExpressHandler.EXPRESS_HANDLER_PREFIX+"2")
 public class GuoMaoEmsHandler implements ExpressHandler{
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(GuoMaoEmsHandler.class);
+	//日期格式
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
 
+	//EMS标准快递代号，目前只用标准快递
+	private static final String STANDARD_BIZ_CODE = "06";
+	private static final String UTF8_CHARACTER_SET = "UTF-8";
+	
 	@Override
 	public String getBillNo(ExpressOrder expressOrder) {
 		// TODO Auto-generated method stub
@@ -40,11 +54,38 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 
 	@Override
 	public void createOrder(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-		String params = generateGetMailNumParams(expressOrder, expressCompany);
-		
+		Map<String, String> params = generateGetMailNumParams(expressOrder, expressCompany);
+		String jsonResult = sendApplicationXwwwFormUrlencodedRequest(params, expressCompany.getOrderUrl());
+		GuoMaoEMSResponseEntity<List<String>> response = JSONObject.parseObject(jsonResult,new TypeReference<GuoMaoEMSResponseEntity<List<String>>(){});
 	}
 
-	private String generateGetMailNumParams(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+
+	@Override
+	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private String sendApplicationXwwwFormUrlencodedRequest(Map<String, String> params, String url){
+		Map<String,String> heads = new HashMap<String,String>();
+		heads.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+		heads.put("Accept", "text/xml,text/javascript,text/html");
+		return Utils.post(url, params, heads);
+	}
+	
+	private Map<String, String> generateGetMailNumParams(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		//系统级别参数
+		Map<String, String> params = getGeneralParams(expressCompany);
+		//接口级别参数
+		params.put("count", "1");//获取一个快递单号就行了
+		params.put("bizcode", STANDARD_BIZ_CODE);
+		String pkEmsSignature = sign(params, expressCompany.getAppSecret(), UTF8_CHARACTER_SET);
+		params.put("sign", pkEmsSignature);
+		return params;
+//		return generateStringParam(params);
+	}
+	
+	private Map<String, String> getGeneralParams(ExpressCompany expressCompany){
 		Map<String, String> params = new HashMap<String, String>();
 		//系统参数取值
 		params.put("timestamp", DATE_TIME_FORMATTER.format(Instant.now()));
@@ -53,33 +94,11 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 //		params.put("partner_id", ""); // 可不填写
 		params.put("format", "json");
 		params.put("app_key", expressCompany.getAppKey());
-		params.put("charset", "UTF-8");
+		params.put("charset", UTF8_CHARACTER_SET);
 		params.put("authorization", expressCompany.getAuthorization());
-		//接口级别参数
-		params.put("count", "1");
-		params.put("bizcode", "06");
-		String pkEmsSignature = sign(params, expressCompany.getAppSecret(), "UTF-8");
-		params.put("sign", pkEmsSignature);
-		return generateStringParam(params);
+		return params;
 	}
 
-	@Override
-	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-
-	private static String generateStringParam(Map<String, String> params) {
-		StringBuffer buffer = new StringBuffer();
-		for (Iterator<String> iterator = params.keySet().iterator(); iterator.hasNext();) {
-			String key = (String) iterator.next();
-			buffer.append("&").append(key).append("=").append(params.get(key));
-			
-		}
-		return buffer.toString().substring(1);
-	
-	}
 	public static String sign(Map<String, String> params, String appSecret, String charset) {
 		// 得到“生成签名的字符串”
 		String content = getSortParams(params) + appSecret;
@@ -92,9 +111,14 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 			MessageDigest md5 = MessageDigest.getInstance("MD5");
 			sign = Base64.getEncoder().encodeToString(md5.digest(content.getBytes(charset)));
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			LOGGER.error("guomao ems sign excetion = {}", e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"guomao ems sign excetion = "+e);
+		
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			LOGGER.error("guomao ems sign excetion = {}", e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"guomao ems sign excetion = "+e);
 		}
 		return sign;
 	}
