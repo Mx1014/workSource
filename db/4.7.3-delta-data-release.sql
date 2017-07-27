@@ -73,3 +73,9 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40026, '0', 'module.conf.relation.delete', '删除责任部门配置', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
     VALUES((@module_privilege_id := @module_privilege_id + 1),'60210','0',40026,'删除责任部门配置','0',NOW());
+    
+-- fix 13160 数据交错问题 add by xiongying 20170727
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) 
+VALUES ('20220', '任务列表', '20200', NULL, 'react:/repair-management/task-list/1', '0', '2', '/20000/20230/20220', 'park', '220', '20100', '3', NULL, 'module');
+
+update `eh_web_menu_scopes` set menu_id = 20220 where menu_id = 20210 and namespace_id = 999983;
