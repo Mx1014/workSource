@@ -257,6 +257,26 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             this.generalFormProvider.updateGeneralForm(form);
         }
 
+
+        CommunityApproveVal obj = ConvertHelper.convert(ca, CommunityApproveVal.class);
+        obj.setApproveId(ca.getId());
+
+        String nameDisplay = null;
+        String phoneDisplay = null;
+        //取出姓名 手机号 公司信息
+        for (PostApprovalFormItem val : cmd.getValues()) {
+            if (GeneralFormDataSourceType.USER_NAME.getCode().equals(val.getFieldName())) {
+                obj.setNameValue(val.getFieldValue());
+                nameDisplay = val.getFieldDisplayName();
+            }
+            if (GeneralFormDataSourceType.USER_PHONE.getCode().equals(val.getFieldName())) {
+                obj.setPhoneValue(val.getFieldValue());
+                phoneDisplay = val.getFieldDisplayName();
+            }
+            if (GeneralFormDataSourceType.USER_COMPANY.getCode().equals(val.getFieldName()))
+                obj.setCompanyValue(val.getFieldValue());
+        }
+//工作流
         Flow flow = flowService.getEnabledFlow(ca.getNamespaceId(), ca.getModuleId(),
                 null, ca.getId(), FlowOwnerType.COMMUNITY_APPROVE.getCode());
         CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
@@ -266,7 +286,11 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
         cmd21.setProjectId(ca.getProjectId());
         cmd21.setProjectType(ca.getProjectType());
-        cmd21.setContent(JSON.toJSONString(cmd));
+        if (nameDisplay!=null)
+            cmd21.setContent(nameDisplay+":"+obj.getNameValue()+"\n");
+        if (phoneDisplay!=null)
+            cmd21.setContent(phoneDisplay+":"+obj.getPhoneValue()+"\n");
+
         cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
         cmd21.setTitle(ca.getApproveName());
 
@@ -282,19 +306,8 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             cmd21.setFlowVersion(flow.getFlowVersion());
             flowCase = flowService.createFlowCase(cmd21);
         }
-
-        CommunityApproveVal obj = ConvertHelper.convert(ca, CommunityApproveVal.class);
-        obj.setApproveId(ca.getId());
+//存审批信息
         obj.setFlowCaseId(flowCase.getId());
-        //取出姓名 手机号 公司信息
-        for (PostApprovalFormItem val : cmd.getValues()) {
-            if (GeneralFormDataSourceType.USER_NAME.getCode().equals(val.getFieldName()))
-                obj.setNameValue(val.getFieldValue());
-            if (GeneralFormDataSourceType.USER_PHONE.getCode().equals(val.getFieldName()))
-                obj.setPhoneValue(val.getFieldValue());
-            if (GeneralFormDataSourceType.USER_COMPANY.getCode().equals(val.getFieldName()))
-                obj.setCompanyValue(val.getFieldValue());
-        }
         Long communityApproveValId = this.communityApproveValProvider.createCommunityApproveVal(obj);
 
         //将值存起来
