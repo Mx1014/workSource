@@ -135,12 +135,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         if(null != imei){
             query.addConditions(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.IMEI_NUMBER.eq(imei));
         }
-        if(null == query.fetchOne()){
-            return null;
-        }
-        return query.fetchOne().map(r ->{
-            return ConvertHelper.convert(r, TerminalAppVersionCumulatives.class);
-        });
+        return query.fetchAnyInto(TerminalAppVersionCumulatives.class);
     }
 
     @Override
@@ -172,12 +167,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         if(null != imei){
             query.addConditions(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.eq(imei));
         }
-        if(null == query.fetchOne()){
-            return null;
-        }
-        return query.fetchOne().map(r ->{
-            return ConvertHelper.convert(r, TerminalAppVersionActives.class);
-        });
+        return query.fetchAnyInto(TerminalAppVersionActives.class);
     }
 
     @Override
@@ -186,12 +176,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         SelectQuery<EhTerminalDayStatisticsRecord> query = context.selectQuery(Tables.EH_TERMINAL_DAY_STATISTICS);
         query.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.DATE.eq(date));
         query.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.NAMESPACE_ID.eq(namespaceId));
-        if(null == query.fetchOne()){
-            return null;
-        }
-        return query.fetchOne().map(r ->{
-            return ConvertHelper.convert(r, TerminalDayStatistics.class);
-        });
+        return query.fetchAnyInto(TerminalDayStatistics.class);
     }
 
     @Override
@@ -200,13 +185,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhTerminalStatisticsTasksRecord> query = context.selectQuery(Tables.EH_TERMINAL_STATISTICS_TASKS);
         query.addConditions(Tables.EH_TERMINAL_STATISTICS_TASKS.TASK_NO.eq(taskNo));
-
-        if(null == query.fetchOne()){
-            return null;
-        }
-        return query.fetchOne().map(r ->{
-            return ConvertHelper.convert(r, TerminalStatisticsTask.class);
-        });
+        return query.fetchAnyInto(TerminalStatisticsTask.class);
     }
 
     @Override
