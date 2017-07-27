@@ -85,6 +85,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
@@ -94,6 +95,8 @@ import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchPointsCommand;
@@ -108,6 +111,7 @@ import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFisResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchDayDetailDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchGroupDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
@@ -6059,4 +6063,24 @@ public class PunchServiceImpl implements PunchService {
 
         return response;
     }
+	@Override
+	public PunchGroupDTO addPunchGroup(AddPunchGroupCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void deletePunchGroup(DeleteCommonCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
 }
