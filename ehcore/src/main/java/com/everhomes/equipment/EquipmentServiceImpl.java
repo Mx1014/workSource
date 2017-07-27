@@ -2530,13 +2530,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 			String[] s = str.split("\\|\\|");
 			dbProvider.execute((TransactionStatus status) -> {
 				EquipmentInspectionStandards standard = new EquipmentInspectionStandards();
-				if(StringUtils.isNotBlank(s[0])) {
+				if(StringUtils.isNotBlank(s[0]) && !"null".equals(s[0])) {
 					standard.setStandardNumber(s[0]);
 				} else {
 					standard.setStandardNumber("");
 				}
 
-				if(StringUtils.isNotBlank(s[1])) {
+				if(StringUtils.isNotBlank(s[1]) && !"null".equals(s[1])) {
 					standard.setName(s[1]);
 				} else {
 					standard.setName("");
@@ -2544,22 +2544,22 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 				standard.setStandardType(StandardType.fromName(s[2]).getCode());
 
-				if(StringUtils.isNotBlank(s[3])) {
+				if(StringUtils.isNotBlank(s[3]) && !"null".equals(s[3])) {
 					standard.setStandardSource(s[3]);
 				} else {
-					standard.setStandardSource(s[3]);
+					standard.setStandardSource("");
 				}
 
-				if(StringUtils.isNotBlank(s[4])) {
+				if(StringUtils.isNotBlank(s[4]) && !"null".equals(s[4])) {
 					standard.setDescription(s[4]);
 				} else {
-					standard.setDescription(s[4]);
+					standard.setDescription("");
 				}
 
-				if(StringUtils.isNotBlank(s[5])) {
+				if(StringUtils.isNotBlank(s[5]) && !"null".equals(s[5])) {
 					standard.setRemarks(s[5]);
 				} else {
-					standard.setRemarks(s[5]);
+					standard.setRemarks("");
 				}
 
 				standard.setOwnerType(cmd.getOwnerType());
