@@ -88,3 +88,8 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 VALUES ('20220', '任务列表', '20200', NULL, 'react:/repair-management/task-list/1', '0', '2', '/20000/20230/20220', 'park', '220', '20100', '3', NULL, 'module');
 
 update `eh_web_menu_scopes` set menu_id = 20220 where menu_id = 20210 and owner_id = 999983;
+
+-- 添加一个手机号黑名单  add by xq.tian 2017/07/27
+SET @max_id = IFNULL(select max(id) from `eh_sms_black_lists`, 1);
+INSERT INTO `eh_sms_black_lists` (`id`, `namespace_id`, `contact_token`, `reason`, `status`, `create_type`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+VALUES (@max_id := @max_id + 1, 0, '13111116818', 'manual', 1, 1, 0, NOW(), NULL, NULL);
