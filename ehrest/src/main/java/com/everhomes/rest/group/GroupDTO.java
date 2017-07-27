@@ -37,7 +37,7 @@ import com.everhomes.util.StringHelper;
  * <li>operatorName: 操作人</li>
  * <li>joinTime: 加入时间</li>
  * <li>shareUrl: 分享链接</li>
- * <li>qrUrl: 二维码链接</li>
+ * <li>scanJoinUrl:扫描入群页面链接</li>
  * <li>alias: group别名，获取群列表时如果name为空的时候会返回一个别名：用户1、用户2、用户3、用户4、用户5</li>
  * </ul>
  */
@@ -69,7 +69,7 @@ public class GroupDTO {
     private String operatorName;
     private Timestamp joinTime;
     private String shareUrl;
-    private String qrUrl;
+    private String scanJoinUrl;
     private String alias;
     
     @ItemType(Long.class)
@@ -351,12 +351,12 @@ public class GroupDTO {
         this.alias = alias;
     }
 
-    public String getQrUrl() {
-        return qrUrl;
+    public String getScanJoinUrl() {
+        return scanJoinUrl;
     }
 
-    public void setQrUrl(String qrUrl) {
-        this.qrUrl = qrUrl;
+    public void setScanJoinUrl(String scanJoinUrl) {
+        this.scanJoinUrl = scanJoinUrl;
     }
 
     @Override
