@@ -282,8 +282,12 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
         cmd21.setProjectId(ca.getProjectId());
         cmd21.setProjectType(ca.getProjectType());
-        cmd21.setContent(CommunityApproveTranEnum.fromCode("USER_NAME")+":"+obj.getNameValue()+"\n");
-        cmd21.setContent(CommunityApproveTranEnum.fromCode("USER_PHONE")+":"+obj.getPhoneValue()+"\n");
+        if (obj.getNameValue()!=null)
+            cmd21.setContent(CommunityApproveTranEnum.USER_NAME.getCode()+":"+JSON.parseObject(obj.getNameValue(),
+                    PostApprovalFormTextValue.class).getText()+"\n");
+        if (obj.getPhoneValue()!=null)
+            cmd21.setContent(CommunityApproveTranEnum.USER_PHONE.getCode()+":"+JSON.parseObject(obj.getNameValue(),
+                    PostApprovalFormTextValue.class).getText()+"\n");
 
         cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
         cmd21.setTitle(ca.getApproveName());
