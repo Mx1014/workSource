@@ -4875,13 +4875,39 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void updatePressTest() {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		context.update(Tables.EH_ORGANIZATION_MEMBERS_TEST).set(Tables.EH_ORGANIZATION_MEMBERS.GROUP_ID, 100000L);
+		Long t1 = System.currentTimeMillis();
+		context.update(Tables.EH_ORGANIZATION_MEMBERS_TEST).set(Tables.EH_ORGANIZATION_MEMBERS_TEST.GROUP_ID, 100000L)
+				.where(Tables.EH_ORGANIZATION_MEMBERS_TEST.ID.lt(100000L)).execute();
+		LOGGER.debug("update setValueModel spend: "+ String.valueOf(System.currentTimeMillis() - t1));
+	}
+
+	@Override
+	public void batchUpdatePressTest(){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOrganizationMembersTestRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS_TEST);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS_TEST.ID.lt(100001L));
+		List<EhOrganizationMembersTestRecord> tests = query.fetch();
+		Long t1 = System.currentTimeMillis();
+		List<EhOrganizationMembersTest> tests1 = tests.stream().map(r-> {
+			r.setEmployeeNo("12222332");
+			LOGGER.debug("update batchModel: id = " + r.getId());
+			return ConvertHelper.convert(r,EhOrganizationMembersTest.class);
+		}).collect(Collectors.toList());
+		Long t2 = System.currentTimeMillis();
+		LOGGER.debug("update batchModel spend: Convert -"+ String.valueOf(t2 - t1));
+		EhOrganizationMembersTestDao dao = new EhOrganizationMembersTestDao(context.configuration());
+		dao.update(tests1);
+		Long t3 = System.currentTimeMillis();
+		LOGGER.debug("update batchModel spend: Convert -"+ String.valueOf(t2 - t1) + " / update -" + String.valueOf(t3 -t2));
 	}
 
 	@Override
 	public void deletePressTest() {
+		Long t1 = System.currentTimeMillis();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		context.delete(Tables.EH_ORGANIZATION_MEMBERS_TEST).where(Tables.EH_ORGANIZATION_MEMBERS.GROUP_ID.eq(100000L));
+		context.delete(Tables.EH_ORGANIZATION_MEMBERS_TEST).where(Tables.EH_ORGANIZATION_MEMBERS_TEST.ID.lt(1000000L)).execute();
+		Long t2 = System.currentTimeMillis();
+		LOGGER.debug("delete spend: "+ String.valueOf(t2 - t1));
 	}
 
 	private Long getTopOrganizationId(Long organizationId) {

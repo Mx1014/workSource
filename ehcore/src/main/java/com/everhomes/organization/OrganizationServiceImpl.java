@@ -5155,6 +5155,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void updatePressTest() {
         this.organizationProvider.updatePressTest();
+//        this.organizationProvider.batchUpdatePressTest();
     }
 
     @Override

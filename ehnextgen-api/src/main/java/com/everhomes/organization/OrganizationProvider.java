@@ -421,6 +421,8 @@ public interface OrganizationProvider {
 
 	void updatePressTest();
 
+	void batchUpdatePressTest();
+
 	void deletePressTest();
 
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);

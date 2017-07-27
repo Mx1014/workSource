@@ -1742,6 +1742,8 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/updatePressTest</b>
      * <p>更新數據壓力測試</p>
      */
+    @RequestMapping("updatePressTest")
+    @RestReturn(value = String.class)
     public RestResponse updatePressTest(){
         organizationService.updatePressTest();
         RestResponse response = new RestResponse();
@@ -1751,9 +1753,11 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/updatePressTest</b>
+     * <b>URL: /org/deletePressTest</b>
      * <p>刪除數據壓力測試</p>
      */
+    @RequestMapping("deletePressTest")
+    @RestReturn(value = String.class)
     public RestResponse deletePressTest(){
         organizationService.deletePressTest();
         RestResponse response = new RestResponse();
