@@ -2909,6 +2909,9 @@ public class CommunityServiceImpl implements CommunityService {
                     UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                     dto.setOperatorName(operator != null ? operator.getNickName() : "");
                     dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
+                } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
+                    // FIXME 临时解决   2017/07/27  xq.tian
+                    dto.setOperatorName("通过公司邮箱认证");
                 }
                 if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
