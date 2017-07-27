@@ -177,6 +177,7 @@
         eh_user_identifier_logs | eh_user_appeal_logs | eh_organization_members_test |
 	    eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |
         eh_uniongroup_configures | eh_uniongroup_member_details |
+        eh_punch_special_days | eh_punch_time_intervals |
         </includes>
 
             <!-- All elements that are excluded from your schema
