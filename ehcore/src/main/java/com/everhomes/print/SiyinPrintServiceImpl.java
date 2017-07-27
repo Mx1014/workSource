@@ -368,9 +368,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         
         RestResponse printResponse = new RestResponse();
         User user = UserContext.current().getUser();
-        boolean trueflag = false;
+
+        boolean successflag = false;
         if(valueOperations.get(key) != null && valueOperations.get(key).length()>0){
-        	trueflag = true;
+			successflag = true;
         	User logonUser  = new User();
         	//这里设置accoutname 为用户id-namespaceid-拥有者id，因为在jobLogNotification
         	//中计算价格的时候，不知道所在的园区，所以只能依靠
@@ -387,7 +388,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         String subject = PRINT_SUBJECT;
 
         // 必须重启一个线程来发布通知，通知二维码扫描成功，跳转到成功页面
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
         	ExecutorUtil.submit(new Runnable() {
         		@Override
         		public void run() {
@@ -402,7 +403,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	});
 		}
        
-        if(trueflag)
+
+        if(successflag)
         	return new InformPrintResponse(PrintLogonStatusType.LOGON_SUCCESS.getCode());
         return new InformPrintResponse(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode());
     
