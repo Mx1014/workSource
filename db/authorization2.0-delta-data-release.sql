@@ -1,8 +1,9 @@
 -- 表单 by dengs,20170711
 set @eh_general_forms_id = (select max(id) from eh_general_forms);
 set @namespace_id = 999971; -- 此处应该修改为张江的namespace
-set @appKey = '7757a75f-b79a-42fd-896e-107f4b59';
-set @secretKey = 'nM9PpqGaV2Qe5QqmNSHfW';
+set @appKey = 'd923d02c-453d-4cd8-a948-a34ca312058e';
+set @secretKey = 'N0S7cUQKjz1k80MvDrnZ19Qc5d5F1DlqQorfTtr9K9NgYRmNTtE7soE1fRxwPG0E9kAoGsxIHpX8i7o6JploTQ==';
+
 -- appkey
 set @eh_apps_id = (select MAX(id) FROM eh_apps);
 INSERT INTO `ehcore`.`eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`) VALUES ((@eh_apps_id:=@eh_apps_id+1), '1', @appKey, @secretKey, 'zjgk', 'zjgk app key', '1', NOW(), NULL, NULL);
