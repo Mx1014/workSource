@@ -2530,12 +2530,37 @@ public class EquipmentServiceImpl implements EquipmentService {
 			String[] s = str.split("\\|\\|");
 			dbProvider.execute((TransactionStatus status) -> {
 				EquipmentInspectionStandards standard = new EquipmentInspectionStandards();
-				standard.setStandardNumber(s[0]);
-				standard.setName(s[1]);
+				if(StringUtils.isNotBlank(s[0])) {
+					standard.setStandardNumber(s[0]);
+				} else {
+					standard.setStandardNumber("");
+				}
+
+				if(StringUtils.isNotBlank(s[1])) {
+					standard.setName(s[1]);
+				} else {
+					standard.setName("");
+				}
+
 				standard.setStandardType(StandardType.fromName(s[2]).getCode());
-				standard.setStandardSource(s[3]);
-				standard.setDescription(s[4]);
-				standard.setRemarks(s[5]);
+
+				if(StringUtils.isNotBlank(s[3])) {
+					standard.setStandardSource(s[3]);
+				} else {
+					standard.setStandardSource(s[3]);
+				}
+
+				if(StringUtils.isNotBlank(s[4])) {
+					standard.setDescription(s[4]);
+				} else {
+					standard.setDescription(s[4]);
+				}
+
+				if(StringUtils.isNotBlank(s[5])) {
+					standard.setRemarks(s[5]);
+				} else {
+					standard.setRemarks(s[5]);
+				}
 
 				standard.setOwnerType(cmd.getOwnerType());
 				standard.setOwnerId(cmd.getOwnerId());
