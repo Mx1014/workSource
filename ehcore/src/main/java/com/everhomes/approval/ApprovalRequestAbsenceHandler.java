@@ -292,8 +292,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		Calendar yesterday = Calendar.getInstance();
 		yesterday.setTime(date);
 		PunchTimeRuleDTO yesterdayRuleDTO = processTimeRuleDTO(punchRule.getId(), yesterday.getTime()); 
-		if(null != yesterdayRuleDTO && yesterdayRuleDTO.getEndEarlyTime() > DAY_MILLISECONDGMT)
-			return true;
+		//TODO: punch-3.0改了
+//		if(null != yesterdayRuleDTO && yesterdayRuleDTO.getEndEarlyTime() > DAY_MILLISECONDGMT)
+//			return true;
 		return false;
 	}
 
@@ -420,22 +421,24 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	}
 
 	private long calculateOneDayTime(long fromTime, long endTime, PunchTimeRuleDTO dto) {
+		//TODO : PUNCH-3.0改了
 		//如果fromTime超过了最早下班时间或者endTime早于最早上班时间,return 0
  		LOGGER.debug("fromtime ="+fromTime+",endtime ="+endTime+",dto = "+dto);
-		if(fromTime > dto.getEndEarlyTime() || endTime < dto.getStartEarlyTime())
-			return 0L;
-		// 确定起始时间:
-		//1.如果fromTime在一天最早上班时间之前,则用最早上班时间
-		//如果fromTime 在午休时间之内 则用午休结束时间
-		if(fromTime < dto.getStartEarlyTime())
-			fromTime = dto.getStartEarlyTime();
-		else if((fromTime > dto.getNoonLeaveTime()) && (fromTime < dto.getAfternoonArriveTime()))
-			fromTime = dto.getAfternoonArriveTime();
-		//2.如果endTime在最早下班时间之后则用最早下班时间,否则用endTime
-		//如果endTime在午休时间之内则用午休开始时间
-		if(endTime > dto.getEndEarlyTime())
-			endTime = dto.getEndEarlyTime();
-		else if((endTime > dto.getNoonLeaveTime()) && (endTime < dto.getAfternoonArriveTime()))
+//		if(fromTime > dto.getEndEarlyTime() || endTime < dto.getStartEarlyTime())
+//			return 0L;
+//		// 确定起始时间:
+//		//1.如果fromTime在一天最早上班时间之前,则用最早上班时间
+//		//如果fromTime 在午休时间之内 则用午休结束时间
+//		if(fromTime < dto.getStartEarlyTime())
+//			fromTime = dto.getStartEarlyTime();
+//		else if((fromTime > dto.getNoonLeaveTime()) && (fromTime < dto.getAfternoonArriveTime()))
+//			fromTime = dto.getAfternoonArriveTime();
+//		//2.如果endTime在最早下班时间之后则用最早下班时间,否则用endTime
+//		//如果endTime在午休时间之内则用午休开始时间
+//		if(endTime > dto.getEndEarlyTime())
+//			endTime = dto.getEndEarlyTime();
+//		else 
+			if((endTime > dto.getNoonLeaveTime()) && (endTime < dto.getAfternoonArriveTime()))
 			endTime = dto.getNoonLeaveTime();
 		//3. 两者相减计算请假时间:如果小于0则设置为0
 		long deltaMs = endTime - fromTime;
@@ -487,11 +490,11 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 					//拿前一天的timerule进行计算 
 					//前一天班次的最晚下班时间>请假开始时间?日期-1:不变 
 					Long endTimeLong = punchService.convertTimeToGMTMillisecond(new Time(endTime.getTime()))+DAY_MILLISECONDGMT; 
-					if(dto.getEndEarlyTime()>endTimeLong){
-						int days = myDate.getDays()-1;
-						myDate.setDays(days);
-						calculateAbsentEndDate(myDate, dto, endTimeLong);					
-					}
+//					if(dto.getEndEarlyTime()>endTimeLong){
+//						int days = myDate.getDays()-1;
+//						myDate.setDays(days);
+//						calculateAbsentEndDate(myDate, dto, endTimeLong);					
+//					}
 					
 				} 
 				//计算结束日当天的  
@@ -520,15 +523,16 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	}
 	
 	private PunchTimeRuleDTO processTimeRuleDTO(PunchTimeRule dayPunchTimeRule) {
+		//TODO : PUNCH 3.0 xiugai
 		PunchTimeRuleDTO dto = null;
 		if(null != dayPunchTimeRule){
 			dto = ConvertHelper.convert(dayPunchTimeRule, PunchTimeRuleDTO.class); 
 			dto.setAfternoonArriveTime(null!=dayPunchTimeRule.getAfternoonArriveTimeLong()?dayPunchTimeRule.getAfternoonArriveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getAfternoonArriveTime()));
 			dto.setNoonLeaveTime(null!=dayPunchTimeRule.getNoonLeaveTimeLong()?dayPunchTimeRule.getNoonLeaveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getNoonLeaveTime()));
-			dto.setStartEarlyTime(null!=dayPunchTimeRule.getStartEarlyTimeLong()?dayPunchTimeRule.getStartEarlyTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartEarlyTime()));
-			dto.setStartLateTime(null!=dayPunchTimeRule.getStartLateTimeLong()?dayPunchTimeRule.getStartLateTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartLateTime()));
-			
-			dto.setEndEarlyTime(dto.getStartEarlyTime() + (null!=dayPunchTimeRule.getWorkTimeLong()?dayPunchTimeRule.getWorkTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getWorkTime())));
+//			dto.setStartEarlyTime(null!=dayPunchTimeRule.getStartEarlyTimeLong()?dayPunchTimeRule.getStartEarlyTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartEarlyTime()));
+//			dto.setStartLateTime(null!=dayPunchTimeRule.getStartLateTimeLong()?dayPunchTimeRule.getStartLateTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartLateTime()));
+//			
+//			dto.setEndEarlyTime(dto.getStartEarlyTime() + (null!=dayPunchTimeRule.getWorkTimeLong()?dayPunchTimeRule.getWorkTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getWorkTime())));
 			dto.setDaySplitTime(null!=dayPunchTimeRule.getDaySplitTimeLong()?dayPunchTimeRule.getDaySplitTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getDaySplitTime()));
 		}
 		return dto;
@@ -537,28 +541,29 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	 * 计算请假结束日的时间
 	 * */
 	private void calculateAbsentEndDate(MyDate myDate,PunchTimeRuleDTO dto,Long endTimeLong ){
+		//TODO : PUNCH 3.0 xiugai
 		long actualLong = 0l;
-		if(endTimeLong<=dto.getStartLateTime()){
-			//0.x<最晚上班时间
-			//不管了
-		}else if(endTimeLong<=dto.getNoonLeaveTime()){
-			//1.最晚上班时间<x<=午休开始时间
-			// 请假时间-最晚上班
-			actualLong = endTimeLong -dto.getStartLateTime();
-		}else if(endTimeLong<=dto.getAfternoonArriveTime()){
-			//2.午休开始时间<x<=午休结束时间  
-			// 中午下班-最晚上班
-			actualLong = dto.getNoonLeaveTime()-dto.getStartLateTime();
-		}else if(endTimeLong<=dto.getEndEarlyTime()){
-			//3.午休结束时间<x<=最早下班时间 
-			//请假时间-下午上班+中午下班-最晚上班
-			actualLong = endTimeLong -dto.getAfternoonArriveTime() + dto.getNoonLeaveTime()-dto.getStartLateTime();
-		}else{
-			//4.最早下班时间<x
-			//请假日期+1
-			int days = myDate.getDays()+1;
-			myDate.setDays(days);
-		}
+//		if(endTimeLong<=dto.getStartLateTime()){
+//			//0.x<最晚上班时间
+//			//不管了
+//		}else if(endTimeLong<=dto.getNoonLeaveTime()){
+//			//1.最晚上班时间<x<=午休开始时间
+//			// 请假时间-最晚上班
+//			actualLong = endTimeLong -dto.getStartLateTime();
+//		}else if(endTimeLong<=dto.getAfternoonArriveTime()){
+//			//2.午休开始时间<x<=午休结束时间  
+//			// 中午下班-最晚上班
+//			actualLong = dto.getNoonLeaveTime()-dto.getStartLateTime();
+//		}else if(endTimeLong<=dto.getEndEarlyTime()){
+//			//3.午休结束时间<x<=最早下班时间 
+//			//请假时间-下午上班+中午下班-最晚上班
+//			actualLong = endTimeLong -dto.getAfternoonArriveTime() + dto.getNoonLeaveTime()-dto.getStartLateTime();
+//		}else{
+//			//4.最早下班时间<x
+//			//请假日期+1
+//			int days = myDate.getDays()+1;
+//			myDate.setDays(days);
+//		}
 		caculateAbsentDate(myDate,actualLong);
 	}
 	/**
@@ -566,27 +571,28 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	 * */
 	private void calculateAbsentBeginDate(MyDate myDate,PunchTimeRuleDTO dto,Long fromTimeLong ){
 		long actualLong = 0l;
-		if(fromTimeLong<=dto.getStartLateTime()){
-			//0.x<最晚上班时间
-			//请假日期+1
-			int days = myDate.getDays()+1;
-			myDate.setDays(days);
-		}else if(fromTimeLong<=dto.getNoonLeaveTime()){
-			//1.最晚上班时间<x<=午休开始时间
-			// 中午下班-请假时间 +最早下班-下午上班
-			actualLong = dto.getNoonLeaveTime()-fromTimeLong + dto.getEndEarlyTime()-dto.getAfternoonArriveTime();
-		}else if(fromTimeLong<=dto.getAfternoonArriveTime()){
-			//2.午休开始时间<x<=午休结束时间  
-			//最早下班-下午上班
-			actualLong =   dto.getEndEarlyTime()-dto.getAfternoonArriveTime();
-		}else if(fromTimeLong<=dto.getEndEarlyTime()){
-			//3.午休结束时间<x<=最早下班时间
-			//最早下班-请假时间
-			actualLong =   dto.getEndEarlyTime()-fromTimeLong;
-		}else{
-			//4.最早下班时间<x
-			//不管了
-		}
+		//TODO : PUNCH 3.0 xiugai
+//		if(fromTimeLong<=dto.getStartLateTime()){
+//			//0.x<最晚上班时间
+//			//请假日期+1
+//			int days = myDate.getDays()+1;
+//			myDate.setDays(days);
+//		}else if(fromTimeLong<=dto.getNoonLeaveTime()){
+//			//1.最晚上班时间<x<=午休开始时间
+//			// 中午下班-请假时间 +最早下班-下午上班
+//			actualLong = dto.getNoonLeaveTime()-fromTimeLong + dto.getEndEarlyTime()-dto.getAfternoonArriveTime();
+//		}else if(fromTimeLong<=dto.getAfternoonArriveTime()){
+//			//2.午休开始时间<x<=午休结束时间  
+//			//最早下班-下午上班
+//			actualLong =   dto.getEndEarlyTime()-dto.getAfternoonArriveTime();
+//		}else if(fromTimeLong<=dto.getEndEarlyTime()){
+//			//3.午休结束时间<x<=最早下班时间
+//			//最早下班-请假时间
+//			actualLong =   dto.getEndEarlyTime()-fromTimeLong;
+//		}else{
+//			//4.最早下班时间<x
+//			//不管了
+//		}
 		caculateAbsentDate(myDate, actualLong);
 	}
 	/**
