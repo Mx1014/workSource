@@ -59,6 +59,8 @@ public class CommunityApproveFormHandler  implements GeneralFormModuleHandler {
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
         CommunityApprove ca = communityApproveProvider.getCommunityApproveById(cmd.getSourceId());
+        if (ca.getStatus()==1)//不启用 返回空
+            return null;
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(ca.getFormOriginId());
         if(form == null )
             throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,

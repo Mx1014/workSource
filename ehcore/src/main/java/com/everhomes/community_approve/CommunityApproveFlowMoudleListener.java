@@ -6,12 +6,15 @@ import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.general_approval.GeneralApprovalController;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.community_approve.CommunityApproveKeyMapping;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
@@ -37,7 +40,8 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
 
     @Autowired
     private CommunityApproveValProvider communityApproveValProvider;
-
+    @Autowired
+    protected ServiceModuleProvider serviceModuleProvider;
     @Autowired
     private CommunityApproveProvider communityApproveProvider;
     @Autowired
@@ -53,7 +57,11 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
     }
     @Override
     public FlowModuleInfo initModule() {
-        return null;
+        FlowModuleInfo moduleInfo = new FlowModuleInfo();
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(CommunityApproveController.MODULE_ID);
+        moduleInfo.setModuleName(module.getName());
+        moduleInfo.setModuleId(CommunityApproveController.MODULE_ID);
+        return moduleInfo;
     }
 
     @Override
@@ -113,31 +121,36 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
         e.setValue(val.getCreateTime().toString());
         entities.add(e);
         //姓名
-         e = new FlowCaseEntity();
         GeneralFormFieldDTO dto = getFieldDTO(GeneralFormDataSourceType.USER_NAME.getCode(),fieldDTOs);
-        e.setKey(dto.getFieldDisplayName());
-        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-        e.setValue(JSON.parseObject(val.getNameValue(),PostApprovalFormTextValue.class).getText());
-        entities.add(e);
-
-        //电话
-        if (val.getPhoneValue()!=null) {
+        if (null!=dto) {
             e = new FlowCaseEntity();
-            dto = getFieldDTO(GeneralFormDataSourceType.USER_PHONE.getCode(), fieldDTOs);
             e.setKey(dto.getFieldDisplayName());
             e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-            e.setValue(JSON.parseObject(val.getPhoneValue(),PostApprovalFormTextValue.class).getText());
+            e.setValue(JSON.parseObject(val.getNameValue(), PostApprovalFormTextValue.class).getText());
             entities.add(e);
+        }
+        //电话
+        if (val.getPhoneValue()!=null) {
+            dto = getFieldDTO(GeneralFormDataSourceType.USER_PHONE.getCode(), fieldDTOs);
+            if (null!=dto) {
+                e = new FlowCaseEntity();
+                e.setKey(dto.getFieldDisplayName());
+                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+                e.setValue(JSON.parseObject(val.getPhoneValue(), PostApprovalFormTextValue.class).getText());
+                entities.add(e);
+            }
         }
 
         //企业
         if (val.getCompanyValue()!=null) {
-            e = new FlowCaseEntity();
-            dto = getFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(), fieldDTOs);
-            e.setKey(dto.getFieldDisplayName());
-            e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-            e.setValue(JSON.parseObject(val.getCompanyValue(),PostApprovalFormTextValue.class).getText());
-            entities.add(e);
+            if (null!=dto) {
+                dto = getFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(), fieldDTOs);
+                e = new FlowCaseEntity();
+                e.setKey(dto.getFieldDisplayName());
+                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+                e.setValue(JSON.parseObject(val.getCompanyValue(), PostApprovalFormTextValue.class).getText());
+                entities.add(e);
+            }
         }
 
         entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
