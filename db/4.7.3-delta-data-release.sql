@@ -37,6 +37,12 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 --
 -- eh_user_activities 数据处理(这些表的数据比较多，可能会比较费时) add by xq.tian 2017/07/25
 --
+-- 第一步
+ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, ADD INDEX i_eh_imei_number(imei_number);
+ALTER TABLE eh_terminal_app_version_cumulatives ALGORITHM=inplace, LOCK=NONE, ADD INDEX i_eh_imei_number(imei_number);
+ALTER TABLE eh_terminal_app_version_actives ALGORITHM=inplace, LOCK=NONE, ADD INDEX i_eh_imei_number(imei_number);
+
+-- 第二步
 UPDATE `eh_terminal_app_version_actives` AS t, `eh_user_activities` AS u
 SET t.`imei_number` = u.`uid`
 WHERE t.`imei_number` = u.`imei_number` AND u.`uid` <> 0;
@@ -48,6 +54,11 @@ WHERE t.`imei_number` = u.`imei_number` AND u.uid <> 0;
 DELETE FROM `eh_user_activities` WHERE `uid` = 0;
 
 UPDATE `eh_user_activities` AS u SET u.`imei_number` = u.`uid`;
+
+-- 第三步
+ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, DROP INDEX i_eh_imei_number;
+ALTER TABLE eh_terminal_app_version_cumulatives ALGORITHM=inplace, LOCK=NONE, DROP INDEX i_eh_imei_number;
+ALTER TABLE eh_terminal_app_version_actives ALGORITHM=inplace, LOCK=NONE, DROP INDEX i_eh_imei_number;
 
 -- by xiongying
 update eh_service_modules set level = 3 where id = 20811;
