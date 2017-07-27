@@ -38,6 +38,7 @@ import com.everhomes.util.StringHelper;
  * <li>joinTime: 加入时间</li>
  * <li>shareUrl: 分享链接</li>
  * <li>scanJoinUrl:扫描入群页面链接</li>
+ * <li>scanDownloadUrl:扫描下载页面链接</li>
  * <li>alias: group别名，获取群列表时如果name为空的时候会返回一个别名：用户1、用户2、用户3、用户4、用户5</li>
  * </ul>
  */
@@ -70,6 +71,7 @@ public class GroupDTO {
     private Timestamp joinTime;
     private String shareUrl;
     private String scanJoinUrl;
+    private String scanDownloadUrl;
     private String alias;
     
     @ItemType(Long.class)
@@ -357,6 +359,14 @@ public class GroupDTO {
 
     public void setScanJoinUrl(String scanJoinUrl) {
         this.scanJoinUrl = scanJoinUrl;
+    }
+
+    public String getScanDownloadUrl() {
+        return scanDownloadUrl;
+    }
+
+    public void setScanDownloadUrl(String scanDownloadUrl) {
+        this.scanDownloadUrl = scanDownloadUrl;
     }
 
     @Override

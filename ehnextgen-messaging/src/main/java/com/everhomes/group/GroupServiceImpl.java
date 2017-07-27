@@ -2666,16 +2666,10 @@ public class GroupServiceImpl implements GroupService {
         
         groupDto.setShareUrl(getShareUrl(group));
 
-        //
-        String scanJoinUrl = configProvider.getValue(group.getNamespaceId(), "group.addgroup.url", "/mobile/static/message/src/addGroup.html");
-        if (scanJoinUrl == null || scanJoinUrl.length() == 0) {
-            LOGGER.error("Invalid scanJoinUrl, scanJoinUrl=" + scanJoinUrl);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid scanJoinUrl");
-        }
-        groupDto.setScanJoinUrl(scanJoinUrl);
+        groupDto.setScanJoinUrl(getScanJoinUrl(group));
+        groupDto.setScanDownloadUrl(getScanDownloadUrl(group));
         //groupDto.setBehaviorTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"),
-        //group.getBehaviorTime().getTime()));
+        //    group.getBehaviorTime().getTime()));
         //groupDto.setCreatorUid(group.getCreatorUid());
         //groupDto.setJoinPolicy(group.getJoinPolicy());
         //groupDto.setDescription(group.getDescription());
@@ -2702,6 +2696,29 @@ public class GroupServiceImpl implements GroupService {
 			return homeUrl + shareUrl + "?namespaceId=" + group.getNamespaceId()+"&groupId="+group.getId()+"&realm=";
 		}
 	}
+
+	private String getScanJoinUrl(Group group){
+        String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
+        String scanJoinUrl = configProvider.getValue(group.getNamespaceId(), "group.scanJoin.url", "/mobile/static/message/src/addGroup.html");
+        if (homeUrl.length() == 0 || scanJoinUrl.length() == 0) {
+            LOGGER.error("Invalid home url or scanJoinUrl, homeUrl=" + homeUrl + ", scanJoinUrl=" + scanJoinUrl);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or scanJoinUrl");
+        }
+        return homeUrl + scanJoinUrl;
+
+    }
+
+    private String getScanDownloadUrl(Group group){
+        String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
+        String scanDownloadUrl = configProvider.getValue(group.getNamespaceId(), "group.scanDownload.url", "/mobile/static/downloadLink/src/downLink.html");
+        if (homeUrl.length() == 0 || scanDownloadUrl.length() == 0) {
+            LOGGER.error("Invalid home url or scanDownloadUrl, homeUrl=" + homeUrl + ", scanDownloadUrl=" + scanDownloadUrl);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or scanDownloadUrl");
+        }
+        return homeUrl + scanDownloadUrl;
+    }
 
 	private void memberInfoToGroupDTO(Long uid, GroupDTO groupDto, Group group) {
         //
