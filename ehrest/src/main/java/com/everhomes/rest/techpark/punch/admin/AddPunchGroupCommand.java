@@ -14,11 +14,11 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType：所属对象类型organization</li>
  * <li>ownerId：所属对象id</li>
  * <li>groupName：规则名(考勤组名)</li>
- * <li>targets：考勤组关联对象</li> 
+ * <li>targets：考勤组关联对象{@link com.everhomes.rest.uniongroup.UniongroupTarget}</li> 
  * <li>ruleType: 0- 排班制 ; 1- 固定班次</li>
  * <li>punchGeoPoints: 地点规则 {@link com.everhomes.rest.techpark.punch.PunchGeoPointDTO}</li>
  * <li>wifis: wifi规则{@link com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO}</li>
- * <li>timeRule: 上班时间{@link com.everhomes.rest.techpark.punch.PunchTimeRuleDTO}</li>
+ * <li>timeRules: 上班时间 列表{@link com.everhomes.rest.techpark.punch.PunchTimeRuleDTO}</li>
  * <li>specialDays: 特殊日期列表 {@link com.everhomes.rest.techpark.punch.admin.PunchSpecialDayDTO}</li>
  * <li>schedulings: 排班列表{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO}</li>
  * <li>chinaHolidayFlag: 使用中国法定假日falg  0-否 1-是 </li>
@@ -44,8 +44,9 @@ public class AddPunchGroupCommand {
 
 	@ItemType(PunchWiFiDTO.class)
 	private  List<PunchWiFiDTO>  wifis;
-	
-	private PunchTimeRuleDTO timeRule;
+	 
+	@ItemType(PunchTimeRuleDTO.class)
+	private  List<PunchTimeRuleDTO> timeRules;
 	  
 	@ItemType(PunchSpecialDayDTO.class)
 	private List<PunchSpecialDayDTO> specialDays;
@@ -116,14 +117,6 @@ public class AddPunchGroupCommand {
 	public void setWifis(List<PunchWiFiDTO> wifis) {
 		this.wifis = wifis;
 	}
-
-	public PunchTimeRuleDTO getTimeRule() {
-		return timeRule;
-	}
-
-	public void setTimeRule(PunchTimeRuleDTO timeRule) {
-		this.timeRule = timeRule;
-	}
  
 	public Byte getChinaHolidayFlag() {
 		return chinaHolidayFlag;
@@ -147,6 +140,14 @@ public class AddPunchGroupCommand {
 
 	public void setSpecialDays(List<PunchSpecialDayDTO> specialDays) {
 		this.specialDays = specialDays;
+	}
+
+	public List<PunchTimeRuleDTO> getTimeRules() {
+		return timeRules;
+	}
+
+	public void setTimeRules(List<PunchTimeRuleDTO> timeRules) {
+		this.timeRules = timeRules;
 	}
 
  

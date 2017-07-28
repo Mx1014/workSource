@@ -1,6 +1,10 @@
 package com.everhomes.rest.techpark.punch.admin;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
 /**
  * <ul>
  * 
@@ -8,11 +12,9 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId：id</li>
  * <li>targetType: 填organization/user</li>
  * <li>targetId：对应设置目标的id比如机构比如人的id</li>
- * <li>punchOriganizationId：考勤组id</li>
- * <li>ruleDate: 日期 时间戳</li>
- * <li>timeRuleId: 班次id --如果没有排班就是null ,休息日</li>
- * <li>timeRuleName: 班次名称 -- 如果没有timeRuleId 就通过name找</li>
- * <li>timeRuleDescription: 班次描述</li>
+ * <li>punchOriganizationId：考勤组id</li> 
+ * <li>daySchedulings：每一天的排班{@link PunchSchedulingDayDTO}</li> 
+ * 
  * 
  * </ul>
  */
@@ -23,10 +25,9 @@ public class PunchSchedulingDTO {
 	private String targetType;
 	private Long targetId;
 	private Long punchOriganizationId;
-	private Long ruleDate;
-	private Long timeRuleId;
-	private String timeRuleName;
-	private String timeRuleDescription;
+	
+	@ItemType(PunchSchedulingDayDTO.class)
+	private List<PunchSchedulingDayDTO> daySchedulings;
 	public String getOwnerType() {
 		return ownerType;
 	}
