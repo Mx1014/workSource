@@ -120,38 +120,38 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
         e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
         e.setValue(val.getCreateTime().toString());
         entities.add(e);
-        //姓名
-        GeneralFormFieldDTO dto = getFieldDTO(GeneralFormDataSourceType.USER_NAME.getCode(),fieldDTOs);
-        if (null!=dto) {
-            e = new FlowCaseEntity();
-            e.setKey(dto.getFieldDisplayName());
-            e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-            e.setValue(JSON.parseObject(val.getNameValue(), PostApprovalFormTextValue.class).getText());
-            entities.add(e);
-        }
-        //电话
-        if (val.getPhoneValue()!=null) {
-            dto = getFieldDTO(GeneralFormDataSourceType.USER_PHONE.getCode(), fieldDTOs);
-            if (null!=dto) {
-                e = new FlowCaseEntity();
-                e.setKey(dto.getFieldDisplayName());
-                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-                e.setValue(JSON.parseObject(val.getPhoneValue(), PostApprovalFormTextValue.class).getText());
-                entities.add(e);
-            }
-        }
-
-        //企业
-        if (val.getCompanyValue()!=null) {
-            if (null!=dto) {
-                dto = getFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(), fieldDTOs);
-                e = new FlowCaseEntity();
-                e.setKey(dto.getFieldDisplayName());
-                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-                e.setValue(JSON.parseObject(val.getCompanyValue(), PostApprovalFormTextValue.class).getText());
-                entities.add(e);
-            }
-        }
+//        //姓名
+//        GeneralFormFieldDTO dto = getFieldDTO(GeneralFormDataSourceType.USER_NAME.getCode(),fieldDTOs);
+//        if (null!=dto) {
+//            e = new FlowCaseEntity();
+//            e.setKey(dto.getFieldDisplayName());
+//            e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+//            e.setValue(JSON.parseObject(val.getNameValue(), PostApprovalFormTextValue.class).getText());
+//            entities.add(e);
+//        }
+//        //电话
+//        if (val.getPhoneValue()!=null) {
+//            dto = getFieldDTO(GeneralFormDataSourceType.USER_PHONE.getCode(), fieldDTOs);
+//            if (null!=dto) {
+//                e = new FlowCaseEntity();
+//                e.setKey(dto.getFieldDisplayName());
+//                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+//                e.setValue(JSON.parseObject(val.getPhoneValue(), PostApprovalFormTextValue.class).getText());
+//                entities.add(e);
+//            }
+//        }
+//
+//        //企业
+//        if (val.getCompanyValue()!=null) {
+//            if (null!=dto) {
+//                dto = getFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(), fieldDTOs);
+//                e = new FlowCaseEntity();
+//                e.setKey(dto.getFieldDisplayName());
+//                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+//                e.setValue(JSON.parseObject(val.getCompanyValue(), PostApprovalFormTextValue.class).getText());
+//                entities.add(e);
+//            }
+//        }
 
         entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
         return entities;
@@ -176,8 +176,7 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
             List<FlowCaseEntity> entities, List<GeneralFormVal> vals , List<GeneralFormFieldDTO> fieldDTOs ){
         for (GeneralFormVal val : vals){
             try{
-                if (!DEFUALT_FIELDS.contains(val.getFieldName())) {
-                    // 不在默认fields的就是自定义字符串，组装这些
+
                     FlowCaseEntity e = new FlowCaseEntity();
                     GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs);
                     if(null == dto ){
@@ -266,7 +265,6 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
                             }
                             break;
                     }
-                }
 
             }catch(NullPointerException e){
                 LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val), e);
