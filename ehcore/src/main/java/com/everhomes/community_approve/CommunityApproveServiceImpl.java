@@ -401,7 +401,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             row.createCell(4).setCellValue(dto.getApproveName());
             row.createCell(5).setCellValue(dto.getCreateTime().toString());
             for (PostApprovalFormItem item:items){
-                if (null==keyColumMap.get(item.getFieldName()))
+                if (null==keyColumMap.get(item.getFieldName()+item.getFieldType()))
                     continue;
                 Integer colunm = (int)keyColumMap.get(item.getFieldName()+item.getFieldType());
                 if (isBasicType(item.getFieldType())){
