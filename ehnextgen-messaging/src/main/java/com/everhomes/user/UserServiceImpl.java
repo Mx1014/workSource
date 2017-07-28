@@ -4241,6 +4241,7 @@ public class UserServiceImpl implements UserService {
 			else {
 				SceneContactV2DTO dto = new SceneContactV2DTO();
 				dto.setUserId(detail.getTargetId());
+				dto.setTargetType(detail.getTargetType());
 				dto.setDetailId(detail.getId());
 				if (!StringUtils.isEmpty(detail.getAvatar()))
 					dto.setContactAvatar(detail.getAvatar());
@@ -4251,7 +4252,7 @@ public class UserServiceImpl implements UserService {
 				dto.setContactToken(detail.getContactToken());
 				if (!StringUtils.isEmpty(detail.getEmail()))
 					dto.setEmail(detail.getEmail());
-				getRelevantContactEnterprise(dto, detail.getOrganizationId());
+				getRelevantContactEnterpriseWithAvatar(dto, detail.getOrganizationId());
 				return dto;
 			}
 		}
@@ -4276,7 +4277,7 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-    private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
+    private void getRelevantContactEnterpriseWithAvatar(SceneContactV2DTO dto, Long organizationId) {
 
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
@@ -4306,5 +4307,13 @@ public class UserServiceImpl implements UserService {
         //  设置岗位
         dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
 
+
+        //  设置头像(由于迁移数据detail表中可能没有头像信息，故由原始的组织架构接口获得)
+        if (OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())) {
+            User user = userProvider.findUserById(dto.getUserId());
+            if (null != user) {
+                dto.setContactAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+            }
+        }
     }
 }

@@ -16,6 +16,7 @@ import java.util.Map;
  * <li>enterpriseName: 公司名称</li>
  * <li>contactName: 联系人名字</li>
  * <li>contactEnglishName: 联系人英文名字</li>
+ * <li>targetType: 用户类型</li>
  * <li>gender: 联系人性别：0-保密, 1-男性, 2-女性</li>
  * <li>jobPosition: 联系人岗位 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>departments: 联系人部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
@@ -36,6 +37,8 @@ public class SceneContactV2DTO {
     private String contactName;
 
     private String contactEnglishName;
+
+    private String targetType;
 
     private Byte gender;
 
@@ -59,6 +62,14 @@ public class SceneContactV2DTO {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     public Long getDetailId() {
