@@ -180,3 +180,47 @@ INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100003','zh_CN','手机号码有误');
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100004','zh_CN','没有实发工资');
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100005','zh_CN','人员不属于本次核算范围');
+
+-- 数据备份
+DROP TABLE IF EXISTS eh_organization_member_details_temp;
+create table eh_organization_member_details_temp select * from eh_organization_member_details;
+DROP TABLE IF EXISTS eh_organization_members_temp;
+create table eh_organization_members_temp select * from eh_organization_members;
+
+-- 查出同时存在父公司的子公司记录
+select * from eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id WHERE	o.parent_id <> 0 and o.parent_id in(SELECT organization_id FROM eh_organization_member_details);
+
+-- 删除这部分记录
+DELETE FROM eh_organization_member_details  WHERE id in (SELECT aa.id from (select omd.id from eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id WHERE	o.parent_id <> 0 and o.parent_id in(SELECT organization_id FROM eh_organization_member_details)) aa);
+
+
+-- 查出不存在父公司的子公司记录
+select * from eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id WHERE	o.parent_id <> 0 and o.parent_id not in (SELECT organization_id FROM eh_organization_member_details);
+
+-- 把这部分子公司的记录更新成所属父公司
+UPDATE eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id SET omd.organization_id = o.parent_id WHERE o.parent_id <> 0 and (o.parent_id not in (SELECT aa.organization_id from (SELECT organization_id FROM eh_organization_member_details) aa));
+
+-- 重新同步member表的detail_id
+
+UPDATE eh_organization_members eom SET eom.detail_id = (select eomd.id from eh_organization_member_details eomd WHERE eomd.organization_id = SUBSTRING_index(SUBSTRING_index(eom.group_path,'/',2),'/',-1) AND eomd.contact_token = eom.contact_token);
+
+-- 数据修复脚本
+UPDATE eh_organization_member_details md
+INNER JOIN (
+	SELECT
+		m.target_id,
+		m.target_type,
+		m.contact_name,
+		m.contact_type,
+		m.detail_id
+	FROM
+		eh_organization_members m
+	INNER JOIN eh_organization_member_details d 
+	ON
+		d.id = m.detail_id
+	AND m.`status` = '3' 
+) AS t1 ON t1.detail_id = md.id
+SET md.target_id = t1.target_id
+
+
+

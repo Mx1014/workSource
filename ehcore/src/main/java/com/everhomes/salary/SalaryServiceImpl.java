@@ -437,36 +437,23 @@ public class SalaryServiceImpl implements SalaryService {
     //  计算异常人数
     @Override
     public String countAbnormalSalaryEmployees(CountAbnormalSalaryEmployees cmd){
-//        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationMemberByPathHavingDetailId("", null, cmd.getOwnerId(), 100000);
 
-        //  存储公司下所有用户的 detailId
-/*        List<Long> userDetailIds = response.getMembers().stream().map(r ->{
-            Long id = r.getDetailId();
-            return id;
-        }).collect(Collectors.toList());*/
-        List<Long> userDetailIds = this.organizationProvider.listOrganizationMemberDetailIdsInActiveStatus(cmd.getOwnerId());
-        int count = userDetailIds.size();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer count;
+        //  1.获取公司总人数
+        //  2.获取设置了实发工资的人数
+        //  3.相减即为异常人数
+        //  (不会存在设置了实发工资却未关联薪酬组的人)
 
-        //  存储所有设置了薪酬组的 detailId
-        List<Object[]> groups = this.uniongroupService.listUniongroupMemberGroupIds(UserContext.getCurrentNamespaceId(), cmd.getOwnerId());
-        List<Long> groupDetails = groups.stream().map(r ->{
-            Long id = (Long) r[0];
-            return id;
-        }).collect(Collectors.toList());
+        //  公司总人数
+        Integer sum = this.organizationProvider.countOrganizationMemberDetailsByOrgId(namespaceId, cmd.getOwnerId());
+        //  设置了实发工资的人数
+        List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(namespaceId,cmd.getOwnerId());
 
-        //  存储所有设置了实发工资的 detailId
-        List<Object[]> wages = this.salaryEmployeeOriginValProvider.listSalaryEmployeeWagesDetails(UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
-        List<Long> wageDetailIds = wages.stream().map(r ->{
-            Long id = (Long) r[0];
-            return id;
-        }).collect(Collectors.toList());
-
-        for(int i=0; i<userDetailIds.size(); i++){
-            if(groupDetails.contains(userDetailIds.get(i)) && wageDetailIds.contains(userDetailIds.get(i))) {
-                count--;
-                continue;
-            }
-        }
+        if(wages != null)
+            count = sum - wages.size();
+        else
+            count = sum;
         return String.valueOf(count);
     }
 
@@ -631,9 +618,9 @@ public class SalaryServiceImpl implements SalaryService {
                         || dto.getIsConfirmed().equals(SalaryEmployeeConfirmedType.NOTCONFIRMED.getCode()))
                     dto.setIsNormal(SalaryEmployeeNormalType.ABNORMAL.getCode());
 
-               /*  //  根据前端“只显示异常员工”条件来判断是否将该员工添加至 response
+                //  根据前端“只显示异常员工”条件来判断是否将该员工添加至 response
                 if (isException.equals(SalaryEmployeeNormalType.ABNORMAL.getCode()) && dto.getIsNormal().equals(SalaryEmployeeNormalType.NORMAL.getCode()))
-                    continue;*/
+                    continue;
                 dtos.add(dto);
             }
         }
@@ -721,24 +708,13 @@ public class SalaryServiceImpl implements SalaryService {
 
         User user = UserContext.current().getUser();
         if(!cmd.getEmployeeOriginVal().isEmpty()){
-
-            //  添加到组织架构的薪酬组中，没有增加有则覆盖
-            this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(),cmd.getUserDetailId(),cmd.getSalaryGroupId());
-/*            AddToOrganizationSalaryGroupCommand addCommand = new AddToOrganizationSalaryGroupCommand();
-            List<UniongroupTarget> targets = new ArrayList<>();
-            UniongroupTarget target = new UniongroupTarget();
-            target.setId(cmd.getUserDetailId());
-            target.setName(cmd.getName());
-            targets.add(target);
-            addCommand.setOwnerId(cmd.getOwnerId());
-            addCommand.setOwnerType(cmd.getOwnerType());
-            addCommand.setSalaryGroupId(cmd.getSalaryGroupId());
-            addCommand.setUsers(targets);
-            this.addToOrganizationSalaryGroup(addCommand);*/
+            //  1.个人设定做完修改
+            //  2.组织架构薪酬组的人员变动
+            //  先做设定再做组织架构的变动是因为方便搜索引擎的同步
 
             //  添加到薪酬组的个人设定中
             List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getUserDetailId(),cmd.getOwnerType(),cmd.getOwnerId());
-            if(originVals.isEmpty()){
+            if(originVals == null){
                 cmd.getEmployeeOriginVal().stream().forEach(r -> {
                     createSalaryEmployeeOriginVal(r, cmd.getOwnerType(),cmd.getOwnerId(),
                             cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getUserDetailId());
@@ -750,6 +726,9 @@ public class SalaryServiceImpl implements SalaryService {
                             cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getUserDetailId());
                 });
             }
+
+            //  添加到组织架构的薪酬组中，没有增加有则覆盖
+            this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(),cmd.getUserDetailId(),cmd.getSalaryGroupId());
         }
     }
 
@@ -769,6 +748,11 @@ public class SalaryServiceImpl implements SalaryService {
         originVal.setOriginEntityId(dto.getOriginEntityId());
         originVal.setSalaryValue(dto.getSalaryValue());
         this.salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(originVal);
+
+        //  同步搜索引擎
+/*        this.uniongroupSearcher.deleteAll();
+        this.uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), UniongroupType.SALARYGROUP.getCode());
+        this.uniongroupSearcher.refresh();*/
     }
 
     @Override
