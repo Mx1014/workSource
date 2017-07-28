@@ -183,89 +183,90 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
                         LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
                         continue;
                     }
-                    e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
-                    switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
-                        case SINGLE_LINE_TEXT:
-                        case NUMBER_TEXT:
-                        case DATE:
-                        case DROP_BOX :
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-                            entities.add(e);
-                            break;
-                        case MULTI_LINE_TEXT:
-                            e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-                            e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-                            entities.add(e);
-                            break;
-                        case IMAGE:
-                            e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
-                            //工作流images怎么传
-                            PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
-                            for(String uriString : imageValue.getUris()){
-                                String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                                e.setValue(url);
-                                FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
-                                entities.add(e2);
-                            }
-                            break;
-                        case FILE:
-//						e.setEntityType(FlowCaseEntityType.F.getCode());
-                            //TODO:工作流需要新增类型file
-                            e.setEntityType(FlowCaseEntityType.FILE.getCode());
-                            PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
-                            if (null == fileValue || fileValue.getFiles() ==null )
-                                break;
-                            List<FlowCaseFileDTO> files = new ArrayList<>();
-                            for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
-                                FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-                                String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                                ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
-                                fileDTO.setUrl(url);
-                                fileDTO.setFileName(dto2.getFileName());
-                                fileDTO.setFileSize(resource.getResourceSize());
-                                files.add(fileDTO);
-                            }
-                            FlowCaseFileValue value = new FlowCaseFileValue();
-                            value.setFiles(files);
-                            e.setValue(JSON.toJSONString(value));
-                            entities.add(e);
-                            break;
-                        case INTEGER_TEXT:
-                            e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                            e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-                            entities.add(e);
-                            break;
-                        case SUBFORM:
-
-                            PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormSubformValue.class);
-                            //取出设置的子表单fields
-                            GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class) ;
-                            //给子表单计数从1开始
-                            int formCount = 1;
-                            //循环取出每一个子表单值
-                            for(PostApprovalFormSubformItemValue subForm1:subFormValue.getForms()){
-                                e = new FlowCaseEntity();
-                                e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
+                    if (!dto.getVisibleType().equals(GeneralFormDataVisibleType.HIDDEN.getCode())) {
+                        e.setKey(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
+                        switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
+                            case SINGLE_LINE_TEXT:
+                            case NUMBER_TEXT:
+                            case DATE:
+                            case DROP_BOX:
                                 e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                                e.setValue(formCount++ +"");
+                                e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
                                 entities.add(e);
-                                List<GeneralFormVal> subVals = new ArrayList<>();
-                                //循环取出一个子表单的每一个字段值
-                                for(PostApprovalFormItem subFromValue1:subForm1.getValues()){
-                                    GeneralFormVal obj =  new GeneralFormVal();
-                                    obj.setFieldName(subFromValue1.getFieldName());
-                                    obj.setFieldType(subFromValue1.getFieldType());
-                                    obj.setFieldValue(subFromValue1.getFieldValue());
-                                    subVals.add(obj);
+                                break;
+                            case MULTI_LINE_TEXT:
+                                e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+                                e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+                                entities.add(e);
+                                break;
+                            case IMAGE:
+                                e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+                                //工作流images怎么传
+                                PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
+                                for (String uriString : imageValue.getUris()) {
+                                    String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                                    e.setValue(url);
+                                    FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
+                                    entities.add(e2);
                                 }
-                                List<FlowCaseEntity> subSingleEntities = new ArrayList<>();
-                                processEntities(subSingleEntities, subVals,subFromExtra.getFormFields());
-                                entities.addAll(subSingleEntities);
-                            }
-                            break;
-                    }
+                                break;
+                            case FILE:
+//						e.setEntityType(FlowCaseEntityType.F.getCode());
+                                //TODO:工作流需要新增类型file
+                                e.setEntityType(FlowCaseEntityType.FILE.getCode());
+                                PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
+                                if (null == fileValue || fileValue.getFiles() == null)
+                                    break;
+                                List<FlowCaseFileDTO> files = new ArrayList<>();
+                                for (PostApprovalFormFileDTO dto2 : fileValue.getFiles()) {
+                                    FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+                                    String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                                    ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+                                    fileDTO.setUrl(url);
+                                    fileDTO.setFileName(dto2.getFileName());
+                                    fileDTO.setFileSize(resource.getResourceSize());
+                                    files.add(fileDTO);
+                                }
+                                FlowCaseFileValue value = new FlowCaseFileValue();
+                                value.setFiles(files);
+                                e.setValue(JSON.toJSONString(value));
+                                entities.add(e);
+                                break;
+                            case INTEGER_TEXT:
+                                e.setEntityType(FlowCaseEntityType.LIST.getCode());
+                                e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+                                entities.add(e);
+                                break;
+                            case SUBFORM:
 
+                                PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormSubformValue.class);
+                                //取出设置的子表单fields
+                                GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class);
+                                //给子表单计数从1开始
+                                int formCount = 1;
+                                //循环取出每一个子表单值
+                                for (PostApprovalFormSubformItemValue subForm1 : subFormValue.getForms()) {
+                                    e = new FlowCaseEntity();
+                                    e.setKey(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
+                                    e.setEntityType(FlowCaseEntityType.LIST.getCode());
+                                    e.setValue(formCount++ + "");
+                                    entities.add(e);
+                                    List<GeneralFormVal> subVals = new ArrayList<>();
+                                    //循环取出一个子表单的每一个字段值
+                                    for (PostApprovalFormItem subFromValue1 : subForm1.getValues()) {
+                                        GeneralFormVal obj = new GeneralFormVal();
+                                        obj.setFieldName(subFromValue1.getFieldName());
+                                        obj.setFieldType(subFromValue1.getFieldType());
+                                        obj.setFieldValue(subFromValue1.getFieldValue());
+                                        subVals.add(obj);
+                                    }
+                                    List<FlowCaseEntity> subSingleEntities = new ArrayList<>();
+                                    processEntities(subSingleEntities, subVals, subFromExtra.getFormFields());
+                                    entities.addAll(subSingleEntities);
+                                }
+                                break;
+                        }
+                    }
             }catch(NullPointerException e){
                 LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val), e);
             }catch(Exception e){
