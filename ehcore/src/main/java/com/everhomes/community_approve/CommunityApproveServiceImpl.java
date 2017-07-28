@@ -378,9 +378,9 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                 List<GeneralFormFieldDTO> formFields = formDTO.getFormFields();
                 Map<String,Integer> keyColumnMap = new HashMap<>();
                 for (GeneralFormFieldDTO fieldDTO:formFields)
-                    if (fieldDTO.getFieldName()!= GeneralFormDataSourceType.USER_NAME.getCode()
-                            && fieldDTO.getFieldName() != GeneralFormDataSourceType.USER_PHONE.getCode()
-                            && fieldDTO.getFieldName() != GeneralFormDataSourceType.USER_COMPANY.getCode()
+                    if (!fieldDTO.getFieldName().equals( GeneralFormDataSourceType.USER_NAME.getCode())
+                            && !(fieldDTO.getFieldName().equals(GeneralFormDataSourceType.USER_PHONE.getCode()))
+                            && !(fieldDTO.getFieldName().equals(GeneralFormDataSourceType.USER_COMPANY.getCode()))
                             && isBasicType(fieldDTO.getFieldType())){
                     row1.createCell(column).setCellValue(fieldDTO.getFieldDisplayName());
                     keyColumnMap.put(fieldDTO.getFieldName()+fieldDTO.getFieldType(),column);
