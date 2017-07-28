@@ -493,7 +493,8 @@ public interface OrganizationService {
 
     ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd);
 
-    OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
+    //  暂时舍弃 by R 20170718
+//    OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
 
 	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
 													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
@@ -522,12 +523,6 @@ public interface OrganizationService {
 			Long userId);
 	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
 
-	void updatePressTest();
-
-	void deletePressTest();
-	// added by R, for salaryGroup 20170630
-	public Organization createSalaryGroupOrganization(Long organizationId, String name);
-	public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
-
-	public void leaveTheJob(LeaveTheJobCommand cmd);
+	/**人事管理-离职**/
+	void leaveTheJob(LeaveTheJobCommand cmd);
 }

@@ -61,10 +61,8 @@ import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
-import com.everhomes.organization.Organization;
+import com.everhomes.organization.*;
 import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
@@ -876,9 +874,9 @@ public class UserServiceImpl implements UserService {
 		if(user == null) {
 			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			// 把regionCode的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
-			if(userIdentifier != null && Objects.equals(userIdentifier.getRegionCode(), regionCode)) {
+            if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
                 user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
-                if(user == null) {
+                if (user == null) {
                     LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                             namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
                     throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
@@ -887,8 +885,8 @@ public class UserServiceImpl implements UserService {
                 LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                         namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
                 throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
-			}
-		}
+            }
+        }
 
 		if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
 			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
@@ -3993,12 +3991,20 @@ public class UserServiceImpl implements UserService {
 
         userAppealLogProvider.createUserAppealLog(log);
 
-        SendUserTestMailCommand mailCmd = new SendUserTestMailCommand();
-        mailCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        mailCmd.setBody(String.format("User \"%s(%s)\" has send a appeal, please check out.", cmd.getName(), cmd.getOldIdentifier()));
-        mailCmd.setSubject("User Appeal");
-        mailCmd.setTo("jinlan.wang@zuolin.com");
-        sendUserTestMail(mailCmd);
+        String home = configProvider.getValue(ConfigConstants.HOME_URL, "");
+
+        // ------------------------------------------------------------------------
+        String wjl = "jinlan.wang@zuolin.com";
+        String xqt = "xq.tian@zuolin.com";
+        String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+        String account = configurationProvider.getValue(0,"mail.smtp.account", "zuolin@zuolin.com");
+
+        String body = String.format("User \"%s(%s)\" has send a appeal, server is \"%s\", please check out. \n[%s]",
+                cmd.getName(), cmd.getOldIdentifier(), home, log.toString());
+        handler.sendMail(0, account, wjl, "User Appeal", body);
+        handler.sendMail(0, account, xqt, "User Appeal", body);
+        // ------------------------------------------------------------------------
 
         return toUserAppealLogDTO(log);
     }
@@ -4219,5 +4225,86 @@ public class UserServiceImpl implements UserService {
                             "Invalid parameter %s [ %s ]", v.getPropertyPath(), v.getInvalidValue());
             }
         }
+    }
+		//added by R 20170713, 通讯录2.4增加
+	@Override
+	public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
+		if (org.springframework.util.StringUtils.isEmpty(cmd.getDetailId())) {
+			//	没有 detailiId 则获取当前用户信息
+			SceneContactV2DTO dto = this.getCurrentContactRealInfo(cmd.getOrganizationId());
+			return dto;
+		} else {
+		    //  有 detailID 则获取详细信息
+			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+			if (detail == null)
+				return null;
+			else {
+				SceneContactV2DTO dto = new SceneContactV2DTO();
+				dto.setUserId(detail.getTargetId());
+				dto.setDetailId(detail.getId());
+				if (!StringUtils.isEmpty(detail.getAvatar()))
+					dto.setContactAvatar(detail.getAvatar());
+				dto.setContactName(detail.getContactName());
+				if (!StringUtils.isEmpty(detail.getEnName()))
+					dto.setContactEnglishName(detail.getEnName());
+				dto.setGender(detail.getGender());
+				dto.setContactToken(detail.getContactToken());
+				if (!StringUtils.isEmpty(detail.getEmail()))
+					dto.setEmail(detail.getEmail());
+				getRelevantContactEnterprise(dto, detail.getOrganizationId());
+				return dto;
+			}
+		}
+	}
+
+	private SceneContactV2DTO getCurrentContactRealInfo(Long organizationId) {
+		User user = UserContext.current().getUser();
+        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(user.getId(), organizationId);
+//		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), organizationId);
+
+		if (members == null)
+			return null;
+		else {
+		    OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(members.get(0).getDetailId());
+		    if(detail == null)
+		        return null;
+			SceneContactV2DTO dto = new SceneContactV2DTO();
+			dto.setUserId(user.getId());
+			dto.setContactName(detail.getContactName());
+			dto.setContactToken(detail.getContactToken());
+			return dto;
+		}
+	}
+
+    private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
+
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+
+        //  设置公司
+        Organization directlyEnterprise = this.organizationProvider.findOrganizationById(organizationId);
+        OrganizationDetail directlyEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
+        if (directlyEnterpriseDetail != null)
+            dto.setEnterpriseName(directlyEnterpriseDetail.getDisplayName());
+        else
+            dto.setEnterpriseName(directlyEnterprise.getName());
+
+        //  设置部门
+        List<OrganizationDTO> departments = this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath());
+        //  设置父部门名称
+        if (departments != null && departments.size() > 0) {
+            for (int i = 0; i < departments.size(); i++) {
+                if (departments.get(i).getParentId().equals(0))
+                    continue;
+                departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
+            }
+        }
+        dto.setDepartments(departments);
+
+        //  设置岗位
+        dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
+
     }
 }

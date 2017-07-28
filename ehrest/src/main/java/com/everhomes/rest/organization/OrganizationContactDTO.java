@@ -14,6 +14,8 @@ import java.sql.Timestamp;
  * <li>contactToken：联系方式:手机号/邮箱</li>
  * <li>creatorUid：创建者uId</li>
  * <li>createTime：创建时间</li>
+ * <li>jobPosition: 岗位</li>
+ * <li>detailId: 用户档案id</li>
  * </ul>
  */
 public class OrganizationContactDTO {
@@ -36,6 +38,8 @@ public class OrganizationContactDTO {
 
     private String targetType;
 
+    //added by R 20120713 增加岗位信息
+    private String jobPosition;
     private Long detailId;
 
     public OrganizationContactDTO() {
@@ -167,6 +171,14 @@ public class OrganizationContactDTO {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
+    }
+
+    public String getJobPosition() {
+        return jobPosition;
+    }
+
+    public void setJobPosition(String jobPosition) {
+        this.jobPosition = jobPosition;
     }
 
     public Long getDetailId() {

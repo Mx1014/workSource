@@ -550,7 +550,7 @@ public class ActivityServiceImpl implements ActivityService {
 		 }
 
 		 // 来自微信的请求支持支付报名   edit by yanjun 20170713
-		 if(cmd.getSignupSourceFlag() != null && cmd.getSignupSourceFlag().byteValue() == SignupSourceFlag.WECHAT.getCode()){
+		 if(cmd.getSignupSourceFlag() != null && cmd.getSignupSourceFlag().byteValue() == ActivityRosterSourceFlag.WECHAT.getCode()){
 			 return;
 		 }
 
@@ -1323,6 +1323,11 @@ public class ActivityServiceImpl implements ActivityService {
         
         // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
         addAdditionalInfo(roster, user, activity);
+
+		// 增加来自微信端报名的来源   edit by yanjun 20170720
+		if(cmd.getSignupSourceFlag() != null && cmd.getSignupSourceFlag().byteValue() == ActivityRosterSourceFlag.WECHAT.getCode()){
+			roster.setSourceFlag(ActivityRosterSourceFlag.WECHAT.getCode());
+		}
         
         return roster;
     }
