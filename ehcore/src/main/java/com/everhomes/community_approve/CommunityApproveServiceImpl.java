@@ -378,7 +378,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                 List<GeneralFormFieldDTO> formFields = formDTO.getFormFields();
                 Map<String,Integer> keyColumnMap = new HashMap<>();
                 for (GeneralFormFieldDTO fieldDTO:formFields)
-                    if (!defaultFields.contains(fieldDTO.getFieldName())){
+                    if (!defaultFields.contains(fieldDTO.getFieldName()) && isBasicType(fieldDTO.getFieldType())){
                     row1.createCell(column).setCellValue(fieldDTO.getFieldDisplayName());
                     keyColumnMap.put(fieldDTO.getFieldName()+fieldDTO.getFieldType(),column);
                     column++;
@@ -402,18 +402,9 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                 if (null==keyColumMap.get(item.getFieldName()))
                     continue;
                 Integer colunm = (int)keyColumMap.get(item.getFieldName()+item.getFieldType());
-                switch (GeneralFormFieldType.fromCode(item.getFieldType())) {
-                    case SINGLE_LINE_TEXT:
-                    case NUMBER_TEXT:
-                    case DATE:
-                    case DROP_BOX :
-                    case MULTI_LINE_TEXT:
-                    case INTEGER_TEXT:
-                        row.createCell(colunm).setCellValue(JSON.parseObject(item.getFieldValue(),
-                                PostApprovalFormTextValue.class).getText());
-                        break;
-                    default:
-                        break;
+                if (isBasicType(item.getFieldType())){
+                    row.createCell(colunm).setCellValue(JSON.parseObject(item.getFieldValue(),
+                            PostApprovalFormTextValue.class).getText());
                 }
 
             }
@@ -427,6 +418,20 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             LOGGER.error("export error, e = {}", e);
         }
 
+    }
+
+    private boolean isBasicType(String fieldType){
+        switch (GeneralFormFieldType.fromCode(fieldType)){
+            case SINGLE_LINE_TEXT:
+            case NUMBER_TEXT:
+            case DATE:
+            case DROP_BOX :
+            case MULTI_LINE_TEXT:
+            case INTEGER_TEXT:
+                return true;
+            default:
+                return false;
+        }
     }
 
     private XSSFSheet createNewSheet(XSSFWorkbook wb,CommunityApproveValDTO dto){
