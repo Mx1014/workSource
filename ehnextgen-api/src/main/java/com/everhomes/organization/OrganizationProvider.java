@@ -345,7 +345,6 @@ public interface OrganizationProvider {
     List<OrganizationMemberDetails> findDetailInfoListByIdIn(List<Long> detailIds);
     List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator,Integer pageSize,Organization org, List<String> groupTypes, String keywords);
 
-	List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize);
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
 	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
     void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
@@ -406,8 +405,6 @@ public interface OrganizationProvider {
 			Long organizationId, Long buildId);
 
 	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String keywords, String organizationType,CrossShardListingLocator locator,Integer pageSize);
-}
-
 	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
 
     List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String keywords, CrossShardListingLocator locator, int pageSize);
