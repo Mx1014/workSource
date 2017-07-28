@@ -18,11 +18,11 @@ import com.everhomes.util.StringHelper;
  * <li>name : 名称</li>  
  * <li>description : 描述</li>  
  * <li>punchTimeIntervals：上班时间段</li> 
- * <li>flexTime：弹性时间段</li>
- * <li>punchLimitTime：提前多少可以打卡的打卡限制时间</li>
- * <li>noonLeaveTime：午休开始时间</li>
- * <li>afternoonArriveTime：午休结束时间</li> 
- * <li>daySplitTime：前一天与后一天的分界点</li>
+ * <li>flexTime：弹性时间段</li> 
+ * <li>noonLeaveTime：午休开始时间 (只有一段打卡可以设置)</li>
+ * <li>afternoonArriveTime：午休结束时间 (只有一段打卡可以设置)</li> 
+ * <li>beginPunchTime：允许开始打开时间--上班时间前多久可以打开</li> 
+ * <li>endPunchTime: 允许结束打卡时间--下班时间后多久可以打卡 (排班制字段)</li>  
  * </ul>
  */
 public class PunchTimeRuleDTO {
@@ -39,8 +39,6 @@ public class PunchTimeRuleDTO {
 
     private Long flexTime;
     
-    private Long punchLimitTime;
-    
 	@NotNull
 	private Long noonLeaveTime;
 	@NotNull
@@ -50,7 +48,10 @@ public class PunchTimeRuleDTO {
 	
 	private String description;
 	  
-
+	private Long beginPunchTime;
+	
+	private Long endPunchTime;
+	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -116,16 +117,7 @@ public class PunchTimeRuleDTO {
 		this.flexTime = flexTime;
 	}
 
-
-	public Long getPunchLimitTime() {
-		return punchLimitTime;
-	}
-
-
-	public void setPunchLimitTime(Long punchLimitTime) {
-		this.punchLimitTime = punchLimitTime;
-	}
-
+ 
 
 	public Long getNoonLeaveTime() {
 		return noonLeaveTime;
@@ -164,6 +156,26 @@ public class PunchTimeRuleDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+
+	public Long getBeginPunchTime() {
+		return beginPunchTime;
+	}
+
+
+	public void setBeginPunchTime(Long beginPunchTime) {
+		this.beginPunchTime = beginPunchTime;
+	}
+
+
+	public Long getEndPunchTime() {
+		return endPunchTime;
+	}
+
+
+	public void setEndPunchTime(Long endPunchTime) {
+		this.endPunchTime = endPunchTime;
 	}
  
 }
