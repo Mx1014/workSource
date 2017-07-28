@@ -740,6 +740,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return assignment;
     }
 
+    @Override
     private List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {
         List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
 

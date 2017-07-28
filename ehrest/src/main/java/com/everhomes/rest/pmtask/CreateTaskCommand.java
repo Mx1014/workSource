@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>namespaceId: 域空间ID</li>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>categoryId: 子类型ID</li>
@@ -18,17 +17,13 @@ import com.everhomes.util.StringHelper;
  * <li>addressId: 门牌id</li>
  * <li>priority: 客户反映</li>
  * <li>reserveTime: 预约时间</li>
- * <li>sourceType: 报事来源 {@link com.everhomes.rest.pmtask.PmTaskSourceType}</li>
+ * <li>sourceType: 报事来源</li>
  * <li>requestorName: 联系人名称</li>
  * <li>requestorPhone: 联系方式</li>
  * <li>addressType: 地址类型   1:小区家庭门牌地址 2: 园区公司地址 {@link com.everhomes.rest.pmtask.PmTaskAddressType }</li>
- * <li>addressOrgId: 地址公司id</li>
- * <li>buildingName: 楼栋名称</li>
- * <li>attachments: 图片列表 {@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
  * </ul>
  */
 public class CreateTaskCommand {
-	private Integer namespaceId;
 	private String ownerType;
     private Long ownerId;
 	private Long categoryId;
@@ -47,16 +42,17 @@ public class CreateTaskCommand {
 	private Byte addressType;
 	private Long addressOrgId;
 	private String buildingName;
-
+	private Long flowOrganizationId;
+	private Integer namespaceId;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
 
-	public Integer getNamespaceId() {
-		return namespaceId;
+	public Long getFlowOrganizationId() {
+		return flowOrganizationId;
 	}
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
+	public void setFlowOrganizationId(Long flowOrganizationId) {
+		this.flowOrganizationId = flowOrganizationId;
 	}
 
 	public String getOwnerType() {
@@ -162,6 +158,15 @@ public class CreateTaskCommand {
 	public void setBuildingName(String buildingName) {
 		this.buildingName = buildingName;
 	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

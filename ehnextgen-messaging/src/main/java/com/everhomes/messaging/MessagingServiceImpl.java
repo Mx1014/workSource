@@ -124,7 +124,8 @@ public class MessagingServiceImpl implements MessagingService {
              userLogin = UserContext.current().getLogin();
             cmd.setLoginId(userLogin.getLoginId());
         } else {
-            userLogin = new UserLogin(cmd.getNamespaceId(), cmd.getUserId(), cmd.getLoginId(), "", "");
+            String appVersion = UserContext.current().getVersion();
+            userLogin = new UserLogin(cmd.getNamespaceId(), cmd.getUserId(), cmd.getLoginId(), "", "", appVersion);
         }
         
         String messageBoxKey = UserMessageRoutingHandler.getMessageBoxKey(userLogin, 

@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.flow.*;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
-import com.everhomes.general_approval.GeneralForm;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseStatus;

@@ -1,30 +1,5 @@
 package com.everhomes.user;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.everhomes.server.schema.tables.records.*;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.activity.ActivityRoster;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -38,36 +13,26 @@ import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhFeedbacksDao;
-import com.everhomes.server.schema.tables.daos.EhRequestAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhSearchTypesDao;
-import com.everhomes.server.schema.tables.daos.EhStatActiveUsersDao;
-import com.everhomes.server.schema.tables.daos.EhUserActivitiesDao;
-import com.everhomes.server.schema.tables.daos.EhUserBehaviorsDao;
-import com.everhomes.server.schema.tables.daos.EhUserContactsDao;
-import com.everhomes.server.schema.tables.daos.EhUserFavoritesDao;
-import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
-import com.everhomes.server.schema.tables.daos.EhUserInstalledAppsDao;
-import com.everhomes.server.schema.tables.daos.EhUserInvitationRosterDao;
-import com.everhomes.server.schema.tables.daos.EhUserLocationsDao;
-import com.everhomes.server.schema.tables.daos.EhUserPostsDao;
-import com.everhomes.server.schema.tables.daos.EhUserProfilesDao;
-import com.everhomes.server.schema.tables.daos.EhUserServiceAddressesDao;
-import com.everhomes.server.schema.tables.pojos.EhRequestAttachments;
-import com.everhomes.server.schema.tables.pojos.EhSearchTypes;
-import com.everhomes.server.schema.tables.pojos.EhStatActiveUsers;
-import com.everhomes.server.schema.tables.pojos.EhUserContacts;
-import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.pojos.EhUserInstalledApps;
-import com.everhomes.server.schema.tables.pojos.EhUserPosts;
-import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
-import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.stereotype.Component;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class UserActivityProviderImpl implements UserActivityProvider {
@@ -1032,5 +997,32 @@ public class UserActivityProviderImpl implements UserActivityProvider {
             locator.setAnchor(results.get(results.size() - 1).getId());
         }
         return results;
+    }
+
+    @Override
+    public List<UserActivity> listUserActivetys(Long userId, Integer pageSize) {
+        List<UserActivity> results = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(Tables.EH_USER_ACTIVITIES);
+        query.addConditions(Tables.EH_USER_ACTIVITIES.UID.eq(userId));
+        query.addOrderBy(Tables.EH_USER_ACTIVITIES.CREATE_TIME.desc());
+
+        if (null != pageSize) {
+            query.addLimit(pageSize);
+        }
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, UserActivity.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public UserActivity findLastUserActivity(Long uid) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_USER_ACTIVITIES)
+                .where(Tables.EH_USER_ACTIVITIES.UID.eq(uid))
+                .orderBy(Tables.EH_USER_ACTIVITIES.CREATE_TIME.desc())
+                .fetchAnyInto(UserActivity.class);
     }
 }

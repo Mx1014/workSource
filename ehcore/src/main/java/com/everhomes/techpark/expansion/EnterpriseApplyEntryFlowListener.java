@@ -7,17 +7,25 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
@@ -41,14 +49,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-/**
- * Created by xq.tian on 2016/12/20.
- */
 @Component
 public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
@@ -56,35 +58,32 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Autowired
     private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
-
     @Autowired
     private LocaleTemplateService localeTemplateService;
-
     @Autowired
-    private LocaleStringService localeStringService;
-
+    private EnterpriseApplyEntryService enterpriseApplyEntryService;
     @Autowired
     private YellowPageProvider yellowPageProvider;
     @Autowired
     private FlowService flowService;
-
     @Autowired
     private CommunityProvider communityProvider;
     @Autowired
     private AddressProvider addressProvider;
     @Autowired
     private BuildingProvider buildingProvider;
-
     @Autowired
-    private OrganizationProvider organizationProvider;
-
+    private ContractProvider contractProvider;
+    @Autowired
+    private ContractBuildingMappingProvider contractBuildingMappingProvider;
     @Autowired
     private SmsProvider smsProvider;
-
     @Autowired
     private FlowEventLogProvider flowEventLogProvider;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private GeneralFormService generalFormService;
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
@@ -144,21 +143,49 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
             map.put("applyBuilding", defaultIfNull(buildingName, ""));
             map.put("applyUserName", defaultIfNull(applyEntry.getApplyUserName(), ""));
-            map.put("contactPhone", defaultIfNull(applyEntry.getApplyContact(), ""));
+
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(applyEntry.getApplyUserId(), IdentifierType.MOBILE.getCode());
+
+            map.put("contactPhone", defaultIfNull(userIdentifier.getIdentifierToken(), ""));
             map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
-            String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
-                    applyEntry.getApplyType() + "", locale, "");
-            map.put("applyType", defaultIfNull(applyType, ""));
-//            map.put("areaSize", defaultIfNull(applyEntry.getAreaSize(), ""));
-//            this.processSourceName(applyEntry);
-//            map.put("sourceType", defaultIfNull(applyEntry.getSourceName(), ""));
+//            String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
+//                    applyEntry.getApplyType() + "", locale, "");
+            ApplyEntrySourceType applyEntrySourceType = ApplyEntrySourceType.fromType(applyEntry.getSourceType());
+            String sourceType = null != applyEntrySourceType? applyEntrySourceType.getDescription() : "";
+
+            GetLeasePromotionConfigCommand cmd = new GetLeasePromotionConfigCommand();
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            LeasePromotionConfigDTO config = enterpriseApplyEntryService.getLeasePromotionConfig(cmd);
+            byte i = -1;
+            if (ApplyEntrySourceType.BUILDING == applyEntrySourceType) {
+                i = LeasePromotionOrder.PARK_INTRODUCE.getCode();
+            }else if (ApplyEntrySourceType.FOR_RENT == applyEntrySourceType) {
+                i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
+            }
+            if (null != config.getDisplayNames() ) {
+                for (Integer k: config.getDisplayOrders()) {
+                    if (k.byteValue() ==i) {
+                        sourceType =config.getDisplayNames().get(k - 1);
+                    }
+                }
+            }
+
+            map.put("sourceType", defaultIfNull(sourceType, ""));
+
             map.put("description", defaultIfNull(applyEntry.getDescription(), ""));
             
             String jsonStr;
 
             jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
 
-            return (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
+            GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
+            cmd2.setSourceType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
+            cmd2.setSourceId(dto.getId());
+            List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd2);
+
+            FlowCaseEntityList result = (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
+            result.addAll(result.size() - 1, formEntities);
+            return result;
         } else {
             LOGGER.warn("Not found EhEnterpriseOpRequests instance for flowCase: {}", StringHelper.toJsonString(flowCase));
         }
@@ -172,7 +199,34 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private String processBuildingName(EnterpriseOpRequest applyEntry) {
         String buildingName = "";
         if(ApplyEntryApplyType.fromType(applyEntry.getApplyType()).equals(ApplyEntryApplyType.RENEW)){
-			//续租的 
+			//续租的
+            if (null != applyEntry.getContractId()) {
+                Contract contract = contractProvider.findContractById(applyEntry.getContractId());
+
+                List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(UserContext.getCurrentNamespaceId(),
+                        contract.getContractNumber());
+                Set<String> buildingNames = new HashSet<>();
+                buildings.forEach(b -> buildingNames.add(b.getBuildingName()));
+
+                StringBuilder sb = new StringBuilder();
+                int n = 1;
+                for (String name: buildingNames) {
+
+                    if (n == buildingNames.size()) {
+                        sb.append(name);
+                    }else {
+                        sb.append(name).append(",");
+                    }
+                    n++;
+                }
+
+                buildingName = sb.toString();
+            }else {
+                Building building = communityProvider.findBuildingById(applyEntry.getBuildingId());
+                if (null != building) {
+                    buildingName = building.getName();
+                }
+            }
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
 			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
@@ -182,11 +236,6 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             }
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())||
 				ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())){
-			//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
-//			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
-//			if(null != leasePromotion){
-//				applyEntry.setSourceName(leasePromotion.getSubject());
-//			}
 
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
 
@@ -212,16 +261,6 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
                 }
 			}
 		}
-//        if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
-//            Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
-//            if(null != building)
-//                applyEntry.setSourceName(building.getName());
-//        } else if (ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType()) ||
-//                ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())) {
-//            LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
-//            if (null != leasePromotion)
-//                applyEntry.setSourceName(leasePromotion.getSubject());
-//        }
 
         return buildingName;
     }

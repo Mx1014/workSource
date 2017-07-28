@@ -157,16 +157,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //			});
 		}
 
-		//五分钟后启动通知
-		Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
-		if(notifyFlag) {
-			Long notifyTime = System.currentTimeMillis() + 300000;
-			String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-			String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
-			String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
-					notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
-		}
+		Long notifyTime = System.currentTimeMillis() + 300000;
+		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
+		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
+				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
 
 
 	}
@@ -644,7 +640,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			CrossShardListingLocator locator, Integer pageSize) {
 
 		List<EquipmentInspectionAccessories> accessories = new ArrayList<EquipmentInspectionAccessories>();
-		
+
 		if (locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhEquipmentInspectionAccessories.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
@@ -652,16 +648,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhEquipmentInspectionAccessoriesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES);
-            
+
             if(locator.getAnchor() != null && locator.getAnchor() != 0L){
             	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.lt(locator.getAnchor()));
             }
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.STATUS.ne((byte) 0));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.desc());
             query.addLimit(pageSize - accessories.size());
-            
+
             query.fetch().map((r) -> {
-            	
+
             	accessories.add(ConvertHelper.convert(r, EquipmentInspectionAccessories.class));
                 return null;
             });
@@ -2002,16 +1998,22 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime) {
+	public List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime, Byte groupType) {
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
 //		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(createTime)));
 
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(new Timestamp(startTime)));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.le(new Timestamp(endTime)));
+		if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(groupType))) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(new Timestamp(startTime)));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.le(new Timestamp(endTime)));
+		}
 
+		if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(groupType))) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(startTime)));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(new Timestamp(endTime)));
+		}
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listTodayEquipmentInspectionTasks, sql=" + query.getSQL());
 			LOGGER.debug("listTodayEquipmentInspectionTasks, bindValues=" + query.getBindValues());

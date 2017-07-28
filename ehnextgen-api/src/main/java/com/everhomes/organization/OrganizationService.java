@@ -20,8 +20,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.enterprise.*;
-import com.everhomes.rest.forum.*;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.BatchApproveContactCommand;
@@ -45,7 +43,6 @@ import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
@@ -56,15 +53,6 @@ import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
-
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-
-import java.util.List;
-import java.util.Map;
-
 
 
 public interface OrganizationService {
@@ -195,7 +183,7 @@ public interface OrganizationService {
 	void updatePersonnelsToDepartment(UpdatePersonnelsToDepartment cmd);
 	void addPersonnelsToGroup(AddPersonnelsToGroup cmd);
 	void rejectForEnterpriseContact(RejectContactCommand cmd);
-	OrganizationMemberDTO createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
+	OrganizationMember createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
 	ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd);
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);
@@ -214,8 +202,10 @@ public interface OrganizationService {
 			Long userId, ImportOrganizationPersonnelDataCommand cmd);
 	
 	ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd);
-	
-	PostDTO acceptTask(ProcessOrganizationTaskCommand cmd);
+
+    List<OrganizationManagerDTO> getOrganizationManagers(List<Long> organizationIds);
+
+    PostDTO acceptTask(ProcessOrganizationTaskCommand cmd);
 	
 	PostDTO refuseTask(ProcessOrganizationTaskCommand cmd);
 	
@@ -436,6 +426,8 @@ public interface OrganizationService {
 
     List<OrganizationMember> listOrganizationContactByJobPositionId(List<Long> organizationIds, Long jobPositionId);
 
+	List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId);
+
     List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd);
 	ContractDTO processContract(Contract contract, Integer namespaceId);
 	ContractDTO processContract(Contract contract);
@@ -451,10 +443,87 @@ public interface OrganizationService {
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
 
+    /****** new interface ******/
+
+    ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
+
+    PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd);
+
+	OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd);
+
+    OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberInfoCommand cmd);
+
+    void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd);
+
+    OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd);
+
+    List<OrganizationMemberEducationsDTO> listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd);
+
+    void deleteOrganizationMemberEducations(DeleteOrganizationMemberEducationsCommand cmd);
+
+    void updateOrganizationMemberEducations(UpdateOrganizationMemberEducationsCommand cmd);
+
+    OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd);
+
+    List<OrganizationMemberWorkExperiencesDTO> listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd);
+
+    void deleteOrganizationMemberWorkExperiences(DeleteOrganizationMemberWorkExperiencesCommand cmd);
+
+    void updateOrganizationMemberWorkExperiences(UpdateOrganizationMemberWorkExperiencesCommand cmd);
+
+    OrganizationMemberInsurancesDTO addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd);
+
+    List<OrganizationMemberInsurancesDTO> listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd);
+
+    void updateOrganizationMemberInsurances(UpdateOrganizationMemberInsurancesCommand cmd);
+
+    void deleteOrganizationMemberInsurances(DeleteOrganizationMemberInsurancesCommand cmd);
+
+    OrganizationMemberContractsDTO addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd);
+
+    List<OrganizationMemberContractsDTO> listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd);
+
+    void updateOrganizationMemberContracts (UpdateOrganizationMemberContractsCommand cmd);
+
+    void deleteOrganizationMemberContracts(DeleteOrganizationMemberContractsCommand cmd);
+
+    void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd);
+
+    List<MemberRecordChangesByJobDTO> listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd);
+
+    ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd);
+
+    //  暂时舍弃 by R 20170718
+//    OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
+
+	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
+													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
+    List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId);
+
+    void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
+
+	ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile multipartFile, Long userId);
+	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
+	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
+
 	/**
 	 * 查询所有管理公司
 	 */
 	List<OrganizationDTO> listAllPmOrganizations();
 
 	List<Long> getIncludeOrganizationIdsByUserId(Long userId, Long organizationId);
+
+	/**
+	 * 最新 获取用户所包含的机构列表，如果用户是某个机构的管理员或者模块管理员或者细化的权限，就拥有这个机构，不一定用户非得在此机构的通讯录
+	 * @param cmd
+	 * @return
+     */
+	List<OrganizationSimpleDTO> listUserRelateOrganizations(ListUserRelatedOrganizationsCommand cmd);
+	List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path,
+			Long userId);
+	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
+
+	/**人事管理-离职**/
+	void leaveTheJob(LeaveTheJobCommand cmd);
+
 }

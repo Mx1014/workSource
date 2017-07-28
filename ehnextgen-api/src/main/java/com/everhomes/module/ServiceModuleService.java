@@ -38,4 +38,5 @@ public interface ServiceModuleService {
 	void deleteServiceModule(DeleteServiceModuleCommand cmd);
 
 	ListServiceModulesResponse listAllServiceModules(ListServiceModulesCommand cmd);
+	List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId);
 }

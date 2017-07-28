@@ -28,6 +28,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
+import com.everhomes.hotTag.HotTags;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
@@ -47,6 +48,8 @@ import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.comment.OwnerTokenDTO;
+import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.common.ActivityDetailActionData;
 import com.everhomes.rest.common.PostDetailActionData;
 import com.everhomes.rest.community.CommunityType;
@@ -57,6 +60,8 @@ import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.hotTag.HotFlag;
+import com.everhomes.rest.hotTag.HotTagServiceType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -69,6 +74,7 @@ import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.search.HotTagSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
@@ -191,6 +197,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Value("${server.contextPath:}")
     private String serverContectPath;
+
+    @Autowired
+    private HotTagSearcher hotTagSearcher;
     
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -256,6 +265,10 @@ public class ForumServiceImpl implements ForumService {
             handler.postProcessEmbeddedObject(post);
         } else {
             forumProvider.createPost(post);
+
+            //将tag保存到搜索引擎，此处仅用于普通话题，因为活动和投票已经在自己的postProcessEmbeddedObject中处理
+            // add by yanjun 20170613
+            feedDocTopicTag(post);
         }
 
 
@@ -269,14 +282,17 @@ public class ForumServiceImpl implements ForumService {
         }
         populatePost(creatorUid, post, communityId, false);
 
-        try {
-            postSearcher.feedDoc(post);
+        //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
+        if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE) {
+            try {
+                postSearcher.feedDoc(post);
 
-            AddUserPointCommand pointCmd = new AddUserPointCommand(creatorUid, PointType.CREATE_TOPIC.name(),
-                userPointService.getItemPoint(PointType.CREATE_TOPIC), creatorUid);
-            userPointService.addPoint(pointCmd);
-        } catch(Exception e) {
-            LOGGER.error("Failed to add post to search engine, userId=" + creatorUid + ", postId=" + post.getId(), e);
+                AddUserPointCommand pointCmd = new AddUserPointCommand(creatorUid, PointType.CREATE_TOPIC.name(),
+                        userPointService.getItemPoint(PointType.CREATE_TOPIC), creatorUid);
+                userPointService.addPoint(pointCmd);
+            } catch (Exception e) {
+                LOGGER.error("Failed to add post to search engine, userId=" + creatorUid + ", postId=" + post.getId(), e);
+            }
         }
 
         /**
@@ -306,6 +322,23 @@ public class ForumServiceImpl implements ForumService {
         return postDto;
     }
 
+    /**
+     * 将tag保存到搜索引擎，此处仅用于普通话题，因为活动和投票已经在自己的postProcessEmbeddedObject中处理  add by yanjun 20170613
+     * @param post
+     */
+    private void feedDocTopicTag(Post post){
+        if(post.getEmbeddedAppId()!=null && post.getEmbeddedAppId() == 0L && !StringUtils.isEmpty(post.getTag())){
+            try{
+                HotTags tag = new HotTags();
+                tag.setName(post.getTag());
+                tag.setHotFlag(HotFlag.NORMAL.getCode());
+                tag.setServiceType(HotTagServiceType.TOPIC.getCode());
+                hotTagSearcher.feedDoc(tag);
+            }catch (Exception e){
+                LOGGER.error("feedDoc topic tag error",e);
+            }
+        }
+    }
     private void checkUserBlacklist(Long userId) {
         String blackListStr = configProvider.getValue(UserContext.getCurrentNamespaceId(), "createTopic.blacklist", "");
         if (org.apache.commons.lang.StringUtils.isNotEmpty(blackListStr)) {
@@ -692,11 +725,13 @@ public class ForumServiceImpl implements ForumService {
     public void deletePost(Long forumId, Long postId, boolean deleteUserPost, Long currentOrgId, String ownerType, Long ownerId) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-        
-        checkForumParameter(userId, forumId, "getTopic");
-        
-        Post post = checkPostParameter(userId, forumId, postId, "deletePost");
 
+        //为了兼容新的统一评论接口，先检查post再检查forum，因为新的统一接口没有传来forumId  add by yanjun 20170601
+        Post post = checkPostParameter(userId, forumId, postId, "deletePost");
+        if(forumId == null && post!= null){
+            forumId = post.getForumId();
+        }
+        checkForumParameter(userId, forumId, "getTopic");
 
         Post pPost = null;
         if(post.getParentPostId() != null && post.getParentPostId() != 0) {
@@ -1402,6 +1437,16 @@ public class ForumServiceImpl implements ForumService {
 	         if(null != privateCond){
 	        	 condition = condition.and(privateCond);
 	         }
+
+             //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+             if(cmd.getCategoryId() != null){
+                 condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+             }
+
+             //支持标签搜索  add by yanjun 20170712
+             if(!StringUtils.isEmpty(cmd.getTag())){
+                 condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+             }
 	         
 	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
 	    	 if(LOGGER.isInfoEnabled()) {
@@ -1744,12 +1789,16 @@ public class ForumServiceImpl implements ForumService {
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
         String tag = "listTopicComments";
-        
+
+        //为了兼容新的统一评论接口，先检查post再检查forum，因为新的统一接口没有传来forumId  add by yanjun 20170601
+        Long topicId = cmd.getTopicId();
+        Post post = checkPostParameter(operatorId, null, topicId, tag);
+        if(post != null && cmd.getForumId() == null){
+            cmd.setForumId(post.getForumId());
+        }
         Long forumId = cmd.getForumId();
         Forum forum = checkForumParameter(operatorId, forumId, tag);
-        
-        Long topicId = cmd.getTopicId();
-        Post post = checkPostParameter(operatorId, forumId, topicId, tag);
+
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forumId);
@@ -1772,9 +1821,19 @@ public class ForumServiceImpl implements ForumService {
         }
         
         populatePosts(operatorId, posts, null, true);
-        
+
         List<PostDTO> postDtoList = posts.stream().map((r) -> {
-          return ConvertHelper.convert(r, PostDTO.class);  
+            PostDTO postdto = ConvertHelper.convert(r, PostDTO.class);
+
+            //如果有附件，则将附件也转换一下，不转换的话可能会报错。 例如：postDTO.getAttachments().get(0)   add by yanjun 20170605
+            if(r.getAttachments() != null && r.getAttachments().size() > 0){
+                List<AttachmentDTO> listAttachementdto = r.getAttachments().stream().map((tt) -> {
+                    return ConvertHelper.convert(tt, AttachmentDTO.class);
+                }).collect(Collectors.toList());
+                postdto.setAttachments(listAttachementdto);
+            }
+            return postdto;
+
         }).collect(Collectors.toList());
         
         //add commentCount when listTopicComments modified by xiongying 20160629
@@ -1819,7 +1878,11 @@ public class ForumServiceImpl implements ForumService {
         
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-                
+
+        //为了兼容新的统一评论接口，先检查活动, 因为新的统一接口没有传来forumId  add by yanjun 20170601
+        Post ownerPost = checkPostParameter(userId, null, cmd.getTopicId(), "createComment");
+        cmd.setForumId(ownerPost.getForumId());
+
         Post post = processCommentCommand(userId, cmd);
 
         //黑名单权限校验 by sfyan20161213
@@ -1861,8 +1924,19 @@ public class ForumServiceImpl implements ForumService {
         
         //发表评论发消息给创建者或父评论者，add by tt, 20170314
         sendMessageToCreatorOrParent(user, post);
-        
-        return ConvertHelper.convert(post, PostDTO.class);
+
+//        return ConvertHelper.convert(post, PostDTO.class);
+
+        //如果有附件，则将附件也转换一下，不转换的话可能会报错。 例如：AttachmentDTO at = postDTO.getAttachments().get(0)   add by yanjun 20170605
+        PostDTO postdto = ConvertHelper.convert(post, PostDTO.class);
+        if(post.getAttachments() != null && post.getAttachments().size() > 0){
+            List<AttachmentDTO> listAttachementdto = post.getAttachments().stream().map((tt) -> {
+                return ConvertHelper.convert(tt, AttachmentDTO.class);
+            }).collect(Collectors.toList());
+            postdto.setAttachments(listAttachementdto);
+        }
+        return postdto;
+
     }
     
     private void sendMessageToCreatorOrParent(User user, Post comment) {
@@ -2572,6 +2646,16 @@ public class ForumServiceImpl implements ForumService {
             }else{
             	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             }
+
+            //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+            if(cmd.getCategoryId() != null){
+                query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+            }
+
+            //支持标签搜索  add by yanjun 20170712
+            if(!StringUtils.isEmpty(cmd.getTag())){
+                query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+            }
             
             if(visibilityCondition != null) {
                 query.addConditions(visibilityCondition);
@@ -2735,7 +2819,15 @@ public class ForumServiceImpl implements ForumService {
             }else{
             	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             }
-            
+
+            //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+            if(cmd.getCategoryId() != null){
+                query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+            }
+            //支持标签搜索  add by yanjun 20170712
+            if(!StringUtils.isEmpty(cmd.getTag())){
+                query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+            }
             if(null != condition){
             	query.addConditions(condition);
             }
@@ -2828,6 +2920,9 @@ public class ForumServiceImpl implements ForumService {
         if(cmd.getStatus() != null){
         	post.setStatus(cmd.getStatus());
         }
+
+        //添加标签普通话题的标签通过此字段从前台出来。 add by yanjun 20170613
+        post.setTag(cmd.getTag());
         
         return post;
     }
@@ -3566,6 +3661,8 @@ public class ForumServiceImpl implements ForumService {
                     }
                     post.setEmbeddedJson(snapshot);
                 }
+
+
                 
                 post.setCommunityId(communityId);
                 
@@ -3582,6 +3679,10 @@ public class ForumServiceImpl implements ForumService {
                 populatePostForumNameInfo(userId, post);
                 
                 processLocation(post);
+
+                //添加ownerToken, 当前字段在评论时使用 add by yanjun 20170601
+                populateOwnerToken(post);
+
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
@@ -3592,11 +3693,21 @@ public class ForumServiceImpl implements ForumService {
                 	//单独处理活动的分享链接 modified by xiongying 20160622
                 	if(post.getCategoryId() != null && post.getCategoryId() == 1010) {
                 		relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
-                		ActivityTokenDTO dto = new ActivityTokenDTO();
-                		dto.setPostId(post.getId());
-                		dto.setForumId(post.getForumId());
-                		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
-                		post.setShareUrl(homeUrl + relativeUrl + "?id=" + encodeStr);
+//                		ActivityTokenDTO dto = new ActivityTokenDTO();
+//                		dto.setPostId(post.getId());
+//                		dto.setForumId(post.getForumId());
+//                		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
+//                		post.setShareUrl(homeUrl + relativeUrl + "?id=" + encodeStr);
+
+                        //改用直接传输的方式。因为增加微信报名活动后，涉及到报名取消支付等操作，这些操作都要编码的话，工作量会巨大。
+                        //添加命名空间ns
+                        // 增加是否支持微信报名wechatSignup  add by yanjun 20170620
+                        ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
+                        Byte wechatSignup = 0;
+                        if(activity != null && activity.getWechatSignup() != null){
+                            wechatSignup = activity.getWechatSignup();
+                        }
+                        post.setShareUrl(homeUrl + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                 	} else {
                 		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}
@@ -3610,6 +3721,19 @@ public class ForumServiceImpl implements ForumService {
         if(LOGGER.isInfoEnabled()) {
             LOGGER.info("Populate post, userId=" + userId + ", postId=" + post.getId() + ", elapse=" + (endTime - startTime));
         }
+    }
+
+    /**
+     *添加ownerToken, 当前字段在评论时使用 add by yanjun 20170601
+     * @param post
+     */
+    private void populateOwnerToken(Post post){
+        OwnerTokenDTO ownerTokenDto = new OwnerTokenDTO();
+        ownerTokenDto.setId(post.getId());
+        ownerTokenDto.setType(OwnerType.FORUM.getCode());
+
+        String ownerTokenStr = WebTokenGenerator.getInstance().toWebToken(ownerTokenDto);
+        post.setOwnerToken(ownerTokenStr);
     }
 
     private void processLocation(Post post){
@@ -5241,6 +5365,16 @@ public class ForumServiceImpl implements ForumService {
                 if(null != cond){
                 	query.addConditions(cond);
                 }
+
+                //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+                if(cmd.getCategoryId() != null){
+                    query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                }
+
+                //支持标签搜索  add by yanjun 20170712
+                if(!StringUtils.isEmpty(cmd.getTag())){
+                    query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+                }
                 
                 return query;
             }, new PostCreateTimeDescComparator());
@@ -5649,6 +5783,18 @@ public class ForumServiceImpl implements ForumService {
 			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
 	        		ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "post not found"); 
 		}
+
+
+        //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
+        try {
+            postSearcher.feedDoc(post);
+
+            AddUserPointCommand pointCmd = new AddUserPointCommand(post.getCreatorUid(), PointType.CREATE_TOPIC.name(),
+                    userPointService.getItemPoint(PointType.CREATE_TOPIC), post.getCreatorUid());
+            userPointService.addPoint(pointCmd);
+        } catch (Exception e) {
+            LOGGER.error("Failed to add post to search engine, userId=" + post.getCreatorUid() + ", postId=" + post.getId(), e);
+        }
 		
 		this.dbProvider.execute((status) -> {
 			activity.setStatus(PostStatus.ACTIVE.getCode());

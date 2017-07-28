@@ -2,11 +2,18 @@ package com.everhomes.rest.techpark.expansion;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
 /**
- * Created by Administrator on 2017/3/15.
+ * <ul>
+ * <li>addressIds：门牌地址列表</li>
+ * <li>communityId：园区id</li>
+ * <li>issuerContact：业主手机号</li>
+ * <li>issuerName：业主姓名</li>
+ * <li>enterpriseIds：公司id列表</li>
+ * </ul>
  */
 public class AddLeaseIssuerCommand {
 
@@ -57,5 +64,10 @@ public class AddLeaseIssuerCommand {
 
     public void setEnterpriseIds(List<Long> enterpriseIds) {
         this.enterpriseIds = enterpriseIds;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

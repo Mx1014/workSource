@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  *  <li>reviewStatus: 审阅状态</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
- *  <li>manualFlag: 是否手动添加 0：自动生成，1：手动添加</li>
+ *  <li>manualFlag: 是否手动添加 0：自动生成，1：手动添加, 2: 核查生成</li>
  * </ul>
  */
 public class ListQualityInspectionTasksCommand {

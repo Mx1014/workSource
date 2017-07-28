@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import com.everhomes.flow.action.FlowTimeoutJob;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.flow.FlowTimeoutType;
@@ -67,7 +68,7 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
     }*/
 
     @Override
-    public void pushTimeout(FlowTimeout ft, FlowCaseState ctx) {
+    public void pushTimeout(FlowTimeout ft) {
     	//FlowTimeoutAction
     	flowTimeoutProvider.createFlowTimeout(ft);
 

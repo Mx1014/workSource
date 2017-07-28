@@ -22,6 +22,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CorrectAddressCommand;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -93,6 +94,22 @@ public class AddressAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+//    
+//    /**
+//     * <b>URL: /admin/address/importParkAddressData</b>
+//     * @param files 上传的文件
+//     * @return 上传的结果
+//     */
+//    @RequestMapping(value="importParkAddressData", method = RequestMethod.POST)
+//    @RestReturn(value=String.class)
+//    public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+//        
+//    	addressService.importParkAddressData(cmd, files);
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
     
     /**
      * <b>URL: /admin/address/importParkAddressData</b>
@@ -100,14 +117,12 @@ public class AddressAdminController extends ControllerBase {
      * @return 上传的结果
      */
     @RequestMapping(value="importParkAddressData", method = RequestMethod.POST)
-    @RestReturn(value=String.class)
+    @RestReturn(value=ImportFileTaskDTO.class)
     public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
-        
-    	addressService.importParkAddressData(cmd, files);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+    	RestResponse response = new RestResponse(addressService.importParkAddressData(cmd, files[0]));
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
     
     /**

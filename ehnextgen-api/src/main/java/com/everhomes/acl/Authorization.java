@@ -10,6 +10,13 @@ public class Authorization extends EhAuthorizations {
 
 	public Authorization() {
     }
+
+    public Authorization(String ownerType, Long ownerId, String identityType, String scope) {
+        setOwnerType(ownerType);
+        setOwnerId(ownerId);
+        setIdentityType(identityType);
+        setScope(scope);
+    }
     
     @Override
     public String toString() {

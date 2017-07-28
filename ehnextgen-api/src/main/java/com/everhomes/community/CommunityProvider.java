@@ -2,6 +2,7 @@
 package com.everhomes.community;
 
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -107,6 +108,8 @@ public interface CommunityProvider {
 
     List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId, String resourceType, List<Long> resourceIds);
 
+    Map<Long, Community> listCommunitiesByIds(List<Long> ids);
+    List<Community> listCommunityByNamespaceIdAndName(Integer namespaceId, String communityName);
     List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
                                     ListingQueryBuilderCallback queryBuilderCallback);
 }

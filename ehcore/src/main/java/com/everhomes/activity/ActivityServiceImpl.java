@@ -61,10 +61,7 @@ import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
@@ -82,6 +79,7 @@ import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
@@ -367,6 +365,9 @@ public class ActivityServiceImpl implements ActivityService {
     //活动报名
     @Override
     public ActivityDTO signup(ActivitySignupCommand cmd) {
+
+    	//检查版本  add by yanjun 20170626
+    	checkPayVersion(cmd);
     	
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());
@@ -538,6 +539,36 @@ public class ActivityServiceImpl implements ActivityService {
 	        });
         }).first();
 	 }
+
+
+	 private void checkPayVersion(ActivitySignupCommand cmd){
+		 Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+		 String version = UserContext.current().getVersion();
+
+		 if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode() ){
+		 	return;
+		 }
+
+		 // 来自微信的请求支持支付报名   edit by yanjun 20170713
+		 if(cmd.getSignupSourceFlag() != null && cmd.getSignupSourceFlag().byteValue() == ActivityRosterSourceFlag.WECHAT.getCode()){
+			 return;
+		 }
+
+		 if(version == null){
+			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
+					 "Please update your App");
+		 }
+
+		 VersionRange versionRange = new VersionRange("["+version+","+version+")");
+		 VersionRange versionRangeMin = new VersionRange("[4.5.4,4.5.4)");
+
+		 if(((int)versionRange.getUpperBound()) < ((int)versionRangeMin.getUpperBound())){
+			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
+					 "Please update your App");
+		 }
+	 }
     
     /**
      * 由signup方法提取处理，填充各种信息
@@ -657,7 +688,104 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		return dto;
 	}
-    
+
+	@Override
+	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
+//		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
+
+		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+		if(roster == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+					"no roster.");
+		}
+		Activity activity = activityProvider.findActivityById(roster.getActivityId());
+		if(activity == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+					"no activity.");
+		}
+
+		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
+
+		CreateWechatJsPayOrderBody orderCmdBody = new CreateWechatJsPayOrderBody();
+		orderCmdBody.setBody(orderCmd);
+
+		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
+
+		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmdBody, PayZuolinCreateWechatJsPayOrderResp.class);
+
+		if(response.getResult()){
+			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
+					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+			return response.getBody();
+		}
+		else{
+			LOGGER.error("CreateWechatJsPayOrder fail, orderNo={}, userId={}, activityId={}, response={}",
+					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+					ActivityServiceErrorCode.ERROR_CREATE_WXJS_ORDER_ERROR,
+					"CreateWechatJsPayOrder error");
+		}
+	}
+
+
+	private CreateWechatJsPayOrderCmd newWechatOrderCmd(Activity activity, ActivityRoster roster){
+
+		//调用统一处理订单接口，返回统一订单格式
+		CreateWechatJsPayOrderCmd orderCmd = new CreateWechatJsPayOrderCmd();
+		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
+				UserContext.current().getUser().getLocale(),
+				"activity roster pay");
+
+		//与微信认证登录时候一致，查找当前域空间的公众号，没有就选择默认的。
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		orderCmd.setRealm("wechat_" + namespaceId);
+		String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
+
+		//用于判断公众号是否是默认的，默认的话将realm设置为wechat_0
+		String appId_default = configurationProvider.getValue("wx.offical.account.appid", "");
+		if(appId != null && appId_default != null && appId.equals(appId_default)){
+			orderCmd.setRealm("wechat_0");
+		}
+
+
+//		if(StringUtils.isEmpty(appId)){
+//			orderCmd.setRealm("wechat_0");
+//		}
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDERWECHAT.getPycode());
+		orderCmd.setOnlinePayStyleNo(VendorType.WEI_XIN.getStyleNo());
+		orderCmd.setOrderNo(roster.getOrderNo().toString());
+		orderCmd.setOrderAmount(activity.getChargePrice().toString());
+		User user = UserContext.current().getUser();
+		orderCmd.setUserId(user.getNamespaceUserToken());
+		orderCmd.setSubject(temple);
+
+		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
+		Long timestamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		orderCmd.setAppKey(appKey);
+		orderCmd.setTimestamp(timestamp);
+		orderCmd.setRandomNum(randomNum);
+
+		App app = appProvider.findAppByKey(appKey);
+
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("realm", orderCmd.getRealm());
+		map.put("orderType",orderCmd.getOrderType());
+		map.put("onlinePayStyleNo",orderCmd.getOnlinePayStyleNo());
+		map.put("orderNo",orderCmd.getOrderNo());
+		map.put("orderAmount",orderCmd.getOrderAmount());
+		map.put("userId", orderCmd.getUserId());
+		map.put("subject",orderCmd.getSubject());
+		map.put("appKey",orderCmd.getAppKey());
+		map.put("timestamp",orderCmd.getTimestamp() + "");
+		map.put("randomNum",orderCmd.getRandomNum() + "");
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		orderCmd.setSignature(URLEncoder.encode(signature));
+		return orderCmd;
+	}
+
+
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
     	Activity outActivity = checkActivityExist(cmd.getActivityId());
@@ -684,6 +812,14 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
 		        }
+		        
+		        ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(cmd.getActivityId(), cmd.getPhone(), ActivityRosterStatus.NORMAL.getCode());
+		        if(oldRoster != null){
+		        	LOGGER.error("Roster already exist. activityId={}, phone={}", cmd.getActivityId(), cmd.getPhone());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_ROSTER_ALREADY_EXIST, "Roster already exist. activityId=" + cmd.getActivityId() + " phone=" + cmd.getPhone());
+		        }
+		        
 		        ActivityRoster roster = newRoster(cmd, user, activity);
 		        
 	            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
@@ -700,7 +836,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+1);
 	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + 1);
 	            
-	            createActivityRoster(roster);
+	            //createActivityRoster(roster);
+	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
 	            return roster;
 	        });
@@ -855,7 +992,9 @@ public class ActivityServiceImpl implements ActivityService {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ActivityRoster> rosters = getRostersFromExcel(files[0]);
+			List<ActivityRoster> rostersTemp = getRostersFromExcel(files[0]);
+			
+			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 			//检查是否超过报名人数限制, add by tt, 20161012
 	        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount().intValue() + rosters.size() > activity.getMaxQuantity().intValue()) {
 	        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -890,10 +1029,18 @@ public class ActivityServiceImpl implements ActivityService {
 			if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
 				continue;
 			}
-			if (row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
+			if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
 				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 	                    ActivityServiceErrorCode.ERROR_PHONE, "invalid phone " + row.getA());
 			}
+			
+			//新增条件真实姓名必填  add by yanjun 20170628
+			if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
+				continue;
+//				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+//	                    ActivityServiceErrorCode.ERROR_INVALID_REALNAME, "invalid realname " + row.getB());
+			}
+			
 			User user = getUserFromPhone(row.getA().trim());
 			ActivityRoster roster = new ActivityRoster();
 			roster.setUuid(UUID.randomUUID().toString());
@@ -906,17 +1053,59 @@ public class ActivityServiceImpl implements ActivityService {
 	        roster.setLotteryFlag((byte) 0);
 	        roster.setPhone(row.getA().trim());
 	        roster.setRealName(row.getB().trim());
-	        roster.setGender(getGender(row.getC().trim()));
-	        roster.setCommunityName(row.getD().trim());
-	        roster.setOrganizationName(row.getE().trim());
-	        roster.setPosition(row.getF().trim());
-	        roster.setLeaderFlag(getLeaderFlag(row.getG().trim()));
-	        roster.setEmail(row.getH().trim());
+	        roster.setGender(getGender(getStrTrim(row.getC())));
+	        roster.setCommunityName(getStrTrim(row.getD()));
+	        roster.setOrganizationName(getStrTrim(row.getE()));
+	        roster.setPosition(getStrTrim(row.getF()));
+	        roster.setLeaderFlag(getLeaderFlag(getStrTrim(row.getG())));
+	        roster.setEmail(getStrTrim(row.getH()));
 	        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
 	        
 	        rosters.add(roster);
 		}
 		return rosters;
+	}
+	
+	private List<ActivityRoster> filterExistRoster(Long activityId, List<ActivityRoster> rosters){
+		List<ActivityRoster> newRosters = new ArrayList<ActivityRoster>();
+		if(rosters == null){
+			return newRosters;
+		}
+		
+		//筛选重复数据，1、数据库不能有重复的，2、自己不能有重复的。
+		for(int i= 0; i< rosters.size(); i++){
+			ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, rosters.get(i).getPhone(), ActivityRosterStatus.NORMAL.getCode());
+			if(oldRoster != null){
+				continue;
+			}
+			
+			boolean oldFlag = false;
+			for(int j =0; j<newRosters.size(); j++){
+				if(rosters.get(i).getPhone().equals(newRosters.get(j).getPhone())){
+					oldFlag = true;
+					break;
+				}
+			}
+			
+			if(oldFlag){
+				continue;
+			}
+			newRosters.add(rosters.get(i));
+		}
+		return newRosters;
+	}
+	
+	/**
+	 * 防止nullPointException
+	 * @param str
+	 * @return
+	 */
+	private String getStrTrim(String str){
+		if(str == null){
+			return null;
+		}else{
+			return str.trim();
+		}
 	}
 
 	private Byte getLeaderFlag(String leaderFlag) {
@@ -1134,6 +1323,11 @@ public class ActivityServiceImpl implements ActivityService {
         
         // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
         addAdditionalInfo(roster, user, activity);
+
+		// 增加来自微信端报名的来源   edit by yanjun 20170720
+		if(cmd.getSignupSourceFlag() != null && cmd.getSignupSourceFlag().byteValue() == ActivityRosterSourceFlag.WECHAT.getCode()){
+			roster.setSourceFlag(ActivityRosterSourceFlag.WECHAT.getCode());
+		}
         
         return roster;
     }
@@ -1330,8 +1524,14 @@ public class ActivityServiceImpl implements ActivityService {
 		refundCmd.setOrderNo(String.valueOf(roster.getOrderNo()));
 		
 		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(roster.getVendorType()).getStyleNo()); 
-		
-		refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+
+		// 老数据无该字段，它们都是ACTIVITYSIGNUPORDER类型的  edit by yanjun 20170713
+		if(roster.getOrderType() != null && !"".equals(roster.getOrderType())){
+			refundCmd.setOrderType(roster.getOrderType());
+		}else{
+			refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+		}
+
 		
 		refundCmd.setRefundAmount(roster.getPayAmount());
 		
@@ -3716,7 +3916,12 @@ public class ActivityServiceImpl implements ActivityService {
                     activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
                 }
 			}
-        }
+        }else{
+			//默认categoryId为1  edit by yanjun 20170712
+			activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(1L));
+		}
+
+
         //增加活动主题分类，add by tt, 20170109
         if (cmd.getContentCategoryId() != null) {
         	//老版本用id作为标识，新版本id无意义，使用entryId和namespaceId作为标识。此处弃用findActivityCategoriesById  add by yanjun 20170524
@@ -3751,7 +3956,9 @@ public class ActivityServiceImpl implements ActivityService {
         if(visibleCondition != null) {
             condition = condition.and(visibleCondition);
         }
-        condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+
+		//删除官方标志  使用CATEGORY_ID， 不传默认使用CATEGORY_ID为1，详见前面condition条件 edit by yanjun 20170712
+        //condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
 
         // 添加活动状态筛选     add by xq.tian  2017/01/24
         if (cmd.getActivityStatusList() != null) {
@@ -3760,6 +3967,11 @@ public class ActivityServiceImpl implements ActivityService {
                 condition = condition.and(statusCondition);
             }
         }
+
+		//支持标签搜索  add by yanjun 20170712
+		if(!StringUtils.isEmpty(cmd.getTag())){
+			condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+		}
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         // TODO: Locator里设置系统论坛ID存在着分区的风险，因为上面的条件是多个论坛，需要后面理顺  by lqs 20160730
@@ -4423,6 +4635,7 @@ public class ActivityServiceImpl implements ActivityService {
 			rosterOrderSetting.setTime(((long)( cmd.getDays()*24+cmd.getHours()))*3600*1000);
 			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
 			rosterOrderSetting.setOperatorUid(rosterOrderSetting.getCreatorUid());
+			rosterOrderSetting.setWechatSignup(cmd.getWechatSignup());
 			
 			rosterOrderSettingProvider.updateRosterOrderSetting(rosterOrderSetting);
 		}else {
@@ -4433,6 +4646,7 @@ public class ActivityServiceImpl implements ActivityService {
 			rosterOrderSetting.setCreatorUid(UserContext.current().getUser().getId());
 			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
 			rosterOrderSetting.setOperatorUid(rosterOrderSetting.getCreatorUid());
+			rosterOrderSetting.setWechatSignup(cmd.getWechatSignup());
 			
 			rosterOrderSettingProvider.createRosterOrderSetting(rosterOrderSetting);
 		}
@@ -4454,10 +4668,11 @@ public class ActivityServiceImpl implements ActivityService {
 		if (rosterOrderSetting != null) {
 			Integer days = (int) (rosterOrderSetting.getTime() / 1000 / 3600 / 24);
 			Integer hours  = (int) (rosterOrderSetting.getTime() / 1000 / 3600 % 24);
-			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), days, hours, rosterOrderSetting.getTime());
+			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), days, hours,
+					rosterOrderSetting.getTime(), rosterOrderSetting.getWechatSignup());
 		}
 		
-		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L);
+		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L, WechatSignupFlag.NO.getCode());
 	}
 	
 
@@ -4479,10 +4694,12 @@ public class ActivityServiceImpl implements ActivityService {
 		orderCommand.setNamespaceId(cmd.getNamespaceId());
 		orderCommand.setDays(cmd.getOrderDays());
 		orderCommand.setHours(cmd.getOrderHours());
+		orderCommand.setWechatSignup(cmd.getWechatSignup());
 		RosterOrderSettingDTO orderResponse = this.setRosterOrderSetting(orderCommand);
 		timeResponse.setOrderDays(orderResponse.getDays());
 		timeResponse.setOrderHours(orderResponse.getHours());
 		timeResponse.setOrderTime(orderResponse.getTime());
+		timeResponse.setWechatSignup(orderResponse.getWechatSignup());
 		
 		return timeResponse;
 	}
@@ -4505,6 +4722,7 @@ public class ActivityServiceImpl implements ActivityService {
 		timeResponse.setOrderDays(orderResponse.getDays());
 		timeResponse.setOrderHours(orderResponse.getHours());
 		timeResponse.setOrderTime(orderResponse.getTime());
+		timeResponse.setWechatSignup(orderResponse.getWechatSignup());
 		
 		return timeResponse;
 	}  
@@ -4517,36 +4735,39 @@ public class ActivityServiceImpl implements ActivityService {
     @Scheduled(cron="0 0 * * * ?")
     @Override
 	public void activityWarningSchedule() {
-    	//使用tryEnter方法可以防止分布式部署时重复执行
-    	coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(()->{
-        	
-        	final Date now = DateUtils.getCurrentHour();
-        	List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
-        	namespaces.add(new NamespaceInfoDTO(0,"zuolin",""));
-        	
-        	//遍历每个域空间
-        	namespaces.forEach(n->{
-        		WarningSetting warningSetting = findWarningSetting(n.getId());
-        		Timestamp queryStartTime = new Timestamp(now.getTime()+warningSetting.getTime());
-        		Timestamp queryEndTime = new Timestamp(now.getTime()+warningSetting.getTime()+3600*1000);
-        		
-        		// 对于这个域空间时间范围内的活动，再单独设置定时任务
-        		List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
-        		activities.forEach(a->{
-        			if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0 && a.getStartTime().getTime() - warningSetting.getTime() >= new Date().getTime()) {
-        				final Job job1 = new Job(
-        						WarnActivityBeginningAction.class.getName(),
-        						new Object[] { String.valueOf(a.getId()) });
-        				
+
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			//使用tryEnter方法可以防止分布式部署时重复执行
+			coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(() -> {
+
+				final Date now = DateUtils.getCurrentHour();
+				List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
+				namespaces.add(new NamespaceInfoDTO(0, "zuolin", ""));
+
+				//遍历每个域空间
+				namespaces.forEach(n -> {
+					WarningSetting warningSetting = findWarningSetting(n.getId());
+					Timestamp queryStartTime = new Timestamp(now.getTime() + warningSetting.getTime());
+					Timestamp queryEndTime = new Timestamp(now.getTime() + warningSetting.getTime() + 3600 * 1000);
+
+					// 对于这个域空间时间范围内的活动，再单独设置定时任务
+					List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
+					activities.forEach(a -> {
+						if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0 && a.getStartTime().getTime() - warningSetting.getTime() >= new Date().getTime()) {
+							final Job job1 = new Job(
+									WarnActivityBeginningAction.class.getName(),
+									new Object[]{String.valueOf(a.getId())});
+
 //        				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 //        						new Date().getTime()+10000);
-        				jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
-        						a.getStartTime().getTime() - warningSetting.getTime());
-        				LOGGER.debug("设置了一个活动提醒："+a.getId());
-					}
-        		});
-        	});
-    	});
+							jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
+									a.getStartTime().getTime() - warningSetting.getTime());
+							LOGGER.debug("设置了一个活动提醒：" + a.getId());
+						}
+					});
+				});
+			});
+		}
 	}
 
 	@Override

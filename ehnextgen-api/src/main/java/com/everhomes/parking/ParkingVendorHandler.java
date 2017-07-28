@@ -12,8 +12,8 @@ public interface ParkingVendorHandler {
     GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId, Long parkingLotId, String plateNumber);
     
     List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String palteNumber,String cardNo);
-    
-    void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order,String payStatus);
+
+    Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order);
    
     ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd);
    
@@ -30,4 +30,8 @@ public interface ParkingVendorHandler {
     ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd);
 
     void lockParkingCar(LockParkingCarCommand cmd);
+
+	GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd);
+
+    boolean recharge(ParkingRechargeOrder order);
 }

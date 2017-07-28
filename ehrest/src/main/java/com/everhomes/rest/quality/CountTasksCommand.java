@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>endTime: 截止月份  </li>
  *  <li>offset: 偏移</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>sampleId: 任务所属例行检查id</li>
  * </ul>
  */
 public class CountTasksCommand {
@@ -35,7 +36,17 @@ public class CountTasksCommand {
 	private Integer offset;
 	
 	private Integer pageSize;
-	
+
+	private Long sampleId;
+
+	public Long getSampleId() {
+		return sampleId;
+	}
+
+	public void setSampleId(Long sampleId) {
+		this.sampleId = sampleId;
+	}
+
 	public Long getOwnerId() {
 		return ownerId;
 	}

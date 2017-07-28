@@ -1,0 +1,118 @@
+// @formatter:off
+package com.everhomes.rest.address;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.util.StringHelper;
+
+/**
+ * 
+ * <ul>
+ * <li>buildingName: 楼栋名称</li>
+ * <li>apartmentName: 门牌名称</li>
+ * <li>status: 状态</li>
+ * <li>areaSize: 面积</li>
+ * <li>enterpriseName: 企业名称，园区有小区无</li>
+ * <li>owerList: 用户列表，园区无小区有,,参考{@link com.everhomes.rest.organization.OrganizationOwnerDTO}</li>
+ * <li>nextPageAnchor: 下页锚点，园区无小区有</li>
+ * </ul>
+ */
+public class GetApartmentDetailResponse {
+	private String buildingName;
+	private String apartmentName;
+	private Byte status;
+	private Double areaSize;
+	private Byte communityType;
+	private String enterpriseName;
+	@ItemType(OrganizationOwnerDTO.class)
+	private List<OrganizationOwnerDTO> owerList;
+	private Long nextPageAnchor;
+
+	
+	public Byte getCommunityType() {
+		return communityType;
+	}
+
+
+	public void setCommunityType(Byte communityType) {
+		this.communityType = communityType;
+	}
+
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+
+	public Byte getStatus() {
+		return status;
+	}
+
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+
+	public Double getAreaSize() {
+		return areaSize;
+	}
+
+
+	public void setAreaSize(Double areaSize) {
+		this.areaSize = areaSize;
+	}
+
+
+	public String getEnterpriseName() {
+		return enterpriseName;
+	}
+
+
+	public void setEnterpriseName(String enterpriseName) {
+		this.enterpriseName = enterpriseName;
+	}
+
+
+	public List<OrganizationOwnerDTO> getOwerList() {
+		return owerList;
+	}
+
+
+	public void setOwerList(List<OrganizationOwnerDTO> owerList) {
+		this.owerList = owerList;
+	}
+
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
+
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+}

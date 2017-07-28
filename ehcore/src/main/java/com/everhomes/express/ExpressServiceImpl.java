@@ -287,11 +287,6 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 
 	@Override
-	public Object query(String query) {
-		return expressOrderProvider.query(query);
-	}
-
-	@Override
 	public ListExpressOrderResponse listExpressOrder(ListExpressOrderCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		checkPrivilege(owner, cmd.getServiceAddressId(), cmd.getExpressCompanyId());
@@ -345,7 +340,7 @@ public class ExpressServiceImpl implements ExpressService {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(cmd.getId());
 		if (expressOrder != null) {
-			if (checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId()) || expressOrder.getCreatorUid().longValue() == owner.getUserId().longValue()) {
+			if (expressOrder.getCreatorUid().longValue() == owner.getUserId().longValue() || checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId())) {
 				return new GetExpressOrderDetailResponse(convertToExpressOrderDTOForDetail(expressOrder));
 			}
 		}

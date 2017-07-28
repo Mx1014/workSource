@@ -55,4 +55,16 @@ public interface EnterpriseApplyEntryProvider {
 	List<LeasePromotion> listLeasePromotionsByUidAndIssuerType(long id, String issuerType);
 
 	void deleteApplyEntrysByLeasePromotionIds(List<Long> idList);
+
+	void createLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	void updateLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	void deleteLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	LeaseFormRequest findLeaseRequestFormById(Long id);
+
+	LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType);
+	
+	List<LeaseFormRequest> listLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType);
 }

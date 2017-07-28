@@ -48,4 +48,6 @@ public interface ContentServerService {
      */
     UploadCsFileResponse uploadFileToContentServer(InputStream fileStream, String fileName, String token);
 
+	String parserUri(String uri);
+
 }

@@ -1,18 +1,6 @@
 package com.everhomes.community.admin;
 
 
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.CommunityService;
 import com.everhomes.constants.ErrorCodes;
@@ -21,51 +9,26 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.community.GetCommunityByUuidCommand;
-import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
-import com.everhomes.rest.community.ListCommunitesByStatusCommand;
-import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
-import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
-import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
-import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
-import com.everhomes.rest.community.admin.CommunityImportBaseConfigCommand;
-import com.everhomes.rest.community.admin.CommunityImportOrganizationConfigCommand;
-import com.everhomes.rest.community.admin.CommunityManagerDTO;
-import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
-import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
-import com.everhomes.rest.community.admin.CreateCommunityCommand;
-import com.everhomes.rest.community.admin.CreateCommunityResponse;
-import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
-import com.everhomes.rest.community.admin.ImportCommunityCommand;
-import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
-import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsCommand;
-import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsResponse;
-import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
-import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
-import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
-import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
-import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
-import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
-import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
-import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
-import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
-import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
-import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
-import com.everhomes.rest.community.admin.UserCommunityDTO;
-import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
-import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
-import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.community.*;
+import com.everhomes.rest.community.admin.*;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import java.util.List;
 
 @RestDoc(value="Community admin controller", site="core")
 @RestController
@@ -401,8 +364,8 @@ public class CommunityAdminController extends ControllerBase {
      * <p>导入楼栋信息excel</p>
      */
     @RequestMapping("importBuildingData")
-    @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importBuildingData(@RequestParam(value = "attachment") MultipartFile[] files){
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importBuildingData(@RequestParam("communityId") Long communityId, @RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){
@@ -410,12 +373,33 @@ public class CommunityAdminController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
 					"files is null");
 		}
-		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
-        RestResponse response = new RestResponse(importDataResponse);
+//		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
+        RestResponse response = new RestResponse(communityService.importBuildingData(communityId, files[0]));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+//    
+//    /**
+//     * <b>URL: /admin/community/importBuildingData</b>
+//     * <p>导入楼栋信息excel</p>
+//     */
+//    @RequestMapping("importBuildingData")
+//    @RestReturn(value=ImportDataResponse.class)
+//    public RestResponse importBuildingData(@RequestParam(value = "attachment") MultipartFile[] files){
+//    	User manaUser = UserContext.current().getUser();
+//    	Long userId = manaUser.getId();
+//    	if(null == files || null == files[0]){
+//    		LOGGER.error("files is null。userId="+userId);
+//    		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+//    				"files is null");
+//    	}
+//    	ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
+//    	RestResponse response = new RestResponse(importDataResponse);
+//    	response.setErrorCode(ErrorCodes.SUCCESS);
+//    	response.setErrorDescription("OK");
+//    	return response;
+//    }
     
     /**
      * <b>URL: /admin/community/qryCommunityUserEnterpriseByUserId</b>
@@ -496,7 +480,6 @@ public class CommunityAdminController extends ControllerBase {
     @RequestMapping("listCommunityAuthUserAddress")
     @RestReturn(value=CommunityAuthUserAddressResponse.class)
     public RestResponse listCommunityAuthUserAddress(@Valid CommunityAuthUserAddressCommand cmd) {
-        
         RestResponse response =  new RestResponse(communityService.listCommunityAuthUserAddress(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -510,12 +493,12 @@ public class CommunityAdminController extends ControllerBase {
     @RequestMapping("listCommunityAuthPersonnels")
     @RestReturn(value=ListCommunityAuthPersonnelsResponse.class)
     public RestResponse listCommunityAuthPersonnels(@Valid ListCommunityAuthPersonnelsCommand cmd) {
-        
         RestResponse response =  new RestResponse(communityService.listCommunityAuthPersonnels(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    } 
+    }
+
     /**
      * <b>URL: /admin/community/listUserByNotJoinedCommunity</b>
      * <p>未加入小区的用户</p>
@@ -614,8 +597,23 @@ public class CommunityAdminController extends ControllerBase {
 		communityService.communityImportOrganizationConfig(cmd);
 		return new RestResponse();
 	}
-	
-	
+
+    /**
+     *
+     * <b>URL: /admin/community/updateBuildingOrder<b>
+     * <p>
+     * 更新楼栋顺序
+     * </p>
+     */
+    @RequestMapping("updateBuildingOrder")
+    @RestReturn(String.class)
+    public RestResponse updateBuildingOrder(@Valid UpdateBuildingOrderCommand cmd){
+        communityService.updateBuildingOrder(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 	
 	
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.flow.*;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -203,14 +204,19 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
-				"organization", RentalNotificationTemplateCode.locale, "")); 
-		List<OrganizationSimpleDTO>  organizaiotnDTOs =this.organizationService.listUserRelateOrgs(new ListUserRelatedOrganizationsCommand(),user);
-		 
-		for(OrganizationSimpleDTO org : organizaiotnDTOs ){ 
-			if (StringUtils.isNotBlank(e.getValue()))
-				e.setValue(e.getValue() + "、" + org.getName());
-			else
-				e.setValue(org.getName());	 
+				"organization", RentalNotificationTemplateCode.locale, ""));
+		if (null != order.getOrganizationId()) {
+			Organization org = organizationProvider.findOrganizationById(order.getOrganizationId());
+			e.setValue(org.getName());
+		}else {
+			List<OrganizationSimpleDTO>  organizaiotnDTOs =this.organizationService.listUserRelateOrgs(new ListUserRelatedOrganizationsCommand(),user);
+
+			for(OrganizationSimpleDTO org : organizaiotnDTOs ){
+				if (StringUtils.isNotBlank(e.getValue()))
+					e.setValue(e.getValue() + "、" + org.getName());
+				else
+					e.setValue(org.getName());
+			}
 		}
 		entities.add(e);
 
@@ -521,13 +527,13 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		}else if (SmsTemplateCode.RENTAL_PROCESSOR_SUCCESS_CODE == templateId) {
 
-			Map<String, String> map = new HashMap<>();
-			map.put("userName", userName);
-			map.put("userPhone", userPhone);
-			map.put("useTime", order.getUseDetail());
-			map.put("resourceName", order.getResourceName());
-			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-					RentalNotificationTemplateCode.RENTAL_PROCESSOR_SUCCESS_CODE);
+//			Map<String, String> map = new HashMap<>();
+//			map.put("userName", userName);
+//			map.put("userPhone", userPhone);
+//			map.put("useTime", order.getUseDetail());
+//			map.put("resourceName", order.getResourceName());
+//			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+//					RentalNotificationTemplateCode.RENTAL_PROCESSOR_SUCCESS_CODE);
 
 			//支付成功
 			smsProvider.addToTupleList(variables, "userName", userName);

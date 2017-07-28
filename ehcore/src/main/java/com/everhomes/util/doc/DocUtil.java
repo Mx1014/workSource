@@ -1,14 +1,6 @@
 package com.everhomes.util.doc;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
@@ -169,18 +161,45 @@ public class DocUtil {
         return null;
     }
 
+//    /**
+//     * 读取输入流,转换为Base64字符串
+//     * @param input
+//     * @return
+//     */
+//    public String GetImageStrByInput(InputStream input) {
+//        byte[] data = null;
+//        // 读取图片字节数组
+//        try {
+//            data = new byte[input.available()];
+//            input.read(data);
+//            input.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        // 对字节数组Base64编码
+//        BASE64Encoder encoder = new BASE64Encoder();
+//        return encoder.encode(data);// 返回Base64编码过的字节数组字符串
+//    }
+
     /**
      * 读取输入流,转换为Base64字符串
      * @param input
      * @return
      */
     public String GetImageStrByInput(InputStream input) {
-        byte[] data = null;
+        byte[] data = new byte[0];
         // 读取图片字节数组
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            data = new byte[input.available()];
-            input.read(data);
+            byte[] read = new byte[1024];
+            int len;
+            while ((len = input.read(read)) != -1) {
+                bos.write(read, 0, len);
+                read = new byte[1024];
+            }
+            data = bos.toByteArray();
             input.close();
+            bos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -188,6 +207,7 @@ public class DocUtil {
         BASE64Encoder encoder = new BASE64Encoder();
         return encoder.encode(data);// 返回Base64编码过的字节数组字符串
     }
+
 
     public void closeHttpConn(){
         httpUrl.disconnect();

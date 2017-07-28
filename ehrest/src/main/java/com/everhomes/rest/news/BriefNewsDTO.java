@@ -3,7 +3,10 @@
 package com.everhomes.rest.news;
 
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -22,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>likeFlag: 点赞状态，0未点赞，1不喜欢，2已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
  * <li>newsUrl: 新闻链接(供分享)</li>
  * <li>categoryId: 新闻类型ID</li>
+ * <li>commentFlag: 新闻是否可以评论，1：可以 0：禁止 {@link NewsNormalFlag}</li>
  * </ul>
  */
 public class BriefNewsDTO {
@@ -38,6 +42,35 @@ public class BriefNewsDTO {
 	private Byte likeFlag;
 	private String newsUrl;
 	private Long categoryId;
+	private Byte commentFlag;
+	private String visibleType;
+
+	@ItemType(ProjectDTO.class)
+	private List<ProjectDTO> projectDTOS;
+
+	public List<ProjectDTO> getProjectDTOS() {
+		return projectDTOS;
+	}
+
+	public void setProjectDTOS(List<ProjectDTO> projectDTOS) {
+		this.projectDTOS = projectDTOS;
+	}
+
+	public String getVisibleType() {
+		return visibleType;
+	}
+
+	public void setVisibleType(String visibleType) {
+		this.visibleType = visibleType;
+	}
+
+	public Byte getCommentFlag() {
+		return commentFlag;
+	}
+
+	public void setCommentFlag(Byte commentFlag) {
+		this.commentFlag = commentFlag;
+	}
 
 	public String getNewsToken() {
 		return newsToken;

@@ -676,9 +676,9 @@ public class PunchAdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exportPunchStatistics")
-	public  HttpServletResponse exportPunchStatistics(@Valid ListPunchCountCommand cmd,HttpServletResponse response ) {
+	public  RestResponse exportPunchStatistics(@Valid ListPunchCountCommand cmd,HttpServletResponse response ) {
 		HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response ); 
-		return commandResponse;
+		return new RestResponse();
 	}
 	/**
 	 * <b>URL: punch/listPunchMonthLogs</b>
@@ -719,12 +719,12 @@ public class PunchAdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exportPunchDetails")
-	public  HttpServletResponse exportPunchDetails(@Valid ListPunchDetailsCommand cmd,HttpServletResponse response ) {
+	public  RestResponse exportPunchDetails(@Valid ListPunchDetailsCommand cmd,HttpServletResponse response ) {
 		HttpServletResponse commandResponse = punchService.exportPunchDetails(cmd, response );
 //		RestResponse response = new RestResponse(commandResponse);
 //		response.setErrorCode(ErrorCodes.SUCCESS);
 //		response.setErrorDescription("OK");
-		return commandResponse;
+		return new RestResponse();
 	}
 
 	/**
@@ -828,5 +828,21 @@ public class PunchAdminController extends ControllerBase {
 		return response;
 	}
 
+
+	/**
+	 * <b>URL: punch/refreshPunchDayLogs</b>
+	 * <p>
+	 * 刷新打卡详情
+	 * </p>
+	 */
+	@RequestMapping("refreshPunchDayLogs")
+	@RestReturn(value = ListPunchDetailsResponse.class)
+	public RestResponse refreshPunchDayLogs(@Valid ListPunchDetailsCommand cmd) {
+		punchService.refreshPunchDayLogs(cmd);
+		RestResponse response = new RestResponse( );
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }

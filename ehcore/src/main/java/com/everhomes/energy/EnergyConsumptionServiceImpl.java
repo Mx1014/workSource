@@ -10,6 +10,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentInspectionEquipments;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
@@ -17,7 +18,6 @@ import com.everhomes.mail.MailHandler;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.MeterFormulaVariable;
@@ -28,25 +28,25 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import com.everhomes.util.*;
+import com.everhomes.util.doc.DocUtil;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.google.zxing.WriterException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.math.NumberUtils;
-import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,17 +55,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -73,6 +79,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -87,6 +94,8 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
  */
 @Service
 public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
+
+    final String downloadDir ="\\download\\";
 
     private final Logger LOGGER = LoggerFactory.getLogger(EnergyConsumptionServiceImpl.class);
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -165,6 +174,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private EnergyMeterFormulaVariableProvider meterFormulaVariableProvider;
 
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
     @Autowired
     private CoordinationProvider coordinationProvider;
 
@@ -904,7 +916,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
                     throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
                 }
-                meterCategoryProvider.deleteEnergyMeterCategory(category);
+                category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+                meterCategoryProvider.updateEnergyMeterCategory(category);
+//                meterCategoryProvider.deleteEnergyMeterCategory(category);
             }
         });
     }
@@ -936,14 +950,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 LOGGER.error("Import energy meter error, error field meterType");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field meterType");
             }
-            EnergyMeterCategory category = meterCategoryProvider.findByName(currNamespaceId(), result.getD());
+            EnergyMeterCategory category = meterCategoryProvider.findByName(currNamespaceId(), cmd.getCommunityId(), result.getD());
             if (category != null) {
                 meter.setBillCategoryId(category.getId());
             } else {
                 LOGGER.error("Import energy meter error, error field meterType");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
             }
-            category = meterCategoryProvider.findByName(currNamespaceId(), result.getE());
+            category = meterCategoryProvider.findByName(currNamespaceId(), cmd.getCommunityId(), result.getE());
             if (category != null) {
                 meter.setServiceCategoryId(category.getId());
             } else {
@@ -972,14 +986,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             } else {
                 meter.setStartReading(new BigDecimal("1"));
             }
-            EnergyMeterFormula formula = meterFormulaProvider.findByName(currNamespaceId(), result.getJ());
+            EnergyMeterFormula formula = meterFormulaProvider.findByName(currNamespaceId(), cmd.getCommunityId(), result.getJ());
             if (formula != null) {
                 meter.setAmountFormulaId(formula.getId());
             } else {
                 LOGGER.error("Import energy meter error, error field meterType");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field formula");
             }
-            formula = meterFormulaProvider.findByName(currNamespaceId(), result.getK());
+            formula = meterFormulaProvider.findByName(currNamespaceId(), cmd.getCommunityId(), result.getK());
             if (formula != null) {
                 meter.setCostFormulaId(formula.getId());
             } else {
@@ -1186,8 +1200,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if(null == billDTO) {
                 billDTO = new BillStatDTO();
                 EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(dayStat.getBillCategoryId());
-                billDTO.setBillCategoryId(billCategory.getId());
-                billDTO.setBillCategoryName(billCategory.getName());
+                if(billCategory != null) {
+                    billDTO.setBillCategoryId(billCategory.getId());
+                    billDTO.setBillCategoryName(billCategory.getName());
+                } else {
+                    billDTO.setBillCategoryId(dayStat.getBillCategoryId());
+                    billDTO.setBillCategoryName("");
+                }
+
                 billDTO.setDayBillStats(deepCopyStatDays(result.getDates()));
                 billDTO.setServiceDayStats(new ArrayList<ServiceStatDTO>());
                 result.getBillDayStats().add(billDTO);
@@ -1201,8 +1221,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if(null == serviceDTO) {
                 serviceDTO = new ServiceStatDTO();
                 EnergyMeterCategory serviceCategory = this.meterCategoryProvider.findById(dayStat.getServiceCategoryId());
-                serviceDTO.setServiceCategoryId(serviceCategory.getId());
-                serviceDTO.setServiceCategoryName(serviceCategory.getName());
+                if(serviceCategory != null) {
+                    serviceDTO.setServiceCategoryId(serviceCategory.getId());
+                    serviceDTO.setServiceCategoryName(serviceCategory.getName());
+                } else {
+                    serviceDTO.setServiceCategoryId(dayStat.getServiceCategoryId());
+                    serviceDTO.setServiceCategoryName("");
+                }
+
                 serviceDTO.setDayServiceStats(deepCopyStatDays(result.getDates()));
                 serviceDTO.setMeterDayStats(new ArrayList<MeterStatDTO>());
                 billDTO.getServiceDayStats().add(serviceDTO);
@@ -1919,18 +1945,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * */
     @Scheduled(cron = "0 10 1 * * ?")
     public void calculateEnergyDayStat(){
-        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_DAY_STAT_SCHEDULE.getCode()).tryEnter(() -> {
-            try {
-                LOGGER.info("calculate energy day stat start...");
-                //刷今天的
-                calculateEnergyDayStatByDate(DateHelper.currentGMTTime());
-                LOGGER.info("calculate energy day stat end...");
-            } catch (Exception e) {
-                LOGGER.error("calculate energy day stat error...", e);
-                sendErrorMessage(e);
-                e.printStackTrace();
-            }
-        });
+
+        //双机判断
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_DAY_STAT_SCHEDULE.getCode()).tryEnter(() -> {
+                try {
+                    LOGGER.info("calculate energy day stat start...");
+                    //刷今天的
+                    calculateEnergyDayStatByDate(DateHelper.currentGMTTime());
+                    LOGGER.info("calculate energy day stat end...");
+                } catch (Exception e) {
+                    LOGGER.error("calculate energy day stat error...", e);
+                    sendErrorMessage(e);
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     private void sendErrorMessage(Exception e) {
@@ -2024,6 +2054,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 //计算当天走了多少字 量程+昨天最后一次读数-锚点
                 amount = amount.add(dayCurrReading.subtract(readingAnchor));
+                dayStat.setCurrentAmount(amount);
+                LOGGER.info("dayStat amount : {}", dayStat);
 
                 //获取公式,计算当天的费用
                 EnergyMeterSettingLog priceSetting  = meterSettingLogProvider
@@ -2077,7 +2109,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 if(PriceCalculationType.BLOCK_TARIFF.equals(
                         PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
-                    realCost = calculateBlockTariff(manager,priceSetting,realAmount, costFormula);
+                    realCost = calculateBlockTariff(manager,priceSetting,amount, costFormula);
                 }
 
                 //删除昨天的记录（手工刷的时候）
@@ -2093,7 +2125,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dayStat.setMeterPrice(priceSetting.getSettingValue());
                 dayStat.setLastReading(dayLastReading);
                 dayStat.setCurrentReading(dayCurrReading);
-                dayStat.setCurrentAmount(realAmount);
+//                dayStat.setCurrentAmount(amount);
                 dayStat.setCurrentCost(realCost);
                 dayStat.setResetMeterFlag(resetFlag);
                 dayStat.setChangeMeterFlag(changeFlag);
@@ -2235,17 +2267,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * */
     @Scheduled(cron = "0 10 3 1 * ?")
     public void calculateEnergyMonthStat() {
-        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_MONTH_STAT_SCHEDULE.getCode()).tryEnter(() -> {
-            try {
-                LOGGER.info("calculate energy month stat start...");
-                calculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
-                LOGGER.info("calculate energy month stat end...");
-            } catch (Exception e) {
-                LOGGER.error("calculate energy month stat error...", e);
-                sendErrorMessage(e);
-                e.printStackTrace();
-            }
-        });
+
+        //双机判断
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_MONTH_STAT_SCHEDULE.getCode()).tryEnter(() -> {
+                try {
+                    LOGGER.info("calculate energy month stat start...");
+                    calculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
+                    LOGGER.info("calculate energy month stat end...");
+                } catch (Exception e) {
+                    LOGGER.error("calculate energy month stat error...", e);
+                    sendErrorMessage(e);
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     @Override
@@ -2535,4 +2571,311 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return expressionDTO;
     }
 
+    @Override
+    public EnergyMeterDTO findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd) {
+//        EnergyMeterCodeDTO meterCodeDTO = WebTokenGenerator.getInstance().fromWebToken(cmd.getMeterQRCode(), EnergyMeterCodeDTO.class);
+        EnergyMeter meter = meterProvider.findById(UserContext.getCurrentNamespaceId(), cmd.getMeterQRCode());
+        if (meter == null || !EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+            LOGGER.error("EnergyMeter not exist, id = {}", cmd.getMeterQRCode());
+            throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", cmd.getMeterQRCode());
+        }
+
+        return toEnergyMeterDTO(meter);
+    }
+
+    @Override
+    public String getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd) {
+        return generateQRString(cmd.getMeterId(), cmd.getNamespaceId());
+    }
+
+    @Override
+    public void batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd) {
+        if(cmd.getReadList() != null && cmd.getReadList().size() > 0) {
+            cmd.getReadList().forEach(read -> {
+                readEnergyMeter(read);
+            });
+        }
+    }
+
+    @Override
+    public void exportEnergyMeterQRCode(ExportEnergyMeterQRCodeCommand cmd, HttpServletResponse response) {
+        List<Long> meterIds = new ArrayList<>();
+        if(!StringUtils.isEmpty(cmd.getIds())) {
+            String[] ids = cmd.getIds().split(",");
+            for(String id : ids) {
+                meterIds.add(Long.valueOf(id));
+            }
+        }
+        LOGGER.info("meterIds: {}", meterIds);
+        List<EnergyMeter> meterList = meterProvider.listByIds(UserContext.getCurrentNamespaceId(), meterIds);
+
+        String filePath = cmd.getFilePath();
+        URL rootPath = EnergyConsumptionServiceImpl.class.getResource("/");
+        filePath = rootPath.getPath() + this.downloadDir ;
+        File file = new File(filePath);
+        if(!file.exists())
+            file.mkdirs();
+
+        DocUtil docUtil=new DocUtil();
+        List<String> files = new ArrayList<>();
+        for(EnergyMeter meter : meterList) {
+            String qrcode = generateQRString(meter.getId(),meter.getNamespaceId());
+            String savePath = filePath + meter.getId() + meter.getName() + ".jpg";
+            graphicsGeneration("Name: "+meter.getName(), "No.: " + meter.getMeterNumber(), qrcode, savePath);
+//            Map<String, Object> dataMap = createEnergyMeterQRCodeDoc(meter);
+//            String savePath = filePath + meter.getId()+ "-" + meter.getName() + ".doc";
+//            docUtil.createDoc(dataMap, "energyMeter", savePath);
+//
+            if(org.apache.commons.lang.StringUtils.isEmpty(cmd.getFilePath())) {
+                files.add(savePath);
+            }
+        }
+
+
+        if(files.size() > 1) {
+            List<String> images = imageMosaic(files, filePath);
+
+            if(images.size() == 1) {
+                download(images.get(0),response);
+            } else {
+                String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
+                LOGGER.info("download images filePath:{}, zipPath:{}",filePath,zipPath);
+                DownloadUtils.writeZip(images, zipPath);
+                download(zipPath,response);
+            }
+        } else if(files.size() == 1) {
+            download(files.get(0),response);
+        }
+
+
+    }
+
+//    private Map<String, Object> createEnergyMeterQRCodeDoc(EnergyMeter meter) {
+//        Map<String, Object> dataMap=new HashMap<String, Object>();
+//        dataMap.put("meterNumber", meter.getMeterNumber());
+//        dataMap.put("name", meter.getName());
+//        String qrCode = generateQRString(meter.getId(), meter.getNamespaceId());
+//        ByteArrayOutputStream out = generateQRCode(org.apache.commons.codec.binary.Base64.encodeBase64String(qrCode.getBytes()));
+//        byte[] data=out.toByteArray();
+//        BASE64Encoder encoder=new BASE64Encoder();
+//        dataMap.put("qrCode", encoder.encode(data));
+//
+//        return dataMap;
+//    }
+
+    private String generateQRString(Long id, Integer namespaceId) {
+//        EnergyMeterCodeDTO dto = new EnergyMeterCodeDTO();
+//        dto.setNamespaceId(namespaceId);
+//        dto.setMeterId(id);
+//        String qrCode = WebTokenGenerator.getInstance().toWebToken(dto);
+        return id.toString();
+
+    }
+
+    private ByteArrayOutputStream generateQRCode(String qrToken) {
+        ByteArrayOutputStream out = null;
+        try {
+            BufferedImage image = QRCodeEncoder.createQrCode(qrToken, 200, 200, null);
+            out = new ByteArrayOutputStream();
+            ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+
+        return out;
+    }
+
+    @Override
+    public void exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response) {
+        cmd.setPageSize(Integer.MAX_VALUE-1);
+        List<Long> meterIds = meterSearcher.getMeterIds(cmd);
+
+        LOGGER.info("meterIds: {}", meterIds);
+        List<EnergyMeter> meterList = meterProvider.listByIds(UserContext.getCurrentNamespaceId(), meterIds);
+
+        URL rootPath = EnergyConsumptionServiceImpl.class.getResource("/");
+        String filePath = rootPath.getPath() + this.downloadDir ;
+        File file = new File(filePath);
+        if(!file.exists())
+            file.mkdirs();
+
+
+        DocUtil docUtil=new DocUtil();
+        List<String> files = new ArrayList<>();
+        for(EnergyMeter meter : meterList) {
+            String qrcode = generateQRString(meter.getId(),meter.getNamespaceId());
+            String savePath = filePath + meter.getId() + meter.getName() + ".jpg";
+            graphicsGeneration("Name: "+meter.getName(), "No.: " + meter.getMeterNumber(), qrcode, savePath);
+//            Map<String, Object> dataMap = createEnergyMeterQRCodeDoc(meter);
+//            String savePath = filePath + meter.getId()+ "-" + meter.getName() + ".doc";
+//            docUtil.createDoc(dataMap, "energyMeter", savePath);
+//
+            files.add(savePath);
+        }
+
+        if(files.size() > 1) {
+            List<String> images = imageMosaic(files, filePath);
+
+            if(images.size() == 1) {
+                download(images.get(0),response);
+            } else {
+                String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
+                LOGGER.info("download images filePath:{}, zipPath:{}",filePath,zipPath);
+                DownloadUtils.writeZip(images, zipPath);
+                download(zipPath,response);
+            }
+//            String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
+//            LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+//            DownloadUtils.writeZip(files, zipPath);
+//            download(zipPath,response);
+        } else if(files.size() == 1) {
+            download(files.get(0),response);
+        }
+
+    }
+
+    public HttpServletResponse download(String path, HttpServletResponse response) {
+        try {
+            // path是指欲下载的文件的路径。
+            File file = new File(path);
+            if ( !file.isFile() ) {
+                LOGGER.info("filename:{} is not a file", path);
+            }
+            // 取得文件名。
+            String filename = file.getName();
+            // 取得文件的后缀名。
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+            // 以流的形式下载文件。
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+
+            // 读取完成删除文件
+            if (file.isFile() && file.exists()) {
+                file.delete();
+            }
+
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw RuntimeErrorException.errorWith(EnergyConsumptionServiceErrorCode.SCOPE,
+                    EnergyConsumptionServiceErrorCode.ERROR_DOWNLOAD_FILE,
+                    ex.getLocalizedMessage());
+
+        }
+        return response;
+    }
+
+    private void graphicsGeneration(String name, String number, String qrcode, String savePath) {
+        int imageWidth = 330;//图片的宽度
+        int imageHeight = 413; //图片的高度
+        BufferedImage image = new BufferedImage(imageWidth, imageHeight,
+                BufferedImage.TYPE_INT_RGB);
+
+        Graphics graphics = image.getGraphics();
+        graphics.setFont(new Font("wqy-zenhei", Font.PLAIN, 14));
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, imageWidth, imageHeight);
+        graphics.setColor(Color.BLACK);
+        BufferedImage bimg = null;
+        try {
+            graphics.drawString(name, 10, 230);
+            graphics.drawString(number, 10, 270);
+            bimg = QRCodeEncoder.createQrCode(Base64.encodeBase64String(qrcode.getBytes()), 200, 200, null);
+        } catch (Exception e) {
+        }
+
+        if (bimg != null) {
+            graphics.drawImage(bimg, 60, 0, null);
+        }
+        graphics.dispose();
+
+        try {
+            FileOutputStream fos = new FileOutputStream(savePath);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+//            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(bos);
+//            encoder.encode(image);
+            ImageIO.write(image, "JPEG", bos);
+            bos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<String> imageMosaic(List<String> files, String filePath) {
+        List<String> images = new ArrayList<>();
+        //每张图包含56张二维码
+        int size = files.size()/56;
+        if(files.size()%56 != 0) {
+            size = size + 1;
+        }
+        int imageWidth = 2480;//图片的宽度
+        int imageHeight = 3508; //图片的高度
+        BufferedImage imageMosaic;
+        try {
+            for(int i =0; i < size; i++) {
+                imageMosaic = new BufferedImage(imageWidth, imageHeight,
+                        BufferedImage.TYPE_INT_RGB);
+                Graphics graphics = imageMosaic.getGraphics();
+                graphics.setColor(Color.WHITE);
+                graphics.fillRect(0, 0, imageWidth, imageHeight);
+                //72张二维码
+                int max = (files.size() > (i+1) * 56) ? 56 : files.size()- i*56;
+                int height = 0;
+
+                int maxRow = max/7;
+                if(max%7 != 0) {
+                    maxRow = maxRow + 1;
+                }
+                LOGGER.info("draw max : {}, maxRow: {}, size: {}" , max, maxRow, size);
+                for(int row = 0; row < maxRow; row++) {
+                    //每行7个
+                    for(int w = 0; w < 7; w++) {
+                        LOGGER.info("draw w : {}, row: {}, file size: {}" , w, row, files.size());
+                        if(row * 7 +w < max) {
+//                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
+                            LOGGER.info("draw page: {}, Width : {}, Height: {}" , i, w * 355, height);
+                            File file = new File(files.get(i*56 + row * 7 + w));
+                            if ( !file.isFile() ) {
+                                LOGGER.info("filename:{} is not a file", files.get(i*56 + row * 7 + w));
+                                continue;
+                            }
+                            graphics.drawImage(ImageIO.read(file), w * 355, height, null);
+
+                            // 读取完成删除文件
+                            if (file.isFile() && file.exists()) {
+                                file.delete();
+                            }
+                        }
+                    }
+                    height = (row+1) * 435;
+
+                }
+
+                graphics.dispose();
+                String imagePath = filePath + System.currentTimeMillis() + "EnergyMeterCard.jpg";
+                FileOutputStream fos = new FileOutputStream(imagePath);
+                BufferedOutputStream bos = new BufferedOutputStream(fos);
+                ImageIO.write(imageMosaic, "JPEG", bos);
+                bos.close();
+                images.add(imagePath);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return images;
+    }
 }

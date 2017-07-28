@@ -1,16 +1,12 @@
 package com.everhomes.user;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Set;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.user.ListFeedbacksCommand;
-import com.everhomes.rest.user.ListFeedbacksResponse;
-import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import org.jooq.Condition;
+
+import java.util.List;
+import java.util.Set;
 
 public interface UserActivityProvider {
     List<User> listUsers(List<Long> uids);
@@ -114,4 +110,8 @@ public interface UserActivityProvider {
 	StatActiveUser findStatActiveUserByDate(java.sql.Date date, Integer namespaceId);
 
 	void createStatActiveUser(StatActiveUser stat);
+
+    List<UserActivity> listUserActivetys(Long userId, Integer pageSize);
+
+    UserActivity findLastUserActivity(Long uid);
 }

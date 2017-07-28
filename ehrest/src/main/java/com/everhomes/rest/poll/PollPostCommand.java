@@ -5,28 +5,31 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
 /**
- * 
- * @author elians
- *<ul>
- * <li>namespaceId:命名空间</li>
- * <li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
- * <li>multiChoiceFlag:多选标记</li>
- * <li>anonymousFlag:匿名标记,1 为匿名,0为公开</li>
- *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
- *</li>
+ * <ul>
+ *     <li>namespaceId: 命名空间</li>
+ *     <li>startTime: 开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
+ *     <li>stopTime: stopTime</li>
+ *     <li>multiChoiceFlag: 多选标记</li>
+ *     <li>anonymousFlag: 匿名标记,1 为匿名,0为公开</li>
+ *     <li>id: id</li>
+ *     <li>tag: tag</li>
+ *     <li>itemList: itemList {@link com.everhomes.rest.poll.PollItemDTO}</li>
+ * </ul>
  */
-public class PollPostCommand{
+public class PollPostCommand {
     private Integer namespaceId;
     private String startTime;
     private String stopTime;
     private Integer multiChoiceFlag;
     private Integer anonymousFlag;
     private transient Long id;
-    
+    private String tag;
+
     @ItemType(PollItemDTO.class)
     private List<PollItemDTO> itemList;
-    
+
     public PollPostCommand() {
     }
 
@@ -69,7 +72,7 @@ public class PollPostCommand{
     public void setAnonymousFlag(Integer anonymousFlag) {
         this.anonymousFlag = anonymousFlag;
     }
-    
+
     public List<PollItemDTO> getItemList() {
         return itemList;
     }
@@ -77,7 +80,14 @@ public class PollPostCommand{
     public void setItemList(List<PollItemDTO> itemList) {
         this.itemList = itemList;
     }
-    
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 
     public Long getId() {
         return id;
@@ -90,5 +100,5 @@ public class PollPostCommand{
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-    
+
 }

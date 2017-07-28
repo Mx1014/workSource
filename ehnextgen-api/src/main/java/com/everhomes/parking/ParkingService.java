@@ -10,6 +10,7 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
@@ -40,11 +41,7 @@ public interface ParkingService {
     
     void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd);
     
-    ParkingActivityDTO setParkingActivity(SetParkingActivityCommand cmd);
-    
-    ParkingActivityDTO getParkingActivity(GetParkingActivityCommand cmd);
-    
-    HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,
+    HttpServletResponse exportParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd,
     		HttpServletResponse response);
     
     void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd);
@@ -80,4 +77,12 @@ public interface ParkingService {
     ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd);
 
     void lockParkingCar(LockParkingCarCommand cmd);
+
+	GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd);
+
+    ParkingRechargeOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd);
+
+    void refundParkingOrder(UpdateParkingOrderCommand cmd);
+
+    DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd);
 }

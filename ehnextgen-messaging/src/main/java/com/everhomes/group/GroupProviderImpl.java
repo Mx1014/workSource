@@ -28,6 +28,7 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.util.RecordHelper;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -784,16 +785,39 @@ public class GroupProviderImpl implements GroupProvider {
     	
     	return groupList;
     }
-    
+
     @Override
-    public List<GroupMember> listGroupMemberByGroupIds(List<Long> groupIds, ListingLocator locator, Integer pageSize,  ListingQueryBuilderCallback queryBuilderCallback){
-    	List<List<GroupMember>> groupMembers = new ArrayList<List<GroupMember>>();
+    public List<Group> listGroupByCommunityIds(List<Long> communityIds, ListingQueryBuilderCallback queryBuilderCallback){
+    	List<Group> groupList = new ArrayList<>();
+
+    	dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
+            groupList, (DSLContext context, Object reducingContext) -> {
+                SelectQuery<EhGroupsRecord> query = context.selectQuery(Tables.EH_GROUPS);
+                 if(queryBuilderCallback != null) {
+                        queryBuilderCallback.buildCondition(null, query);
+                 }
+                 query.addConditions(Tables.EH_GROUPS.INTEGRAL_TAG2.in(communityIds));
+
+                 query.fetch().map((r) -> {
+                     groupList.add(ConvertHelper.convert(r, Group.class));
+                     return null;
+                 });
+            return true;
+    	});
+    	return groupList;
+    }
+
+    @Override
+    public List<GroupMember> listGroupMemberByGroupIds(List<Long> groupIds, ListingLocator locator, Integer pageSize,
+                                                       ListingQueryBuilderCallback queryBuilderCallback) {
+    	List<List<GroupMember>> groupMembers = new ArrayList<>();
     	
     	int count = null == pageSize ? 0 : pageSize + 1;
     	
     	dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
     			groupMembers, (DSLContext context, Object reducingContext) -> {
-    				SelectQuery<EhGroupMembersRecord> query = context.selectQuery(Tables.EH_GROUP_MEMBERS);
+    				SelectQuery<Record> query = context.select(Tables.EH_GROUP_MEMBERS.fields())
+                            .from(Tables.EH_GROUP_MEMBERS).getQuery();
     				 if(queryBuilderCallback != null) {
     	                    queryBuilderCallback.buildCondition(locator, query);
     	             }
@@ -803,7 +827,7 @@ public class GroupProviderImpl implements GroupProvider {
     				 }
     				
     				 List<GroupMember> groupList = query.fetch().map((r) -> {
-    					 return ConvertHelper.convert(r, GroupMember.class);
+    					 return RecordHelper.convert(r, GroupMember.class);
     	             });
     				 
     				 locator.setAnchor(null);
@@ -868,15 +892,12 @@ public class GroupProviderImpl implements GroupProvider {
 				.from(EH_GROUP_MEMBERS)
 				.where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId));
 				
-		
 		if (status != null) {
 			step = step.and(EH_GROUP_MEMBERS.MEMBER_STATUS.eq(status));
 		}
-
         if (keyword != null) {
             step = step.and(EH_GROUP_MEMBERS.MEMBER_NICK_NAME.like(DSL.concat("%", keyword, "%")));
         }
-		
 		if (!includeCreator) {
 			step = step.and(EH_GROUP_MEMBERS.MEMBER_ID.ne(creatorId));
 		}
@@ -888,8 +909,7 @@ public class GroupProviderImpl implements GroupProvider {
 		if (result != null) {
 			return result.map(r->ConvertHelper.convert(r, GroupMember.class));
 		}
-		
-		return new ArrayList<GroupMember>();
+		return new ArrayList<>();
 	}
 
     @Override
@@ -902,30 +922,4 @@ public class GroupProviderImpl implements GroupProvider {
 	public List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize) {
 		return listPublicGroupMembersByStatus(groupId, keyword, status, from, pageSize, true, 0L);
 	}
-
-	@Override
-	public GroupMemberLog findGroupMemberLogByGroupMemberId(Long groupMemberId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		Result<Record> records = context.select().from(Tables.EH_GROUP_MEMBER_LOGS)
-			.where(Tables.EH_GROUP_MEMBER_LOGS.GROUP_MEMBER_ID.eq(groupMemberId))
-			.orderBy(Tables.EH_GROUP_MEMBER_LOGS.ID.desc())
-			.limit(1)
-			.fetch();
-		if (records != null && records.size() > 0) {
-			return ConvertHelper.convert(records.get(0), GroupMemberLog.class);
-		}
-		return null;
-	}
-
-	@Override
-	public void createGroupMemberLog(GroupMemberLog groupMemberLog) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGroupMemberLogs.class));
-		groupMemberLog.setId(id);
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMemberLogs.class, groupMemberLog.getId()));
-        EhGroupMemberLogsDao dao = new EhGroupMemberLogsDao(context.configuration());
-        dao.insert(groupMemberLog);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhGroupMemberLogs.class, null);
-	}
-	
-	
 }

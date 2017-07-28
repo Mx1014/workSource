@@ -10,13 +10,13 @@ package com.everhomes.rest.parking.clearance;
  *     <li>PENDING(4): 待处理</li>
  * </ul>
  */
-public enum ParkingClearanceLogStatus {
+public enum  ParkingClearanceLogStatus {
 
     INACTIVE     ((byte) 0),
     PROCESSING   ((byte) 1),
     COMPLETED    ((byte) 2),
     CANCELLED    ((byte) 3),
-    PENDING      ((byte) 4);
+    /*PENDING      ((byte) 4)*/;
 
     private Byte code;
 
@@ -31,6 +31,15 @@ public enum ParkingClearanceLogStatus {
     public static ParkingClearanceLogStatus fromCode(Byte code) {
         for (ParkingClearanceLogStatus type : ParkingClearanceLogStatus.values()) {
             if (type.code.equals(code)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    public static ParkingClearanceLogStatus fromName(String name) {
+        for (ParkingClearanceLogStatus type : ParkingClearanceLogStatus.values()) {
+            if (type.name().equals(name)) {
                 return type;
             }
         }

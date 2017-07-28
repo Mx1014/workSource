@@ -38,6 +38,8 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
+		LOGGER.info("ActivitySignupOrderEmbeddedHandler paySuccess cmd = {}", cmd);
+
 		ActivityRoster roster = activityProvider.findRosterByOrderNo(Long.valueOf(cmd.getOrderNo()));
 		if(roster == null){
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
@@ -56,6 +58,7 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 			roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayTime())));
 			roster.setPayAmount(new BigDecimal(cmd.getPayAmount()));
 			roster.setVendorType(cmd.getVendorType());
+			roster.setOrderType(cmd.getOrderType());
 			activityProvider.updateRoster(roster);
 			return null;
 		});
@@ -63,6 +66,8 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 
 	@Override
 	public void payFail(PayCallbackCommand cmd) {
+		LOGGER.info("ActivitySignupOrderEmbeddedHandler payFail cmd = {}", cmd);
+
 		if(LOGGER.isDebugEnabled())
 			LOGGER.error("onlinePayBillFail");
 		ActivityRoster roster = activityProvider.findRosterByOrderNo(Long.valueOf(cmd.getOrderNo()));
@@ -80,7 +85,7 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	
 	
 	private void checkPayAmount(String payAmount, BigDecimal chargePrice) {
-		if(StringUtils.isBlank(payAmount) || chargePrice == null || !chargePrice.equals(new BigDecimal(payAmount))){
+		if(StringUtils.isBlank(payAmount) || chargePrice == null || !chargePrice.equals(new BigDecimal(payAmount).setScale(2))){
 			LOGGER.error("payAmount and chargePrice is not equal.");
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_PAYAMOUNT_ERROR,
 					"payAmount and chargePrice is not equal.");

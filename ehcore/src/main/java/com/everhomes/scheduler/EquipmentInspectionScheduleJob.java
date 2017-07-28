@@ -7,6 +7,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.*;
+import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.util.CronDateUtils;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -56,14 +57,17 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 			LOGGER.info("EquipmentInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
 
-		//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
-		scheduleProvider.unscheduleJob("EquipmentInspectionNotify ");
+		//双机判断
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
+			scheduleProvider.unscheduleJob("EquipmentInspectionNotify ");
 
-		closeDelayTasks();
-		createTask();
-		Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
-		if(notifyFlag) {
-			sendTaskMsg();
+			closeDelayTasks();
+			createTask();
+			Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
+			if (notifyFlag) {
+				sendTaskMsg();
+			}
 		}
 
 	}
@@ -199,7 +203,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 		long endTime = current + (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
 		//通知当天零点到11分的所有任务
-		equipmentService.sendTaskMsg(zero, endTime+60000);
+		equipmentService.sendTaskMsg(zero, endTime+60000, QualityGroupType.EXECUTIVE_GROUP.getCode());
+		equipmentService.sendTaskMsg(zero, endTime+60000, QualityGroupType.REVIEW_GROUP.getCode());
 		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(endTime+60000);
 
 		if(task != null) {

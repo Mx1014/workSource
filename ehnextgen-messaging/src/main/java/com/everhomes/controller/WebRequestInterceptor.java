@@ -231,6 +231,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     }
 
     private void setupScheme(Map<String, String> userAgents) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("setupScheme userAgents = {}", userAgents);
+        }
         UserContext context = UserContext.current();
         if(org.springframework.util.StringUtils.isEmpty(context.getVersion()) || context.getVersion().equals("0.0.0")){
             context.setScheme(userAgents.get("scheme"));
@@ -357,6 +360,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             try {
                 ContentServer server = contentServerService.selectContentServer();
                 Integer port = server.getPublicPort();
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Final selectContentServer port = {}", port);
+                }
                 if (80 == port || 443 == port) {
                     scheme = HTTPS;
                 } else {
@@ -366,6 +372,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 LOGGER.error("Get user agent. Failed to find content server", e);
                 scheme = HTTP;
             }
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Final parsed schema = {}", scheme);
         }
         map.put("scheme", scheme);
         return map;
@@ -443,6 +452,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if (app.getAppKey().equalsIgnoreCase(AppConstants.APPKEY_BORDER)) {
             User user = this.userProvider.findUserById(User.ROOT_UID);
             UserContext.current().setUser(user);
+        } else  {
+            // 由于把发短信的相关接口加入到使用签名的行列来，此时由于使用了UserContext会引起空指针，
+            // 故需要为这个场景加上UserContext， by lqs 20170629
+            setupAnnonymousUserContext();
         }
     }
 

@@ -80,6 +80,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 			createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
 			//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
 			createFlowCaseCommand.setContent(task.getContent());
+			createFlowCaseCommand.setCurrentOrganizationId(cmd.getFlowOrganizationId());
 
 			createFlowCaseCommand.setProjectId(task.getOwnerId());
 			createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
@@ -167,7 +168,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
 
-			if(StringUtils.isNotBlank(task.getStringTag1())) {
+			if(task != null && StringUtils.isNotBlank(task.getStringTag1())) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 

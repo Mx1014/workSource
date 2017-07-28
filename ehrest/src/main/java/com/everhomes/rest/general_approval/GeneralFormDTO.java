@@ -15,7 +15,7 @@ import java.util.List;
  * <li>organizationId: 属于的公司 ID</li>
  * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
  * <li>formVersion: 当前版本信息</li>
- * <li>templateType: 模板数据类型。未来表单可能同样的控件有不同的表达方式，则可以用这个类型区分 {@link com.everhomes.rest.general_approval.GeneralFormTemplateType}</li>
+ * <li>templateType: 模板数据类型。未来表单可能同样的控件有不同的表达方式，则可以用这个类型区分 {@link GeneralFormTemplateType}</li>
  * <li>formName: 表单名字</li>
  * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
  * </ul>
@@ -37,7 +37,7 @@ public class GeneralFormDTO {
     private String     templateType;
     private String     templateText;
     private Timestamp     createTime;
-    
+
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
 
