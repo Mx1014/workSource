@@ -1621,6 +1621,39 @@ public class PortalServiceImpl implements PortalService {
 		return "/" + layoutName;
 	}
 
+	private void chuliLayout(){
+		List<LaunchPadLayout> padLayouts = launchPadProvider.getLaunchPadLayouts();
+		for (LaunchPadLayout padLayout: padLayouts) {
+			PortalLayout layout = ConvertHelper.convert(padLayout, PortalLayout.class);
+
+			LaunchPadLayoutJson layoutJson = (LaunchPadLayoutJson)StringHelper.fromJsonString(padLayout.getLayoutJson(), LaunchPadLayoutJson.class);
+			layout.setLabel(layoutJson.getDisplayName());
+			List<LaunchPadLayoutGroupDTO> padLayoutGroups = layoutJson.getGroups();
+			for (LaunchPadLayoutGroupDTO padLayoutGroup: padLayoutGroups) {
+				PortalItemGroup itemGroup = ConvertHelper.convert(padLayoutGroup, PortalItemGroup.class);
+				itemGroup.setNamespaceId(layout.getNamespaceId());
+				itemGroup.setLayoutId(layout.getId());
+				itemGroup.setLabel(padLayoutGroup.getGroupName());
+				itemGroup.setStatus(layout.getStatus());
+				if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NAVIGATOR){
+					NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), NavigatorInstanceConfig.class);
+					itemGroup.setName(instanceConfig.getItemGroup());
+					ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
+					if(Style.fromCode(padLayoutGroup.getStyle()) == Style.GALLERY){
+						if(StringUtils.isEmpty(padLayoutGroup.getTitle()) || StringUtils.isEmpty(padLayoutGroup.getIconUrl())){
+							config.setTitleFlag(TitleFlag.TRUE.getCode());
+							config.setTitle(padLayoutGroup.getTitle());
+							config.setTitleUri(padLayoutGroup.getIconUrl());
+						}
+						config.setColumnCount(padLayoutGroup.getColumnCount());
+					}
+				}
+
+			}
+		}
+	}
+
+
 	public static void main(String[] args) {
 //		PortalItemGroupJson[] jsons = (PortalItemGroupJson[])StringHelper.fromJsonString("[{\"label\":\"应用\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Navigator\",\"style\":\"Metro\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"cs://\"},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"横幅广告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"公告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"运营模块\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"OPPush\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"titleFlag\":0,\"title\":\"标题\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"无时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News_Flash\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"timeWidgetStyle\":\"date\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"分页签\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Tabs\",\"style\":\"Pure_text\",\"defaultOrder\":0,\"description\":\"描述\"}]", PortalItemGroupJson[].class);
 //		for (PortalItemGroupJson json: jsons) {

@@ -1,6 +1,7 @@
 package com.everhomes.rest.acl;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.acl.admin.RolePrivilege;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -12,7 +13,8 @@ import java.util.List;
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司</li>
  * <li>roleName:角色名称</li>
  * <li>description:描述</li>
- * <li>privilegeIds:权限集合</li>
+ * <li>RolePrivileges:权限集合</li>
+ * <li>allFlag:是否全部</li>
  * </ul>
  */
 public class UpdateRolePrivilegesCommand {
@@ -27,8 +29,10 @@ public class UpdateRolePrivilegesCommand {
 
 	private String description;
 
-	@ItemType(Long.class)
-	private List<Long> privilegeIds;
+	@ItemType(RolePrivilege.class)
+	private List<RolePrivilege> RolePrivileges;
+
+	private Byte allFlag;
 
 
 	public Long getRoleId() {
@@ -71,12 +75,20 @@ public class UpdateRolePrivilegesCommand {
 		this.description = description;
 	}
 
-	public List<Long> getPrivilegeIds() {
-		return privilegeIds;
+	public List<RolePrivilege> getRolePrivileges() {
+		return RolePrivileges;
 	}
 
-	public void setPrivilegeIds(List<Long> privilegeIds) {
-		this.privilegeIds = privilegeIds;
+	public void setRolePrivileges(List<RolePrivilege> rolePrivileges) {
+		RolePrivileges = rolePrivileges;
+	}
+
+	public Byte getAllFlag() {
+		return allFlag;
+	}
+
+	public void setAllFlag(Byte allFlag) {
+		this.allFlag = allFlag;
 	}
 
 	@Override

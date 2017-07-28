@@ -37,4 +37,5 @@ public interface LaunchPadProvider {
     void createItemServiceCategry(ItemServiceCategry itemServiceCategry);
     void deleteItemServiceCategryById(Long id);
     List<LaunchPadItem> listLaunchPadItemsByItemGroup(Integer namespaceId, String itemLocation,String itemGroup);
+    List<LaunchPadLayout> getLaunchPadLayouts();
 }

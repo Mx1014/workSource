@@ -5,6 +5,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
@@ -253,7 +254,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Override
 	public void updateRolePrivileges(UpdateRolePrivilegesCommand cmd) {
-
 		checkRole(cmd.getRoleId());
 
 		User user = UserContext.current().getUser();
@@ -269,23 +269,39 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			deleteAcls(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), cmd.getRoleId());
 
 			//重新添加角色和权限的关系
-			List<Long> privilegeIds = cmd.getPrivilegeIds();
-			if(null != privilegeIds && 0 != privilegeIds.size()){
-				Acl acl = new Acl();
-				acl.setGrantType((byte) 1);
-				acl.setOwnerType(cmd.getOwnerType());
-				acl.setOwnerId(cmd.getOwnerId());
-				acl.setOrderSeq(0);
-				acl.setRoleType(EntityType.ROLE.getCode());
-				acl.setRoleId(cmd.getRoleId());
-				acl.setCreatorUid(user.getId());
-				acl.setCreateTime(time);
-				for (Long privilegeId : privilegeIds) {
-					acl.setPrivilegeId(privilegeId);
-					aclProvider.createAcl(acl);
+			Acl acl = new Acl();
+			acl.setGrantType((byte) 1);
+			acl.setOwnerType(cmd.getOwnerType());
+			acl.setOwnerId(cmd.getOwnerId());
+			acl.setOrderSeq(0);
+			acl.setRoleType(EntityType.ROLE.getCode());
+			acl.setRoleId(cmd.getRoleId());
+			acl.setCreatorUid(user.getId());
+			acl.setCreateTime(time);
+			if(AllFlagType.YES != AllFlagType.fromCode(cmd.getAllFlag())){
+				if(null != cmd.getRolePrivileges() || cmd.getRolePrivileges().size() == 0){
+					LOGGER.error("params RolePrivileges error, cmd="+ cmd);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"params RolePrivileges error.");
 				}
+
+				for (RolePrivilege rolePrivilege: cmd.getRolePrivileges()) {
+					if(ServiceModuleTreeVType.fromCode(rolePrivilege.getType()) == ServiceModuleTreeVType.SERVICE_MODULE){
+						List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(rolePrivilege.getId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+						if(modulePrivileges.size() > 0){
+							acl.setPrivilegeId(modulePrivileges.get(0).getPrivilegeId());
+							aclProvider.createAcl(acl);
+						}
+					}else{
+						acl.setPrivilegeId(rolePrivilege.getId());
+						aclProvider.createAcl(acl);
+					}
+				}
+			}else{
+				acl.setPrivilegeId(PrivilegeConstants.ALL_SERVICE_MODULE);
+				aclProvider.createAcl(acl);
 			}
-			
+
 			return null;
 		});
 	}
@@ -371,7 +387,35 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return r.getPrivilegeId();
 		}).collect(Collectors.toList());
 	}
-	
+
+
+
+	private List<RolePrivilege> getPrivilegeByRoleId(String ownerType, Long ownerId, Long roleId){
+		List<RolePrivilege> rolePrivileges = new ArrayList<>();
+		List<Acl> acls = aclProvider.getResourceAclByRole(ownerType, ownerId, new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId));
+		for (Acl acl: acls) {
+			List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(acl.getPrivilegeId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+			RolePrivilege rolePrivilege = new RolePrivilege();
+			if(modulePrivileges.size() > 0){
+				rolePrivilege.setType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
+				rolePrivilege.setId(modulePrivileges.get(0).getModuleId());
+			}else{
+				rolePrivilege.setType(ServiceModuleTreeVType.PRIVILEGE.getCode());
+				rolePrivilege.setId(acl.getPrivilegeId());
+			}
+			rolePrivileges.add(rolePrivilege);
+		}
+		return rolePrivileges;
+	}
+
+	private void a(String ownerType, Long ownerId, Long roleId){
+		List<RolePrivilege> rolePrivileges = getPrivilegeByRoleId(ownerType, ownerId, roleId);
+		for (RolePrivilege rolePrivilege: rolePrivileges) {
+
+		}
+	}
+
+
 	//added by janson
 	@Override
 	public AclPrivilegeInfoResponse getPrivilegeInfosByRoleId(ListPrivilegesByRoleIdCommand cmd) {

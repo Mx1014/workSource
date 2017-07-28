@@ -347,6 +347,20 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 		return list;
 	}
+
+	@Override
+	public List<LaunchPadLayout> getLaunchPadLayouts() {
+		List<LaunchPadLayout> list = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
+		SelectJoinStep<Record> query = context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS);
+		query.groupBy(Tables.EH_LAUNCH_PAD_LAYOUTS.NAME, Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID);
+		query.fetch().map(r -> {
+			list.add(ConvertHelper.convert(r,LaunchPadLayout.class));
+			return null;
+		});
+		return list;
+	}
+
     @Override
     public List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId) {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
