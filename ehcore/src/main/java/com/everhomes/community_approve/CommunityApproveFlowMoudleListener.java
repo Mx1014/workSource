@@ -277,11 +277,11 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
 
                     }
             }
-            if (!flag){
+            if (!flag && !dto.getVisibleType().equals(GeneralFormDataVisibleType.HIDDEN.getCode())){
                 FlowCaseEntity e = new FlowCaseEntity();
                 e.setKey(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
-                e.setValue("");
-                e.setEntityType(dto.getFieldType());
+                e.setValue("无");
+                e.setEntityType(FlowCaseEntityType.LIST.getCode());
                 entities.add(e);
             }
         }
