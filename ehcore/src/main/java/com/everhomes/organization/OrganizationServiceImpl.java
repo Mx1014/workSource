@@ -9210,7 +9210,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             /**modify by lei.lv*/
             //总公司和分公司的ID集合
-//            enterpriseIds.add(org.getId());
+            enterpriseIds.add(org.getId());
 
             if (null != departmentIds) {
                 for (Long departmentId : departmentIds) {
