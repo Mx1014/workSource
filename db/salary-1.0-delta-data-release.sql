@@ -172,6 +172,9 @@ INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_ty
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privileges_id, 1005, 'EhAclRoles', 0, 1, NOW()); 
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privileges_id, 1001, 'EhAclRoles', 0, 1, NOW()); 
+-- 补充acls表
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid` , `create_time` , `namespace_id` , `role_type`) SELECT (@acl_id := @acl_id + 1),`owner_type`, `owner_id`,1,10, target_id, 0,1,NOW(),0, target_type FROM `eh_acl_role_assignments` eara WHERE role_id = 1001 AND target_type = 'EhUsers' AND target_id NOT IN (SELECT role_id FROM eh_acls WHERE role_type = 'EhUsers' AND privilege_id = 10 AND owner_id = eara.owner_id);
 
 
 SET @locale_id = (SELECT MAX(id) FROM eh_locale_strings);
@@ -183,26 +186,26 @@ INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@
 
 -- 数据备份
 DROP TABLE IF EXISTS eh_organization_member_details_temp;
-create table eh_organization_member_details_temp select * from eh_organization_member_details;
+CREATE TABLE eh_organization_member_details_temp SELECT * FROM eh_organization_member_details;
 DROP TABLE IF EXISTS eh_organization_members_temp;
-create table eh_organization_members_temp select * from eh_organization_members;
+CREATE TABLE eh_organization_members_temp SELECT * FROM eh_organization_members;
 
 -- 查出同时存在父公司的子公司记录
-select * from eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id WHERE	o.parent_id <> 0 and o.parent_id in(SELECT organization_id FROM eh_organization_member_details);
+SELECT * FROM eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id WHERE	o.parent_id <> 0 AND o.parent_id IN(SELECT organization_id FROM eh_organization_member_details);
 
 -- 删除这部分记录
-DELETE FROM eh_organization_member_details  WHERE id in (SELECT aa.id from (select omd.id from eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id WHERE	o.parent_id <> 0 and o.parent_id in(SELECT organization_id FROM eh_organization_member_details)) aa);
+DELETE FROM eh_organization_member_details  WHERE id IN (SELECT aa.id FROM (SELECT omd.id FROM eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id WHERE	o.parent_id <> 0 AND o.parent_id IN(SELECT organization_id FROM eh_organization_member_details)) aa);
 
 
 -- 查出不存在父公司的子公司记录
-select * from eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id WHERE	o.parent_id <> 0 and o.parent_id not in (SELECT organization_id FROM eh_organization_member_details);
+SELECT * FROM eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id WHERE	o.parent_id <> 0 AND o.parent_id NOT IN (SELECT organization_id FROM eh_organization_member_details);
 
 -- 把这部分子公司的记录更新成所属父公司
-UPDATE eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id SET omd.organization_id = o.parent_id WHERE o.parent_id <> 0 and (o.parent_id not in (SELECT aa.organization_id from (SELECT organization_id FROM eh_organization_member_details) aa));
+UPDATE eh_organization_member_details omd INNER JOIN eh_organizations o ON omd.organization_id = o.id SET omd.organization_id = o.parent_id WHERE o.parent_id <> 0 AND (o.parent_id NOT IN (SELECT aa.organization_id FROM (SELECT organization_id FROM eh_organization_member_details) aa));
 
 -- 重新同步member表的detail_id
 
-UPDATE eh_organization_members eom SET eom.detail_id = (select eomd.id from eh_organization_member_details eomd WHERE eomd.organization_id = SUBSTRING_index(SUBSTRING_index(eom.group_path,'/',2),'/',-1) AND eomd.contact_token = eom.contact_token);
+UPDATE eh_organization_members eom SET eom.detail_id = (SELECT eomd.id FROM eh_organization_member_details eomd WHERE eomd.organization_id = SUBSTRING_INDEX(SUBSTRING_INDEX(eom.group_path,'/',2),'/',-1) AND eomd.contact_token = eom.contact_token);
 
 -- 数据修复脚本
 UPDATE eh_organization_member_details md

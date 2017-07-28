@@ -174,3 +174,6 @@ SET @locale_id = (SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100001','zh_CN','没有文件');
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100002','zh_CN','姓名为空');
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100003','zh_CN','手机号码有误');
+-- 补充acls表
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid` , `create_time` , `namespace_id` , `role_type`) SELECT (@acl_id := @acl_id + 1),`owner_type`, `owner_id`,1,10, target_id, 0,1,NOW(),0, target_type FROM `eh_acl_role_assignments` eara WHERE role_id = 1001 AND target_type = 'EhUsers' AND target_id NOT IN (SELECT role_id FROM eh_acls WHERE role_type = 'EhUsers' AND privilege_id = 10 AND owner_id = eara.owner_id);
