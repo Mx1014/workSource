@@ -32,6 +32,7 @@ import com.everhomes.rest.express.ListExpressHotlinesCommand;
 import com.everhomes.rest.express.ListExpressHotlinesResponse;
 import com.everhomes.rest.express.ListExpressOrderCommand;
 import com.everhomes.rest.express.ListExpressOrderResponse;
+import com.everhomes.rest.express.ListExpressOrderStatusResponse;
 import com.everhomes.rest.express.ListExpressPackageTypesCommand;
 import com.everhomes.rest.express.ListExpressPackageTypesResponse;
 import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
@@ -144,6 +145,6 @@ public interface ExpressService {
 
 	GetExpressInsuredDocumentsResponse getExpressInsuredDocuments(GetExpressInsuredDocumentsCommand cmd);
 
-	Object listExpressOrderStatus();
+	ListExpressOrderStatusResponse listExpressOrderStatus();
 
 }

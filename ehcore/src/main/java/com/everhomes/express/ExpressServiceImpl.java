@@ -2,6 +2,7 @@
 package com.everhomes.express;
 
 import java.math.BigDecimal;
+import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -171,6 +173,9 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Autowired
 	private LocaleStringService localeStringService;
+	
+	@Autowired
+    private ConfigurationProvider configProvider;
 	
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {

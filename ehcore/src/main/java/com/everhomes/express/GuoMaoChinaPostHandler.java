@@ -1,7 +1,15 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.net.URL;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -11,12 +19,19 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.express.guomao.GuoMaoChinaPostResponseEntity;
 import com.everhomes.express.guomao.GuoMaoChinaPostResponse;
+import com.everhomes.express.guomao.GuoMaoChinaPostResponseEntity;
 import com.everhomes.parking.Utils;
+import com.everhomes.rest.express.ExpressLogisticsStatus;
+import com.everhomes.rest.express.ExpressTraceDTO;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
+
+import cn.cpst.rit.model.ArrayOfMail;
+import cn.cpst.rit.model.Mail;
+import cn.cpst.rit.service.MailTtServiceGn;
+import cn.cpst.rit.service.MailTtServiceGnPortType;
 //后面的2为表eh_express_companies中父id为0的行的id 国贸 中国邮政
 @Component(ExpressHandler.EXPRESS_HANDLER_PREFIX+"3")
 public class GuoMaoChinaPostHandler implements ExpressHandler{
@@ -32,7 +47,7 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 //	private static final String TRACK_BILL_URL = "http://211.156.193.140:8000/cotrackapi/api/track/mail/#{billno}"; 
 	
 	//java8新加的格式化时间类，是线程安全的
-//	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
 	
 
 	@Override
@@ -43,8 +58,67 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 
 	@Override
 	public GetExpressLogisticsDetailResponse getExpressLogisticsDetail(ExpressCompany expressCompany, String billNo) {
-		// TODO Auto-generated method stub
-		return null;
+		URL wsdlURL = MailTtServiceGn.WSDL_LOCATION;
+		MailTtServiceGn service = new MailTtServiceGn(wsdlURL, MailTtServiceGn.SERVICE);
+		MailTtServiceGnPortType port = service.getMailTtServiceGnHttpPort();
+		ArrayOfMail arrayOfMail = port.getMails("6", "83b6fe9b4cbb442d", billNo);
+		List<Mail> maillist = arrayOfMail.getMail();
+		if(maillist == null || maillist.size() == 0){
+			return null;
+		}
+		return converMailToResponse(maillist,expressCompany,billNo);
+	}
+
+	private GetExpressLogisticsDetailResponse converMailToResponse(List<Mail> maillist,ExpressCompany expressCompany, String billNo) {
+		//TODO
+		GetExpressLogisticsDetailResponse response = new GetExpressLogisticsDetailResponse();
+		response.setBillNo(billNo);
+		response.setExpressCompany(expressCompany.getName());
+		response.setExpressLogo(expressCompany.getLogo());
+//		response.setConsumeTime(consumeTime);
+		response.setTraces(new ArrayList<ExpressTraceDTO>());
+		for (Mail mail : maillist) {
+			ExpressTraceDTO dto = new ExpressTraceDTO();
+			dto.setAcceptAddress(mail.getRelationOfficeDesc().getValue());
+			dto.setAcceptTime(DATE_TIME_FORMATTER.format(java.time.Instant.ofEpochMilli(mail.getActionDateTime().getMillisecond())));
+			System.out.print(mail.getActionInfoOut().getValue()+" | ");
+			System.out.print(mail.getActionDateTime().getYear()+"."+
+					mail.getActionDateTime().getMonth()+"."+
+					mail.getActionDateTime().getDay()+" "+
+					mail.getActionDateTime().getHour()+"-"+
+					mail.getActionDateTime().getMinute()+"-"+
+					mail.getActionDateTime().getSecond()+" | ");
+			System.out.print(mail.getMailCode().getValue()+" | ");
+			System.out.print(mail.getActionDateTime().getMillisecond()+" | ");
+			System.out.print(mail.getOfficeName().getValue()+" | ");
+			System.out.print(mail.getRelationOfficeDesc().getValue()+" | ");
+			System.out.println("--------------------------------------------------------");
+			response.getTraces().add(dto);
+		}
+		String statusvalue = maillist.get(maillist.size()-1).getActionInfoOut().getValue();
+		if("已妥投".equals(statusvalue)){
+			response.setLogisticsStatus(ExpressLogisticsStatus.RECEIVED.getCode());
+		}else {
+			response.setLogisticsStatus(ExpressLogisticsStatus.IN_TRANSIT.getCode());
+		}
+		
+		if (maillist.size() > 1) {
+			Mail first = maillist.get(0);
+			Mail last = maillist.get(maillist.size()-1);
+//			response.setConsumeTime(getDeltaTime(String.valueOf(last.getActionDateTime().get String.valueOf(first.getActionDateTime().getMillisecond())));
+		}
+		
+		return response;
+	}
+	
+	private String getDeltaTime(String last, String first) {
+		LocalDateTime dateTime = LocalDateTime.parse(first, DATE_TIME_FORMATTER);
+		Instant instant = dateTime.atZone(ZoneOffset.systemDefault()).toInstant();
+		LocalDateTime dateTime2 = LocalDateTime.parse(last, DATE_TIME_FORMATTER);
+		Instant instant2 = dateTime2.atZone(ZoneOffset.systemDefault()).toInstant();
+		long deltaHours = instant2.until(instant, ChronoUnit.HOURS);
+		//返回格式x.y表示x天y小时
+		return deltaHours/24+"."+deltaHours%24;
 	}
 
 	@Override

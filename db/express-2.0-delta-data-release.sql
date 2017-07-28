@@ -22,3 +22,13 @@ INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`,
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('2', @namespaceId, 'EhNamespaces', @namespaceId, '2', '2', 'EMS标准快递', '[{"packageType": 3},{"packageType": 1}]', '请确认寄件物品价值不超过5万元，贵重物品务必保价，保价费=保价金额*0.5%，最低1元','[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', '2', '0', NOW(), NOW(), '0');
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('3', @namespaceId, 'EhNamespaces', @namespaceId, '3', '3', '邮政快递包裹', '[{"packageType": 3},{"packageType": 2},{"packageType": 1}]', '请确认寄件物品价值不超过2万元，贵重物品务必保价，保价费=保价金额*1%，最低2元', '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', '2', '0', NOW(), NOW(), '0');
 INSERT INTO `eh_express_company_businesses` (`id`, `namespace_id`, `owner_type`, `owner_id`, `express_company_id`, `send_type`, `send_type_name`, `package_types`, `insured_documents`, `order_status_collections`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('4', @namespaceId, 'EhNamespaces', @namespaceId, '3', '4', '同城信筒快件', '[{"packageType": 4},{"packageType": 5}]', NULL, '[{"status": 1},{"status": 2},{"status": 5},{"status": 4}]', '2', '0', NOW(), NOW(), '0');
+
+-- 国贸单点登录的appkey，和seckey
+set @appKey = 'de875e40-1c5f-4a0c-94a6-0b37421b8554';
+set @secretKey = 'k9+3iUUSlUah1Uggv5ZKbTEktcIuvs7834ZThJS/CmA4eVBR2msOBak9uvut1Io0gZ9tdFJ0LpJ9ELfes8XXZw==';
+
+set @eh_apps_id = (select MAX(id) FROM eh_apps);
+INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`) VALUES ((@eh_apps_id:=@eh_apps_id+1), '1', @appKey, @secretKey, 'guomao', 'guomao app key', '1', NOW(), NULL, NULL);
+-- appkey mapping namespace
+set @eh_app_namespace_mappings_id = (select MAX(id) FROM eh_app_namespace_mappings);
+INSERT INTO `eh_app_namespace_mappings` (`id`, `namespace_id`, `app_key`, `community_id`) VALUES ((@eh_app_namespace_mappings_id:=@eh_app_namespace_mappings_id+1), @namespace_id, @appKey, '1');
