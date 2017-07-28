@@ -6791,7 +6791,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != member) {
                 organizationProvider.updateOrganizationMember(member);
             }
-            
+
             // 同步userOrganization
             if(member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){
                 this.createOrUpdateUserOrganization(member);
