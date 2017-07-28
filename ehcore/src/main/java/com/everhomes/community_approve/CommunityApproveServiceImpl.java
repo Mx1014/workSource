@@ -252,7 +252,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
     public GetTemplateByCommunityApproveIdResponse postApprovalForm(PostCommunityApproveFormCommand cmd) {
 
         CommunityApprove ca =  this.communityApproveProvider.getCommunityApproveById(cmd.getApprovalId());
-        GeneralForm form = this.generalFormProvider.getGeneralFormById(ca.getFormOriginId());
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ca.getFormOriginId());
 
         if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
             // 使用表单/审批 注意状态 config
@@ -263,7 +263,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
         CommunityApproveVal obj = ConvertHelper.convert(ca, CommunityApproveVal.class);
         obj.setApproveId(ca.getId());
-
+        obj.setFormVersion(form.getFormVersion());
         //取出姓名 手机号 公司信息
         for (PostApprovalFormItem val : cmd.getValues()) {
             if (GeneralFormDataSourceType.USER_NAME.getCode().equals(val.getFieldName()))
@@ -347,8 +347,6 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         font.setFontName("Courier New");
 
         style.setFont(font);
-        List<String> defaultFields = Arrays.stream(GeneralFormDataSourceType.values()).map(GeneralFormDataSourceType::getCode)
-                .collect(Collectors.toList());
 
         Map<String,XSSFSheet> sheets = new HashMap<>();
         Map<String,Map> keyColumMaps = new HashMap<>();
@@ -441,8 +439,9 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
     private XSSFSheet createNewSheet(XSSFWorkbook wb,CommunityApproveValDTO dto){
         CommunityApprove ca = communityApproveProvider.getCommunityApproveById(dto.getApproveId());
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(ca.getFormOriginId());
         XSSFSheet sheet = null;
-        if (ca.getFormOriginId() == dto.getFormOriginId() && ca.getFormVersion()==dto.getFormVersion()){
+        if (form.getFormOriginId() == dto.getFormOriginId() && form.getFormVersion()==dto.getFormVersion()){
             sheet = wb.createSheet(ca.getApproveName());
         }else{
             GeneralForm gf = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(dto.getFormOriginId()
