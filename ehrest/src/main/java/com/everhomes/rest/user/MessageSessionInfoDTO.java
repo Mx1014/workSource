@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>avatar: 头像</li>
  *     <li>messageType: 用户发送的消息类型，决定了客户端怎么显示这个用户发送的消息{@link com.everhomes.rest.messaging.UserMessageType}</li>
  *     <li>muteFlag: 免打扰状态{@link com.everhomes.rest.user.UserMuteNotificationFlag}</li>
+ *     <li>alias: group别名，如果name为空的时候会返回一个别名：用户1、用户2、用户3、用户4、用户5</li>
  * </ul>
  */
 public class MessageSessionInfoDTO {
@@ -17,6 +18,7 @@ public class MessageSessionInfoDTO {
     private String avatar;
     private String messageType;
     private Byte muteFlag;
+    private String alias;
 
     public String getName() {
         return name;
@@ -48,6 +50,14 @@ public class MessageSessionInfoDTO {
 
     public void setMuteFlag(Byte muteFlag) {
         this.muteFlag = muteFlag;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     @Override

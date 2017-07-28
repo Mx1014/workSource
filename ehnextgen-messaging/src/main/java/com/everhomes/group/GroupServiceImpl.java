@@ -595,7 +595,8 @@ public class GroupServiceImpl implements GroupService {
 
             //群聊名称为空时填充群聊别名  edit by yanjun 20170724
             if(StringUtils.isEmpty(dto.getName())){
-                populateAlias(dto);
+                String alias = getGroupAlias(dto.getId());
+                dto.setAlias(alias);
             }
 
             return dto;
@@ -766,7 +767,8 @@ public class GroupServiceImpl implements GroupService {
 
                     //群聊名称为空时填充群聊别名  edit by yanjun 20170724
                     if(StringUtils.isEmpty(dto.getName())){
-                        populateAlias(dto);
+                        String alias = getGroupAlias(dto.getId());
+                        dto.setAlias(alias);
                     }
                     groupDtoList.add(dto);
                 } else {
@@ -812,10 +814,10 @@ public class GroupServiceImpl implements GroupService {
         return groupDtoList;
     }
 
-    //填充群聊别名
-    private void populateAlias(GroupDTO groupDTO){
+    @Override
+    public String getGroupAlias(Long groupId){
         ListMemberInStatusCommand cmd = new ListMemberInStatusCommand();
-        cmd.setGroupId(groupDTO.getId());
+        cmd.setGroupId(groupId);
         cmd.setStatus(GroupMemberStatus.ACTIVE.getCode());
         cmd.setPageSize(5);
         ListMemberCommandResponse commandResponse = this.listMembersInStatus(cmd);
@@ -825,9 +827,9 @@ public class GroupServiceImpl implements GroupService {
                 alias += commandResponse.getMembers().get(i).getMemberNickName();
                 alias += "、";
             }
-            alias = alias.substring(0, alias.length()-1);
-            groupDTO.setAlias(alias);
+           return alias.substring(0, alias.length()-1);
         }
+        return "";
     }
     
     

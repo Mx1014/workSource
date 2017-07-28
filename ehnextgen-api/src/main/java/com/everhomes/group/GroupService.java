@@ -167,4 +167,6 @@ public interface GroupService {
      * 删除俱乐部的广播
      */
     void deleteBroadcastByToken(DeleteBroadcastByTokenCommand cmd);
+
+    public String getGroupAlias(Long groupId);
 }

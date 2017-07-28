@@ -43,6 +43,7 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -273,6 +274,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
+
+	@Autowired
+	private GroupService groupService;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -3801,6 +3805,13 @@ public class UserServiceImpl implements UserService {
                         name = organization.getName();
                     }
                     dto.setName(name);
+
+					//群聊名称为空时填充群聊别名  edit by yanjun 20170724
+					if(name == null || "".equals(name)){
+						String alias = groupService.getGroupAlias(group.getId());
+						dto.setAlias(alias);
+					}
+
                     dto.setMessageType(UserMessageType.MESSAGE.getCode());
                     String avatar = parseUri(group.getAvatar(), com.everhomes.rest.common.EntityType.GROUP.getCode(), group.getId());
                     dto.setAvatar(avatar);
