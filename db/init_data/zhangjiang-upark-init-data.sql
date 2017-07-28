@@ -26,7 +26,7 @@ SET @eh_namespace_details = (SELECT MAX(id) FROM `eh_namespace_details`) ;
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(@eh_namespace_id, '张江高科');
 
 INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
-	VALUES((@eh_namespace_details := @eh_namespace_details + 1), @eh_namespace_id, 'community_commercial', UTC_TIMESTAMP()); 
+	VALUES((@eh_namespace_details := @eh_namespace_details + 1), @eh_namespace_id, 'community_mix', UTC_TIMESTAMP()); 
 
 INSERT INTO `eh_version_realm` VALUES ((@version_realm_id := @version_realm_id + 1), 'Android_UPark', NULL, UTC_TIMESTAMP(), @eh_namespace_id);
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
@@ -90,13 +90,13 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 	VALUES((@organization_community_request_id := @organization_community_request_id + 1), @community_id, 'organization', @organization_id, 3, 0, UTC_TIMESTAMP());
 
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
-	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316636  , 'manager', '傅晨', 0, '13535570575', 3, @eh_namespace_id);	
+	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316636  , 'manager', '傅晨', 0, '13601820627', 3, @eh_namespace_id);	
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
-	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316641 , 'manager', '方靖', 0, '13535570575', 3, @eh_namespace_id);	
+	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316641 , 'manager', '方靖', 0, '13801631605', 3, @eh_namespace_id);	
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
-	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316647 , 'manager', '陈承祖', 0, '13535570575', 3, @eh_namespace_id);	
+	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316647 , 'manager', '陈承祖', 0, '13501985965', 3, @eh_namespace_id);	
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
-	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316630 , 'manager', '陈安娜', 0, '13535570575', 3, @eh_namespace_id);	
+	VALUES((@org_member_id :=@org_member_id+1), @organization_id, 'USER', 316630 , 'manager', '陈安娜', 0, '13916591882', 3, @eh_namespace_id);	
 
 SET @organization_community_request_id = (SELECT MAX(id) FROM `eh_acl_role_assignments`); 	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
@@ -107,8 +107,11 @@ INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, tar
 	VALUES((@organization_community_request_id :=@organization_community_request_id+1), 'EhOrganizations', @organization_id, 'EhUsers', 316647 , 1001, 1, UTC_TIMESTAMP());
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES((@organization_community_request_id :=@organization_community_request_id+1), 'EhOrganizations', @organization_id, 'EhUsers',316630  , 1001, 1, UTC_TIMESTAMP());
+-- 补充acls表
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid` , `create_time` , `namespace_id` , `role_type`) SELECT (@acl_id := @acl_id + 1),`owner_type`, `owner_id`,1,10, target_id, 0,1,NOW(),0, target_type FROM `eh_acl_role_assignments` eara WHERE role_id = 1001 AND target_type = 'EhUsers' AND target_id NOT IN (SELECT role_id FROM eh_acls WHERE role_type = 'EhUsers' AND privilege_id = 10 AND owner_id = eara.owner_id);
 
-	
+ 	
 
 SET @namespace_resource_id = (SELECT MAX(id) FROM `eh_namespace_resources`) +1 ; 	
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
@@ -1112,6 +1115,14 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60000,'', 'EhNamespaces', @eh_namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60100,'', 'EhNamespaces', @eh_namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60200,'', 'EhNamespaces', @eh_namespace_id,2);
+-- 增加服务联盟
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40500,'', 'EhNamespaces', @eh_namespace_id,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40510,'', 'EhNamespaces', @eh_namespace_id,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40520,'', 'EhNamespaces', @eh_namespace_id,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40530,'', 'EhNamespaces', @eh_namespace_id,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40541,'', 'EhNamespaces', @eh_namespace_id,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40542,'', 'EhNamespaces', @eh_namespace_id,2);
+
 
 SET @module_id = (SELECT MAX(id) FROM `eh_service_module_scopes`); 
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`) 
