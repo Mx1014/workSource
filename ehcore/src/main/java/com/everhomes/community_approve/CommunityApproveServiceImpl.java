@@ -194,7 +194,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        int pageSize = cmd.getPageSize()==null?10:cmd.getPageSize();
         List<CommunityApproveVal>  cas = this.communityApproveValProvider.queryCommunityApproves(locator,
                 pageSize, new ListingQueryBuilderCallback() {
 
@@ -337,6 +337,8 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
     @Override
     public void exportCommunityApproveValWithForm(ListCommunityApproveValCommand cmd
             , HttpServletResponse httpResponse){
+        cmd.setPageAnchor(0l);
+        cmd.setPageSize(Integer.MAX_VALUE-1);
         List<ListCommunityApproveValWithFormResponse> list = this.listCommunityApproveValsWithForm(cmd);
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFCellStyle style = wb.createCellStyle();// 样式对象
