@@ -4,7 +4,7 @@ package com.everhomes.community_approve;
  * Created by zhengsiting on 2017/7/27.
  */
 public enum CommunityApproveTranEnum {
-    USER_NAME("姓名"),USER_PHONE("联系方式");
+    USER_NAME("姓名"),USER_PHONE("联系电话");
 
     private String code;
 

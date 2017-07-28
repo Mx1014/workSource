@@ -79,8 +79,11 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
         if (null!=cmd.getApproveName())
             ca.setApproveName(cmd.getApproveName());
-        if (null!=cmd.getFormOriginId())
+        if (null!=cmd.getFormOriginId()) {
             ca.setFormOriginId(cmd.getFormOriginId());
+            GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormOriginId());
+            ca.setFormVersion(form.getFormVersion());
+        }
         ca.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         this.communityApproveProvider.updateCommunityApprove(ca);
         return this.processApprove(ca);
@@ -351,10 +354,10 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         for (ListCommunityApproveValWithFormResponse response : list){
             CommunityApproveValDTO dto = response.getDto();
             List<PostApprovalFormItem> items = response.getItems();
-            if (sheets.get(dto.getApproveId()+""+dto.getFormOriginId())==null){
+            if (sheets.get(dto.getApproveId()+""+dto.getFormOriginId()+""+dto.getFormVersion())==null){
                 //新建一张sheet
                 XSSFSheet sheet = createNewSheet(wb,dto);
-                sheets.put(dto.getApproveId()+""+dto.getFormOriginId(),sheet);
+                sheets.put(dto.getApproveId()+""+dto.getFormOriginId()+""+dto.getFormVersion(),sheet);
                 int rowNum = 0;
 
                 XSSFRow row1 = sheet.createRow(rowNum++);
@@ -366,28 +369,29 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                 row1.createCell(4).setCellValue("审批名称");
                 row1.createCell(5).setCellValue("提交时间");
 
-                rows.put(dto.getApproveId()+""+dto.getFormOriginId(),1);
+                rows.put(dto.getApproveId()+""+dto.getFormOriginId()+""+dto.getFormVersion(),1);
                 int column = 6;
                 GeneralFormIdCommand cmd2 = new GeneralFormIdCommand();
                 cmd2.setFormOriginId(dto.getFormOriginId());
-                GeneralFormDTO formDTO = generalFormService.getGeneralForm(cmd2);
+                GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(dto.getFormOriginId(),dto.getFormVersion());
+                GeneralFormDTO formDTO = this.processGeneralFormDTO(form);
                 List<GeneralFormFieldDTO> formFields = formDTO.getFormFields();
                 Map<String,Integer> keyColumnMap = new HashMap<>();
                 for (GeneralFormFieldDTO fieldDTO:formFields)
                     if (!defaultFields.contains(fieldDTO.getFieldName())){
                     row1.createCell(column).setCellValue(fieldDTO.getFieldDisplayName());
-                    keyColumnMap.put(fieldDTO.getFieldName(),column);
+                    keyColumnMap.put(fieldDTO.getFieldName()+fieldDTO.getFieldType(),column);
                     column++;
                     }
-                keyColumMaps.put(dto.getApproveId()+""+dto.getFormOriginId(),keyColumnMap);
+                keyColumMaps.put(dto.getApproveId()+""+dto.getFormOriginId()+""+dto.getFormVersion(),keyColumnMap);
             }
 
             //插入数据
-            XSSFSheet sheet = sheets.get(dto.getApproveId()+""+dto.getFormOriginId());
-            Integer rowNum = rows.get(dto.getApproveId()+""+dto.getFormOriginId());
-            Map keyColumMap = keyColumMaps.get(dto.getApproveId()+""+dto.getFormOriginId());
+            XSSFSheet sheet = sheets.get(dto.getApproveId()+""+dto.getFormOriginId()+""+dto.getFormVersion());
+            Integer rowNum = rows.get(dto.getApproveId()+""+dto.getFormOriginId()+""+dto.getFormVersion());
+            Map keyColumMap = keyColumMaps.get(dto.getApproveId()+""+dto.getFormOriginId()+""+dto.getFormVersion());
             XSSFRow row = sheet.createRow(rowNum++);
-            rows.put(dto.getApproveId()+""+dto.getFormOriginId(),rowNum);
+            rows.put(dto.getApproveId()+""+dto.getFormOriginId()+""+dto.getFormVersion(),rowNum);
             row.createCell(0).setCellValue(rowNum-1);
             row.createCell(1).setCellValue(dto.getName());
             row.createCell(2).setCellValue(dto.getPhone());
@@ -397,7 +401,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             for (PostApprovalFormItem item:items){
                 if (null==keyColumMap.get(item.getFieldName()))
                     continue;
-                Integer colunm = (int)keyColumMap.get(item.getFieldName());
+                Integer colunm = (int)keyColumMap.get(item.getFieldName()+item.getFieldType());
                 switch (GeneralFormFieldType.fromCode(item.getFieldType())) {
                     case SINGLE_LINE_TEXT:
                     case NUMBER_TEXT:
@@ -428,12 +432,12 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
     private XSSFSheet createNewSheet(XSSFWorkbook wb,CommunityApproveValDTO dto){
         CommunityApprove ca = communityApproveProvider.getCommunityApproveById(dto.getApproveId());
         XSSFSheet sheet = null;
-        if (ca.getFormOriginId() == dto.getFormOriginId() ){
+        if (ca.getFormOriginId() == dto.getFormOriginId() && ca.getFormVersion()==dto.getFormVersion()){
             sheet = wb.createSheet(ca.getApproveName());
         }else{
             GeneralForm gf = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(dto.getFormOriginId()
                     ,dto.getFormVersion());
-            sheet = wb.createSheet(ca.getApproveName()+gf.getId());
+            sheet = wb.createSheet(ca.getApproveName()+gf.getFormOriginId()+"_"+gf.getFormVersion());
         }
         return sheet;
     }
@@ -455,6 +459,13 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
             list.add(response);
         }
         return list;
+    }
+
+    private GeneralFormDTO processGeneralFormDTO(GeneralForm form) {
+        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        dto.setFormFields(fieldDTOs);
+        return dto;
     }
 
     @Override
