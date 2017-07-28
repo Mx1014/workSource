@@ -12,8 +12,9 @@ import com.everhomes.discover.ItemType;
  * <li>ownerId：id</li>
  * <li>targetType: 填organization/user</li>
  * <li>targetId：对应设置目标的id比如机构比如人的id</li>
+ * <li>month：月份时间戳</li>
  * <li>punchOriganizationId：考勤组id</li> 
- * <li>daySchedulings：每一天的排班{@link PunchSchedulingDayDTO}</li> 
+ * <li>employees：每一个人的排班{@link PunchSchedulingEmployeeDTO}</li> 
  * 
  * 
  * </ul>
@@ -22,12 +23,9 @@ public class PunchSchedulingDTO {
 
 	private String ownerType;
 	private Long ownerId;
-	private String targetType;
-	private Long targetId;
-	private Long punchOriganizationId;
-	
-	@ItemType(PunchSchedulingDayDTO.class)
-	private List<PunchSchedulingDayDTO> daySchedulings;
+	private Long month;
+	private Long punchOriganizationId; 
+	private List<PunchSchedulingEmployeeDTO> employees;
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -40,41 +38,11 @@ public class PunchSchedulingDTO {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public String getTargetType() {
-		return targetType;
+	public Long getMonth() {
+		return month;
 	}
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
-	public Long getTargetId() {
-		return targetId;
-	}
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
-	}
-	public Long getRuleDate() {
-		return ruleDate;
-	}
-	public void setRuleDate(Long ruleDate) {
-		this.ruleDate = ruleDate;
-	}
-	public Long getTimeRuleId() {
-		return timeRuleId;
-	}
-	public void setTimeRuleId(Long timeRuleId) {
-		this.timeRuleId = timeRuleId;
-	}
-	public String getTimeRuleName() {
-		return timeRuleName;
-	}
-	public void setTimeRuleName(String timeRuleName) {
-		this.timeRuleName = timeRuleName;
-	}
-	public String getTimeRuleDescription() {
-		return timeRuleDescription;
-	}
-	public void setTimeRuleDescription(String timeRuleDescription) {
-		this.timeRuleDescription = timeRuleDescription;
+	public void setMonth(Long month) {
+		this.month = month;
 	}
 	public Long getPunchOriganizationId() {
 		return punchOriganizationId;
@@ -82,7 +50,12 @@ public class PunchSchedulingDTO {
 	public void setPunchOriganizationId(Long punchOriganizationId) {
 		this.punchOriganizationId = punchOriganizationId;
 	}
-	
-	
+	public List<PunchSchedulingEmployeeDTO> getEmployees() {
+		return employees;
+	}
+	public void setEmployees(List<PunchSchedulingEmployeeDTO> employees) {
+		this.employees = employees;
+	}
+	 
 	
 }

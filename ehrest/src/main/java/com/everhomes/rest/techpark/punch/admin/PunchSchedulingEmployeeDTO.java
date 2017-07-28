@@ -8,15 +8,15 @@ import com.everhomes.util.StringHelper;
  * <ul> 
  * <li>userId: userId</li>
  * <li>contactName：联系人姓名</li> 
- * <li>schedulings: 排班列表{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO}</li> 
+ * <li>daySchedulings: 排班列表字符串比如["早班","","晚班"]代表1号早班,2号不上班,3号晚班</li> 
  * </ul>
  */
 public class PunchSchedulingEmployeeDTO {
 	private Long userId;
 	private String contactName;
 
-	@ItemType(PunchSchedulingDTO.class)
-	private List<PunchSchedulingDTO> schedulings;
+	@ItemType(String.class)
+	private List<String> daySchedulings;
 
 	@Override
 	public String toString() {
