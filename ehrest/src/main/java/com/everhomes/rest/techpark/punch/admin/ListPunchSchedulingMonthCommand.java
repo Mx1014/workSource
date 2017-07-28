@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId：id</li>
  * <li>targetType: 填organization/user</li>
  * <li>targetId：对应设置目标的id比如机构比如人的id</li>
+ * <li>punchOriganizationId：打卡考勤组id</li>
  * <li>queryTime: 查询时间 数字时间戳</li>
  * </ul>
  */
@@ -21,8 +22,8 @@ public class ListPunchSchedulingMonthCommand {
 	@NotNull
 	private Long ownerId;
 	private String targetType;
-	private Long targetId;
-
+	private Long targetId; 
+	private Long punchOriganizationId;
 	private Long queryTime; 
 
 	@Override
@@ -68,6 +69,14 @@ public class ListPunchSchedulingMonthCommand {
 
 	public void setQueryTime(Long queryTime) {
 		this.queryTime = queryTime;
+	}
+
+	public Long getPunchOriganizationId() {
+		return punchOriganizationId;
+	}
+
+	public void setPunchOriganizationId(Long punchOriganizationId) {
+		this.punchOriganizationId = punchOriganizationId;
 	}
 
 }

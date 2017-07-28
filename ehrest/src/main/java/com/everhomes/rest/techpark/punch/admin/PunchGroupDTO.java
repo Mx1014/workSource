@@ -21,8 +21,10 @@ import com.everhomes.util.StringHelper;
  * <li>wifis: wifi规则{@link com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO}</li>
  * <li>timeRule: 上班时间{@link com.everhomes.rest.techpark.punch.PunchTimeRuleDTO}</li>
  * <li>specialDay: 特殊日期列表 {@link com.everhomes.rest.techpark.punch.admin.PunchSpecialDayDTO}</li>
- * <li>employees: 排班的员工列表{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO}</li>
+ * <li>schedulings: 排班列表{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO}</li>
  * <li>chinaHolidayFlag: 使用中国法定假日falg  0-否 1-是 </li>
+ * <li>employeeCount: 总人数 </li>
+ * <li>unSchedulingCount: 未排班人数</li>
  * <li>operatorUid: 最后操作人id </li>
  * <li>operatorName: 最后操作人姓名 </li>
  * <li>operateTime: 最后操作时间 </li>
@@ -50,18 +52,21 @@ public class PunchGroupDTO {
 
 	@ItemType(PunchWiFiDTO.class)
 	private  List<PunchWiFiDTO>  wifis;
-	
-	private PunchTimeRuleDTO timeRule;
+
+	@ItemType(PunchTimeRuleDTO.class)
+	private  List<PunchTimeRuleDTO> timeRules;
 	  
 	@ItemType(PunchSpecialDayDTO.class)
 	private List<PunchSpecialDayDTO> specialDay;
 	
 
-	@ItemType(PunchSchedulingEmployeeDTO.class)
-	private List<PunchSchedulingEmployeeDTO> employees;
+	@ItemType(PunchSchedulingDTO.class)
+	private List<PunchSchedulingDTO> schedulings;
 	
 	private Byte chinaHolidayFlag;
 	
+	private Integer employeeCount;
+	private Integer unSchedulingCount;
     private Long operatorUid;
 
     private String operatorName; 
@@ -128,14 +133,6 @@ public class PunchGroupDTO {
 	public void setWifis(List<PunchWiFiDTO> wifis) {
 		this.wifis = wifis;
 	}
-
-	public PunchTimeRuleDTO getTimeRule() {
-		return timeRule;
-	}
-
-	public void setTimeRule(PunchTimeRuleDTO timeRule) {
-		this.timeRule = timeRule;
-	}
  
 
 	public Byte getChinaHolidayFlag() {
@@ -161,14 +158,18 @@ public class PunchGroupDTO {
 
 	public void setPunchOriganizationId(Long punchOriganizationId) {
 		this.punchOriganizationId = punchOriganizationId;
+	} 
+
+	public List<PunchSchedulingDTO> getSchedulings() {
+		return schedulings;
 	}
 
-	public List<PunchSchedulingEmployeeDTO> getEmployees() {
-		return employees;
+	public void setSchedulings(List<PunchSchedulingDTO> schedulings) {
+		this.schedulings = schedulings;
 	}
 
-	public void setEmployees(List<PunchSchedulingEmployeeDTO> employees) {
-		this.employees = employees;
+	public List<PunchSpecialDayDTO> getSpecialDay() {
+		return specialDay;
 	}
 
 	public Long getOperatorUid() {
@@ -197,6 +198,30 @@ public class PunchGroupDTO {
 
 	public void setSpecialDay(List<PunchSpecialDayDTO> specialDay) {
 		this.specialDay = specialDay;
+	}
+
+	public Integer getEmployeeCount() {
+		return employeeCount;
+	}
+
+	public void setEmployeeCount(Integer employeeCount) {
+		this.employeeCount = employeeCount;
+	}
+
+	public Integer getUnSchedulingCount() {
+		return unSchedulingCount;
+	}
+
+	public void setUnSchedulingCount(Integer unSchedulingCount) {
+		this.unSchedulingCount = unSchedulingCount;
+	}
+
+	public List<PunchTimeRuleDTO> getTimeRules() {
+		return timeRules;
+	}
+
+	public void setTimeRules(List<PunchTimeRuleDTO> timeRules) {
+		this.timeRules = timeRules;
 	}
 
  

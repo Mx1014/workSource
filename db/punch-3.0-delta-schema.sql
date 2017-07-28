@@ -11,6 +11,7 @@ ALTER TABLE `eh_punch_time_rules` ADD COLUMN `begin_punch_time` BIGINT  COMMENT 
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `end_punch_time` BIGINT  COMMENT '下班多久之后可以打卡';
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `punch_organization_id` BIGINT  COMMENT 'fk:eh_punch_workday_rules id';
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `punch_rule_id` BIGINT DEFAULT NULL COMMENT 'eh_punch_rules id  ';
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `open_weekday` VARCHAR(7) DEFAULT NULL COMMENT '7位二进制，0000000每一位表示星期7123456';
 
 -- 固定时间制:特殊日期
 CREATE TABLE `eh_punch_special_days` (
@@ -40,7 +41,6 @@ CREATE TABLE `eh_punch_time_intervals` (
   `time_rule_id` BIGINT DEFAULT NULL COMMENT 'eh_punch_time_rules id  ', 
   `arrive_time_long` BIGINT  COMMENT ' arrive',
   `leave_time_long` BIGINT  COMMENT 'leave',
-  `open_weekday` VARCHAR(7) DEFAULT NULL COMMENT '7位二进制，0000000每一位表示星期7123456',
   `description` TEXT ,
   `creator_uid` BIGINT ,
   `create_time` DATETIME ,
