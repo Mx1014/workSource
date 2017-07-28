@@ -6791,7 +6791,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != member) {
                 organizationProvider.updateOrganizationMember(member);
             }
+            
+            // 同步userOrganization
+            if(member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){
+                this.createOrUpdateUserOrganization(member);
+            }
             return null;
+
         });
         userSearcher.feedDoc(member);
         if (LOGGER.isInfoEnabled()) {
@@ -12455,7 +12461,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         userOrganizations.setOrganizationId(organizationMember.getOrganizationId());
         userOrganizations.setGroupPath(organizationMember.getGroupPath());
         userOrganizations.setGroupType(organizationMember.getGroupType());
-        userOrganizations.setStatus(UserOrganizationStatus.ACTIVE.getCode());
+        userOrganizations.setStatus(organizationMember.getStatus());
         userOrganizations.setNamespaceId(organizationMember.getNamespaceId());
         userOrganizations.setVisibleFlag(organizationMember.getVisibleFlag());
     }
