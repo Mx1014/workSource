@@ -72,6 +72,25 @@ public class PunchController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /techpark/punch/getPunchType</b>
+	 * <p>
+	 * 获取现在打卡类型--上班或者下班
+	 * </p>
+	 */
+	@RequestMapping("getPunchType")
+	@RestReturn(value = GetPunchTypeResponse.class)
+	public RestResponse getPunchType(@Valid GetPunchTypeCommand cmd) {
+		// 打卡返回打卡时间
+		GetPunchTypeResponse resp = punchService.getPunchType(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	
+
 
 	/**
 	 * <b>URL: /techpark/punch/checkPunchAdmin</b>

@@ -675,7 +675,7 @@ public class PunchAdminController extends ControllerBase {
 	 * 列出打卡规则(考勤组)
 	 * </p>
 	 */
-	@RequestMapping("addPunchGroup")
+	@RequestMapping("listPunchGroups")
 	@RestReturn(value = ListPunchGroupsResponse.class)
 	public RestResponse listPunchGroups(@Valid ListPunchGroupsCommand cmd) {
 		ListPunchGroupsResponse commandResponse = punchService.listPunchGroups(cmd);

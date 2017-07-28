@@ -234,4 +234,6 @@ public interface PunchService {
 
 	public void deletePunchGroup(DeleteCommonCommand cmd);
 
+	public GetPunchTypeResponse getPunchType(GetPunchTypeCommand cmd);
+
 }

@@ -7,7 +7,8 @@ ALTER TABLE `eh_punch_day_logs` ADD COLUMN status_list VARCHAR(20) COMMENT '多�
 
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `rule_type` TINYINT DEFAULT '0' COMMENT '0- 排班制 ; 1- 固定班次'; 
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `flex_time_long` BIGINT  COMMENT '弹性时间 ';
-ALTER TABLE `eh_punch_time_rules` ADD COLUMN `punch_limit_time` BIGINT  COMMENT '多久之前可以打卡';
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `begin_punch_time` BIGINT  COMMENT '上班多久之前可以打卡';
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `end_punch_time` BIGINT  COMMENT '下班多久之后可以打卡';
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `punch_organization_id` BIGINT  COMMENT 'fk:eh_punch_workday_rules id';
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `punch_rule_id` BIGINT DEFAULT NULL COMMENT 'eh_punch_rules id  ';
 
