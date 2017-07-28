@@ -634,13 +634,13 @@ public class SalaryServiceImpl implements SalaryService {
         List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
 
         //  获取对应批次的项目字段
-        List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+        List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
         //  获取个人的项目字段
-        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(), cmd.getOwnerType(), cmd.getOwnerId());
+        List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(), cmd.getOwnerType(), cmd.getOwnerId());
 
         //  若没有关联批次则直接返回空
-        if (!salaryGroupEntities.isEmpty()) {
-            salaryGroupEntities.stream().forEach(r -> {
+        if (!entities.isEmpty()) {
+            entities.stream().forEach(r -> {
                 SalaryEmployeeOriginValDTO dto = new SalaryEmployeeOriginValDTO();
                 dto.setSalaryGroupId(r.getGroupId());
                 dto.setUserId(cmd.getUserId());
@@ -660,13 +660,13 @@ public class SalaryServiceImpl implements SalaryService {
                     dto.setSalaryValue(processSalaryValue(r.getOriginEntityId(), cmd.getDetailId()));
                     dto.setId(r.getId());
                 } else {
-                    if (!salaryEmployeeOriginVals.isEmpty()) {
-                        for (int i = 0; i < salaryEmployeeOriginVals.size(); i++) {
+                    if (originVals != null) {
+                        for (int i = 0; i < originVals.size(); i++) {
                             //  若是数值类则直接赋值，若是公式则依然返回公式
-                            if (r.getName().equals(salaryEmployeeOriginVals.get(i).getGroupEntityName())
+                            if (r.getName().equals(originVals.get(i).getGroupEntityName())
                                     && r.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
-                                dto.setSalaryValue(salaryEmployeeOriginVals.get(i).getSalaryValue());
-                                dto.setId(salaryEmployeeOriginVals.get(i).getId());
+                                dto.setSalaryValue(originVals.get(i).getSalaryValue());
+                                dto.setId(originVals.get(i).getId());
                                 break;
                             }
                         }
