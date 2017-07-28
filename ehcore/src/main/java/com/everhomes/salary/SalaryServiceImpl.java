@@ -662,7 +662,9 @@ public class SalaryServiceImpl implements SalaryService {
                 } else {
                     if (!salaryEmployeeOriginVals.isEmpty()) {
                         for (int i = 0; i < salaryEmployeeOriginVals.size(); i++) {
-                            if (r.getName().equals(salaryEmployeeOriginVals.get(i).getGroupEntityName())) {
+                            //  若是数值类则直接赋值，若是公式则依然返回公式
+                            if (r.getName().equals(salaryEmployeeOriginVals.get(i).getGroupEntityName())
+                                    && r.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
                                 dto.setSalaryValue(salaryEmployeeOriginVals.get(i).getSalaryValue());
                                 dto.setId(salaryEmployeeOriginVals.get(i).getId());
                                 break;
