@@ -183,5 +183,9 @@ VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privileges_id,
 SET @locale_id = (SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100001','zh_CN','没有文件');
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100002','zh_CN','姓名为空');
-INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100003','zh_CN','手机号码有误');
- 
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100003','zh_CN','手机号码有误或不属于本薪酬组范围');
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100004','zh_CN','没有实发工资');
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100005','zh_CN','人员不属于本次核算范围');
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100006','zh_CN','需完整填写表格');
+
+

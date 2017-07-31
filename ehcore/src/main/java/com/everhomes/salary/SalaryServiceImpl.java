@@ -998,6 +998,17 @@ public class SalaryServiceImpl implements SalaryService {
 
         ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
 
+        //  导入时各字段不能为空
+        for(int i=2; i<data.getSalaryEmployeeVal().size(); i++){
+            if(StringUtils.isEmpty(data.getSalaryEmployeeVal().get(i))){
+                LOGGER.warn("Salary entitiy is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Salary entitiy  is null");
+                log.setCode(SalaryServiceErrorCode.ERROR_SALARY_ENTITY_IS_EMPTY);
+                return log;
+            }
+        }
+
         //  get(0)是姓名
         if(StringUtils.isEmpty(data.getSalaryEmployeeVal().get(0))){
             LOGGER.warn("Organization member contactName is null. data = {}", data);
