@@ -1471,8 +1471,8 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_COMMUNITY_APPROVE.ID.max()).from(Tables.EH_COMMUNITY_APPROVE).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhCommunityApproveVals.class, Tables.EH_COMMUNITY_APPROVE_VALS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_COMMUNITY_APPROVE_VALS.ID.max()).from(Tables.EH_COMMUNITY_APPROVE_VALS).fetchOne().value1();
+        syncTableSequence(null, EhCommunityApproveRequests.class, Tables.EH_COMMUNITY_APPROVE_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_COMMUNITY_APPROVE_REQUESTS.ID.max()).from(Tables.EH_COMMUNITY_APPROVE_REQUESTS).fetchOne().value1();
         });
         syncTableSequence(null, EhSmsLogs.class, Tables.EH_USER_IDENTIFIER_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_USER_IDENTIFIER_LOGS.ID.max()).from(Tables.EH_USER_IDENTIFIER_LOGS).fetchOne().value1();

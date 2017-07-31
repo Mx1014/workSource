@@ -2,9 +2,6 @@ package com.everhomes.community_approve;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.community_approve.CommunityApprove;
-import com.everhomes.community_approve.CommunityApproveProvider;
-import com.everhomes.community_approve.CommunityApproveService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
@@ -23,11 +20,9 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.yellowPage.ServiceAllianceRequestInfoSearcherImpl;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -110,17 +105,17 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         return result;
     }
 
-    private CommunityApproveValDTO processApproveVal(CommunityApproveVal r){
+    private CommunityApproveValDTO processApproveVal(CommunityApproveRequests r){
         CommunityApproveValDTO result = ConvertHelper.convert(r,CommunityApproveValDTO.class);
         //name
-        if (r.getNameValue()!=null)
-            result.setName(JSON.parseObject(r.getNameValue(),PostApprovalFormTextValue.class).getText());
+        if (r.getRequestorName()!=null)
+            result.setName(JSON.parseObject(r.getRequestorName(),PostApprovalFormTextValue.class).getText());
         //phone
-        if (r.getPhoneValue()!=null)
-            result.setPhone(JSON.parseObject(r.getPhoneValue(),PostApprovalFormTextValue.class).getText());
+        if (r.getRequestorPhone()!=null)
+            result.setPhone(JSON.parseObject(r.getRequestorPhone(),PostApprovalFormTextValue.class).getText());
         //company
-        if (r.getCompanyValue()!=null)
-            result.setCompany(JSON.parseObject(r.getCompanyValue(),PostApprovalFormTextValue.class).getText());
+        if (r.getRequestorCompany()!=null)
+            result.setCompany(JSON.parseObject(r.getRequestorCompany(),PostApprovalFormTextValue.class).getText());
         return  result;
     }
     @Override
@@ -195,7 +190,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         int pageSize = cmd.getPageSize()==null?10:cmd.getPageSize();
-        List<CommunityApproveVal>  cas = this.communityApproveValProvider.queryCommunityApproves(locator,
+        List<CommunityApproveRequests>  cas = this.communityApproveValProvider.queryCommunityApproves(locator,
                 pageSize, new ListingQueryBuilderCallback() {
 
                     @Override
@@ -208,8 +203,8 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                             communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
                             Condition conditionOR = null;
                             for (OrganizationCommunity organizationCommunity : communityList) {
-                                Condition condition = Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
-                                        .and(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+                                Condition condition = Tables.EH_COMMUNITY_APPROVE_REQUESTS.OWNER_ID.eq(organizationCommunity.getCommunityId())
+                                        .and(Tables.EH_COMMUNITY_APPROVE_REQUESTS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
                                 if(conditionOR==null){
                                     conditionOR = condition;
                                 }else{
@@ -219,21 +214,21 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                             if(conditionOR!=null)
                                 query.addConditions(conditionOR);
                         }else {
-                            query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_ID.eq(cmd.getOwnerId()));
-                            query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.OWNER_TYPE.eq(cmd.getOwnerType()));
+                            query.addConditions(Tables.EH_COMMUNITY_APPROVE_REQUESTS.OWNER_ID.eq(cmd.getOwnerId()));
+                            query.addConditions(Tables.EH_COMMUNITY_APPROVE_REQUESTS.OWNER_TYPE.eq(cmd.getOwnerType()));
                         }
 
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.MODULE_ID.eq(cmd.getModuleId()));
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.MODULE_TYPE.eq(cmd.getModuleType()));
+                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_REQUESTS.MODULE_ID.eq(cmd.getModuleId()));
+                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_REQUESTS.MODULE_TYPE.eq(cmd.getModuleType()));
 
                         if (null!=cmd.getApproveName())
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.APPROVE_NAME.eq(cmd.getApproveName()));
+                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_REQUESTS.APPROVE_NAME.eq(cmd.getApproveName()));
                         if (null!=cmd.getKeywords())
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.NAME_VALUE.like("%"+cmd.getKeywords()+"%").or(
-                                Tables.EH_COMMUNITY_APPROVE_VALS.PHONE_VALUE.like("%"+cmd.getKeywords()+"%")
+                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_REQUESTS.REQUESTOR_NAME.like("%"+cmd.getKeywords()+"%").or(
+                                Tables.EH_COMMUNITY_APPROVE_REQUESTS.REQUESTOR_PHONE.like("%"+cmd.getKeywords()+"%")
                         ));
                         if (null!=cmd.getTimeStart() && null!=cmd.getTimeEnd())
-                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_VALS.CREATE_TIME.between(
+                        query.addConditions(Tables.EH_COMMUNITY_APPROVE_REQUESTS.CREATE_TIME.between(
                                 new Timestamp(cmd.getTimeStart()),new Timestamp(cmd.getTimeEnd())));
 
                         return query;
@@ -261,19 +256,19 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         }
 
 
-        CommunityApproveVal obj = ConvertHelper.convert(ca, CommunityApproveVal.class);
+        CommunityApproveRequests obj = ConvertHelper.convert(ca, CommunityApproveRequests.class);
         obj.setApproveId(ca.getId());
         obj.setFormVersion(form.getFormVersion());
         //取出姓名 手机号 公司信息
         for (PostApprovalFormItem val : cmd.getValues()) {
             if (GeneralFormDataSourceType.USER_NAME.getCode().equals(val.getFieldName()))
-                obj.setNameValue(val.getFieldValue());
+                obj.setRequestorName(val.getFieldValue());
 
             if (GeneralFormDataSourceType.USER_PHONE.getCode().equals(val.getFieldName()))
-                obj.setPhoneValue(val.getFieldValue());
+                obj.setRequestorPhone(val.getFieldValue());
 
             if (GeneralFormDataSourceType.USER_COMPANY.getCode().equals(val.getFieldName()))
-                obj.setCompanyValue(val.getFieldValue());
+                obj.setRequestorCompany(val.getFieldValue());
         }
 //工作流
         Flow flow = flowService.getEnabledFlow(ca.getNamespaceId(), ca.getModuleId(),
@@ -286,11 +281,11 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         cmd21.setProjectId(ca.getProjectId());
         cmd21.setProjectType(ca.getProjectType());
         String content = "";
-        if (obj.getNameValue()!=null)
-            content += CommunityApproveTranEnum.USER_NAME.getCode()+":"+JSON.parseObject(obj.getNameValue(),
+        if (obj.getRequestorName()!=null)
+            content += CommunityApproveTranEnum.USER_NAME.getCode()+":"+JSON.parseObject(obj.getRequestorName(),
                     PostApprovalFormTextValue.class).getText()+"\n";
-        if (obj.getPhoneValue()!=null)
-            content += CommunityApproveTranEnum.USER_PHONE.getCode()+":"+JSON.parseObject(obj.getPhoneValue(),
+        if (obj.getRequestorPhone()!=null)
+            content += CommunityApproveTranEnum.USER_PHONE.getCode()+":"+JSON.parseObject(obj.getRequestorPhone(),
                     PostApprovalFormTextValue.class).getText()+"\n";
         cmd21.setContent(content);
         cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
