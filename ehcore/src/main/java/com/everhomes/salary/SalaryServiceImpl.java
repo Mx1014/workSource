@@ -932,6 +932,9 @@ public class SalaryServiceImpl implements SalaryService {
             for (int j = 0; j < salaryGroupEntities.size(); j++) {
                 RowResult r = (RowResult) list.get(i);
                 String val = r.getCells().get(GetExcelLetter(j + 1));
+                //  当为空时则设置一个空字符串，这样导出错误原因才能正确显示
+                if(val == null)
+                    val = "";
                 vals.add(val);
             }
             data.setSalaryEmployeeVal(vals);
