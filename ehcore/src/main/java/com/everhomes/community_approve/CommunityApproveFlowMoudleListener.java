@@ -21,6 +21,7 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,7 +178,8 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
         for (GeneralFormFieldDTO dto:fieldDTOs) {
             boolean flag = false;
             for (GeneralFormVal val : vals) {
-                if (dto.getFieldName().equals(val.getFieldName()) && dto.getFieldType().equals(val.getFieldType()))
+                if (dto.getFieldName().equals(val.getFieldName()) && dto.getFieldType().equals(val.getFieldType())
+                        && !StringUtils.isEmpty(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText()))
                     try {
                         flag = true;
                         FlowCaseEntity e = new FlowCaseEntity();
@@ -189,6 +191,7 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
                         if (!dto.getVisibleType().equals(GeneralFormDataVisibleType.HIDDEN.getCode())) {
                             e.setKey(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
                             switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
+
                                 case SINGLE_LINE_TEXT:
                                 case NUMBER_TEXT:
                                 case DATE:

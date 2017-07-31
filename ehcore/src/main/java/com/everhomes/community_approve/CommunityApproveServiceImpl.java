@@ -28,6 +28,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.yellowPage.ServiceAllianceRequestInfoSearcherImpl;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -411,6 +412,13 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                             PostApprovalFormTextValue.class).getText());
                 }
 
+            }
+
+            for (int i=0 ;i<keyColumMap.size();i++) {
+                if (row.getCell(i) == null )
+                    row.createCell(i).setCellValue("无");
+                if (StringUtils.isEmpty(row.getCell(i).getStringCellValue()))
+                    row.getCell(i).setCellValue("无");
             }
 
         }
