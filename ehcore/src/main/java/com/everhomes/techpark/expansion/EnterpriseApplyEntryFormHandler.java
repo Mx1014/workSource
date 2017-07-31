@@ -40,7 +40,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         Long requestFormId = null;
         if (null == request) {
             //查询初始默认数据
-            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
+            BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                     GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
             GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
@@ -133,7 +133,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             List<GeneralFormFieldDTO> temp = dto.getFormFields();
 
             //查询初始默认数据
-            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
+            BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                     GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
             GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
@@ -143,7 +143,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             dto.setFormFields(fieldDTOs);
         } else {
             //查询初始默认数据
-            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
+            BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                     GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
             GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
