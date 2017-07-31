@@ -1,10 +1,21 @@
 set @namespaceId = 23456; -- 国贸namespaceId-待定，园区等，待定
 set @community_id = 23456789; -- 待定
 -- 国贸EMS快递公司 -- 图标待定 --url等，待定 -- TODO
-INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `order_url`, `logistics_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('2', @namespaceId, 'EhNamespaces', @namespaceId, '0', 'EMS', 'cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw', '国贸项目，EMS快递公司', 'http://211.156.193.124/api-test-print/getaway','http://211.156.193.140:8000/cotrackapi/api/track/mail/{ mail_num }', 'ff3edb9e3ccd5329128e00e69b08c452', '1c70d09c96761e04f8f1c6d36e3cd007', 'e5751eb89b6760ba146e786fc2926367', '2', '0', NOW(), NOW(), '0');
+set @guo_mao_ems_logo = 'cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw';
+set @guo_mao_ems_order_url = 'http://211.156.193.124/api-test-print/getaway';
+set @guo_mao_ems_logistics_url = 'http://211.156.193.140:8000/cotrackapi/api/track/mail/{ mail_num }';
+set @guo_mao_ems_app_key = 'ff3edb9e3ccd5329128e00e69b08c452';
+set @guo_mao_ems_app_secret = '1c70d09c96761e04f8f1c6d36e3cd007';
+set @guo_mao_ems_authorization = 'e5751eb89b6760ba146e786fc2926367';
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `order_url`, `logistics_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('2', @namespaceId, 'EhNamespaces', @namespaceId, '0', 'EMS', @guo_mao_ems_logo, '国贸项目，EMS快递公司', @guo_mao_ems_order_url,@guo_mao_ems_logistics_url, @guo_mao_ems_app_key, @guo_mao_ems_app_secret, @guo_mao_ems_authorization, '2', '0', NOW(), NOW(), '0');
 INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `order_url`, `logistics_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('10003', @namespaceId, 'community', @community_id, '2', 'EMS', '', '国贸项目，EMS快递公司', NULL,NULL, NULL, NULL, NULL, '2', '0', NOW(), NOW(), '0');
 -- 国贸中国邮政快递公司
-INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `order_url`, `logistics_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('3', @namespaceId, 'EhNamespaces', @namespaceId, '0', '中国邮政', 'cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw', '国贸项目，中国邮政快递公司', 'http://222.222.2.155:8001','http://211.156.198.97/zdxtJkServer/zhddws/MailTtService_Gn?wsdl', '123', 'FC480127D90D26DE382506EE5D409F46', NULL, '2', '0', NOW(), NOW(), '0');
+set @guo_mao_chinapost_logo = 'cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw';
+set @guo_mao_chinapost_order_url = 'http://222.222.2.155:8001';
+set @guo_mao_chinapost_logistics_url = 'http://211.156.198.97/zdxtJkServer/zhddws/MailTtService_Gn?wsdl';
+set @guo_mao_chinapost_app_key = '123';
+set @guo_mao_chinapost_app_secret = 'FC480127D90D26DE382506EE5D409F46';
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `order_url`, `logistics_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('3', @namespaceId, 'EhNamespaces', @namespaceId, '0', '中国邮政', @guo_mao_chinapost_logo, '国贸项目，中国邮政快递公司', @guo_mao_chinapost_order_url,@guo_mao_chinapost_logistics_url, @guo_mao_chinapost_app_key, @guo_mao_chinapost_app_secret, NULL, '2', '0', NOW(), NOW(), '0');
 INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `order_url`, `logistics_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('10004', @namespaceId, 'community', @community_id, '3', '中国邮政', '', '国贸项目，中国邮政快递公司', NULL,NULL, NULL, NULL, NULL, '2', '0', NOW(), NOW(), '0');
 -- 华润的EMS的namespace改成 华润namespaceid 999985
 UPDATE `eh_express_companies` SET `namespace_id`=999985, `owner_type`='EhNamespaces',`owner_id`=999985 WHERE `id`= 1;
@@ -32,3 +43,7 @@ INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `de
 -- appkey mapping namespace
 set @eh_app_namespace_mappings_id = (select MAX(id) FROM eh_app_namespace_mappings);
 INSERT INTO `eh_app_namespace_mappings` (`id`, `namespace_id`, `app_key`, `community_id`) VALUES ((@eh_app_namespace_mappings_id:=@eh_app_namespace_mappings_id+1), @namespace_id, @appKey, '1');
+
+-- 菜单修改 by dengs 2017.07.31
+UPDATE eh_web_menus SET  `name` = '参数设置' where id = 40710 AND `name` = '快递员管理';
+UPDATE eh_web_menus SET  `name` = '订单管理' where id = 40720 AND `name` = '订单记录';
