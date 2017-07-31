@@ -30,7 +30,7 @@ public class UpdateRolePrivilegesCommand {
 	private String description;
 
 	@ItemType(RolePrivilege.class)
-	private List<RolePrivilege> RolePrivileges;
+	private List<RolePrivilege> rolePrivileges;
 
 	private Byte allFlag;
 
@@ -76,11 +76,11 @@ public class UpdateRolePrivilegesCommand {
 	}
 
 	public List<RolePrivilege> getRolePrivileges() {
-		return RolePrivileges;
+		return rolePrivileges;
 	}
 
 	public void setRolePrivileges(List<RolePrivilege> rolePrivileges) {
-		RolePrivileges = rolePrivileges;
+		this.rolePrivileges = rolePrivileges;
 	}
 
 	public Byte getAllFlag() {

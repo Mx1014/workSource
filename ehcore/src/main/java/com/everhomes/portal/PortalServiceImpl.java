@@ -856,15 +856,29 @@ public class PortalServiceImpl implements PortalService {
 
 	@Override
 	public void deletePortalItemCategory(DeletePortalItemCategoryCommand cmd) {
+		User user = UserContext.current().getUser();
 		PortalItemCategory portalItemCategory = checkPortalItemCategory(cmd.getId());
-		portalItemCategory.setOperatorUid(UserContext.current().getUser().getId());
+		checkPortalItemCategory(cmd.getMoveItemCategoryId());
+		portalItemCategory.setOperatorUid(user.getId());
 		portalItemCategory.setStatus(PortalItemCategoryStatus.INACTIVE.getCode());
+
 		this.dbProvider.execute((status) -> {
+			List<PortalItem> portalItems = portalItemProvider.listPortalItemByCategoryId(portalItemCategory.getId());
+			List<PortalItemReorder> itemReorders = new ArrayList<>();
+			for (PortalItem portalItem: portalItems) {
+				PortalItemReorder reorder = new PortalItemReorder();
+				reorder.setItemId(portalItem.getId());
+				itemReorders.add(reorder);
+			}
+			PortalItemCategoryRank rank = new PortalItemCategoryRank();
+			rank.setItemCategoryId(cmd.getMoveItemCategoryId());
+			rank.setItems(itemReorders);
+			//把要删除的分类移动到对应的分类
+			setPortalItemCategory(rank, user);
 			portalItemCategoryProvider.updatePortalItemCategory(portalItemCategory);
 			portalContentScopeProvider.deletePortalContentScopes(EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId());
 			return null;
 		});
-
 	}
 
 	private PortalItemCategoryDTO processPortalItemCategoryDTO(PortalItemCategory portalItemCategory){
@@ -964,25 +978,31 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		this.dbProvider.execute((status) -> {
 			for (PortalItemCategoryRank portalItemCategoryRank : cmd.getRanks()) {
-				PortalItemCategory portalItemCategory = checkPortalItemCategory(portalItemCategoryRank.getItemCategoryId());
-				if(null != portalItemCategoryRank.getItems() && portalItemCategoryRank.getItems().size() > 0){
-					for (PortalItemReorder item: portalItemCategoryRank.getItems()) {
-						PortalItem portalItem = checkPortalItem(item.getItemId());
-						portalItem.setOperatorUid(user.getId());
-						portalItem.setItemCategoryId(portalItemCategory.getId());
-						if(null != ItemDisplayFlag.fromCode(item.getDisplayFlag()))
-							portalItem.setDisplayFlag(item.getDisplayFlag());
-						portalItem.setMoreOrder(item.getMoreOrder());
-						if(null != portalItem.getDefaultOrder())
-							portalItem.setDefaultOrder(item.getDefaultOrder());
-						portalItemProvider.updatePortalItem(portalItem);
-					}
-				}
+				setPortalItemCategory(portalItemCategoryRank, user);
 			}
 			return null;
 		});
 
 	}
+
+	private void setPortalItemCategory(PortalItemCategoryRank rank, User user){
+		PortalItemCategory portalItemCategory = checkPortalItemCategory(rank.getItemCategoryId());
+		if(null != rank.getItems() && rank.getItems().size() > 0){
+			for (PortalItemReorder item: rank.getItems()) {
+				PortalItem portalItem = checkPortalItem(item.getItemId());
+				portalItem.setOperatorUid(user.getId());
+				portalItem.setItemCategoryId(portalItemCategory.getId());
+				if(null != ItemDisplayFlag.fromCode(item.getDisplayFlag()))
+					portalItem.setDisplayFlag(item.getDisplayFlag());
+				if(null != item.getMoreOrder())
+					portalItem.setMoreOrder(item.getMoreOrder());
+				if(null != portalItem.getDefaultOrder())
+					portalItem.setDefaultOrder(item.getDefaultOrder());
+				portalItemProvider.updatePortalItem(portalItem);
+			}
+		}
+	}
+
 
 	@Override
 	public PortalItemGroupDTO getPortalItemGroupById(GetPortalItemGroupByIdCommand cmd) {

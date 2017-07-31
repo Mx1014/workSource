@@ -741,7 +741,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     @Override
-    private List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {
+    public List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {
         List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
 
         if(namespaceId != Namespace.DEFAULT_NAMESPACE){

@@ -390,6 +390,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}).collect(Collectors.toList());
 	}
 
+	@Override
+	public List<RolePrivilege> getPrivilegeByRoleId(ListPrivilegesByRoleIdCommand cmd){
+		checkRole(cmd.getRoleId());
+		return getPrivilegeByRoleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getRoleId());
+	}
 
 
 	private List<RolePrivilege> getPrivilegeByRoleId(String ownerType, Long ownerId, Long roleId){
@@ -409,14 +414,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		return rolePrivileges;
 	}
-
-	private void a(String ownerType, Long ownerId, Long roleId){
-		List<RolePrivilege> rolePrivileges = getPrivilegeByRoleId(ownerType, ownerId, roleId);
-		for (RolePrivilege rolePrivilege: rolePrivileges) {
-
-		}
-	}
-
 
 	//added by janson
 	@Override

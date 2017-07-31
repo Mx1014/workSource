@@ -69,7 +69,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Autowired 
 	private SequenceProvider sequenceProvider;
 
-    @Override
+	@Override
     public void createOrganization(Organization organization) {
         // eh_organizations表是global表，不能使用key table表的方式来获取id  modify by lqs 20160722
         // long id = shardingProvider.allocShardableContentId(EhOrganizations.class).second();
@@ -298,14 +298,28 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String keywords, String organizationType, CrossShardListingLocator locator, Integer pageSize) {
+		return listEnterpriseByNamespaceIds(namespaceId, organizationType, null, keywords, locator, pageSize);
+	}
+
+	@Override
 	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
 														   Byte setAdminFlag, CrossShardListingLocator locator, int pageSize) {
+		return listEnterpriseByNamespaceIds(namespaceId, organizationType, setAdminFlag, locator, pageSize);
+	}
+
+	@Override
+	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
+														   Byte setAdminFlag, String keywords, CrossShardListingLocator locator, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<Organization> result  = new ArrayList<Organization>();
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 		if(null != namespaceId){
 			query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		}
+		if(!StringUtils.isEmpty(keywords)){
+			query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keywords + "%"));
 		}
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
