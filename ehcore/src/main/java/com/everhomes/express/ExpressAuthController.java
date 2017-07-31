@@ -89,6 +89,7 @@ public class ExpressAuthController {// extends ControllerBase
         		vaildParams(params, namespaceId);
         	}catch(Exception e){
         		 response.sendRedirect("");
+        		 return ;
         	}
         	//验证通过了，那么如果没有注册，则注册
         	 processUserInfo(namespaceId, params, request, response);
@@ -241,13 +242,13 @@ public class ExpressAuthController {// extends ControllerBase
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		 byte[] bytes = md.digest((params.get("timestamp")+params.get("timestamp")+"k9+3iUUSlUah1Uggv5ZKbTEktcIuvs7834ZThJS/CmA4eVBR2msOBak9uvut1Io0gZ9tdFJ0LpJ9ELfes8XXZw==").getBytes());
+		 byte[] bytes = md.digest((params.get("timestamp")+params.get("mobile")+"k9+3iUUSlUah1Uggv5ZKbTEktcIuvs7834ZThJS/CmA4eVBR2msOBak9uvut1Io0gZ9tdFJ0LpJ9ELfes8XXZw==").getBytes());
 		 params.put("checksum",Hex.encodeHexString(bytes));
 		 StringBuffer buffer = new StringBuffer();
 		 for (Iterator iterator = params.keySet().iterator(); iterator.hasNext();) {
 			String key = (String) iterator.next();
 			buffer.append("&").append(key).append("=").append(params.get(key));
 		}
-		System.out.println(buffer.toString().substring(1));
+		System.out.println("http://10.1.110.46:8080/evh/expressauth/authReq?"+buffer.toString().substring(1));
 	}
 }

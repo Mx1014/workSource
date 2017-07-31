@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -45,8 +46,12 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	private static final String GET_ORDER_CONTEXT = "/express/getOrderDetail";
 	//创建订单
 	private static final String UPDATE_ORDER_CONTEXT = "/express/updateOrderStatus";
-	//跟踪运单信息
-//	private static final String TRACK_BILL_URL = "http://211.156.193.140:8000/cotrackapi/api/track/mail/#{billno}"; 
+	//服务进入方式(必选项)
+	//用于标识是从何处发起的查询；数据来源：0-本系统；1-电子化支局系统；2-中心局系统；3-投递系统；4-短信；5-11185；6-电子商务网站
+	private static final String SER_KIND = "6";
+	//查询方标识(必选项)
+	//每个客户提供一个经过认证的标识码
+	private static final String SER_SIGN = "83b6fe9b4cbb442d";
 	
 	//java8新加的格式化时间类，是线程安全的
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
@@ -60,10 +65,16 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 
 	@Override
 	public GetExpressLogisticsDetailResponse getExpressLogisticsDetail(ExpressCompany expressCompany, String billNo) {
-		URL wsdlURL = MailTtServiceGn.WSDL_LOCATION;
+//		URL wsdlURL = MailTtServiceGn.WSDL_LOCATION;
+		URL wsdlURL = null;
+		try {
+			wsdlURL = new URL(expressCompany.getLogisticsUrl());
+		} catch (MalformedURLException e) {
+			wsdlURL = MailTtServiceGn.WSDL_LOCATION;
+		}
 		MailTtServiceGn service = new MailTtServiceGn(wsdlURL, MailTtServiceGn.SERVICE);
 		MailTtServiceGnPortType port = service.getMailTtServiceGnHttpPort();
-		ArrayOfMail arrayOfMail = port.getMails("6", "83b6fe9b4cbb442d", billNo);
+		ArrayOfMail arrayOfMail = port.getMails(SER_KIND, SER_SIGN, billNo);
 		List<Mail> maillist = arrayOfMail.getMail();
 		if(maillist == null || maillist.size() == 0){
 			return null;
