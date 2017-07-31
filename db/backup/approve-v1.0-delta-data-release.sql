@@ -70,7 +70,7 @@ VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 9999
 -- by dengs 添加菜单 end
 
 -- 服务广场 -- 添加到左邻域
- 
+ SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
  INSERT INTO `eh_launch_pad_items` 
 (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`,
  `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
