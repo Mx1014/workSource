@@ -116,4 +116,6 @@ interface PortalService {
 	ListScopeResponse listScopes(ListScopeCommand cmd);
 
 	ListScopeResponse searchScopes(ListScopeCommand cmd);
+
+	PortalItemDTO getAllOrMoreItem(GetItemAllOrMoreCommand cmd);
 }

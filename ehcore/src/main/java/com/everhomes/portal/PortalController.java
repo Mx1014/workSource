@@ -463,4 +463,14 @@ public class PortalController extends ControllerBase {
 	public RestResponse searchScopes(ListScopeCommand cmd){
 		return new RestResponse(portalService.searchScopes(cmd));
 	}
+
+	/**
+	 * <p>获取全部或者更多item</p>
+	 * <b>URL: /portal/getAllOrMoreItem</b>
+	 */
+	@RequestMapping("getAllOrMoreItem")
+	@RestReturn(PortalItemDTO.class)
+	public RestResponse getAllOrMoreItem(GetItemAllOrMoreCommand cmd){
+		return new RestResponse(portalService.getAllOrMoreItem(cmd));
+	}
 }

@@ -906,6 +906,12 @@ public class PortalServiceImpl implements PortalService {
 		return dto;
 	}
 
+	@Override
+	public PortalItemDTO getAllOrMoreItem(GetItemAllOrMoreCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		return processPortalItemDTO(getItemAllOrMore(namespaceId, AllOrMoreType.fromCode(cmd.getMoreOrAllType())));
+	}
+
 	private PortalItem getItemAllOrMore(Integer namespaceId, AllOrMoreType type){
 		List<PortalItem> portalItems = portalItemProvider.listPortalItem(null, namespaceId, PortalItemActionType.ALLORMORE.getCode(), null);
 		for (PortalItem portalItem: portalItems) {
