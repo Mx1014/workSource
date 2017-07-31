@@ -11,21 +11,32 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.talent.ClearTalentQueryHistoryCommand;
+import com.everhomes.rest.talent.CreateMessageSenderCommand;
+import com.everhomes.rest.talent.CreateOrUpdateRequestSettingCommand;
+import com.everhomes.rest.talent.CreateOrUpdateRequestSettingResponse;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
+import com.everhomes.rest.talent.DeleteMessageSenderCommand;
 import com.everhomes.rest.talent.DeleteTalentCategoryCommand;
 import com.everhomes.rest.talent.DeleteTalentCommand;
 import com.everhomes.rest.talent.DeleteTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.EnableTalentCommand;
 import com.everhomes.rest.talent.GetTalentDetailCommand;
 import com.everhomes.rest.talent.GetTalentDetailResponse;
+import com.everhomes.rest.talent.GetTalentRequestDetailCommand;
+import com.everhomes.rest.talent.GetTalentRequestDetailResponse;
 import com.everhomes.rest.talent.ImportTalentCommand;
+import com.everhomes.rest.talent.ListMessageSenderCommand;
+import com.everhomes.rest.talent.ListMessageSenderResponse;
 import com.everhomes.rest.talent.ListTalentCategoryCommand;
 import com.everhomes.rest.talent.ListTalentCategoryResponse;
 import com.everhomes.rest.talent.ListTalentCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryResponse;
+import com.everhomes.rest.talent.ListTalentRequestCommand;
+import com.everhomes.rest.talent.ListTalentRequestResponse;
 import com.everhomes.rest.talent.ListTalentResponse;
+import com.everhomes.rest.talent.MessageSenderDTO;
 import com.everhomes.rest.talent.TalentDTO;
 import com.everhomes.rest.talent.TopTalentCommand;
 
@@ -172,6 +183,78 @@ public class TalentController extends ControllerBase {
 	public RestResponse clearTalentQueryHistory(ClearTalentQueryHistoryCommand cmd){
 		talentService.clearTalentQueryHistory(cmd);
 		return new RestResponse();
+	}
+	
+	/**
+	 * <p>14.创建或更新申请设置</p>
+	 * <b>URL: /talent/createOrUpdateRequestSetting</b>
+	 */
+	@RequestMapping("createOrUpdateRequestSetting")
+	@RestReturn(CreateOrUpdateRequestSettingResponse.class)
+	public RestResponse createOrUpdateRequestSetting(CreateOrUpdateRequestSettingCommand cmd){
+		return new RestResponse(talentService.createOrUpdateRequestSetting(cmd));
+	}
+	
+	/**
+	 * <p>15.查看申请设置</p>
+	 * <b>URL: /talent/findRequestSetting</b>
+	 */
+	@RequestMapping("findRequestSetting")
+	@RestReturn(CreateOrUpdateRequestSettingResponse.class)
+	public RestResponse findRequestSetting(){
+		return new RestResponse(talentService.findRequestSetting());
+	}
+	
+	/**
+	 * <p>16.创建需要消息推送的人</p>
+	 * <b>URL: /talent/createMessageSender</b>
+	 */
+	@RequestMapping("createMessageSender")
+	@RestReturn(String.class)
+	public RestResponse createMessageSender(CreateMessageSenderCommand cmd){
+		talentService.createMessageSender(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>17.删除需要消息推送的人</p>
+	 * <b>URL: /talent/deleteMessageSender</b>
+	 */
+	@RequestMapping("deleteMessageSender")
+	@RestReturn(String.class)
+	public RestResponse deleteMessageSender(DeleteMessageSenderCommand cmd){
+		talentService.deleteMessageSender(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>18.消息推送的人列表</p>
+	 * <b>URL: /talent/listMessageSender</b>
+	 */
+	@RequestMapping("listMessageSender")
+	@RestReturn(ListMessageSenderResponse.class)
+	public RestResponse listMessageSender(ListMessageSenderCommand cmd){
+		return new RestResponse(talentService.listMessageSender(cmd));
+	}
+
+	/**
+	 * <p>19.申请记录列表</p>
+	 * <b>URL: /talent/listTalentRequest</b>
+	 */
+	@RequestMapping("listTalentRequest")
+	@RestReturn(ListTalentRequestResponse.class)
+	public RestResponse listTalentRequest(ListTalentRequestCommand cmd){
+		return new RestResponse(talentService.listTalentRequest(cmd));
+	}
+
+	/**
+	 * <p>20.申请记录详情</p>
+	 * <b>URL: /talent/getTalentRequestDetail</b>
+	 */
+	@RequestMapping("getTalentRequestDetail")
+	@RestReturn(GetTalentRequestDetailResponse.class)
+	public RestResponse getTalentRequestDetail(GetTalentRequestDetailCommand cmd){
+		return new RestResponse(talentService.getTalentRequestDetail(cmd));
 	}
 
 }

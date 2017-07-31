@@ -4,7 +4,6 @@ package com.everhomes.rest.acl;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -22,113 +21,124 @@ import java.util.List;
  */
 public class ServiceModuleAuthorizationsDTO {
 
-	private String ownerType;
+    private String ownerType;
 
-	private Long ownerId;
+    private Long ownerId;
 
-	private Long targetId;
+    private Long targetId;
 
-	private String targetType;
+    private String targetType;
 
-	private String   targetName;
+    private String targetName;
 
-	private Byte     identifierType;
+    private String nickName;
 
-	private String   identifierToken;
+    private Byte identifierType;
 
-	private Byte allFlag;
+    private String identifierToken;
 
-	@ItemType(ServiceModuleDTO.class)
-	private List<ServiceModuleDTO> modules;
+    private Byte allFlag;
 
-	@ItemType(ProjectDTO.class)
-	private List<ProjectDTO> projects;
+    @ItemType(ServiceModuleDTO.class)
+    private List<ServiceModuleDTO> modules;
 
-	public ServiceModuleAuthorizationsDTO() {
+    @ItemType(ProjectDTO.class)
+    private List<ProjectDTO> projects;
+
+    public ServiceModuleAuthorizationsDTO() {
     }
 
-	public Long getTargetId() {
-		return targetId;
-	}
+    public Long getTargetId() {
+        return targetId;
+    }
 
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
-	}
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
 
-	public String getTargetType() {
-		return targetType;
-	}
+    public String getTargetType() {
+        return targetType;
+    }
 
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
 
-	public String getTargetName() {
-		return targetName;
-	}
+    public String getTargetName() {
+        return targetName;
+    }
 
-	public void setTargetName(String targetName) {
-		this.targetName = targetName;
-	}
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
+    }
 
-	public Byte getIdentifierType() {
-		return identifierType;
-	}
+    public Byte getIdentifierType() {
+        return identifierType;
+    }
 
-	public void setIdentifierType(Byte identifierType) {
-		this.identifierType = identifierType;
-	}
+    public void setIdentifierType(Byte identifierType) {
+        this.identifierType = identifierType;
+    }
 
-	public String getIdentifierToken() {
-		return identifierToken;
-	}
+    public String getIdentifierToken() {
+        return identifierToken;
+    }
 
-	public void setIdentifierToken(String identifierToken) {
-		this.identifierToken = identifierToken;
-	}
+    public void setIdentifierToken(String identifierToken) {
+        this.identifierToken = identifierToken;
+    }
 
-	public List<ServiceModuleDTO> getModules() {
-		return modules;
-	}
+    public List<ServiceModuleDTO> getModules() {
+        return modules;
+    }
 
-	public void setModules(List<ServiceModuleDTO> modules) {
-		this.modules = modules;
-	}
+    public void setModules(List<ServiceModuleDTO> modules) {
+        this.modules = modules;
+    }
 
-	public List<ProjectDTO> getProjects() {
-		return projects;
-	}
+    public List<ProjectDTO> getProjects() {
+        return projects;
+    }
 
-	public void setProjects(List<ProjectDTO> projects) {
-		this.projects = projects;
-	}
+    public void setProjects(List<ProjectDTO> projects) {
+        this.projects = projects;
+    }
 
-	public Byte getAllFlag() {
-		return allFlag;
-	}
+    public Byte getAllFlag() {
+        return allFlag;
+    }
 
-	public void setAllFlag(Byte allFlag) {
-		this.allFlag = allFlag;
-	}
+    public void setAllFlag(Byte allFlag) {
+        this.allFlag = allFlag;
+    }
 
-	public String getOwnerType() {
-		return ownerType;
-	}
+    public String getOwnerType() {
+        return ownerType;
+    }
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
-	public Long getOwnerId() {
-		return ownerId;
-	}
+    public Long getOwnerId() {
+        return ownerId;
+    }
 
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
-	@Override
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

@@ -1505,7 +1505,7 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/updateOrganiz ationMemberWorkExperiences</b>
+     * <b>URL: /org/updateOrganizationMemberWorkExperiences</b>
      * <p>修改员工工作经历</p>
      */
     @RequestMapping("updateOrganizationMemberWorkExperiences")
@@ -1688,11 +1688,8 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /org/getProfileIntegrity</b>
-     * <p>查看档案完整度</p>
-     */
-    @RequestMapping("getProfileIntegrity")
+    //  查看档案完整度接口暂时舍弃
+/*    @RequestMapping("getProfileIntegrity")
     @RestReturn(value = OrganizationMemberProfileIntegrity.class)
     public RestResponse getProfileIntegrity(@Valid GetProfileIntegrityCommand cmd) {
         OrganizationMemberProfileIntegrity res = this.organizationService.getProfileIntegrity(cmd);
@@ -1700,7 +1697,7 @@ public class OrganizationController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /org/importOrganizationPersonnelFiles</b>
@@ -1736,4 +1733,19 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /org/leaveTheJob</b>
+     * <p>人事档案离职</p>
+     */
+    @RequestMapping("leaveTheJob")
+    @RestReturn(value = String.class)
+    public RestResponse leaveTheJob(@Valid LeaveTheJobCommand cmd) {
+        this.organizationService.leaveTheJob(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

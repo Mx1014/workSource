@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.user;
 
 import com.everhomes.discover.ItemType;
@@ -28,6 +29,7 @@ import java.util.List;
  *  <li>addressId:地址id</li>
  *  <li>address:地址</li>
  *  <li>phones:手机</li>
+ *  <li>regionCodes:区号列表</li>
  *  <li>emails:邮箱</li>
  *  <li>regionId:城市ID</li>
  *  <li>regionName:城市名</li>
@@ -69,6 +71,8 @@ public class UserInfo {
 
     @ItemType(String.class)
     private List<String> phones;
+    @ItemType(Integer.class)
+    private List<Integer> regionCodes;
 
     @ItemType(String.class)
     private List<String> emails;
@@ -315,7 +319,15 @@ public class UserInfo {
 		this.registerDaysDesc = registerDaysDesc;
 	}
 
-	@Override
+    public List<Integer> getRegionCodes() {
+        return regionCodes;
+    }
+
+    public void setRegionCodes(List<Integer> regionCodes) {
+        this.regionCodes = regionCodes;
+    }
+
+    @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }

@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  *<li>position:职位</li>
  *<li>email:邮箱</li>
  *<li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
- *<li>signupSourceFlag: 来源  参考{@link com.everhomes.rest.activity.SignupSourceFlag}</li>
+ *<li>signupSourceFlag: 来源  参考{@link com.everhomes.rest.activity.ActivityRosterSourceFlag}</li>
  *</ul>
  */
 public class ActivitySignupCommand {

@@ -166,6 +166,9 @@ public class GroupServiceImpl implements GroupService {
     
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+
+    @Autowired
+    private GroupMemberLogProvider groupMemberLogProvider;
     
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
@@ -1426,7 +1429,7 @@ public class GroupServiceImpl implements GroupService {
         case WAITING_FOR_ACCEPTANCE:
             deletePendingGroupMember(operatorUid, member);
             member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
-            addGroupMemberLog(member);
+            addGroupMemberLog(member, group);
             
             GroupMember inviter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), member.getInviterUid());
@@ -1443,14 +1446,18 @@ public class GroupServiceImpl implements GroupService {
         }
     }
     
-    private void addGroupMemberLog(GroupMember member) {
-    	GroupMemberLog groupMemberLog = new GroupMemberLog();
-    	groupMemberLog.setGroupMemberId(member.getId());
-    	groupMemberLog.setStatus(member.getMemberStatus());
-    	groupMemberLog.setCreatorUid(UserContext.current().getUser().getId());
-    	groupMemberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-    	groupMemberLog.setProcessMessage(member.toString());
-    	groupProvider.createGroupMemberLog(groupMemberLog);
+    private void addGroupMemberLog(GroupMember member, Group group) {
+        GroupMemberLog memberLog = ConvertHelper.convert(member, GroupMemberLog.class);
+        memberLog.setNamespaceId(UserContext.getCurrentNamespaceId());
+        memberLog.setMemberStatus(member.getMemberStatus());
+        memberLog.setOperatorUid(UserContext.currentUserId());
+        memberLog.setApproveTime(DateUtils.currentTimestamp());
+        memberLog.setGroupMemberId(member.getId());
+        memberLog.setCreatorUid(UserContext.currentUserId());
+        memberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        memberLog.setCommunityId(group.getFamilyCommunityId());
+        memberLog.setAddressId(group.getFamilyAddressId());
+        groupMemberLogProvider.createGroupMemberLog(memberLog);
 	}
 
 	@Override
@@ -1525,7 +1532,7 @@ public class GroupServiceImpl implements GroupService {
         case WAITING_FOR_APPROVAL:
             deletePendingGroupMember(operatorUid, member);
             member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
-            addGroupMemberLog(member);
+            addGroupMemberLog(member, group);
 
             GroupMember rejecter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), operatorUid);

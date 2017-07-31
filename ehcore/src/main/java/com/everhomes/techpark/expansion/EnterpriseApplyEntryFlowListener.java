@@ -143,7 +143,10 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
             map.put("applyBuilding", defaultIfNull(buildingName, ""));
             map.put("applyUserName", defaultIfNull(applyEntry.getApplyUserName(), ""));
-            map.put("contactPhone", defaultIfNull(applyEntry.getApplyContact(), ""));
+
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(applyEntry.getApplyUserId(), IdentifierType.MOBILE.getCode());
+
+            map.put("contactPhone", defaultIfNull(userIdentifier.getIdentifierToken(), ""));
             map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
 //            String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
 //                    applyEntry.getApplyType() + "", locale, "");

@@ -49,7 +49,7 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
 	VALUES(1000750, 0, 'PM', '深业集团（深圳）物业管理有限公司', 0, '', '/1000750', 1, 2, 'ENTERPRISE', 999992);
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
 	VALUES(2101378, 1000750, 'USER', 212500  , 'manager', '唐玮', 0, '13510551322', 3, 999992);	
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
@@ -123,15 +123,15 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ('77', 'app.agreements.url', 'http://sywy.zuolin.com/mobile/static/app_agreements/sywy_agreements.html', 'the relative path for shenye app agreements', '999992', NULL);	
 	
-INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) 
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, NAME, layout_json, version_code, min_version_code, STATUS, create_time) 
 	VALUES (36, 999992, 'ServiceMarketLayout', '{"versionCode":"2015120406","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2015120406', '0', '2', '2015-06-24 16:09:30');
-INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) 
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, NAME, layout_json, version_code, min_version_code, STATUS, create_time) 
 	VALUES (28, 999992, 'PmLayout', '{"versionCode":"2015120406","versionName":"3.0.0","displayName":"物业","layoutName":"PmLayout","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015120406', '0', '2', '2015-06-27 14:04:57');
-INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) 
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, NAME, layout_json, version_code, min_version_code, STATUS, create_time) 
 	VALUES (29, 999992, 'GarcLayout', '{"versionCode":"2015120406","versionName":"3.0.0","displayName":"业委会","layoutName":"GarcLayout","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015120406', '0', '2', '2015-06-27 14:04:57');
-INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) 
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, NAME, layout_json, version_code, min_version_code, STATUS, create_time) 
 	VALUES (32, 999992, 'GacwLayout', '{"versionCode":"2015120406","versionName":"3.0.0","displayName":"工作站","layoutName":"GacwLayout","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015120406', '0', '2', '2015-06-27 14:04:57');
-INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) 
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, NAME, layout_json, version_code, min_version_code, STATUS, create_time) 
 	VALUES (33, 999992, 'GapsLayout', '{"versionCode":"2015120406","versionName":"3.0.0","displayName":"派出所","layoutName":"GapsLayout","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015120406', '0', '2', '2015-06-27 14:04:57');
 
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
@@ -152,7 +152,7 @@ INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,ite
 INSERT INTO  `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES (10026, '999992', '0', '0', '0', '/home', 'Bizs', '服务预约', '服务预约', 'cs://1/image/aW1hZ2UvTVRvNFpEVTVOalpqTVdNMk1UQTVPREpqWW1RME5qTTFOalV5WVRKa09UY3laUQ', '1', '1', '37', '{\"ownerType\":\"organization\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL);	
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id)  
-	VALUES (10027, 999992, 0, 0, 0, '/home', 'Bizs', '快递查询', '快递查询', 'cs://1/image/aW1hZ2UvTVRwaU56VmxZVEUyTmpGaU1qSXdPV1l4WldKbU1EZ3hOekl3T0RjeE5qUXpPQQ', '1', '1', '14', '{\"url\":\" http://m.kuaidi100.com"}', '0', '0', '1', '1', '', '0', null, null, null);
+	VALUES (10027, 999992, 0, 0, 0, '/home', 'Bizs', '快递查询', '快递查询', 'cs://1/image/aW1hZ2UvTVRwaU56VmxZVEUyTmpGaU1qSXdPV1l4WldKbU1EZ3hOekl3T0RjeE5qUXpPQQ', '1', '1', '14', '{\"url\":\" http://m.kuaidi100.com"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 	VALUES (10028, 999992, '0', '0', '0', '/home', 'Bizs', '门禁', '门禁', 'cs://1/image/aW1hZ2UvTVRvME9XTmtNV1ZqWWpNeU16WmhPV1kxT0RJMFpqYzRaVEUzTnpRNE5XSmlZZw', '1', '1', '40', '', '1', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'default');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
@@ -254,11 +254,11 @@ INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, 
     VALUES (10004, 'pm_admin', 999992, 0, 0, 0, '/home/NoticeManager', 'GaActions', 'PUBLIC_NOTICE', '发布公告', 'cs://1/image/aW1hZ2UvTVRvMk1USXdPREJpTkRSa05XVXhNV1EzTW1ZeVpEWTNaRE5tTnpCaU0ySmhNQQ', 1, 1, 19, '{"contentCategory":1003,"actionCategory":0,"targetEntityTag":"PM","visibleRegionType":0}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL);
 
 
-INSERT INTO `eh_version_realm` VALUES ('30', 'Android_Shenye', null, UTC_TIMESTAMP(), '999992');
-INSERT INTO `eh_version_realm` VALUES ('31', 'iOS_Shenye', null, UTC_TIMESTAMP(), '999992');
+INSERT INTO `eh_version_realm` VALUES ('30', 'Android_Shenye', NULL, UTC_TIMESTAMP(), '999992');
+INSERT INTO `eh_version_realm` VALUES ('31', 'iOS_Shenye', NULL, UTC_TIMESTAMP(), '999992');
 
-insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(30,30,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
-insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(31,31,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(30,30,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(31,31,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999992, 'sms.default.yzx', 1, 'zh_CN', '验证码-深业', '23046');
@@ -4184,12 +4184,34 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 -- 管理员场景下的任务icon名称修改为"客户沟通" add by xujuan 20170221
-update eh_launch_pad_items set item_label="客户沟通",item_name="客户沟通" where id = 110069 and namespace_id = 999992;
+UPDATE eh_launch_pad_items SET item_label="客户沟通",item_name="客户沟通" WHERE id = 110069 AND namespace_id = 999992;
 
 
+ 
+	
+-- 深业物业后台增加 项目 2017年7月20日 by wh
 
-
-
+SET @namespace_id = 999992;
+SET @community_forum_id = (SELECT default_forum_id FROM eh_communities WHERE namespace_id = @namespace_id LIMIT 1); 
+SET @feedback_forum_id = (SELECT feedback_forum_id FROM eh_communities WHERE namespace_id = @namespace_id LIMIT 1); 
+SET @shi_id = 14956;  
+SET @qu_id = (SELECT id FROM `eh_regions` WHERE NAME = '龙岗区' AND namespace_id = @namespace_id AND STATUS = 2); ; 
+SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
+SET @namespace_resource_id = (SELECT MAX(id) FROM `eh_namespace_resources`);
+SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; -- 需要取现网eh_communities的ID的最大值再加一定余量
+SET @organization_id = (SELECT id FROM eh_organizations WHERE namespace_id = @namespace_id AND organization_type = 'PM' AND parent_id = 0 LIMIT 1);
+SET @building1_id = (SELECT MAX(id) FROM `eh_buildings`) + 5;
+ 
+ 
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@community_id, UUID(), @shi_id, '深圳市',  @qu_id, '龙岗区', '东城上邸', '东城上邸', '深圳市龙岗区坪山街道中山大道与横坪路交汇处西侧', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 1, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 114.33, 22.68, 'ws1318u8d46v');
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(@organization_id, @community_id);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, default_order,`namespace_id`)VALUES(@building1_id, @community_id, '东城上邸', '东城上邸', 0, '', '深圳市龙岗区坪山街道中山大道与横坪路交汇处西侧', 5206.73, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @building1_id, @namespace_id);
 
 
 

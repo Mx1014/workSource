@@ -13,7 +13,18 @@ public class GetGeneralFormValuesCommand {
 
     private Byte originFieldFlag;
 
-    public Byte getOriginFieldFlag() {
+    public GetGeneralFormValuesCommand() {
+		super();
+	}
+
+	public GetGeneralFormValuesCommand(String sourceType, Long sourceId, Byte originFieldFlag) {
+		super();
+		this.sourceType = sourceType;
+		this.sourceId = sourceId;
+		this.originFieldFlag = originFieldFlag;
+	}
+
+	public Byte getOriginFieldFlag() {
         return originFieldFlag;
     }
 

@@ -1,13 +1,13 @@
 // @formatter:off
 package com.everhomes.user;
 
-import java.io.Serializable;
-import java.util.Random;
-
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.UserLoginDTO;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.util.StringHelper;
+
+import java.io.Serializable;
+import java.util.Random;
 
 /**
  * Represents user login session, compared with other data structure like UserIdentifier or User, it is persisted in
@@ -42,15 +42,18 @@ public class UserLogin implements Serializable {
     private String borderSessionId;
     
     private Long impersonationId;
+
+    private String appVersion;// add by xq.tian 2017/07/14
     
     public UserLogin() {
     }
     
-    public UserLogin(int namespaceId, long userId, int loginId, String identifier, String pusherIdentify) {
+    public UserLogin(int namespaceId, long userId, int loginId, String identifier, String pusherIdentify, String appVersion) {
         this.namespaceId = namespaceId;
         this.userId = userId;
         this.loginId = loginId;
         this.deviceIdentifier = identifier;
+        this.appVersion = appVersion;
         loginInstanceNumber = new Random().nextInt();
         lastAccessTick = System.currentTimeMillis();
         status = UserLoginStatus.LOGGED_OFF;
@@ -181,6 +184,14 @@ public class UserLogin implements Serializable {
 
     public void setImpersonationId(Long impersonationId) {
         this.impersonationId = impersonationId;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
     }
 
     @Override

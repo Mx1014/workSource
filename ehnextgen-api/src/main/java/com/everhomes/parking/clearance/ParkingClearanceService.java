@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.parking.clearance.*;
 
+import java.util.List;
+
 /**
  * 车辆放行service
  * Created by xq.tian on 2016/12/2.
@@ -42,4 +44,8 @@ public interface ParkingClearanceService {
     CheckAuthorityResponse checkAuthority(CheckAuthorityCommand cmd);
 
 	void exportClearanceLog(SearchClearanceLogCommand cmd, HttpServletResponse response);
+
+	void deleteClearanceLog(DeleteClearanceLogCommand cmd);
+
+    List<ParkingActualClearanceLogDTO> getActualClearanceLog(GetActualClearanceLogCommand cmd);
 }

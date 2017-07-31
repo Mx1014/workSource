@@ -55,9 +55,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -374,10 +372,11 @@ public class UserController extends ControllerBase {
 	@RestReturn(LogonCommandResponse.class)
 	public RestResponse logon(@Valid LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
 	    long startTime = System.currentTimeMillis();
-	    
 	    long loginStartTime = System.currentTimeMillis();
-		UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
-				cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+
+        int regionCode = cmd.getRegionCode() != null ? cmd.getRegionCode() : 86;
+        UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
+                regionCode, cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
 		long loginEndTime = System.currentTimeMillis();
 		
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
@@ -762,6 +761,62 @@ public class UserController extends ControllerBase {
     }
 
 	/**
+	 * <b>URL: /user/sendVerificationCodeByResetIdentifier</b>
+	 * <p>发送修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("sendVerificationCodeByResetIdentifier")
+	@RestReturn(String.class)
+	public RestResponse sendVerificationCodeByResetIdentifier(@Valid SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request){
+		userService.sendVerificationCodeByResetIdentifier(cmd, request);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/verifyResetIdentifierCode</b>
+	 * <p>核实修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("verifyResetIdentifierCode")
+	@RestReturn(String.class)
+	public RestResponse verifyResetIdentifierCode(@Valid VerifyResetIdentifierCodeCommand cmd){
+		userService.verifyResetIdentifierCode(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/listResetIdentifierCode</b>
+	 * <p>获取修改手机号的短信验证码</p>
+	 */
+	@RequestMapping("listResetIdentifierCode")
+	@RestReturn(value = UserIdentifierLogDTO.class)
+	public RestResponse listResetIdentifierCode(@Valid ListResetIdentifierCodeCommand cmd){
+		UserIdentifierLogDTO log = userService.listResetIdentifierCode(cmd);
+        RestResponse response = new RestResponse(log);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /user/createResetIdentifierAppeal</b>
+	 * <p>申诉修改手机号</p>
+	 */
+	@RequestMapping("createResetIdentifierAppeal")
+	@RestReturn(UserAppealLogDTO.class)
+	public RestResponse createResetIdentifierAppeal(@Valid CreateResetIdentifierAppealCommand cmd){
+        UserAppealLogDTO dto = userService.createResetIdentifierAppeal(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+	/**
 	 * <b>URL: /user/verfiyAndReset</b>
 	 * <p>忘记密码，重新设置</p>
 	 * @return  OK
@@ -987,8 +1042,10 @@ public class UserController extends ControllerBase {
 	@RequireAuthentication(false)
 	@RestReturn(LogonCommandResponse.class)
 	public RestResponse adminLogon(@Valid LogonCommand cmd, HttpServletRequest request, HttpServletResponse response) {
-		UserLogin login = this.userService.logon(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId(),
-				cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+        int regionCode = cmd.getRegionCode() != null ? cmd.getRegionCode() : 86;
+        int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+        UserLogin login = this.userService.logon(namespaceId, regionCode, cmd.getUserIdentifier(),
+                cmd.getPassword(), cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
 
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserPrivilege(login.getUserId(), 0);
