@@ -901,10 +901,10 @@ public class SalaryServiceImpl implements SalaryService {
                 List<ImportSalaryEmployeeOriginValDTO> datas = handleImportSalaryFiles(resultList, cmd.getSalaryGroupId(), salaryGroupEntities);
                 if (datas.size() > 0) {
                     //设置导出报错的结果excel的标题
-                    response.setTitle(datas.get(0));
+                    response.setTitle(employeeOriginlistToMap(datas.get(0).getSalaryEmployeeVal()));
                     datas.remove(0);
                 }
-                List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> results = importSalaryFiles(datas,
+                List<ImportFileResultLog<Map>> results = importSalaryFiles(datas,
                         salaryGroupEntities, userId, cmd, namespaceId, type);
                 response.setTotalCount((long) datas.size());
                 response.setFailCount((long) results.size());
@@ -940,12 +940,12 @@ public class SalaryServiceImpl implements SalaryService {
         return datas;
     }
 
-    private List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> importSalaryFiles(
+        private List<ImportFileResultLog<Map>> importSalaryFiles(
             List<ImportSalaryEmployeeOriginValDTO> datas, List<SalaryGroupEntity> salaryGroupEntities,
             Long operatorId, ImportSalaryInfoCommand cmd, Integer namespaceId, String type) {
 
-        ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
-        List<ImportFileResultLog<ImportSalaryEmployeeOriginValDTO>> errorDataLogs = new ArrayList<>();
+        ImportFileResultLog<Map> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
+        List<ImportFileResultLog<Map>> errorDataLogs = new ArrayList<>();
 
         //  读取薪酬组列表中所有的手机号以及对应的userId
         List<Object[]> users = this.uniongroupService.listUniongroupMemberDetailsInfo(
@@ -971,7 +971,7 @@ public class SalaryServiceImpl implements SalaryService {
                     //check计算好的是否满足规则
                     log = checkSalaryGroup(salaryEmployeePeriodVals);
                     if (log != null) {
-                        log.setData(data);
+                        log.setData(employeeOriginlistToMap(data.getSalaryEmployeeVal()));
                         errorDataLogs.add(log);
                         continue;
                     }
@@ -984,7 +984,7 @@ public class SalaryServiceImpl implements SalaryService {
                     savePeriodSalaryGroup(employee,salaryEmployeePeriodVals,cmd.getSalaryGroupId());
                 }
                 catch (Exception e){
-                    log.setData(data);
+                    log.setData(employeeOriginlistToMap(data.getSalaryEmployeeVal()));
                     errorDataLogs.add(log);
                     continue;
                 }
@@ -993,16 +993,26 @@ public class SalaryServiceImpl implements SalaryService {
         return errorDataLogs;
     }
 
-    private ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> checkSalaryGroup(
+    //  为了能够成功的解析得转换成为 map
+    private Map employeeOriginlistToMap(List<String> list) {
+        Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < list.size(); i++) {
+            map.put(String.valueOf(i), list.get(i));
+        }
+        return map;
+    }
+
+
+    private ImportFileResultLog<Map> checkSalaryGroup(
             ImportSalaryEmployeeOriginValDTO data, List<Object[]> users){
 
-        ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
+        ImportFileResultLog<Map> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
 
         //  导入时各字段不能为空
         for(int i=2; i<data.getSalaryEmployeeVal().size(); i++){
             if(StringUtils.isEmpty(data.getSalaryEmployeeVal().get(i))){
                 LOGGER.warn("Salary entitiy is null. data = {}", data);
-                log.setData(data);
+                log.setData(employeeOriginlistToMap(data.getSalaryEmployeeVal()));
                 log.setErrorLog("Salary entitiy  is null");
                 log.setCode(SalaryServiceErrorCode.ERROR_SALARY_ENTITY_IS_EMPTY);
                 return log;
@@ -1012,7 +1022,7 @@ public class SalaryServiceImpl implements SalaryService {
         //  get(0)是姓名
         if(StringUtils.isEmpty(data.getSalaryEmployeeVal().get(0))){
             LOGGER.warn("Organization member contactName is null. data = {}", data);
-            log.setData(data);
+            log.setData(employeeOriginlistToMap(data.getSalaryEmployeeVal()));
             log.setErrorLog("Organization member contactName is null");
             log.setCode(SalaryServiceErrorCode.ERROR_CONTACTNAME_ISNULL);
             return log;
@@ -1021,7 +1031,7 @@ public class SalaryServiceImpl implements SalaryService {
         //  get(1)是手机号
         if(StringUtils.isEmpty(data.getSalaryEmployeeVal().get(1))){
             LOGGER.warn("Organization member contactToken is null. data = {}", data);
-            log.setData(data);
+            log.setData(employeeOriginlistToMap(data.getSalaryEmployeeVal()));
             log.setErrorLog("Organization member contactToken is null");
             log.setCode(SalaryServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
             return log;
@@ -1040,15 +1050,15 @@ public class SalaryServiceImpl implements SalaryService {
             }
             //  未比对成功则失败
             LOGGER.warn("Organization member contactToken is null. data = {}", data);
-            log.setData(data);
+            log.setData(employeeOriginlistToMap(data.getSalaryEmployeeVal()));
             log.setErrorLog("Organization member contactToken is null");
             log.setCode(SalaryServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
             return log;
         }
     }
 
-    private ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> checkSalaryGroup(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals) {
-        ImportFileResultLog<ImportSalaryEmployeeOriginValDTO> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
+    private ImportFileResultLog<Map> checkSalaryGroup(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals) {
+        ImportFileResultLog<Map> log = new ImportFileResultLog<>(SalaryServiceErrorCode.SCOPE);
 
         for (SalaryEmployeePeriodVal val : salaryEmployeePeriodVals) {
             if (val.getOriginEntityId().equals(SalaryConstants.ENTITY_ID_SHIFA)) {
