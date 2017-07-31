@@ -14,11 +14,22 @@ import com.everhomes.util.StringHelper;
  * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>
  * <li>targetTypes: 是否注册{@link com.everhomes.rest.organization.OrganizationMemberTargetType} </li>
  * <li>filterScopeTypes: 过滤范围类型{@link com.everhomes.rest.organization.FilterOrganizationContactScopeType}</li>
+ * <li>employeeStatus: 员工状态, 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * </ul>
  */
 public class ListPersonnelsV2Command extends ListOrganizationContactCommand {
 
+    private Byte employeeStatus;
+
     public ListPersonnelsV2Command() {
+    }
+
+    public Byte getEmployeeStatus() {
+        return employeeStatus;
+    }
+
+    public void setEmployeeStatus(Byte employeeStatus) {
+        this.employeeStatus = employeeStatus;
     }
 
     @Override

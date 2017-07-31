@@ -22,20 +22,20 @@ SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 SET @banner_id = (SELECT MAX(id) FROM `eh_banners`);
 SET @org_member_id = (SELECT MAX(id) FROM `eh_organization_members`); 
 SET @role_assignment_id = (SELECT MAX(id) FROM `eh_acl_role_assignments`); 
-SET @user_identifier_id = (SELECT max(id) FROM `eh_user_identifiers`);
-SET @organization_address_mapping_id = (SELECT max(id) FROM `eh_organization_address_mappings`);
-SET @namespace_detail_id = (SELECT max(id) FROM `eh_namespace_details`);
-SET @org_cmnty_request_id = (SELECT max(id) FROM `eh_organization_community_requests`);
-SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
-SET @configuration_id = (SELECT max(id) FROM `eh_configurations`);
+SET @user_identifier_id = (SELECT MAX(id) FROM `eh_user_identifiers`);
+SET @organization_address_mapping_id = (SELECT MAX(id) FROM `eh_organization_address_mappings`);
+SET @namespace_detail_id = (SELECT MAX(id) FROM `eh_namespace_details`);
+SET @org_cmnty_request_id = (SELECT MAX(id) FROM `eh_organization_community_requests`);
+SET @namespace_resource_id = (SELECT MAX(id) FROM `eh_namespace_resources`);
+SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ((@configuration_id := @configuration_id + 1), 'app.agreements.url', CONCAT('https://', @core_server_url, '/mobile/static/app_agreements/agreements.html?ns=1'), 'the relative path for volgo app agreements', @namespace_id, NULL);	   
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ((@configuration_id := @configuration_id + 1), 'business.url', CONCAT('https://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix'), 'biz access url for volgo', @namespace_id, NULL);	   
 
-INSERT INTO `eh_version_realm` VALUES (101, 'Android_OA', null, UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_version_realm` VALUES (102, 'iOS_OA', null, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_version_realm` VALUES (101, 'Android_OA', NULL, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_version_realm` VALUES (102, 'iOS_OA', NULL, UTC_TIMESTAMP(), @namespace_id);
 
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(301,101,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(302,102,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
@@ -70,7 +70,7 @@ INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, 
 	VALUES (@user_id, UUID(), @account_name, '李祥涛', '', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '13590318460',  '221616',  3, UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
 	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '李祥涛', 0, '13889818001', 3, @namespace_id);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
@@ -841,23 +841,23 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 -- 更新服务广场 add by sw 20170518
-UPDATE eh_launch_pad_layouts set version_code = '2017051801', layout_json = '{"versionCode":"2017051801","versionName":"3.5.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16,"columnCount":4},{"groupName":"","widget":"OPPush","instanceConfig":{"itemGroup":"OPPushBiz","entityCount":6,"subjectHeight":1,"descriptionHeight":0},"style":"HorizontalScrollView","defaultOrder":1,"separatorFlag":1,"separatorHeight":0,"columnCount":0},{"groupName":"","widget":"OPPush","instanceConfig":{"itemGroup":"OPPushActivity","entityCount":3,"subjectHeight":1,"descriptionHeight":0},"style":"ListView","defaultOrder":6,"separatorFlag":0,"separatorHeight":0,"columnCount":1}]}' where namespace_id = 1;
+UPDATE eh_launch_pad_layouts SET version_code = '2017051801', layout_json = '{"versionCode":"2017051801","versionName":"3.5.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16,"columnCount":4},{"groupName":"","widget":"OPPush","instanceConfig":{"itemGroup":"OPPushBiz","entityCount":6,"subjectHeight":1,"descriptionHeight":0},"style":"HorizontalScrollView","defaultOrder":1,"separatorFlag":1,"separatorHeight":0,"columnCount":0},{"groupName":"","widget":"OPPush","instanceConfig":{"itemGroup":"OPPushActivity","entityCount":3,"subjectHeight":1,"descriptionHeight":0},"style":"ListView","defaultOrder":6,"separatorFlag":0,"separatorHeight":0,"columnCount":1}]}' WHERE namespace_id = 1;
 
-UPDATE eh_launch_pad_items set item_label = '新品推荐' WHERE namespace_id = 1 and item_label = '能量加油站';
+UPDATE eh_launch_pad_items SET item_label = '新品推荐' WHERE namespace_id = 1 AND item_label = '能量加油站';
 
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMlkySTBNRE0xWkRjek16TmhZek0zTVRSa016TXhZV015TXprd01EazJNUQ', service_categry_id = 89 WHERE namespace_id = 1 and item_label = '门禁' and scene_type = 'pm_admin';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE1ESTRNREV6WkRnMFpEUTJZV0ZtWWpoaE56UmtZbUZrWlRreE56STJPQQ', service_categry_id = 88, item_label = '打卡' WHERE namespace_id = 1 and item_label = '打卡考勤' and scene_type = 'pm_admin';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1pUbGxZbU0xTW1Fek16bGhObU5pTVdGaFptWmxaVE01TVRBd1lqUm1PUQ', service_categry_id = 88, item_label = '考勤审批' WHERE namespace_id = 1 and item_label = '审批' and scene_type = 'pm_admin';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFpESXpaRGxpTWpBNVpURXpaVEF3TXpJellUa3pNakEwWkRFeU16VmlPQQ', service_categry_id = 88 WHERE namespace_id = 1 and item_label = '通讯录' and scene_type = 'pm_admin';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', service_categry_id = 88, item_label = '会议室预订' WHERE namespace_id = 1 and item_label = '会议室预定' and scene_type = 'pm_admin';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveE1tRmlPVEJqTW1ZMU1URmtOREZtTkRZMk0yTTVNakJsT1RZNFl6Qm1OUQ', service_categry_id = 88 WHERE namespace_id = 1 and item_label = '视频会议' and scene_type = 'pm_admin';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMlkySTBNRE0xWkRjek16TmhZek0zTVRSa016TXhZV015TXprd01EazJNUQ', service_categry_id = 89 WHERE namespace_id = 1 AND item_label = '门禁' AND scene_type = 'pm_admin';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE1ESTRNREV6WkRnMFpEUTJZV0ZtWWpoaE56UmtZbUZrWlRreE56STJPQQ', service_categry_id = 88, item_label = '打卡' WHERE namespace_id = 1 AND item_label = '打卡考勤' AND scene_type = 'pm_admin';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1pUbGxZbU0xTW1Fek16bGhObU5pTVdGaFptWmxaVE01TVRBd1lqUm1PUQ', service_categry_id = 88, item_label = '考勤审批' WHERE namespace_id = 1 AND item_label = '审批' AND scene_type = 'pm_admin';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFpESXpaRGxpTWpBNVpURXpaVEF3TXpJellUa3pNakEwWkRFeU16VmlPQQ', service_categry_id = 88 WHERE namespace_id = 1 AND item_label = '通讯录' AND scene_type = 'pm_admin';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', service_categry_id = 88, item_label = '会议室预订' WHERE namespace_id = 1 AND item_label = '会议室预定' AND scene_type = 'pm_admin';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE1tRmlPVEJqTW1ZMU1URmtOREZtTkRZMk0yTTVNakJsT1RZNFl6Qm1OUQ', service_categry_id = 88 WHERE namespace_id = 1 AND item_label = '视频会议' AND scene_type = 'pm_admin';
 
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMlkySTBNRE0xWkRjek16TmhZek0zTVRSa016TXhZV015TXprd01EazJNUQ', service_categry_id = 91 WHERE namespace_id = 1 and item_label = '门禁' and scene_type = 'park_tourist';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE1ESTRNREV6WkRnMFpEUTJZV0ZtWWpoaE56UmtZbUZrWlRreE56STJPQQ', service_categry_id = 90, item_label = '打卡' WHERE namespace_id = 1 and item_label = '打卡考勤' and scene_type = 'park_tourist';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1pUbGxZbU0xTW1Fek16bGhObU5pTVdGaFptWmxaVE01TVRBd1lqUm1PUQ', service_categry_id = 90, item_label = '考勤审批' WHERE namespace_id = 1 and item_label = '审批' and scene_type = 'park_tourist';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFpESXpaRGxpTWpBNVpURXpaVEF3TXpJellUa3pNakEwWkRFeU16VmlPQQ', service_categry_id = 90 WHERE namespace_id = 1 and item_label = '通讯录' and scene_type = 'park_tourist';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', service_categry_id = 90, item_label = '会议室预订' WHERE namespace_id = 1 and item_label = '会议室预定' and scene_type = 'park_tourist';
-UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveE1tRmlPVEJqTW1ZMU1URmtOREZtTkRZMk0yTTVNakJsT1RZNFl6Qm1OUQ', service_categry_id = 90 WHERE namespace_id = 1 and item_label = '视频会议' and scene_type = 'park_tourist';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMlkySTBNRE0xWkRjek16TmhZek0zTVRSa016TXhZV015TXprd01EazJNUQ', service_categry_id = 91 WHERE namespace_id = 1 AND item_label = '门禁' AND scene_type = 'park_tourist';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE1ESTRNREV6WkRnMFpEUTJZV0ZtWWpoaE56UmtZbUZrWlRreE56STJPQQ', service_categry_id = 90, item_label = '打卡' WHERE namespace_id = 1 AND item_label = '打卡考勤' AND scene_type = 'park_tourist';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1pUbGxZbU0xTW1Fek16bGhObU5pTVdGaFptWmxaVE01TVRBd1lqUm1PUQ', service_categry_id = 90, item_label = '考勤审批' WHERE namespace_id = 1 AND item_label = '审批' AND scene_type = 'park_tourist';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFpESXpaRGxpTWpBNVpURXpaVEF3TXpJellUa3pNakEwWkRFeU16VmlPQQ', service_categry_id = 90 WHERE namespace_id = 1 AND item_label = '通讯录' AND scene_type = 'park_tourist';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', service_categry_id = 90, item_label = '会议室预订' WHERE namespace_id = 1 AND item_label = '会议室预定' AND scene_type = 'park_tourist';
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE1tRmlPVEJqTW1ZMU1URmtOREZtTkRZMk0yTTVNakJsT1RZNFl6Qm1OUQ', service_categry_id = 90 WHERE namespace_id = 1 AND item_label = '视频会议' AND scene_type = 'park_tourist';
 
 	
 INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
@@ -872,7 +872,7 @@ INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `alig
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ('200879', 'community', '240111044331058733', '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '1', '');
 
-SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+SET @sa_id = (SELECT MAX(id) FROM `eh_service_alliances`);
 INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
     VALUES ((@sa_id := @sa_id + 1), '0', 'community', '240111044331058733', '服务联盟', '服务联盟', '200879', '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
@@ -885,7 +885,7 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`) 
 	VALUES ('10617', '左邻会议室', '0', NULL, '2', '1', '0');
 
-SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES ((@item_id := @item_id + 1), 1, '0', '0', '0', '/home', 'Bizs', '全部', '全部', 'cs://1/image/aW1hZ2UvTVRwak1USXhPVGc0T1RrMU5HTTBOMkpoWW1VellqZGlPR0prTkRFeE56bGxNZw', '1', '1', '53', '{"itemLocation": "/home", "itemGroup": "Bizs"}', 100, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
@@ -982,34 +982,34 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`) 
 	VALUES ('10617', '左邻会议室', '0', NULL, '2', '1', '0');
 
-UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.male.url';
-UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.female.url';	
-UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.undisclosured.url';	
+UPDATE eh_configurations SET `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' WHERE `name` = 'user.avatar.male.url';
+UPDATE eh_configurations SET `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' WHERE `name` = 'user.avatar.female.url';	
+UPDATE eh_configurations SET `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' WHERE `name` = 'user.avatar.undisclosured.url';	
 	
-SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 	
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
     VALUES ((@item_id := @item_id + 1), 1, '0', '4', '1023080', '/home', 'Bizs', '左邻会议室', '左邻会议室', 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', '1', '1', '49', '{"resourceTypeId":10617,"pageType":0}', 0, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', 0, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
     VALUES ((@item_id := @item_id + 1), 1, '0', '4', '1023080', '/home', 'Bizs', '左邻会议室', '左邻会议室', 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', '1', '1', '49', '{"resourceTypeId":10617,"pageType":0}', 0, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', 0, NULL);
 	
-update eh_launch_pad_items set default_order = 20 where namespace_id = 1 and item_label = '左邻会议室';
-update eh_launch_pad_items set display_flag = 0 where namespace_id = 1 and item_label = '公共会议室';
+UPDATE eh_launch_pad_items SET default_order = 20 WHERE namespace_id = 1 AND item_label = '左邻会议室';
+UPDATE eh_launch_pad_items SET display_flag = 0 WHERE namespace_id = 1 AND item_label = '公共会议室';
 	
 	
-update eh_launch_pad_items set action_data = '{"url": "https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&isfromindex=0&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}' where namespace_id = 1 and item_label = '新品推荐';
+UPDATE eh_launch_pad_items SET action_data = '{"url": "https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&isfromindex=0&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}' WHERE namespace_id = 1 AND item_label = '新品推荐';
 	
 	
 	
 -- fix 10934 by xiongying20170608
-SET @org_id = (select id from eh_organizations where namespace_id = 1 and name = '华润网络（深圳）有限公司');
+SET @org_id = (SELECT id FROM eh_organizations WHERE namespace_id = 1 AND NAME = '华润网络（深圳）有限公司');
 
 
 -- fix 10934 by xiongying20170608
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`) 
 	VALUES (10825, '华润通会议室', '0', NULL, '2', '1', '0');
 SET @namespace_id=1;
-SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);	
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);	
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '4', @org_id, '/home', 'Bizs', '华润通会议室', '华润通会议室', 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', '1', '1', '49', '{"resourceTypeId":10825,"pageType":0}', 10, 3, '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');	
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
@@ -1021,10 +1021,10 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
     
 -- fix 10690 纲哥要求拿下物业缴费和物业服务
-delete from eh_launch_pad_items where namespace_id = 1 and item_label in('物业服务','物业缴费');
+DELETE FROM eh_launch_pad_items WHERE namespace_id = 1 AND item_label IN('物业服务','物业缴费');
 	
 -- fix 11023 by xiongying20170609	
-update eh_launch_pad_items set action_type = 50  where namespace_id = 1 and item_label = '最新活动';
+UPDATE eh_launch_pad_items SET action_type = 50  WHERE namespace_id = 1 AND item_label = '最新活动';
 
 UPDATE eh_launch_pad_items SET action_data = '{"pageType":0,"resourceTypeId":10821}'
 WHERE namespace_id = 1 AND item_label = '华润通会议室';
@@ -1038,7 +1038,7 @@ UPDATE `eh_launch_pad_items` SET `action_data` = '{"url":"https://biz.zuolin.com
 UPDATE `eh_launch_pad_items` SET `action_data` = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3fisfromindex%3d0%23%2fmicroshop%2fhome%3f_k%3dzlbiz#sign_suffix"}' WHERE `id` = 114203;
 
 -- fix #11356 by xq.tian  2017/06/14
-SET @max_id = (SELECT max(id) FROM eh_app_urls);
+SET @max_id = (SELECT MAX(id) FROM eh_app_urls);
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
 VALUES ((@max_id := @max_id + 1), 1, 'Volgo', 1, 'https://itunes.apple.com/cn/app/volgo/id1237505762?mt=8', 'cs://1/image/aW1hZ2UvTVRveE5UUTNObUZqWlRneFkyRmtaREl4TmpJNU5Ea3pNMlV6Tm1VeFpUbGhNZw', '这里，将改变世界');
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
@@ -2480,7 +2480,7 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1007144, 240111044331055035, '239825274387259050',  NULL, '0');
 
 	
-UPDATE eh_buildings set `name` = '金融基地1栋', alias_name = '金融基地1栋' where id = 194002;
+UPDATE eh_buildings SET `name` = '金融基地1栋', alias_name = '金融基地1栋' WHERE id = 194002;
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`, `product_type`, `complete_date`, `joinin_date`, `floor_count`, `namespace_building_type`, `namespace_building_token`, `traffic_description`, `lift_description`, `pm_description`, `parking_lot_description`, `environmental_description`, `power_description`, `telecommunication_description`, `air_condition_description`, `security_description`, `fire_control_description`) 
 	VALUES ('194015', '240111044331058733', '金融基地2栋', '金融基地2栋', '2100163', '13509688398', '深圳市南山区科技园科苑路6号', NULL, '113.953143', '22.549789', 'ws103144h9mf', '科技园金融基地一期总建筑面积9.6万平方米，项目分A、B两栋，每栋12层，1-3层为商业裙楼，约14000平方米，4-12层为办公场所。科技园金融基地一期写字楼荣获深圳首家国际绿色建筑LEEDTM认证金奖，独享双花园广场景观，南面为3000平米外花园广场，拥有面积达5000平米的围合式中央花园。尤为值得一提的是在基地建设运营中，科技园金融基地与世界著名的物业顾问公司——世邦魏理仕全方位合作，全方位提升物业管理水平。', 'cs://1/image/aW1hZ2UvTVRvNE1HUmlaRGszT1RkaU1EVmxaV1k0T0RJMk5UWmpOakEzWmpNMVltRXlaZw', '2', '1', '2017-04-24 23:01:31', '195506', '2015-12-09 14:57:13', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 	
@@ -3166,10 +3166,10 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 SET @namespace_id=1;
 SET @community_forum_id = (SELECT MAX(id) FROM `eh_forums`) + 5;   -- 取eh_forums的ID最大值再加一定余量
 SET @feedback_forum_id = @community_forum_id + 1;   -- @community_forum_id+1
-SET @shi_id = (select id FROM `eh_regions` where name = '深圳市' and namespace_id = @namespace_id and status = 2);  -- 在@sheng_id上加1
-SET @qu_id = (select id FROM `eh_regions` where name = '南山区' and namespace_id = @namespace_id and status = 2);    -- 在@shi_id上加1
+SET @shi_id = (SELECT id FROM `eh_regions` WHERE NAME = '深圳市' AND namespace_id = @namespace_id AND STATUS = 2);  -- 在@sheng_id上加1
+SET @qu_id = (SELECT id FROM `eh_regions` WHERE NAME = '南山区' AND namespace_id = @namespace_id AND STATUS = 2);    -- 在@shi_id上加1
 SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
-SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
+SET @namespace_resource_id = (SELECT MAX(id) FROM `eh_namespace_resources`);
 SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; -- 需要取现网eh_communities的ID的最大值再加一定余量
 SET @organization_id = 1023080;
 
@@ -3190,3 +3190,10 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(@organization_id, @community_id);
 	
+-- volgo要加一个云打印 2017-7-20 by wh 
+
+SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM eh_launch_pad_items) ;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
+VALUES((@eh_launch_pad_items_id:= @eh_launch_pad_items_id +1),'1','0','0','0','/home','Bizs','云打印','云打印','cs://1/image/aW1hZ2UvTVRwa01qRTNNV1k0TW1KaE9XVmlNakF4WldSa1l6TTVOamc1T0dSaE9UQTVOdw','1','1','14','{\"url\":\"http://core.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}','3','0','1','1','','0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'0',NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
+VALUES((@eh_launch_pad_items_id:= @eh_launch_pad_items_id +1),'1','0','0','0','/home','Bizs','云打印','云打印','cs://1/image/aW1hZ2UvTVRwa01qRTNNV1k0TW1KaE9XVmlNakF4WldSa1l6TTVOamc1T0dSaE9UQTVOdw','1','1','14','{\"url\":\"http://core.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}','3','0','1','1','','0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'0',NULL);

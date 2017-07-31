@@ -163,7 +163,7 @@
         eh_energy_meter_price_config |
         eh_general_form_vals | eh_lease_configs2 | eh_lease_form_requests | eh_general_form_mappings |
         eh_warehouses | eh_warehouse_materials | eh_warehouse_material_categories | eh_warehouse_stocks | eh_warehouse_stock_logs | eh_warehouse_requests | eh_warehouse_request_materials | eh_warehouse_units | 
-        eh_talents | eh_talent_categories | eh_talent_query_histories |
+        eh_talents | eh_talent_categories | eh_talent_query_histories | eh_talent_requests | eh_talent_message_senders |
         eh_authorizations | eh_authorization_relations | eh_service_module_assignment_relations | eh_domains |
         eh_user_notification_settings | eh_group_member_logs | 
         eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat |
@@ -172,6 +172,11 @@
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
         eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations |
             eh_sms_black_lists |
+        eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |
+        eh_sms_black_lists | eh_yzx_sms_logs |
+        eh_user_identifier_logs | eh_user_appeal_logs |
+        eh_authorization_third_party_forms | eh_authorization_third_party_records | eh_authorization_third_party_buttons |
+        eh_user_identifier_logs | eh_user_appeal_logs |
         eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve|
             eh_community_approve_vals
 

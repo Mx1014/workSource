@@ -48,6 +48,8 @@ public class GroupMemberDTO {
     private Timestamp inviteTime;
     private Timestamp createTime;
     private Timestamp approveTime;
+    private String operatorName;
+    private String operatorPhone;
     private Timestamp updateTime;
     private Byte phonePrivateFlag;
     private String cellPhone;
@@ -56,7 +58,10 @@ public class GroupMemberDTO {
     private Long addressId;
     private String buildingName;
     private String apartmentName;
-    
+    private String communityName;
+    private String areaName;
+    private String cityName;
+
     public GroupMemberDTO() {
     }
 
@@ -82,6 +87,46 @@ public class GroupMemberDTO {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
+
+    public String getOperatorPhone() {
+        return operatorPhone;
+    }
+
+    public void setOperatorPhone(String operatorPhone) {
+        this.operatorPhone = operatorPhone;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 
     public Long getGroupId() {

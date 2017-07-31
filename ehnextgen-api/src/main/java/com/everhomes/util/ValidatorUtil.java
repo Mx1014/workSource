@@ -11,13 +11,19 @@ import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import org.slf4j.LoggerFactory;
+
+import org.slf4j.Logger;
+
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 
 public class ValidatorUtil {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ValidatorUtil.class);
     private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 	
 	public static void validate(Object o) {
+		LOGGER.debug(o == null ? "null" : o.toString());
         Set<ConstraintViolation<Object>> result = validator.validate(o);
         for (ConstraintViolation<Object> v : result) {
             ConstraintDescriptor<?> constraintDescriptor = v.getConstraintDescriptor();

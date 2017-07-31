@@ -178,6 +178,10 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         
         SearchResponse rsp = builder.execute().actionGet();
 
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("SearchEquipmentStandardRelations query : {}", builder);
+			LOGGER.debug("SearchEquipmentStandardRelations rsp : {}", rsp);
+		}
         List<Long> ids = getIds(rsp);
         
         SearchEquipmentStandardRelationsResponse response = new SearchEquipmentStandardRelationsResponse();

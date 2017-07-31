@@ -18,32 +18,53 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.talent.ClearTalentQueryHistoryCommand;
+import com.everhomes.rest.talent.CreateMessageSenderCommand;
+import com.everhomes.rest.talent.CreateOrUpdateRequestSettingCommand;
+import com.everhomes.rest.talent.CreateOrUpdateRequestSettingResponse;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
+import com.everhomes.rest.talent.DeleteMessageSenderCommand;
 import com.everhomes.rest.talent.DeleteTalentCategoryCommand;
 import com.everhomes.rest.talent.DeleteTalentCommand;
 import com.everhomes.rest.talent.DeleteTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.EnableTalentCommand;
 import com.everhomes.rest.talent.GetTalentDetailCommand;
 import com.everhomes.rest.talent.GetTalentDetailResponse;
+import com.everhomes.rest.talent.GetTalentRequestDetailCommand;
+import com.everhomes.rest.talent.GetTalentRequestDetailResponse;
 import com.everhomes.rest.talent.ImportTalentCommand;
+import com.everhomes.rest.talent.ListMessageSenderCommand;
+import com.everhomes.rest.talent.ListMessageSenderResponse;
 import com.everhomes.rest.talent.ListTalentCategoryCommand;
 import com.everhomes.rest.talent.ListTalentCategoryResponse;
 import com.everhomes.rest.talent.ListTalentCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryResponse;
+import com.everhomes.rest.talent.ListTalentRequestCommand;
+import com.everhomes.rest.talent.ListTalentRequestResponse;
 import com.everhomes.rest.talent.ListTalentResponse;
+import com.everhomes.rest.talent.MessageSenderDTO;
 import com.everhomes.rest.talent.TalentCategoryDTO;
 import com.everhomes.rest.talent.TalentDTO;
 import com.everhomes.rest.talent.TalentDegreeEnum;
 import com.everhomes.rest.talent.TalentQueryHistoryDTO;
+import com.everhomes.rest.talent.TalentRequestDTO;
 import com.everhomes.rest.talent.TopTalentCommand;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.ValidatorUtil;
@@ -56,6 +77,9 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 @Component
 public class TalentServiceImpl implements TalentService {
 
+	private static final String TALENT_REQUEST_NAME = "talent.request.name";
+	private static final String TALENT_FORM_ID = "talent.form.id";
+	
 	@Autowired
 	private TalentCategoryProvider talentCategoryProvider;
 	
@@ -73,6 +97,21 @@ public class TalentServiceImpl implements TalentService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private TalentMessageSenderProvider talentMessageSenderProvider;
+	
+	@Autowired
+	private TalentRequestProvider talentRequestProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
+	
+	@Autowired
+	private GeneralFormService generalFormService;
 	
 	@Override
 	public ListTalentCategoryResponse listTalentCategory(ListTalentCategoryCommand cmd) {
@@ -442,6 +481,32 @@ public class TalentServiceImpl implements TalentService {
 		});
 	}
 	
+	@Override
+	public CreateOrUpdateRequestSettingResponse createOrUpdateRequestSetting(CreateOrUpdateRequestSettingCommand cmd) {
+		Integer namespaceId = namespaceId();
+		TrueOrFalseFlag enable = TrueOrFalseFlag.fromCode(cmd.getEnable());
+		if (enable == TrueOrFalseFlag.TRUE) {
+			configurationProvider.setValue(namespaceId, TALENT_REQUEST_NAME, cmd.getRequestName());
+			configurationProvider.setLongValue(namespaceId, TALENT_FORM_ID, cmd.getFormId());
+		}else {
+			configurationProvider.deleteValue(namespaceId, TALENT_REQUEST_NAME);
+			configurationProvider.deleteValue(namespaceId, TALENT_FORM_ID);
+		}
+		
+		return null;
+	}
+
+	@Override
+	public CreateOrUpdateRequestSettingResponse findRequestSetting() {
+		Integer namespaceId = namespaceId();
+		String talentRequestName = configurationProvider.getValue(namespaceId, TALENT_REQUEST_NAME, "");
+		Long talentFormId = configurationProvider.getLongValue(namespaceId, TALENT_FORM_ID, 0L);
+		if (StringUtils.isEmpty(talentRequestName) || talentFormId == 0L) {
+			return new CreateOrUpdateRequestSettingResponse(TrueOrFalseFlag.FALSE.getCode(), null, null);
+		}
+		return new CreateOrUpdateRequestSettingResponse(TrueOrFalseFlag.TRUE.getCode(), talentRequestName, talentFormId);
+	}
+
 	private Long userId() {
 		return UserContext.current().getUser().getId();
 	}
@@ -449,5 +514,101 @@ public class TalentServiceImpl implements TalentService {
 	private Integer namespaceId() {
 		return UserContext.getCurrentNamespaceId();
 	} 
+
+	@Override
+	public void createMessageSender(CreateMessageSenderCommand cmd) {
+		if (cmd.getSenders() == null || cmd.getSenders().isEmpty()) {
+			return;
+		}
+		cmd.getSenders().forEach(t->{
+			TalentMessageSender talentMessageSender = talentMessageSenderProvider.findTalentMessageSender(namespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), t.getOrganizationMemberId(), t.getUserId());
+			if (talentMessageSender == null) {
+				talentMessageSender = new TalentMessageSender();
+				talentMessageSender.setNamespaceId(namespaceId());
+				talentMessageSender.setOwnerType(cmd.getOwnerType());
+				talentMessageSender.setOwnerId(cmd.getOwnerId());
+				talentMessageSender.setStatus(CommonStatus.ACTIVE.getCode());
+				talentMessageSender.setOrganizationMemberId(t.getOrganizationMemberId());
+				talentMessageSender.setUserId(t.getUserId());
+				talentMessageSenderProvider.createTalentMessageSender(talentMessageSender);
+			}else {
+				talentMessageSender.setStatus(CommonStatus.ACTIVE.getCode());
+				talentMessageSenderProvider.updateTalentMessageSender(talentMessageSender);
+			}
+		});
+	}
+
+	private MessageSenderDTO convert(TalentMessageSender talentMessageSender) {
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(talentMessageSender.getOrganizationMemberId());
+		if (organizationMember != null) {
+			return new MessageSenderDTO(talentMessageSender.getId(), organizationMember.getContactName(), organizationMember.getContactToken());
+		}
+		User user = userProvider.findUserById(talentMessageSender.getUserId());
+		if (user != null) {
+			List<UserIdentifier> userIdentifiers = userProvider.listUserIdentifiersOfUser(user.getId());
+			if (userIdentifiers != null && !userIdentifiers.isEmpty()) {
+				return new MessageSenderDTO(talentMessageSender.getId(), user.getNickName(), userIdentifiers.get(0).getIdentifierToken());
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void deleteMessageSender(DeleteMessageSenderCommand cmd) {
+		TalentMessageSender talentMessageSender = talentMessageSenderProvider.findTalentMessageSenderById(cmd.getId());
+		talentMessageSender.setStatus(CommonStatus.INACTIVE.getCode());
+		talentMessageSenderProvider.updateTalentMessageSender(talentMessageSender);
+	}
+
+	@Override
+	public ListMessageSenderResponse listMessageSender(ListMessageSenderCommand cmd) {
+		List<TalentMessageSender> talentMessageSenders = talentMessageSenderProvider.listTalentMessageSenderByOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		return new ListMessageSenderResponse(talentMessageSenders.stream().map(this::convert).collect(Collectors.toList()));
+	}
 	
+	@Override
+	public ListTalentRequestResponse listTalentRequest(ListTalentRequestCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		cmd.setPageSize(pageSize+1);
+		List<TalentRequest> talentRequests = talentRequestProvider.listTalentRequestByCondition(namespaceId(), cmd);
+		Long nextPageAnchor = null;
+		if (talentRequests.size() > pageSize) {
+			talentRequests.remove(talentRequests.size()-1);
+			nextPageAnchor = talentRequests.get(talentRequests.size()-1).getId();
+		}
+		
+		return new ListTalentRequestResponse(nextPageAnchor, talentRequests.stream().map(this::convertWithoutDetail).collect(Collectors.toList()));
+	}
+
+	private TalentRequestDTO convertWithoutDetail(TalentRequest talentRequest) {
+		TalentRequestDTO talentRequestDTO = new TalentRequestDTO();
+		talentRequestDTO.setId(talentRequest.getId());
+		talentRequestDTO.setRequestor(talentRequest.getRequestor());
+		talentRequestDTO.setPhone(talentRequest.getPhone());
+		talentRequestDTO.setOrganizationName(talentRequest.getOrganizationName());
+		talentRequestDTO.setCreateTime(talentRequest.getCreateTime().getTime());
+		talentRequestDTO.setTalentId(talentRequest.getTalentId());
+		Talent talent = talentProvider.findTalentById(talentRequest.getTalentId());
+		if(talent != null){
+			talentRequestDTO.setTalentName(talent.getName());
+		}
+		return talentRequestDTO;
+	}
+	
+	@Override
+	public GetTalentRequestDetailResponse getTalentRequestDetail(GetTalentRequestDetailCommand cmd) {
+		TalentRequest talentRequest = talentRequestProvider.findTalentRequestById(cmd.getId());
+		return new GetTalentRequestDetailResponse(convert(talentRequest));
+	}
+
+	private TalentRequestDTO convert(TalentRequest talentRequest) {
+		TalentRequestDTO talentRequestDTO = convertWithoutDetail(talentRequest);
+		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
+        cmd.setSourceType(EntityType.TALENT_REQUEST.getCode());
+        cmd.setSourceId(talentRequest.getId());
+        List<FlowCaseEntity> flowCaseEntities = generalFormService.getGeneralFormFlowEntities(cmd, true);
+		talentRequestDTO.setFlowCaseEntities(flowCaseEntities);
+		return talentRequestDTO;
+	}
+
 }

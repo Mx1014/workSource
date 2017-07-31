@@ -287,6 +287,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 	@Override
 	public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd) {
+		return getGeneralFormFlowEntities(cmd, false);
+	}
+		
+	@Override
+	public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd, boolean showDefaultFields) {
 
 		List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
 
@@ -298,23 +303,28 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
 					GeneralFormFieldDTO.class);
 
-			processFlowEntities(entities, vals, fieldDTOs);
+			processFlowEntities(entities, vals, fieldDTOs, showDefaultFields);
 		}
 		return entities;
 	}
 
 	@Override
 	public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs) {
+		processFlowEntities(entities, vals, fieldDTOs, false);
+	}
+	
+	@Override
+	public void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs, boolean showDefaultFields) {
 
 		List<String> defaultFields = Arrays.stream(GeneralFormDataSourceType.values()).map(GeneralFormDataSourceType::getCode)
 				.collect(Collectors.toList());
 
 		for (GeneralFormVal val : vals) {
 			try{
-				if (!defaultFields.contains(val.getFieldName())) {
+				if (showDefaultFields || !defaultFields.contains(val.getFieldName())) {
 					// 不在默认fields的就是自定义字符串，组装这些
 					GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					if(null == dto ){
+					if(null == dto || GeneralFormDataVisibleType.fromCode(dto.getVisibleType()) == GeneralFormDataVisibleType.HIDDEN){
 						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
 						continue;
 					}
@@ -459,18 +469,26 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 			if (null == form || form.getStatus().equals(GeneralFormStatus.INVALID.getCode()))
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 						ErrorCodes.ERROR_INVALID_PARAMETER, "form not found");
-			form.setFormName(cmd.getFormName());
-			form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
-			form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
 			if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-				// 如果是config状态的直接改
+				// 如果是config状态的直接改,
+				//这里更新老的form之后才把表单内容，才把内容设置到新表单里面 by dengs issue:12817
+				form.setFormName(cmd.getFormName());
+				form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
 				this.generalFormProvider.updateGeneralForm(form);
 			} else if (form.getStatus().equals(GeneralFormStatus.RUNNING.getCode())) {
 				// 如果是RUNNING状态的,置原form为失效,重新create一个版本+1的config状态的form
 				form.setStatus(GeneralFormStatus.INVALID.getCode());
+				form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				//这里更新老的form之后才把表单内容，才把内容设置到新表单里面 by dengs issue:12817
 				this.generalFormProvider.updateGeneralForm(form);
+				form.setFormName(cmd.getFormName());
+				form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
 				form.setFormVersion(form.getFormVersion() + 1);
 				form.setStatus(GeneralFormStatus.CONFIG.getCode());
+				form.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				form.setUpdateTime(null);
 				this.generalFormProvider.createGeneralForm(form);
 			}
 			return processGeneralFormDTO(form);

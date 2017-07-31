@@ -437,7 +437,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     public List<ServiceModuleDTO> treeServiceModules(TreeServiceModuleCommand cmd) {
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
-        Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
         List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
 

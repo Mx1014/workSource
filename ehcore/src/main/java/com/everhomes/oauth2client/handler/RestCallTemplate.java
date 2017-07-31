@@ -163,9 +163,21 @@ public class RestCallTemplate {
         return this;
     }
 
+    public <R> HttpResponseEntity<R> get() {
+        return execute(HttpMethod.GET);
+    }
+
+    public <R> HttpResponseEntity<R> post() {
+        return execute(HttpMethod.POST);
+    }
+
     public <R> HttpResponseEntity<R> execute() {
+        return execute(httpMethod);
+    }
+
+    private <R> HttpResponseEntity<R> execute(HttpMethod method) {
         HttpEntity httpEntity = new HttpEntity(body, headers);
-        ResponseEntity<String> result = template.exchange(url, httpMethod, httpEntity, String.class, variables);
+        ResponseEntity<String> result = template.exchange(url, method, httpEntity, String.class, variables);
         // handle error
         if (hasError(result.getStatusCode())) {
             Object errorObj;
@@ -185,16 +197,6 @@ public class RestCallTemplate {
         }
         R r = gson.fromJson(result.getBody(), (Class<R>) responseType);
         return new HttpResponseEntity<>(r, result.getHeaders(), result.getStatusCode());
-    }
-
-    public <R> HttpResponseEntity<R> post() {
-        this.httpMethod = HttpMethod.POST;
-        return execute();
-    }
-
-    public <R> HttpResponseEntity<R> get() {
-        this.httpMethod = HttpMethod.GET;
-        return execute();
     }
 
     public static QueryStringBuilder queryStringBuilder() {

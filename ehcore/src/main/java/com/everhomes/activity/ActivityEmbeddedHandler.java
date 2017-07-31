@@ -274,26 +274,54 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         // 旧版本发布的活动只有officialFlag，新版本发布的活动有categoryId，当然更老的版本两者都没有
         // 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
         // add by tt, 20170116
-        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
-        Long categoryId = cmd.getCategoryId();
-        if (officialFlag != null && officialFlag == OfficialFlag.YES) {
-			categoryId = 1L;
-		}else {
-			if (categoryId == null) {
-				if(officialFlag == null) officialFlag = OfficialFlag.NO;
-				categoryId = officialFlag == OfficialFlag.YES?1L:0L;
+//        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+//        Long categoryId = cmd.getCategoryId();
+//        if (officialFlag != null && officialFlag == OfficialFlag.YES) {
+//			categoryId = 1L;
+//		}else {
+//			if (categoryId == null) {
+//				if(officialFlag == null) officialFlag = OfficialFlag.NO;
+//				categoryId = officialFlag == OfficialFlag.YES?1L:0L;
+//			}else {
+//				if (categoryId.longValue() == 1L) {
+//					officialFlag = OfficialFlag.YES;
+//				}else if (categoryId.longValue() == 0L) {
+//					officialFlag = OfficialFlag.NO;
+//				}else {
+//					// 如果categoryId不是0和1，则表示是新增的入口，不与之前的官方非官方活动对应
+//					officialFlag = OfficialFlag.UNKOWN;
+//				}
+//			}
+//		}
+
+		// 旧版本发布的活动只有officialFlag，新版本发布的活动有categoryId，当然更老的版本两者都没有
+		// 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
+		// add by tt, 20170116
+		// 因为旧版本的app在其他入口的情况下仍然会传OfficialFlag.YES，因此在上面规则的情况下，使用新的方法
+		// 1、OfficialFlag为1时判断categoryId，如果是其他入口则使用OfficialFlag.UNKOWN，不然默认1
+		// 2、officialFlag不是1时，根据categoryId给officialFlag赋值
+		OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+		Long categoryId = cmd.getCategoryId();
+		if(officialFlag == OfficialFlag.YES){
+			if(categoryId != null && categoryId.longValue() == 0) {
+				categoryId = 1L;
 			}else {
-				if (categoryId.longValue() == 1L) {
-					officialFlag = OfficialFlag.YES;
-				}else if (categoryId.longValue() == 0L) {
-					officialFlag = OfficialFlag.NO;
-				}else {
-					// 如果categoryId不是0和1，则表示是新增的入口，不与之前的官方非官方活动对应
-					officialFlag = OfficialFlag.UNKOWN;
-				}
+				officialFlag = OfficialFlag.UNKOWN;
+			}
+		}else{
+			if(categoryId == null){
+				categoryId = 0L;
+				officialFlag = OfficialFlag.NO;
+			}else if(categoryId.longValue() == 0){
+				officialFlag = OfficialFlag.NO;
+			}else if(categoryId.longValue() == 1){
+				officialFlag = OfficialFlag.YES;
+			}else{
+				officialFlag = OfficialFlag.UNKOWN;
 			}
 		}
-        
+
+
         cmd.setOfficialFlag(officialFlag.getCode());
         post.setOfficialFlag(officialFlag.getCode());
         cmd.setCategoryId(categoryId);

@@ -1,36 +1,35 @@
 package com.everhomes.user;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.group.Group;
-import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhUserGroupHistoriesDao;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhUserGroupHistories;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhUserGroupHistoriesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 @Component
 public class UserGroupHistoryProviderImpl implements UserGroupHistoryProvider {
@@ -183,24 +182,45 @@ public class UserGroupHistoryProviderImpl implements UserGroupHistoryProvider {
     }
 
 	@Override
-	public List<UserGroupHistory> queryUserGroupHistoryByGroupIds(List<Long> groupIds, CrossShardListingLocator locator, int pageSize) {
+	public List<UserGroupHistory> queryUserGroupHistoryByGroupIds(String userInfoKeyword, String communityKeyword,
+                                                    List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
 		 
 		List<UserGroupHistory> objs = new ArrayList<UserGroupHistory>();
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), objs, (DSLContext context, Object reducingContext) -> {
 //			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
 	        
-	        SelectQuery<EhUserGroupHistoriesRecord> query = context.selectQuery(Tables.EH_USER_GROUP_HISTORIES);
-	         
-	        query.addConditions(Tables.EH_USER_GROUP_HISTORIES.GROUP_ID.in(groupIds));
-	        if(locator.getAnchor() != null) {
+	        SelectQuery<Record> query = context.select(Tables.EH_USER_GROUP_HISTORIES.fields())
+                    .from(Tables.EH_USER_GROUP_HISTORIES).getQuery();
+
+	        query.addSelect(Tables.EH_USERS.NICK_NAME);
+            query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USER_GROUP_HISTORIES.OWNER_UID.eq(Tables.EH_USERS.ID));
+            query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+
+            query.addSelect(Tables.EH_COMMUNITIES.NAME);
+            query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_USER_GROUP_HISTORIES.COMMUNITY_ID.eq(Tables.EH_COMMUNITIES.ID));
+
+            query.addConditions(Tables.EH_USER_GROUP_HISTORIES.COMMUNITY_ID.in(communityIds));
+            if (StringUtils.isNotBlank(userInfoKeyword)) {
+                String keyword = "%" + userInfoKeyword + "%";
+                query.addConditions(Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword)));
+            }
+            if (StringUtils.isNotBlank(communityKeyword)) {
+                String keyword = "%" + communityKeyword + "%";
+                query.addConditions(Tables.EH_COMMUNITIES.NAME.like(keyword));
+            }
+
+            if(locator.getAnchor() != null) {
 	            query.addConditions(Tables.EH_USER_GROUP_HISTORIES.ID.gt(locator.getAnchor()));
-	            }
+            }
 	        
 	        query.addLimit(pageSize+1);
 	        query.addOrderBy(Tables.EH_USER_GROUP_HISTORIES.ID.desc());
 	        query.fetch().map((r) -> {
-	        	objs.add( ConvertHelper.convert(r, UserGroupHistory.class));
-	        	return null;
+                UserGroupHistory history = RecordHelper.convert(r, UserGroupHistory.class);
+                String communityName = r.getValue(Tables.EH_COMMUNITIES.NAME);
+                history.setCommunityName(communityName);
+                objs.add(history);
+                return null;
 	        });
 	        return true;
 		});
@@ -214,5 +234,5 @@ public class UserGroupHistoryProviderImpl implements UserGroupHistoryProvider {
         
         return objs;
 	}
-     
+
 }

@@ -27,7 +27,8 @@ public enum FlowOwnerType {
 	RESERVER_PLACE("RESERVER_PLACE"), 
 	EhOrganizations("EhOrganizations"), 
     WAREHOUSE_REQUEST("WAREHOUSEREQUEST"),
-    LEASE_PROMOTION("LEASE_PROMOTION")
+    LEASE_PROMOTION("LEASE_PROMOTION"),
+    TALENT_REQUEST("TALENT_REQUEST")
     ;
 
 	private String code;
