@@ -34,9 +34,9 @@ CREATE TABLE `eh_community_approve_vals` (
   `form_version` bigint(20) DEFAULT NULL,
   `approve_id` bigint(20) DEFAULT '0',
   `approve_name` varchar(64) DEFAULT NULL,
-  `requestor_name` varchar(64) DEFAULT NULL,
-  `requestor_phone` varchar(64) DEFAULT NULL,
-  `requestor_company` varchar(64) DEFAULT NULL,
+  `name_value` varchar(64) DEFAULT NULL,
+  `phone_value` varchar(64) DEFAULT NULL,
+  `company_value` varchar(64) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
