@@ -95,6 +95,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN.eq(organizationToken));
 		return ConvertHelper.convert(query.fetchOne(), Organization.class);
 	}
+
 	@Override
 	public void updateOrganization(Organization department){
 		assert(department.getId() == null);
@@ -105,6 +106,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dao.update(department);
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
+	}
+
+	@Override
+	public void updateOrganization(List<Long> ids, Byte status, Long uid, Timestamp now){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		int count = context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.STATUS,status)
+				.set(Tables.EH_ORGANIZATIONS.OPERATOR_UID, uid)
+				.set(Tables.EH_ORGANIZATIONS.UPDATE_TIME, now)
+				.where(Tables.EH_ORGANIZATIONS.ID.in(ids)).execute();
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, null);
 	}
 
 
@@ -358,6 +370,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, departmentMember.getId());
 	}
 
+	@Override
+	public void updateOrganizationMemberByOrgPaths(String path, Byte status, Long uid, Timestamp now) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		int count = context.update(Tables.EH_ORGANIZATION_MEMBERS).set(Tables.EH_ORGANIZATION_MEMBERS.STATUS,status)
+				.set(Tables.EH_ORGANIZATION_MEMBERS.OPERATOR_UID, uid)
+				.set(Tables.EH_ORGANIZATION_MEMBERS.UPDATE_TIME, now)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path)).execute();
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, null);
+	}
+
 	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
 	@Override
 	public void deleteOrganizationMemberById(Long id){
@@ -525,6 +548,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dao.deleteById(id);
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationCommunities.class, id);
+	}
+
+	@Override
+	public void deleteOrganizationCommunityByOrgIds(List<Long> organizationIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_ORGANIZATION_COMMUNITIES).where(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.in(organizationIds)).execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationCommunities.class, null);
 	}
 
 	@Override
@@ -2293,7 +2323,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.update(organizationCommunityRequest);
     }
 
-    @Override
+	@Override
+	public void updateOrganizationCommunityRequestByOrgIds(List<Long> orgIds, Byte status, Long uid, Timestamp now) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		int count = context.update(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS).set(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS,status)
+				.set(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.OPERATOR_UID, uid)
+				.set(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.UPDATE_TIME, now)
+				.where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.in(orgIds)
+						.and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())))
+				.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationCommunityRequests.class, null);
+	}
+
+	@Override
     public void deleteOrganizationCommunityRequestById(OrganizationCommunityRequest organizationCommunityRequest) {
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
         // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, organizationCommunityRequest.getCommunityId()));
@@ -4735,7 +4778,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						query.addConditions(Tables.EH_USERS.ID.lt(locator.getAnchor()));
 
 					query.addOrderBy(Tables.EH_USERS.ID.desc());
-					query.addOrderBy(Tables.EH_USER_ORGANIZATIONS.STATUS.desc());
 					query.addLimit(size);
 					LOGGER.debug("query sql:{}", query.getSQL());
 					LOGGER.debug("query param:{}", query.getBindValues());

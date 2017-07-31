@@ -540,4 +540,8 @@ UPDATE eh_configurations SET `value` = REPLACE(`value`, 'ns=1', 'ns=999973'), `d
 UPDATE eh_configurations SET `description` =  'biz access url for eboill' WHERE id = 1600 AND namespace_id = 999973;
 
 
+-- 公告栏更新为1行  20170728 add by yanjun
+update eh_launch_pad_layouts set version_code = '2017072801', layout_json = '{"versionCode":"2017072801","versionName":"4.7.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Metro","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount": 1},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"date","categoryId":0,"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16}]}' where  id in (596, 597) and namespace_id = 999973;
+
+
 
