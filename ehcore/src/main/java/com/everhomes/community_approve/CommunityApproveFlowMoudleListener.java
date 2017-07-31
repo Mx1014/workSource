@@ -177,7 +177,7 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
         for (GeneralFormFieldDTO dto:fieldDTOs) {
             boolean flag = false;
             for (GeneralFormVal val : vals) {
-                if (dto.getFieldName().equals(val.getFieldName()))
+                if (dto.getFieldName().equals(val.getFieldName()) && dto.getFieldType().equals(val.getFieldType()))
                     try {
                         flag = true;
                         FlowCaseEntity e = new FlowCaseEntity();
