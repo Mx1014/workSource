@@ -443,4 +443,11 @@ public interface OrganizationProvider {
 	 * added by R, 20170719
 	 */
 	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId);
+
+
+	List listOrganizationMembersGroupByToken();
+
+	List listOrganizationMemberByToken(String token);
+
+	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
 }
