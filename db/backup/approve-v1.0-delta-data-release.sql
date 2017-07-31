@@ -34,7 +34,7 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileg
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41420, '审批管理', 1, 1, '审批管理  全部权限', 501);
 
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `申请记录`, `sort_num`)
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41430, '申请记录', 1, 1, '打印价格  全部权限', 502);
 
 -- 角色对应的菜单权限
@@ -71,7 +71,7 @@ VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 9999
 
 -- 服务广场 -- 添加到左邻域
  SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
- INSERT INTO `eh_launch_pad_items` 
+ INSERT INTO `eh_launch_pad_items`
 (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`,
  `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 

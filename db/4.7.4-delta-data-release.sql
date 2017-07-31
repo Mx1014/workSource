@@ -34,7 +34,7 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileg
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41420, '审批管理', 1, 1, '审批管理  全部权限', 501);
 
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `申请记录`, `sort_num`)
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41430, '申请记录', 1, 1, '打印价格  全部权限', 502);
 
 -- 角色对应的菜单权限 by zt.zheng
