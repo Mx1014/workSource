@@ -166,10 +166,13 @@ public class PollServiceImpl implements PollService {
                 item.setVoteCount(item.getVoteCount()+1);
                 //update poll item
                 pollProvider.updatePollItem(item);
-                //update poll
-                poll.setPollCount(poll.getPollCount()+1);
-                pollProvider.updatePoll(poll);
+
             });
+
+            //将pollCount放在forEach外面，因为一个人投票多个选项，仍然算是一个人投票   edit by yanjun 20170728
+            //update poll
+            poll.setPollCount(poll.getPollCount()+1);
+            pollProvider.updatePoll(poll);
             return true;
             });
             if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
