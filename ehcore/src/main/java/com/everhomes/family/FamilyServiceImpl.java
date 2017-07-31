@@ -154,6 +154,8 @@ public class FamilyServiceImpl implements FamilyService {
     	if(null == u){
     		u = UserContext.current().getUser();
     	}
+
+
     	
     	final User user = u;
         long uid = user.getId();
@@ -179,7 +181,13 @@ public class FamilyServiceImpl implements FamilyService {
                 family = this.dbProvider.execute((TransactionStatus status) -> {
                     Family f = new Family();
                     f.setName(address.getAddress());
-                    f.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+
+                    //生成的域空间原来是使用Namespace.DEFAULT_NAMESPACE，但是这查询的时候根据当前域空间查询查不出来，此处使用当前域空间  edit by yanjun 20170731
+                    Integer namespaceId = UserContext.getCurrentNamespaceId();
+                    if(namespaceId == null){
+                        namespaceId = Namespace.DEFAULT_NAMESPACE;
+                    }
+                    f.setNamespaceId(namespaceId);
                     f.setDiscriminator(GroupDiscriminator.FAMILY.getCode());
                     f.setAddressId(address.getId());
                     f.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
