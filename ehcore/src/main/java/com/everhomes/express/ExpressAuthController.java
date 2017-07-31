@@ -54,7 +54,8 @@ public class ExpressAuthController {// extends ControllerBase
     private final static String AVATAR = "avatar";
     
     //重定向url
-    private final static String REDIRECT_URL = "";
+    private final static String ERROR_REDIRECT_URL = "/deliver/dist/assets/error.html";
+    private final static String SUCCESS_REDIRECT_URL = "/deliver/dist/index.html?hideNavigationBar=1#/home_page#sign_suffixl";
     
     
     @Autowired
@@ -91,7 +92,7 @@ public class ExpressAuthController {// extends ControllerBase
         	try{
         		vaildParams(params, namespaceId);
         	}catch(Exception e){
-        		 response.sendRedirect(REDIRECT_URL);
+        		 response.sendRedirect(ERROR_REDIRECT_URL);
         		 return ;
         	}
         	//验证通过了，那么如果没有注册，则注册
@@ -102,7 +103,7 @@ public class ExpressAuthController {// extends ControllerBase
         LOGGER.info("Process express auth request, loginToken={}", loginToken);
         long endTime = System.currentTimeMillis();
         //重定向到快递的地址。
-        response.sendRedirect(REDIRECT_URL);
+        response.sendRedirect(SUCCESS_REDIRECT_URL);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(req calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
