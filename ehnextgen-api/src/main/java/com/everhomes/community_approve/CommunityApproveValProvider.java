@@ -10,16 +10,16 @@ import java.util.List;
  */
 public interface CommunityApproveValProvider {
 
-    Long createCommunityApproveVal(CommunityApproveVal obj);
+    Long createCommunityApproveVal(CommunityApproveRequests obj);
 
-    void updateCommunityApproveVal(CommunityApproveVal obj);
+    void updateCommunityApproveVal(CommunityApproveRequests obj);
 
-    void deleteCommunityApproveVal(CommunityApproveVal obj);
+    void deleteCommunityApproveVal(CommunityApproveRequests obj);
 
-    CommunityApproveVal getCommunityApproveValById(Long id);
+    CommunityApproveRequests getCommunityApproveValById(Long id);
 
-    CommunityApproveVal getCommunityApproveValByFlowCaseId(Long id);
+    CommunityApproveRequests getCommunityApproveValByFlowCaseId(Long id);
 
-    List<CommunityApproveVal> queryCommunityApproves(ListingLocator locator,
-                                                  int count, ListingQueryBuilderCallback queryBuilderCallback);
+    List<CommunityApproveRequests> queryCommunityApproves(ListingLocator locator,
+                                                          int count, ListingQueryBuilderCallback queryBuilderCallback);
 }

@@ -6,9 +6,6 @@ import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
-import com.everhomes.general_approval.GeneralApprovalController;
-import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
-import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormVal;
@@ -104,7 +101,7 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         List<FlowCaseEntity> entities = new ArrayList<>();
 
-        CommunityApproveVal val = communityApproveValProvider.getCommunityApproveValByFlowCaseId(flowCase.getId());
+        CommunityApproveRequests val = communityApproveValProvider.getCommunityApproveValByFlowCaseId(flowCase.getId());
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(val.getFormOriginId(),
                 val.getFormVersion());
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
@@ -161,7 +158,7 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
     public List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         List<FlowCaseEntity> entities = new ArrayList<>();
         if (flowCase.getReferType().equals(FlowReferType.COMMUNITY_APPROVE.getCode())) {
-            CommunityApproveVal val = communityApproveValProvider.getCommunityApproveValByFlowCaseId(flowCase.getId());
+            CommunityApproveRequests val = communityApproveValProvider.getCommunityApproveValByFlowCaseId(flowCase.getId());
             List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(val.getModuleType(),val.getId());
             GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
                     list.get(0).getFormOriginId(),list.get(0).getFormVersion());
