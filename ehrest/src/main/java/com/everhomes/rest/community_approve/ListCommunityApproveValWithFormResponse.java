@@ -1,5 +1,6 @@
 package com.everhomes.rest.community_approve;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 
@@ -12,6 +13,7 @@ public class ListCommunityApproveValWithFormResponse {
 
     CommunityApproveValDTO dto;
 
+    @ItemType(PostApprovalFormItem.class)
     List<PostApprovalFormItem> items;
 
     public CommunityApproveValDTO getDto() {
