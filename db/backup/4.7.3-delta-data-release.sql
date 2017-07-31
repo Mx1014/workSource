@@ -97,3 +97,6 @@ VALUES ((@max_id := @max_id + 1), 0, '13111116818', 'manual', 1, 1, 0, NOW(), NU
 -- added by janson, add zuolin_v2
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999993, 'aclink.qr_driver_zuolin_inner', 'zuolin_v2', 'use version2 of zuolin driver');
 
+-- added by janson
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999993, 'aclink.qr_image_timeout', '600', '10 minute for image timeout');
+
