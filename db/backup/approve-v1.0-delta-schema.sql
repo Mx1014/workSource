@@ -1,7 +1,4 @@
--- 增加详情字段
-ALTER TABLE `eh_rentalv2_items` ADD COLUMN `description` VARCHAR(1024) NULL DEFAULT NULL AFTER `item_type`;
-
-CREATE TABLE `eh_community_approve` (
+﻿CREATE TABLE `eh_community_approve` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
   `organization_id` bigint(20) NOT NULL,

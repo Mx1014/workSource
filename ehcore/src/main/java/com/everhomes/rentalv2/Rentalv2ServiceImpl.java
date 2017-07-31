@@ -1364,6 +1364,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		} 
 		siteItemDTO.setItemName(item.getName());
 		siteItemDTO.setItemPrice(item.getPrice());
+		siteItemDTO.setDescription(item.getDescription());
 		siteItemDTO.setImgUrl(this.contentServerService.parserUri(siteItemDTO.getImgUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 		return siteItemDTO;
 	}
@@ -5409,6 +5410,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		siteItem.setItemType(cmd.getItemType());
 		siteItem.setName(cmd.getItemName());
 		siteItem.setPrice(cmd.getItemPrice());
+		siteItem.setDescription(cmd.getDescription());
 		rentalv2Provider.updateRentalSiteItem(siteItem);
 	}
 
