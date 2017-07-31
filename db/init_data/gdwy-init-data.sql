@@ -1914,4 +1914,5 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 
 SET FOREIGN_KEY_CHECKS = 1;
 
-
+-- 考勤统计 后台菜单 add by yanjun 20170731
+UPDATE `eh_web_menu_scopes` SET  menu_id=50660 where menu_id = 56161 and owner_id = 999970;
