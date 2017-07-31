@@ -21,7 +21,7 @@ CREATE TABLE `eh_community_approve` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --创建申请表 by st.zheng
-CREATE TABLE `eh_community_approve_requests` (
+CREATE TABLE `eh_community_approve_vals` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `organization_id` bigint(20) NOT NULL DEFAULT '0',
