@@ -1539,7 +1539,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setContactToken(member.getContactToken());
 						dto.setTargetType(PmMemberTargetType.USER.getCode());
 					}
-					dtos.add(dto);
+					if(dto.getId() != null){
+						dtos.add(dto);
+					}
+
 				}
 			}
 		}
@@ -1575,7 +1578,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setContactToken(member.getContactToken());
 						dto.setTargetType(PmMemberTargetType.USER.getCode());
 					}
-					dtos.add(dto);
+					if(dto.getId() != null){
+						dtos.add(dto);
+					}
 				}
 			}
 		}

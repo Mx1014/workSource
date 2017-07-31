@@ -28,9 +28,30 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.family.ListNeighborUsersCommand;
 import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
 import com.everhomes.rest.family.ParamType;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+ 
+import com.everhomes.rest.user.ListUserOpPromotionsRespose;
+ 
+import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListAuthFormsResponse;
+import com.everhomes.rest.ui.user.ListContactBySceneRespose;
+import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
+import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
+import com.everhomes.rest.ui.user.SceneContactDTO;
+import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.WebTokenGenerator;
 
 /**
@@ -286,7 +307,7 @@ public class UserUiController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
+ 
 /*
     @RequestMapping("getCurrentContactRealInfo")
     @RestReturn(value=SceneContactV2DTO.class)
@@ -311,6 +332,34 @@ public class UserUiController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    } 
+	
+	/**
+	 * <b>URL: /ui/user/listAuthForms</b>
+	 * <p>获取家庭认证和公司认证的sourceType,sourceId</p>
+	 */
+	@RequestMapping("listAuthForms")
+	@RestReturn(value=ListAuthFormsResponse.class)
+	public RestResponse listAuthForm() {
+		ListAuthFormsResponse listAuthFormResponse = userService.listAuthForms();
+		RestResponse response = new RestResponse(listAuthFormResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /ui/user/getFamilyButtonStatus</b>
+	 * <p>获取文案,和家庭下button的是否显示</p>
+	 */
+	@RequestMapping("getFamilyButtonStatus")
+	@RestReturn(value=GetFamilyButtonStatusResponse.class)
+	public RestResponse getFamilyButtonStatus() {
+		GetFamilyButtonStatusResponse getFamilyButtonStatusResponse = userService.getFamilyButtonStatus();
+		RestResponse response = new RestResponse(getFamilyButtonStatusResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }

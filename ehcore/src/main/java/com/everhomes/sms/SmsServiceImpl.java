@@ -76,7 +76,8 @@ public class SmsServiceImpl implements SmsService {
                     .write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<response>\n<retcode>0</retcode>\n</response>"
                             .getBytes("utf-8"));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("YZX sms report error", e);
+            // e.printStackTrace();
         }
     }
 
