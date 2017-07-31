@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -80,19 +82,21 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		for (Mail mail : maillist) {
 			ExpressTraceDTO dto = new ExpressTraceDTO();
 			dto.setAcceptAddress(mail.getRelationOfficeDesc().getValue());
-			dto.setAcceptTime(DATE_TIME_FORMATTER.format(java.time.Instant.ofEpochMilli(mail.getActionDateTime().getMillisecond())));
-			System.out.print(mail.getActionInfoOut().getValue()+" | ");
-			System.out.print(mail.getActionDateTime().getYear()+"."+
-					mail.getActionDateTime().getMonth()+"."+
-					mail.getActionDateTime().getDay()+" "+
-					mail.getActionDateTime().getHour()+"-"+
-					mail.getActionDateTime().getMinute()+"-"+
-					mail.getActionDateTime().getSecond()+" | ");
-			System.out.print(mail.getMailCode().getValue()+" | ");
-			System.out.print(mail.getActionDateTime().getMillisecond()+" | ");
-			System.out.print(mail.getOfficeName().getValue()+" | ");
-			System.out.print(mail.getRelationOfficeDesc().getValue()+" | ");
-			System.out.println("--------------------------------------------------------");
+			XMLGregorianCalendar cdar = mail.getActionDateTime();
+			if(cdar != null)
+				dto.setAcceptTime(cdar.toString().replace("T", " ").replace("+08:00", ""));
+//			System.out.print(mail.getActionInfoOut().getValue()+" | ");
+//			System.out.print(mail.getActionDateTime().getYear()+"."+
+//					mail.getActionDateTime().getMonth()+"."+
+//					mail.getActionDateTime().getDay()+" "+
+//					mail.getActionDateTime().getHour()+"-"+
+//					mail.getActionDateTime().getMinute()+"-"+
+//					mail.getActionDateTime().getSecond()+" | ");
+//			System.out.print(mail.getMailCode().getValue()+" | ");
+//			System.out.print(mail.getActionDateTime().getMillisecond()+" | ");
+//			System.out.print(mail.getOfficeName().getValue()+" | ");
+//			System.out.print(mail.getRelationOfficeDesc().getValue()+" | ");
+//			System.out.println("--------------------------------------------------------");
 			response.getTraces().add(dto);
 		}
 		String statusvalue = maillist.get(maillist.size()-1).getActionInfoOut().getValue();
@@ -105,18 +109,24 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		if (maillist.size() > 1) {
 			Mail first = maillist.get(0);
 			Mail last = maillist.get(maillist.size()-1);
-//			response.setConsumeTime(getDeltaTime(String.valueOf(last.getActionDateTime().get String.valueOf(first.getActionDateTime().getMillisecond())));
+			last.getActionDateTime().toString();
+			response.setConsumeTime(getDeltaTime(first, last));
 		}
 		
 		return response;
 	}
 	
-	private String getDeltaTime(String last, String first) {
-		LocalDateTime dateTime = LocalDateTime.parse(first, DATE_TIME_FORMATTER);
-		Instant instant = dateTime.atZone(ZoneOffset.systemDefault()).toInstant();
-		LocalDateTime dateTime2 = LocalDateTime.parse(last, DATE_TIME_FORMATTER);
-		Instant instant2 = dateTime2.atZone(ZoneOffset.systemDefault()).toInstant();
-		long deltaHours = instant2.until(instant, ChronoUnit.HOURS);
+	private String getDeltaTime(Mail first, Mail last) {
+		XMLGregorianCalendar fc = first.getActionDateTime();
+		XMLGregorianCalendar lc = last.getActionDateTime();
+		if(fc == null || fc.toString() == null || lc == null || lc.toString()==null ){
+			return null;
+		}
+		LocalDateTime firstDatetime = LocalDateTime.parse(fc.toString().replace("T", " ").replace("+08:00", ""), DATE_TIME_FORMATTER);
+		LocalDateTime lastDatetime = LocalDateTime.parse(lc.toString().replace("T", " ").replace("+08:00", ""), DATE_TIME_FORMATTER);
+		Instant finstant = firstDatetime.atZone(ZoneOffset.systemDefault()).toInstant();
+		Instant linstant = lastDatetime.atZone(ZoneOffset.systemDefault()).toInstant();
+		long deltaHours = finstant.until(linstant, ChronoUnit.HOURS);
 		//返回格式x.y表示x天y小时
 		return deltaHours/24+"."+deltaHours%24;
 	}
