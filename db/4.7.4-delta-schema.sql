@@ -1,6 +1,6 @@
 -- 增加详情字段 by st.zheng
 ALTER TABLE `eh_rentalv2_items` ADD COLUMN `description` VARCHAR(1024) NULL DEFAULT NULL AFTER `item_type`;
---创建 审批表 by st.zheng
+-- 创建 审批表 by st.zheng
 CREATE TABLE `eh_community_approve` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE `eh_community_approve` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---创建申请表 by st.zheng
+-- 创建申请表 by st.zheng
 CREATE TABLE `eh_community_approve_requests` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
