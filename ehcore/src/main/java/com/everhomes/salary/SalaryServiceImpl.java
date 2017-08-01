@@ -190,17 +190,18 @@ public class SalaryServiceImpl implements SalaryService {
     public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd) {
 
         AddSalaryGroupResponse response = new AddSalaryGroupResponse();
+        Long salaryOrgId = null;
         if (!cmd.getSalaryGroupEntity().isEmpty()) {
-
             Long groupId;
+
             if (StringUtils.isEmpty(cmd.getSalaryGroupId())) {
                 //	添加批次至组织结构
                 Organization org = this.organizationService.createSalaryGroupOrganization(cmd.getOwnerId(), cmd.getSalaryGroupName());
                 groupId = org.getId();
             } else
                 groupId = cmd.getSalaryGroupId();
-
-            //  添加至薪酬组刘表
+            salaryOrgId = groupId;
+            //  添加至薪酬组列表
             response.setSalaryGroupEntity(cmd.getSalaryGroupEntity().stream().map(r -> {
                 SalaryGroupEntity entity = new SalaryGroupEntity();
                 if (!StringUtils.isEmpty(cmd.getOwnerType()))
@@ -227,6 +228,8 @@ public class SalaryServiceImpl implements SalaryService {
                 return r;
             }).collect(Collectors.toList()));
         }
+
+
         return response;
     }
 
@@ -283,6 +286,9 @@ public class SalaryServiceImpl implements SalaryService {
             salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeValsByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
             response.setSalaryGroupEntity(salaryGroupEntities);
+
+
+
             return response;
         }
 		return null;
@@ -792,6 +798,15 @@ public class SalaryServiceImpl implements SalaryService {
 
         // 3.将人员添加至组织架构的薪酬组
         this.uniongroupService.saveUniongroupConfigures(command);
+
+        //计算之前六个月的period
+        Organization salaryOrg = organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
+        Calendar periodCalendar = Calendar.getInstance();
+        for(int i = 0;i<=5;i++){
+            String period = monthSF.get().format(periodCalendar.getTime());
+            calculateGroupPeroid(salaryOrg, period);
+            periodCalendar.add(Calendar.MONTH, -1);
+        }
     }
 
 
@@ -1690,21 +1705,21 @@ public class SalaryServiceImpl implements SalaryService {
 	@Scheduled(cron = "5 5 0 1 * ?")
         public void monthScheduled() {
         Calendar periodCalendar = Calendar.getInstance();
-        periodCalendar.add(Calendar.MONTH, -1);
+//        periodCalendar.add(Calendar.MONTH, -1);
         String period = monthSF.get().format(periodCalendar.getTime());
         monthScheduled(period);
     }
     @Override
     public void monthScheduled(String period)  {
         Calendar calendar = Calendar.getInstance();
-        String lastPeriod = "";
-        try {
-            calendar.setTime(monthSF.get().parse(period));
-            calendar.set(Calendar.MONTH,-1);
-            lastPeriod =  monthSF.get().format(calendar.getTime());
-        } catch (ParseException e) {
-            LOGGER.error("parse exception ",e);
-        }
+//        String lastPeriod = "";
+//        try {
+//            calendar.setTime(monthSF.get().parse(period));
+//            calendar.set(Calendar.MONTH,-1);
+//            lastPeriod =  monthSF.get().format(calendar.getTime());
+//        } catch (ParseException e) {
+//            LOGGER.error("parse exception ",e);
+//        }
 
         // : 1.获取所有的薪酬组
         List<Organization> salaryOrganizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), null);
@@ -1730,6 +1745,10 @@ public class SalaryServiceImpl implements SalaryService {
         salaryGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
 //        SalaryGroup lastGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryOrg.getId(), lastPeriod);
         salaryGroup.setEmailContent(salaryOrg.getEmailContent());
+        SalaryGroup oldGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryGroup.getOrganizationGroupId(), salaryGroup.getSalaryPeriod());
+        if (null != oldGroup && oldGroup.getStatus().equals(SalaryGroupStatus.SENDED.getCode())) {
+            return;
+        }
         salaryGroupProvider.deleteSalaryGroup(salaryGroup.getOrganizationGroupId(), salaryGroup.getSalaryPeriod());
         salaryGroupProvider.createSalaryGroup(salaryGroup);
         // 2.循环薪酬组取里面的人员
@@ -1737,7 +1756,7 @@ public class SalaryServiceImpl implements SalaryService {
         List<UniongroupMemberDetailsDTO> members = uniongroupService.listUniongroupMemberDetailsByGroupId(salaryOrg.getId());
         if(null == members) {
             LOGGER.error("salaryOrg no members :" + salaryOrg);
-            continue;
+            return;
         }
         for (UniongroupMemberDetailsDTO member : members) {
             calculateMemberPeriodVals(member, salaryGroup, salaryGroupEntities);
@@ -1750,7 +1769,11 @@ public class SalaryServiceImpl implements SalaryService {
     private void calculateMemberPeriodVals(UniongroupMemberDetailsDTO member ,SalaryGroup salaryGroup,List<SalaryGroupEntity> salaryGroupEntities  ){
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
         if (memberDetail.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
-            continue;
+            return;
+        }
+        SalaryEmployee oldEmployee = salaryEmployeeProvider.findSalaryEmployee(salaryGroup.getOwnerId(), member.getDetailId(), salaryGroup.getId());
+        if (null != oldEmployee) {
+            return;
         }
         SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
         employee.setUserId(member.getTargetId());

@@ -32,4 +32,6 @@ public interface SalaryEmployeeProvider {
 	Integer countSalaryEmployeesByStatus(Long salaryPeriodGroupId,  Byte code);
 
 	SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndDetailId(Long salaryGroupId, Long memberId);
+
+	SalaryEmployee findSalaryEmployee(Long ownerId, Long detailId, Long id);
 }
