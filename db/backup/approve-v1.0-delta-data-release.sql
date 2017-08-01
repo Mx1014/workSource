@@ -1,7 +1,7 @@
 -- 添加审批
 INSERT INTO `ehcore`.`eh_community_approve` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `project_id`,
  `approve_name`, `status`, `form_origin_id`, `form_version`, `update_time`, `create_time`) VALUES ('1', '999983', '1008900', '240111044331055940', 'community',
- '41600', 'EhCommunityApprove', '0', '审批测试', '2', '0', '0', '2017-07-31 08:52:50', '2017-01-19 20:29:29');
+ '41600', 'EhCommunityApprove', '0', '审批测试', '1', '0', '0', NOW(), NOW());
 
 -- 添加菜单 -- 按照产品要求，添加菜单到左邻域
 
@@ -87,6 +87,6 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999983, 0, 0, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
 VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999983, 0, 0, 0, '/home', 'Bizs', '园区审批测试', '园区审批测试',
-'', 1, 1, 14, '{"url":"{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=狗头军小头领&metaObject="}', 3, 0,
+'', 1, 1, 14, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=狗头军小头领&metaObject="}', 3, 0,
  1, 1, '', 0, NULL, NULL, NULL, 0,
  'pm_admin', 1, NULL, NULL, 0, NULL);

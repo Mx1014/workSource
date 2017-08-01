@@ -410,12 +410,10 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
 
             }
 
-            for (int i=0 ;i<keyColumMap.size();i++) {
-                if (row.getCell(i) == null )
-                    row.createCell(i).setCellValue("无");
-                if (StringUtils.isEmpty(row.getCell(i).getStringCellValue()))
-                    row.getCell(i).setCellValue("无");
-            }
+//            for (int i=0 ;i<keyColumMap.size();i++) {
+//                if (row.getCell(i) == null )
+//                    row.createCell(i).setCellValue("无");
+//            }
 
         }
         try {
