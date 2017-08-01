@@ -721,6 +721,11 @@ public class GroupServiceImpl implements GroupService {
                         GroupDTO dto = toGroupDTO(userId, tmpGroup);
                         dto.setMemberOf((byte)1);
                         dto.setMemberStatus(org.getMemberStatus());
+
+                        //默认使用org那边的名称
+                        if(org.getName() != null){
+                            dto.setName(org.getName());
+                        }
                         groupDtoList.add(dto);
                     } else {
                         LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + org.getGroupId());
