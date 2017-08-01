@@ -175,8 +175,7 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
         for (GeneralFormFieldDTO dto:fieldDTOs) {
             boolean flag = false;
             for (GeneralFormVal val : vals) {
-                if (dto.getFieldName().equals(val.getFieldName()) && dto.getFieldType().equals(val.getFieldType())
-                        && !StringUtils.isEmpty(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText()))
+                if (dto.getFieldName().equals(val.getFieldName()) && dto.getFieldType().equals(val.getFieldType()))
                     try {
                         flag = true;
                         FlowCaseEntity e = new FlowCaseEntity();
@@ -268,6 +267,10 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
                                         entities.addAll(subSingleEntities);
                                     }
                                     break;
+                            }
+                            if (StringUtils.isEmpty(e.getValue())) {
+                                e.setValue("无");
+                                e.setEntityType(FlowCaseEntityType.LIST.getCode());
                             }
                         }
                     } catch (NullPointerException e) {
