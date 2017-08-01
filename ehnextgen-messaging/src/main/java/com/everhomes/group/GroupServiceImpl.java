@@ -28,6 +28,7 @@ import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
@@ -169,6 +170,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
+
+    @Autowired
+    private LocaleStringService localeStringService;
     
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
@@ -336,7 +340,7 @@ public class GroupServiceImpl implements GroupService {
             Forum forum = createGroupForum(group);
             group.setOwningForumId(forum.getId());
             this.groupProvider.updateGroup(group);
-            
+
             GroupMember member = new GroupMember();
             member.setGroupId(group.getId());
             member.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -600,6 +604,9 @@ public class GroupServiceImpl implements GroupService {
             if(StringUtils.isEmpty(dto.getName())){
                 String alias = getGroupAlias(dto.getId());
                 dto.setAlias(alias);
+                String defaultName = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_DEFAULT_NAME), UserContext.current().getUser().getLocale(), "");
+                dto.setName(defaultName);
+                dto.setIsNameEmptyBefore(GroupNameEmptyFlag.EMPTY.getCode());
             }
 
             return dto;
@@ -777,6 +784,9 @@ public class GroupServiceImpl implements GroupService {
                     if(StringUtils.isEmpty(dto.getName())){
                         String alias = getGroupAlias(dto.getId());
                         dto.setAlias(alias);
+                        String defaultName = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_DEFAULT_NAME), UserContext.current().getUser().getLocale(), "");
+                        dto.setName(defaultName);
+                        dto.setIsNameEmptyBefore(GroupNameEmptyFlag.EMPTY.getCode());
                     }
                     groupDtoList.add(dto);
                 } else {

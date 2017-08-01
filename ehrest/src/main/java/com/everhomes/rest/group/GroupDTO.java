@@ -40,6 +40,7 @@ import com.everhomes.util.StringHelper;
  * <li>scanJoinUrl:扫描入群页面链接</li>
  * <li>scanDownloadUrl:扫描下载页面链接</li>
  * <li>alias: group别名，获取群列表时如果name为空的时候会返回一个别名：用户1、用户2、用户3、用户4、用户5</li>
+ * <li>isNameEmptyBefore: 原来的name字段是否为空，0-非空，1-空, {@link com.everhomes.rest.group.GroupNameEmptyFlag}</li>
  * </ul>
  */
 public class GroupDTO {
@@ -73,6 +74,7 @@ public class GroupDTO {
     private String scanJoinUrl;
     private String scanDownloadUrl;
     private String alias;
+    private Byte isNameEmptyBefore;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -367,6 +369,14 @@ public class GroupDTO {
 
     public void setScanDownloadUrl(String scanDownloadUrl) {
         this.scanDownloadUrl = scanDownloadUrl;
+    }
+
+    public Byte getIsNameEmptyBefore() {
+        return isNameEmptyBefore;
+    }
+
+    public void setIsNameEmptyBefore(Byte isNameEmptyBefore) {
+        this.isNameEmptyBefore = isNameEmptyBefore;
     }
 
     @Override

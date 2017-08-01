@@ -29,6 +29,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.group.GroupLocalStringCode;
+import com.everhomes.rest.group.GroupNameEmptyFlag;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -3993,6 +3995,9 @@ public class UserServiceImpl implements UserService {
 					if(name == null || "".equals(name)){
 						String alias = groupService.getGroupAlias(group.getId());
 						dto.setAlias(alias);
+						String defaultName = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_DEFAULT_NAME), UserContext.current().getUser().getLocale(), "");
+						dto.setName(defaultName);
+						dto.setIsNameEmptyBefore(GroupNameEmptyFlag.EMPTY.getCode());
 					}
 
                     dto.setMessageType(UserMessageType.MESSAGE.getCode());
