@@ -7,7 +7,8 @@ ALTER TABLE `eh_service_modules` ADD `creator_uid` bigint(20) NOT NULL;
 ALTER TABLE `eh_service_modules` ADD `description` varchar(1024);
 ALTER TABLE `eh_service_modules` ADD `multiple_flag` tinyint(4) DEFAULT NULL;
 
-
+ALTER TABLE `eh_item_service_categries` ADD `item_location` varchar(2048) DEFAULT NULL;
+ALTER TABLE `eh_item_service_categries` ADD `item_group` varchar(128) NOT NULL DEFAULT '';
 ALTER TABLE `eh_item_service_categries` ADD `update_time` datetime DEFAULT NULL;
 ALTER TABLE `eh_item_service_categries` ADD `operator_uid` bigint(20) NOT NULL;
 ALTER TABLE `eh_item_service_categries` ADD `creator_uid` bigint(20) NOT NULL;
