@@ -18,8 +18,8 @@ import com.everhomes.util.StringHelper;
  * <li>name : 名称</li>  
  * <li>description : 描述</li>  
  * <li>openWeekday : 一周开放日期: 7位二进制，0000000每一位表示星期7123456</li>   
- * <li>punchTimeIntervals：上班时间段</li> 
- * <li>flexTime：弹性时间段 {@link com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO}</li> 
+ * <li>punchTimeIntervals：上班时间段列表 {@link com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO} </li> 
+ * <li>flexTime：弹性时间</li> 
  * <li>noonLeaveTime：午休开始时间 (只有一段打卡可以设置)</li>
  * <li>afternoonArriveTime：午休结束时间 (只有一段打卡可以设置)</li> 
  * <li>beginPunchTime：允许开始打开时间--上班时间前多久可以打开</li> 
