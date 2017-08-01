@@ -142,6 +142,7 @@ CREATE TABLE `eh_portal_layout_templates` (
 CREATE TABLE `eh_portal_item_categories` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) DEFAULT NULL,
+  `item_group_id` bigint(20) NOT NULL,
   `name` varchar(64) NOT NULL COMMENT 'item categry name',
   `icon_uri` varchar(1024) DEFAULT NULL COMMENT 'service categry icon uri',
   `default_order` int(11) DEFAULT NULL COMMENT 'order ',
