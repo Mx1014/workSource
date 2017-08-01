@@ -1645,19 +1645,16 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public void revokeGroupMemberList(RevokeGroupMemberListCommand cmd) {
-        dbProvider.execute((status -> {
-            RevokeGroupMemberCommand cmdOne = new RevokeGroupMemberCommand();
-            cmdOne.setGroupId(cmd.getGroupId());
-            cmdOne.setRevokeText(cmd.getRevokeText());
+        RevokeGroupMemberCommand cmdOne = new RevokeGroupMemberCommand();
+        cmdOne.setGroupId(cmd.getGroupId());
+        cmdOne.setRevokeText(cmd.getRevokeText());
 
-            if(cmd.getUserIds() != null && cmd.getUserIds().size() > 0){
-                for(int i = 0; i< cmd.getUserIds().size(); i++){
-                    cmdOne.setUserId(cmd.getUserIds().get(i));
-                    this.revokeGroupMember(cmdOne);
-                }
+        if(cmd.getUserIds() != null && cmd.getUserIds().size() > 0){
+            for(int i = 0; i< cmd.getUserIds().size(); i++){
+                cmdOne.setUserId(cmd.getUserIds().get(i));
+                this.revokeGroupMember(cmdOne);
             }
-            return null;
-        }));
+        }
     }
 
     @Override
