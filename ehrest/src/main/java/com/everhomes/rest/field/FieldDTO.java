@@ -12,8 +12,8 @@ import com.everhomes.util.StringHelper;
  *     <li>fieldId: 在系统里的字段id</li>
  *     <li>fieldDisplayName: 字段显示名</li>
  *     <li>fieldName: 字段名，数据库中的名字</li>
- *     <li>fieldType: 字段类型枚举型，参考{@link FieldType}</li>
- *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段组件类型枚举型，参考{@link FieldParamType}</li>
+ *     <li>fieldType: 字段类型枚举型，参考{@link com.everhomes.rest.field.FieldType}</li>
+ *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段组件类型枚举型，参考{@link com.everhomes.rest.field.FieldParamType}</li>
  *     <li>mandatoryFlag: 是否必填 0: 否; 1: 是</li>
  *     <li>defaultOrder: 顺序</li>
  * </ul>

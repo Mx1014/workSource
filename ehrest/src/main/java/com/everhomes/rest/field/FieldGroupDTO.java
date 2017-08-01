@@ -13,7 +13,7 @@ import java.util.List;
  *     <li>groupId: 在系统组里的id</li>
  *     <li>groupDisplayName: 组名</li>
  *     <li>defaultOrder: 顺序</li>
- *     <li>childrenGroup: 子字段组 参考{@link FieldGroupDTO}</li>
+ *     <li>childrenGroup: 子字段组 参考{@link com.everhomes.rest.field.FieldGroupDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
