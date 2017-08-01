@@ -335,7 +335,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
-	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
+	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true),@CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
 	@Override
 	public void createOrganizationMember(OrganizationMember organizationMember) {
 		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -359,7 +359,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 	}
 
-	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
+	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true), @CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
 	@Override
 	public void updateOrganizationMember(OrganizationMember departmentMember){
 		assert(departmentMember.getId() == null);
@@ -381,7 +381,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, null);
 	}
 
-	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
+	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true), @CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
 	@Override
 	public void deleteOrganizationMemberById(Long id){
 
@@ -3868,6 +3868,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null);
 	}
 
+	@Cacheable(value="ListOrganizationMemberByPath", key="#path+#groupTypes+#contactToken")
 	@Override
 	public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken){
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
