@@ -294,7 +294,8 @@ public class SalaryServiceImpl implements SalaryService {
             Calendar periodCalendar = Calendar.getInstance();
             for(int i = 0;i<=5;i++){
                 String period = monthSF.get().format(periodCalendar.getTime());
-                calculateGroupPeroid(salaryOrg, period);
+                //只要未发放就重新刷
+                calculateGroupPeroid(salaryOrg, period,false);
                 periodCalendar.add(Calendar.MONTH, -1);
             }
             return response;
@@ -812,7 +813,7 @@ public class SalaryServiceImpl implements SalaryService {
         Calendar periodCalendar = Calendar.getInstance();
         for(int i = 0;i<=5;i++){
             String period = monthSF.get().format(periodCalendar.getTime());
-            calculateGroupPeroid(salaryOrg, period);
+            calculateGroupPeroid(salaryOrg, period,true);
             periodCalendar.add(Calendar.MONTH, -1);
         }
     }
@@ -1733,14 +1734,14 @@ public class SalaryServiceImpl implements SalaryService {
         List<Organization> salaryOrganizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.SALARYGROUP.getCode(), null);
 
         for (Organization salaryOrg : salaryOrganizations) {
-			calculateGroupPeroid(salaryOrg,period);
+			calculateGroupPeroid(salaryOrg,period,false);
 		}
 
 	}
     /**
      * 计算某批次某期数据
      * */
-    private void calculateGroupPeroid(Organization salaryOrg, String period) {
+    private void calculateGroupPeroid(Organization salaryOrg, String period,Boolean returnFlag) {
         SalaryGroup salaryGroup = new SalaryGroup();
         salaryGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
                 .getTime()));
@@ -1767,20 +1768,23 @@ public class SalaryServiceImpl implements SalaryService {
             return;
         }
         for (UniongroupMemberDetailsDTO member : members) {
-            calculateMemberPeriodVals(member, salaryGroup, salaryGroupEntities);
+            calculateMemberPeriodVals(member, salaryGroup, salaryGroupEntities,returnFlag);
         }
     }
 
     /**
      * 计算某期某人的薪酬值
      * */
-    private void calculateMemberPeriodVals(UniongroupMemberDetailsDTO member ,SalaryGroup salaryGroup,List<SalaryGroupEntity> salaryGroupEntities  ){
+    private void calculateMemberPeriodVals(UniongroupMemberDetailsDTO member ,SalaryGroup salaryGroup,List<SalaryGroupEntity> salaryGroupEntities,Boolean returnFlag  ){
+        if (null == returnFlag) {
+            returnFlag = true;
+        }
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
         if (memberDetail.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
             return;
         }
         SalaryEmployee oldEmployee = salaryEmployeeProvider.findSalaryEmployee(salaryGroup.getOwnerId(), member.getDetailId(), salaryGroup.getId());
-        if (null != oldEmployee && oldEmployee.equals(SalaryGroupStatus.CHECKED.getCode())) {
+        if (returnFlag && null != oldEmployee && oldEmployee.equals(SalaryGroupStatus.CHECKED.getCode())) {
             return;
         }
         SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
