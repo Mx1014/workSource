@@ -2,13 +2,15 @@ package com.everhomes.general_approval;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.spi.LocaleServiceProvider;
 
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -21,6 +23,7 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
@@ -33,6 +36,7 @@ import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
+import com.everhomes.rest.general_approval.PostApprovalFormContactValue;
 import com.everhomes.rest.general_approval.PostApprovalFormFileDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
@@ -58,6 +62,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	protected GeneralApprovalValProvider generalApprovalValProvider;
 	@Autowired
 	protected GeneralFormProvider generalFormProvider; 
+	@Autowired
+	protected LocaleStringService localeStringService;
 	
 	public GeneralApprovalFlowModuleListener() {
 		for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
@@ -286,6 +292,37 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 							processEntities(subSingleEntities, subVals,subFromExtra.getFormFields());
 							entities.addAll(subSingleEntities);
 						}
+						break;
+					case CONTACT:
+						//企业联系人
+						PostApprovalFormContactValue contactValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormContactValue.class);
+						e = new FlowCaseEntity();  
+						e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "1", "zh_CN", "企业"));  
+						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
+						e.setValue(contactValue.getEnterpriseName());
+						entities.add(e);
+
+						e = new FlowCaseEntity();  
+						e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "2", "zh_CN", "楼栋-门牌"));  
+						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
+						String addresses = "";
+						
+						if(null != contactValue.getAddresses() && contactValue.getAddresses().size()>0)
+							addresses = StringUtils.join(contactValue.getAddresses(),",");
+						e.setValue(addresses);
+						entities.add(e);
+
+						e = new FlowCaseEntity();  
+						e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "3", "zh_CN", "联系人"));  
+						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
+						e.setValue(contactValue.getContactName());
+						entities.add(e);
+
+						e = new FlowCaseEntity();  
+						e.setKey(localeStringService.getLocalizedString("general_approval.contact.key", "4", "zh_CN", "联系方式"));  
+						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
+						e.setValue(contactValue.getContactNumber());
+						entities.add(e);
 						break;
 					}
 					

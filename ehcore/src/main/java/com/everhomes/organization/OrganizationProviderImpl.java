@@ -4790,7 +4790,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						query.addConditions(Tables.EH_USERS.ID.lt(locator.getAnchor()));
 
 					query.addOrderBy(Tables.EH_USERS.ID.desc());
-					query.addOrderBy(Tables.EH_USER_ORGANIZATIONS.STATUS.desc());
 					query.addLimit(size);
 					LOGGER.debug("query sql:{}", query.getSQL());
 					LOGGER.debug("query param:{}", query.getBindValues());
@@ -4955,6 +4954,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return null;
     }
+
 	@Override
 	public List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId, List<String> groupTypes) {
 		List<OrganizationMember> list = new ArrayList<OrganizationMember>();

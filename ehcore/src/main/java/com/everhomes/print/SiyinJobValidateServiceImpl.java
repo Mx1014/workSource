@@ -361,7 +361,7 @@ public class SiyinJobValidateServiceImpl {
 		Integer blackWhiteSurfaceCount = 0; //
 		for (SiyinPrintRecord record : list) {
 			if(jobType == PrintJobTypeType.SCAN){
-				colorSurfaceCount+=record.getSurfaceCount();
+				colorSurfaceCount+=record.getColorSurfaceCount();
 				blackWhiteSurfaceCount+=record.getMonoSurfaceCount();
 			}else{
 				PrintPaperSizeType paperSizeType = PrintPaperSizeType.fromCode(record.getPaperSize());
