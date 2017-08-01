@@ -4213,8 +4213,21 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 	VALUES(@organization_id, @community_id);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, default_order,`namespace_id`)VALUES(@building1_id, @community_id, '东城上邸', '东城上邸', 0, '', '深圳市龙岗区坪山街道中山大道与横坪路交汇处西侧', 5206.73, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @building1_id, @namespace_id);
 
+-- add by xq.tian 2017/08/01git
+SELECT max(id) FROM eh_communities INTO @max_community_id;
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+VALUES((@max_community_id := @max_community_id + 1), UUID(), 14956, '深圳市',  14958, '罗湖区', '深港花园（原大工业区规土委）', '深港花园', '文锦中路', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 0, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,0, 179900, 179901, UTC_TIMESTAMP(), 999992);
 
+SELECT max(id) FROM eh_community_geopoints INTO @max_community_geo_id;
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
+VALUES((@max_community_geo_id := @max_community_geo_id + 1), @max_community_id, '', 114.33, 22.68, 'ws1318u8d46v');
 
+INSERT INTO `eh_organization_communities`(organization_id, community_id)
+VALUES(1000750, @max_community_id);
+
+SELECT max(id) FROM eh_namespace_resources INTO @max_name_res_id;
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`)
+VALUES((@max_name_res_id := @max_name_res_id + 1), 999992, 'COMMUNITY', @max_community_id, UTC_TIMESTAMP());
 
 
 
