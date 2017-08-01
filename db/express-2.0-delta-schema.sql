@@ -6,7 +6,7 @@ CREATE TABLE `eh_express_company_businesses` (
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '目前是EhNamespaces',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT '域空间',
   `express_company_id` BIGINT COMMENT 'id of the express company id,是parent_id = 0 的快递公司的id',
-  `send_type` BIGINT COMMENT '业务类型id',
+  `send_type` TINYINT COMMENT '业务类型id',
   `send_type_name` VARCHAR(128) COMMENT '业务类型名称(/（华润）标准快递/（国贸）EMS标准快递/（国贸）邮政快递包裹/（国贸）同城信筒快件)',
   `package_types` TEXT COMMENT '封装类型，参考 ExpressPackageType.class,json数组',
   `insured_documents` VARCHAR(1024) COMMENT '保价文案，目前只有国贸ems和国贸邮政的邮政快递包裹有保价文案，所以跟着业务走',

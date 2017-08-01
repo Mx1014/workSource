@@ -59,6 +59,7 @@ import com.everhomes.rest.express.ExpressPackageTypeDTO;
 import com.everhomes.rest.express.ExpressQueryHistoryDTO;
 import com.everhomes.rest.express.ExpressSendMode;
 import com.everhomes.rest.express.ExpressSendModeDTO;
+import com.everhomes.rest.express.ExpressSendType;
 import com.everhomes.rest.express.ExpressSendTypeDTO;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
 import com.everhomes.rest.express.ExpressServiceErrorCode;
@@ -697,6 +698,7 @@ public class ExpressServiceImpl implements ExpressService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		checkExpressParams(cmd, owner);
 		ExpressOrder expressOrder = generateExpressOrder(owner, cmd);
 		// by dengs, 创建订单，这里就直接丢给邮政和国贸EMS
 		dbProvider.execute(status -> {
@@ -708,6 +710,38 @@ public class ExpressServiceImpl implements ExpressService {
 		});
 		createExpressOrderLog(owner, ExpressActionEnum.CREATE, expressOrder, null);
 		return new CreateExpressOrderResponse(convertToExpressOrderDTOForDetail(expressOrder));
+	}
+
+	//快递公司对应的业务检查，业务对应的包装类型检查。
+	private void checkExpressParams(CreateExpressOrderCommand cmd, ExpressOwner owner) {
+		ExpressCompany company = findTopExpressCompany(cmd.getExpressCompanyId());
+		if(company == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown expresscompany id = "+cmd.getExpressCompanyId());
+		}
+		List<ExpressCompanyBusiness> list = expressCompanyBusinessProvider.listExpressSendTypesByOwner(owner.getNamespaceId(), EntityType.NAMESPACE.getCode(),
+				Long.valueOf(owner.getNamespaceId()), company.getId());
+		if(list == null || list.size() == 0){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "expressCompany = " + company.getName() + " mismatch sendType = "+cmd.getSendType());
+		}
+		boolean isInvaildSendType = true;
+		ExpressCompanyBusiness business = null;
+		for (ExpressCompanyBusiness r : list) {
+			if(r.getSendType().longValue() == cmd.getSendType().longValue()){
+				isInvaildSendType = false;
+				business = r;
+				break;
+			}
+		}
+		if(isInvaildSendType){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "expressCompany = " + company.getName() + " mismatch sendType = "+cmd.getSendType());
+		}
+		List<ExpressPackageTypeDTO> dtos = convertPackageTypesList(business.getPackageTypes());
+		if(dtos == null || dtos.size() == 0){
+			return ;
+		}
+		if(!dtos.stream().map(r-> r.getPackageType().longValue()).collect(Collectors.toList()).contains(cmd.getPackageType().longValue())){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "sendType = " + cmd.getSendType() + " mismatch packageType = "+cmd.getPackageType());
+		}
 	}
 
 	private void createExpressOrderLog(ExpressOwner owner, ExpressActionEnum action, ExpressOrder expressOrder, String remark) {
@@ -1091,13 +1125,17 @@ public class ExpressServiceImpl implements ExpressService {
 		if(business == null || business.getPackageTypes() == null || business.getPackageTypes().length() == 0){
 			return new ListExpressPackageTypesResponse();
 		}
-		List<ExpressPackageTypeDTO> list = new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(business.getPackageTypes()).toArray())).stream().map(r->{
+		List<ExpressPackageTypeDTO> list = convertPackageTypesList(business.getPackageTypes());
+		return new ListExpressPackageTypesResponse(list);
+	}
+	
+	private List<ExpressPackageTypeDTO> convertPackageTypesList(String packageTypes){
+		return new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(packageTypes).toArray())).stream().map(r->{
 			ExpressPackageTypeDTO dto = JSONObject.parseObject(r.toString(), new TypeReference<ExpressPackageTypeDTO>(){});
 			ExpressPackageType packageType = ExpressPackageType.fromCode(dto.getPackageType());
 			dto.setPackageTypeName(packageType == null? "":packageType.getDescription());
 			return dto;
 		}).collect(Collectors.toList());
-		return new ListExpressPackageTypesResponse(list);
 	}
 
 	@Override
