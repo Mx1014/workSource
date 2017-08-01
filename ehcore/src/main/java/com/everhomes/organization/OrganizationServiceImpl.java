@@ -5279,9 +5279,18 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         });
 
-        //发消息等等操作
-        leaveOrganizationAfterOperation(user.getId(), members);
-
+        //执行太慢，开一个线程来做
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    // 发消息等等操作
+                    leaveOrganizationAfterOperation(user.getId(), members);
+                }catch (Exception e){
+                    LOGGER.error("leaveOrganizationAfterOperation error", e);
+                }
+            }
+        });
     }
 
     /**
@@ -9136,13 +9145,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void deleteOrganizationPersonnelByContactToken(
             DeleteOrganizationPersonnelByContactTokenCommand cmd) {
 
-        Organization organization = this.checkOrganization(cmd.getOrganizationId());
-
-
         if (StringUtils.isEmpty(cmd.getContactToken())) {
             LOGGER.error("contactToken is null");
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
         }
+
+        Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
         String path = organization.getPath();
         //查询出人员在这个组织架构的所有关系（全部节点选项）
