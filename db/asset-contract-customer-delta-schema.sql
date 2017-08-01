@@ -148,11 +148,9 @@ CREATE TABLE `eh_enterprise_customers` (
   `contact_fax` VARCHAR(128) COMMENT '传真',
   `contact_address_id` BIGINT COMMENT 'refer to id of eh_addresses',
   `contact_address` VARCHAR(1024) COMMENT '地址',
-  
   `corp_email` VARCHAR(128) COMMENT '企业邮箱',
   `corp_website` VARCHAR(128) COMMENT '企业网址',
   `corp_reg_address` VARCHAR(1024) COMMENT '企业注册地址',
-  `corp_op_address` VARCHAR(1024) COMMENT '企业运营地址',
   `corp_op_address` VARCHAR(1024) COMMENT '企业运营地址',
   `corp_legal_person` VARCHAR(128) COMMENT '法人代表',
   `corp_reg_capital` VARCHAR(128) COMMENT '注册资金(万元)',
