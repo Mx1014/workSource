@@ -289,6 +289,14 @@ public class SalaryServiceImpl implements SalaryService {
 
 
 
+            //计算之前六个月的period
+            Organization salaryOrg = organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
+            Calendar periodCalendar = Calendar.getInstance();
+            for(int i = 0;i<=5;i++){
+                String period = monthSF.get().format(periodCalendar.getTime());
+                calculateGroupPeroid(salaryOrg, period);
+                periodCalendar.add(Calendar.MONTH, -1);
+            }
             return response;
         }
 		return null;
@@ -1772,7 +1780,7 @@ public class SalaryServiceImpl implements SalaryService {
             return;
         }
         SalaryEmployee oldEmployee = salaryEmployeeProvider.findSalaryEmployee(salaryGroup.getOwnerId(), member.getDetailId(), salaryGroup.getId());
-        if (null != oldEmployee) {
+        if (null != oldEmployee && oldEmployee.equals(SalaryGroupStatus.CHECKED.getCode())) {
             return;
         }
         SalaryEmployee employee = ConvertHelper.convert(salaryGroup, SalaryEmployee.class);
