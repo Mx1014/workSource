@@ -77,7 +77,7 @@ VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 9999
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
 VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999983, 0, 0, 0, '/home', 'Bizs', '园区审批测试', '园区审批测试',
-'', 1, 1, 14, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=审批测试&metaObject="}', 3, 0,
+'', 1, 1, 60, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=审批测试&metaObject="}', 3, 0,
  1, 1, '', 0, NULL, NULL, NULL, 0,
  'park_tourist', 1, NULL, NULL, 0, NULL);
  
@@ -87,6 +87,6 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999983, 0, 0, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
 VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999983, 0, 0, 0, '/home', 'Bizs', '园区审批测试', '园区审批测试',
-'', 1, 1, 14, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=审批测试&metaObject="}', 3, 0,
+'', 1, 1, 60, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=审批测试&metaObject="}', 3, 0,
  1, 1, '', 0, NULL, NULL, NULL, 0,
  'pm_admin', 1, NULL, NULL, 0, NULL);
