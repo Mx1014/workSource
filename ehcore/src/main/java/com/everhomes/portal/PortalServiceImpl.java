@@ -1567,7 +1567,7 @@ public class PortalServiceImpl implements PortalService {
 			navigationActionData.setItemLocation(getItemLocation(layout.getName()));
 			navigationActionData.setLayoutName(layout.getName());
 			navigationActionData.setTitle(layout.getLabel());
-			item.setActionData(StringHelper.toJsonString(actionData));
+			item.setActionData(StringHelper.toJsonString(navigationActionData));
 		}else{
 			LOGGER.error("Unable to find the portal layout.id = {}, actionData = {}", data.getLayoutId(), actionData);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1696,8 +1696,33 @@ public class PortalServiceImpl implements PortalService {
 				}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.OPPUSH){
 					OPPushInstanceConfig instanceConfig = (OPPushInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), OPPushInstanceConfig.class);
 					itemGroup.setName(instanceConfig.getItemGroup());
+					Long moduleId = null;
+					if(OPPushWidgetStyle.LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
+						moduleId = 10600L;
+					}else if(OPPushWidgetStyle.LARGE_IMAGE_LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
+						moduleId = 40500L;
+					}
 					ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
+					List<LaunchPadItem> padItems = launchPadProvider.listLaunchPadItemsByItemGroup(padLayout.getNamespaceId(), "/home", instanceConfig.getItemGroup());
+					if(padItems.size() > 0){
+						config.setTitleFlag(TitleFlag.TRUE.getCode());
+						config.setTitle(padItems.get(0).getItemLabel());
+						UrlActionData urlData = (UrlActionData)StringHelper.fromJsonString(padItems.get(0).getActionData(), UrlActionData.class);
+						config.setBizUrl(urlData.getUrl());
+					}
+					if(null != moduleId){
+						List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(padLayout.getNamespaceId(), moduleId);
+						if(moduleApps.size() > 0){
+							config.setModuleAppId(moduleApps.get(0).getId());
+						}
+					}
 					itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
+				}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.TAB){
+
+				}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS){
+
+				}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS_FLASH){
+
 				}
 
 			}
