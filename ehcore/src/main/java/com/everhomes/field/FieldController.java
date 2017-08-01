@@ -102,4 +102,17 @@ public class FieldController extends ControllerBase {
         res.setErrorDescription("OK");
         return res;
     }
+
+    /**
+     * <b>URL: /field/listFieldStatistics</b>
+     * <p>列出特定字段统计信息</p>
+     */
+    @RequestMapping("listFieldStatistics")
+    @RestReturn(value = FieldStatisticDTO.class)
+    public RestResponse listFieldStatistics(@Valid ListFieldStatisticsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

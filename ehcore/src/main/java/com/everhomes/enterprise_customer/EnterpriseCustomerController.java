@@ -5,6 +5,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.enterprise_customer.*;
+import com.everhomes.rest.field.FieldStatisticDTO;
+import com.everhomes.rest.field.ListFieldStatisticsCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.User;
@@ -95,19 +97,6 @@ public class EnterpriseCustomerController extends ControllerBase {
                     "files is null");
         }
 //        enterpriseCustomerService.importEnterpriseData(cmd, files[0], userId);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /enterpriseCustomer/listEnterpriseCustomerFieldStatistics</b>
-     * <p>列出企业客户特定字段统计信息</p>
-     */
-    @RequestMapping("listEnterpriseCustomerFieldStatistics")
-    @RestReturn(value = FieldStatisticDTO.class)
-    public RestResponse listEnterpriseCustomerFieldStatistics(@Valid ListEnterpriseCustomerFieldStatisticsCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

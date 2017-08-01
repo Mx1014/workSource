@@ -6,7 +6,65 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- *     <li></li>
+ *     <li>id: id</li>
+ *     <li>organizationId: 客户企业账号id</li>
+ *     <li>customerNumber: 客户编码</li>
+ *     <li>name: 客户名称</li>
+ *     <li>nickName: 客户昵称</li>
+ *     <li>categoryItemId: 客户类型id</li>
+ *     <li>categoryItemName: 客户类型名</li>
+ *     <li>levelItemId: 客户级别id</li>
+ *     <li>levelItemName: 客户级别名</li>
+ *     <li>sourceItemId: 来源途径id</li>
+ *     <li>sourceItemName: 来源途径名</li>
+ *     <li>contactAvatarUri: 联系人头像</li>
+ *     <li>contactName: 联系人名称</li>
+ *     <li>contactGenderItemId: 联系人性别id</li>
+ *     <li>contactGenderItemName: 联系人性别名</li>
+ *     <li>contactMobile: 联系人手机号码</li>
+ *     <li>contactPhone: 联系人座机号码</li>
+ *     <li>contactOffficePhone: 办公电话</li>
+ *     <li>contactFamilyPhone: 家庭电话</li>
+ *     <li>contactEmail: 电子邮件</li>
+ *     <li>contactFax: 传真</li>
+ *     <li>contactAddressId: 地址id</li>
+ *     <li>contactAddress: 地址</li>
+ *     <li>corpEmail: 企业邮箱</li>
+ *     <li>corpWebsite: 企业网址</li>
+ *     <li>corpRegAddress: 企业注册地址</li>
+ *     <li>corpOpAddress: 企业运营地址</li>
+ *     <li>corpLegalPerson: 法人代表</li>
+ *     <li>corpRegCapital: 注册资金(万元)</li>
+ *     <li>corpNatureItemId: 企业性质id</li>
+ *     <li>corpNatureItemName: 企业性质</li>
+ *     <li>corpScale: 企业规模</li>
+ *     <li>corpIndustryItemId: 行业类型id</li>
+ *     <li>corpIndustryItemName: 行业类型</li>
+ *     <li>corpPurposeItemId: 企业定位id</li>
+ *     <li>corpPurposeItemName: 企业定位</li>
+ *     <li>corpAnnualTurnover: 年营业额（万元）</li>
+ *     <li>corpBusinessScope: 营业范围</li>
+ *     <li>corpBusinessLicense: 营业执照号</li>
+ *     <li>corpSiteArea: 场地面积</li>
+ *     <li>corpEntryDate: 入住园区日期</li>
+ *     <li>corpProductCategoryItemId: 产品类型id</li>
+ *     <li>corpProductCategoryItemName: 产品类型</li>
+ *     <li>corpProductDesc: 主要技术及产品</li>
+ *     <li>corpQualificationItemId: 企业资质认证id</li>
+ *     <li>corpQualificationItemName: 企业资质认证</li>
+ *     <li>corpLogoUri: 企业LOGO</li>
+ *     <li>corpDescription: 企业简介</li>
+ *     <li>corpEmployeeAmount: 员工总数</li>
+ *     <li>corpEmployeeAmountMale: 男员工总数</li>
+ *     <li>corpEmployeeAmountFemale: 女员工总数</li>
+ *     <li>corpEmployeeAmountRd: 研发员工总数</li>
+ *     <li>corpEmployeeReturneeRate: 海归人数占比(%)</li>
+ *     <li>corpEmployeeAverageAge: 员工平均年龄</li>
+ *     <li>corpManagerAverageAge: 高管平均年龄</li>
+ *     <li>managerName: 总经理名称</li>
+ *     <li>managerPhone: 总经理电话</li>
+ *     <li>managerEmail: 总经理邮箱</li>
+ *     <li>remark: 备注</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */

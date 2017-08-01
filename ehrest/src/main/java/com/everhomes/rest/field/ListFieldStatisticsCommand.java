@@ -1,4 +1,4 @@
-package com.everhomes.rest.enterprise_customer;
+package com.everhomes.rest.field;
 
 /**
  * <ul>
@@ -9,7 +9,7 @@ package com.everhomes.rest.enterprise_customer;
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
-public class ListEnterpriseCustomerFieldStatisticsCommand {
+public class ListFieldStatisticsCommand {
     private Long communityId;
 
     private Long fieldId;
