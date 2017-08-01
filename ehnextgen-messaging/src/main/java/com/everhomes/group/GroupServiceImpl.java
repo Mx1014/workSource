@@ -84,6 +84,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -556,6 +557,10 @@ public class GroupServiceImpl implements GroupService {
             return null;
         });
         groupSearcher.feedDoc(group);
+
+        if(cmd.getName() != null){
+            sendNotificationForUpdateName(group, operator.getLocale());
+        }
         
         return this.toGroupDTO(operatorUid, group);
     }
@@ -1221,6 +1226,24 @@ public class GroupServiceImpl implements GroupService {
         int userCount = 0;
         if(inviteeIds != null) {
             userCount = inviteeIds.size();
+
+            //用于发信息
+            String inviteeNames = "";
+            ListMemberInStatusCommand listMemberInStatusCommand = new ListMemberInStatusCommand();
+            listMemberInStatusCommand.setGroupId(group.getId());
+            listMemberInStatusCommand.setPageSize(1000000);
+            ListMemberCommandResponse response = this.listMembersInStatus(listMemberInStatusCommand);
+            List<Long> includeList = new ArrayList<Long>();
+            if(response == null || response.getMembers() == null || response.getMembers().size() == 0){
+                for(int i = 0; i<response.getMembers().size(); i++){
+                    if(response.getMembers().get(i).getMemberId() != operatorUid.longValue()){
+                        includeList.add(response.getMembers().get(i).getMemberId());
+                    }
+
+                }
+            }
+
+
             for(Long inviteeId : inviteeIds) {
                 if(inviteeId == null) {
                     LOGGER.error("The invited user id is null, operatorId=" + operator.getId() 
@@ -1235,7 +1258,15 @@ public class GroupServiceImpl implements GroupService {
                 }
                 result = inviteToJoinGroup(operator, group, inviteeId, cmd.getInvitationText(), true);
                 resultList.add(result);
+
+                inviteeNames = inviteeNames + invitee.getNickName() + "、";
             }
+
+            if(inviteeNames.length() > 0){
+                sendGroupNotificationForInviteToJoinGroupToinviter(group, operator.getId(), inviteeNames.substring(0, inviteeNames.length() - 1));
+                sendGroupNotificationForInviteToJoinGroupToOthers(group, operator.getId(), inviteeNames.substring(0, inviteeNames.length() - 1), includeList);
+            }
+
         }
         
         if(LOGGER.isInfoEnabled()) {
@@ -1590,6 +1621,7 @@ public class GroupServiceImpl implements GroupService {
                     code, "Creator can't leave the group");
             } else {
                 deleteActiveGroupMember(userId, member, "leave group");
+                sendNotificationForLeaveToCreator(group.getCreatorUid(), member, user.getLocale());
             }
             
             // 俱乐部退出不发消息，add by tt, 20161115
@@ -1664,11 +1696,16 @@ public class GroupServiceImpl implements GroupService {
         cmdOne.setGroupId(cmd.getGroupId());
         cmdOne.setRevokeText(cmd.getRevokeText());
 
+        String revokeNames = "";
         if(cmd.getUserIds() != null && cmd.getUserIds().size() > 0){
             for(int i = 0; i< cmd.getUserIds().size(); i++){
                 cmdOne.setUserId(cmd.getUserIds().get(i));
                 this.revokeGroupMember(cmdOne);
+
+                User user = userProvider.findUserById(cmdOne.getUserId());
+                revokeNames = revokeNames + user.getNickName() + "、";
             }
+            sendGroupNotificationForRevokeGroupMemberToOpeartor(cmd.getGroupId(), UserContext.current().getUser().getId(), revokeNames.substring(0, revokeNames.length() - 1));
         }
     }
 
@@ -3372,7 +3409,7 @@ public class GroupServiceImpl implements GroupService {
             // send notification to the applicant
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("groupName", group.getName());
-            map.put("operatorName", inviter.getMemberNickName());
+            map.put("inviterName", inviter.getMemberNickName());
             map.put("userName", invitee.getMemberNickName());
             User user = userProvider.findUserById(invitee.getMemberId());
             String locale = user.getLocale();
@@ -3390,12 +3427,82 @@ public class GroupServiceImpl implements GroupService {
             
             // send notification to all members in the group
             int code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_OTHER;
-            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, 52, locale, map, "");
             //sendGroupNotificationToExcludeUsers(group.getId(), inviter.getMemberId(), invitee.getMemberId(), notifyTextForOther);
-            sendGroupNotification(group.getId(), null, null, notifyTextForOther, null, null);
+
+            Date now = new Date();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+            String hhmm = dateFormat.format( now );
+            sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), hhmm);
+
+            sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForOther);
+            //sendGroupNotification(invitee.getMemberId(), null, null, notifyTextForOther, null, null);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", inviterId=" 
                 + inviter.getMemberId() + ", inviteeId=" + invitee.getMemberId(), e);
+        }
+    }
+
+    private void sendGroupNotificationForInviteToJoinGroupToinviter(Group group, Long inviterId, String inviteeNames) {
+        if(inviterId == null || inviteeNames == null) {
+            LOGGER.error("The inviter or inviteeNames should not be null, inviter=" + inviterId + ", inviteeNames=" + inviteeNames);
+            return;
+        }
+
+        try {
+            // send notification to the applicant
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("userNameList", inviteeNames);
+            User user = userProvider.findUserById(inviterId);
+            String locale = user.getLocale();
+
+            String scope = GroupNotificationTemplateCode.SCOPE;
+
+            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, 50, locale, map, "");
+
+            Date now = new Date();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+            String hhmm = dateFormat.format( now );
+            sendGroupNotificationToIncludeUser(group.getId(), inviterId, hhmm);
+
+            sendGroupNotificationToIncludeUser(group.getId(), inviterId, notifyTextForOther);
+        } catch(Exception e) {
+            LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", inviterId="
+                    + inviterId + ", inviteeId=" + inviterId, e);
+        }
+    }
+
+    private void sendGroupNotificationForInviteToJoinGroupToOthers(Group group, Long inviterId, String inviteeNames, List<Long> includeList) {
+        if(inviterId == null || inviteeNames == null) {
+            LOGGER.error("The inviter or inviteeNames should not be null, inviter=" + inviterId + ", inviteeNames=" + inviteeNames);
+            return;
+        }
+        if(includeList.size() == 0){
+            return;
+        }
+
+        try {
+
+            User user = userProvider.findUserById(inviterId);
+            String locale = user.getLocale();
+            // send notification to the applicant
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("inviterName", user.getNickName());
+            map.put("userNameList", inviteeNames);
+
+            String scope = GroupNotificationTemplateCode.SCOPE;
+            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, 51, locale, map, "");
+
+            Date now = new Date();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+            String hhmm = dateFormat.format( now );
+
+            sendGroupNotification(group.getId(), includeList, null, hhmm, null, null);
+            //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+            sendGroupNotification(group.getId(), includeList, null, notifyTextForOther, null, null);
+        } catch(Exception e) {
+            LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", inviterId="
+                    + inviterId + ", inviteeId=" + inviterId, e);
         }
     }
     
@@ -3658,36 +3765,72 @@ public class GroupServiceImpl implements GroupService {
             sendGroupNotificationPublicForMemberLeaveGroup(group, member);
         }
     }
-    
+
     private void sendGroupNotificationForRevokeGroupMember(Group group, GroupMember opeartor, GroupMember member) {
         if(opeartor == null || member == null) {
             LOGGER.error("The opeartor or member should not be null, opeartor=" + opeartor + ", requestor=" + member);
             return;
         }
-        
+
         // send notification to the applicant
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("groupName", group.getName());
-        map.put("operatorName", opeartor.getMemberNickName());
-        map.put("userName", member.getMemberNickName());
+        map.put("userName", opeartor.getMemberNickName());
         User user = userProvider.findUserById(member.getMemberId());
         String locale = user.getLocale();
-        
-        // send notification to who is invited to join the group
+
         String scope = GroupNotificationTemplateCode.SCOPE;
-        int code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_APPLICANT;
-        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 56, locale, map, "");
+
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        String hhmm = dateFormat.format( now );
+
+        sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), hhmm);
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
         sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
 
-        // send notification to inviter
-        code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_OPERATOR;
-        String notifyTextForOperator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        sendGroupNotificationToIncludeUser(group.getId(), opeartor.getMemberId(), notifyTextForOperator);
-        
-        // send notification to all members in the group
-        code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_OTHER;
-        String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        sendGroupNotificationToExcludeUsers(group.getId(), opeartor.getMemberId(), member.getMemberId(), notifyTextForOther);
+//        // send notification to who is invited to join the group
+//        String scope = GroupNotificationTemplateCode.SCOPE;
+//        int code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_APPLICANT;
+//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//        sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+//
+//        // send notification to inviter
+//        code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_OPERATOR;
+//        String notifyTextForOperator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//        sendGroupNotificationToIncludeUser(group.getId(), opeartor.getMemberId(), notifyTextForOperator);
+//
+//        // send notification to all members in the group
+//        code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_OTHER;
+//        String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//        sendGroupNotificationToExcludeUsers(group.getId(), opeartor.getMemberId(), member.getMemberId(), notifyTextForOther);
+    }
+
+    private void sendGroupNotificationForRevokeGroupMemberToOpeartor(Long groupId, Long opeartorId, String revokeNames) {
+        if(groupId == null || opeartorId == null) {
+            LOGGER.error("The groupId or opeartorId should not be null, groupId=" + groupId + ", opeartorId=" + opeartorId);
+            return;
+        }
+
+        // send notification to the applicant
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("userNameList", revokeNames);
+        User user = userProvider.findUserById(opeartorId);
+        String locale = user.getLocale();
+
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 55, locale, map, "");
+
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        String hhmm = dateFormat.format( now );
+
+        sendGroupNotificationToIncludeUser(groupId, opeartorId, hhmm);
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+        sendGroupNotificationToIncludeUser(groupId, opeartorId, notifyTextForApplicant);
+
     }
     
     private void sendGroupNotificationForReqToBeGroupAdminWaitingApproval(Group group, GroupMember member) {
@@ -4053,13 +4196,29 @@ public class GroupServiceImpl implements GroupService {
         messageDto.setSenderUid(User.SYSTEM_UID);
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
         // messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_GROUP);
         if(null != meta && meta.size() > 0) {
             messageDto.getMeta().putAll(meta);
             }
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+
+    private void sendSystemMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        // messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+        }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
     
@@ -4096,21 +4255,27 @@ public class GroupServiceImpl implements GroupService {
         sendMessageToUser(creator, notifyTextForApplicant, null);
     }
     
-    private void sendNotifactionToMembers(List<Long> members, String userName, Group group, String locale) {
+    private void sendNotifactionToMembers(List<Long> members, String nickName, Group group, String locale) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("groupName", group.getName());
-        map.put("userName", userName);
+        if(group.getName() == null ){
+            map.put("groupName", nickName);
+        }else {
+            map.put("groupName", group.getName());
+        }
+
+//        map.put("userName", userName);
        
         String scope = GroupNotificationTemplateCode.SCOPE;
-        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
-        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
-        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE){
-        	code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_ADMIN;
-        }else if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
-        	//如果解散俱乐部，消息改为你加入的“${groupName}”已解散， add by tt, 20161102
-        	code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ALL_WHEN_DELETE;
-		}
-        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        int code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ALL_WHEN_DELETE;
+//        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
+//        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
+//        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE){
+//        	code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_ADMIN;
+//        }else if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+//        	//如果解散俱乐部，消息改为你加入的“${groupName}”已解散， add by tt, 20161102
+//        	code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ALL_WHEN_DELETE;
+//		}
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 57, locale, map, "");
         
             //如果圈太大，不发消息
         //make better hear
@@ -4119,7 +4284,7 @@ public class GroupServiceImpl implements GroupService {
             }
         
         for(Long userId: members) {
-            sendMessageToUser(userId, notifyTextForApplicant, null);
+            sendSystemMessageToUser(userId, notifyTextForApplicant, null);
         }
     }
     
@@ -4167,28 +4332,39 @@ public class GroupServiceImpl implements GroupService {
         String nickName = user.getNickName();
         
         List<GroupMember> groupMember = groupProvider.findGroupMemberByGroupId(groupId);
-        for(GroupMember gm : groupMember){
+        for(int i = 0; i < groupMember.size(); i++ ){
+            GroupMember gm =  groupMember.get(i);
             gm.setMemberStatus(GroupMemberStatus.INACTIVE.getCode());
-            
-            if(gm.getMemberId().equals(user.getId())) {
-                if(gm.getMemberNickName() != null && !gm.getMemberNickName().isEmpty()) {
-                    nickName = gm.getMemberNickName();
-                    }
-            } else {
-                if(RoleConstants.ResourceCreator != gm.getMemberRole().longValue() && RoleConstants.ResourceAdmin != gm.getMemberRole().longValue()) {
-                    members.add(gm.getMemberId());     
-                    }
-                }
+            members.add(gm.getMemberId());
+            if(i < 5){
+                nickName = nickName + gm.getMemberNickName() + "、";
+            }
+
+//            if(gm.getMemberId().equals(user.getId())) {
+//                if(gm.getMemberNickName() != null && !gm.getMemberNickName().isEmpty()) {
+//                    nickName = gm.getMemberNickName();
+//                    }
+//            } else {
+//                if(RoleConstants.ResourceCreator != gm.getMemberRole().longValue() && RoleConstants.ResourceAdmin != gm.getMemberRole().longValue()) {
+//                    members.add(gm.getMemberId());
+//                }
+//            }
             groupProvider.updateGroupMember(gm);
             }
+
+        if(groupMember.size() > 0 && groupMember.size() <= 5) {
+            nickName = nickName.substring(0, nickName.length() - 1);
+        }else if(groupMember.size() > 5){
+            nickName = nickName.substring(0, nickName.length() - 1) + "...";
+        }
         
   
         //Send message to all other admins
         String locale = user.getLocale();
-        sendNotificationToAdmin(admins, nickName, group, locale);
-        
-        //Send message to creator
-        sendNotificationToCreator(user.getId(), nickName, group, locale);
+//        sendNotificationToAdmin(admins, nickName, group, locale);
+//
+//        //Send message to creator
+//        sendNotificationToCreator(user.getId(), nickName, group, locale);
         
         sendNotifactionToMembers(members, nickName, group, locale);
     }
@@ -4549,14 +4725,61 @@ public class GroupServiceImpl implements GroupService {
 			nickname = user.getNickName();
 		}
 		
-		Map<String, Object> map = new HashMap<String, Object>();
-        map.put("groupName", group.getName());
+//		Map<String, Object> map = new HashMap<String, Object>();
+//        map.put("groupName", group.getName());
        
         String scope = GroupAdminNotificationTemplateCode.SCOPE;
         int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
-        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+        String notifyTextForApplicant = localeStringService.getLocalizedString("group", "20002", locale, "");
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        String hhmm = dateFormat.format( now );
+        sendGroupNotificationToIncludeUser(group.getId(), newCreator.getMemberId(), hhmm);
+
+        sendGroupNotificationToIncludeUser(group.getId(), newCreator.getMemberId(), notifyTextForApplicant);
 	}
+
+    private void sendNotificationForLeaveToCreator(Long creatorId, GroupMember leaveMember, String locale) {
+        Group group = groupProvider.findGroupById(leaveMember.getGroupId());
+        String nickname = leaveMember.getMemberNickName();
+        if (StringUtils.isEmpty(nickname)) {
+            User user = userProvider.findUserById(leaveMember.getMemberId());
+            nickname = user.getNickName();
+        }
+
+		Map<String, Object> map = new HashMap<String, Object>();
+        map.put("userName", nickname);
+
+        String scope = GroupAdminNotificationTemplateCode.SCOPE;
+        int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString("group.notification", 53, locale, map, "");
+
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        String hhmm = dateFormat.format( now );
+
+        sendGroupNotificationToIncludeUser(group.getId(), creatorId, hhmm);
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+        sendGroupNotificationToIncludeUser(group.getId(), creatorId, notifyTextForApplicant);
+    }
+
+    private void sendNotificationForUpdateName(Group group, String locale) {
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("groupName", group.getName());
+
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 54, locale, map, "");
+
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        String hhmm = dateFormat.format( now );
+
+        sendGroupNotification(group.getId(), null, null, hhmm, null, null);
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+        sendGroupNotification(group.getId(), null, null, notifyTextForApplicant, null, null);
+    }
 
 	private boolean checkIfOnlyOneGroupMember(Long userId, Long groupId) {
 		ListingLocator locator = new ListingLocator(groupId);
