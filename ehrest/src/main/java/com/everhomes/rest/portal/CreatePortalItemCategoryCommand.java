@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>namespaceId: 域空间</li>
+ * <li>itemGroupId: item group id</li>
  * <li>name: 分类名称</li>
  * <li>iconUri: icon图片的uri</li>
  * <li>itemIds: itemId列表</li>
@@ -19,6 +20,8 @@ import com.everhomes.util.StringHelper;
 public class CreatePortalItemCategoryCommand {
 
 	private Integer namespaceId;
+
+	private Long itemGroupId;
 
 	private String name;
 
@@ -81,6 +84,14 @@ public class CreatePortalItemCategoryCommand {
 
 	public void setScopes(List<PortalScope> scopes) {
 		this.scopes = scopes;
+	}
+
+	public Long getItemGroupId() {
+		return itemGroupId;
+	}
+
+	public void setItemGroupId(Long itemGroupId) {
+		this.itemGroupId = itemGroupId;
 	}
 
 	@Override

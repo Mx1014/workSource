@@ -7,11 +7,14 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>namespaceId: 域空间</li>
+ * <li>itemGroupId: item group id</li>
  * </ul>
  */
 public class ListPortalItemCategoriesCommand {
 
 	private Integer namespaceId;
+
+	private Long itemGroupId;
 
 	public ListPortalItemCategoriesCommand() {
 
@@ -28,6 +31,14 @@ public class ListPortalItemCategoriesCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getItemGroupId() {
+		return itemGroupId;
+	}
+
+	public void setItemGroupId(Long itemGroupId) {
+		this.itemGroupId = itemGroupId;
 	}
 
 	@Override
