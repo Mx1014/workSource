@@ -115,7 +115,7 @@ public class ExpressCompanyBusinessProviderImpl implements ExpressCompanyBusines
 				.and(Tables.EH_EXPRESS_COMPANY_BUSINESSES.NAMESPACE_ID.eq(namespaceId));
 		query.and(Tables.EH_EXPRESS_COMPANY_BUSINESSES.OWNER_TYPE.eq(ownerType));
 		query.and(Tables.EH_EXPRESS_COMPANY_BUSINESSES.OWNER_ID.eq(ownerId));
-		query.and(Tables.EH_EXPRESS_COMPANY_BUSINESSES.SEND_TYPE.eq(Long.valueOf(sendType)));
+		query.and(Tables.EH_EXPRESS_COMPANY_BUSINESSES.SEND_TYPE.eq(sendType));
 		List list = query.fetch();
 		if(list != null && list.size()>0){
 			return ConvertHelper.convert(list.get(0),ExpressCompanyBusiness.class);
