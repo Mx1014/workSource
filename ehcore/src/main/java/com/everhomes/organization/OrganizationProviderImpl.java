@@ -370,6 +370,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, departmentMember.getId());
 	}
 
+	@Caching(evict = { @CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
 	@Override
 	public void updateOrganizationMemberByOrgPaths(String path, Byte status, Long uid, Timestamp now) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -2083,6 +2084,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //        return result;
     }
 
+	@Caching(evict = { @CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
     @Override
     public boolean updateOrganizationMemberByIds(List<Long> ids, Organization org) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
