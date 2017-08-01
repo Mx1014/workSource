@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>userId：用户id</li>
  * <li>userName：用户名称</li>
  * <li>deptName：部门</li>  
+ * <li>punchOrgName：所属规则</li>  
  * <li>punchDate: 打卡日期</li>
  * <li>arriveTime：上班打卡时间</li>
  * <li>leaveTime：下班打卡时间</li>
@@ -32,6 +33,7 @@ public class PunchDayDetailDTO {
 	private Long userId;
 	private String userName;
 	private String deptName;   
+	private String punchOrgName;   
 	private Long punchDate;
 	private Long arriveTime;
 	private Long noonLeaveTime;
@@ -222,6 +224,14 @@ public class PunchDayDetailDTO {
 
 	public void setStatuString(String statuString) {
 		this.statuString = statuString;
+	}
+
+	public String getPunchOrgName() {
+		return punchOrgName;
+	}
+
+	public void setPunchOrgName(String punchOrgName) {
+		this.punchOrgName = punchOrgName;
 	}
  
 
