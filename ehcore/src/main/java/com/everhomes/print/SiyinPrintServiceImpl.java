@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.everhomes.bus.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusOneshotSubscriber;
-import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -146,6 +144,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private LocalBus localBus;
+
+	@Autowired
+	private BusBridgeProvider busBridgeProvider;
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
@@ -361,53 +362,36 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode() == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
 		}
-		
-		//验证redis中存的identifierToken
-        String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken().trim();
-        ValueOperations<String, String> valueOperations = getValueOperations(key);
-        
-        RestResponse printResponse = new RestResponse();
-        User user = UserContext.current().getUser();
 
-        boolean successflag = false;
-        if(valueOperations.get(key) != null && valueOperations.get(key).length()>0){
-			successflag = true;
-        	User logonUser  = new User();
-        	//这里设置accoutname 为用户id-namespaceid-拥有者id，因为在jobLogNotification
-        	//中计算价格的时候，不知道所在的园区，所以只能依靠
-        	logonUser.setAccountName(user.getId()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
-            printResponse.setResponseObject(logonUser);
-            printResponse.setErrorCode(ErrorCodes.SUCCESS);
-            //
-            addPrintingTaskCount(cmd);
-        }else{
-            printResponse.setResponseObject("identifierToken "+cmd.getIdentifierToken()+" out of date");
-            printResponse.setErrorCode(409);
-        }
+		RestResponse printResponse = new RestResponse();
+		try {
+			//验证redis中存的identifierToken
+			String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken().trim();
+			ValueOperations<String, String> valueOperations = getValueOperations(key);
 
-        String subject = PRINT_SUBJECT;
+			User user = UserContext.current().getUser();
 
-        // 必须重启一个线程来发布通知，通知二维码扫描成功，跳转到成功页面
-        for (int i = 0; i < 3; i++) {
-        	ExecutorUtil.submit(new Runnable() {
-        		@Override
-        		public void run() {
-        			try {
-						Thread.sleep(200);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-        			localBus.publish(null, subject + "." + cmd.getIdentifierToken(), printResponse);
-        		}
-        	});
+			if (valueOperations.get(key) != null && valueOperations.get(key).length() > 0) {
+				User logonUser = new User();
+				//这里设置accoutname 为用户id-namespaceid-拥有者id，因为在jobLogNotification
+				//中计算价格的时候，不知道所在的园区，所以只能依靠
+				logonUser.setAccountName(user.getId() + PRINT_LOGON_ACCOUNT_SPLIT + cmd.getOwnerId());
+				printResponse.setResponseObject(logonUser);
+				printResponse.setErrorCode(ErrorCodes.SUCCESS);
+				//添加正在打印的数量
+				addPrintingTaskCount(cmd);
+				return new InformPrintResponse(PrintLogonStatusType.LOGON_SUCCESS.getCode());
+			}
+			printResponse.setResponseObject("identifierToken " + cmd.getIdentifierToken() + " out of date");
+			printResponse.setErrorCode(409);
+			return new InformPrintResponse(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode());
+		}finally {
+			LOGGER.info("subject = {}, print response = {}", PRINT_SUBJECT + "." + cmd.getIdentifierToken(),printResponse);
+			LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+			localBusSubscriber.onLocalBusMessage(null,  PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse, null);
+			ExecutorUtil.submit(()->localBus.publish(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse));
 		}
-       
 
-        if(successflag)
-        	return new InformPrintResponse(PrintLogonStatusType.LOGON_SUCCESS.getCode());
-        return new InformPrintResponse(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode());
-    
 	}
 
 	//正在进行的任务计数
