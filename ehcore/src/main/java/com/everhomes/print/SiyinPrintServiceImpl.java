@@ -19,7 +19,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bus.*;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -335,13 +337,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		        //这里可以清掉redis的uid
 		    	String key = REDIS_PRINT_IDENTIFIER_TOKEN + identifierToken;
 		    	deleteValueOperations(key);
-		    	
-//		    	ValueOperations<String, String> valueOperations = getValueOperations(key);
-//		    	Object object = valueOperations.get(key);
-//		    	
-//		    	LOGGER.info("object is {}" + object);
-		    	
-		        deferredResult.setResult((RestResponse)logonResponse);
+				String response = (String)logonResponse;
+		        deferredResult.setResult(JSONObject.parseObject(response, RestResponse.class));
 		        return null;
 		    }
 		    @Override
@@ -388,9 +385,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}finally {
 			LOGGER.info("subject = {}, print response = {}", PRINT_SUBJECT + "." + cmd.getIdentifierToken(),printResponse);
 			ExecutorUtil.submit(()->{
-//				LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
-//				localBusSubscriber.onLocalBusMessage(null,  PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse, null);
-				localBus.publish(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse);
+				try {
+					LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+					localBusSubscriber.onLocalBusMessage(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), JSONObject.toJSONString(printResponse), null);
+				}catch (Exception e){
+					e.printStackTrace();
+				}
+				localBus.publish(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), JSONObject.toJSONString(printResponse));
 				return ;
 			});
 		}
