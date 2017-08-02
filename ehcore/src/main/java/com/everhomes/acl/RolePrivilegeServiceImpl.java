@@ -289,7 +289,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 				for (RolePrivilege rolePrivilege: cmd.getRolePrivileges()) {
 					if(ServiceModuleTreeVType.fromCode(rolePrivilege.getType()) == ServiceModuleTreeVType.SERVICE_MODULE){
-						List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(rolePrivilege.getId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+						List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(rolePrivilege.getId(), ServiceModulePrivilegeType.SUPER);
 						if(modulePrivileges.size() > 0){
 							acl.setPrivilegeId(modulePrivileges.get(0).getPrivilegeId());
 							aclProvider.createAcl(acl);
@@ -401,7 +401,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<RolePrivilege> rolePrivileges = new ArrayList<>();
 		List<Acl> acls = aclProvider.getResourceAclByRole(ownerType, ownerId, new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId));
 		for (Acl acl: acls) {
-			List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(acl.getPrivilegeId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+			List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(acl.getPrivilegeId(), ServiceModulePrivilegeType.SUPER);
 			RolePrivilege rolePrivilege = new RolePrivilege();
 			if(modulePrivileges.size() > 0){
 				rolePrivilege.setType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
