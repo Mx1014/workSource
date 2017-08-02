@@ -14,13 +14,7 @@ ALTER TABLE `eh_punch_time_rules` ADD COLUMN `end_punch_time` BIGINT  COMMENT '�
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `punch_organization_id` BIGINT  COMMENT 'fk:eh_punch_workday_rules id';
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `punch_rule_id` BIGINT DEFAULT NULL COMMENT 'eh_punch_rules id  ';
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `open_weekday` VARCHAR(7) DEFAULT NULL COMMENT '7位二进制，0000000每一位表示星期7123456';
-
-ALTER TABLE `eh_punch_geopoints` ADD COLUMN `owner_type` VARCHAR(128) DEFAULT NULL COMMENT 'owner resource(user/organization) type';
-ALTER TABLE `eh_punch_geopoints` ADD COLUMN `owner_id` BIGINT(20) DEFAULT NULL COMMENT 'owner resource(user/organization) id-- 不是公司id 而是考勤组的id';
-
-ALTER TABLE `eh_punch_wifis` ADD COLUMN `owner_type` VARCHAR(128) DEFAULT NULL COMMENT 'owner resource(user/organization) type';
-ALTER TABLE `eh_punch_wifis` ADD COLUMN `owner_id` BIGINT(20) DEFAULT NULL COMMENT 'owner resource(user/organization) id -- 不是公司id 而是考勤组的id';
-
+  
 
 -- 固定时间制:特殊日期
 CREATE TABLE `eh_punch_special_days` (
