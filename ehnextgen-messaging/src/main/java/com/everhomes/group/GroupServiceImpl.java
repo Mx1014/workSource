@@ -517,6 +517,8 @@ public class GroupServiceImpl implements GroupService {
         
         Long groupId = cmd.getGroupId();
         Group group = checkGroupParameter(groupId, operatorUid, "updateGroup");
+
+        String oldName = group.getName();
         
         //群管理员修改群信息时显示 Insufficient privilege 所以注释掉 modified by xiongying 20160614
         //checkGroupPrivilege(operatorUid, groupId, PrivilegeConstants.Write);
@@ -558,7 +560,7 @@ public class GroupServiceImpl implements GroupService {
         });
         groupSearcher.feedDoc(group);
 
-        if(cmd.getName() != null){
+        if(cmd.getName() != null && !cmd.getName().equals(oldName)){
             sendNotificationForUpdateName(group, operator.getLocale());
         }
         
