@@ -37,7 +37,7 @@ import com.everhomes.util.SignatureHelper;
 
 @RestDoc(value="authorization open Controller", site="core")
 @RestController
-@RequestMapping("/openapi")
+@RequestMapping("/openapi/user")
 public class AuthoriztionController extends ControllerBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AuthoriztionController.class);
 
@@ -57,7 +57,7 @@ public class AuthoriztionController extends ControllerBase {
 	 * <b>URL: /openapi/unrentFeedback</b>
      * <p>退租调用接口</p>
 	 */
-	@RequestMapping("unrentFeedback")
+	@RequestMapping("cancelAuthFeedback")
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
 	public RestResponse unrentFeedback(@Valid UnrentFeedbackCommand cmd,HttpServletRequest request, HttpServletResponse response) {
