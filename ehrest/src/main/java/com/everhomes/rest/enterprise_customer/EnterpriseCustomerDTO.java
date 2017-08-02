@@ -97,7 +97,7 @@ public class EnterpriseCustomerDTO {
     private String corpRegAddress;
     private String corpOpAddress;
     private String corpLegalPerson;
-    private String corpRegCapital;
+    private BigDecimal corpRegCapital;
     private Long corpNatureItemId;
     private String corpNatureItemName;
     private BigDecimal corpScale;
@@ -121,9 +121,9 @@ public class EnterpriseCustomerDTO {
     private Integer corpEmployeeAmountMale;
     private Integer corpEmployeeAmountFemale;
     private Integer corpEmployeeAmountRd;
-    private Integer corpEmployeeReturneeRate;
-    private Integer corpEmployeeAverageAge;
-    private Integer corpManagerAverageAge;
+    private Double corpEmployeeReturneeRate;
+    private Double corpEmployeeAverageAge;
+    private Double corpManagerAverageAge;
     private String managerName;
     private String managerPhone;
     private String managerEmail;
@@ -313,21 +313,6 @@ public class EnterpriseCustomerDTO {
         this.corpEmployeeAmountRd = corpEmployeeAmountRd;
     }
 
-    public Integer getCorpEmployeeAverageAge() {
-        return corpEmployeeAverageAge;
-    }
-
-    public void setCorpEmployeeAverageAge(Integer corpEmployeeAverageAge) {
-        this.corpEmployeeAverageAge = corpEmployeeAverageAge;
-    }
-
-    public Integer getCorpEmployeeReturneeRate() {
-        return corpEmployeeReturneeRate;
-    }
-
-    public void setCorpEmployeeReturneeRate(Integer corpEmployeeReturneeRate) {
-        this.corpEmployeeReturneeRate = corpEmployeeReturneeRate;
-    }
 
     public Date getCorpEntryDate() {
         return corpEntryDate;
@@ -369,12 +354,32 @@ public class EnterpriseCustomerDTO {
         this.corpLogoUri = corpLogoUri;
     }
 
-    public Integer getCorpManagerAverageAge() {
+    public Double getCorpEmployeeAverageAge() {
+        return corpEmployeeAverageAge;
+    }
+
+    public void setCorpEmployeeAverageAge(Double corpEmployeeAverageAge) {
+        this.corpEmployeeAverageAge = corpEmployeeAverageAge;
+    }
+
+    public Double getCorpEmployeeReturneeRate() {
+        return corpEmployeeReturneeRate;
+    }
+
+    public void setCorpEmployeeReturneeRate(Double corpEmployeeReturneeRate) {
+        this.corpEmployeeReturneeRate = corpEmployeeReturneeRate;
+    }
+
+    public Double getCorpManagerAverageAge() {
         return corpManagerAverageAge;
     }
 
-    public void setCorpManagerAverageAge(Integer corpManagerAverageAge) {
+    public void setCorpManagerAverageAge(Double corpManagerAverageAge) {
         this.corpManagerAverageAge = corpManagerAverageAge;
+    }
+
+    public void setCorpRegCapital(BigDecimal corpRegCapital) {
+        this.corpRegCapital = corpRegCapital;
     }
 
     public Long getCorpNatureItemId() {
@@ -457,20 +462,16 @@ public class EnterpriseCustomerDTO {
         this.corpQualificationItemName = corpQualificationItemName;
     }
 
+    public BigDecimal getCorpRegCapital() {
+        return corpRegCapital;
+    }
+
     public String getCorpRegAddress() {
         return corpRegAddress;
     }
 
     public void setCorpRegAddress(String corpRegAddress) {
         this.corpRegAddress = corpRegAddress;
-    }
-
-    public String getCorpRegCapital() {
-        return corpRegCapital;
-    }
-
-    public void setCorpRegCapital(String corpRegCapital) {
-        this.corpRegCapital = corpRegCapital;
     }
 
     public BigDecimal getCorpScale() {

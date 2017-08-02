@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 /**
  * <ul>
+ *     <li>communityId: 客户所属园区id</li>
  *     <li>customerNumber: 客户编码</li>
  *     <li>name: 客户名称</li>
  *     <li>nickName: 客户昵称</li>
@@ -69,6 +70,7 @@ public class CreateEnterpriseCustomerCommand {
     private String name;
     private String nickName;
     private Long categoryItemId;
+    private Long communityId;
     private String categoryItemName;
     private Long levelItemId;
     private String levelItemName;
@@ -91,7 +93,7 @@ public class CreateEnterpriseCustomerCommand {
     private String corpRegAddress;
     private String corpOpAddress;
     private String corpLegalPerson;
-    private String corpRegCapital;
+    private BigDecimal corpRegCapital;
     private Long corpNatureItemId;
     private String corpNatureItemName;
     private BigDecimal corpScale;
@@ -115,13 +117,21 @@ public class CreateEnterpriseCustomerCommand {
     private Integer corpEmployeeAmountMale;
     private Integer corpEmployeeAmountFemale;
     private Integer corpEmployeeAmountRd;
-    private Integer corpEmployeeReturneeRate;
-    private Integer corpEmployeeAverageAge;
-    private Integer corpManagerAverageAge;
+    private Double corpEmployeeReturneeRate;
+    private Double corpEmployeeAverageAge;
+    private Double corpManagerAverageAge;
     private String managerName;
     private String managerPhone;
     private String managerEmail;
     private String remark;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getCategoryItemId() {
         return categoryItemId;
@@ -307,21 +317,7 @@ public class CreateEnterpriseCustomerCommand {
         this.corpEmployeeAmountRd = corpEmployeeAmountRd;
     }
 
-    public Integer getCorpEmployeeAverageAge() {
-        return corpEmployeeAverageAge;
-    }
 
-    public void setCorpEmployeeAverageAge(Integer corpEmployeeAverageAge) {
-        this.corpEmployeeAverageAge = corpEmployeeAverageAge;
-    }
-
-    public Integer getCorpEmployeeReturneeRate() {
-        return corpEmployeeReturneeRate;
-    }
-
-    public void setCorpEmployeeReturneeRate(Integer corpEmployeeReturneeRate) {
-        this.corpEmployeeReturneeRate = corpEmployeeReturneeRate;
-    }
 
     public Long getCorpEntryDate() {
         return corpEntryDate;
@@ -363,13 +359,6 @@ public class CreateEnterpriseCustomerCommand {
         this.corpLogoUri = corpLogoUri;
     }
 
-    public Integer getCorpManagerAverageAge() {
-        return corpManagerAverageAge;
-    }
-
-    public void setCorpManagerAverageAge(Integer corpManagerAverageAge) {
-        this.corpManagerAverageAge = corpManagerAverageAge;
-    }
 
     public Long getCorpNatureItemId() {
         return corpNatureItemId;
@@ -459,11 +448,35 @@ public class CreateEnterpriseCustomerCommand {
         this.corpRegAddress = corpRegAddress;
     }
 
-    public String getCorpRegCapital() {
+    public Double getCorpEmployeeAverageAge() {
+        return corpEmployeeAverageAge;
+    }
+
+    public void setCorpEmployeeAverageAge(Double corpEmployeeAverageAge) {
+        this.corpEmployeeAverageAge = corpEmployeeAverageAge;
+    }
+
+    public Double getCorpEmployeeReturneeRate() {
+        return corpEmployeeReturneeRate;
+    }
+
+    public void setCorpEmployeeReturneeRate(Double corpEmployeeReturneeRate) {
+        this.corpEmployeeReturneeRate = corpEmployeeReturneeRate;
+    }
+
+    public Double getCorpManagerAverageAge() {
+        return corpManagerAverageAge;
+    }
+
+    public void setCorpManagerAverageAge(Double corpManagerAverageAge) {
+        this.corpManagerAverageAge = corpManagerAverageAge;
+    }
+
+    public BigDecimal getCorpRegCapital() {
         return corpRegCapital;
     }
 
-    public void setCorpRegCapital(String corpRegCapital) {
+    public void setCorpRegCapital(BigDecimal corpRegCapital) {
         this.corpRegCapital = corpRegCapital;
     }
 

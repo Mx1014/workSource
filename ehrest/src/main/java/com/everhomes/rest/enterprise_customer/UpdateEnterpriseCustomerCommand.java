@@ -95,7 +95,7 @@ public class UpdateEnterpriseCustomerCommand {
     private String corpRegAddress;
     private String corpOpAddress;
     private String corpLegalPerson;
-    private String corpRegCapital;
+    private BigDecimal corpRegCapital;
     private Long corpNatureItemId;
     private String corpNatureItemName;
     private BigDecimal corpScale;
@@ -119,9 +119,9 @@ public class UpdateEnterpriseCustomerCommand {
     private Integer corpEmployeeAmountMale;
     private Integer corpEmployeeAmountFemale;
     private Integer corpEmployeeAmountRd;
-    private Integer corpEmployeeReturneeRate;
-    private Integer corpEmployeeAverageAge;
-    private Integer corpManagerAverageAge;
+    private Double corpEmployeeReturneeRate;
+    private Double corpEmployeeAverageAge;
+    private Double corpManagerAverageAge;
     private String managerName;
     private String managerPhone;
     private String managerEmail;
@@ -311,22 +311,6 @@ public class UpdateEnterpriseCustomerCommand {
         this.corpEmployeeAmountRd = corpEmployeeAmountRd;
     }
 
-    public Integer getCorpEmployeeAverageAge() {
-        return corpEmployeeAverageAge;
-    }
-
-    public void setCorpEmployeeAverageAge(Integer corpEmployeeAverageAge) {
-        this.corpEmployeeAverageAge = corpEmployeeAverageAge;
-    }
-
-    public Integer getCorpEmployeeReturneeRate() {
-        return corpEmployeeReturneeRate;
-    }
-
-    public void setCorpEmployeeReturneeRate(Integer corpEmployeeReturneeRate) {
-        this.corpEmployeeReturneeRate = corpEmployeeReturneeRate;
-    }
-
     public Long getCorpEntryDate() {
         return corpEntryDate;
     }
@@ -365,14 +349,6 @@ public class UpdateEnterpriseCustomerCommand {
 
     public void setCorpLogoUri(String corpLogoUri) {
         this.corpLogoUri = corpLogoUri;
-    }
-
-    public Integer getCorpManagerAverageAge() {
-        return corpManagerAverageAge;
-    }
-
-    public void setCorpManagerAverageAge(Integer corpManagerAverageAge) {
-        this.corpManagerAverageAge = corpManagerAverageAge;
     }
 
     public Long getCorpNatureItemId() {
@@ -463,11 +439,35 @@ public class UpdateEnterpriseCustomerCommand {
         this.corpRegAddress = corpRegAddress;
     }
 
-    public String getCorpRegCapital() {
+    public Double getCorpEmployeeAverageAge() {
+        return corpEmployeeAverageAge;
+    }
+
+    public void setCorpEmployeeAverageAge(Double corpEmployeeAverageAge) {
+        this.corpEmployeeAverageAge = corpEmployeeAverageAge;
+    }
+
+    public Double getCorpEmployeeReturneeRate() {
+        return corpEmployeeReturneeRate;
+    }
+
+    public void setCorpEmployeeReturneeRate(Double corpEmployeeReturneeRate) {
+        this.corpEmployeeReturneeRate = corpEmployeeReturneeRate;
+    }
+
+    public Double getCorpManagerAverageAge() {
+        return corpManagerAverageAge;
+    }
+
+    public void setCorpManagerAverageAge(Double corpManagerAverageAge) {
+        this.corpManagerAverageAge = corpManagerAverageAge;
+    }
+
+    public BigDecimal getCorpRegCapital() {
         return corpRegCapital;
     }
 
-    public void setCorpRegCapital(String corpRegCapital) {
+    public void setCorpRegCapital(BigDecimal corpRegCapital) {
         this.corpRegCapital = corpRegCapital;
     }
 
