@@ -90,3 +90,6 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999983, 0, 0, 
 '', 1, 1, 60, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=审批测试&metaObject="}', 3, 0,
  1, 1, '', 0, NULL, NULL, NULL, 0,
  'pm_admin', 1, NULL, NULL, 0, NULL);
+
+-- 修复组织架构的历史数据
+update eh_organization_members SET visible_flag = 0 WHERE visible_flag = null;
