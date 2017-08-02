@@ -8,6 +8,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -241,23 +243,36 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         TerminalDayStatistics statistics = new TerminalDayStatistics();
 
-        Integer startingPosition = 10;
+        Condition condition = Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+
+        condition = condition.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
+                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
+
+        // Integer startingPosition = 10;
+        String newDate = date + " 00";
+        long mill = 24 * 60 * 60 * 1000 - 1;
+
         if(!StringUtils.isEmpty(hour)){
-            startingPosition = 13;
-            date = date + " " + hour;
+            // startingPosition = 13;
+            newDate = date + " " + hour;
+            mill = 60 * 60 * 1000 - 1;
         }
 
-        Condition condition = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).eq(date);
-        if(null != namespaceId){
+        Date date1 = DateUtil.strToDate(newDate, "yyyy-MM-dd HH");
+        long time1 = date1.getTime();
+        Timestamp minTime = new Timestamp(time1);
+        Timestamp maxTime = new Timestamp(time1 + mill);
+
+        condition = condition.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
+        // Condition condition = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).eq(date);
+        /*if(null != namespaceId){
             condition = condition.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }
+        }*/
         SelectConditionStep<Record2<Integer,Integer>> selectConditionStep1 = context.select(
                 Tables.EH_USER_ACTIVITIES.ID.count(),
-                Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct() )
+                Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_USER_ACTIVITIES)
-                .where(condition)
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
+                .where(condition);
         LOGGER.debug("statistical start number and active user number sql:{}", selectConditionStep1.getSQL());
         Record2<Integer, Integer> fetchAny = selectConditionStep1.fetchAny();
         if(null == fetchAny){
@@ -272,12 +287,15 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         }
 
 
-        Condition condition1= Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).lt(date);
-        if(null != namespaceId){
-            condition1 = condition1.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }
+        Condition condition1 = Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
         condition1 = condition1.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
         condition1 = condition1.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
+
+        condition1 = condition1.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.lt(minTime));
+        // Condition condition1= Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).lt(date);
+        /*if(null != namespaceId){
+            condition1 = condition1.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+        }*/
 
         SelectConditionStep<Record1<Integer>> selectConditionStep2 = context.select(
                 Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
@@ -289,9 +307,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                                 .from(Tables.EH_USER_ACTIVITIES)
                                 .where(condition1)
 
-                ))
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
+                ));
         LOGGER.debug("statistical new user number sql:{}", selectConditionStep2.getSQL());
         Record1<Integer> fetchAny1 = selectConditionStep2.fetchAny();
         if(null == fetchAny1){
@@ -303,16 +319,19 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
             });
         }
 
-        Condition condition2 = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).le(date);
-        if(null != namespaceId){
+        Condition condition2 = Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+        condition2 = condition2.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
+        condition2 = condition2.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
+
+        condition2 = condition2.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.le(minTime));
+        // Condition condition2 = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).le(date);
+       /* if(null != namespaceId){
             condition2 = condition2.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }
+        }*/
         SelectConditionStep<Record1<Integer>> selectConditionStep3 = context.select(
                 Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_USER_ACTIVITIES)
-                .where(condition2)
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
+                .where(condition2);
         LOGGER.debug("statistical cumulative user number sql:{}", selectConditionStep3.getSQL());
         Record1<Integer> fetchAny2 = selectConditionStep3.fetchAny();
         if(null == fetchAny2){
@@ -332,16 +351,31 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
     @Override
     public Long getTerminalActiveUserNumberByDate(String startDate, String endDate, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Condition condition = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).ge(startDate);
-        condition = condition.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).le(endDate));
-        if(null != namespaceId){
+
+        Condition condition = Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+
+        condition = condition.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
+        condition = condition.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
+
+        Date date1 = DateUtil.strToDate(startDate, "yyyy-MM-dd");
+        long time1 = date1.getTime();
+        Timestamp minTime = new Timestamp(time1);
+
+        Date date2 = DateUtil.strToDate(endDate, "yyyy-MM-dd");
+        long time2 = date2.getTime();
+        Timestamp maxTime = new Timestamp(time2);
+
+        condition = condition.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
+
+        // Condition condition = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).ge(startDate);
+        // condition = condition.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).le(endDate));
+        /*if(null != namespaceId){
             condition = condition.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }
+        }*/
         SelectConditionStep<Record1<Integer>> step = context.select(
                 Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_USER_ACTIVITIES)
-                .where(condition)
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
+                .where(condition);
         LOGGER.debug("statistical active user number sql:{}", step.getSQL());
         Record1<Integer> fetchAny = step.fetchAny();
         if(null == fetchAny){
@@ -427,11 +461,12 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
     @Override
     public Long getTerminalStartNumberByDay(String date, String version, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        TerminalDayStatistics statistics = new TerminalDayStatistics();
-        Condition condition = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).eq(date);
-        if(null != namespaceId){
-            condition = condition.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }
+
+        Condition condition = Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+
+        condition = condition.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
+                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
+
         if(!StringUtils.isEmpty(version)){
             Condition versionCond = Tables.EH_USER_ACTIVITIES.APP_VERSION_NAME.eq(version);
             if(version.split("\\.").length > 2){
@@ -440,12 +475,24 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
             condition = condition.and(versionCond);
         }
 
+        long aDayMill = 24 * 60 * 60 * 1000 - 1;
+        Date date1 = DateUtil.strToDate(date, "yyyy-MM-dd");
+
+        long time = date1.getTime();
+        Timestamp minTime = new Timestamp(time);
+        Timestamp maxTime = new Timestamp(time + aDayMill);
+
+        condition = condition.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
+
+        // Condition condition = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).eq(date);
+        /*if(null != namespaceId){
+            condition = condition.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+        }*/
+
         SelectConditionStep<Record1<Integer>> step = context.select(
                 Tables.EH_USER_ACTIVITIES.ID.count())
                 .from(Tables.EH_USER_ACTIVITIES)
-                .where(condition)
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
+                .where(condition);
         LOGGER.debug("statistical start number and active user number sql:{}", step.getSQL());
         Record1<Integer> fetchAny = step.fetchAny();
         if(null == fetchAny){
