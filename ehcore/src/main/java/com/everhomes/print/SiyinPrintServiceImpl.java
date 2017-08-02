@@ -388,8 +388,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}finally {
 			LOGGER.info("subject = {}, print response = {}", PRINT_SUBJECT + "." + cmd.getIdentifierToken(),printResponse);
 			ExecutorUtil.submit(()->{
-				LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
-				localBusSubscriber.onLocalBusMessage(null,  PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse, null);
+//				LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+//				localBusSubscriber.onLocalBusMessage(null,  PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse, null);
 				localBus.publish(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse);
 				return ;
 			});
