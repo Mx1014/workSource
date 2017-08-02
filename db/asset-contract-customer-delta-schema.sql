@@ -212,8 +212,8 @@ ALTER TABLE `eh_contracts` ADD COLUMN `contract_situation` TEXT COMMENT '合同�
  
 -- 合同状态 重新定义一下枚举
 
-ALTER TABLE `eh_contracts` ADD COLUMN  `category_item_id` BIGINT COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the id of eh_var_field_items',
-ALTER TABLE `eh_contracts` ADD COLUMN  `category_item_name` VARCHAR(128) COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the display_name of eh_var_field_items',
+ALTER TABLE `eh_contracts` ADD COLUMN  `category_item_id` BIGINT COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the id of eh_var_field_items';
+ALTER TABLE `eh_contracts` ADD COLUMN  `category_item_name` VARCHAR(128) COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the display_name of eh_var_field_items';
 --ALTER TABLE `eh_contracts` ADD COLUMN `category` TINYINT NOT NULL DEFAULT 0 COMMENT '0:资源租赁合同、1:物业服务合同、2:车位服务合同';
 ALTER TABLE `eh_contracts` ADD COLUMN `advanced_notify_days` INTEGER NOT NULL DEFAULT 0 COMMENT '提前提醒天数';
 ALTER TABLE `eh_contracts` ADD COLUMN `filing_place` VARCHAR(64) COMMENT '归档地';
