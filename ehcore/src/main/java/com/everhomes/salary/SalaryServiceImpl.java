@@ -723,7 +723,7 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd) {
 
-        User user = UserContext.current().getUser();
+//        User user = UserContext.current().getUser();
         if(!cmd.getEmployeeOriginVal().isEmpty()){
             //  1.个人设定做完修改
             //  2.组织架构薪酬组的人员变动
@@ -743,9 +743,28 @@ public class SalaryServiceImpl implements SalaryService {
                             cmd.getSalaryGroupId(),cmd.getUserId(),cmd.getUserDetailId());
                 });
             }
-
             //  添加到组织架构的薪酬组中，没有增加有则覆盖
             this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(),cmd.getUserDetailId(),cmd.getSalaryGroupId());
+        }
+        //计算前6个月的薪酬组的periodvals
+
+        //计算之前六个月的period
+        Organization salaryOrg = organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
+        Calendar periodCalendar = Calendar.getInstance();
+        // TODO: 荣楠来做 通过cmd的信息拿member的DTO
+        UniongroupMemberDetailsDTO member = uniongroupService.;
+        for(int i = 0;i<=5;i++){
+            String period = monthSF.get().format(periodCalendar.getTime());
+            SalaryGroup oldGroup = salaryGroupProvider.findSalaryGroupByOrgId(cmd.getSalaryGroupId(), period);
+            if(null == oldGroup ){
+                calculateGroupPeroid(salaryOrg, period, false);
+            }else{
+                oldGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
+                List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryOrg.getId());
+                calculateMemberPeriodVals(member,oldGroup,salaryGroupEntities,false);
+                salaryGroupProvider.updateSalaryGroup(oldGroup);
+            }
+            periodCalendar.add(Calendar.MONTH, -1);
         }
     }
 
