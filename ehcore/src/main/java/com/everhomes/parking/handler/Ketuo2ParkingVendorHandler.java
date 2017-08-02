@@ -386,6 +386,15 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 //		}
 
 		if(null == card) {
+
+			Calendar calendar = Calendar.getInstance();
+			calendar.set(Calendar.HOUR_OF_DAY, 0);
+			calendar.set(Calendar.MINUTE, 0);
+			calendar.set(Calendar.SECOND, 0);
+			//充值记录的开始时间
+			Timestamp tempStart = new Timestamp(calendar.getTimeInMillis());
+			order1.setStartPeriod(tempStart);
+
 			String cardType = "2";
 			KetuoCardRate ketuoCardRate = null;
 			for(KetuoCardRate rate: getCardRule(cardType)) {
@@ -436,6 +445,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 				}
 			}
 
+
 			Timestamp tempStart = Utils.addSeconds(time, 1);
 			Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(time, order.getMonthCount().intValue());
 			String validStart = sdf1.format(tempStart);
@@ -470,7 +480,9 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 
 			//将充值信息存入订单
 			order1.setErrorDescriptionJson(json);
-			order1.setStartPeriod(tempStart);
+			if (null == order1.getStartPeriod()) {
+				order1.setStartPeriod(tempStart);
+			}
 			order1.setEndPeriod(tempEnd);
 
 			JSONObject jsonObject = JSONObject.parseObject(json);
