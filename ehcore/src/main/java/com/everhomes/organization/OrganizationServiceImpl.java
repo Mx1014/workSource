@@ -10610,11 +10610,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         if (memberDetails != null) {
-//            OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
-            List<String> types = new ArrayList<>();
-            types.add(OrganizationGroupType.ENTERPRISE.getCode());
-            List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByDetailId(cmd.getDetailId(), types);
-            OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(members.get(0), OrganizationMemberBasicDTO.class);
+            OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
+//            List<String> types = new ArrayList<>();
+//            types.add(OrganizationGroupType.ENTERPRISE.getCode());
+//            List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByDetailId(cmd.getDetailId(), types);
+//            OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(members.get(0), OrganizationMemberBasicDTO.class);
 
             //  计算在职天数
             Long workingDays = ((new Timestamp(DateHelper.currentGMTTime().getTime()).getTime() - memberDetails.getCheckInTime().getTime()) / (24 * 60 * 60 * 1000));
