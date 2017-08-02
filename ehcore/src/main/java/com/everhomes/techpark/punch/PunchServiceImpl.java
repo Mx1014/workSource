@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.approval.ApprovalCategory;
@@ -182,12 +183,17 @@ import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
+import com.everhomes.rest.uniongroup.UniongroupTarget;
+import com.everhomes.rest.uniongroup.UniongroupTargetType;
+import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -247,6 +253,9 @@ public class PunchServiceImpl implements PunchService {
 	private EnterpriseContactProvider enterpriseContactProvider;
 	@Autowired
 	private DbProvider dbProvider;
+
+	@Autowired
+    private UniongroupService uniongroupService;
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
@@ -2828,9 +2837,11 @@ public class PunchServiceImpl implements PunchService {
 	private void createPunchStatisticsBookSheetHead(Sheet sheet ){
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i =-1 ;
-		 
+
+		row.createCell(++i).setCellValue("时间");
 		row.createCell(++i).setCellValue("姓名");
 		row.createCell(++i).setCellValue("部门");
+		row.createCell(++i).setCellValue("所属规则");
 		row.createCell(++i).setCellValue("应上班天数");
 		row.createCell(++i).setCellValue("实际上班天数");
 		row.createCell(++i).setCellValue("缺勤天数");
@@ -2848,8 +2859,10 @@ public class PunchServiceImpl implements PunchService {
 	public void setNewPunchStatisticsBookRow(Sheet sheet , PunchCountDTO statistic){
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1; 
+		row.createCell(++i).setCellValue(statistic.getPunchMonth());
 		row.createCell(++i).setCellValue(statistic.getUserName());
 		row.createCell(++i).setCellValue(statistic.getDeptName());
+		row.createCell(++i).setCellValue(statistic.getPunchOrgName());
 		row.createCell(++i).setCellValue(statistic.getWorkDayCount());
 		row.createCell(++i).setCellValue(statistic.getWorkCount());
 		row.createCell(++i).setCellValue(statistic.getUnpunchCount());
@@ -4827,7 +4840,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	/**
-	 * 打卡2.0 的考勤统计
+	 * 打卡2.0 的考勤统计-按月统计
 	 * */
 	@Override
 	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response) {
@@ -6148,6 +6161,17 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO addPunchGroup(AddPunchGroupCommand cmd) {
 		// TODO Auto-generated method stub
+		//建立考勤组
+		Organization org = this.organizationService.createUniongroupOrganization(cmd.getOwnerId(),cmd.getGroupName(),UniongroupType.PUNCHGROUP.getCode());
+		//添加关联
+		SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
+        command.setGroupId(org.getId());
+        command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
+        command.setEnterpriseId(cmd.getOwnerId());
+        command.setTargets(cmd.getTargets()); 
+        this.uniongroupService.saveUniongroupConfigures(command);
+        
+        
 		return null;
 	}
 	@Override

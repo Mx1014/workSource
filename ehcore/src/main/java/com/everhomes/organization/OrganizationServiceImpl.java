@@ -118,6 +118,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
 import org.jooq.Condition;
@@ -134,6 +135,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -12566,6 +12568,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     // added by R, for salaryGroup 20170630
     @Override
     public Organization createSalaryGroupOrganization(Long organizationId, String name) {
+        return createUniongroupOrganization(organizationId,name,UniongroupType.SALARYGROUP.getCode());
+    }
+    
+    @Override
+    public Organization createUniongroupOrganization(Long organizationId, String name,String groupType) {
 
         User user = UserContext.current().getUser();
         Organization parOrg = this.checkOrganization(organizationId);
@@ -12574,7 +12581,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setName(name);
         organization.setDirectlyEnterpriseId(organizationId);
         organization.setParentId(organizationId);
-        organization.setGroupType(UniongroupType.SALARYGROUP.getCode());
+		organization.setGroupType(groupType);
         organization.setLevel(parOrg.getLevel() + 1);
         organization.setStatus(OrganizationStatus.ACTIVE.getCode());
         organization.setCreatorUid(user.getId());
@@ -12583,7 +12590,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return organization;
     }
-
     @Override
     public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize) {
         ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();

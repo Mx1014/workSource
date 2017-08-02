@@ -533,5 +533,6 @@ public interface OrganizationService {
 	// added by R, for salaryGroup 20170630
 	public Organization createSalaryGroupOrganization(Long organizationId, String name);
 	public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
+	Organization createUniongroupOrganization(Long organizationId, String name, String groupType);
 	
 }
