@@ -1,5 +1,5 @@
 
-package com.bosigao2;
+package com.everhomes.parking.bosigao2;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;

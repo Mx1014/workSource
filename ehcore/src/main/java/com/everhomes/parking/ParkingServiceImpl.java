@@ -863,11 +863,7 @@ public class ParkingServiceImpl implements ParkingService {
     	if(size > 0){
     		response.setRequests(list.stream().map(r -> {
     			ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
-    			
-    			FlowCaseDetailDTO flowCaseDetailDTO = flowService.getFlowCaseDetail(r.getFlowCaseId(),
-						userId, FlowUserType.PROCESSOR, false);
-    			
-    			dto.setButtons(flowCaseDetailDTO.getButtons());
+
     			return dto;
     		}).collect(Collectors.toList()));
     		

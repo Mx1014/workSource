@@ -1,4 +1,4 @@
-package com.everhomes.parking.cxf;
+package com.everhomes.parking.bosigao.cxf;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;

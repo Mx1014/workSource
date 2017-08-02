@@ -1,4 +1,4 @@
-package com.everhomes.parking.cxf;
+package com.everhomes.parking.bosigao.cxf;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;

@@ -1,4 +1,4 @@
-package com.everhomes.parking.cxf.rest;
+package com.everhomes.parking.bosigao.cxf.rest;
 
 import com.everhomes.util.StringHelper;
 

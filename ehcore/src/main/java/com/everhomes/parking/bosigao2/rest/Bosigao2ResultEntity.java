@@ -1,4 +1,4 @@
-package com.bosigao2.rest;
+package com.everhomes.parking.bosigao2.rest;
 
 public class Bosigao2ResultEntity {
 	private String errorCode;
