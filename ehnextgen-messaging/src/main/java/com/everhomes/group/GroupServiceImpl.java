@@ -602,6 +602,12 @@ public class GroupServiceImpl implements GroupService {
                     dto.setMemberStatus(member.getStatus());
                 else
                     dto.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
+
+                // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
+                if(dto.getMemberCount() == 0){
+                    long count = getOrganizationMemberCount(organization.getId());
+                    dto.setMemberCount(count);
+                }
             }
 
 
@@ -613,6 +619,8 @@ public class GroupServiceImpl implements GroupService {
                 dto.setName(defaultName);
                 dto.setIsNameEmptyBefore(GroupNameEmptyFlag.EMPTY.getCode());
             }
+
+
 
             return dto;
 
@@ -738,6 +746,12 @@ public class GroupServiceImpl implements GroupService {
                         if(org.getName() != null){
                             dto.setName(org.getName());
                         }
+
+                        // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
+                        if(dto.getMemberCount() == 0){
+                            long count = getOrganizationMemberCount(org.getId());
+                            dto.setMemberCount(count);
+                        }
                         groupDtoList.add(dto);
                     } else {
                         LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + org.getGroupId());
@@ -835,6 +849,18 @@ public class GroupServiceImpl implements GroupService {
         }
 
         return groupDtoList;
+    }
+
+
+    private long getOrganizationMemberCount(Long orgId){
+        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        command.setOrganizationId(orgId);
+        command.setPageSize(100000000);
+        ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
+        if(res != null && res.getMembers() != null && res.getMembers().size() > 0){
+            return (long)res.getMembers().size();
+        }
+        return 0;
     }
 
     @Override
