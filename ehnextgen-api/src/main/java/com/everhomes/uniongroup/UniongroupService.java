@@ -58,4 +58,7 @@ public interface UniongroupService {
 
     /**单独添加一个人进入薪酬组**/
     void distributionUniongroupToDetail(Long organiztionId, Long detailId, Long groupId);
+
+    /**通过 detailId 查找其信息**/
+    UniongroupMemberDetailsDTO findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId);
 }

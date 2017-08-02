@@ -752,7 +752,7 @@ public class SalaryServiceImpl implements SalaryService {
         Organization salaryOrg = organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
         Calendar periodCalendar = Calendar.getInstance();
         // TODO: 荣楠来做 通过cmd的信息拿member的DTO
-        UniongroupMemberDetailsDTO member = uniongroupService.;
+        UniongroupMemberDetailsDTO member = uniongroupService.findUniongroupMemberDetailByDetailId(UserContext.getCurrentNamespaceId(),cmd.getUserDetailId());
         for(int i = 0;i<=5;i++){
             String period = monthSF.get().format(periodCalendar.getTime());
             SalaryGroup oldGroup = salaryGroupProvider.findSalaryGroupByOrgId(cmd.getSalaryGroupId(), period);
