@@ -1,5 +1,5 @@
-set @namespaceId = 23456; -- 国贸namespaceId-待定，园区等，待定
-set @community_id = 23456789; -- 待定
+set @namespaceId = 999901; -- 国贸namespaceId-待定，园区等，待定
+set @community_id = 240111044331070561; -- 待定
 -- 国贸EMS快递公司 -- 图标待定 --url等，待定 -- TODO
 set @guo_mao_ems_logo = 'cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw';
 set @guo_mao_ems_order_url = 'http://211.156.193.124/api-test-print/getaway';
