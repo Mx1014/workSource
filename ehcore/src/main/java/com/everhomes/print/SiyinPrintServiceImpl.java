@@ -387,9 +387,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			return new InformPrintResponse(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode());
 		}finally {
 			LOGGER.info("subject = {}, print response = {}", PRINT_SUBJECT + "." + cmd.getIdentifierToken(),printResponse);
-			LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
-			localBusSubscriber.onLocalBusMessage(null,  PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse, null);
-			ExecutorUtil.submit(()->localBus.publish(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse));
+			ExecutorUtil.submit(()->{
+				LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+				localBusSubscriber.onLocalBusMessage(null,  PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse, null);
+				localBus.publish(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), printResponse);
+				return ;
+			});
 		}
 
 	}
