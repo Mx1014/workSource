@@ -4700,7 +4700,7 @@ public class ActivityServiceImpl implements ActivityService {
 					rosterOrderSetting.getTime(), rosterOrderSetting.getWechatSignup());
 		}
 		
-		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L, WechatSignupFlag.NO.getCode());
+		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L, WechatSignupFlag.YES.getCode());
 	}
 	
 
