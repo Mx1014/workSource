@@ -1,4 +1,86 @@
 
+DROP TABLE IF EXISTS `eh_authorization_third_party_forms`;
+CREATE TABLE `eh_authorization_third_party_forms` (
+  `id` BIGINT NOT NULL COMMENT 'id for records',
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `source_type` VARCHAR(32) COMMENT 'zj_personal_auth zj_organization_auth,form ownertype',
+  `source_id` BIGINT COMMENT 'form owner id',
+  `authorization_url` VARCHAR(512) COMMENT 'third party authorization url',
+  `app_key` VARCHAR(128) COMMENT 'app key',
+  `secret_key` VARCHAR(512) COMMENT 'secret_key',
+  `title` VARCHAR(512) COMMENT 'form title',
+  `detail` VARCHAR(512) COMMENT 'form detail',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 增加详情字段 by st.zheng
+ALTER TABLE `eh_rentalv2_items` ADD COLUMN `description` VARCHAR(1024) NULL DEFAULT NULL AFTER `item_type`;
+-- 创建 审批表 by st.zheng
+CREATE TABLE `eh_community_approve` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL,
+  `organization_id` bigint(20) NOT NULL,
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `module_id` bigint(20) DEFAULT NULL,
+  `module_type` varchar(64) DEFAULT NULL,
+  `project_id` bigint(20) DEFAULT '0',
+  `project_type` varchar(64) DEFAULT NULL,
+  `approve_name` varchar(64) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `form_origin_id` bigint(20) DEFAULT NULL,
+  `form_version` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 创建申请表 by st.zheng
+CREATE TABLE `eh_community_approve_requests` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `organization_id` bigint(20) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `module_id` bigint(20) DEFAULT NULL,
+  `module_type` varchar(64) DEFAULT NULL,
+  `flow_case_id` bigint(20) DEFAULT '0',
+  `form_origin_id` bigint(20) DEFAULT NULL,
+  `form_version` bigint(20) DEFAULT NULL,
+  `approve_id` bigint(20) DEFAULT '0',
+  `approve_name` varchar(64) DEFAULT NULL,
+  `requestor_name` varchar(64) DEFAULT NULL,
+  `requestor_phone` varchar(64) DEFAULT NULL,
+  `requestor_company` varchar(64) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_authorization_third_party_buttons` (
+  `id` BIGINT NOT NULL COMMENT 'id for records',
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `title` VARCHAR(128) COMMENT 'ren cai gong yu',
+  `modify_flag` TINYINT COMMENT '0,hidden,1,show',
+  `families_flag` TINYINT COMMENT '0,hidden,1,show',
+  `qrcode_flag` TINYINT COMMENT '0,hidden,1,show',
+  `delete_flag` TINYINT COMMENT '0,hidden,1,show',
+  `blank_detail` VARCHAR(128) COMMENT 'ni hai mei jia ru jia ting',
+  `button_detail` VARCHAR(128) COMMENT 'shen qing ren zheng ',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- merge from forum-2.0 by yanjun 20170703
 -- 投票增加标签字段  add by yanjun 20170613
 ALTER TABLE `eh_polls` ADD COLUMN `tag` VARCHAR(32) NULL;
@@ -224,85 +306,3 @@ CREATE TABLE `eh_organization_member_logs` (
   `contact_description` TEXT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-DROP TABLE IF EXISTS `eh_authorization_third_party_forms`;
-CREATE TABLE `eh_authorization_third_party_forms` (
-  `id` BIGINT NOT NULL COMMENT 'id for records',
-  `namespace_id` INTEGER,
-  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
-  `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `source_type` VARCHAR(32) COMMENT 'zj_personal_auth zj_organization_auth,form ownertype',
-  `source_id` BIGINT COMMENT 'form owner id',
-  `authorization_url` VARCHAR(512) COMMENT 'third party authorization url',
-  `app_key` VARCHAR(128) COMMENT 'app key',
-  `secret_key` VARCHAR(512) COMMENT 'secret_key',
-  `title` VARCHAR(512) COMMENT 'form title',
-  `detail` VARCHAR(512) COMMENT 'form detail',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `update_time` DATETIME,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 增加详情字段 by st.zheng
-ALTER TABLE `eh_rentalv2_items` ADD COLUMN `description` VARCHAR(1024) NULL DEFAULT NULL AFTER `item_type`;
--- 创建 审批表 by st.zheng
-CREATE TABLE `eh_community_approve` (
-  `id` bigint(20) NOT NULL,
-  `namespace_id` int(11) NOT NULL,
-  `organization_id` bigint(20) NOT NULL,
-  `owner_id` bigint(20) NOT NULL,
-  `owner_type` varchar(64) NOT NULL,
-  `module_id` bigint(20) DEFAULT NULL,
-  `module_type` varchar(64) DEFAULT NULL,
-  `project_id` bigint(20) DEFAULT '0',
-  `project_type` varchar(64) DEFAULT NULL,
-  `approve_name` varchar(64) DEFAULT NULL,
-  `status` tinyint(4) NOT NULL DEFAULT '1',
-  `form_origin_id` bigint(20) DEFAULT NULL,
-  `form_version` bigint(20) DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL,
-  `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 创建申请表 by st.zheng
-CREATE TABLE `eh_community_approve_requests` (
-  `id` bigint(20) NOT NULL,
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `organization_id` bigint(20) NOT NULL DEFAULT '0',
-  `owner_id` bigint(20) NOT NULL,
-  `owner_type` varchar(64) NOT NULL,
-  `module_id` bigint(20) DEFAULT NULL,
-  `module_type` varchar(64) DEFAULT NULL,
-  `flow_case_id` bigint(20) DEFAULT '0',
-  `form_origin_id` bigint(20) DEFAULT NULL,
-  `form_version` bigint(20) DEFAULT NULL,
-  `approve_id` bigint(20) DEFAULT '0',
-  `approve_name` varchar(64) DEFAULT NULL,
-  `requestor_name` varchar(64) DEFAULT NULL,
-  `requestor_phone` varchar(64) DEFAULT NULL,
-  `requestor_company` varchar(64) DEFAULT NULL,
-  `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE `eh_authorization_third_party_buttons` (
-  `id` BIGINT NOT NULL COMMENT 'id for records',
-  `namespace_id` INTEGER,
-  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
-  `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `title` VARCHAR(128) COMMENT 'ren cai gong yu',
-  `modify_flag` TINYINT COMMENT '0,hidden,1,show',
-  `families_flag` TINYINT COMMENT '0,hidden,1,show',
-  `qrcode_flag` TINYINT COMMENT '0,hidden,1,show',
-  `delete_flag` TINYINT COMMENT '0,hidden,1,show',
-  `blank_detail` VARCHAR(128) COMMENT 'ni hai mei jia ru jia ting',
-  `button_detail` VARCHAR(128) COMMENT 'shen qing ren zheng ',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `update_time` DATETIME,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
