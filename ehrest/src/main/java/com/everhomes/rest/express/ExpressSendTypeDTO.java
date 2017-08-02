@@ -15,12 +15,12 @@ import com.everhomes.util.StringHelper;
  */
 public class ExpressSendTypeDTO {
 	private Long expressCompanyId;
-	private Long sendType;
+	private Byte sendType;
 	private String sendTypeName;
 	
 	public ExpressSendTypeDTO() {
 	}
-	public ExpressSendTypeDTO(Long expressCompanyId, Long sendType, String sendTypeName) {
+	public ExpressSendTypeDTO(Long expressCompanyId, Byte sendType, String sendTypeName) {
 		super();
 		this.expressCompanyId = expressCompanyId;
 		this.sendType = sendType;
@@ -32,10 +32,10 @@ public class ExpressSendTypeDTO {
 	public void setExpressCompanyId(Long expressCompanyId) {
 		this.expressCompanyId = expressCompanyId;
 	}
-	public Long getSendType() {
+	public Byte getSendType() {
 		return sendType;
 	}
-	public void setSendType(Long sendType) {
+	public void setSendType(Byte sendType) {
 		this.sendType = sendType;
 	}
 	public String getSendTypeName() {
