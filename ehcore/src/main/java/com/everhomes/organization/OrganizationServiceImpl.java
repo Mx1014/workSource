@@ -126,7 +126,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -12607,38 +12606,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizationMember;// add by xq.tian 2017/07/05
     }
 
-    @Override
-    public ListOrganizationMemberCommandResponse syncOrganizationMemberStatus() {
-        // 1.查同一个域空间下，同一个公司的member的记录，按手机号码分组
-        List<EhOrganizationMembers> ehMembers = this.organizationProvider.listOrganizationMembersGroupByToken();
-        ListOrganizationMemberCommandResponse res = new ListOrganizationMemberCommandResponse();
-        List<OrganizationMemberDTO> members = new ArrayList<>();
-        for(EhOrganizationMembers m : ehMembers){
-            List<EhOrganizationMembers> m_token = this.organizationProvider.listOrganizationMemberByToken(m.getContactToken());
-            Map map = new HashMap();
-            for(EhOrganizationMembers r : m_token){
-                Long enterpriseId = getTopEnterpriserIdOfOrganization(r.getOrganizationId());
-                OrganizationMember des = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(r.getContactToken(),enterpriseId);
-                if(des != null){
-                    continue;
-                }
-                if(enterpriseId != null && map.keySet().contains(enterpriseId)){
-                    if(r.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()) && !r.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){//如果状态不同
-                        LOGGER.debug("token :"+r.getContactToken() + "  id :"+ r.getId());
-                        members.add(ConvertHelper.convert(r,OrganizationMemberDTO.class));
-                        continue;
-                    }
-                }else if(!map.keySet().contains(enterpriseId) && r.getGroupPath().split("/").length == 2){
-                    if(!r.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()) && r.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){
-                        map.put(enterpriseId,r.getStatus()); //标识着一个企业内一个人的唯一状态
-                    }
-                }
-            };
-        }
-        res.setMembers(members);
-        return res;
-    }
-
     /**获取一个组织的总公司ID**/
     private Long getTopEnterpriserIdOfOrganization(Long organizationId){
         Organization org = checkOrganization(organizationId);
@@ -12653,7 +12620,5 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         }
     }
-}
-
 }
 
