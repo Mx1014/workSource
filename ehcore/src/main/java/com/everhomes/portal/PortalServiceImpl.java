@@ -421,7 +421,7 @@ public class PortalServiceImpl implements PortalService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
-		List<PortalItem> portalItems = portalItemProvider.listPortalItem(locator, pageSize, new ListingQueryBuilderCallback() {
+		List<PortalItem> portalItems = portalItemProvider.listPortalItems(locator, pageSize, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				Condition cond = Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(cmd.getItemGroupId());
@@ -784,7 +784,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItemCategories.add(category);
 		List<PortalItemCategoryDTO> dtos = portalItemCategories.stream().map(r ->{
 			PortalItemCategoryDTO dto = processPortalItemCategoryDTO(r);
-			List<PortalItem> portalItems = portalItemProvider.listPortalItemByCategoryId(r.getId());
+			List<PortalItem> portalItems = portalItemProvider.listPortalItems(r.getId(), cmd.getItemGroupId());
 
 			List<PortalItemDTO> items = portalItems.stream().map(i ->{
 				return processPortalItemDTO(i);
@@ -922,7 +922,7 @@ public class PortalServiceImpl implements PortalService {
 
 	private List<PortalItem> getItemAllOrMore(Integer namespaceId,Long itemGroupId, AllOrMoreType type){
 		List<PortalItem> items = new ArrayList<>();
-		List<PortalItem> portalItems = portalItemProvider.listPortalItem(null, namespaceId, PortalItemActionType.ALLORMORE.getCode(), itemGroupId);
+		List<PortalItem> portalItems = portalItemProvider.listPortalItems(null, namespaceId, PortalItemActionType.ALLORMORE.getCode(), itemGroupId);
 		for (PortalItem portalItem: portalItems) {
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
 			if(null != actionData && AllOrMoreType.fromCode(actionData.getType()) == type){

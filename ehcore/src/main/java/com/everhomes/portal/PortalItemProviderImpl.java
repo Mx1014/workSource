@@ -63,17 +63,22 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	}
 
 	@Override
+	public List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId){
+		return listPortalItems(itemCategoryId, null, null, itemGroupId);
+	}
+
+	@Override
 	public List<PortalItem> listPortalItemByCategoryId(Long itemCategoryId){
-		return listPortalItem(itemCategoryId, null, null, null);
+		return listPortalItems(itemCategoryId, null, null, null);
 	}
 
 	@Override
 	public List<PortalItem> listPortalItemByGroupId(Long itemGroupId){
-		return listPortalItem(null, null, null, itemGroupId);
+		return listPortalItems(null, null, null, itemGroupId);
 	}
 
 	@Override
-	public List<PortalItem> listPortalItem(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId) {
+	public List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId) {
 		Condition cond = Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode());
 		if(null != itemCategoryId){
 			if(0L == itemCategoryId)
@@ -102,7 +107,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 
 
 	@Override
-	public List<PortalItem> listPortalItem(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
+	public List<PortalItem> listPortalItems(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
 		List<PortalItem> results = new ArrayList<>();
 		pageSize = pageSize + 1;
 		SelectQuery<Record> query = getReadOnlyContext().selectQuery();
