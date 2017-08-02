@@ -195,3 +195,61 @@ CREATE TABLE `eh_enterprise_customers` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+ALTER TABLE `eh_contracts` ADD COLUMN `contract_start_date` DATETIME COMMENT '合同开始日期';
+ALTER TABLE `eh_contracts` ADD COLUMN `name` VARCHAR(128) COMMENT '合同名称';
+ALTER TABLE `eh_contracts` ADD COLUMN `contract_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0:新签合同、1:续约合同、2:变更合同、3:退约合同';
+ALTER TABLE `eh_contracts` ADD COLUMN `create_uid` BIGINT COMMENT '经办人id';
+ALTER TABLE `eh_contracts` ADD COLUMN `party_a_type` TINYINT NOT NULL DEFAULT 0 COMMENT '合同甲方类型 0: organization; 1: individual';
+ALTER TABLE `eh_contracts` ADD COLUMN `party_a_id` BIGINT COMMENT '合同甲方id';
+ALTER TABLE `eh_contracts` ADD COLUMN `party_a_name` VARCHAR(64) COMMENT '合同甲方名称';
+ALTER TABLE `eh_contracts` ADD COLUMN `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual';
+ALTER TABLE `eh_contracts` CHANGE `organization_id` `customer_id` BIGINT;
+ALTER TABLE `eh_contracts` CHANGE `organization_name` `customer_name` VARCHAR(64);
+ALTER TABLE `eh_contracts` ADD COLUMN `contract_situation` TEXT COMMENT '合同情况';
+ 
+-- 合同状态 重新定义一下枚举
+
+ALTER TABLE `eh_contracts` ADD COLUMN  `category_item_id` BIGINT COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the id of eh_var_field_items',
+ALTER TABLE `eh_contracts` ADD COLUMN  `category_item_name` VARCHAR(128) COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the display_name of eh_var_field_items',
+--ALTER TABLE `eh_contracts` ADD COLUMN `category` TINYINT NOT NULL DEFAULT 0 COMMENT '0:资源租赁合同、1:物业服务合同、2:车位服务合同';
+ALTER TABLE `eh_contracts` ADD COLUMN `advanced_notify_days` INTEGER NOT NULL DEFAULT 0 COMMENT '提前提醒天数';
+ALTER TABLE `eh_contracts` ADD COLUMN `filing_place` VARCHAR(64) COMMENT '归档地';
+ALTER TABLE `eh_contracts` ADD COLUMN `record_number` VARCHAR(32) COMMENT '备案号';
+ALTER TABLE `eh_contracts` ADD COLUMN `invalid_uid` BIGINT COMMENT '作废人id';
+ALTER TABLE `eh_contracts` ADD COLUMN `invalid_time` DATETIME COMMENT '作废时间';
+ALTER TABLE `eh_contracts` ADD COLUMN `invalid_reason` VARCHAR(256) COMMENT '作废原因';
+ALTER TABLE `eh_contracts` ADD COLUMN `delete_uid` BIGINT COMMENT '删除人id';
+ALTER TABLE `eh_contracts` ADD COLUMN `delete_time` DATETIME COMMENT '删除时间';
+ 
+ALTER TABLE `eh_contracts` ADD COLUMN `signed_time` DATETIME COMMENT '签约时间';
+ALTER TABLE `eh_contracts` ADD COLUMN `parent_id` BIGINT COMMENT '父合同id';
+ALTER TABLE `eh_contracts` ADD COLUMN `root_parent_id` BIGINT COMMENT '根合同id';
+ALTER TABLE `eh_contracts` ADD COLUMN `rent_size` DOUBLE COMMENT '出租面积';
+ALTER TABLE `eh_contracts` ADD COLUMN `rent` DECIMAL(10,2) COMMENT '租金';
+ALTER TABLE `eh_contracts` ADD COLUMN `downpayment` DECIMAL(10,2) COMMENT '首付款';
+ALTER TABLE `eh_contracts` ADD COLUMN `downpayment_time` DATETIME COMMENT '首付截止日期';
+ALTER TABLE `eh_contracts` ADD COLUMN `deposit` DECIMAL(10,2) COMMENT '定金';
+ALTER TABLE `eh_contracts` ADD COLUMN `deposit_time` DATETIME COMMENT '定金最迟收取日期';
+ALTER TABLE `eh_contracts` ADD COLUMN `contractual_penalty` DECIMAL(10,2) COMMENT '违约金';
+ALTER TABLE `eh_contracts` ADD COLUMN `penalty_remark` VARCHAR(256) COMMENT '违约说明';
+ALTER TABLE `eh_contracts` ADD COLUMN `commission` DECIMAL(10,2) COMMENT '佣金';
+ALTER TABLE `eh_contracts` ADD COLUMN `paid_type` VARCHAR(32) COMMENT '付款方式';
+ALTER TABLE `eh_contracts` ADD COLUMN `free_days` INTEGER COMMENT '免租期天数';
+ALTER TABLE `eh_contracts` ADD COLUMN `free_parking_space` INTEGER COMMENT '赠送车位数量';
+ALTER TABLE `eh_contracts` ADD COLUMN `decorate_begin_date` DATETIME COMMENT '装修开始日期';
+ALTER TABLE `eh_contracts` ADD COLUMN `decorate_end_date` DATETIME COMMENT '装修结束日期';
+ALTER TABLE `eh_contracts` ADD COLUMN `signed_purpose` VARCHAR(128) COMMENT '签约原因';
+
+
+ALTER TABLE `eh_contracts` ADD COLUMN `source` VARCHAR(32) COMMENT 'contract source like zuolin...';
+ALTER TABLE `eh_contracts` ADD COLUMN `source_id` VARCHAR(128) COMMENT 'contract source unique identifier...';
+ 
+ 
+ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_reason` VARCHAR(256) COMMENT '为退约合同的时候';
+-- 如果退约合同只是改状态而不是一个新合同时:
+ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_time` DATETIME COMMENT '为退约合同的时候';
+ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_uid` BIGINT COMMENT '为退约合同的时候';
+ 

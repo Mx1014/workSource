@@ -1,12 +1,10 @@
-package com.everhomes.enterprise_customer;
+package com.everhomes.customer;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.enterprise_customer.*;
-import com.everhomes.rest.field.FieldStatisticDTO;
-import com.everhomes.rest.field.ListFieldStatisticsCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.User;
@@ -26,12 +24,12 @@ import javax.validation.Valid;
  */
 
 @RestController
-@RequestMapping("/enterpriseCustomer")
-public class EnterpriseCustomerController extends ControllerBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseCustomerController.class);
+@RequestMapping("/customer")
+public class CustomerController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerController.class);
 
     /**
-     * <b>URL: /enterpriseCustomer/createEnterpriseCustomer</b>
+     * <b>URL: /customer/createEnterpriseCustomer</b>
      * <p>创建企业客户</p>
      */
     @RequestMapping("createEnterpriseCustomer")
@@ -44,7 +42,7 @@ public class EnterpriseCustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /enterpriseCustomer/updateEnterpriseCustomer</b>
+     * <b>URL: /customer/updateEnterpriseCustomer</b>
      * <p>修改企业客户</p>
      */
     @RequestMapping("updateEnterpriseCustomer")
@@ -57,7 +55,7 @@ public class EnterpriseCustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /enterpriseCustomer/deleteEnterpriseCustomer</b>
+     * <b>URL: /customer/deleteEnterpriseCustomer</b>
      * <p>删除</p>
      */
     @RequestMapping("deleteEnterpriseCustomer")
@@ -70,7 +68,7 @@ public class EnterpriseCustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /enterpriseCustomer/searchEnterpriseCustomer</b>
+     * <b>URL: /customer/searchEnterpriseCustomer</b>
      * <p>列出企业客户</p>
      */
     @RequestMapping("searchEnterpriseCustomer")
@@ -83,7 +81,7 @@ public class EnterpriseCustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /enterpriseCustomer/importEnterpriseCustomerData</b>
+     * <b>URL: /customer/importEnterpriseCustomerData</b>
      * <p>导入企业客户信息</p>
      */
     @RequestMapping("importEnterpriseCustomerData")
@@ -104,7 +102,7 @@ public class EnterpriseCustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /enterpriseCustomer/listEnterpriseCustomerStatistics</b>
+     * <b>URL: /customer/listEnterpriseCustomerStatistics</b>
      * <p>列出企业客户统计信息</p>
      */
     @RequestMapping("listEnterpriseCustomerStatistics")
