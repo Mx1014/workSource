@@ -293,7 +293,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         ListUniongroupMemberDetailResponse response = new ListUniongroupMemberDetailResponse();
 
         if (list != null && list.size() > 0) {
-            if (!search_cmd.getPageAnchor().equals(0))
+            if (search_cmd.getPageAnchor().longValue() != 0L)
                 response.setPageAnchor(search_cmd.getPageAnchor());
             response.setPageSize(search_cmd.getPageSize());
             response.setUniongroupMemberDetailList(list);
