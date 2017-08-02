@@ -3235,46 +3235,61 @@ public class GroupServiceImpl implements GroupService {
     private void sendGroupNotificationPrivateForReqToJoinGroupFreely(Group group, GroupMember member) {
      // send notification to the applicant
         try {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("groupName", group.getName());
+
             User user = userProvider.findUserById(member.getMemberId());
-            String userName = "";
-            if(member.getMemberNickName() != null && !member.getMemberNickName().trim().isEmpty()) {
-                userName = member.getMemberNickName();
-            } else {
-                userName = user.getNickName();
-                if (null != userName) {
-                    userName = "";
-                    }
-                }
-            map.put("userName", userName);
-            String locale = user.getLocale();
-            
-            // send notification to who is requesting to join the group
-            String scope = GroupNotificationTemplateCode.SCOPE;
-            int code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_APPLICANT;
-            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+
+            String notifyTextForApplicant = localeStringService.getLocalizedString("group", "20003", user.getLocale(), "");
+            //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+            Date now = new Date();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+            String hhmm = dateFormat.format( now );
+            sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), hhmm);
+
             sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
-            
-            // send notification to all members in the group
-            code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_OTHER;
-            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            
-            //Modify by Janson
-            List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
-            //sendGroupNotificationToExcludeUsers(group.getId(), member.getMemberId(), null, notifyTextForOther);
-            if(includeList.size() > 0) {
 
-                QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
-                metaObject.setRequestInfo(notifyTextForOther);
 
-                QuestionMetaActionData actionData = new QuestionMetaActionData();
-                actionData.setMetaObject(metaObject);
 
-                String routerUri = RouterBuilder.build(Router.GROUP_MEMBER_APPLY, actionData);
-
-                sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForOther, routerUri);
-            }
+//            Map<String, Object> map = new HashMap<String, Object>();
+//            map.put("groupName", group.getName());
+//            User user = userProvider.findUserById(member.getMemberId());
+//            String userName = "";
+//            if(member.getMemberNickName() != null && !member.getMemberNickName().trim().isEmpty()) {
+//                userName = member.getMemberNickName();
+//            } else {
+//                userName = user.getNickName();
+//                if (null != userName) {
+//                    userName = "";
+//                    }
+//                }
+//            map.put("userName", userName);
+//            String locale = user.getLocale();
+//
+//            // send notification to who is requesting to join the group
+//            String scope = GroupNotificationTemplateCode.SCOPE;
+//            int code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_APPLICANT;
+//            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//            sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+//
+//            // send notification to all members in the group
+//            code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_OTHER;
+//            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//
+//            //Modify by Janson
+//            List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
+//            //sendGroupNotificationToExcludeUsers(group.getId(), member.getMemberId(), null, notifyTextForOther);
+//            if(includeList.size() > 0) {
+//
+//                QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
+//                metaObject.setRequestInfo(notifyTextForOther);
+//
+//                QuestionMetaActionData actionData = new QuestionMetaActionData();
+//                actionData.setMetaObject(metaObject);
+//
+//                String routerUri = RouterBuilder.build(Router.GROUP_MEMBER_APPLY, actionData);
+//
+//                sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForOther, routerUri);
+//            }
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -4686,7 +4701,7 @@ public class GroupServiceImpl implements GroupService {
 					//发消息
 					if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE) {
 						//退出群聊时发送消息
-						sendNotificationToOldCreator(gm, user);
+						//sendNotificationToOldCreator(gm, user);
 						sendNotificationToNewCreator(newCreator, user.getLocale());
 					}else {
 						//退出俱乐部时发送消息，add by tt, 20161102
