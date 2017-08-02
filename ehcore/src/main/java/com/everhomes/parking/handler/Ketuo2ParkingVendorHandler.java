@@ -44,6 +44,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+/**
+ * 科兴 正中会 停车对接
+ */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO2")
 public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ketuo2ParkingVendorHandler.class);
@@ -343,7 +346,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		KetuoCard card = null;
 		JSONObject param = new JSONObject();
 		
-		//储能月卡车没有 归属地区分
+		//月卡车没有 归属地区分
     	plateNumber = plateNumber.substring(1, plateNumber.length());
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_CARD);
@@ -466,9 +469,9 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			String json = post(param, RECHARGE);
 
 			//将充值信息存入订单
-			order.setErrorDescriptionJson(json);
-			order.setStartPeriod(tempStart);
-			order.setEndPeriod(tempEnd);
+			order1.setErrorDescriptionJson(json);
+			order1.setStartPeriod(tempStart);
+			order1.setEndPeriod(tempEnd);
 
 			JSONObject jsonObject = JSONObject.parseObject(json);
 			Object obj = jsonObject.get("resCode");

@@ -66,10 +66,6 @@ public class ParkingCardRequestDTO {
 	private Timestamp processSucceedTime;
 	private Timestamp openCardTime;
 	private Timestamp cancelTime;
-    
-    //工作流
-	@ItemType(FlowButtonDTO.class)
-	private List<FlowButtonDTO> buttons;
 	
     public ParkingCardRequestDTO() {
     }
@@ -248,14 +244,6 @@ public class ParkingCardRequestDTO {
 
 	public void setFlowCaseId(Long flowCaseId) {
 		this.flowCaseId = flowCaseId;
-	}
-
-	public List<FlowButtonDTO> getButtons() {
-		return buttons;
-	}
-
-	public void setButtons(List<FlowButtonDTO> buttons) {
-		this.buttons = buttons;
 	}
 
 	public Timestamp getAuditSucceedTime() {

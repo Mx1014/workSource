@@ -1451,7 +1451,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			RentalOrder rentalBill = ConvertHelper.convert(rs, RentalOrder.class);
 			//设置当前场景公司id
-			rentalBill.setOrganizationId(orgId);
+			rentalBill.setRequestorOrganizationId(orgId);
 			if(null== rs.getCancelTime())
 				rentalBill.setCancelTime(new Timestamp(0));
 			else

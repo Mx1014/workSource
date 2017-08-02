@@ -41,6 +41,7 @@ CREATE TABLE `eh_community_approve_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE `eh_rentalv2_orders`  ADD COLUMN `requestor_organization_id` BIGINT DEFAULT NULL COMMENT 'id of the requestor organization';
 
 
 
