@@ -1,5 +1,5 @@
 
-package com.bosigao.cxf;
+package com.everhomes.parking.cxf;
 
 /**
  * Please modify this class to meet your needs

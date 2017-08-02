@@ -1,5 +1,5 @@
 
-package com.bosigao.cxf;
+package com.everhomes.parking.cxf;
 
 import javax.xml.bind.annotation.*;
 
@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.*;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
- *         &lt;element name="CardPayMoneyResult" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="GetAllCardDescriptResult" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -25,36 +25,36 @@ import javax.xml.bind.annotation.*;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "cardPayMoneyResult"
+    "getAllCardDescriptResult"
 })
-@XmlRootElement(name = "CardPayMoneyResponse")
-public class CardPayMoneyResponse {
+@XmlRootElement(name = "GetAllCardDescriptResponse")
+public class GetAllCardDescriptResponse {
 
-    @XmlElement(name = "CardPayMoneyResult")
-    protected String cardPayMoneyResult;
+    @XmlElement(name = "GetAllCardDescriptResult")
+    protected String getAllCardDescriptResult;
 
     /**
-     * 获取cardPayMoneyResult属性的值。
+     * 获取getAllCardDescriptResult属性的值。
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getCardPayMoneyResult() {
-        return cardPayMoneyResult;
+    public String getGetAllCardDescriptResult() {
+        return getAllCardDescriptResult;
     }
 
     /**
-     * 设置cardPayMoneyResult属性的值。
+     * 设置getAllCardDescriptResult属性的值。
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setCardPayMoneyResult(String value) {
-        this.cardPayMoneyResult = value;
+    public void setGetAllCardDescriptResult(String value) {
+        this.getAllCardDescriptResult = value;
     }
 
 }

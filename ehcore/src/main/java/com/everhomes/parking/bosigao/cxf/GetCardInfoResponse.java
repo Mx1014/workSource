@@ -1,5 +1,5 @@
 
-package com.bosigao.cxf;
+package com.everhomes.parking.cxf;
 
 import javax.xml.bind.annotation.*;
 

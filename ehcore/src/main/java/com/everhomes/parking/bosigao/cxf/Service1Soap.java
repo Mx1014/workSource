@@ -1,4 +1,4 @@
-package com.bosigao.cxf;
+package com.everhomes.parking.cxf;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -22,8 +22,8 @@ public interface Service1Soap {
      * 月卡充值延期
      */
     @WebMethod(operationName = "CardPayMoney", action = "http://tempuri.org/CardPayMoney")
-    @RequestWrapper(localName = "CardPayMoney", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.CardPayMoney")
-    @ResponseWrapper(localName = "CardPayMoneyResponse", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.CardPayMoneyResponse")
+    @RequestWrapper(localName = "CardPayMoney", targetNamespace = "http://tempuri.org/", className = "com.everhomes.parking.cxf.CardPayMoney")
+    @ResponseWrapper(localName = "CardPayMoneyResponse", targetNamespace = "http://tempuri.org/", className = "com.everhomes.parking.cxf.CardPayMoneyResponse")
     @WebResult(name = "CardPayMoneyResult", targetNamespace = "http://tempuri.org/")
     public String cardPayMoney(
             @WebParam(name = "cardCode", targetNamespace = "http://tempuri.org/")
@@ -48,8 +48,8 @@ public interface Service1Soap {
      * 所有月卡类型描述查询
      */
     @WebMethod(operationName = "GetAllCardDescript", action = "http://tempuri.org/GetAllCardDescript")
-    @RequestWrapper(localName = "GetAllCardDescript", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.GetAllCardDescript")
-    @ResponseWrapper(localName = "GetAllCardDescriptResponse", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.GetAllCardDescriptResponse")
+    @RequestWrapper(localName = "GetAllCardDescript", targetNamespace = "http://tempuri.org/", className = "com.everhomes.parking.cxf.GetAllCardDescript")
+    @ResponseWrapper(localName = "GetAllCardDescriptResponse", targetNamespace = "http://tempuri.org/", className = "com.everhomes.parking.cxf.GetAllCardDescriptResponse")
     @WebResult(name = "GetAllCardDescriptResult", targetNamespace = "http://tempuri.org/")
     public String getAllCardDescript();
 
@@ -57,8 +57,8 @@ public interface Service1Soap {
      * 月卡用户信息查询
      */
     @WebMethod(operationName = "GetCardInfo", action = "http://tempuri.org/GetCardInfo")
-    @RequestWrapper(localName = "GetCardInfo", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.GetCardInfo")
-    @ResponseWrapper(localName = "GetCardInfoResponse", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.GetCardInfoResponse")
+    @RequestWrapper(localName = "GetCardInfo", targetNamespace = "http://tempuri.org/", className = "com.everhomes.parking.cxf.GetCardInfo")
+    @ResponseWrapper(localName = "GetCardInfoResponse", targetNamespace = "http://tempuri.org/", className = "com.everhomes.parking.cxf.GetCardInfoResponse")
     @WebResult(name = "GetCardInfoResult", targetNamespace = "http://tempuri.org/")
     public String getCardInfo(
             @WebParam(name = "cardCode", targetNamespace = "http://tempuri.org/")
