@@ -598,7 +598,7 @@ public class PortalServiceImpl implements PortalService {
 			if(AllOrMoreType.ALL == AllOrMoreType.fromCode(actionData.getType())){
 				dto.setContentName(configurationProvider.getValue(ConfigConstants.PORTAL_ITEM_ALL_TITLE, "全部"));
 				if(!StringUtils.isEmpty(actionData.getDefUri())){
-					String url = contentServerService.parserUri(portalItem.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+					String url = contentServerService.parserUri(actionData.getDefUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 					actionData.setDefUrl(url);
 				}
 				dto.setActionData(StringHelper.toJsonString(actionData));
