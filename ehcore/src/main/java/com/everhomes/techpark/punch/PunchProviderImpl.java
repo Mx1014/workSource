@@ -2303,7 +2303,7 @@ long id = sequenceProvider.getNextSequence(key);
     }
 
 	@Override
-	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, String month, Byte exceptionStatus,
+	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
 			List<Long> userIds, CrossShardListingLocator locator, int i) {
 		List<PunchStatistic> result = queryPunchStatistics(locator,  i, new ListingQueryBuilderCallback() {
             @Override
@@ -2315,8 +2315,8 @@ long id = sequenceProvider.getNextSequence(key);
                 	query.addConditions(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(exceptionStatus));   
                 if(null != userIds )
                 	query.addConditions(Tables.EH_PUNCH_STATISTICS.USER_ID.in(userIds));   
-                if(null != month)
-                	query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(month));   
+                if(null != months)
+                	query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.in(months));   
                 	
                 return query;
             }

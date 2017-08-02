@@ -255,7 +255,7 @@ public interface PunchProvider {
 
 	Long createPunchStatistic(PunchStatistic obj);
 
-	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, String month, Byte exceptionStatus,
+	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
 			List<Long> userIds, CrossShardListingLocator locator, int i);
   
 	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId);
