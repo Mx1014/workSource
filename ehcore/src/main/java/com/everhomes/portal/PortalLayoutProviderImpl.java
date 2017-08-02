@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.rest.portal.PortalLayoutStatus;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import com.everhomes.server.schema.tables.pojos.EhPortalLayouts;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.springframework.util.StringUtils;
 
 @Component
 public class PortalLayoutProviderImpl implements PortalLayoutProvider {
@@ -56,12 +58,24 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalLayout.class);
 	}
-	
+
 	@Override
-	public List<PortalLayout> listPortalLayout(Integer namespaceId) {
+	public PortalLayout getPortalLayout(Integer namespaceId, String name) {
+		List<PortalLayout> layouts = listPortalLayout(namespaceId, name);
+		if(layouts.size() > 0)
+			return layouts.get(0);
+		return null;
+	}
+
+	@Override
+	public List<PortalLayout> listPortalLayout(Integer namespaceId, String name) {
+		Condition cond = Tables.EH_PORTAL_LAYOUTS.NAMESPACE_ID.eq(namespaceId);
+		if(!StringUtils.isEmpty(name)){
+			cond = cond.and(Tables.EH_PORTAL_LAYOUTS.NAME.eq(name));
+		}
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAYOUTS)
 				.where(Tables.EH_PORTAL_LAYOUTS.STATUS.eq(PortalLayoutStatus.ACTIVE.getCode()))
-				.and(Tables.EH_PORTAL_LAYOUTS.NAMESPACE_ID.eq(namespaceId))
+				.and(cond)
 				.orderBy(Tables.EH_PORTAL_LAYOUTS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLayout.class));
 	}

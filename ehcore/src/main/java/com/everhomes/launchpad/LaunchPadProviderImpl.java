@@ -32,6 +32,7 @@ import com.everhomes.server.schema.tables.daos.EhLaunchPadItemsDao;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadLayoutsDao;
 import com.everhomes.server.schema.tables.daos.EhUserLaunchPadItemsDao;
 import com.everhomes.util.ConvertHelper;
+import org.springframework.util.StringUtils;
 
 @Component
 public class LaunchPadProviderImpl implements LaunchPadProvider {
@@ -349,11 +350,15 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
-	public List<LaunchPadLayout> getLaunchPadLayouts() {
+	public List<LaunchPadLayout> getLaunchPadLayouts(String name, Integer namespaceId) {
 		List<LaunchPadLayout> list = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
 		SelectJoinStep<Record> query = context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS);
-		query.groupBy(Tables.EH_LAUNCH_PAD_LAYOUTS.NAME, Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID);
+		if(null != namespaceId)
+			query.where(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
+		if(!StringUtils.isEmpty(name)){
+			query.where(Tables.EH_LAUNCH_PAD_LAYOUTS.NAME.eq(name));
+		}
 		query.fetch().map(r -> {
 			list.add(ConvertHelper.convert(r,LaunchPadLayout.class));
 			return null;

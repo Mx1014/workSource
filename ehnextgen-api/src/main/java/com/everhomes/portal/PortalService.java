@@ -118,4 +118,6 @@ interface PortalService {
 	ListScopeResponse searchScopes(ListScopeCommand cmd);
 
 	PortalItemDTO getAllOrMoreItem(GetItemAllOrMoreCommand cmd);
+
+	void syncLaunchPadData();
 }

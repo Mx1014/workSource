@@ -473,4 +473,15 @@ public class PortalController extends ControllerBase {
 	public RestResponse getAllOrMoreItem(GetItemAllOrMoreCommand cmd){
 		return new RestResponse(portalService.getAllOrMoreItem(cmd));
 	}
+
+	/**
+	 * <p>服务广场的数据同步到配置表</p>
+	 * <b>URL: /portal/syncLaunchPadData</b>
+	 */
+	@RequestMapping("syncLaunchPadData")
+	@RestReturn(String.class)
+	public RestResponse syncLaunchPadData(){
+		portalService.syncLaunchPadData();
+		return new RestResponse();
+	}
 }

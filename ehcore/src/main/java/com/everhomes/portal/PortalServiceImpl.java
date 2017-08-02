@@ -184,8 +184,8 @@ public class PortalServiceImpl implements PortalService {
 		ServiceModuleApp moduleApp = checkServiceModuleApp(cmd.getId());
 		moduleApp.setOperatorUid(UserContext.current().getUser().getId());
 		moduleApp.setName(cmd.getName());
-		moduleApp.setModuleId(cmd.getModuleId());
 		if(null != cmd.getModuleId()){
+			moduleApp.setModuleId(cmd.getModuleId());
 			ServiceModule serviceModule = checkServiceModule(cmd.getModuleId());
 			if(StringUtils.isEmpty(cmd.getInstanceConfig()) && null != serviceModule){
 				cmd.setInstanceConfig(serviceModule.getInstanceConfig());
@@ -244,8 +244,10 @@ public class PortalServiceImpl implements PortalService {
 
 	private ServiceModuleAppDTO processServiceModuleAppDTO(ServiceModuleApp moduleApp){
 		ServiceModuleAppDTO dto = ConvertHelper.convert(moduleApp, ServiceModuleAppDTO.class);
-		ServiceModule serviceModule = checkServiceModule(moduleApp.getModuleId());
-		dto.setModuleName(serviceModule.getName());
+		if(null != moduleApp.getModuleId() && moduleApp.getModuleId() != 0){
+			ServiceModule serviceModule = checkServiceModule(moduleApp.getModuleId());
+			dto.setModuleName(serviceModule.getName());
+		}
 		return dto;
 	}
 
@@ -1219,7 +1221,7 @@ public class PortalServiceImpl implements PortalService {
 	public PortalPublishLogDTO publish(PublishCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId());
+		List<PortalLayout> layouts = portalLayoutProvider.listPortalLayout(cmd.getNamespaceId(), null);
 		PortalPublishLog portalPublishLog = new PortalPublishLog();
 		portalPublishLog.setNamespaceId(namespaceId);
 		portalPublishLog.setStatus(PortalPublishLogStatus.PUBLISHING.getCode());
@@ -1659,74 +1661,272 @@ public class PortalServiceImpl implements PortalService {
 		return "/" + layoutName;
 	}
 
-	private void chuliLayout(){
-		List<LaunchPadLayout> padLayouts = launchPadProvider.getLaunchPadLayouts();
-		for (LaunchPadLayout padLayout: padLayouts) {
-			PortalLayout layout = ConvertHelper.convert(padLayout, PortalLayout.class);
 
-			LaunchPadLayoutJson layoutJson = (LaunchPadLayoutJson)StringHelper.fromJsonString(padLayout.getLayoutJson(), LaunchPadLayoutJson.class);
-			layout.setLabel(layoutJson.getDisplayName());
-			List<LaunchPadLayoutGroupDTO> padLayoutGroups = layoutJson.getGroups();
-			for (LaunchPadLayoutGroupDTO padLayoutGroup: padLayoutGroups) {
-				PortalItemGroup itemGroup = ConvertHelper.convert(padLayoutGroup, PortalItemGroup.class);
-				itemGroup.setNamespaceId(layout.getNamespaceId());
-				itemGroup.setLayoutId(layout.getId());
-				itemGroup.setLabel(padLayoutGroup.getGroupName());
-				itemGroup.setStatus(layout.getStatus());
-				if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NAVIGATOR){
-					NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), NavigatorInstanceConfig.class);
-					itemGroup.setName(instanceConfig.getItemGroup());
-					ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
-					if(Style.fromCode(padLayoutGroup.getStyle()) == Style.GALLERY){
-						if(StringUtils.isEmpty(padLayoutGroup.getTitle()) || StringUtils.isEmpty(padLayoutGroup.getIconUrl())){
-							config.setTitleFlag(TitleFlag.TRUE.getCode());
-							config.setTitle(padLayoutGroup.getTitle());
-							config.setTitleUri(padLayoutGroup.getIconUrl());
+	@Override
+	public void syncLaunchPadData(){
+		dbProvider.execute((status) -> {
+			syncLayout(null, "/home", "ServiceMarketLayout");
+			return null;
+		});
+	}
+
+
+	private PortalLayout syncLayout(Integer namespaceId, String location, String name){
+		User user = UserContext.current().getUser();
+		List<LaunchPadLayout> padLayouts = launchPadProvider.getLaunchPadLayouts(name, namespaceId);
+		PortalLayout layout = null;
+		for (LaunchPadLayout padLayout: padLayouts) {
+			layout = portalLayoutProvider.getPortalLayout(padLayout.getNamespaceId(), name);
+			if(null == layout){
+				layout = ConvertHelper.convert(padLayout, PortalLayout.class);
+
+				LaunchPadLayoutJson layoutJson = (LaunchPadLayoutJson)StringHelper.fromJsonString(padLayout.getLayoutJson(), LaunchPadLayoutJson.class);
+				layout.setLabel(layoutJson.getDisplayName());
+				List<LaunchPadLayoutGroupDTO> padLayoutGroups = layoutJson.getGroups();
+				for (LaunchPadLayoutGroupDTO padLayoutGroup: padLayoutGroups) {
+					PortalItemGroup itemGroup = ConvertHelper.convert(padLayoutGroup, PortalItemGroup.class);
+					itemGroup.setNamespaceId(layout.getNamespaceId());
+					itemGroup.setLayoutId(layout.getId());
+					itemGroup.setLabel(padLayoutGroup.getGroupName());
+					itemGroup.setStatus(layout.getStatus());
+					itemGroup.setCreatorUid(user.getId());
+					itemGroup.setOperatorUid(user.getId());
+					if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NAVIGATOR){
+						NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), NavigatorInstanceConfig.class);
+						itemGroup.setName(instanceConfig.getItemGroup());
+						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
+						if(Style.fromCode(padLayoutGroup.getStyle()) == Style.GALLERY){
+							if(StringUtils.isEmpty(padLayoutGroup.getTitle()) || StringUtils.isEmpty(padLayoutGroup.getIconUrl())){
+								config.setTitleFlag(TitleFlag.TRUE.getCode());
+								config.setTitle(padLayoutGroup.getTitle());
+								config.setTitleUri(padLayoutGroup.getIconUrl());
+							}
+							config.setColumnCount(padLayoutGroup.getColumnCount());
+							config.setPadding(instanceConfig.getPaddingTop());
+							config.setMargin(instanceConfig.getLineSpacing());
 						}
-						config.setColumnCount(padLayoutGroup.getColumnCount());
-						config.setPadding(instanceConfig.getPaddingTop());
-						config.setMargin(instanceConfig.getLineSpacing());
-					}
-					itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
-				}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BULLETINS){
-					BulletinsInstanceConfig instanceConfig = (BulletinsInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), BulletinsInstanceConfig.class);
-					itemGroup.setName(instanceConfig.getItemGroup());
-					ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
-					itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
-				}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.OPPUSH){
-					OPPushInstanceConfig instanceConfig = (OPPushInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), OPPushInstanceConfig.class);
-					itemGroup.setName(instanceConfig.getItemGroup());
-					Long moduleId = null;
-					if(OPPushWidgetStyle.LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
-						moduleId = 10600L;
-					}else if(OPPushWidgetStyle.LARGE_IMAGE_LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
-						moduleId = 40500L;
-					}
-					ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
-					List<LaunchPadItem> padItems = launchPadProvider.listLaunchPadItemsByItemGroup(padLayout.getNamespaceId(), "/home", instanceConfig.getItemGroup());
-					if(padItems.size() > 0){
-						config.setTitleFlag(TitleFlag.TRUE.getCode());
-						config.setTitle(padItems.get(0).getItemLabel());
-						UrlActionData urlData = (UrlActionData)StringHelper.fromJsonString(padItems.get(0).getActionData(), UrlActionData.class);
-						config.setBizUrl(urlData.getUrl());
-					}
-					if(null != moduleId){
+						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
+						portalItemGroupProvider.createPortalItemGroup(itemGroup);
+
+						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId());
+						if(name.equals("ServiceMarketLayout"))
+							syncItemCategory(itemGroup.getNamespaceId(),itemGroup.getId());
+					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BULLETINS){
+						BulletinsInstanceConfig instanceConfig = (BulletinsInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), BulletinsInstanceConfig.class);
+						itemGroup.setName(instanceConfig.getItemGroup());
+						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
+						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
+						portalItemGroupProvider.createPortalItemGroup(itemGroup);
+					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.OPPUSH){
+						OPPushInstanceConfig instanceConfig = (OPPushInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), OPPushInstanceConfig.class);
+						itemGroup.setName(instanceConfig.getItemGroup());
+						Long moduleId = null;
+						if(OPPushWidgetStyle.LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
+							moduleId = 10600L;
+						}else if(OPPushWidgetStyle.LARGE_IMAGE_LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
+							moduleId = 40500L;
+						}
+						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
+						List<LaunchPadItem> padItems = launchPadProvider.listLaunchPadItemsByItemGroup(padLayout.getNamespaceId(), "/home", instanceConfig.getItemGroup());
+						if(padItems.size() > 0){
+							config.setTitleFlag(TitleFlag.TRUE.getCode());
+							config.setTitle(padItems.get(0).getItemLabel());
+							UrlActionData urlData = (UrlActionData)StringHelper.fromJsonString(padItems.get(0).getActionData(), UrlActionData.class);
+							config.setBizUrl(urlData.getUrl());
+						}
+						if(null != moduleId){
+							List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(padLayout.getNamespaceId(), moduleId);
+							if(moduleApps.size() > 0){
+								config.setModuleAppId(moduleApps.get(0).getId());
+							}
+						}
+						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
+						portalItemGroupProvider.createPortalItemGroup(itemGroup);
+					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.TAB){
+						TabInstanceConfig instanceConfig = (TabInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), TabInstanceConfig.class);
+						itemGroup.setName(instanceConfig.getItemGroup());
+						portalItemGroupProvider.createPortalItemGroup(itemGroup);
+
+						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId());
+
+					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS){
+						NewsInstanceConfig instanceConfig = (NewsInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), NewsInstanceConfig.class);
+						itemGroup.setName(instanceConfig.getItemGroup());
+						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
+						Long moduleId = 10900L;
 						List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(padLayout.getNamespaceId(), moduleId);
 						if(moduleApps.size() > 0){
 							config.setModuleAppId(moduleApps.get(0).getId());
 						}
+						portalItemGroupProvider.createPortalItemGroup(itemGroup);
+					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS_FLASH){
+						NewsFlashInstanceConfig instanceConfig = (NewsFlashInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), NewsFlashInstanceConfig.class);
+						itemGroup.setName(instanceConfig.getItemGroup());
+						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
+						Long moduleId = 10900L;
+						List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(padLayout.getNamespaceId(), moduleId);
+						if(moduleApps.size() > 0){
+							config.setModuleAppId(moduleApps.get(0).getId());
+						}
+						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}
-					itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
-				}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.TAB){
+				}
+			}
 
-				}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS){
+			PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+			mapping.setLaunchPadContentId(padLayout.getId());
+			mapping.setPortalContentId(layout.getId());
+			mapping.setContentType(EntityType.PORTAL_LAYOUT.getCode());
+			mapping.setCreatorUid(user.getId());
+			portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+		}
+		return layout;
+	}
 
-				}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS_FLASH){
+	private void syncItemCategory(Integer namespaceId, Long itemGroupId){
+		User user = UserContext.current().getUser();
+		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategries(namespaceId, null);
+		for (ItemServiceCategry category: categories) {
+			PortalItemCategory portalItemCategory = portalItemCategoryProvider.getPortalItemCategoryByName(namespaceId, itemGroupId, category.getName());
+			if(null == portalItemCategory){
+				portalItemCategory = ConvertHelper.convert(category, PortalItemCategory.class);
+				portalItemCategory.setItemGroupId(itemGroupId);
+				portalItemCategory.setDefaultOrder(category.getOrder());
+				portalItemCategory.setStatus(PortalItemCategoryStatus.ACTIVE.getCode());
 
+				// 添加item 分类
+				portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
+			}
+			syncContentScope(user, namespaceId, EntityType.PORTAL_ITEM.getCode(), portalItemCategory.getId(), ScopeType.ALL.getCode(), 0L, category.getSceneType());
+
+			PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+			mapping.setLaunchPadContentId(category.getId());
+			mapping.setPortalContentId(portalItemCategory.getId());
+			mapping.setContentType(EntityType.PORTAL_ITEM_CATEGORY.getCode());
+			mapping.setCreatorUid(user.getId());
+			portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+		}
+	}
+
+
+	private void syncItem(Integer namespaceId, String location, String itemGroupName, Long itemGroupId){
+		User user = UserContext.current().getUser();
+		List<LaunchPadItem> padItems = launchPadProvider.listLaunchPadItemsByItemGroup(namespaceId, location, itemGroupName);
+		for (LaunchPadItem padItem: padItems) {
+			PortalItem item = portalItemProvider.getPortalItemByGroupNameAndName(namespaceId, location, itemGroupName, padItem.getItemName(), itemGroupId);
+			if(null == item){
+				item = ConvertHelper.convert(padItem, PortalItem.class);
+				item.setItemGroupId(itemGroupId);
+				item.setLabel(padItem.getItemLabel());
+				item.setName(padItem.getItemName());
+				item.setGroupName(padItem.getItemGroup());
+				item.setStatus(PortalItemStatus.ACTIVE.getCode());
+				item.setCreatorUid(user.getId());
+				item.setOperatorUid(user.getId());
+				if(ActionType.NONE == ActionType.fromCode(padItem.getActionType())){
+					item.setActionType(PortalItemActionType.NONE.getCode());
+				}else if(ActionType.MORE_BUTTON == ActionType.fromCode(padItem.getActionType())){
+					item.setActionType(PortalItemActionType.ALLORMORE.getCode());
+					AllOrMoreActionData actionData = new AllOrMoreActionData();
+					actionData.setType(AllOrMoreType.MORE.getCode());
+					item.setActionData(StringHelper.toJsonString(actionData));
+				}else if(ActionType.ALL_BUTTON == ActionType.fromCode(padItem.getActionType())){
+					item.setActionType(PortalItemActionType.ALLORMORE.getCode());
+					AllOrMoreActionData actionData = new AllOrMoreActionData();
+					actionData.setType(AllOrMoreType.ALL.getCode());
+					item.setActionData(StringHelper.toJsonString(actionData));
+				}else if(ActionType.OFFICIAL_URL == ActionType.fromCode(padItem.getActionType())){
+					item.setActionType(PortalItemActionType.ZUOLINURL.getCode());
+					UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
+					item.setActionData(StringHelper.toJsonString(actionData));
+				}else if(ActionType.THIRDPART_URL == ActionType.fromCode(padItem.getActionType())){
+					item.setActionType(PortalItemActionType.THIRDURL.getCode());
+					UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
+					item.setActionData(StringHelper.toJsonString(actionData));
+				}else if(ActionType.NAVIGATION  == ActionType.fromCode(padItem.getActionType())){
+					item.setActionType(PortalItemActionType.LAYOUT.getCode());
+					NavigationActionData data = (NavigationActionData)StringHelper.fromJsonString(padItem.getActionData(), NavigationActionData.class);
+					PortalLayout layout = syncLayout(item.getNamespaceId(), item.getItemLocation(), data.getLayoutName());
+					LayoutActionData actionData = new LayoutActionData();
+					actionData.setLayoutId(layout.getId());
+					item.setActionData(StringHelper.toJsonString(actionData));
+				}else{
+					item.setActionType(PortalItemActionType.MODULEAPP.getCode());
+					ModuleAppActionData actionData = new ModuleAppActionData();
+					List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleAppByActionType(namespaceId, padItem.getActionType());
+					for (ServiceModuleApp moduleApp:moduleApps) {
+						if(moduleApp.getModuleId() == 10600L){
+
+						}else if(moduleApp.getModuleId() == 40500L){
+
+						}else if(moduleApp.getModuleId() == 10900L){
+
+						}else{
+							actionData.setModuleAppId(moduleApp.getId());
+							break;
+						}
+					}
+					item.setActionData(StringHelper.toJsonString(actionData));
 				}
 
+				//添加item到数据库
+				portalItemProvider.createPortalItem(item);
 			}
+
+			syncContentScope(user, namespaceId, EntityType.PORTAL_ITEM.getCode(), item.getId(), padItem.getScopeCode(), padItem.getScopeId(), padItem.getSceneType());
+
+			PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+			mapping.setLaunchPadContentId(padItem.getId());
+			mapping.setPortalContentId(item.getId());
+			mapping.setContentType(EntityType.PORTAL_ITEM.getCode());
+			mapping.setCreatorUid(user.getId());
+			portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+
 		}
+	}
+
+	private PortalContentScope syncContentScope(User user, Integer namespaceId, String contentType, Long contentId, Byte scopeType, Long scopeId, String sceneType){
+		PortalContentScope scope = new PortalContentScope();
+		scope.setContentType(contentType);
+		scope.setContentId(contentId);
+		scope.setNamespaceId(namespaceId);
+		scope.setCreatorUid(user.getId());
+		scope.setOperatorUid(user.getId());
+		if(ScopeType.ALL == ScopeType.fromCode(scopeType)){
+			if(SceneType.PM_ADMIN == SceneType.fromCode(sceneType)){
+				scope.setScopeType(PortalScopeType.PM.getCode());
+				scope.setScopeId(0L);
+			}else if(SceneType.PARK_TOURIST == SceneType.fromCode(sceneType)){
+				scope.setScopeType(PortalScopeType.COMMERCIAL.getCode());
+				scope.setScopeId(0L);
+			}else if(SceneType.DEFAULT == SceneType.fromCode(sceneType)){
+				scope.setScopeType(PortalScopeType.RESIDENTIAL.getCode());
+				scope.setScopeId(0L);
+			}
+
+		}else if(ScopeType.COMMUNITY == ScopeType.fromCode(scopeType)){
+			Community community = communityProvider.findCommunityById(scopeId);
+			scope.setScopeType(PortalScopeType.COMMERCIAL.getCode());
+			if(null != community){
+				if(CommunityType.RESIDENTIAL == CommunityType.fromCode(community.getCommunityType())){
+					scope.setScopeType(PortalScopeType.RESIDENTIAL.getCode());
+				}
+			}
+			scope.setScopeId(scopeId);
+		}else if(ScopeType.ORGANIZATION == ScopeType.fromCode(scopeType)){
+			Organization organization = organizationProvider.findOrganizationById(scopeId);
+			scope.setScopeType(PortalScopeType.ORGANIZATION.getCode());
+			if(null != organization){
+				if(OrganizationType.PM == OrganizationType.fromCode(organization.getOrganizationType())){
+					scope.setScopeType(PortalScopeType.PM.getCode());
+				}
+			}
+			scope.setScopeId(scopeId);
+		}
+
+		//添加item的scope到数据库
+		portalContentScopeProvider.createPortalContentScope(scope);
+		return scope;
 	}
 
 

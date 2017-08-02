@@ -81,12 +81,23 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), ServiceModuleApp.class);
 	}
-	
+
 	@Override
-	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId) {
+	public List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId){
+		return listServiceModuleApp(namespaceId, moduleId, null);
+	}
+
+	@Override
+	public List<ServiceModuleApp> listServiceModuleAppByActionType(Integer namespaceId, Byte actionType){
+		return listServiceModuleApp(namespaceId, null, actionType);
+	}
+
+	private List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long moduleId, Byte actionType) {
 		Condition cond = Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId);
 		if(null != moduleId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(moduleId));
+		if(null != actionType)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.ACTION_TYPE.eq(actionType));
 		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
 				.where(cond)
 				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))

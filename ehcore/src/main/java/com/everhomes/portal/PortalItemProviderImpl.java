@@ -27,6 +27,7 @@ import com.everhomes.server.schema.tables.pojos.EhPortalItems;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.springframework.util.StringUtils;
 
 @Component
 public class PortalItemProviderImpl implements PortalItemProvider {
@@ -92,6 +93,44 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 
 		if(null != PortalItemActionType.fromCode(actionType)){
 			cond = cond.and(Tables.EH_PORTAL_ITEMS.ACTION_TYPE.eq(actionType));
+		}
+
+		if(null != itemGroupId){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_GROUP_ID.eq(itemGroupId));
+		}
+
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
+				.where(Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode()))
+				.and(cond)
+				.orderBy(Tables.EH_PORTAL_ITEMS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
+	}
+
+	@Override
+	public PortalItem getPortalItemByGroupNameAndName(Integer namespaceId, String location, String groupName, String name, Long itemGroupId){
+		List<PortalItem> portalItems = listPortalItems(namespaceId, location, groupName, name, itemGroupId);
+		if(portalItems.size() > 0){
+			return portalItems.get(0);
+		}
+		return null;
+	}
+
+	private List<PortalItem> listPortalItems(Integer  namespaceId, String location, String groupName, String name, Long itemGroupId) {
+		Condition cond = Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode());
+		if(null != namespaceId){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.NAMESPACE_ID.eq(namespaceId));
+		}
+
+		if(!StringUtils.isEmpty(location)){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_LOCATION.eq(location));
+		}
+
+		if(!StringUtils.isEmpty(groupName)){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.GROUP_NAME.eq(groupName));
+		}
+
+		if(!StringUtils.isEmpty(name)){
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.NAME.eq(name));
 		}
 
 		if(null != itemGroupId){
