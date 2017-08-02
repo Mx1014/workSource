@@ -86,7 +86,7 @@ public class ForumController extends ControllerBase {
     @RestReturn(value=PostDTO.class)
     public RestResponse getTopic(GetTopicCommand cmd) {
         PostDTO postDto = this.forumService.getTopic(cmd);
-        
+		
         RestResponse response = new RestResponse(postDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -95,14 +95,14 @@ public class ForumController extends ControllerBase {
     
     /**
      * <b>URL: /forum/listTopics</b>
-     * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
+     * <p>查询指定论坛的帖子列表</p>
      */
     @RequestMapping("listTopics")
     @RestReturn(value=ListPostCommandResponse.class)
     @RequireAuthentication(false)
     public RestResponse listTopics(ListTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = this.forumService.listTopics(cmd);
-        
+		
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

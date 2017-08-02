@@ -7,6 +7,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.*;
+import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.util.CronDateUtils;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -202,7 +203,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 		long endTime = current + (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
 		//通知当天零点到11分的所有任务
-		equipmentService.sendTaskMsg(zero, endTime+60000);
+		equipmentService.sendTaskMsg(zero, endTime+60000, QualityGroupType.EXECUTIVE_GROUP.getCode());
+		equipmentService.sendTaskMsg(zero, endTime+60000, QualityGroupType.REVIEW_GROUP.getCode());
 		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(endTime+60000);
 
 		if(task != null) {

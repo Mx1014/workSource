@@ -445,4 +445,18 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		return ConvertHelper.convert(query.fetchAny(), LeaseFormRequest.class);
 
 	}
+	
+	@Override
+	public List<LeaseFormRequest> listLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+
+		SelectQuery<EhLeaseFormRequestsRecord> query = context.selectQuery(Tables.EH_LEASE_FORM_REQUESTS);
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_TYPE.eq(ownerType));
+
+		query.addOrderBy(Tables.EH_LEASE_FORM_REQUESTS.ID.asc());
+		return query.fetch().map(r->ConvertHelper.convert(r, LeaseFormRequest.class));
+	}
 }

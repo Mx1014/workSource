@@ -1737,7 +1737,8 @@ public class FlowServiceImpl implements FlowService {
             Map<String, String> meta = new HashMap<>();
             meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
             meta.put(MessageMetaConstant.META_OBJECT, rmo.toString());
-            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, ctx.getModuleName());
+            String messageTitle = flowCase.getTitle() != null ? flowCase.getTitle() : ctx.getModuleName();
+            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, messageTitle);
 
             messageDto.setMeta(meta);
 
@@ -2678,6 +2679,14 @@ public class FlowServiceImpl implements FlowService {
             dto.setModuleName("testwuye");
             dto.setDisplayName("testwuye");
             return dto;
+        }
+        
+        if (moduleId.equals(FlowConstants.TALENT_REQUEST)) {
+        	FlowModuleDTO dto = new FlowModuleDTO();
+        	dto.setModuleId(FlowConstants.TALENT_REQUEST);
+        	dto.setModuleName("企业人才");
+        	dto.setDisplayName("企业人才");
+        	return dto;
         }
 
 //

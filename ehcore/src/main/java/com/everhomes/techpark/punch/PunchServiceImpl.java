@@ -1,13 +1,6 @@
 package com.everhomes.techpark.punch;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Time;
@@ -28,6 +21,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.scheduler.RunningFlag;
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -609,10 +603,13 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	/***
+<<<<<<< HEAD
+=======
 	 * @param userId
 	 *            ： 打卡用户;
 	 * @param companyId
 	 *            :打卡规则
+>>>>>>> master
 	 * @param logDay
 	 *            : 计算的打卡日期
 	 * @return PunchLogsDayList：计算好的当日打卡状态
@@ -739,14 +736,14 @@ public class PunchServiceImpl implements PunchService {
 						.getRequestType());
 				punchExceptionDTO.setCreateTime(exceptionRequest
 						.getCreateTime().getTime());
+				Organization organization = organizationProvider.findOrganizationById(companyId);
 				if (exceptionRequest.getRequestType().equals(
 						PunchRquestType.REQUEST.getCode())) {
 					// 对于申请
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getDescription());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), companyId);
-
-					if (null == member) {
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), organization.getPath());
+					if (null == member ) {
 						punchExceptionDTO.setName("无此人");
 					} else {
 						punchExceptionDTO.setName(member.getContactName());
@@ -755,9 +752,8 @@ public class PunchServiceImpl implements PunchService {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getOperatorUid(), companyId);
-
-					if (null == member) {
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), organization.getPath());
+					if (null == member ) {
 						punchExceptionDTO.setName("无此人");
 					} else {
 						punchExceptionDTO.setName(member.getContactName());
@@ -1180,12 +1176,13 @@ public class PunchServiceImpl implements PunchService {
 						.getRequestType());
 				punchExceptionDTO.setCreateTime(exceptionRequest
 						.getCreateTime().getTime());
+				Organization organization = organizationProvider.findOrganizationById(companyId);
 				if (exceptionRequest.getRequestType().equals(
 						PunchRquestType.REQUEST.getCode())) {
 					// 对于申请
-					
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), companyId);
-
+					punchExceptionDTO.setExceptionComment(exceptionRequest
+							.getDescription());
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), organization.getPath());
 					if (null == member) {
 						punchExceptionDTO.setName("无此人");
 					} else {
@@ -1195,8 +1192,7 @@ public class PunchServiceImpl implements PunchService {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getOperatorUid(), companyId);
-
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), organization.getPath());
 					if (null == member) {
 						punchExceptionDTO.setName("无此人");
 					} else {
@@ -1239,6 +1235,8 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd) {
+
+		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 		String punchTime = datetimeSF.get().format(new Date());
 		return createPunchLog(cmd,punchTime);
 		
@@ -1786,6 +1784,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchExceptionRequestCommandResponse listExceptionRequests(
 			ListPunchExceptionRequestCommand cmd) {
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
+		Organization organization = organizationProvider.findOrganizationById(cmd.getEnterpriseId());
 		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 
@@ -1861,7 +1860,7 @@ public class PunchServiceImpl implements PunchService {
 					if(null!=punchDayLog.getWorkTime() )
 						dto.setWorkTime(punchDayLog.getWorkTime().getTime()); 
 					dto.setPunchTimesPerDay(punchDayLog.getPunchTimesPerDay());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getEnterpriseId());
+					OrganizationMember member = findOrganizationMemberByOrgIdAndUId(dto.getUserId(), organization.getPath());
 
 					if (null == member) {
 					} else {
@@ -1872,13 +1871,13 @@ public class PunchServiceImpl implements PunchService {
 					if (null != dto.getOperatorUid()
 							&& 0 != dto.getOperatorUid()) {
 
-						member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), cmd.getEnterpriseId());
+						member = findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), organization.getPath());
 
 						if (null == member) {
 							dto.setOperatorName("无此人");
 						} else {
 							dto.setOperatorName(member.getContactName());
-						}
+						} 
 					}
 					
 					PunchExceptionApproval  approval = punchProvider.getExceptionApproval(r.getUserId(), cmd.getEnterpriseId(),r.getPunchDate());
@@ -1947,10 +1946,11 @@ public class PunchServiceImpl implements PunchService {
 
 						member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), cmd.getEnterpriseId());
 						if (null == member) {
-							dto.setOperatorName("无此人");
+							dto.setOperatorName("");
 						} else {
 							dto.setOperatorName(member.getContactName());
 						}
+						
 					}
 					
 					if(null== approval){
@@ -2832,7 +2832,7 @@ public class PunchServiceImpl implements PunchService {
 	   
 	}
 	
-	public void setNewPunchStatisticsBookRow(Sheet sheet ,PunchStatistic statistic){
+	public void setNewPunchStatisticsBookRow(Sheet sheet , PunchCountDTO statistic){
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1; 
 		row.createCell(++i).setCellValue(statistic.getUserName());
@@ -2847,7 +2847,7 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getSickCount()); 
 		row.createCell(++i).setCellValue(statistic.getExchangeCount()); 
 		row.createCell(++i).setCellValue(statistic.getOutworkCount()); 
-		if(statistic.getOverTimeSum().equals(0L)){
+		if(statistic.getOverTimeSum()==null || statistic.getOverTimeSum().equals(0L)){
 			row.createCell(++i).setCellValue(0);
 		}
 		else{
@@ -2857,27 +2857,28 @@ public class PunchServiceImpl implements PunchService {
 			 
 	}
 	
-	public void createPunchStatisticsBook(String path,List<PunchStatistic> results) {
+	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results) {
 		if (null == results || results.size() == 0)
-			return;
+			return null;
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("punchStatistics");
 		
 		this.createPunchStatisticsBookSheetHead(sheet );
-		for (PunchStatistic statistic : results )
+		for (PunchCountDTO statistic : results )
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
-		try {
-			
-			FileOutputStream out = new FileOutputStream(path);
-			wb.write(out);
-			wb.close();
-			out.close();
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
-					e.getLocalizedMessage());
-		}
+		return wb;
+//		try {
+//
+//			FileOutputStream out = new FileOutputStream(path);
+//			wb.write(out);
+//			wb.close();
+//			out.close();
+//		} catch (Exception e) {
+//			LOGGER.error(e.getMessage());
+//			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+//					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+//					e.getLocalizedMessage());
+//		}
 	}
 
 //	@Override
@@ -2959,36 +2960,24 @@ public class PunchServiceImpl implements PunchService {
 //		
 //		return download(filePath,response);
 //	}
-	public HttpServletResponse download(String path, HttpServletResponse response) {
+	public HttpServletResponse download(Workbook workbook, String fileName, HttpServletResponse response) {
         try {
-            // path是指欲下载的文件的路径。
-            File file = new File(path);
-            // 取得文件名。
-            String filename = file.getName();
-            // 取得文件的后缀名。
-//            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
-
-            // 以流的形式下载文件。
-            InputStream fis = new BufferedInputStream(new FileInputStream(path));
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            fis.close();
-            // 清空response
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			workbook.write(out);
             response.reset();
             // 设置response的Header
-            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
-            response.addHeader("Content-Length", "" + file.length());
-            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
-            response.setContentType("application/octet-stream");
-            toClient.write(buffer);
-            toClient.flush();
-            toClient.close();
-            
-            // 读取完成删除文件
-            if (file.isFile() && file.exists()) {  
-                file.delete();  
-            } 
-        } catch (IOException ex) { 
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes()));
+			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+			response.setContentType("application/msexcel");
+			toClient.write(out.toByteArray());
+			toClient.flush();
+			toClient.close();
+
+//            // 读取完成删除文件
+//            if (file.isFile() && file.exists()) {
+//                file.delete();
+//            }
+        } catch (IOException ex) {
  			LOGGER.error(ex.getMessage());
  			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
@@ -3893,9 +3882,25 @@ public class PunchServiceImpl implements PunchService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		 
+		//找到所有子部门 下面的用户
+		List<Long> userIds = null;
+		if (cmd.getOrganizationId() != null) {
+
+			List<String> groupTypeList = new ArrayList<String>();
+			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+			List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
+					(cmd.getOrganizationId(), groupTypeList, null) ;
+			if(null == organizationMembers)
+				return response;
+			userIds = new ArrayList<Long>();
+			for(OrganizationMemberDTO member : organizationMembers){
+				if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
+					userIds.add(member.getTargetId());
+			}
+		}
 		List<PunchRuleOwnerMap> results = this.punchProvider.queryPunchRuleOwnerMapList(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getTargetType(),
-				cmd.getTargetId(),locator, pageSize + 1 );
+				cmd.getTargetId(),userIds,locator, pageSize + 1 );
 		if (null == results)
 			return response;
 		Long nextPageAnchor = null;
@@ -3906,6 +3911,7 @@ public class PunchServiceImpl implements PunchService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setPunchRuleMaps(new ArrayList<PunchRuleMapDTO>()); 
 		 
+		Organization organization = checkOrganization(cmd.getOwnerId());
 		for(PunchRuleOwnerMap other:results)  {
 			PunchRuleMapDTO dto = ConvertHelper.convert(other, PunchRuleMapDTO.class);
 //			PunchRule pr = this.punchProvider.getPunchRuleById(other.getPunchRuleId());
@@ -3915,7 +3921,7 @@ public class PunchServiceImpl implements PunchService {
 //						"have no punch rule");
 //			dto.setPunchRuleName(pr.getName());
 			if(PunchOwnerType.User.getCode().equals(other.getTargetType())){
-				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
+				OrganizationMember member = findOrganizationMemberByOrgIdAndUId(other.getTargetId(), organization.getPath()); 
 				if(null== member)
 					continue;
 				dto.setTargetName(member.getContactName());
@@ -3934,6 +3940,16 @@ public class PunchServiceImpl implements PunchService {
 		} 
 		return response;
 	}
+	private OrganizationMember findOrganizationMemberByOrgIdAndUId(Long targetId, String path) {
+		List<OrganizationMember> members = this.organizationProvider.listOrganizationMemberByPath(null, path, null, null, new CrossShardListingLocator(), 1000000);
+		if(null== members || members.size() == 0)
+			return null;
+		for(OrganizationMember member : members){
+			if(member.getTargetId().equals(targetId))
+				return member;
+		}
+		return null;
+	}
 	@Override
 	public Long getTopEnterpriseId(Long organizationId){
 		Organization organization = organizationProvider.findOrganizationById(organizationId);
@@ -3942,9 +3958,11 @@ public class PunchServiceImpl implements PunchService {
 		else{
 			return Long.valueOf(organization.getPath().split("/")[1]);
 		}
-		
-		
 	}
+
+
+
+
 	/**找到用户的部门-多部门取最上级第一个*/
 	private OrganizationDTO findUserDepartment(Long userId, Long organizationId){
 //		// 多部门找顶级部门
@@ -3974,7 +3992,6 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			List<String> groupTypes = new ArrayList<String>();
 			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 			return this.organizationService.getMemberTopDepartment(groupTypes,
 					userIdentifier.getIdentifierToken(), organizationId);
 			}
@@ -4080,7 +4097,7 @@ public class PunchServiceImpl implements PunchService {
 		//分页查询
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(0L);
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize =  getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 //		Long organizationId = org.getDirectlyEnterpriseId();
@@ -4184,9 +4201,9 @@ public class PunchServiceImpl implements PunchService {
 //		});
 		
 		return response;
-	}
-
-	private List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
+	} 
+	
+	public List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
 		//找到所有子部门 下面的用户
 		 
 		List<String> groupTypeList = new ArrayList<String>();
@@ -4337,76 +4354,62 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid owner type or  Id parameter in the command");
 		}
-		List<PunchDayDetailDTO> dtos = new ArrayList<PunchDayDetailDTO>();
-		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
-		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
-			//找到所有子部门 下面的用户
-			Organization org = this.checkOrganization(cmd.getOwnerId());
+//		List<PunchDayDetailDTO> dtos = new ArrayList<PunchDayDetailDTO>();
+//		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
+//		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
+//			//找到所有子部门 下面的用户
+//			Organization org = this.checkOrganization(cmd.getOwnerId());
+//
+//			List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+//			if (null == userIds)
+//				return response;
+//			//分页查询 由于用到多条件排序,所以使用pageOffset方式分页
+//			 
+//			String startDay=null;
+//			if(null!=cmd.getStartDay())
+//				startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
+//			String endDay=null;
+//			if(null!=cmd.getEndDay())
+//				endDay =  dateSF.get().format(new Date(cmd.getEndDay()));
+//			Long organizationId = org.getDirectlyEnterpriseId();
+//			if(organizationId.equals(0L))
+//				organizationId = org.getId();
+//			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
+//					organizationId,startDay,endDay , 
+//					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
+//					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
+//					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), null, null);
+//			
+//			if (null == results)
+//				return null;
+//			 
+//			for(PunchDayLog r : results){
+//				PunchDayDetailDTO dto =convertToPunchDayDetailDTO(r);
+//				dtos.add(dto);
+//			}
+//			
+//		}
+		cmd.setPageSize(Integer.MAX_VALUE-1);
+		ListPunchDetailsResponse resp = listPunchDetails(cmd);
 
-			List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
-			if (null == userIds)
-				return response;
-			//分页查询 由于用到多条件排序,所以使用pageOffset方式分页
-			 
-			String startDay=null;
-			if(null!=cmd.getStartDay())
-				startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
-			String endDay=null;
-			if(null!=cmd.getEndDay())
-				endDay =  dateSF.get().format(new Date(cmd.getEndDay()));
-			Long organizationId = org.getDirectlyEnterpriseId();
-			if(organizationId.equals(0L))
-				organizationId = org.getId();
-			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-					organizationId,startDay,endDay , 
-					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
-					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
-					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), null, null);
-			
-			if (null == results)
-				return null;
-			 
-			for(PunchDayLog r : results){
-				PunchDayDetailDTO dto =convertToPunchDayDetailDTO(r);
-				dtos.add(dto);
-			}
-			
-		}
-		
-		URL rootPath = PunchServiceImpl.class.getResource("/");
-		String filePath =rootPath.getPath() + this.downloadDir ;
-		File file = new File(filePath);
-		if(!file.exists())
-			file.mkdirs();
-		filePath = filePath + "PunchDetails"+System.currentTimeMillis()+".xlsx";
+		String filePath = "PunchDetails" + System.currentTimeMillis() + ".xlsx";
 		//新建了一个文件
+
+		Workbook wb = createPunchDetailsBook(resp.getPunchDayDetails());
 		
-		this.createPunchDetailsBook(filePath,dtos);
-		
-		return download(filePath,response);
+		return download(wb,filePath,response);
 	}
 
-    private void createPunchDetailsBook(String path, List<PunchDayDetailDTO> dtos) {
+    private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos) {
     	if (null == dtos || dtos.size() == 0)
-			return;
+			return null;
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("punchDetails");
 		
 		this.createPunchDetailsBookSheetHead(sheet );
 		for (PunchDayDetailDTO dto : dtos )
 			this.setNewPunchDetailsBookRow(sheet, dto);
-		try {
-			
-			FileOutputStream out = new FileOutputStream(path);
-			wb.write(out);
-			wb.close();
-			out.close();
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
-					e.getLocalizedMessage());
-		}
+		return wb;
 	}
     private String convertTimeLongToString(Long timeLong){
     	if(null == timeLong)
@@ -4600,49 +4603,63 @@ public class PunchServiceImpl implements PunchService {
 			start.setTimeInMillis(cmd.getStartDay());
 			end.setTimeInMillis(cmd.getEndDay());
 			while (start.before(end)) {
-				try { 
+				
+				coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_SCHEDULE.getCode()+start.getTimeInMillis()).tryEnter(() -> {
+					try { 
 
-
-					PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
-									companyId, dateSF.get().format(start.getTime()));
-					if (null == punchDayLog) {
-						// 数据库没有计算好的数据 
-						PunchLogsDay pdl = new PunchLogsDay();
-						pdl.setPunchDay(String.valueOf(start.get(Calendar.DAY_OF_MONTH)));
-						pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
-						
-						
-						PunchDayLog newPunchDayLog = new PunchDayLog();
-						pdl = calculateDayLog(userId, companyId, start, pdl,newPunchDayLog);
-						if (null == pdl) {
-							start.add(Calendar.DAY_OF_MONTH, 1);
-							continue  ;
-						} 
-						newPunchDayLog.setUserId(userId);
-						newPunchDayLog.setEnterpriseId(companyId);
-						newPunchDayLog.setCreatorUid(userId);
-						newPunchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.get().format(start
-								.getTime())));
-						newPunchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-								.getTime()));
-						newPunchDayLog.setPunchTimesPerDay(pdl.getPunchTimesPerDay());
-						newPunchDayLog.setStatus(pdl.getPunchStatus());
-						newPunchDayLog.setMorningStatus(pdl.getMorningPunchStatus());
-						newPunchDayLog.setAfternoonStatus(pdl.getAfternoonPunchStatus());
-						newPunchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
-						newPunchDayLog.setExceptionStatus(pdl.getExceptionStatus());
-						newPunchDayLog.setDeviceChangeFlag(getDeviceChangeFlag(userId,java.sql.Date.valueOf(dateSF.get().format(start
-								.getTime())),companyId));
-						punchProvider.createPunchDayLog(newPunchDayLog);
-			
+						PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
+										companyId, dateSF.get().format(start.getTime()));
+						if (null == punchDayLog) {
+							// 数据库没有计算好的数据 
+							PunchLogsDay pdl = new PunchLogsDay();
+							pdl.setPunchDay(String.valueOf(start.get(Calendar.DAY_OF_MONTH)));
+							pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
+							
+							
+							PunchDayLog newPunchDayLog = new PunchDayLog();
+							pdl = calculateDayLog(userId, companyId, start, pdl,newPunchDayLog);
+							if (null == pdl) {
+//								start.add(Calendar.DAY_OF_MONTH, 1);
+//								continue  ;
+								return;
+							} 
+							newPunchDayLog.setUserId(userId);
+							newPunchDayLog.setEnterpriseId(companyId);
+							newPunchDayLog.setCreatorUid(userId);
+							newPunchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.get().format(start
+									.getTime())));
+							newPunchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+									.getTime()));
+							newPunchDayLog.setPunchTimesPerDay(pdl.getPunchTimesPerDay());
+							newPunchDayLog.setStatus(pdl.getPunchStatus());
+							newPunchDayLog.setMorningStatus(pdl.getMorningPunchStatus());
+							newPunchDayLog.setAfternoonStatus(pdl.getAfternoonPunchStatus());
+							newPunchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
+							newPunchDayLog.setExceptionStatus(pdl.getExceptionStatus());
+							newPunchDayLog.setDeviceChangeFlag(getDeviceChangeFlag(userId,java.sql.Date.valueOf(dateSF.get().format(start
+									.getTime())),companyId));
+							punchProvider.createPunchDayLog(newPunchDayLog);
+				
+							}
+					} catch (Exception e) {
+						LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
 					}
-				} catch (Exception e) {
-					LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
-				}
+				});				
 	
 				start.add(Calendar.DAY_OF_MONTH, 1);
 			}
 		}
+	}
+	public static int getPageSize(ConfigurationProvider configProvider, Integer requestedPageSize) {
+		if(requestedPageSize == null) {
+			return configProvider.getIntValue("pagination.default.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+		}
+//
+//		int maxSize = configProvider.getIntValue("pagination.max.size", AppConstants.PAGINATION_MAX_SIZE);
+//		if(requestedPageSize.intValue() > maxSize)
+//			return maxSize;
+
+		return requestedPageSize.intValue();
 	}
 	/**
 	 * 打卡2.0 的考勤详情
@@ -4672,7 +4689,7 @@ public class PunchServiceImpl implements PunchService {
 			Integer pageOffset = 0; 
 			if (cmd.getPageAnchor() != null)
 				pageOffset = cmd.getPageAnchor().intValue();
-			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+			int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
 			String startDay=null;
 			if(null!=cmd.getStartDay())
 				startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
@@ -4785,32 +4802,32 @@ public class PunchServiceImpl implements PunchService {
 
 		//找到所有子部门 下面的用户
 		Organization org = this.checkOrganization(cmd.getOwnerId());
-		 
-
-		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
-		if (null == userIds)
-			return response;
-
-		Long organizationId = org.getDirectlyEnterpriseId();
-		if(organizationId.equals(0L))
-			organizationId = org.getId();
-		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),organizationId,cmd.getMonth(),cmd.getExceptionStatus()
-				,userIds, null, Integer.MAX_VALUE);
-		if(null == results || results.isEmpty())
-			return response;
-		URL rootPath = PunchServiceImpl.class.getResource("/");
-		String filePath =rootPath.getPath() + this.downloadDir ;
-		File file = new File(filePath);
-		if(!file.exists())
-			file.mkdirs();
-		filePath = filePath + "PunchStatistics"+System.currentTimeMillis()+".xlsx";
+		cmd.setPageSize(Integer.MAX_VALUE-1);
+		ListPunchCountCommandResponse resp = listPunchCount(cmd);
+//		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+//		if (null == userIds)
+//			return response;
+//
+//		Long organizationId = org.getDirectlyEnterpriseId();
+//		if(organizationId.equals(0L))
+//			organizationId = org.getId();
+//		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),organizationId,cmd.getMonth(),cmd.getExceptionStatus()
+//				,userIds, null, Integer.MAX_VALUE);
+//		if(null == results || results.isEmpty())
+//			return response;
+//		URL rootPath = PunchServiceImpl.class.getResource("/");
+//		String filePath =rootPath.getPath() + this.downloadDir ;
+//		File file = new File(filePath);
+//		if(!file.exists())
+//			file.mkdirs();
+		String fileName =  "PunchStatistics"+System.currentTimeMillis()+".xlsx";
 		//新建了一个文件
+
+		Workbook wb = createPunchStatisticsBook(resp.getPunchCountList());
 		
-		this.createPunchStatisticsBook(filePath,results);
-		
-		return download(filePath,response);
+		return download(wb,fileName,response);
 	}
-	
+
 	@Override
 	public void refreshMonthDayLogs(String month){
 
@@ -5037,6 +5054,10 @@ public class PunchServiceImpl implements PunchService {
 			if(null == punchScheduling.getTimeRuleId())
 				continue;
 			PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
+			if(null == ptr || null == punchScheduling.getRuleDate()){
+				LOGGER.error("punch time rule is null!! or  rule date is null!!   punchScheduling = "+punchScheduling.toString());
+				continue;
+			}
 			long punchDateLong = punchScheduling.getRuleDate().getTime()+ptr.getDaySplitTimeLong(); 
 			if(punchDateLong > endLong || punchDateLong < beginLong)
 				continue;
@@ -5715,29 +5736,28 @@ public class PunchServiceImpl implements PunchService {
 //		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
 		 
 		
-		URL rootPath = PunchServiceImpl.class.getResource("/");
-		String filePath =rootPath.getPath() + this.downloadDir ;
-		File file = new File(filePath);
-		if(!file.exists())
-			file.mkdirs();
+//		URL rootPath = PunchServiceImpl.class.getResource("/");
+//		String filePath =rootPath.getPath() + this.downloadDir ;
+//		File file = new File(filePath);
+//		if(!file.exists())
+//			file.mkdirs();
 
 		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
-		filePath = filePath +monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"排班表":scheduleLocaleString.getText())+".xlsx";
-		LOGGER.debug("filePath = "+ filePath);
+		String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"排班表":scheduleLocaleString.getText())+".xlsx";
 		//新建了一个文件
-		
-		createPunchSchedulingsBook(filePath,listPunchScheduling(cmd));
-		
-		return download(filePath,response);
+
+		Workbook wb = createPunchSchedulingsBook(listPunchScheduling(cmd));
+
+		return download(wb, filePath, response);
 		 
 	}
 	
-	 private void createPunchSchedulingsBook(String filePath,
+	 private Workbook createPunchSchedulingsBook(
 			ListPunchSchedulingMonthResponse listPunchScheduling) {
 		// TODO Auto-generated method stub
 			if (null == listPunchScheduling ||  listPunchScheduling.getSchedulings().size() == 0)
-				return;
+				return null;
 			Workbook wb = new XSSFWorkbook();
 			Sheet sheet = wb.createSheet("sheet1");
 			
@@ -5754,18 +5774,7 @@ public class PunchServiceImpl implements PunchService {
 			for (PunchSchedulingDTO statistic : listPunchScheduling.getSchedulings() )
 				setNewPunchSchedulingsBookRow(sheet, statistic,textlist);
 //			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
-			try {
-				
-				FileOutputStream out = new FileOutputStream(filePath);
-				wb.write(out);
-				wb.close();
-				out.close();
-			} catch (Exception e) {
-				LOGGER.error(e.getMessage());
-				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-						PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
-						e.getLocalizedMessage());
-			}
+		 	return wb;
 	}
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet) { 
 		Row row = sheet.createRow(sheet.getLastRowNum());

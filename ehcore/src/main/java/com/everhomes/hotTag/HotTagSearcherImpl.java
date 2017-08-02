@@ -54,7 +54,12 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
 
 	@Override
 	public SearchTagResponse query(SearchTagCommand cmd) {
-        
+
+	    //热门标签查询实限制10个字符  add by yanjun 20170629
+        if(cmd.getKeyword() != null && cmd.getKeyword().trim().length() > 10){
+            cmd.setKeyword(cmd.getKeyword().trim().substring(0, 10));
+        }
+
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb;
@@ -101,7 +106,14 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
         	}
         	return tag;
         }).collect(Collectors.toList());
-        
+
+        // 默认第一个值要返回搜索的关键字。如果有关键字一样的标签，根据elasticsearch匹配度，它会排第一。因此仅需和第一个返回值比较。 add by yanjun 20170613
+        if(tags.size() == 0 || tags.get(0).getName()==null || !tags.get(0).getName().equals(cmd.getKeyword())){
+            TagDTO tag = new TagDTO();
+            tag.setName(cmd.getKeyword());
+            tags.add(0, tag);
+        }
+
         response.setTags(tags);
 		return response;
 	}

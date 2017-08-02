@@ -12,6 +12,8 @@ import java.util.List;
 
 
 import java.util.stream.Collectors;
+
+import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -196,13 +198,25 @@ class ShenyePmTaskHandle implements PmTaskHandle {
 		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		Integer pageSize = cmd.getPageSize();
 		Long parentId = cmd.getParentId();
+
+		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
+
 		if(null == parentId){
 			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 			Category ancestor = categoryProvider.findCategoryById(defaultId);
 			parentId = ancestor.getId();
+		}else {
+			Category parent = categoryProvider.findCategoryById(parentId);
+			if (null == parent) {
+				LOGGER.error("Category not found, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Category not found.");
+			}
+			if (CategoryAdminStatus.INACTIVE.getCode() == parent.getStatus()) {
+				return response;
+			}
 		}
-		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
-		
+
 		List<Category> list;
 		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && (null == cmd.getParentId() || cmd.getParentId() == 0L)) {
 			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
@@ -288,23 +302,29 @@ class ShenyePmTaskHandle implements PmTaskHandle {
 		SearchTasksResponse response = new SearchTasksResponse();
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
 				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), 
-				cmd.getPageAnchor(), pageSize);
+				cmd.getPageAnchor(), pageSize+1);
 		int listSize = list.size();
 		if (listSize > 0) {
     		response.setRequests(list.stream().map(t -> {
     			PmTask task = pmTaskProvider.findTaskById(t.getId());
     			PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
-    			
-    			Category taskCategory = checkCategory(task.getTaskCategoryId());
-    			dto.setTaskCategoryId(taskCategory.getId());
-    			dto.setTaskCategoryName(taskCategory.getName());
-    			
+    			if(task != null) {
+					Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+//					Category taskCategory = checkCategory(task.getTaskCategoryId());
+					if(taskCategory != null) {
+						dto.setTaskCategoryId(taskCategory.getId());
+						dto.setTaskCategoryName(taskCategory.getName());
+					}
+
+				}
+
     			return dto;
     		}).collect(Collectors.toList()));
-    		if(listSize != pageSize){
-        		response.setNextPageAnchor(null);
+    		if(response.getRequests() != null && response.getRequests().size() > pageSize){
+				response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
+				response.getRequests().remove(list.get(listSize-1));
         	}else{
-        		response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
+				response.setNextPageAnchor(null);
         	}
     	}
 		

@@ -10,6 +10,7 @@ package com.everhomes.rest.order;
  *	<li>10000006-expressOrder-快递订单</li>
  *	<li>10000006-rentalrefund-思源物业</li>
  *  <li>10000007-activitySignupOrder-活动报名缴费</li>
+ *  <li>10000008-PRINT_ORDER_CODE-活动报名缴费</li>
  *</ul>
  */
 public class OrderType {
@@ -19,8 +20,10 @@ public class OrderType {
 	public static final int PAYMENT_CARD_CODE = 10000004;
 	public static final int RENTAL_ORDER_CODE = 10000005; 
 	public static final int EXPRESS_ORDER_CODE = 10000006; 
-	public static final int ACTIVITY_SIGNUP_ORDER_CODE = 10000007; 
-	
+	public static final int ACTIVITY_SIGNUP_ORDER_CODE = 10000007;
+	public static final int PRINT_ORDER_CODE = 10000008;
+	public static final int ACTIVITY_SIGNUP_ORDER_WECHAT_CODE = 10000009;
+
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用"),
 		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付"),
@@ -28,7 +31,10 @@ public class OrderType {
 		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通"),
 		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订"),
 		EXPRESS_ORDER(OrderType.EXPRESS_ORDER_CODE,"expressOrder","快递订单"),
-		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费"); 
+		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费"),
+		PRINT_ORDER(OrderType.PRINT_ORDER_CODE,"printOrder","打印订单"),
+		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费");
+		
 
 		private int code;
 		private String pycode;

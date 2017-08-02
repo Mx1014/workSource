@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +61,9 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	private SmsProvider smsProvider;
 	@Autowired
     private ContentServerService contentServerService;
-	
+	@Autowired
+	private UserProvider userProvider;
+
 	@Override
 	public FlowModuleInfo initModule() {
 		FlowModuleInfo module = new FlowModuleInfo();
@@ -127,7 +132,9 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
 		
 		ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
-    	
+
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(parkingCardRequest.getRequestorUid(), IdentifierType.MOBILE.getCode());
+		dto.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
 		if(null != parkingCardRequest.getCarSerieId()) {
 			ParkingCarSerie carSerie = parkingProvider.findParkingCarSerie(parkingCardRequest.getCarSerieId());
 			if(null != carSerie) {

@@ -57,3 +57,5 @@ ehtest-integration/pom.xml
 oauth2-client/pom.xml
 pom.properties
 
+*.xml.bak
+*rebel.xml

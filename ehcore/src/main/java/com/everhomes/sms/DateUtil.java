@@ -1,5 +1,6 @@
 package com.everhomes.sms;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -193,5 +194,19 @@ public class DateUtil {
             return java.sql.Date.valueOf(ld);
         }
         return null;
+    }
+
+    public static Timestamp parseTimestamp(String date) {
+        try{
+            if(date.matches("\\d{4}-\\d{2}-\\d{2}")){
+                date = date + " 00:00:00";
+            }
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date parsedDate = dateFormat.parse(date);
+            Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
+            return timestamp;
+        }catch(Exception e) {
+            return null;
+        }
     }
 }

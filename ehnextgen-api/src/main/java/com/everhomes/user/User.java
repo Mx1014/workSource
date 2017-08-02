@@ -1,11 +1,11 @@
 // @formatter:off
 package com.everhomes.user;
 
-import java.util.Locale;
-
 import com.everhomes.namespace.Namespace;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.util.StringHelper;
+
+import java.util.Locale;
 
 public class User extends EhUsers {
     private static final long serialVersionUID = 7192442994996415975L;
@@ -24,11 +24,11 @@ public class User extends EhUsers {
     
     public static final long BIZ_UID = 3L;
     
-    public static final UserLogin SYSTEM_USER_LOGIN = new UserLogin(0, User.SYSTEM_UID, 0, "system", null);
+    public static final UserLogin SYSTEM_USER_LOGIN = new UserLogin(0, User.SYSTEM_UID, 0, "system", null, "0.0.0");
     
-    public static final UserLogin ANNONYMOUS_LOGIN = new UserLogin(0, User.ANNONYMOUS_UID, 0, null, null);
+    public static final UserLogin ANNONYMOUS_LOGIN = new UserLogin(0, User.ANNONYMOUS_UID, 0, null, null, "0.0.0");
     
-    public static final UserLogin BIZ_USER_LOGIN = new UserLogin(0, User.BIZ_UID, 0, "bizhelper", null);
+    public static final UserLogin BIZ_USER_LOGIN = new UserLogin(0, User.BIZ_UID, 0, "bizhelper", null, "0.0.0");
     
     
     public User() {

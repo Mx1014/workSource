@@ -28,6 +28,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
+import com.everhomes.hotTag.HotTags;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
@@ -50,6 +51,7 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.common.ActivityDetailActionData;
+import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.common.PostDetailActionData;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -59,6 +61,8 @@ import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.hotTag.HotFlag;
+import com.everhomes.rest.hotTag.HotTagServiceType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -71,6 +75,7 @@ import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.search.HotTagSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
@@ -193,6 +198,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Value("${server.contextPath:}")
     private String serverContectPath;
+
+    @Autowired
+    private HotTagSearcher hotTagSearcher;
     
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -258,6 +266,10 @@ public class ForumServiceImpl implements ForumService {
             handler.postProcessEmbeddedObject(post);
         } else {
             forumProvider.createPost(post);
+
+            //将tag保存到搜索引擎，此处仅用于普通话题，因为活动和投票已经在自己的postProcessEmbeddedObject中处理
+            // add by yanjun 20170613
+            feedDocTopicTag(post);
         }
 
 
@@ -311,6 +323,23 @@ public class ForumServiceImpl implements ForumService {
         return postDto;
     }
 
+    /**
+     * 将tag保存到搜索引擎，此处仅用于普通话题，因为活动和投票已经在自己的postProcessEmbeddedObject中处理  add by yanjun 20170613
+     * @param post
+     */
+    private void feedDocTopicTag(Post post){
+        if(post.getEmbeddedAppId()!=null && post.getEmbeddedAppId() == 0L && !StringUtils.isEmpty(post.getTag())){
+            try{
+                HotTags tag = new HotTags();
+                tag.setName(post.getTag());
+                tag.setHotFlag(HotFlag.NORMAL.getCode());
+                tag.setServiceType(HotTagServiceType.TOPIC.getCode());
+                hotTagSearcher.feedDoc(tag);
+            }catch (Exception e){
+                LOGGER.error("feedDoc topic tag error",e);
+            }
+        }
+    }
     private void checkUserBlacklist(Long userId) {
         String blackListStr = configProvider.getValue(UserContext.getCurrentNamespaceId(), "createTopic.blacklist", "");
         if (org.apache.commons.lang.StringUtils.isNotEmpty(blackListStr)) {
@@ -1409,6 +1438,16 @@ public class ForumServiceImpl implements ForumService {
 	         if(null != privateCond){
 	        	 condition = condition.and(privateCond);
 	         }
+
+             //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+             if(cmd.getCategoryId() != null){
+                 condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+             }
+
+             //支持标签搜索  add by yanjun 20170712
+             if(!StringUtils.isEmpty(cmd.getTag())){
+                 condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+             }
 	         
 	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
 	    	 if(LOGGER.isInfoEnabled()) {
@@ -2608,6 +2647,16 @@ public class ForumServiceImpl implements ForumService {
             }else{
             	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             }
+
+            //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+            if(cmd.getCategoryId() != null){
+                query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+            }
+
+            //支持标签搜索  add by yanjun 20170712
+            if(!StringUtils.isEmpty(cmd.getTag())){
+                query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+            }
             
             if(visibilityCondition != null) {
                 query.addConditions(visibilityCondition);
@@ -2771,7 +2820,15 @@ public class ForumServiceImpl implements ForumService {
             }else{
             	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             }
-            
+
+            //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+            if(cmd.getCategoryId() != null){
+                query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+            }
+            //支持标签搜索  add by yanjun 20170712
+            if(!StringUtils.isEmpty(cmd.getTag())){
+                query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+            }
             if(null != condition){
             	query.addConditions(condition);
             }
@@ -2864,6 +2921,9 @@ public class ForumServiceImpl implements ForumService {
         if(cmd.getStatus() != null){
         	post.setStatus(cmd.getStatus());
         }
+
+        //添加标签普通话题的标签通过此字段从前台出来。 add by yanjun 20170613
+        post.setTag(cmd.getTag());
         
         return post;
     }
@@ -3634,13 +3694,23 @@ public class ForumServiceImpl implements ForumService {
                 	//单独处理活动的分享链接 modified by xiongying 20160622
                 	if(post.getCategoryId() != null && post.getCategoryId() == 1010) {
                 		relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
-                		ActivityTokenDTO dto = new ActivityTokenDTO();
-                		dto.setPostId(post.getId());
-                		dto.setForumId(post.getForumId());
-                		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
-                		post.setShareUrl(homeUrl + relativeUrl + "?id=" + encodeStr);
+//                		ActivityTokenDTO dto = new ActivityTokenDTO();
+//                		dto.setPostId(post.getId());
+//                		dto.setForumId(post.getForumId());
+//                		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
+//                		post.setShareUrl(homeUrl + relativeUrl + "?id=" + encodeStr);
+
+                        //改用直接传输的方式。因为增加微信报名活动后，涉及到报名取消支付等操作，这些操作都要编码的话，工作量会巨大。
+                        //添加命名空间ns
+                        // 增加是否支持微信报名wechatSignup  add by yanjun 20170620
+                        ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
+                        Byte wechatSignup = 0;
+                        if(activity != null && activity.getWechatSignup() != null){
+                            wechatSignup = activity.getWechatSignup();
+                        }
+                        post.setShareUrl(homeUrl.replace("http://", "https://") + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                 	} else {
-                		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                		post.setShareUrl(homeUrl.replace("http://", "https://") + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}
                 }
             } catch(Exception e) {
@@ -5295,6 +5365,16 @@ public class ForumServiceImpl implements ForumService {
                 query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
                 if(null != cond){
                 	query.addConditions(cond);
+                }
+
+                //支持按话题、活动、投票来查询数据   add by yanjun 20170612
+                if(cmd.getCategoryId() != null){
+                    query.addConditions(Tables.EH_FORUM_POSTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+                }
+
+                //支持标签搜索  add by yanjun 20170712
+                if(!StringUtils.isEmpty(cmd.getTag())){
+                    query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
                 }
                 
                 return query;

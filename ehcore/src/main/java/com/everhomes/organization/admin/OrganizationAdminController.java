@@ -1,7 +1,9 @@
 package com.everhomes.organization.admin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -26,31 +28,33 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
-import com.everhomes.rest.enterprise.ApproveContactCommand;
-import com.everhomes.rest.enterprise.BatchApproveContactCommand;
-import com.everhomes.rest.enterprise.BatchRejectContactCommand;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
-import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
-import com.everhomes.rest.enterprise.RejectContactCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
-import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
-import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
-import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
-import com.everhomes.rest.organization.pm.PmBuildingDTO;
-import com.everhomes.rest.organization.pm.PmManagementsResponse;
-import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
-import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/org")
@@ -86,7 +90,6 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse createOrganizationMember(@Valid CreateOrganizationMemberCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-
         organizationService.createOrganizationMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -717,6 +720,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <b>URL: /admin/org/listPersonnelNotJoinGroups</b>
      * <p>查询未加入组的人员</p>
      */
+    @Deprecated
     @RequestMapping("listPersonnelNotJoinGroups")
     @RestReturn(value = ListOrganizationMemberCommandResponse.class)
     public RestResponse listPersonnelNotJoinGroups(@Valid ListPersonnelNotJoinGroupCommand cmd) {
@@ -741,7 +745,7 @@ public class OrganizationAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/org/ listOrgAuthPersonnels</b>
+     * <b>URL: /admin/org/listOrgAuthPersonnels</b>
      * <p>认证通讯录列表</p>
      */
     @RequestMapping("listOrgAuthPersonnels")
@@ -771,19 +775,19 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /admin/org/createOrganizationPersonnel</b>
-     * <p>添加机构成员</p>
-     */
-    @RequestMapping("createOrganizationPersonnel")
-    @RestReturn(value = String.class)
-    public RestResponse createOrganizationPersonnel(@Valid CreateOrganizationMemberCommand cmd) {
-        OrganizationMemberDTO dto = organizationService.createOrganizationPersonnel(cmd);
-        RestResponse response = new RestResponse(dto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /admin/org/createOrganizationPersonnel</b>
+//     * <p>添加机构成员</p>
+//     */
+//    @RequestMapping("createOrganizationPersonnel")
+//    @RestReturn(value = String.class)
+//    public RestResponse createOrganizationPersonnel(@Valid CreateOrganizationMemberCommand cmd) {
+//        OrganizationMemberDTO dto = organizationService.createOrganizationPersonnel(cmd);
+//        RestResponse response = new RestResponse(dto);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
      * <b>URL: /admin/org/updateOrganizationPersonnel</b>
@@ -1205,6 +1209,21 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse exportImportFileFailResultXls(@Valid GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
         organizationService.exportImportFileFailResultXls(cmd, httpResponse);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/org/checkIfLastOnNode</b>
+     * <p></p>
+     */
+    @RequestMapping("checkIfLastOnNode")
+    @RestReturn(value = String.class)
+    public RestResponse checkIfLastOnNode(@Valid DeleteOrganizationPersonnelByContactTokenCommand cmd, HttpServletResponse httpResponse) {
+        Map map = new HashMap<>();
+        map.put("isLastOne", organizationService.checkIfLastOnNode(cmd));
+        RestResponse response = new RestResponse(map);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

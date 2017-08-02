@@ -43,7 +43,7 @@ public class CreateTaskCommand {
 	private Long addressOrgId;
 	private String buildingName;
 	private Long flowOrganizationId;
-
+	private Integer namespaceId;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
 
@@ -158,6 +158,15 @@ public class CreateTaskCommand {
 	public void setBuildingName(String buildingName) {
 		this.buildingName = buildingName;
 	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
