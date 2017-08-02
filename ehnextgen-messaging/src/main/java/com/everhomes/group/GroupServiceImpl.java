@@ -1266,7 +1266,7 @@ public class GroupServiceImpl implements GroupService {
             listMemberInStatusCommand.setPageSize(1000000);
             ListMemberCommandResponse response = this.listMembersInStatus(listMemberInStatusCommand);
             List<Long> includeList = new ArrayList<Long>();
-            if(response == null || response.getMembers() == null || response.getMembers().size() == 0){
+            if(response != null && response.getMembers() != null && response.getMembers().size() != 0){
                 for(int i = 0; i<response.getMembers().size(); i++){
                     if(response.getMembers().get(i).getMemberId() != operatorUid.longValue()){
                         includeList.add(response.getMembers().get(i).getMemberId());
@@ -1708,7 +1708,7 @@ public class GroupServiceImpl implements GroupService {
                 sendGroupNotificationForRevokeGroupMember(group, revoker, member);
             }
             
-            sendGroupNotificationForMemberLeaveGroup(group, member);
+//            sendGroupNotificationForMemberLeaveGroup(group, member);
             break;
         default:
             LOGGER.error("Target user is not an active group member, operatorUid=" + userId + ", groupId=" + groupId 
