@@ -281,7 +281,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			acl.setCreatorUid(user.getId());
 			acl.setCreateTime(time);
 			if(AllFlagType.YES != AllFlagType.fromCode(cmd.getAllFlag())){
-				if(null != cmd.getRolePrivileges() || cmd.getRolePrivileges().size() == 0){
+				if(null == cmd.getRolePrivileges() || cmd.getRolePrivileges().size() == 0){
 					LOGGER.error("params RolePrivileges error, cmd="+ cmd);
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"params RolePrivileges error.");
