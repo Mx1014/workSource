@@ -608,6 +608,8 @@ public class GroupServiceImpl implements GroupService {
                     long count = getOrganizationMemberCount(organization.getId());
                     dto.setMemberCount(count);
                 }
+
+                dto.setOrgId(organization.getId());
             }
 
 
@@ -752,6 +754,8 @@ public class GroupServiceImpl implements GroupService {
                             long count = getOrganizationMemberCount(org.getId());
                             dto.setMemberCount(count);
                         }
+
+                        dto.setOrgId(org.getId());
                         groupDtoList.add(dto);
                     } else {
                         LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + org.getGroupId());

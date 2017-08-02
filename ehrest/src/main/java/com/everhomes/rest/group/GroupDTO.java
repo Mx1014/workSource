@@ -41,6 +41,7 @@ import com.everhomes.util.StringHelper;
  * <li>scanDownloadUrl:扫描下载页面链接</li>
  * <li>alias: group别名，获取群列表时如果name为空的时候会返回一个别名：用户1、用户2、用户3、用户4、用户5</li>
  * <li>isNameEmptyBefore: 原来的name字段是否为空，0-非空，1-空, {@link com.everhomes.rest.group.GroupNameEmptyFlag}</li>
+ * <li>ogrId: orgId公司Id</li>
  * </ul>
  */
 public class GroupDTO {
@@ -75,6 +76,7 @@ public class GroupDTO {
     private String scanDownloadUrl;
     private String alias;
     private Byte isNameEmptyBefore;
+    private Long orgId;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -377,6 +379,14 @@ public class GroupDTO {
 
     public void setIsNameEmptyBefore(Byte isNameEmptyBefore) {
         this.isNameEmptyBefore = isNameEmptyBefore;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     @Override
