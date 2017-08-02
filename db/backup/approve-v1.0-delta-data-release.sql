@@ -1,5 +1,5 @@
 -- 添加审批
-INSERT INTO `ehcore`.`eh_community_approve` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `project_id`,
+INSERT INTO `eh_community_approve` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `project_id`,
  `approve_name`, `status`, `form_origin_id`, `form_version`, `update_time`, `create_time`) VALUES ('1', '999983', '1008900', '240111044331055940', 'community',
  '41600', 'EhCommunityApprove', '0', '审批测试', '1', '0', '0', NOW(), NOW());
 

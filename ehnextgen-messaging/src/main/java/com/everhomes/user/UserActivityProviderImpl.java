@@ -669,7 +669,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         
         if(locator.getAnchor() != null) {
         	//修改EH_FORUM_POSTS为EH_USER_POSTS，by tt, 20160930
-            query.addConditions(Tables.EH_USER_POSTS.ID.lt(locator.getAnchor()));
+            query.addConditions(Tables.EH_USER_POSTS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
         }
         
         query.addOrderBy(Tables.EH_USER_POSTS.CREATE_TIME.desc());
@@ -684,8 +684,10 @@ public class UserActivityProviderImpl implements UserActivityProvider {
             return ConvertHelper.convert(r, UserPost.class);
         });
         
-        if(posts.size() > 0) {
-            locator.setAnchor(posts.get(posts.size() -1).getId());
+        if(posts.size() == count) {
+            locator.setAnchor(posts.get(count -2).getCreateTime().getTime());
+        }else {
+            locator.setAnchor(null);
         }
         
         return posts;

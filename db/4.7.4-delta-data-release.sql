@@ -1,5 +1,5 @@
 -- 添加审批 by zt.zheng
-INSERT INTO `ehcore`.`eh_community_approve` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `project_id`,
+INSERT INTO `eh_community_approve` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `project_id`,
  `approve_name`, `status`, `form_origin_id`, `form_version`, `update_time`, `create_time`) VALUES ('1', '999983', '1008900', '240111044331055940', 'community',
  '41600', 'EhCommunityApprove', '0', '审批测试', '1', '0', '0', NOW(), NOW());
 
@@ -90,3 +90,6 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999983, 0, 0, 
 '', 1, 1, 60, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=审批测试&metaObject="}', 3, 0,
  1, 1, '', 0, NULL, NULL, NULL, 0,
  'pm_admin', 1, NULL, NULL, 0, NULL);
+
+-- 修复组织架构的历史数据
+update eh_organization_members SET visible_flag = 0 WHERE visible_flag = null;
