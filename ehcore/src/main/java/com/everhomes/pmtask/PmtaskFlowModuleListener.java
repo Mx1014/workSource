@@ -150,15 +150,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				pmTaskProvider.updateTask(task);
 				//通知第三方 config表中配置api请求地址
 				pmTaskCommonService.handoverTaskToTrd(task);
-			}else if ("FLOWCOMPLETED".equals(nodeType)) {
-				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
-				stepDTO.setFlowCaseId(flowCase.getId());
-				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-				stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
-				flowService.processAutoStep(stepDTO);
-
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				pmTaskProvider.updateTask(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
@@ -320,6 +311,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 						}
 
 					}
+			}
+		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
+			if ("FLOWCOMPLETED".equals(nodeType)) {
+				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+				stepDTO.setFlowCaseId(flowCase.getId());
+				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+				stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
+				flowService.processAutoStep(stepDTO);
+				ctx.getFlowGraph().getGraphButton(ctx.getCurrentEvent().getFiredButtonId()).getFlowButton().setFlowStepType(FlowStepType.NO_STEP.getCode());
+
+				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				pmTaskProvider.updateTask(task);
 			}
 		}
 
