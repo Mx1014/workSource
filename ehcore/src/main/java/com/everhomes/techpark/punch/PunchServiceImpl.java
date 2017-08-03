@@ -42,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.approval.ApprovalCategory;
@@ -184,8 +183,6 @@ import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
-import com.everhomes.rest.uniongroup.UniongroupTarget;
-import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -6160,19 +6157,69 @@ public class PunchServiceImpl implements PunchService {
 	} 
 	@Override
 	public PunchGroupDTO addPunchGroup(AddPunchGroupCommand cmd) {
-		// TODO Auto-generated method stub
+		// 
 		//建立考勤组
-		Organization org = this.organizationService.createUniongroupOrganization(cmd.getOwnerId(),cmd.getGroupName(),UniongroupType.PUNCHGROUP.getCode());
+		Organization punchOrg = this.organizationService.createUniongroupOrganization(cmd.getOwnerId(),cmd.getGroupName(),UniongroupType.PUNCHGROUP.getCode());
 		//添加关联
 		SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
-        command.setGroupId(org.getId());
+        command.setGroupId(punchOrg.getId());
         command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
         command.setEnterpriseId(cmd.getOwnerId());
         command.setTargets(cmd.getTargets()); 
         this.uniongroupService.saveUniongroupConfigures(command);
+        //打卡地点和wifi
+        if(null != cmd.getPunchGeoPoints()){
+        	for(PunchGeoPointDTO point:cmd.getPunchGeoPoints()){
+        		PunchGeopoint punchGeopoint =convertDTO2GeoPoint(point);
+        		punchGeopoint.setOwnerId(punchOrg.getId());  
+        		punchProvider.createPunchGeopoint(punchGeopoint);
+        	}
+        }
+        if(null != cmd.getWifis()){
+        	for(PunchWiFiDTO wifi:cmd.getWifis()){ 
+        		PunchWifi punchWifi = convertDTO2Wifi(wifi); 
+        		punchWifi.setOwnerId(punchOrg.getId());  
+        		punchProvider.createPunchWifi(punchWifi);
+        	}
+        }
         
+        //打卡时间
+        PunchRule pr = new PunchRule();
+        pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+        pr.setOwnerId(cmd.getOwnerId());  
+        pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
+        pr.setName(cmd.getGroupName());
+        pr.setRuleType(cmd.getRuleType());
+        pr.setPunchOrganizationId(punchOrg.getId()); 
+        punchProvider.createPunchRule(pr);
+        if(null != cmd.getTimeRules()){
+        	for(PunchTimeRuleDTO timeRule:cmd.getTimeRules()){
+        		
+        	}
+        }
+        //特殊地点
         
+        //节假日
+        
+        //排班
 		return null;
+	}
+	private PunchWifi convertDTO2Wifi(PunchWiFiDTO wifi) {
+		PunchWifi punchWifi = ConvertHelper.convert(wifi, PunchWifi.class);
+		punchWifi.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+		punchWifi.setCreatorUid(UserContext.current().getUser().getId());
+		punchWifi.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+				.getTime())); 
+		return punchWifi;
+	}
+	private PunchGeopoint convertDTO2GeoPoint(PunchGeoPointDTO point) {
+		PunchGeopoint punchGeopoint = ConvertHelper.convert(point, PunchGeopoint.class);
+ 		punchGeopoint.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+ 		punchGeopoint.setCreatorUid(UserContext.current().getUser().getId());
+ 		punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+ 		punchGeopoint.setGeohash(GeoHashUtils.encode(
+ 				punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+		return punchGeopoint;
 	}
 	@Override
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) {

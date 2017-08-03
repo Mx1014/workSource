@@ -39,12 +39,13 @@ public class PunchSchedulingEmployeeDTO {
 		this.contactName = contactName;
 	}
 
-	public List<PunchSchedulingDTO> getSchedulings() {
-		return schedulings;
+	public List<String> getDaySchedulings() {
+		return daySchedulings;
 	}
 
-	public void setSchedulings(List<PunchSchedulingDTO> schedulings) {
-		this.schedulings = schedulings;
+	public void setDaySchedulings(List<String> daySchedulings) {
+		this.daySchedulings = daySchedulings;
 	}
+ 
 	
 }
