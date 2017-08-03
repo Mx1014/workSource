@@ -153,7 +153,7 @@ public class SalaryServiceImpl implements SalaryService {
             return response;
         else {
             ListOrganizationContactCommandResponse results = this.organizationService.listOrganizationContacts(cmd);
-            if (results != null) {
+            if (results.getMembers() != null) {
                 response.setMembers(results.getMembers().stream().filter(r -> {
                     return !StringUtils.isEmpty(r.getDetailId());
                 }).map(r -> {
