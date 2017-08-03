@@ -4,6 +4,7 @@ package com.everhomes.rest.contract;
  * <ul>
  *     <li>id: id</li>
  *     <li>namespaceId: 域空间id</li>
+ *     <li>communityId: 园区id</li>
  *     <li>expiringPeriod: 合同到期日前多久为即将到期合同</li>
  *     <li>expiringUnit: 单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
  *     <li>notifyPeriod: 提醒时间</li>
@@ -17,12 +18,21 @@ public class ContractParamDTO {
 
     private Long id;
     private Integer namespaceId;
+    private Long communityId;
     private Integer expiringPeriod;
     private Byte expiringUnit;
     private Integer notifyPeriod;
     private Byte notifyUnit;
     private Integer expiredPeriod;
     private Byte expiredUnit;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Integer getExpiredPeriod() {
         return expiredPeriod;

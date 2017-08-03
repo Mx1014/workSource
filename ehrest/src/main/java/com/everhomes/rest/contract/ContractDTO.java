@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>serviceUserName: 客服人员名称</li>
  * <li>serviceUserPhone: 客服人员电话</li>
  * <li>buildings: 楼栋门牌信息{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
+ * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * </ul>
  */
 public class ContractDTO {
@@ -49,10 +50,20 @@ public class ContractDTO {
     private String serviceUserName;
     
     private String serviceUserPhone;
+
+	private Byte status;
     
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> buildings;
-	
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
 	public List<BuildingApartmentDTO> getBuildings() {
 		return buildings;
 	}

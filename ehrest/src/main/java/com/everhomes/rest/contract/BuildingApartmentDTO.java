@@ -8,12 +8,22 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>buildingName: 楼栋</li>
  * <li>apartmentName: 门牌</li>
+ * <li>addressId: 门牌id</li>
  * </ul>
  */
 public class BuildingApartmentDTO {
+	private Long addressId;
 	private String buildingName;
 	private String apartmentName;
-	
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
 	public String getBuildingName() {
 		return buildingName;
 	}

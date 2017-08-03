@@ -1,9 +1,13 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.discover.ItemType;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
+ *     <li>communityId: 项目id</li>
  *     <li>parentId: 原合同id</li>
  *     <li>rootParentId: 初始合同id</li>
  *     <li>customerType: 客户类型 0: organization; 1: individual</li>
@@ -38,10 +42,15 @@ import java.math.BigDecimal;
  *     <li>freeParkingSpace: 赠送车位数量</li>
  *     <li>invalidReason: 作废原因</li>
  *     <li>denunciationReason: 退约原因</li>
+ *     <li>apartments: 合同资产列表</li>
+ *     <li>chargingItems: 合同计价条款</li>
+ *     <li>attachments: 合同附件</li>
+ *     <li>status: 合同状态 1 待发起；3 审批中 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
 public class CreateContractCommand {
+    private Long communityId;
     private Long parentId;
     private Long rootParentId;
     private Long customerId;
@@ -76,6 +85,57 @@ public class CreateContractCommand {
     private Long decorateEndDate;
     private String signedPurpose;
     private String denunciationReason;
+
+    @ItemType(BuildingApartmentDTO.class)
+    private List<BuildingApartmentDTO> apartments;
+
+    @ItemType(ContractChargingItemDTO.class)
+    private List<ContractChargingItemDTO> chargingItems;
+
+    @ItemType(ContractAttachmentDTO.class)
+    private List<ContractAttachmentDTO> attachments;
+
+    private Byte status;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    public List<ContractAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<ContractAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public List<BuildingApartmentDTO> getApartments() {
+        return apartments;
+    }
+
+    public void setApartments(List<BuildingApartmentDTO> apartments) {
+        this.apartments = apartments;
+    }
+
+    public List<ContractChargingItemDTO> getChargingItems() {
+        return chargingItems;
+    }
+
+    public void setChargingItems(List<ContractChargingItemDTO> chargingItems) {
+        this.chargingItems = chargingItems;
+    }
 
     public Long getCategoryItemId() {
         return categoryItemId;

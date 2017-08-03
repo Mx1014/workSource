@@ -1,7 +1,10 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.discover.ItemType;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -48,6 +51,10 @@ import java.sql.Timestamp;
  *     <li>denunciationUserName: 退约经办人</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>denunciationReason: 退约原因</li>
+ *     <li>apartments: 合同资产列表</li>
+ *     <li>chargingItems: 合同计价条款</li>
+ *     <li>attachments: 合同附件</li>
+ *     <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -95,6 +102,48 @@ public class ContractDetailDTO {
     private String denunciationUserName;
     private Timestamp denunciationTime;
     private String denunciationReason;
+    private Byte status;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    @ItemType(BuildingApartmentDTO.class)
+    private List<BuildingApartmentDTO> apartments;
+
+    @ItemType(ContractChargingItemDTO.class)
+    private List<ContractChargingItemDTO> chargingItems;
+
+    @ItemType(ContractAttachmentDTO.class)
+    private List<ContractAttachmentDTO> attachments;
+
+    public List<ContractAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<ContractAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    public List<BuildingApartmentDTO> getApartments() {
+        return apartments;
+    }
+
+    public void setApartments(List<BuildingApartmentDTO> apartments) {
+        this.apartments = apartments;
+    }
+
+    public List<ContractChargingItemDTO> getChargingItems() {
+        return chargingItems;
+    }
+
+    public void setChargingItems(List<ContractChargingItemDTO> chargingItems) {
+        this.chargingItems = chargingItems;
+    }
 
     public Long getCategoryItemId() {
         return categoryItemId;
