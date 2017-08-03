@@ -51,9 +51,9 @@ import java.util.List;
  *     <li>denunciationUserName: 退约经办人</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>denunciationReason: 退约原因</li>
- *     <li>apartments: 合同资产列表</li>
- *     <li>chargingItems: 合同计价条款</li>
- *     <li>attachments: 合同附件</li>
+ *     <li>apartments: 合同资产列表 参考{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
+ *     <li>chargingItems: 合同计价条款 参考{@link com.everhomes.rest.contract.ContractChargingItemDTO}</li>
+ *     <li>attachments: 合同附件 参考{@link com.everhomes.rest.contract.ContractAttachmentDTO}</li>
  *     <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
