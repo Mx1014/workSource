@@ -49,6 +49,7 @@ import com.everhomes.rest.express.ExpressActionEnum;
 import com.everhomes.rest.express.ExpressAddressDTO;
 import com.everhomes.rest.express.ExpressCompanyDTO;
 import com.everhomes.rest.express.ExpressHotlineDTO;
+import com.everhomes.rest.express.ExpressInvoiceFlagType;
 import com.everhomes.rest.express.ExpressOrderDTO;
 import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressOrderStatusDTO;
@@ -693,10 +694,7 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public CreateExpressOrderResponse createExpressOrder(CreateExpressOrderCommand cmd) {
-		if (cmd.getSendAddressId() == null || cmd.getReceiveAddressId() == null || cmd.getExpressCompanyId() == null || cmd.getSendType() == null 
-				|| cmd.getSendMode() == null || cmd.getServiceAddressId() == null || cmd.getPayType() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
-		}
+		checkCreateExpressOrderCommand(cmd);
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		checkExpressParams(cmd, owner);
 		ExpressOrder expressOrder = generateExpressOrder(owner, cmd);
@@ -710,6 +708,45 @@ public class ExpressServiceImpl implements ExpressService {
 		});
 		createExpressOrderLog(owner, ExpressActionEnum.CREATE, expressOrder, null);
 		return new CreateExpressOrderResponse(convertToExpressOrderDTOForDetail(expressOrder));
+	}
+
+	private void checkCreateExpressOrderCommand(CreateExpressOrderCommand cmd) {
+		ExpressSendType sendType = ExpressSendType.fromCode(cmd.getSendType());
+		if(sendType == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid sendType = " + cmd.getSendType());
+		}
+		//通用参数校验
+		if (cmd.getSendAddressId() == null || cmd.getExpressCompanyId() == null 
+				|| cmd.getSendMode() == null || cmd.getPayType() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters"
+					+ "sendAddressId = null or expressCompanyId = null or sendMode = null or payType = null");
+		}
+		//除了同城信筒的校验
+		if(sendType == ExpressSendType.CHINA_POST_PACKAGE || sendType == ExpressSendType.STANDARD || sendType == ExpressSendType.EMS_STANDARD){
+			if(cmd.getReceiveAddressId() == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters receiveAddressId = null");
+			}
+		}
+		//华润ems快递，参数校验 
+		if (sendType == ExpressSendType.STANDARD){
+			if(cmd.getServiceAddressId() == null )
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters serviceAddressId = null");
+		}
+		//邮政快递包裹 信筒
+		if(sendType == ExpressSendType.CHINA_POST_PACKAGE || sendType == ExpressSendType.CITY_EMPTIES){
+			ExpressPackageType packageType = ExpressPackageType.fromCode(cmd.getPackageType());
+			if(packageType == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown package type = " + cmd.getPackageType());
+			}
+			ExpressInvoiceFlagType invoiceFlagType = ExpressInvoiceFlagType.fromCode(cmd.getInvoiceFlag());
+			if(invoiceFlagType == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown invoiceFlag Type = " + cmd.getInvoiceFlag());
+			}
+			if(invoiceFlagType == ExpressInvoiceFlagType.NEED_TAX_INVOIE && (cmd.getInvoiceHead() == null || cmd.getInvoiceHead().length() == 0)){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild parameters invoicehead = null");
+			}
+		}
+		//国贸ems校验 TODO
 	}
 
 	//快递公司对应的业务检查，业务对应的包装类型检查。
