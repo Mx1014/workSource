@@ -1020,7 +1020,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			if (StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
 				continue;
 			}
-			ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingByName(contract.getNamespaceId(), contract.getOrganizationId(), customerContract.getContractNumber(), customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+			ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingByName(contract.getNamespaceId(), contract.getCustomerId(), customerContract.getContractNumber(), customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
 			if (contractBuildingMapping == null) {
 				insertContractBuildingMapping(contract, customerContractBuilding);
 			}else {
@@ -1248,8 +1248,11 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	private Contract insertContract(Organization organization, CustomerContract customerContract) {
 		Contract contract = new Contract();
 		contract.setNamespaceId(organization.getNamespaceId());
-		contract.setOrganizationId(organization.getId());
-		contract.setOrganizationName(organization.getName());
+//		contract.setOrganizationId(organization.getId());
+//		contract.setOrganizationName(organization.getName());
+		contract.setCustomerType((byte) 0);
+		contract.setCustomerId(organization.getId());
+		contract.setCustomerName(organization.getName());
 		contract.setContractNumber(customerContract.getContractNumber());
 		contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
 		contract.setStatus(CommonStatus.ACTIVE.getCode());
@@ -1259,7 +1262,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void deleteContractBuildingMappings(Contract contract) {
-		List<ContractBuildingMapping> myContractBuildingMappingList = contractBuildingMappingProvider.listContractBuildingMappingByContract(contract.getNamespaceId(), contract.getOrganizationId(), contract.getContractNumber());
+		List<ContractBuildingMapping> myContractBuildingMappingList = contractBuildingMappingProvider.listContractBuildingMappingByContract(contract.getNamespaceId(), contract.getCustomerId(), contract.getContractNumber());
 		myContractBuildingMappingList.forEach(c->{
 			if (CommonStatus.fromCode(c.getStatus()) != CommonStatus.INACTIVE) {
 				c.setStatus(CommonStatus.INACTIVE.getCode());
@@ -1284,7 +1287,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	//全量同步合同地址
 	private void insertOrUpdateAllContractBuildingMappings(Contract contract, CustomerContract customerContract){
 		//比较合同中的地址
-		List<ContractBuildingMapping> myContractBuildingMappingList = contractBuildingMappingProvider.listContractBuildingMappingByContract(contract.getNamespaceId(), contract.getOrganizationId(), contract.getContractNumber());
+		List<ContractBuildingMapping> myContractBuildingMappingList = contractBuildingMappingProvider.listContractBuildingMappingByContract(contract.getNamespaceId(), contract.getCustomerId(), contract.getContractNumber());
 		List<CustomerContractBuilding> theirContractBuildingList = customerContract.getBuildings();
 		for (ContractBuildingMapping myContractBuildingMapping : myContractBuildingMappingList) {
 			CustomerContractBuilding customerContractBuilding = findFromTheirContractBuildingList(myContractBuildingMapping, theirContractBuildingList);
@@ -1339,8 +1342,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 		ContractBuildingMapping contractBuildingMapping = new ContractBuildingMapping();
 		contractBuildingMapping.setNamespaceId(contract.getNamespaceId());
-		contractBuildingMapping.setOrganizationId(contract.getOrganizationId());
-		contractBuildingMapping.setOrganizationName(contract.getOrganizationName());
+		contractBuildingMapping.setOrganizationId(contract.getCustomerId());
+		contractBuildingMapping.setOrganizationName(contract.getCustomerName());
 		contractBuildingMapping.setContractId(contract.getId());
 		contractBuildingMapping.setContractNumber(contract.getContractNumber());
 		contractBuildingMapping.setBuildingName(customerContractBuilding.getBuildingName());

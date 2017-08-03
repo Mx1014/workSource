@@ -71,7 +71,7 @@ public class ContractProviderImpl implements ContractProvider {
 	public Contract findContractByNumber(Integer namespaceId, Long organizationId, String contractNumber) {
 		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_CONTRACTS.ORGANIZATION_ID.eq(organizationId))
+				.and(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(organizationId))
 				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
 				.fetchOne();
 		if (record != null) {
@@ -85,7 +85,7 @@ public class ContractProviderImpl implements ContractProvider {
 		getReadWriteContext().update(Tables.EH_CONTRACTS)
 			.set(Tables.EH_CONTRACTS.STATUS, CommonStatus.INACTIVE.getCode())
 			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-			.and(Tables.EH_CONTRACTS.ORGANIZATION_NAME.eq(organizationName))
+			.and(Tables.EH_CONTRACTS.CUSTOMER_NAME.eq(organizationName))
 			.and(Tables.EH_CONTRACTS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
 			.execute();
 	}
@@ -128,7 +128,7 @@ public class ContractProviderImpl implements ContractProvider {
 	public List<Contract> listContractByOrganizationId(Long organizationId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
-				.where(Tables.EH_CONTRACTS.ORGANIZATION_ID.eq(organizationId))
+				.where(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(organizationId))
 				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc()) 
 				.fetch();
@@ -176,7 +176,7 @@ public class ContractProviderImpl implements ContractProvider {
 		return getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_CONTRACTS.ORGANIZATION_ID.eq(organizationId))
+				.and(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(organizationId))
 				.fetch()
 				.map(r->ConvertHelper.convert(r, Contract.class));
 	}
