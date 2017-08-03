@@ -46,5 +46,5 @@ set @eh_app_namespace_mappings_id = (select MAX(id) FROM eh_app_namespace_mappin
 INSERT INTO `eh_app_namespace_mappings` (`id`, `namespace_id`, `app_key`, `community_id`) VALUES ((@eh_app_namespace_mappings_id:=@eh_app_namespace_mappings_id+1), @namespace_id, @appKey, '1');
 
 -- 菜单修改 by dengs 2017.07.31
-UPDATE eh_web_menus SET  `name` = '参数设置' where id = 40710 AND `name` = '快递员管理';
-UPDATE eh_web_menus SET  `name` = '订单管理' where id = 40720 AND `name` = '订单记录';
+UPDATE eh_web_menus SET  `name` = '参数设置' where id = 40710;
+UPDATE eh_web_menus SET  `name` = '订单管理' where id = 40720;
