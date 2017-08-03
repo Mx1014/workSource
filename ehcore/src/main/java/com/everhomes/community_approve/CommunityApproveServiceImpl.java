@@ -139,7 +139,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                                 if(conditionOR==null){
                                     conditionOR = condition;
                                 }else{
-                                    conditionOR.or(condition);
+                                    conditionOR = conditionOR.or(condition);
                                 }
                             }
                             if(conditionOR!=null)
@@ -210,7 +210,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
                                 if(conditionOR==null){
                                     conditionOR = condition;
                                 }else{
-                                    conditionOR.or(condition);
+                                    conditionOR = conditionOR.or(condition);
                                 }
                             }
                             if(conditionOR!=null)
