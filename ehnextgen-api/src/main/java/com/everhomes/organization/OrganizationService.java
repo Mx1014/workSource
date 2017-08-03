@@ -526,4 +526,5 @@ public interface OrganizationService {
 	/**人事管理-离职**/
 	void leaveTheJob(LeaveTheJobCommand cmd);
 
+	ListOrganizationMemberCommandResponse syncOrganizationMemberStatus();
 }

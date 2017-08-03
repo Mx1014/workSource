@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "EhBuildings")
-public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
+public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
 
     @Autowired
     private EnterpriseApplyEntryService enterpriseApplyEntryService;
@@ -46,7 +46,7 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
         Long requestFormId = null;
         if (null == request) {
             //查询初始默认数据
-            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
+            BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                     GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
             GeneralForm form = handler.getDefaultGeneralForm(EntityType.BUILDING.getCode());

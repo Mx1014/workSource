@@ -16,6 +16,7 @@ import java.sql.Timestamp;
  *     <li>clearanceTime: 通过时间</li>
  *     <li>remarks: 备注</li>
  *     <li>status: 状态</li>
+ *     <li>logJson: 第三方json数据</li>
  * </ul>
  */
 public class ParkingClearanceLogDTO {
@@ -31,6 +32,15 @@ public class ParkingClearanceLogDTO {
     private String clearanceTimeString;
     private String remarks;
     private String status;
+    private String logJson;
+
+    public String getLogJson() {
+        return logJson;
+    }
+
+    public void setLogJson(String logJson) {
+        this.logJson = logJson;
+    }
 
     public String getApplyTimeString() {
 		return applyTimeString;

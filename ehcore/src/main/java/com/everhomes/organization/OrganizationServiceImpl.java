@@ -103,6 +103,7 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -5278,9 +5279,18 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         });
 
-        //发消息等等操作
-        leaveOrganizationAfterOperation(user.getId(), members);
-
+        //执行太慢，开一个线程来做
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    // 发消息等等操作
+                    leaveOrganizationAfterOperation(user.getId(), members);
+                }catch (Exception e){
+                    LOGGER.error("leaveOrganizationAfterOperation error", e);
+                }
+            }
+        });
     }
 
     /**
@@ -5595,6 +5605,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                 dto.setOperatorName(operator != null ? operator.getNickName() : "");
                 dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
+            } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
+                // FIXME 临时解决   2017/07/27  xq.tian
+                dto.setOperatorName("通过公司邮箱认证");
             }
             if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
                 if (c.getTargetId() != null && c.getTargetId() != 0) {
@@ -6787,7 +6800,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != member) {
                 organizationProvider.updateOrganizationMember(member);
             }
+
+            // 同步userOrganization
+            if(member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){
+                this.createOrUpdateUserOrganization(member);
+            }
             return null;
+
         });
         userSearcher.feedDoc(member);
         if (LOGGER.isInfoEnabled()) {
@@ -9126,13 +9145,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void deleteOrganizationPersonnelByContactToken(
             DeleteOrganizationPersonnelByContactTokenCommand cmd) {
 
-        Organization organization = this.checkOrganization(cmd.getOrganizationId());
-
-
         if (StringUtils.isEmpty(cmd.getContactToken())) {
             LOGGER.error("contactToken is null");
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
         }
+
+        Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
         String path = organization.getPath();
         //查询出人员在这个组织架构的所有关系（全部节点选项）
@@ -12452,7 +12470,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         userOrganizations.setOrganizationId(organizationMember.getOrganizationId());
         userOrganizations.setGroupPath(organizationMember.getGroupPath());
         userOrganizations.setGroupType(organizationMember.getGroupType());
-        userOrganizations.setStatus(UserOrganizationStatus.ACTIVE.getCode());
+        userOrganizations.setStatus(organizationMember.getStatus());
         userOrganizations.setNamespaceId(organizationMember.getNamespaceId());
         userOrganizations.setVisibleFlag(organizationMember.getVisibleFlag());
     }
@@ -12529,6 +12547,53 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationProvider.createOrganizationMember(organizationMember);
         }
         return organizationMember;// add by xq.tian 2017/07/05
+    }
+
+    @Override
+    public ListOrganizationMemberCommandResponse syncOrganizationMemberStatus() {
+        // 1.查同一个域空间下，同一个公司的member的记录，按手机号码分组
+        List<EhOrganizationMembers> ehMembers = this.organizationProvider.listOrganizationMembersGroupByToken();
+        ListOrganizationMemberCommandResponse res = new ListOrganizationMemberCommandResponse();
+        List<OrganizationMemberDTO> members = new ArrayList<>();
+        for(EhOrganizationMembers m : ehMembers){
+            List<EhOrganizationMembers> m_token = this.organizationProvider.listOrganizationMemberByToken(m.getContactToken());
+            Map map = new HashMap();
+            for(EhOrganizationMembers r : m_token){
+                Long enterpriseId = getTopEnterpriserIdOfOrganization(r.getOrganizationId());
+                OrganizationMember des = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(r.getContactToken(),enterpriseId);
+                if(des != null){
+                    continue;
+                }
+                if(enterpriseId != null && map.keySet().contains(enterpriseId)){
+                    if(r.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()) && !r.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){//如果状态不同
+                        LOGGER.debug("token :"+r.getContactToken() + "  id :"+ r.getId());
+                        members.add(ConvertHelper.convert(r,OrganizationMemberDTO.class));
+                        continue;
+                    }
+                }else if(!map.keySet().contains(enterpriseId) && r.getGroupPath().split("/").length == 2){
+                    if(!r.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()) && r.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){
+                        map.put(enterpriseId,r.getStatus()); //标识着一个企业内一个人的唯一状态
+                    }
+                }
+            };
+        }
+        res.setMembers(members);
+        return res;
+    }
+
+    /**获取一个组织的总公司ID**/
+    private Long getTopEnterpriserIdOfOrganization(Long organizationId){
+        Organization org = checkOrganization(organizationId);
+        //判断是总公司
+        if(org != null && org.getParentId() == 0L && org.getGroupType() == OrganizationGroupType.ENTERPRISE.getCode()){
+            return organizationId;
+        }
+        //不是总公司
+        if(org != null && !StringUtils.isEmpty(org.getPath())){
+            return Long.valueOf(org.getPath().split("/")[1]);
+        }else{
+            return null;
+        }
     }
 }
 

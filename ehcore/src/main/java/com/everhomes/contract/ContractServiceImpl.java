@@ -101,7 +101,7 @@ public class ContractServiceImpl implements ContractService {
 		if (StringUtils.isNotBlank(cmd.getBuildingName()) || StringUtils.isNotBlank(cmd.getKeywords())) {
 			List<String> contractNumbers = contractBuildingMappingProvider.listContractByKeywords(namespaceId, cmd.getBuildingName(), cmd.getKeywords());
 			contractNumbers.sort((t1, t2)->{
-				if (t1.compareTo(t2) > 1) {
+				if (t1.compareTo(t2) > 0) {
 					return 1;
 				}
 				return -1;

@@ -2012,16 +2012,17 @@ public class CommunityServiceImpl implements CommunityService {
 				if(null != cmd.getExecutiveFlag()){
 					query.addConditions(Tables.EH_USERS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
 				}
-				query.addGroupBy(Tables.EH_USERS.ID);
-				Condition cond = Tables.EH_USERS.ID.isNotNull();
+
 				if(AuthFlag.YES == AuthFlag.fromCode(cmd.getIsAuth())){
-					cond = cond.and("`eh_user_organizations`.`status` = " + UserOrganizationStatus.ACTIVE.getCode());
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()));
 				}
 
+				query.addGroupBy(Tables.EH_USERS.ID);
+
+				Condition cond = Tables.EH_USERS.ID.isNotNull();
 				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
-					cond = cond.and("`eh_user_organizations`.`status` <> " + UserOrganizationStatus.ACTIVE.getCode() + " or `eh_user_organizations`.`status` is null");
+					cond = cond.and("`eh_user_organizations`.`status` is null or (`eh_user_organizations`.`status` <> " + UserOrganizationStatus.ACTIVE.getCode() + " and `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + "))");
 				}
-
 				query.addHaving(cond);
 
 				return query;
@@ -2037,7 +2038,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setPhone(r.getPhoneNumber());
 			dto.setApplyTime(r.getRegisterTime());
 			dto.setIdentityNumber(r.getIdentityNumberTag());
-
+			dto.setExecutiveFlag(r.getExecutiveTag());
 			//最新活跃时间 add by sfyan 20170620
 			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(r.getUserId(), 1);
 			if(userActivities.size() > 0){
@@ -2908,6 +2909,9 @@ public class CommunityServiceImpl implements CommunityService {
                     UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                     dto.setOperatorName(operator != null ? operator.getNickName() : "");
                     dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
+                } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
+                    // FIXME 临时解决   2017/07/27  xq.tian
+                    dto.setOperatorName("通过公司邮箱认证");
                 }
                 if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());

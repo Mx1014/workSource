@@ -4778,7 +4778,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						query.addConditions(Tables.EH_USERS.ID.lt(locator.getAnchor()));
 
 					query.addOrderBy(Tables.EH_USERS.ID.desc());
-					query.addOrderBy(Tables.EH_USER_ORGANIZATIONS.STATUS.desc());
 					query.addLimit(size);
 					LOGGER.debug("query sql:{}", query.getSQL());
 					LOGGER.debug("query param:{}", query.getBindValues());
@@ -4943,4 +4942,42 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return null;
     }
+
+	@Override
+	public List listOrganizationMembersGroupByToken() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<EhOrganizationMembers> list = new ArrayList<>();
+		context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.notEqual(0))
+				.groupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN).having("count(*) > 1").fetch().map(r->{
+			list.add(ConvertHelper.convert(r,EhOrganizationMembers.class));
+			return null;
+		});
+		return list;
+	}
+
+	@Override
+	public List listOrganizationMemberByToken(String token) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<EhOrganizationMembers> list = new ArrayList<>();
+		context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(token))
+				.fetch().map(r->{
+			list.add(ConvertHelper.convert(r,EhOrganizationMembers.class));
+			return null;
+		});
+		return list;
+	}
+
+	@Override
+	public List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<EhOrganizationMembers> list = new ArrayList<>();
+		context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(token))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/"+enterpriseId+"%"))
+				.fetch().map(r->{
+			list.add(ConvertHelper.convert(r,EhOrganizationMembers.class));
+			return null;
+		});
+		return list;
+	}
 }
