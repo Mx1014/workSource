@@ -1,11 +1,10 @@
-package com.everhomes.rest.enterprise_customer;
+package com.everhomes.rest.customer;
 
 import java.math.BigDecimal;
 
 /**
  * <ul>
- *     <li>id: id</li>
- *     <li>organizationId: 客户企业账号id</li>
+ *     <li>communityId: 客户所属园区id</li>
  *     <li>customerNumber: 客户编码</li>
  *     <li>name: 客户名称</li>
  *     <li>nickName: 客户昵称</li>
@@ -66,13 +65,12 @@ import java.math.BigDecimal;
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
-public class UpdateEnterpriseCustomerCommand {
-    private Long id;
-    private Long organizationId;
+public class CreateEnterpriseCustomerCommand {
     private String customerNumber;
     private String name;
     private String nickName;
     private Long categoryItemId;
+    private Long communityId;
     private String categoryItemName;
     private Long levelItemId;
     private String levelItemName;
@@ -126,6 +124,14 @@ public class UpdateEnterpriseCustomerCommand {
     private String managerPhone;
     private String managerEmail;
     private String remark;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getCategoryItemId() {
         return categoryItemId;
@@ -311,6 +317,8 @@ public class UpdateEnterpriseCustomerCommand {
         this.corpEmployeeAmountRd = corpEmployeeAmountRd;
     }
 
+
+
     public Long getCorpEntryDate() {
         return corpEntryDate;
     }
@@ -350,6 +358,7 @@ public class UpdateEnterpriseCustomerCommand {
     public void setCorpLogoUri(String corpLogoUri) {
         this.corpLogoUri = corpLogoUri;
     }
+
 
     public Long getCorpNatureItemId() {
         return corpNatureItemId;
@@ -503,14 +512,6 @@ public class UpdateEnterpriseCustomerCommand {
         this.customerNumber = customerNumber;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Long getLevelItemId() {
         return levelItemId;
     }
@@ -565,14 +566,6 @@ public class UpdateEnterpriseCustomerCommand {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
-    }
-
-    public Long getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
     }
 
     public String getRemark() {

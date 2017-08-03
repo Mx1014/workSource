@@ -1,4 +1,4 @@
-package com.everhomes.rest.enterprise_customer;
+package com.everhomes.rest.customer;
 
 import java.math.BigDecimal;
 import java.sql.Date;

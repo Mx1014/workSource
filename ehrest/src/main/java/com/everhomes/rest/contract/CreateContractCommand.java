@@ -1,7 +1,6 @@
 package com.everhomes.rest.contract;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -12,8 +11,8 @@ import java.sql.Timestamp;
  *     <li>customerName: 客户名称</li>
  *     <li>contractType: 合同类型 参考{@link com.everhomes.rest.contract.ContractType}</li>
  *     <li>contractNumber: 合同编码</li>
- *     <li>contractStartDate: 合同开始日期</li>
- *     <li>contractEndDate: 合同结束日期</li>
+ *     <li>contractStartDate: 合同开始日期 时间戳</li>
+ *     <li>contractEndDate: 合同结束日期 时间戳</li>
  *     <li>name: 合同名称</li>
  *     <li>partyAType: 甲方类型 0: organization; 1: individual</li>
  *     <li>partyAId: 甲方id</li>
@@ -21,21 +20,21 @@ import java.sql.Timestamp;
  *     <li>categoryItemId: 合同类型id </li>
  *     <li>filingPlace: 归档地</li>
  *     <li>recordNumber: 备案号</li>
- *     <li>signedTime: 签约日期</li>
+ *     <li>signedTime: 签约日期 时间戳</li>
  *     <li>signedPurpose: 签约原因</li>
  *     <li>rentSize: 出租面积</li>
  *     <li>rent: 租金</li>
  *     <li>downpayment: 首付款</li>
- *     <li>downpaymentTime: 首付截止日期</li>
+ *     <li>downpaymentTime: 首付截止日期 时间戳</li>
  *     <li>deposit: 定金</li>
- *     <li>depositTime: 定金最迟收取日期</li>
+ *     <li>depositTime: 定金最迟收取日期 时间戳</li>
  *     <li>contractualPenalty: 违约金</li>
  *     <li>penaltyRemark: 违约说明</li>
  *     <li>commission: 佣金</li>
  *     <li>paidType: 付款方式</li>
  *     <li>freeDays: 免租期天数</li>
- *     <li>decorateBeginDate: 装修开始日期</li>
- *     <li>decorateEndDate: 装修结束日期</li>
+ *     <li>decorateBeginDate: 装修开始日期 时间戳</li>
+ *     <li>decorateEndDate: 装修结束日期 时间戳</li>
  *     <li>freeParkingSpace: 赠送车位数量</li>
  *     <li>invalidReason: 作废原因</li>
  *     <li>denunciationReason: 退约原因</li>
@@ -48,8 +47,8 @@ public class CreateContractCommand {
     private Long customerId;
     private String customerName;
     private String contractNumber;
-    private Timestamp contractEndDate;
-    private Timestamp contractStartDate;
+    private Long contractEndDate;
+    private Long contractStartDate;
     private String name;
     private Byte contractType;
     private Byte partyAType;
@@ -60,21 +59,21 @@ public class CreateContractCommand {
     private String filingPlace;
     private String recordNumber;
     private String invalidReason;
-    private Timestamp signedTime;
+    private Long signedTime;
     private Double rentSize;
     private BigDecimal rent;
     private BigDecimal downpayment;
-    private Timestamp downpaymentTime;
+    private Long downpaymentTime;
     private BigDecimal deposit;
-    private Timestamp depositTime;
+    private Long depositTime;
     private BigDecimal contractualPenalty;
     private String penaltyRemark;
     private BigDecimal commission;
     private String paidType;
     private Integer freeDays;
     private Integer freeParkingSpace;
-    private Timestamp decorateBeginDate;
-    private Timestamp decorateEndDate;
+    private Long decorateBeginDate;
+    private Long decorateEndDate;
     private String signedPurpose;
     private String denunciationReason;
 
@@ -94,13 +93,6 @@ public class CreateContractCommand {
         this.commission = commission;
     }
 
-    public Timestamp getContractEndDate() {
-        return contractEndDate;
-    }
-
-    public void setContractEndDate(Timestamp contractEndDate) {
-        this.contractEndDate = contractEndDate;
-    }
 
     public String getContractNumber() {
         return contractNumber;
@@ -118,13 +110,6 @@ public class CreateContractCommand {
         this.contractSituation = contractSituation;
     }
 
-    public Timestamp getContractStartDate() {
-        return contractStartDate;
-    }
-
-    public void setContractStartDate(Timestamp contractStartDate) {
-        this.contractStartDate = contractStartDate;
-    }
 
     public Byte getContractType() {
         return contractType;
@@ -166,21 +151,6 @@ public class CreateContractCommand {
         this.customerType = customerType;
     }
 
-    public Timestamp getDecorateBeginDate() {
-        return decorateBeginDate;
-    }
-
-    public void setDecorateBeginDate(Timestamp decorateBeginDate) {
-        this.decorateBeginDate = decorateBeginDate;
-    }
-
-    public Timestamp getDecorateEndDate() {
-        return decorateEndDate;
-    }
-
-    public void setDecorateEndDate(Timestamp decorateEndDate) {
-        this.decorateEndDate = decorateEndDate;
-    }
 
     public String getDenunciationReason() {
         return denunciationReason;
@@ -198,13 +168,6 @@ public class CreateContractCommand {
         this.deposit = deposit;
     }
 
-    public Timestamp getDepositTime() {
-        return depositTime;
-    }
-
-    public void setDepositTime(Timestamp depositTime) {
-        this.depositTime = depositTime;
-    }
 
     public BigDecimal getDownpayment() {
         return downpayment;
@@ -214,13 +177,6 @@ public class CreateContractCommand {
         this.downpayment = downpayment;
     }
 
-    public Timestamp getDownpaymentTime() {
-        return downpaymentTime;
-    }
-
-    public void setDownpaymentTime(Timestamp downpaymentTime) {
-        this.downpaymentTime = downpaymentTime;
-    }
 
     public String getFilingPlace() {
         return filingPlace;
@@ -342,11 +298,59 @@ public class CreateContractCommand {
         this.signedPurpose = signedPurpose;
     }
 
-    public Timestamp getSignedTime() {
+    public Long getContractEndDate() {
+        return contractEndDate;
+    }
+
+    public void setContractEndDate(Long contractEndDate) {
+        this.contractEndDate = contractEndDate;
+    }
+
+    public Long getContractStartDate() {
+        return contractStartDate;
+    }
+
+    public void setContractStartDate(Long contractStartDate) {
+        this.contractStartDate = contractStartDate;
+    }
+
+    public Long getDecorateBeginDate() {
+        return decorateBeginDate;
+    }
+
+    public void setDecorateBeginDate(Long decorateBeginDate) {
+        this.decorateBeginDate = decorateBeginDate;
+    }
+
+    public Long getDecorateEndDate() {
+        return decorateEndDate;
+    }
+
+    public void setDecorateEndDate(Long decorateEndDate) {
+        this.decorateEndDate = decorateEndDate;
+    }
+
+    public Long getDepositTime() {
+        return depositTime;
+    }
+
+    public void setDepositTime(Long depositTime) {
+        this.depositTime = depositTime;
+    }
+
+    public Long getDownpaymentTime() {
+        return downpaymentTime;
+    }
+
+    public void setDownpaymentTime(Long downpaymentTime) {
+        this.downpaymentTime = downpaymentTime;
+    }
+
+    public Long getSignedTime() {
         return signedTime;
     }
 
-    public void setSignedTime(Timestamp signedTime) {
+    public void setSignedTime(Long signedTime) {
         this.signedTime = signedTime;
     }
 }

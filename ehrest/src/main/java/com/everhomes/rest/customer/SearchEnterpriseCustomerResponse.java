@@ -1,4 +1,4 @@
-package com.everhomes.rest.enterprise_customer;
+package com.everhomes.rest.customer;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>dtos: 企业客户信息列表, 参考{@link com.everhomes.rest.enterprise_customer.EnterpriseCustomerDTO}</li>
+ *     <li>dtos: 企业客户信息列表, 参考{@link EnterpriseCustomerDTO}</li>
  *     <li>nextPageAnchor: 下一页锚点，没有下一页则无</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.

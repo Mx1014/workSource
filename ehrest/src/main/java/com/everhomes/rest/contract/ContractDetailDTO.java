@@ -4,9 +4,55 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
+ * <ul>
+ *     <li>id: 合同id</li>
+ *     <li>parentId: 原合同id</li>
+ *     <li>rootParentId: 初始合同id</li>
+ *     <li>customerType: 客户类型 0: organization; 1: individual</li>
+ *     <li>customerId: 客户id</li>
+ *     <li>customerName: 客户名称</li>
+ *     <li>contractType: 合同类型 参考{@link com.everhomes.rest.contract.ContractType}</li>
+ *     <li>contractNumber: 合同编码</li>
+ *     <li>contractStartDate: 合同开始日期</li>
+ *     <li>contractEndDate: 合同结束日期</li>
+ *     <li>name: 合同名称</li>
+ *     <li>partyAType: 甲方类型 0: organization; 1: individual</li>
+ *     <li>partyAId: 甲方id</li>
+ *     <li>partyAName: 甲方名称</li>
+ *     <li>contractSituation: 合同情况</li>
+ *     <li>categoryItemId: 合同类型id </li>
+ *     <li>categoryItemName: 合同类型 </li>
+ *     <li>filingPlace: 归档地</li>
+ *     <li>recordNumber: 备案号</li>
+ *     <li>signedTime: 签约日期</li>
+ *     <li>signedPurpose: 签约原因</li>
+ *     <li>rentSize: 出租面积</li>
+ *     <li>rent: 租金</li>
+ *     <li>downpayment: 首付款</li>
+ *     <li>downpaymentTime: 首付截止日期</li>
+ *     <li>deposit: 定金</li>
+ *     <li>depositTime: 定金最迟收取日期</li>
+ *     <li>contractualPenalty: 违约金</li>
+ *     <li>penaltyRemark: 违约说明</li>
+ *     <li>commission: 佣金</li>
+ *     <li>paidType: 付款方式</li>
+ *     <li>freeDays: 免租期天数</li>
+ *     <li>decorateBeginDate: 装修开始日期</li>
+ *     <li>decorateEndDate: 装修结束日期</li>
+ *     <li>freeParkingSpace: 赠送车位数量</li>
+ *     <li>invalidUid: 作废人id</li>
+ *     <li>invalidUserName: 作废人</li>
+ *     <li>invalidTime: 作废时间</li>
+ *     <li>invalidReason: 作废原因</li>
+ *     <li>denunciationUid: 退约经办人id</li>
+ *     <li>denunciationUserName: 退约经办人</li>
+ *     <li>denunciationTime: 退约时间</li>
+ *     <li>denunciationReason: 退约原因</li>
+ * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
 public class ContractDetailDTO {
+    private Long id;
     private Long parentId;
     private Long rootParentId;
     private Long customerId;
@@ -18,11 +64,16 @@ public class ContractDetailDTO {
     private Byte contractType;
     private Byte partyAType;
     private Long partyAId;
+    private String partyAName;
     private Byte customerType;
     private String contractSituation;
     private Long categoryItemId;
+    private String categoryItemName;
     private String filingPlace;
     private String recordNumber;
+    private Long invalidUid;
+    private String invalidUserName;
+    private Timestamp invalidTime;
     private String invalidReason;
     private Timestamp signedTime;
     private Double rentSize;
@@ -40,5 +91,352 @@ public class ContractDetailDTO {
     private Timestamp decorateBeginDate;
     private Timestamp decorateEndDate;
     private String signedPurpose;
+    private Long denunciationUid;
+    private String denunciationUserName;
+    private Timestamp denunciationTime;
     private String denunciationReason;
+
+    public Long getCategoryItemId() {
+        return categoryItemId;
+    }
+
+    public void setCategoryItemId(Long categoryItemId) {
+        this.categoryItemId = categoryItemId;
+    }
+
+    public String getCategoryItemName() {
+        return categoryItemName;
+    }
+
+    public void setCategoryItemName(String categoryItemName) {
+        this.categoryItemName = categoryItemName;
+    }
+
+    public BigDecimal getCommission() {
+        return commission;
+    }
+
+    public void setCommission(BigDecimal commission) {
+        this.commission = commission;
+    }
+
+    public Timestamp getContractEndDate() {
+        return contractEndDate;
+    }
+
+    public void setContractEndDate(Timestamp contractEndDate) {
+        this.contractEndDate = contractEndDate;
+    }
+
+    public String getContractNumber() {
+        return contractNumber;
+    }
+
+    public void setContractNumber(String contractNumber) {
+        this.contractNumber = contractNumber;
+    }
+
+    public String getContractSituation() {
+        return contractSituation;
+    }
+
+    public void setContractSituation(String contractSituation) {
+        this.contractSituation = contractSituation;
+    }
+
+    public Timestamp getContractStartDate() {
+        return contractStartDate;
+    }
+
+    public void setContractStartDate(Timestamp contractStartDate) {
+        this.contractStartDate = contractStartDate;
+    }
+
+    public Byte getContractType() {
+        return contractType;
+    }
+
+    public void setContractType(Byte contractType) {
+        this.contractType = contractType;
+    }
+
+    public BigDecimal getContractualPenalty() {
+        return contractualPenalty;
+    }
+
+    public void setContractualPenalty(BigDecimal contractualPenalty) {
+        this.contractualPenalty = contractualPenalty;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public Byte getCustomerType() {
+        return customerType;
+    }
+
+    public void setCustomerType(Byte customerType) {
+        this.customerType = customerType;
+    }
+
+    public Timestamp getDecorateBeginDate() {
+        return decorateBeginDate;
+    }
+
+    public void setDecorateBeginDate(Timestamp decorateBeginDate) {
+        this.decorateBeginDate = decorateBeginDate;
+    }
+
+    public Timestamp getDecorateEndDate() {
+        return decorateEndDate;
+    }
+
+    public void setDecorateEndDate(Timestamp decorateEndDate) {
+        this.decorateEndDate = decorateEndDate;
+    }
+
+    public String getDenunciationReason() {
+        return denunciationReason;
+    }
+
+    public void setDenunciationReason(String denunciationReason) {
+        this.denunciationReason = denunciationReason;
+    }
+
+    public Timestamp getDenunciationTime() {
+        return denunciationTime;
+    }
+
+    public void setDenunciationTime(Timestamp denunciationTime) {
+        this.denunciationTime = denunciationTime;
+    }
+
+    public Long getDenunciationUid() {
+        return denunciationUid;
+    }
+
+    public void setDenunciationUid(Long denunciationUid) {
+        this.denunciationUid = denunciationUid;
+    }
+
+    public String getDenunciationUserName() {
+        return denunciationUserName;
+    }
+
+    public void setDenunciationUserName(String denunciationUserName) {
+        this.denunciationUserName = denunciationUserName;
+    }
+
+    public BigDecimal getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(BigDecimal deposit) {
+        this.deposit = deposit;
+    }
+
+    public Timestamp getDepositTime() {
+        return depositTime;
+    }
+
+    public void setDepositTime(Timestamp depositTime) {
+        this.depositTime = depositTime;
+    }
+
+    public BigDecimal getDownpayment() {
+        return downpayment;
+    }
+
+    public void setDownpayment(BigDecimal downpayment) {
+        this.downpayment = downpayment;
+    }
+
+    public Timestamp getDownpaymentTime() {
+        return downpaymentTime;
+    }
+
+    public void setDownpaymentTime(Timestamp downpaymentTime) {
+        this.downpaymentTime = downpaymentTime;
+    }
+
+    public String getFilingPlace() {
+        return filingPlace;
+    }
+
+    public void setFilingPlace(String filingPlace) {
+        this.filingPlace = filingPlace;
+    }
+
+    public Integer getFreeDays() {
+        return freeDays;
+    }
+
+    public void setFreeDays(Integer freeDays) {
+        this.freeDays = freeDays;
+    }
+
+    public Integer getFreeParkingSpace() {
+        return freeParkingSpace;
+    }
+
+    public void setFreeParkingSpace(Integer freeParkingSpace) {
+        this.freeParkingSpace = freeParkingSpace;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getInvalidReason() {
+        return invalidReason;
+    }
+
+    public void setInvalidReason(String invalidReason) {
+        this.invalidReason = invalidReason;
+    }
+
+    public Timestamp getInvalidTime() {
+        return invalidTime;
+    }
+
+    public void setInvalidTime(Timestamp invalidTime) {
+        this.invalidTime = invalidTime;
+    }
+
+    public Long getInvalidUid() {
+        return invalidUid;
+    }
+
+    public void setInvalidUid(Long invalidUid) {
+        this.invalidUid = invalidUid;
+    }
+
+    public String getInvalidUserName() {
+        return invalidUserName;
+    }
+
+    public void setInvalidUserName(String invalidUserName) {
+        this.invalidUserName = invalidUserName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPaidType() {
+        return paidType;
+    }
+
+    public void setPaidType(String paidType) {
+        this.paidType = paidType;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Long getPartyAId() {
+        return partyAId;
+    }
+
+    public void setPartyAId(Long partyAId) {
+        this.partyAId = partyAId;
+    }
+
+    public String getPartyAName() {
+        return partyAName;
+    }
+
+    public void setPartyAName(String partyAName) {
+        this.partyAName = partyAName;
+    }
+
+    public Byte getPartyAType() {
+        return partyAType;
+    }
+
+    public void setPartyAType(Byte partyAType) {
+        this.partyAType = partyAType;
+    }
+
+    public String getPenaltyRemark() {
+        return penaltyRemark;
+    }
+
+    public void setPenaltyRemark(String penaltyRemark) {
+        this.penaltyRemark = penaltyRemark;
+    }
+
+    public String getRecordNumber() {
+        return recordNumber;
+    }
+
+    public void setRecordNumber(String recordNumber) {
+        this.recordNumber = recordNumber;
+    }
+
+    public BigDecimal getRent() {
+        return rent;
+    }
+
+    public void setRent(BigDecimal rent) {
+        this.rent = rent;
+    }
+
+    public Double getRentSize() {
+        return rentSize;
+    }
+
+    public void setRentSize(Double rentSize) {
+        this.rentSize = rentSize;
+    }
+
+    public Long getRootParentId() {
+        return rootParentId;
+    }
+
+    public void setRootParentId(Long rootParentId) {
+        this.rootParentId = rootParentId;
+    }
+
+    public String getSignedPurpose() {
+        return signedPurpose;
+    }
+
+    public void setSignedPurpose(String signedPurpose) {
+        this.signedPurpose = signedPurpose;
+    }
+
+    public Timestamp getSignedTime() {
+        return signedTime;
+    }
+
+    public void setSignedTime(Timestamp signedTime) {
+        this.signedTime = signedTime;
+    }
 }
