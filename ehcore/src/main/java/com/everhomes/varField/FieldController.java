@@ -1,26 +1,30 @@
-package com.everhomes.field;
+package com.everhomes.varField;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.field.*;
+import com.everhomes.rest.varField.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * Created by ying.xiong on 2017/7/31.
  */
 
 @RestController
-@RequestMapping("/field")
+@RequestMapping("/varField")
 public class FieldController extends ControllerBase {
 
+    @Autowired
+    private FieldService fieldService;
 
     /**
-     * <b>URL: /field/updateFields</b>
+     * <b>URL: /varField/updateFields</b>
      * <p>更新域空间模块字段</p>
      * @return {@link String}
      */
@@ -34,21 +38,22 @@ public class FieldController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /field/listFields</b>
+     * <b>URL: /varField/listFields</b>
      * <p>获取域空间模块字段</p>
      * @return {@link FieldDTO}
      */
     @RequestMapping("listFields")
     @RestReturn(value=FieldDTO.class, collection = true)
     public RestResponse listFields(@Valid ListFieldCommand cmd) {
-        RestResponse res = new RestResponse();
+        List<FieldDTO> fields = fieldService.listFields(cmd);
+        RestResponse res = new RestResponse(fields);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
     }
 
     /**
-     * <b>URL: /field/updateFieldGroups</b>
+     * <b>URL: /varField/updateFieldGroups</b>
      * <p>更新域空间模块字段组</p>
      * @return {@link String}
      */
@@ -62,21 +67,22 @@ public class FieldController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /field/listFieldGroups</b>
+     * <b>URL: /varField/listFieldGroups</b>
      * <p>获取域空间模块字段组</p>
      * @return {@link FieldGroupDTO}
      */
     @RequestMapping("listFieldGroups")
     @RestReturn(value=FieldGroupDTO.class, collection = true)
     public RestResponse listFieldGroups(@Valid ListFieldGroupCommand cmd) {
-        RestResponse res = new RestResponse();
+        List<FieldGroupDTO> groups = fieldService.listFieldGroups(cmd);
+        RestResponse res = new RestResponse(groups);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
     }
 
     /**
-     * <b>URL: /field/updateFieldItems</b>
+     * <b>URL: /varField/updateFieldItems</b>
      * <p>更新域空间模块字段选择项</p>
      * @return {@link String}
      */
@@ -90,7 +96,7 @@ public class FieldController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /field/listFieldItems</b>
+     * <b>URL: /varField/listFieldItems</b>
      * <p>获取域空间模块字段选择项</p>
      * @return {@link FieldItemDTO}
      */
@@ -104,7 +110,7 @@ public class FieldController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /field/listFieldStatistics</b>
+     * <b>URL: /varField/listFieldStatistics</b>
      * <p>列出特定字段统计信息</p>
      */
     @RequestMapping("listFieldStatistics")

@@ -1,25 +1,26 @@
-package com.everhomes.rest.field;
+package com.everhomes.rest.varField;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  *     <li>namespaceId: 域空间id</li>
- *     <li>rootGroupId: 所属最顶层的字段组在系统中的id</li>
+ *     <li>fieldId: 在系统里的字段id</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
-public class ListFieldCommand {
+public class ListFieldItemCommand {
+
     private Integer namespaceId;
 
-    private Long rootGroupId;
+    private Long fieldId;
 
-    public Long getRootGroupId() {
-        return rootGroupId;
+    public Long getFieldId() {
+        return fieldId;
     }
 
-    public void setRootGroupId(Long rootGroupId) {
-        this.rootGroupId = rootGroupId;
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
     }
 
     public Integer getNamespaceId() {

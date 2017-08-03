@@ -1,4 +1,4 @@
-package com.everhomes.rest.field;
+package com.everhomes.rest.varField;
 
 /**
  * <ul>

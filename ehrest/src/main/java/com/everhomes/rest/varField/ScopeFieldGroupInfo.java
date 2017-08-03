@@ -1,9 +1,6 @@
-package com.everhomes.rest.field;
+package com.everhomes.rest.varField;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
-import java.util.List;
 
 /**
  * <ul>
@@ -13,11 +10,11 @@ import java.util.List;
  *     <li>groupId: 在系统组里的id</li>
  *     <li>groupDisplayName: 组名</li>
  *     <li>defaultOrder: 顺序</li>
- *     <li>childrenGroup: 子字段组 参考{@link FieldGroupDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
-public class FieldGroupDTO {
+public class ScopeFieldGroupInfo {
+
     private Long id;
 
     private Integer namespaceId;
@@ -29,9 +26,6 @@ public class FieldGroupDTO {
     private String groupDisplayName;
 
     private Integer defaultOrder;
-
-    @ItemType(FieldGroupDTO.class)
-    private List<FieldGroupDTO> childrenGroup;
 
     public Integer getDefaultOrder() {
         return defaultOrder;
@@ -81,17 +75,8 @@ public class FieldGroupDTO {
         this.namespaceId = namespaceId;
     }
 
-    public List<FieldGroupDTO> getChildrenGroup() {
-        return childrenGroup;
-    }
-
-    public void setChildrenGroup(List<FieldGroupDTO> childrenGroup) {
-        this.childrenGroup = childrenGroup;
-    }
-
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
 }

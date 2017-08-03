@@ -1,4 +1,4 @@
-package com.everhomes.rest.field;
+package com.everhomes.rest.varField;
 
 import com.everhomes.util.StringHelper;
 
@@ -8,15 +8,13 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: 域空间id</li>
  *     <li>moduleName: 字段所属的模块类型名</li>
  *     <li>fieldId: 在系统里的字段id</li>
- *     <li>fieldDisplayName: 字段名</li>
- *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段类型枚举型，参考{@link FieldParamType}</li>
- *     <li>mandatoryFlag: 是否必填 0: 否; 1: 是</li>
+ *     <li>itemId: 在系统里的字段选项id</li>
+ *     <li>itemDisplayName: 字段选项名</li>
  *     <li>defaultOrder: 顺序</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
-public class ScopeFieldInfo {
-
+public class FieldItemDTO {
     private Long id;
 
     private Integer namespaceId;
@@ -25,11 +23,9 @@ public class ScopeFieldInfo {
 
     private Long fieldId;
 
-    private String fieldDisplayName;
+    private Long itemId;
 
-    private String fieldParam;
-
-    private Byte mandatoryFlag;
+    private String itemDisplayName;
 
     private Integer defaultOrder;
 
@@ -41,28 +37,12 @@ public class ScopeFieldInfo {
         this.defaultOrder = defaultOrder;
     }
 
-    public String getFieldDisplayName() {
-        return fieldDisplayName;
-    }
-
-    public void setFieldDisplayName(String fieldDisplayName) {
-        this.fieldDisplayName = fieldDisplayName;
-    }
-
     public Long getFieldId() {
         return fieldId;
     }
 
     public void setFieldId(Long fieldId) {
         this.fieldId = fieldId;
-    }
-
-    public String getFieldParam() {
-        return fieldParam;
-    }
-
-    public void setFieldParam(String fieldParam) {
-        this.fieldParam = fieldParam;
     }
 
     public Long getId() {
@@ -73,12 +53,20 @@ public class ScopeFieldInfo {
         this.id = id;
     }
 
-    public Byte getMandatoryFlag() {
-        return mandatoryFlag;
+    public String getItemDisplayName() {
+        return itemDisplayName;
     }
 
-    public void setMandatoryFlag(Byte mandatoryFlag) {
-        this.mandatoryFlag = mandatoryFlag;
+    public void setItemDisplayName(String itemDisplayName) {
+        this.itemDisplayName = itemDisplayName;
+    }
+
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
     }
 
     public String getModuleName() {

@@ -1,4 +1,4 @@
-package com.everhomes.rest.field;
+package com.everhomes.rest.varField;
 
 import com.everhomes.util.StringHelper;
 
