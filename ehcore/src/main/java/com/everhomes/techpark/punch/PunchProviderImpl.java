@@ -55,6 +55,7 @@ import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchStatisticsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchTimeIntervalsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchTimeRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchWifiRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchWifisDao;
@@ -2527,6 +2528,16 @@ long id = sequenceProvider.getNextSequence(key);
 				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)) ; 
 		step.where(condition);
 		step.execute();
+	}
+
+	@Override
+	public void createPunchTimeInterval(PunchTimeInterval ptInterval) {
+		 String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchRules.class);
+			long id = sequenceProvider.getNextSequence(key);
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		 ptInterval.setId(id); 
+		 EhPunchTimeIntervalsDao dao = new EhPunchTimeIntervalsDao(context.configuration());
+		 dao.insert(ptInterval);  
 	}
 	
 	

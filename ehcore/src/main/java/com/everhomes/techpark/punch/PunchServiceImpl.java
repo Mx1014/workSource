@@ -6231,6 +6231,7 @@ public class PunchServiceImpl implements PunchService {
         				ptInterval.setPunchRuleId(pr.getId());
         				ptInterval.setTimeRuleId(ptr.getId());
         				punchProvider.createPunchTimeInterval(ptInterval);
+        				
         			}
         		} 
         	}
