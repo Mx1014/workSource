@@ -391,9 +391,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public List<RolePrivilege> getPrivilegeByRoleId(ListPrivilegesByRoleIdCommand cmd){
+	public GetPrivilegeByRoleIdResponse getPrivilegeByRoleId(ListPrivilegesByRoleIdCommand cmd){
 		checkRole(cmd.getRoleId());
-		return getPrivilegeByRoleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getRoleId());
+		GetPrivilegeByRoleIdResponse response = new GetPrivilegeByRoleIdResponse();
+		List<RolePrivilege> rolePrivileges = getPrivilegeByRoleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getRoleId());
+		for (RolePrivilege rolePrivilege: rolePrivileges) {
+			if(ServiceModuleTreeVType.PRIVILEGE == ServiceModuleTreeVType.fromCode(rolePrivilege.getType()) && rolePrivilege.getId() == PrivilegeConstants.ALL_SERVICE_MODULE){
+				response.setAllFlag(AllFlagType.YES.getCode());
+				return response;
+			}
+		}
+		response.setPrivileges(rolePrivileges);
+		return response;
 	}
 
 

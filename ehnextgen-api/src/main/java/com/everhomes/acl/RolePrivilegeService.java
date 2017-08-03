@@ -81,7 +81,7 @@ public interface RolePrivilegeService {
 	 */
 	boolean checkAdministrators(Long organizationId);
 
-	List<RolePrivilege> getPrivilegeByRoleId(ListPrivilegesByRoleIdCommand cmd);
+	GetPrivilegeByRoleIdResponse getPrivilegeByRoleId(ListPrivilegesByRoleIdCommand cmd);
 	
 	/**
 	 * 校验是否有权限

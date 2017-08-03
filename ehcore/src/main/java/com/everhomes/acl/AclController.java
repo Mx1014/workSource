@@ -328,7 +328,7 @@ public class AclController extends ControllerBase {
      * <p>获取角色的权限</p>
      */
     @RequestMapping("getPrivilegeByRoleId")
-    @RestReturn(value=RolePrivilege.class, collection = true)
+    @RestReturn(value=GetPrivilegeByRoleIdResponse.class)
     public RestResponse getPrivilegeByRoleId(@Valid ListPrivilegesByRoleIdCommand cmd) {
         RestResponse response = new RestResponse(rolePrivilegeService.getPrivilegeByRoleId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
