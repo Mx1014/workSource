@@ -24,6 +24,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.persistence.Convert;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -137,6 +138,7 @@ import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
 import com.everhomes.rest.techpark.punch.PunchStatus;
+import com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.PunchUserStatus;
@@ -6200,24 +6202,37 @@ public class PunchServiceImpl implements PunchService {
         pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
         pr.setName(cmd.getGroupName());
         pr.setRuleType(cmd.getRuleType());
-        pr.setPunchOrganizationId(punchOrgId); 
+        pr.setPunchOrganizationId(punchOrgId);  
         punchProvider.createPunchRule(pr);
         if(null != cmd.getTimeRules()){
         	for(PunchTimeRuleDTO timeRule:cmd.getTimeRules()){
         		if(timeRule.getPunchTimeIntervals() == null || timeRule.getPunchTimeIntervals().size() == 0)
         			continue;
-        		PunchTimeRule ptr = new PunchTimeRule();
+        		PunchTimeRule ptr =ConvertHelper.convert(timeRule, PunchTimeRule.class);
                 ptr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
                 ptr.setOwnerId(punchOrgId);  
         		ptr.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
+        		punchProvider.createPunchTimeRule(ptr);
         		if(timeRule.getPunchTimeIntervals().size()==1){
-        			
+        			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+        			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
+        			ptr.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
         		}else if(timeRule.getPunchTimeIntervals().size()==2){
-        			
+        			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+        			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
+        			ptr.setNoonLeaveTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime());
+        			ptr.setAfternoonArriveTimeLong(timeRule.getPunchTimeIntervals().get(1).getArriveTime());
+        			ptr.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(1).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
         		}else{
-        			
-        		}
-        		
+        			for(PunchTimeIntervalDTO interval:timeRule.getPunchTimeIntervals()){
+        				PunchTimeInterval ptInterval = ConvertHelper.convert(ptr, PunchTimeInterval.class);
+        				ptInterval.setArriveTimeLong(interval.getArriveTime());
+        				ptInterval.setLeaveTimeLong(interval.getLeaveTime());
+        				ptInterval.setPunchRuleId(pr.getId());
+        				ptInterval.setTimeRuleId(ptr.getId());
+        				punchProvider.createPunchTimeInterval(ptInterval);
+        			}
+        		} 
         	}
         }
 	}

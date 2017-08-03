@@ -294,6 +294,8 @@ public interface PunchProvider {
 
 	void deletePunchTimeRulesByOwnerAndTarget(String ownerType, Long ownerId,
 			String targetType, Long targetId);
+
+	public void createPunchTimeInterval(PunchTimeInterval ptInterval);
  
  
  
