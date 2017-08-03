@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import com.everhomes.rest.family.FamilyMemberDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.ui.user.*;
+import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,13 +154,15 @@ public class UserUiController extends ControllerBase {
 // 	    	command.setId(sceneToken.getEntityId());
 // 	    	resp= familyService.listNeighborUsers(command);
 		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
- 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
- 	    	command.setIsPinyin(1);
- 	    	command.setType(ParamType.FAMILY.getCode());
- 	    	command.setId(sceneToken.getEntityId());
-			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 10000);
 
+// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+// 	    	command.setIsPinyin(1);
+// 	    	command.setType(ParamType.FAMILY.getCode());
+// 	    	command.setId(sceneToken.getEntityId());
 //			resp = familyService.listNeighborUsers(command);
+			
+			// 群聊里只看同一个家庭的人  edit by yanjun 20170803
+			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
 		}
  	    
  	    if(null != resp &&  0 != resp.size()){
@@ -171,10 +174,11 @@ public class UserUiController extends ControllerBase {
 				dto.setOccupation(r.getOccupation());
 				dto.setContactAvatar(r.getMemberAvatarUrl());
 				dto.setUserId(r.getMemberUid());
-//				dto.setInitial(r.getInitial());
-//				dto.setFullInitial(r.getFullInitial());
-//				dto.setFullPinyin(r.getFullPinyin());
-//				dto.setNeighborhoodRelation(r.getNeighborhoodRelation());
+
+				String pinyin = PinYinHelper.getPinYin(r.getMemberName());
+				dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+				dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+				dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
 				return dto;
 			}).collect(Collectors.toList());
  	    }
