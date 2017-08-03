@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.family.FamilyMemberDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.util.RequireAuthentication;
@@ -142,8 +143,8 @@ public class UserUiController extends ControllerBase {
 			}
 			 
 		}
-		
-		ListNeighborUsersCommandResponse resp = null;
+
+		List<FamilyMemberDTO> resp = null;
 		// 仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
  	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 // 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
@@ -156,22 +157,24 @@ public class UserUiController extends ControllerBase {
  	    	command.setIsPinyin(1);
  	    	command.setType(ParamType.FAMILY.getCode());
  	    	command.setId(sceneToken.getEntityId());
- 	    	resp = familyService.listNeighborUsers(command);
+			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 10000);
+
+//			resp = familyService.listNeighborUsers(command);
 		}
  	    
- 	    if(null != resp && null != resp.getNeighborUserList() &&  0 != resp.getNeighborUserList().size()){
- 	    	dtos = resp.getNeighborUserList().stream().map(r->{
+ 	    if(null != resp &&  0 != resp.size()){
+ 	    	dtos = resp.stream().map(r->{
 				SceneContactDTO dto = new SceneContactDTO();
-				dto.setContactId(r.getUserId());
-				dto.setContactName(r.getUserName());
-				dto.setStatusLine(r.getUserStatusLine());
+				dto.setContactId(r.getMemberUid());
+				dto.setContactName(r.getMemberName());
+				dto.setStatusLine(r.getStatusLine());
 				dto.setOccupation(r.getOccupation());
-				dto.setContactAvatar(r.getUserAvatarUrl());
-				dto.setUserId(r.getUserId());
-				dto.setInitial(r.getInitial());
-				dto.setFullInitial(r.getFullInitial());
-				dto.setFullPinyin(r.getFullPinyin());
-				dto.setNeighborhoodRelation(r.getNeighborhoodRelation());
+				dto.setContactAvatar(r.getMemberAvatarUrl());
+				dto.setUserId(r.getMemberUid());
+//				dto.setInitial(r.getInitial());
+//				dto.setFullInitial(r.getFullInitial());
+//				dto.setFullPinyin(r.getFullPinyin());
+//				dto.setNeighborhoodRelation(r.getNeighborhoodRelation());
 				return dto;
 			}).collect(Collectors.toList());
  	    }
