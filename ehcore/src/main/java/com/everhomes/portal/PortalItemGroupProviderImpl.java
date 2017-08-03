@@ -24,6 +24,7 @@ import com.everhomes.server.schema.tables.pojos.EhPortalItemGroups;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.springframework.util.StringUtils;
 
 @Component
 public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
@@ -40,7 +41,8 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 	public void createPortalItemGroup(PortalItemGroup portalItemGroup) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemGroups.class));
 		portalItemGroup.setId(id);
-		portalItemGroup.setName(EhPortalItemGroups.class.getSimpleName() + id);
+		if(StringUtils.isEmpty(portalItemGroup.getName()))
+			portalItemGroup.setName(EhPortalItemGroups.class.getSimpleName() + id);
 		portalItemGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		portalItemGroup.setUpdateTime(portalItemGroup.getCreateTime());
 		getReadWriteDao().insert(portalItemGroup);

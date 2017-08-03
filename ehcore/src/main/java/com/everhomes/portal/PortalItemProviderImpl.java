@@ -42,7 +42,8 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	public void createPortalItem(PortalItem portalItem) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalItems.class));
 		portalItem.setId(id);
-		portalItem.setName(EhPortalItems.class.getSimpleName() + id);
+		if(StringUtils.isEmpty(portalItem.getName()))
+			portalItem.setName(EhPortalItems.class.getSimpleName() + id);
 		portalItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		portalItem.setUpdateTime(portalItem.getCreateTime());
 		getReadWriteDao().insert(portalItem);

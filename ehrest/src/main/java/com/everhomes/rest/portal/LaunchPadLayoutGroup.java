@@ -1,10 +1,10 @@
 // @formatter:off
-package com.everhomes.rest.launchpad;
+package com.everhomes.rest.portal;
 
+import com.everhomes.rest.launchpad.EditFlagType;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-
-import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -16,15 +16,15 @@ import com.everhomes.util.StringHelper;
  * <li>separatorFlag: 组底部是否有分隔条，0: no, 1: yes"</li>
  * <li>separatorHeight: 组底部分隔条高度</li>
  * <li>columnCount: 组件一行显示的图标数，目前针对Navigator</li>
- * <li>editFlag: 0-不可编辑,1-可编辑 详情{@link com.everhomes.rest.launchpad.EditFlagType}</li>
+ * <li>editFlag: 0-不可编辑,1-可编辑 详情{@link EditFlagType}</li>
  * <li>title: 标题</li>
  * <li>iconUrl: 标题图片</li>
  * </ul>
  */
-public class LaunchPadLayoutGroupDTO {
+public class LaunchPadLayoutGroup {
     private String groupName;
     private String widget;
-    private String instanceConfig;
+    private Object instanceConfig;
     private String style;
     private Integer defaultOrder;
     private Integer separatorFlag;
@@ -50,14 +50,14 @@ public class LaunchPadLayoutGroupDTO {
     public void setWidget(String widget) {
         this.widget = widget;
     }
-
-    public String getInstanceConfig() {
-        return instanceConfig;
-    }
-
-    public void setInstanceConfig(String instanceConfig) {
-        this.instanceConfig = instanceConfig;
-    }
+//
+//    public String getInstanceConfig() {
+//        return instanceConfig;
+//    }
+//
+//    public void setInstanceConfig(String instanceConfig) {
+//        this.instanceConfig = instanceConfig;
+//    }
 
     public String getStyle() {
         return style;
@@ -129,6 +129,14 @@ public class LaunchPadLayoutGroupDTO {
 
     public void setAlign(String align) {
         this.align = align;
+    }
+
+    public Object getInstanceConfig() {
+        return instanceConfig;
+    }
+
+    public void setInstanceConfig(Object instanceConfig) {
+        this.instanceConfig = instanceConfig;
     }
 
     @Override

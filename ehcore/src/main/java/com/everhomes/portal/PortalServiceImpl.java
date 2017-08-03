@@ -32,6 +32,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.portal.*;
+import com.everhomes.rest.portal.LaunchPadLayoutJson;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.widget.*;
@@ -978,11 +979,13 @@ public class PortalServiceImpl implements PortalService {
 	public void setItemCategoryDefStyle(SetItemCategoryDefStyleCommand cmd) {
 		PortalItem portalItem = checkPortalItem(cmd.getId());
 		portalItem.setOperatorUid(UserContext.current().getUser().getId());
-		AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
-		actionData.setAlign(cmd.getAlign());
-		actionData.setDefUri(cmd.getDefUri());
-		portalItem.setActionData(StringHelper.toJsonString(actionData));
-		portalItemProvider.updatePortalItem(portalItem);
+		if(!StringUtils.isEmpty(portalItem.getActionData())){
+			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
+			actionData.setAlign(cmd.getAlign());
+			actionData.setDefUri(cmd.getDefUri());
+			portalItem.setActionData(StringHelper.toJsonString(actionData));
+			portalItemProvider.updatePortalItem(portalItem);
+		}
 	}
 
 	@Override
@@ -1251,6 +1254,7 @@ public class PortalServiceImpl implements PortalService {
 				}catch (Exception e){
 					portalPublishLog.setStatus(PortalPublishLogStatus.FAILING.getCode());
 					portalPublishLogProvider.updatePortalPublishLog(portalPublishLog);
+					LOGGER.error("publish error:", e);
 				}finally {
 					LOGGER.debug("publish end...");
 				}
@@ -1276,10 +1280,10 @@ public class PortalServiceImpl implements PortalService {
 		LaunchPadLayoutJson layoutJson = new LaunchPadLayoutJson();
 		layoutJson.setDisplayName(layout.getLabel());
 		layoutJson.setLayoutName(layout.getName());
-		List<LaunchPadLayoutGroupDTO> groups = new ArrayList<>();
+		List<LaunchPadLayoutGroup> groups = new ArrayList<>();
 		List<PortalItemGroup> itemGroups = portalItemGroupProvider.listPortalItemGroup(layout.getId());
 		for (PortalItemGroup itemGroup: itemGroups) {
-			LaunchPadLayoutGroupDTO group = ConvertHelper.convert(itemGroup, LaunchPadLayoutGroupDTO.class);
+			LaunchPadLayoutGroup group = ConvertHelper.convert(itemGroup, LaunchPadLayoutGroup.class);
 			group.setGroupName(itemGroup.getLabel());
 			ItemGroupInstanceConfig instanceConfig = new ItemGroupInstanceConfig();
 			if(!StringUtils.isEmpty(itemGroup.getInstanceConfig())){
@@ -1307,18 +1311,18 @@ public class PortalServiceImpl implements PortalService {
 				config.setColumnSpacing(instanceConfig.getMargin());
 				config.setLineSpacing(instanceConfig.getMargin());
 				config.setItemGroup(itemGroup.getName());
-				group.setInstanceConfig(StringHelper.toJsonString(config));
+				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.BANNERS){
 				BannersInstanceConfig config = new BannersInstanceConfig();
 				config.setItemGroup(itemGroup.getName());
-				group.setInstanceConfig(StringHelper.toJsonString(config));
+				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS){
 				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
 				if(null != moduleApp){
 					NewsInstanceConfig config = (NewsInstanceConfig)StringHelper.fromJsonString(moduleApp.getInstanceConfig(), NewsInstanceConfig.class);
 					config.setItemGroup(itemGroup.getName());
 					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
-					group.setInstanceConfig(StringHelper.toJsonString(config));
+					group.setInstanceConfig(config);
 				}
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS_FLASH){
 				ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
@@ -1327,13 +1331,13 @@ public class PortalServiceImpl implements PortalService {
 					config.setItemGroup(itemGroup.getName());
 					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
 					config.setNewsSize(instanceConfig.getNewsSize());
-					group.setInstanceConfig(StringHelper.toJsonString(config));
+					group.setInstanceConfig(config);
 				}
 			}else if(Widget.fromCode(group.getWidget()) == Widget.BULLETINS){
 				BulletinsInstanceConfig config = new BulletinsInstanceConfig();
 				config.setItemGroup(itemGroup.getName());
 				config.setRowCount(instanceConfig.getRowCount());
-				group.setInstanceConfig(StringHelper.toJsonString(config));
+				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.OPPUSH){
 				OPPushInstanceConfig config = new OPPushInstanceConfig();
 				config.setItemGroup(itemGroup.getName());
@@ -1350,12 +1354,13 @@ public class PortalServiceImpl implements PortalService {
 				}
 				publishOPPushItem(itemGroup);
 				config.setItemGroup(itemGroup.getName());
-				group.setInstanceConfig(StringHelper.toJsonString(config));
+//				group.setInstanceConfig(StringHelper.toJsonString(config));
+				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.TAB){
 				TabInstanceConfig config = new TabInstanceConfig();
 				publishTabItem(itemGroup);
 				config.setItemGroup(itemGroup.getName());
-				group.setInstanceConfig(StringHelper.toJsonString(config));
+				group.setInstanceConfig(config);
 			}
 			groups.add(group);
 
@@ -1679,11 +1684,13 @@ public class PortalServiceImpl implements PortalService {
 			layout = portalLayoutProvider.getPortalLayout(padLayout.getNamespaceId(), name);
 			if(null == layout){
 				layout = ConvertHelper.convert(padLayout, PortalLayout.class);
-
 				LaunchPadLayoutJson layoutJson = (LaunchPadLayoutJson)StringHelper.fromJsonString(padLayout.getLayoutJson(), LaunchPadLayoutJson.class);
 				layout.setLabel(layoutJson.getDisplayName());
-				List<LaunchPadLayoutGroupDTO> padLayoutGroups = layoutJson.getGroups();
-				for (LaunchPadLayoutGroupDTO padLayoutGroup: padLayoutGroups) {
+				layout.setOperatorUid(user.getId());
+				layout.setCreatorUid(user.getId());
+				portalLayoutProvider.createPortalLayout(layout);
+				List<LaunchPadLayoutGroup> padLayoutGroups = layoutJson.getGroups();
+				for (LaunchPadLayoutGroup padLayoutGroup: padLayoutGroups) {
 					PortalItemGroup itemGroup = ConvertHelper.convert(padLayoutGroup, PortalItemGroup.class);
 					itemGroup.setNamespaceId(layout.getNamespaceId());
 					itemGroup.setLayoutId(layout.getId());
@@ -1692,7 +1699,7 @@ public class PortalServiceImpl implements PortalService {
 					itemGroup.setCreatorUid(user.getId());
 					itemGroup.setOperatorUid(user.getId());
 					if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NAVIGATOR){
-						NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), NavigatorInstanceConfig.class);
+						NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BulletinsInstanceConfig.class)), NavigatorInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						if(Style.fromCode(padLayoutGroup.getStyle()) == Style.GALLERY){
@@ -1712,13 +1719,13 @@ public class PortalServiceImpl implements PortalService {
 						if(name.equals("ServiceMarketLayout"))
 							syncItemCategory(itemGroup.getNamespaceId(),itemGroup.getId());
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BULLETINS){
-						BulletinsInstanceConfig instanceConfig = (BulletinsInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), BulletinsInstanceConfig.class);
+						BulletinsInstanceConfig instanceConfig = (BulletinsInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BulletinsInstanceConfig.class)), BulletinsInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.OPPUSH){
-						OPPushInstanceConfig instanceConfig = (OPPushInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), OPPushInstanceConfig.class);
+						OPPushInstanceConfig instanceConfig = (OPPushInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), OPPushInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						Long moduleId = null;
 						if(OPPushWidgetStyle.LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
@@ -1743,14 +1750,14 @@ public class PortalServiceImpl implements PortalService {
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.TAB){
-						TabInstanceConfig instanceConfig = (TabInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), TabInstanceConfig.class);
+						TabInstanceConfig instanceConfig = (TabInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), TabInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 
 						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId());
 
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS){
-						NewsInstanceConfig instanceConfig = (NewsInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), NewsInstanceConfig.class);
+						NewsInstanceConfig instanceConfig = (NewsInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), NewsInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						Long moduleId = 10900L;
@@ -1760,7 +1767,7 @@ public class PortalServiceImpl implements PortalService {
 						}
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS_FLASH){
-						NewsFlashInstanceConfig instanceConfig = (NewsFlashInstanceConfig)StringHelper.fromJsonString(padLayoutGroup.getInstanceConfig(), NewsFlashInstanceConfig.class);
+						NewsFlashInstanceConfig instanceConfig = (NewsFlashInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), NewsFlashInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						Long moduleId = 10900L;
@@ -1837,19 +1844,26 @@ public class PortalServiceImpl implements PortalService {
 					item.setActionData(StringHelper.toJsonString(actionData));
 				}else if(ActionType.OFFICIAL_URL == ActionType.fromCode(padItem.getActionType())){
 					item.setActionType(PortalItemActionType.ZUOLINURL.getCode());
-					UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
-					item.setActionData(StringHelper.toJsonString(actionData));
+					if(!StringUtils.isEmpty(padItem.getActionData())){
+						UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
+						item.setActionData(StringHelper.toJsonString(actionData));
+					}
+
 				}else if(ActionType.THIRDPART_URL == ActionType.fromCode(padItem.getActionType())){
 					item.setActionType(PortalItemActionType.THIRDURL.getCode());
-					UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
-					item.setActionData(StringHelper.toJsonString(actionData));
+					if(!StringUtils.isEmpty(padItem.getActionData())){
+						UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(padItem.getActionData(), UrlActionData.class);
+						item.setActionData(StringHelper.toJsonString(actionData));
+					}
 				}else if(ActionType.NAVIGATION  == ActionType.fromCode(padItem.getActionType())){
 					item.setActionType(PortalItemActionType.LAYOUT.getCode());
-					NavigationActionData data = (NavigationActionData)StringHelper.fromJsonString(padItem.getActionData(), NavigationActionData.class);
-					PortalLayout layout = syncLayout(item.getNamespaceId(), item.getItemLocation(), data.getLayoutName());
-					LayoutActionData actionData = new LayoutActionData();
-					actionData.setLayoutId(layout.getId());
-					item.setActionData(StringHelper.toJsonString(actionData));
+					if(!StringUtils.isEmpty(padItem.getActionData())){
+						NavigationActionData data = (NavigationActionData)StringHelper.fromJsonString(padItem.getActionData(), NavigationActionData.class);
+						PortalLayout layout = syncLayout(item.getNamespaceId(), item.getItemLocation(), data.getLayoutName());
+						LayoutActionData actionData = new LayoutActionData();
+						actionData.setLayoutId(layout.getId());
+						item.setActionData(StringHelper.toJsonString(actionData));
+					}
 				}else{
 					item.setActionType(PortalItemActionType.MODULEAPP.getCode());
 					ModuleAppActionData actionData = new ModuleAppActionData();
@@ -1902,6 +1916,9 @@ public class PortalServiceImpl implements PortalService {
 			}else if(SceneType.DEFAULT == SceneType.fromCode(sceneType)){
 				scope.setScopeType(PortalScopeType.RESIDENTIAL.getCode());
 				scope.setScopeId(0L);
+			}else{
+				LOGGER.debug("data error. sceneType = " + sceneType);
+				return null;
 			}
 
 		}else if(ScopeType.COMMUNITY == ScopeType.fromCode(scopeType)){
@@ -1922,6 +1939,9 @@ public class PortalServiceImpl implements PortalService {
 				}
 			}
 			scope.setScopeId(scopeId);
+		}else{
+			LOGGER.debug("data error. scopeType = " + scopeType);
+			return null;
 		}
 
 		//添加item的scope到数据库

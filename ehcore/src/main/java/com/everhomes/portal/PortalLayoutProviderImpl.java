@@ -39,7 +39,8 @@ public class PortalLayoutProviderImpl implements PortalLayoutProvider {
 		portalLayout.setId(id);
 		portalLayout.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		portalLayout.setUpdateTime(portalLayout.getCreateTime());
-		portalLayout.setName(EhPortalLayouts.class.getSimpleName() + id);
+		if(StringUtils.isEmpty(portalLayout.getName()))
+			portalLayout.setName(EhPortalLayouts.class.getSimpleName() + id);
 		getReadWriteDao().insert(portalLayout);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPortalLayouts.class, null);
 	}
