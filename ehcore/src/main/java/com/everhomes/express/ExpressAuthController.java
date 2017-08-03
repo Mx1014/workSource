@@ -45,6 +45,7 @@ public class ExpressAuthController {// extends ControllerBase
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressAuthController.class);
     
     private final static String NS = "ns";
+    private final static String COMMUNITY = "community";
     private final static String APPKEY = "appkey";
     private final static String NICK = "nick";
     private final static String MOBILE = "mobile";
@@ -55,7 +56,7 @@ public class ExpressAuthController {// extends ControllerBase
     
     //重定向url
     private final static String ERROR_REDIRECT_URL = "/deliver/dist/assets/error.html";
-    private final static String SUCCESS_REDIRECT_URL = "/deliver/dist/index.html?hideNavigationBar=1#/home_page#sign_suffixl";
+    private final static String SUCCESS_REDIRECT_URL = "/deliver/dist/index.html#/home_page";
     
     
     @Autowired
@@ -92,7 +93,7 @@ public class ExpressAuthController {// extends ControllerBase
         	try{
         		vaildParams(params, namespaceId);
         	}catch(Exception e){
-        		 response.sendRedirect(ERROR_REDIRECT_URL);
+        		 response.sendRedirect(ERROR_REDIRECT_URL+"?"+e.toString());
         		 return ;
         	}
         	//验证通过了，那么如果没有注册，则注册
@@ -127,6 +128,9 @@ public class ExpressAuthController {// extends ControllerBase
 		checkSign(mobile, timestamp, checksum, app.getSecretKey());
 		
 		AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(appkey);
+		if(params.get(COMMUNITY) == null){
+			params.put(COMMUNITY, mapping.getCommunityId()+"");
+		}
 		
 		if(mapping == null || mapping.getNamespaceId() == null || namespaceId.intValue() != mapping.getNamespaceId().intValue()){
 			LOGGER.error("appkey not mapping to namespace, mapping = {}, appKey = {}", mapping, appkey);
@@ -176,7 +180,7 @@ public class ExpressAuthController {// extends ControllerBase
         
         userService.signupByThirdparkUser(guoMaoUser, request);
         userService.logonBythirdPartUser(guoMaoUser.getNamespaceId(), guoMaoUser.getNamespaceUserType(), guoMaoUser.getNamespaceUserToken(), request, response);
-        
+        userService.updateUserCurrentCommunityToProfile(guoMaoUser.getId(), Long.valueOf(params.get(COMMUNITY)), guoMaoUser.getNamespaceId());
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process express auth request(userinfo calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
@@ -233,13 +237,13 @@ public class ExpressAuthController {// extends ControllerBase
 	
 	public static void main(String[] args) {
 		 Map<String, String> params = new HashMap<String, String>();
-		 params.put("ns",23456+"");
+		 params.put("ns",999901+"");
 		 params.put("appkey","de875e40-1c5f-4a0c-94a6-0b37421b8554");
-		 params.put("nick","邓爽");
-		 params.put("mobile","12345678901");
-		 params.put("uid","1234567xxxbbbb");
+		 params.put("nick","邓爽2");
+		 params.put("mobile","12345678902");
+		 params.put("uid","1234567xxxbbbbxxx");
 		 params.put("timestamp",System.currentTimeMillis()+"");
-		 params.put("avatar","www.baidu.com");
+		 params.put("avatar","core.zuolin.com");
 		 MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");
@@ -254,6 +258,6 @@ public class ExpressAuthController {// extends ControllerBase
 			String key = (String) iterator.next();
 			buffer.append("&").append(key).append("=").append(params.get(key));
 		}
-		System.out.println("http://10.1.110.46:8080/evh/expressauth/authReq?"+buffer.toString().substring(1));
+		System.out.println("http://10.1.10.90/evh/expressauth/authReq?"+buffer.toString().substring(1));
 	}
 }

@@ -43,7 +43,7 @@ set @eh_apps_id = (select MAX(id) FROM eh_apps);
 INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`) VALUES ((@eh_apps_id:=@eh_apps_id+1), '1', @appKey, @secretKey, 'guomao', 'guomao app key', '1', NOW(), NULL, NULL);
 -- appkey mapping namespace
 set @eh_app_namespace_mappings_id = (select MAX(id) FROM eh_app_namespace_mappings);
-INSERT INTO `eh_app_namespace_mappings` (`id`, `namespace_id`, `app_key`, `community_id`) VALUES ((@eh_app_namespace_mappings_id:=@eh_app_namespace_mappings_id+1), @namespace_id, @appKey, '1');
+INSERT INTO `eh_app_namespace_mappings` (`id`, `namespace_id`, `app_key`, `community_id`) VALUES ((@eh_app_namespace_mappings_id:=@eh_app_namespace_mappings_id+1), @namespace_id, @appKey, @community_id);
 
 -- 菜单修改 by dengs 2017.07.31
 UPDATE eh_web_menus SET  `name` = '参数设置' where id = 40710;
