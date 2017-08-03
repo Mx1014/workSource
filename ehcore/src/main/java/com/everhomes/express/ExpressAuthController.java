@@ -153,7 +153,7 @@ public class ExpressAuthController {// extends ControllerBase
 		
 		if(mapping == null || mapping.getNamespaceId() == null || namespaceId.intValue() != mapping.getNamespaceId().intValue()){
 			LOGGER.error("appkey not mapping to namespace, mapping = {}, appKey = {}", mapping, appkey);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "appkey不匹配 ns");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "appkey不匹配ns");
 		}
 	}
 
@@ -199,7 +199,9 @@ public class ExpressAuthController {// extends ControllerBase
         
         userService.signupByThirdparkUser(guoMaoUser, request);
         userService.logonBythirdPartUser(guoMaoUser.getNamespaceId(), guoMaoUser.getNamespaceUserType(), guoMaoUser.getNamespaceUserToken(), request, response);
-        userService.updateUserCurrentCommunityToProfile(guoMaoUser.getId(), Long.valueOf(params.get(COMMUNITY)), guoMaoUser.getNamespaceId());
+        if(guoMaoUser.getId()!=null){
+        	userService.updateUserCurrentCommunityToProfile(guoMaoUser.getId(), Long.valueOf(params.get(COMMUNITY)), guoMaoUser.getNamespaceId());
+        }
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process express auth request(userinfo calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
@@ -263,6 +265,7 @@ public class ExpressAuthController {// extends ControllerBase
 		 params.put("uid","1234567xxxx");
 		 params.put("timestamp",System.currentTimeMillis()+"");
 		 params.put("avatar","core.zuolin.com");
+		 params.put("community","240111044331070561");
 		 MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");
@@ -278,5 +281,6 @@ public class ExpressAuthController {// extends ControllerBase
 			buffer.append("&").append(key).append("=").append(params.get(key));
 		}
 		System.out.println("http://printtest.zuolin.com/evh/expressauth/authReq?"+buffer.toString().substring(1));
+		System.out.println("http://10.1.10.90/evh/expressauth/authReq?"+buffer.toString().substring(1));
 	}
 }
