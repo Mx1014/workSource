@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>arriveTime：上班打卡时间</li>
  * <li>leaveTime：下班打卡时间</li>
  * <li>workTime：工作时间</li>
+ * <li>punchCount：打卡次数</li>
  * <li>status：打卡状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>morningStatus：早上打卡状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>afternoonStatus：下午打卡状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
@@ -40,6 +41,7 @@ public class PunchDayDetailDTO {
 	private Long afternoonArriveTime;
 	private Long leaveTime;
 	private Long workTime;
+	private Integer punchCount;
 	private Byte status;
 	private java.lang.Byte morningStatus;
 	private java.lang.Byte afternoonStatus;  
@@ -232,6 +234,14 @@ public class PunchDayDetailDTO {
 
 	public void setPunchOrgName(String punchOrgName) {
 		this.punchOrgName = punchOrgName;
+	}
+
+	public Integer getPunchCount() {
+		return punchCount;
+	}
+
+	public void setPunchCount(Integer punchCount) {
+		this.punchCount = punchCount;
 	}
  
 
