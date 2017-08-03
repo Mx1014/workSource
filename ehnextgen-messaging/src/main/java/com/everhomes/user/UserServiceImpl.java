@@ -4489,8 +4489,23 @@ public class UserServiceImpl implements UserService {
         dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
 
     }
-	
-	@Override
+
+    @Override
+    public SceneContactV2DTO getGroupUserInfo(GetGroupUserInfoCommand cmd) {
+        // 1.通过 userId 与 organizationId 去找到 detailId
+        // 2.根据 detailId 调用之前的获取信息接口
+        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+        GetRelevantContactInfoCommand command = new GetRelevantContactInfoCommand();
+        command.setDetailId(members.get(0).getDetailId());
+        command.setOrganizationId(cmd.getOrganizationId());
+        SceneContactV2DTO dto = this.getRelevantContactInfo(command);
+        if (dto != null)
+            return dto;
+        else
+            return null;
+    }
+
+    @Override
 	public GetFamilyButtonStatusResponse getFamilyButtonStatus(){
 		int namespaceId = UserContext.getCurrentNamespaceId();
 		AuthorizationThirdPartyButton buttonstatus = authorizationThirdPartyButtonProvider.getButtonStatusByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
