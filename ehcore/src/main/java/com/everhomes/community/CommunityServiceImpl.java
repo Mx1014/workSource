@@ -2872,6 +2872,7 @@ public class CommunityServiceImpl implements CommunityService {
                             if (list != null && list.size() > 0) {
                                 list = list.stream()
                                         .filter(member -> OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE)
+                                        .filter(member -> OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER)
                                         // .limit(1)
                                         .map(member -> {
                                             member.setOperatorUid(r.getOperatorUid());
