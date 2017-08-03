@@ -8,13 +8,13 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 公司id</li>
  * </ul>
  */
-public class GetGroupUserInfoCommand {
+public class GetContactInfoByUserIdCommand {
 
 	private Long userId;
 
 	private Long organizationId;
 
-	public GetGroupUserInfoCommand() {
+	public GetContactInfoByUserIdCommand() {
 	}
 
 	public Long getUserId() {

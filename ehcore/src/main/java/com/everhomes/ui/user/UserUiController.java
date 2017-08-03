@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import com.everhomes.rest.organization.*;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
@@ -32,9 +31,7 @@ import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
- 
-import com.everhomes.rest.user.ListUserOpPromotionsRespose;
- 
+
 import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
@@ -51,7 +48,6 @@ import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
-import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.WebTokenGenerator;
 
 /**
@@ -309,13 +305,13 @@ public class UserUiController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /ui/user/getGroupUserInfo</b>
+	 * <b>URL: /ui/user/getContactInfoByUserId</b>
 	 * <p>根据用户 id 获取用户详细信息</p>
 	 */
-    @RequestMapping("getGroupUserInfo")
+    @RequestMapping("getContactInfoByUserId")
     @RestReturn(value=SceneContactV2DTO.class)
-    public RestResponse getGroupUserInfo(GetGroupUserInfoCommand cmd) {
-        SceneContactV2DTO result = userService.getGroupUserInfo(cmd);
+    public RestResponse getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
+        SceneContactV2DTO result = userService.getContactInfoByUserId(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
