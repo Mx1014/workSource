@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
@@ -55,7 +57,7 @@ public class ExpressAuthController {// extends ControllerBase
     private final static String AVATAR = "avatar";
     
     //重定向url
-    private final static String ERROR_REDIRECT_URL = "/deliver/dist/assets/error.html";
+    private final static String ERROR_REDIRECT_URL = "/deliver/dist/assets/error.html?error=";
     private final static String SUCCESS_REDIRECT_URL = "/deliver/dist/index.html#/home_page";
     
     
@@ -67,6 +69,9 @@ public class ExpressAuthController {// extends ControllerBase
     
 	@Autowired
 	private AppNamespaceMappingProvider appNamespaceMappingProvider;
+	
+	@Autowired
+	private CommunityProvider communityProvider;
 
 	@Autowired
 	private AppProvider appProvider;
@@ -93,7 +98,7 @@ public class ExpressAuthController {// extends ControllerBase
         	try{
         		vaildParams(params, namespaceId);
         	}catch(Exception e){
-        		 response.sendRedirect(ERROR_REDIRECT_URL+"?"+e.toString());
+        		 response.sendRedirect(ERROR_REDIRECT_URL+"?error="+e.toString());
         		 return ;
         	}
         	//验证通过了，那么如果没有注册，则注册
@@ -128,13 +133,26 @@ public class ExpressAuthController {// extends ControllerBase
 		checkSign(mobile, timestamp, checksum, app.getSecretKey());
 		
 		AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(appkey);
-		if(params.get(COMMUNITY) == null){
+		String stringCommunityId = params.get(COMMUNITY);
+		if(stringCommunityId != null){
+			Long communityId = null;
+			try{
+				communityId = Long.valueOf(stringCommunityId);
+			}catch(Exception e){
+				LOGGER.error("invaild community = {}", stringCommunityId);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild community");
+			}
+			Community community = communityProvider.findCommunityById(communityId);
+			if(community == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown community");
+			}
+		}else{
 			params.put(COMMUNITY, mapping.getCommunityId()+"");
 		}
 		
 		if(mapping == null || mapping.getNamespaceId() == null || namespaceId.intValue() != mapping.getNamespaceId().intValue()){
 			LOGGER.error("appkey not mapping to namespace, mapping = {}, appKey = {}", mapping, appkey);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "appkey not match ns");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "appkey mismatch ns");
 		}
 	}
 
@@ -216,11 +234,11 @@ public class ExpressAuthController {// extends ControllerBase
 		Long currentTimestamp = System.currentTimeMillis();
 		if(Math.abs(currentTimestamp-Long.parseLong(timestamp))>1000*60*2L){
 			// TODO 重定向到登录页面
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "timestamp overtime, timestamp = " + checksum);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "timestamp overtime, timestamp is " + checksum);
 		}
 		if(checksum == null){
 			// TODO 重定向到登录页面
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "checksum = " + checksum);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "checksum is null" );
 		}
 		String sum = null;
 		try {
@@ -231,7 +249,7 @@ public class ExpressAuthController {// extends ControllerBase
 		}
 		if(!checksum.equals(sum)){
 			// TODO 重定向到登录页面
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild params ");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild params, mismatch checksum");
 		}
 	}
 	
@@ -241,7 +259,7 @@ public class ExpressAuthController {// extends ControllerBase
 		 params.put("appkey","de875e40-1c5f-4a0c-94a6-0b37421b8554");
 		 params.put("nick","邓爽2");
 		 params.put("mobile","12345678902");
-		 params.put("uid","1234567xxxbbbbxxx");
+		 params.put("uid","1234567xxxx");
 		 params.put("timestamp",System.currentTimeMillis()+"");
 		 params.put("avatar","core.zuolin.com");
 		 MessageDigest md = null;
