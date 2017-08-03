@@ -1,5 +1,6 @@
 package com.everhomes.express;
 
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
@@ -98,7 +99,7 @@ public class ExpressAuthController {// extends ControllerBase
         	try{
         		vaildParams(params, namespaceId);
         	}catch(Exception e){
-        		 response.sendRedirect(ERROR_REDIRECT_URL+"?error="+e.toString());
+        		 response.sendRedirect(ERROR_REDIRECT_URL+URLEncoder.encode(e.getMessage(), "UTF-8"));
         		 return ;
         	}
         	//验证通过了，那么如果没有注册，则注册
@@ -124,7 +125,7 @@ public class ExpressAuthController {// extends ControllerBase
 		App app = appProvider.findAppByKey(appkey);
 		if(app == null){
 			LOGGER.error("app not found.key = {}", appkey);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild appkey");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "非法的appkey");
 		}
 		//签名校验
 		String mobile = params.get(MOBILE);
@@ -140,11 +141,11 @@ public class ExpressAuthController {// extends ControllerBase
 				communityId = Long.valueOf(stringCommunityId);
 			}catch(Exception e){
 				LOGGER.error("invaild community = {}", stringCommunityId);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild community");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "非法的community");
 			}
 			Community community = communityProvider.findCommunityById(communityId);
 			if(community == null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown community");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "非法的community");
 			}
 		}else{
 			params.put(COMMUNITY, mapping.getCommunityId()+"");
@@ -152,7 +153,7 @@ public class ExpressAuthController {// extends ControllerBase
 		
 		if(mapping == null || mapping.getNamespaceId() == null || namespaceId.intValue() != mapping.getNamespaceId().intValue()){
 			LOGGER.error("appkey not mapping to namespace, mapping = {}, appKey = {}", mapping, appkey);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "appkey mismatch ns");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "appkey不匹配 ns");
 		}
 	}
 
@@ -234,11 +235,11 @@ public class ExpressAuthController {// extends ControllerBase
 		Long currentTimestamp = System.currentTimeMillis();
 		if(Math.abs(currentTimestamp-Long.parseLong(timestamp))>1000*60*2L){
 			// TODO 重定向到登录页面
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "timestamp overtime, timestamp is " + checksum);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "时间戳不匹配");
 		}
 		if(checksum == null){
 			// TODO 重定向到登录页面
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "checksum is null" );
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "校验和为空" );
 		}
 		String sum = null;
 		try {
@@ -249,7 +250,7 @@ public class ExpressAuthController {// extends ControllerBase
 		}
 		if(!checksum.equals(sum)){
 			// TODO 重定向到登录页面
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild params, mismatch checksum");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "参数校验失败");
 		}
 	}
 	
@@ -276,6 +277,6 @@ public class ExpressAuthController {// extends ControllerBase
 			String key = (String) iterator.next();
 			buffer.append("&").append(key).append("=").append(params.get(key));
 		}
-		System.out.println("http://10.1.10.90/evh/expressauth/authReq?"+buffer.toString().substring(1));
+		System.out.println("http://printtest.zuolin.com/evh/expressauth/authReq?"+buffer.toString().substring(1));
 	}
 }
