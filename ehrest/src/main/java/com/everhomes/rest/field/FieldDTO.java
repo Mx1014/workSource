@@ -2,6 +2,8 @@ package com.everhomes.rest.field;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
  *     <li>id: 域下的字段id，新加进去的没有</li>
@@ -16,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段组件类型枚举型，参考{@link com.everhomes.rest.field.FieldParamType}</li>
  *     <li>mandatoryFlag: 是否必填 0: 否; 1: 是</li>
  *     <li>defaultOrder: 顺序</li>
+ *     <li>items: 字段选择项 参考{@link com.everhomes.rest.field.FieldItemDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -44,6 +47,16 @@ public class FieldDTO {
     private Byte mandatoryFlag;
 
     private Integer defaultOrder;
+
+    private List<FieldItemDTO> items;
+
+    public List<FieldItemDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<FieldItemDTO> items) {
+        this.items = items;
+    }
 
     public String getFieldName() {
         return fieldName;
