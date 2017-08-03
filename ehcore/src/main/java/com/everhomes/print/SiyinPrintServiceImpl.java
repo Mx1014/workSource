@@ -316,10 +316,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         String logonURL = configurationProvider.getValue(PrintErrorCode.PRINT_INFORM_URL, "");
         GetPrintLogonUrlResponse response = new GetPrintLogonUrlResponse();
         response.setIdentifierToken(identifierToken);
-        response.setScanTimes(timeout*1000*getScale(unit)/scanTimeout);
         response.setType("pc");
-        response.setBase64(Base64.getEncoder().encodeToString(response.toString().getBytes()));
-        return response;
+		response.setBase64(Base64.getEncoder().encodeToString(response.toString().getBytes()));
+		response.setScanTimes(timeout*1000*getScale(unit)/scanTimeout);
+		return response;
 	}
 
 	@Override
