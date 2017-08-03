@@ -25,6 +25,7 @@ public class PunchSchedulingDTO {
 	private Long ownerId;
 	private Long month;
 	private Long punchOriganizationId; 
+	@ItemType(PunchSchedulingEmployeeDTO.class)
 	private List<PunchSchedulingEmployeeDTO> employees;
 	public String getOwnerType() {
 		return ownerType;
