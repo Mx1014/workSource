@@ -7126,21 +7126,21 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId) {
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId);
+    public Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId){
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken,organizationId);
         if(member == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, organizationId cannot be found");
-        List<Object> result = new ArrayList<>();
-        result.add(member.getId());
+/*        List<Object> result = new ArrayList<>();
+        result.add(member.getId());*/
         Byte visibleFlag;
         if (null == VisibleFlag.fromCode(member.getVisibleFlag())) {
             visibleFlag = VisibleFlag.SHOW.getCode();
         } else {
             visibleFlag = member.getVisibleFlag();
         }
-        result.add(visibleFlag);
-        return result;
+//        result.add(visibleFlag);
+        return visibleFlag;
     }
 
     @Override
@@ -10639,23 +10639,24 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             List<OrganizationDTO> departments = new ArrayList<>();
             memberDTO.setDepartments(this.getOrganizationMemberGroups(groupTypes, memberDTO.getContactToken(), directlyEnterprise.getPath()));
-            //岗位
+            //  岗位
             memberDTO.setJobPositions(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, memberDTO.getContactToken(), directlyEnterprise.getPath()));
 
-            //职级
+            //  职级
             memberDTO.setJobLevels(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_LEVEL, memberDTO.getContactToken(), directlyEnterprise.getPath()));
 
+            //  查询头像
             if (OrganizationMemberTargetType.USER.getCode().equals(memberDTO.getTargetType())) {
                 User user = userProvider.findUserById(memberDTO.getTargetId());
                 if (null != user) {
                     memberDTO.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
-                    memberDTO.setNickName(memberDTO.getNickName());
+                    //  memberDTO.setNickName(memberDTO.getNickName());
                 }
 
             }
-            List<Object> result = this.getOrganizationMemberIdAndVisibleFlag(memberDTO.getContactToken(), memberDTO.getOrganizationId());
-            memberDTO.setMembersId((Long) result.get(0));
-            memberDTO.setVisibleFlag((Byte) result.get(1));
+            //  memberDTO.setMembersId((Long)result.get(0));
+            //  查询是否隐藏情况
+            memberDTO.setVisibleFlag(this.getOrganizationMemberVisibleFlag(memberDTO.getContactToken(),memberDTO.getOrganizationId()));
             return memberDTO;
         } else {
             return null;
