@@ -1,4 +1,3 @@
-ALTER TABLE eh_buildings DROP COLUMN traffic_description;
 ALTER TABLE eh_buildings DROP COLUMN lift_description;
 ALTER TABLE eh_buildings DROP COLUMN pm_description;
 ALTER TABLE eh_buildings DROP COLUMN parking_lot_description;
@@ -8,7 +7,6 @@ ALTER TABLE eh_buildings DROP COLUMN telecommunication_description;
 ALTER TABLE eh_buildings DROP COLUMN air_condition_description;
 ALTER TABLE eh_buildings DROP COLUMN security_description;
 ALTER TABLE eh_buildings DROP COLUMN fire_control_description;
-ALTER TABLE eh_buildings DROP COLUMN floor_count;
 
 CREATE TABLE `eh_lease_buildings` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
