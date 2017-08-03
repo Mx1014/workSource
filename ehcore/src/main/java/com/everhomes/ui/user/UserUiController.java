@@ -307,17 +307,20 @@ public class UserUiController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
- 
-/*
-    @RequestMapping("getCurrentContactRealInfo")
+
+	/**
+	 * <b>URL: /ui/user/getGroupUserInfo</b>
+	 * <p>根据用户 id 获取用户详细信息</p>
+	 */
+    @RequestMapping("getGroupUserInfo")
     @RestReturn(value=SceneContactV2DTO.class)
-    public RestResponse getCurrentContactRealInfo(GetCurrentContactRealInfoCommand cmd) {
-        SceneContactV2DTO result = userService.getCurrentContactRealInfo(cmd);
+    public RestResponse getGroupUserInfo(GetGroupUserInfoCommand cmd) {
+        SceneContactV2DTO result = userService.getGroupUserInfo(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }*/
+    }
 
     /**
      * <b>URL: /ui/user/getRelevantContactInfo</b>
