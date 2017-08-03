@@ -6184,25 +6184,42 @@ public class PunchServiceImpl implements PunchService {
         }
         
         //打卡时间
-        PunchRule pr = new PunchRule();
-        pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-        pr.setOwnerId(cmd.getOwnerId());  
-        pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
-        pr.setName(cmd.getGroupName());
-        pr.setRuleType(cmd.getRuleType());
-        pr.setPunchOrganizationId(punchOrg.getId()); 
-        punchProvider.createPunchRule(pr);
-        if(null != cmd.getTimeRules()){
-        	for(PunchTimeRuleDTO timeRule:cmd.getTimeRules()){
-        		
-        	}
-        }
+		savePunchTimeRule(cmd, punchOrg.getId());
         //特殊地点
         
         //节假日
         
         //排班
 		return null;
+	} 
+
+	private void savePunchTimeRule(AddPunchGroupCommand cmd, Long punchOrgId) {
+        PunchRule pr = new PunchRule();
+        pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+        pr.setOwnerId(cmd.getOwnerId());  
+        pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
+        pr.setName(cmd.getGroupName());
+        pr.setRuleType(cmd.getRuleType());
+        pr.setPunchOrganizationId(punchOrgId); 
+        punchProvider.createPunchRule(pr);
+        if(null != cmd.getTimeRules()){
+        	for(PunchTimeRuleDTO timeRule:cmd.getTimeRules()){
+        		if(timeRule.getPunchTimeIntervals() == null || timeRule.getPunchTimeIntervals().size() == 0)
+        			continue;
+        		PunchTimeRule ptr = new PunchTimeRule();
+                ptr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+                ptr.setOwnerId(punchOrgId);  
+        		ptr.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
+        		if(timeRule.getPunchTimeIntervals().size()==1){
+        			
+        		}else if(timeRule.getPunchTimeIntervals().size()==2){
+        			
+        		}else{
+        			
+        		}
+        		
+        	}
+        }
 	}
 	private PunchWifi convertDTO2Wifi(PunchWiFiDTO wifi) {
 		PunchWifi punchWifi = ConvertHelper.convert(wifi, PunchWifi.class);
