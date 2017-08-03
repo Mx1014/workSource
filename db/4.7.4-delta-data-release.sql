@@ -93,3 +93,10 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999983, 0, 0, 
 
 -- 修复组织架构的历史数据
 update eh_organization_members SET visible_flag = 0 WHERE visible_flag = null;
+
+-- 资源预约 add by sw 20170802
+UPDATE eh_rentalv2_orders set requestor_organization_id = organization_id;
+UPDATE eh_rentalv2_orders o join eh_organization_communities c on o.community_id = c.community_id set o.organization_id = c.organization_id;
+
+-- by dengs,张江高科用户认证 url改变
+UPDATE `eh_authorization_third_party_forms` SET `authorization_url`='http://139.129.220.146:3578/openapi/user/Authenticate' WHERE id in (1,2);
