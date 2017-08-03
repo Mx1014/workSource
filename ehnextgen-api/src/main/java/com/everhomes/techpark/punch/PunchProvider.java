@@ -296,6 +296,8 @@ public interface PunchProvider {
 			String targetType, Long targetId);
 
 	public void createPunchTimeInterval(PunchTimeInterval ptInterval);
+
+	public void createPunchSpecialDay(PunchSpecialDay psd);
  
  
  

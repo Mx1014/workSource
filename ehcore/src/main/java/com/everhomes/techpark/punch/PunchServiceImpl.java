@@ -135,6 +135,7 @@ import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
+import com.everhomes.rest.techpark.punch.PunchRuleType;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
 import com.everhomes.rest.techpark.punch.PunchStatus;
@@ -173,6 +174,9 @@ import com.everhomes.rest.techpark.punch.admin.PunchDayDetailDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchGroupDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchSpecialDayDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchTargetType;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
@@ -6187,16 +6191,12 @@ public class PunchServiceImpl implements PunchService {
         
         //打卡时间
 		savePunchTimeRule(cmd, punchOrg.getId());
-        //特殊地点
-        
-        //节假日
-        
-        //排班
+		
 		return null;
 	} 
 
 	private void savePunchTimeRule(AddPunchGroupCommand cmd, Long punchOrgId) {
-        PunchRule pr = new PunchRule();
+        PunchRule pr = ConvertHelper.convert(cmd, PunchRule.class);
         pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
         pr.setOwnerId(cmd.getOwnerId());  
         pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
@@ -6204,6 +6204,7 @@ public class PunchServiceImpl implements PunchService {
         pr.setRuleType(cmd.getRuleType());
         pr.setPunchOrganizationId(punchOrgId);  
         punchProvider.createPunchRule(pr);
+        List<PunchTimeRule> ptrs = new ArrayList<>();
         if(null != cmd.getTimeRules()){
         	for(PunchTimeRuleDTO timeRule:cmd.getTimeRules()){
         		if(timeRule.getPunchTimeIntervals() == null || timeRule.getPunchTimeIntervals().size() == 0)
@@ -6213,6 +6214,7 @@ public class PunchServiceImpl implements PunchService {
                 ptr.setOwnerId(punchOrgId);  
         		ptr.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
         		punchProvider.createPunchTimeRule(ptr);
+        		ptrs.add(ptr);
         		if(timeRule.getPunchTimeIntervals().size()==1){
         			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
         			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
@@ -6236,6 +6238,55 @@ public class PunchServiceImpl implements PunchService {
         		} 
         	}
         }
+        
+        //特殊日期
+        if(null != cmd.getSpecialDays()){
+        	for(PunchSpecialDayDTO specialDayDTO : cmd.getSpecialDays()){
+        		PunchSpecialDay psd =ConvertHelper.convert(specialDayDTO, PunchSpecialDay.class);
+        		psd.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+        		psd.setOwnerId(cmd.getOwnerId());  
+        		psd.setPunchRuleId(pr.getId());
+        		psd.setPunchOrganizationId(punchOrgId);  
+        		psd.setRuleDate(new java.sql.Date(specialDayDTO.getRuleDate())); 
+				punchProvider.createPunchSpecialDay(psd);
+        		
+        	}
+        }
+        //排班
+        if(cmd.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && cmd.getSchedulings() != null){
+        	for(PunchSchedulingDTO monthScheduling : cmd.getSchedulings()){
+        		monthScheduling.getEmployees().stream().map(r->{
+        			saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
+        			return null;
+        		});
+        	}
+        }
+	}
+	private void saveEmployeeScheduling(PunchSchedulingEmployeeDTO r, Long month, PunchRule pr, List<PunchTimeRule> ptrs) { 
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(month); 
+		int i = 1; 
+		for(String ruleName : r.getDaySchedulings() ){
+			PunchTimeRule ptr =findPtrByName(ptrs,ruleName);
+			if(null != ptr){
+				calendar.set(Calendar.DAY_OF_MONTH, i);
+				PunchScheduling ps = ConvertHelper.convert(pr, PunchScheduling.class);
+				ps.setPunchRuleId(pr.getId());
+				ps.setRuleDate(new java.sql.Date(calendar.getTimeInMillis()));
+				ps.setTimeRuleId(ptr.getId());
+				ps.setTargetType(PunchTargetType.USER.getCode());
+				ps.setTargetId(r.getUserId());
+				punchSchedulingProvider.createPunchScheduling(ps);
+			}
+			i++;
+		}
+	}
+	private PunchTimeRule findPtrByName(List<PunchTimeRule> ptrs, String ruleName) {
+		for(PunchTimeRule ptr : ptrs){
+			if(ptr.getName().equals(ruleName))
+				return ptr;
+		}
+		return null;
 	}
 	private PunchWifi convertDTO2Wifi(PunchWiFiDTO wifi) {
 		PunchWifi punchWifi = ConvertHelper.convert(wifi, PunchWifi.class);

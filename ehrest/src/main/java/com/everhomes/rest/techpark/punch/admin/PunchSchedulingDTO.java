@@ -9,9 +9,7 @@ import com.everhomes.discover.ItemType;
  * <ul>
  * 
  * <li>ownerType：organization/user</li>
- * <li>ownerId：id</li>
- * <li>targetType: 填organization/user</li>
- * <li>targetId：对应设置目标的id比如机构比如人的id</li>
+ * <li>ownerId：id</li> 
  * <li>month：月份时间戳</li>
  * <li>punchOriganizationId：考勤组id</li> 
  * <li>employees：每一个人的排班{@link PunchSchedulingEmployeeDTO}</li> 

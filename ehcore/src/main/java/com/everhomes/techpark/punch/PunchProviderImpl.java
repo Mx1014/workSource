@@ -54,6 +54,7 @@ import com.everhomes.server.schema.tables.daos.EhPunchHolidaysDao;
 import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchSpecialDaysDao;
 import com.everhomes.server.schema.tables.daos.EhPunchStatisticsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchTimeIntervalsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchTimeRulesDao;
@@ -69,7 +70,9 @@ import com.everhomes.server.schema.tables.pojos.EhPunchLocationRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
 import com.everhomes.server.schema.tables.pojos.EhPunchRuleOwnerMap;
 import com.everhomes.server.schema.tables.pojos.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchSpecialDays;
 import com.everhomes.server.schema.tables.pojos.EhPunchStatistics;
+import com.everhomes.server.schema.tables.pojos.EhPunchTimeIntervals;
 import com.everhomes.server.schema.tables.pojos.EhPunchTimeRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWifiRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWifis;
@@ -2532,14 +2535,25 @@ long id = sequenceProvider.getNextSequence(key);
 
 	@Override
 	public void createPunchTimeInterval(PunchTimeInterval ptInterval) {
-		 String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchRules.class);
+		 String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchTimeIntervals.class);
 			long id = sequenceProvider.getNextSequence(key);
 		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 		 ptInterval.setId(id); 
 		 EhPunchTimeIntervalsDao dao = new EhPunchTimeIntervalsDao(context.configuration());
 		 dao.insert(ptInterval);  
 	}
-	
+
+
+	@Override
+	public void createPunchSpecialDay(PunchSpecialDay psd){
+		 String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchSpecialDays.class);
+			long id = sequenceProvider.getNextSequence(key);
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		 psd.setId(id); 
+		 EhPunchSpecialDaysDao dao = new EhPunchSpecialDaysDao(context.configuration());
+		 dao.insert(psd);  
+		
+	};
 	
 }
 
