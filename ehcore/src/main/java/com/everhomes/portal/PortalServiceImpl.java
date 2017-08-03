@@ -236,7 +236,7 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public ListPortalLayoutsResponse listPortalLayouts(ListPortalLayoutsCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<PortalLayout> portalLayouts = portalLayoutProvider.listPortalLayout(namespaceId);
+		List<PortalLayout> portalLayouts = portalLayoutProvider.listPortalLayout(namespaceId, null);
 		return new ListPortalLayoutsResponse(portalLayouts.stream().map(r ->{
 			return processPortalLayoutDTO(r);
 		}).collect(Collectors.toList()));
