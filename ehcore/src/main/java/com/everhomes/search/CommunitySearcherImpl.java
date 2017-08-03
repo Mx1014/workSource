@@ -139,21 +139,31 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
                 .field("name", 5.0f)
                 .field("name.pinyin_prefix", 2.0f)
                 .field("name.pinyin_gram", 1.0f);
-        
-        FilterBuilder fb = null;
-        int namespaceId = UserContext.getCurrentNamespaceId();
-        fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+
+        //修改查询条件关系 add by sfyan 20170803
+        List<FilterBuilder> filterBuilders = new ArrayList<>();
         if(null != communityType) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityType", communityType));
+            filterBuilders.add(FilterBuilders.termFilter("communityType", communityType));
+
         }
         if((null != cityId) && (cityId > 0)) {
-            fb = FilterBuilders.termFilter("cityId", cityId);
+            filterBuilders.add(FilterBuilders.termFilter("cityId", cityId));
+
         }
-        
+
         if((null != regionId) && (regionId > 0)) {
-            fb = FilterBuilders.orFilter(FilterBuilders.termFilter("cityId", regionId)
-                    , FilterBuilders.termFilter("regionId", regionId));
+            filterBuilders.add(FilterBuilders.termFilter("regionId", regionId));
         }
+        FilterBuilder filterBuilder = filterBuilders.get(0);
+        if(filterBuilders.size() > 1){
+            FilterBuilder[] fbs = new FilterBuilder[filterBuilders.size()];
+            filterBuilders.toArray(fbs);
+            filterBuilder = FilterBuilders.andFilter(fbs);
+        }
+
+        int namespaceId = UserContext.getCurrentNamespaceId();
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+        fb = FilterBuilders.andFilter(fb, filterBuilder);
         
         //园区和小区都要搜索出来 by xiongying 20160518
 //        if(null == fb) {
