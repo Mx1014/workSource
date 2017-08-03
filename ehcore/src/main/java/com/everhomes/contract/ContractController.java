@@ -62,7 +62,7 @@ public class ContractController extends ControllerBase {
 	 * <b>URL: /contract/findContract</b>
 	 */
 	@RequestMapping("findContract")
-	@RestReturn(ContractDTO.class)
+	@RestReturn(ContractDetailDTO.class)
 	public RestResponse findContract(FindContractCommand cmd){
 		return new RestResponse();
 	}

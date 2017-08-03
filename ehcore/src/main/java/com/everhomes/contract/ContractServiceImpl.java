@@ -166,7 +166,8 @@ public class ContractServiceImpl implements ContractService {
 		}
 		
 		for (Contract contract : contractList) {
-			Long organizationId = contract.getOrganizationId();
+//			Long organizationId = contract.getOrganizationId();
+			Long organizationId = contract.getCustomerId();
 			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
 			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
 			String contractEndDate = getChinaDate(contract.getContractEndDate());
@@ -206,7 +207,8 @@ public class ContractServiceImpl implements ContractService {
 		}
 		
 		for (Contract contract : contractList) {
-			Long organizationId = contract.getOrganizationId();
+//			Long organizationId = contract.getOrganizationId();
+			Long organizationId = contract.getCustomerId();
 			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
 			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
 			String contractEndDate = getChinaDate(contract.getContractEndDate());
@@ -243,7 +245,8 @@ public class ContractServiceImpl implements ContractService {
 		}
 		
 		for (Contract contract : contractList) {
-			Long organizationId = contract.getOrganizationId();
+//			Long organizationId = contract.getOrganizationId();
+			Long organizationId = contract.getCustomerId();
 			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
 			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
 			String communityName = getCommunityName(organizationId);
