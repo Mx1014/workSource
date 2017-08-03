@@ -8,6 +8,10 @@ ALTER TABLE eh_buildings DROP COLUMN air_condition_description;
 ALTER TABLE eh_buildings DROP COLUMN security_description;
 ALTER TABLE eh_buildings DROP COLUMN fire_control_description;
 
+ALTER TABLE `eh_lease_promotion_attachments` ADD COLUMN `owner_type` VARCHAR(128) NOT NULL AFTER `id`;
+ALTER TABLE `eh_lease_promotion_attachments` CHANGE COLUMN `lease_id` `owner_id` BIGINT NOT NULL AFTER `id`;
+
+
 CREATE TABLE `eh_lease_buildings` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
