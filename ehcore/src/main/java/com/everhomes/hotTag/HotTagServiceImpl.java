@@ -1,6 +1,7 @@
 package com.everhomes.hotTag;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.namespace.Namespace;
@@ -40,10 +41,17 @@ public class HotTagServiceImpl implements HotTagService{
 	public List<TagDTO> listHotTag(ListHotTagCommand cmd) {
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		if(cmd.getNamespaceId() == null){
-			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		cmd.setNamespaceId(namespaceId);
+
+		List<TagDTO> tags = new ArrayList<TagDTO>();
+		if(cmd.getNamespaceId() == 0){
+			tags = hotTagProvider.listDistinctAllHotTag(cmd.getServiceType());
+		}else {
+			tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getServiceType(), pageSize);
 		}
-		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getServiceType(), pageSize);
+
 		return tags;
 	}
 
@@ -51,9 +59,8 @@ public class HotTagServiceImpl implements HotTagService{
 	public TagDTO setHotTag(SetHotTagCommand cmd) {
 		User user = UserContext.current().getUser();
 
-		if(cmd.getNamespaceId() == null){
-			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-		}
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		cmd.setNamespaceId(namespaceId);
 
 		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getName());
 		if(tag != null) {
@@ -115,9 +122,8 @@ public class HotTagServiceImpl implements HotTagService{
 	public void deleteHotTagByName(DeleteHotTagByNameCommand cmd) {
 		User user = UserContext.current().getUser();
 
-		if(cmd.getNamespaceId() == null){
-			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-		}
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		cmd.setNamespaceId(namespaceId);
 
 		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getName());
 		tag.setStatus(HotTagStatus.INACTIVE.getCode());

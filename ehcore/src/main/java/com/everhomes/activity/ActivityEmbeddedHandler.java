@@ -408,6 +408,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 					tag.setName(cmd.getTag());
 					tag.setHotFlag(HotFlag.NORMAL.getCode());
 					tag.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+
+					Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+					tag.setNamespaceId(namespaceId);
+
 					hotTagSearcher.feedDoc(tag);
 				}catch (Exception e){
 					LOGGER.error("feedDoc activity tag error",e);

@@ -7,6 +7,7 @@ import com.everhomes.hotTag.HotTags;
 import com.everhomes.rest.hotTag.HotFlag;
 import com.everhomes.rest.hotTag.HotTagServiceType;
 import com.everhomes.search.HotTagSearcher;
+import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +104,10 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
                 tag.setName(cmd.getTag());
                 tag.setHotFlag(HotFlag.NORMAL.getCode());
                 tag.setServiceType(HotTagServiceType.POLL.getCode());
+
+                Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+                tag.setNamespaceId(namespaceId);
+
                 hotTagSearcher.feedDoc(tag);
             }catch (Exception e){
                 LOGGER.error("feedDoc poll tag error",e);

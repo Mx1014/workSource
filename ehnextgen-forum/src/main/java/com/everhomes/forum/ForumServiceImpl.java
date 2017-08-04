@@ -331,6 +331,10 @@ public class ForumServiceImpl implements ForumService {
         if(post.getEmbeddedAppId()!=null && post.getEmbeddedAppId() == 0L && !StringUtils.isEmpty(post.getTag())){
             try{
                 HotTags tag = new HotTags();
+
+                Integer namespaceId = UserContext.getCurrentNamespaceId(post.getNamespaceId());
+                tag.setNamespaceId(namespaceId);
+
                 tag.setName(post.getTag());
                 tag.setHotFlag(HotFlag.NORMAL.getCode());
                 tag.setServiceType(HotTagServiceType.TOPIC.getCode());

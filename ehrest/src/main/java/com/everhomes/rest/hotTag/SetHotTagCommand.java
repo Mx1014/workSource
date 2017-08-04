@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  *<ul>
  *<li>name:标签名</li>
  *<li>serviceType:标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
- *<li>namespaceId: 域空间Id，不传则取当前域空间的。0为默认域空间即总列表，域空间的热门标签都应该从总列表中设置得到</li>
+ *<li>namespaceId: 域空间Id，不传则取当前域空间的，0为默认域空间即总列表</li>
  *</ul>
  */
 public class SetHotTagCommand {

@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.util.RecordHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -66,18 +67,17 @@ public class HotTagProviderImpl implements HotTagProvider {
 
 	@Override
 	public List<TagDTO> listDistinctAllHotTag(String serviceType) {
+		List<TagDTO> result = new ArrayList<TagDTO>();
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		context.selectDistinct(Tables.EH_HOT_TAGS.NAME)
 				.from(Tables.EH_HOT_TAGS)
-				.where(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()))
-				.fetch();.stream().map(r -> {
-
+				.where(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType)
+						.and(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode())))
+				.fetch().map(r ->{
+					result.add(RecordHelper.convert(r, TagDTO.class));
+					return null;
 				});
-		List<TagDTO> result = new ArrayList<TagDTO>();
-		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, TagDTO.class));
-			return null;
-		});
 
 		return result;
 	}
