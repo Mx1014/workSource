@@ -8,7 +8,7 @@ import java.util.List;
 public interface FieldProvider {
     List<ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, String moduleName);
     List<FieldGroup> listFieldGroups(List<Long> ids);
-    List<ScopeField> listScopeFields(Integer namespaceId, String moduleName, String groupPath);
+    List<ScopeField> listScopeFields(Integer namespaceId, String moduleName, Long groupId);
     List<Field> listFields(List<Long> ids);
     List<FieldItem> listFieldItems(List<Long> fieldIds);
     List<ScopeFieldItem> listScopeFieldItems(List<Long> fieldIds);

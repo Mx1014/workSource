@@ -19,8 +19,7 @@ public class FieldServiceImpl implements FieldService {
     private FieldProvider fieldProvider;
     @Override
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
-        String groupPath = "/"+cmd.getRootGroupId();
-        List<ScopeField> scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getModuleName(), groupPath);
+        List<ScopeField> scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getModuleName(), cmd.getGroupId());
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
             Map<Long, FieldDTO> dtoMap = new HashMap<>();
@@ -47,6 +46,10 @@ public class FieldServiceImpl implements FieldService {
                                 FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
                                 items.add(fieldItem);
                             }
+                        });
+                        //按default order排序
+                        Collections.sort(items, (a,b) -> {
+                            return b.getDefaultOrder() - a.getDefaultOrder();
                         });
                         dto.setItems(items);
                     }

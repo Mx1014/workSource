@@ -47,8 +47,18 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeField> listScopeFields(Integer namespaceId, String moduleName, String groupPath) {
-        return null;
+    public List<ScopeField> listScopeFields(Integer namespaceId, String moduleName, Long groupId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<ScopeField> fields = context.select().from(Tables.EH_VAR_FIELD_SCOPES)
+                .where(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_VAR_FIELD_SCOPES.MODULE_NAME.eq(moduleName))
+                .and(Tables.EH_VAR_FIELD_SCOPES.GROUP_ID.eq(groupId))
+                .fetch().map((record)-> {
+                    return ConvertHelper.convert(record, ScopeField.class);
+                });
+
+        return fields;
     }
 
     @Override
