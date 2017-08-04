@@ -1,4 +1,6 @@
 
+--  修改活动旧入口  之前已经上线   20170804  start
+
 -- 增加活动和发现入口  add by yanjuun 20170712
 SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 
@@ -11,4 +13,5 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 1000000, '0', '0', '0', '/home', 'Bizs', 'POST_LIST', '发现二', 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', '1', '1', '62', '{"tag":"创客"}', 210, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 1000000, '0', '0', '0', '/home', 'Bizs', 'POST_LIST', '发现二', 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', '1', '1', '62', '{"tag":"创客"}', 210, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
-    
+
+--  修改活动旧入口  之前已经上线   20170804  end
