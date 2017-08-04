@@ -580,7 +580,6 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				leasePromotion.setNamespaceId(namespaceId);
 				leasePromotion.setCommunityId(communityId);
 				leasePromotion.setRentType(LeasePromotionType.ORDINARY.getCode());
-				leasePromotion.setSubject(apartmentName);
 				leasePromotion.setRentAreas(String.valueOf(rentArea));
 				leasePromotion.setCreateUid(1L);
 				leasePromotion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

@@ -116,15 +116,11 @@ public class CommunityServiceImpl implements CommunityService {
 	private CommunitySearcher communitySearcher;
 	@Autowired
 	private ContentServerService contentServerService;
-
-    @Autowired
-    private UserGroupHistoryProvider userGroupHistoryProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
 	private OrganizationService organizationService;
-	
 
 	@Autowired
 	private GroupProvider groupProvider;
@@ -176,9 +172,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private  UserActivityProvider userActivityProvider;
-
-	@Autowired
-	private UserOrganizationProvider userOrganizationProvider;
 
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
@@ -332,7 +325,7 @@ public class CommunityServiceImpl implements CommunityService {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 		
-		if(community.getCityId() == null || community.getCityId().longValue() == 0){
+		if(community.getCityId() == null || community.getCityId() == 0L){
 		    LOGGER.error("Community missing infomation,cityId is null.communityId=" + cmd.getCommunityId());
             throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_CITY_NOT_EXIST, 
                     "Community missing infomation,cityId is null.");
@@ -668,21 +661,21 @@ public class CommunityServiceImpl implements CommunityService {
             }
         }
 
-		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
-		cmd.setSourceType(EntityType.BUILDING.getCode());
-		cmd.setSourceId(building.getId());
-		cmd.setOriginFieldFlag(NormalFlag.NEED.getCode());
-
-		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
-		building.setFormValues(formValues);
-
-		if (LeasePromotionFlag.ENABLED.getCode() == building.getCustomFormFlag()) {
-			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(building.getNamespaceId(),
-					building.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
-			if (null != request) {
-				building.setRequestFormId(request.getSourceId());
-			}
-		}
+//		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
+//		cmd.setSourceType(EntityType.BUILDING.getCode());
+//		cmd.setSourceId(building.getId());
+//		cmd.setOriginFieldFlag(NormalFlag.NEED.getCode());
+//
+//		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
+//		building.setFormValues(formValues);
+//
+//		if (LeasePromotionFlag.ENABLED.getCode() == building.getCustomFormFlag()) {
+//			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(building.getNamespaceId(),
+//					building.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
+//			if (null != request) {
+//				building.setRequestFormId(request.getSourceId());
+//			}
+//		}
     }
 	@Override
 	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
@@ -860,15 +853,15 @@ public class CommunityServiceImpl implements CommunityService {
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
 		Building building = ConvertHelper.convert(cmd, Building.class);
-		building.setAddress(cmd.getAddress());
-		building.setAliasName(cmd.getAliasName());
-		building.setAreaSize(cmd.getAreaSize());
-		building.setCommunityId(cmd.getCommunityId());
-		building.setContact(cmd.getContact());
-		building.setDescription(cmd.getDescription());
-		building.setManagerUid(cmd.getManagerUid());
-		building.setName(cmd.getName());
-		building.setPosterUri(cmd.getPosterUri());
+//		building.setAddress(cmd.getAddress());
+//		building.setAliasName(cmd.getAliasName());
+//		building.setAreaSize(cmd.getAreaSize());
+//		building.setCommunityId(cmd.getCommunityId());
+//		building.setContact(cmd.getContact());
+//		building.setDescription(cmd.getDescription());
+//		building.setManagerUid(cmd.getManagerUid());
+//		building.setName(cmd.getName());
+//		building.setPosterUri(cmd.getPosterUri());
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		building.setNamespaceId(null == cmd.getNamespaceId() ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId());
 		if(StringUtils.isNotBlank(cmd.getGeoString())){
@@ -912,7 +905,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
 
-		populateFormInfo(dto);
+//		populateFormInfo(dto);
 		return dto;
 		
 	}

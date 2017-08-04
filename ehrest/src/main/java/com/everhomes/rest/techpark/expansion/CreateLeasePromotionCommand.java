@@ -21,7 +21,6 @@ import com.everhomes.util.StringHelper;
  * <li>contactPhone：联系电话</li>
  * <li>description：随便写一点什么</li>
  * <li>enterTime：入住时间</li>
- * <li>status：命名空间 参考{@link com.everhomes.rest.techpark.expansion.LeasePromotionStatus}}</li>
  * <li>enterTimeFlag：入住时间是否启用 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
  * <li>addressId：门牌ID</li>
  * <li>orientation：朝向</li>
@@ -36,27 +35,30 @@ import com.everhomes.util.StringHelper;
  */
 public class CreateLeasePromotionCommand {
 	
+	private Integer namespaceId;
+
+	//兼容app业主发招租, 现在发招租有范围用下面的communityIds add by sw 20170804
 	@NotNull
-	private Integer  namespaceId;
+	@Deprecated
+	private Long communityId;
+	private List<Long> communityIds;
 	
 	@NotNull
-	private Long     communityId;
-	
-	@NotNull
-	private Long     buildingId;
-	private String   rentPosition;
-	private String   rentType;
-	private String   posterUri;
-	private String   subject;
-	private String   rentAreas;
-	private String   contacts;
-	private String   contactPhone;
-	private String   description;
-	private Long enterTime;
-	private Byte     status;
+	private Long buildingId;
+	private String buildingName;
+	private String rentPosition;
+	private String rentType;
+	private String posterUri;
+	private String rentAreas;
+	private String contacts;
+	private String contactPhone;
+	private String description;
 
 	private Byte enterTimeFlag;
+	private Long enterTime;
+
 	private Long addressId;
+	private String apartmentName;
 	private String orientation;
 	private BigDecimal rentAmount;
 	private String issuerType;
@@ -72,6 +74,22 @@ public class CreateLeasePromotionCommand {
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
 
 	public String getAddress() {
 		return address;
@@ -197,12 +215,6 @@ public class CreateLeasePromotionCommand {
 	public void setPosterUri(String posterUri) {
 		this.posterUri = posterUri;
 	}
-	public String getSubject() {
-		return subject;
-	}
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
 
 	public String getRentAreas() {
 		return rentAreas;
@@ -236,17 +248,19 @@ public class CreateLeasePromotionCommand {
 	public void setEnterTime(Long enterTime) {
 		this.enterTime = enterTime;
 	}
-	public Byte getStatus() {
-		return status;
-	}
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
 	public List<BuildingForRentAttachmentDTO> getAttachments() {
 		return attachments;
 	}
 	public void setAttachments(List<BuildingForRentAttachmentDTO> attachments) {
 		this.attachments = attachments;
+	}
+
+	public List<Long> getCommunityIds() {
+		return communityIds;
+	}
+
+	public void setCommunityIds(List<Long> communityIds) {
+		this.communityIds = communityIds;
 	}
 
 	@Override

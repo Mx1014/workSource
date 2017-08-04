@@ -35,7 +35,8 @@ public class ListBuildingForRentCommand {
     private Byte status;
     
     private Long buildingId;
-    
+	private Byte buildingType;
+
     private String rentType;
 
 	private BigDecimal startRentArea;
@@ -45,6 +46,14 @@ public class ListBuildingForRentCommand {
 	private Long userId;
 	private Long organizationId;
 	private String issuerType;
+
+	public Byte getBuildingType() {
+		return buildingType;
+	}
+
+	public void setBuildingType(Byte buildingType) {
+		this.buildingType = buildingType;
+	}
 
 	public Long getOrganizationId() {
 		return organizationId;

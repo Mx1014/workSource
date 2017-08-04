@@ -105,15 +105,6 @@ public class BuildingDTO {
 
 	private String floorCount;
 	private String trafficDescription;
-	private String liftDescription;
-	private String pmDescription;
-	private String parkingLotDescription;
-	private String environmentalDescription;
-	private String powerDescription;
-	private String telecommunicationDescription;
-	private String airConditionDescription;
-	private String securityDescription;
-	private String fireControlDescription;
 	
 	@ItemType(BuildingAttachmentDTO.class)
 	private List<BuildingAttachmentDTO> attachments;
@@ -412,78 +403,6 @@ public class BuildingDTO {
 
 	public void setTrafficDescription(String trafficDescription) {
 		this.trafficDescription = trafficDescription;
-	}
-
-	public String getLiftDescription() {
-		return liftDescription;
-	}
-
-	public void setLiftDescription(String liftDescription) {
-		this.liftDescription = liftDescription;
-	}
-
-	public String getPmDescription() {
-		return pmDescription;
-	}
-
-	public void setPmDescription(String pmDescription) {
-		this.pmDescription = pmDescription;
-	}
-
-	public String getParkingLotDescription() {
-		return parkingLotDescription;
-	}
-
-	public void setParkingLotDescription(String parkingLotDescription) {
-		this.parkingLotDescription = parkingLotDescription;
-	}
-
-	public String getEnvironmentalDescription() {
-		return environmentalDescription;
-	}
-
-	public void setEnvironmentalDescription(String environmentalDescription) {
-		this.environmentalDescription = environmentalDescription;
-	}
-
-	public String getPowerDescription() {
-		return powerDescription;
-	}
-
-	public void setPowerDescription(String powerDescription) {
-		this.powerDescription = powerDescription;
-	}
-
-	public String getTelecommunicationDescription() {
-		return telecommunicationDescription;
-	}
-
-	public void setTelecommunicationDescription(String telecommunicationDescription) {
-		this.telecommunicationDescription = telecommunicationDescription;
-	}
-
-	public String getAirConditionDescription() {
-		return airConditionDescription;
-	}
-
-	public void setAirConditionDescription(String airConditionDescription) {
-		this.airConditionDescription = airConditionDescription;
-	}
-
-	public String getSecurityDescription() {
-		return securityDescription;
-	}
-
-	public void setSecurityDescription(String securityDescription) {
-		this.securityDescription = securityDescription;
-	}
-
-	public String getFireControlDescription() {
-		return fireControlDescription;
-	}
-
-	public void setFireControlDescription(String fireControlDescription) {
-		this.fireControlDescription = fireControlDescription;
 	}
 
 	public String getFloorCount() {
