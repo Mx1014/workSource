@@ -14,6 +14,10 @@ ALTER TABLE `eh_lease_promotion_attachments` CHANGE COLUMN `lease_id` `owner_id`
 ALTER TABLE `eh_lease_promotions` DROP COLUMN community_id;
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `building_name` VARCHAR(512) DEFAULT NULL AFTER `building_id`;
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `building_type` tinyint DEFAULT NULL AFTER `building_id`;
+ALTER TABLE `eh_lease_promotions` DROP COLUMN `subject`;
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `update_uid` bigint(20) DEFAULT NULL AFTER `update_time`;
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `apartment_name` varchar(128) DEFAULT NULL AFTER `address_id`;
+
 
 CREATE TABLE `eh_lease_promotion_communities` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
