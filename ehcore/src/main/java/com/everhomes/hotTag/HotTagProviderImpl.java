@@ -33,6 +33,7 @@ import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRe
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import scala.Int;
 
 @Component
 public class HotTagProviderImpl implements HotTagProvider {
@@ -45,21 +46,39 @@ public class HotTagProviderImpl implements HotTagProvider {
 	private DbProvider dbProvider;
 
 	@Override
-	public List<TagDTO> listHotTag(String serviceType, Integer pageSize) {
+	public List<TagDTO> listHotTag(Integer nameSpaceId, String serviceType, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
-		
+		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(nameSpaceId));
 		query.addConditions(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_HOT_TAGS.DEFAULT_ORDER.desc());
 		query.addLimit(pageSize);
-		
+
 		List<TagDTO> result = new ArrayList<TagDTO>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, TagDTO.class));
 			return null;
 		});
 		
+		return result;
+	}
+
+	@Override
+	public List<TagDTO> listDistinctAllHotTag(String serviceType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		context.selectDistinct(Tables.EH_HOT_TAGS.NAME)
+				.from(Tables.EH_HOT_TAGS)
+				.where(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()))
+				.fetch();.stream().map(r -> {
+
+				});
+		List<TagDTO> result = new ArrayList<TagDTO>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, TagDTO.class));
+			return null;
+		});
+
 		return result;
 	}
 
@@ -104,12 +123,13 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public HotTags findByName(String serviceType, String name) {
+	public HotTags findByName(Integer namespaceId, String serviceType, String name) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
 		query.addConditions(Tables.EH_HOT_TAGS.NAME.eq(name));
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
-		 
+		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(namespaceId));
+
 		List<HotTags> result = new ArrayList<HotTags>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, HotTags.class));

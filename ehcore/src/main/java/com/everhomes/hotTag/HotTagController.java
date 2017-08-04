@@ -2,6 +2,7 @@ package com.everhomes.hotTag;
 
 import java.util.List;
 
+import com.everhomes.rest.hotTag.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,12 +12,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.hotTag.ListHotTagCommand;
-import com.everhomes.rest.hotTag.SearchTagCommand;
-import com.everhomes.rest.hotTag.SearchTagResponse;
-import com.everhomes.rest.hotTag.SetHotTagCommand;
-import com.everhomes.rest.hotTag.TagDTO;
-import com.everhomes.rest.hotTag.DeleteHotTagCommand;
 import com.everhomes.search.HotTagSearcher;
 
 @RestDoc(value = "HotTag Controller", site = "core")
@@ -77,7 +72,24 @@ public class HotTagController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /hotTag/deleteHotTagByName</b>
+     * <p>通过名称删除热门标签</p>
+     */
+    @RequestMapping("deleteHotTagByName")
+    @RestReturn(value=String.class)
+    public RestResponse deleteHotTagByName(DeleteHotTagByNameCommand cmd) {
+
+        hotTagService.deleteHotTagByName(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
     /**
      * <b>URL: /hotTag/searchTag</b>
      * <p>搜素自定义标签</p>

@@ -3,6 +3,8 @@ package com.everhomes.hotTag;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.hotTag.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.rest.hotTag.DeleteHotTagCommand;
-import com.everhomes.rest.hotTag.HotTagServiceErrorCode;
-import com.everhomes.rest.hotTag.HotTagStatus;
-import com.everhomes.rest.hotTag.ListHotTagCommand;
-import com.everhomes.rest.hotTag.SetHotTagCommand;
-import com.everhomes.rest.hotTag.TagDTO;
 import com.everhomes.search.HotTagSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -44,16 +40,22 @@ public class HotTagServiceImpl implements HotTagService{
 	public List<TagDTO> listHotTag(ListHotTagCommand cmd) {
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		
-		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getServiceType(), pageSize);
+		if(cmd.getNamespaceId() == null){
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getServiceType(), pageSize);
 		return tags;
 	}
 
 	@Override
 	public TagDTO setHotTag(SetHotTagCommand cmd) {
 		User user = UserContext.current().getUser();
-		
-		HotTags tag = hotTagProvider.findByName(cmd.getServiceType(), cmd.getName());
+
+		if(cmd.getNamespaceId() == null){
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getName());
 		if(tag != null) {
 			if(tag.getStatus() == HotTagStatus.ACTIVE.getCode()) {
 				LOGGER.error("the tag which name = "+cmd.getName()+" and serviceType = "+cmd.getServiceType()+" is already hot tag!");
@@ -72,6 +74,7 @@ public class HotTagServiceImpl implements HotTagService{
 				tag.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				tag.setDeleteUid(0L);
 				tag.setDeleteTime(null);
+				tag.setNamespaceId(cmd.getNamespaceId());
 				hotTagProvider.updateHotTag(tag);
 				
 				tag.setHotFlag(HotTagStatus.ACTIVE.getCode());
@@ -80,6 +83,7 @@ public class HotTagServiceImpl implements HotTagService{
 		}
 		else {
 			tag = new HotTags();
+			tag.setNamespaceId(cmd.getNamespaceId());
 			tag.setName(cmd.getName());
 			tag.setServiceType(cmd.getServiceType());
 			tag.setCreateUid(user.getId());
@@ -103,6 +107,24 @@ public class HotTagServiceImpl implements HotTagService{
 		tag.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		hotTagProvider.updateHotTag(tag);
 		
+		tag.setHotFlag(HotTagStatus.INACTIVE.getCode());
+		hotTagSearcher.feedDoc(tag);
+	}
+
+	@Override
+	public void deleteHotTagByName(DeleteHotTagByNameCommand cmd) {
+		User user = UserContext.current().getUser();
+
+		if(cmd.getNamespaceId() == null){
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getName());
+		tag.setStatus(HotTagStatus.INACTIVE.getCode());
+		tag.setDeleteUid(user.getId());
+		tag.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		hotTagProvider.updateHotTag(tag);
+
 		tag.setHotFlag(HotTagStatus.INACTIVE.getCode());
 		hotTagSearcher.feedDoc(tag);
 	}

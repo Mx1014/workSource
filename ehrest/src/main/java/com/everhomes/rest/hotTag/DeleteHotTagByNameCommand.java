@@ -4,25 +4,25 @@ import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
- *<li>pageSize:列热门标签的数量</li>
+ *<li>name:标签名</li>
  *<li>serviceType:标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
- *<li>namespaceId: 域空间Id，不传则取当前域空间的。0为默认域空间即总列表</li>
+ *<li>namespaceId: 域空间Id，不传则取当前域空间的。0为默认域空间即总列表，域空间的热门标签都应该从总列表中设置得到</li>
  *</ul>
  */
-public class ListHotTagCommand {
-	
-	private Integer pageSize;
-	
+public class DeleteHotTagByNameCommand {
+
+	private String name;
+
 	private String serviceType;
 
 	private Integer namespaceId;
-	
-	public Integer getPageSize() {
-		return pageSize;
+
+	public String getName() {
+		return name;
 	}
 
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getServiceType() {

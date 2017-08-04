@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  *<ul>
  *<li>name:标签名</li>
  *<li>serviceType:标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
+ *<li>namespaceId: 域空间Id，不传则取当前域空间的。0为默认域空间即总列表，域空间的热门标签都应该从总列表中设置得到</li>
  *</ul>
  */
 public class SetHotTagCommand {
@@ -13,6 +14,8 @@ public class SetHotTagCommand {
 	private String name;
 	
 	private String serviceType;
+
+	private Integer namespaceId;
 
 	public String getName() {
 		return name;
@@ -29,7 +32,15 @@ public class SetHotTagCommand {
 	public void setServiceType(String serviceType) {
 		this.serviceType = serviceType;
 	}
-	
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
