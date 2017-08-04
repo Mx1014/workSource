@@ -11,6 +11,10 @@ public interface PortalItemGroupProvider {
 
 	PortalItemGroup findPortalItemGroupById(Long id);
 
-	// List<PortalItemGroup> listPortalItemGroup();
+    List<PortalItemGroup> listPortalItemGroupByStatus(Long layoutId, byte status);
+
+    PortalItemGroup findPortalItemGroup(Long layoutId, String widgetName, String itemGroup);
+
+    // List<PortalItemGroup> listPortalItemGroup();
 
 }

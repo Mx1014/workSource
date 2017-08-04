@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.statistics.event;
 
+import java.sql.Date;
 import java.util.List;
 
 public interface StatEventStatisticProvider {
@@ -16,7 +17,9 @@ public interface StatEventStatisticProvider {
      */
     List<Long> listEventStatIdByPortalStatIds(List<Long> portalStatIdList);
 
-    List<StatEventStatistic> listEventStatByPortalStatIds(List<Long> portalStatIdList);
+    void insertEventStatList(List<StatEventStatistic> statList);
+
+    List<StatEventStatistic> countAndListEventStat(Integer namespaceId, Long parentId, String identifier, Date startDate, Date endDate);
 
     // List<StatEventStatistic> listStatEventStatistic();
 

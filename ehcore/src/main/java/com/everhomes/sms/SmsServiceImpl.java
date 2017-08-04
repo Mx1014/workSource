@@ -48,12 +48,15 @@ public class SmsServiceImpl implements SmsService {
                 body = body + line;
             }
 
-            // LOGGER.debug("--------------> YZX sms report body: {} <--------------", body);
+            if (LOGGER.isDebugEnabled()) {
+                body = body.replaceAll("\\s+", "").replaceAll("\\n", "");
+                LOGGER.debug("YZX sms report body: {}", body);
+            }
 
             YzxSmsReport report = xmlToBean(body, YzxSmsReport.class);
             String smsId = report.getSmsId();
             if (smsId == null) {
-                LOGGER.error("YZX sms report smsId is null, report = {}", reader);
+                LOGGER.error("YZX sms report smsId is null, report = {}", report);
                 return;
             }
             YzxSmsLog log = yzxSmsLogProvider.findBySmsId(smsId);

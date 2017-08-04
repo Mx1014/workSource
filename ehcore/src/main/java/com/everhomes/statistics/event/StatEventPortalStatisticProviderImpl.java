@@ -70,7 +70,31 @@ public class StatEventPortalStatisticProviderImpl implements StatEventPortalStat
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.PARENT_ID.eq(parentId))
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.IDENTIFIER.eq(identifier))
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.between(startDate, endDate))
+                // .groupBy(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID)
                 .fetchInto(Long.class);
+    }
+
+    @Override
+    public StatEventPortalStatistic findStatEventPortalStatistic(Integer namespaceId, byte statType, String configName, Date statDate) {
+        return context().select()
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_TYPE.eq(statType))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.NAME.eq(configName))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.eq(statDate))
+                .fetchAnyInto(StatEventPortalStatistic.class);
+    }
+
+    @Override
+    public StatEventPortalStatistic findStatEventPortalStatistic(Integer namespaceId, byte statType, String ownerType, Long ownerId, Date statDate) {
+        return context().select()
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_TYPE.eq(statType))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.eq(statDate))
+                .fetchAnyInto(StatEventPortalStatistic.class);
     }
 
     private EhStatEventPortalStatisticsDao rwDao() {

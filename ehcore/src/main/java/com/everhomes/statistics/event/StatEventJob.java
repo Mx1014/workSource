@@ -25,7 +25,8 @@ public class StatEventJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         LocalDate statDate = (LocalDate) context.get("statDate");
+        LOGGER.info("stat event job start [{}]", statDate);
         statEventJobService.executeTask(statDate);
-        LOGGER.info("");
+        LOGGER.info("stat event job finish [{}]", statDate);
     }
 }

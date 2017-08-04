@@ -11,6 +11,8 @@ public interface PortalItemProvider {
 
 	PortalItem findPortalItemById(Long id);
 
-	// List<PortalItem> listPortalItem();
+    List<PortalItem> listPortalItem(Integer namespaceId, byte status);
+
+    // List<PortalItem> listPortalItem();
 
 }

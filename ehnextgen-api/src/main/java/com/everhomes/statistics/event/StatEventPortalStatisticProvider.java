@@ -21,4 +21,8 @@ public interface StatEventPortalStatisticProvider {
      * 根据时间查询identifier为所需的id列表
      */
     List<Long> listEventPortalStatByIdentifier(Integer namespaceId, Long parentId, String identifier, Date startDate, Date endDate);
+
+    StatEventPortalStatistic findStatEventPortalStatistic(Integer namespaceId, byte statType, String configName, Date statDate);
+
+    StatEventPortalStatistic findStatEventPortalStatistic(Integer namespaceId, byte statType, String ownerType, Long ownerId, Date statDate);
 }

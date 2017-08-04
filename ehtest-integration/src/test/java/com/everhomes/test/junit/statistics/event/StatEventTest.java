@@ -7,7 +7,7 @@ import com.everhomes.rest.statistics.event.StatPostDeviceCommand;
 import com.everhomes.rest.statistics.event.StatPostLogFileCommand;
 import com.everhomes.rest.statistics.event.StatPostLogFileDTO;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhStatEventAppLogAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhStatEventAppAttachmentLogsRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 import org.jooq.Result;
@@ -46,7 +46,7 @@ public class StatEventTest extends BaseLoginAuthTestCase {
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
         // assertNotNull("response should be not null", response.getResponse());
 
-        Result<EhStatEventAppLogAttachmentsRecord> records = dbProvider.getDslContext().selectFrom(Tables.EH_STAT_EVENT_APP_LOG_ATTACHMENTS).fetch();
+        Result<EhStatEventAppAttachmentLogsRecord> records = dbProvider.getDslContext().selectFrom(Tables.EH_STAT_EVENT_APP_ATTACHMENT_LOGS).fetch();
 
         assertTrue(records != null);
         assertTrue(records.size() == 1);
@@ -58,7 +58,6 @@ public class StatEventTest extends BaseLoginAuthTestCase {
         StatPostDeviceCommand cmd = new StatPostDeviceCommand();
         cmd.setSceneToken("sceneToken");
         cmd.setDeviceTime(1L);
-        cmd.setAppVersionCode(1);
         cmd.setDeviceId("deviceId");
         cmd.setDeviceBrand("deviceBrand");
         cmd.setDeviceModel("deviceModel");

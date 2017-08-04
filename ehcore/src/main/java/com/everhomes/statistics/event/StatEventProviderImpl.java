@@ -1,13 +1,6 @@
 // @formatter:off
 package com.everhomes.statistics.event;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -17,10 +10,13 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhStatEventsDao;
 import com.everhomes.server.schema.tables.pojos.EhStatEvents;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class StatEventProviderImpl implements StatEventProvider {
@@ -49,18 +45,23 @@ public class StatEventProviderImpl implements StatEventProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhStatEvents.class, statEvent.getId());
 	}
 
-	@Override
+    @Override
+    public List<StatEvent> listStatEvent() {
+        return context().selectFrom(Tables.EH_STAT_EVENTS).fetchInto(StatEvent.class);
+    }
+
+    @Override
 	public StatEvent findStatEventById(Long id) {
 		return ConvertHelper.convert(dao().findById(id), StatEvent.class);
 	}
-	
-	// @Override
-	// public List<StatEvent> listStatEvent() {
-	// 	return getReadOnlyContext().select().from(Tables.EH_STAT_EVENTS)
-	//			.orderBy(Tables.EH_STAT_EVENTS.ID.asc())
-	//			.fetch().map(r -> ConvertHelper.convert(r, StatEvent.class));
-	// }
-	
+
+    @Override
+    public StatEvent findStatEventByName(String eventName) {
+        return context().selectFrom(Tables.EH_STAT_EVENTS)
+                .where(Tables.EH_STAT_EVENTS.EVENT_NAME.eq(eventName))
+                .fetchAnyInto(StatEvent.class);
+    }
+
 	private EhStatEventsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhStatEventsDao(context.configuration());
@@ -70,4 +71,8 @@ public class StatEventProviderImpl implements StatEventProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhStatEventsDao(context.configuration());
 	}
+
+	private DSLContext context() {
+        return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
 }

@@ -3,31 +3,31 @@ package com.everhomes.rest.statistics.event;
 
 /**
  * <ul>
- *     <li>NO("NO"): 不上传</li>
- *     <li>STARTUP("STARTUP"): 启动时上传</li>
- *     <li>INTERVAL("INTERVAL"): 定时上传</li>
- *     <li>IMMEDIATE("IMMEDIATE"): 即时上传</li>
+ *     <li>NO((byte) 0): 不上传</li>
+ *     <li>INTERVAL((byte) 1): 定时上传</li>
+ *     <li>IMMEDIATELY((byte) 2): 及时上传</li>
+ *     <li>TIMES_PER_DAY((byte) 3): 每天上传多少次</li>
  * </ul>
  */
 public enum StatLogUploadStrategy {
 
-    NO("NO"),
-    STARTUP("STARTUP"),
-    INTERVAL("INTERVAL"),
-    IMMEDIATE("IMMEDIATE"),
+    NO((byte) 0),
+    INTERVAL((byte) 1),
+    IMMEDIATELY((byte) 2),
+    TIMES_PER_DAY((byte) 3),
     ;
 
-    private String code;
+    private Byte code;
 
-    StatLogUploadStrategy(String code) {
+    StatLogUploadStrategy(Byte code) {
         this.code = code;
     }
 
-    public String getCode() {
+    public Byte getCode() {
         return code;
     }
 
-    private static StatLogUploadStrategy fromCode(String code) {
+    public static StatLogUploadStrategy fromCode(Byte code) {
         if (code != null) {
             for (StatLogUploadStrategy strategy : StatLogUploadStrategy.values()) {
                 if (strategy.code.equals(code)) {

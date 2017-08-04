@@ -1,31 +1,30 @@
 // @formatter:off
 package com.everhomes.rest.statistics.event;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
-import java.util.List;
 
 /**
  * <ul>
  *     <li>id: id</li>
- *     <li>statType: statType</li>
- *     <li>parentId: parentId</li>
- *     <li>identifier: identifier</li>
- *     <li>displayName: displayName</li>
- *     <li>childs: 子分组 {@link com.everhomes.rest.statistics.event.StatEventPortalStatDTO}</li>
+ *     <li>parentId: 该门户项的parentId</li>
+ *     <li>identifier: 标识符</li>
+ *     <li>displayName: 显示名称</li>
+ *     <li>ownerType: ownerType</li>
+ *     <li>ownerId: ownerId</li>
+ *     <li>widget: widget {@link com.everhomes.rest.launchpad.Widget}</li>
+ *     <li>itemGroup: itemGroup</li>
  * </ul>
  */
 public class StatEventPortalStatDTO {
 
     private Long id;
-    private Byte statType;
     private Long parentId;
     private String identifier;
     private String displayName;
-
-    @ItemType(StatEventPortalStatDTO.class)
-    private List<StatEventPortalStatDTO> childs;
+    private String ownerType;
+    private Long ownerId;
+    private String widget;
+    private String itemGroup;
 
     public Long getId() {
         return id;
@@ -51,28 +50,44 @@ public class StatEventPortalStatDTO {
         this.displayName = displayName;
     }
 
-    public List<StatEventPortalStatDTO> getChilds() {
-        return childs;
-    }
-
-    public void setChilds(List<StatEventPortalStatDTO> childs) {
-        this.childs = childs;
-    }
-
-    public Byte getStatType() {
-        return statType;
-    }
-
-    public void setStatType(Byte statType) {
-        this.statType = statType;
-    }
-
     public String getIdentifier() {
         return identifier;
     }
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getWidget() {
+        return widget;
+    }
+
+    public void setWidget(String widget) {
+        this.widget = widget;
+    }
+
+    public String getItemGroup() {
+        return itemGroup;
+    }
+
+    public void setItemGroup(String itemGroup) {
+        this.itemGroup = itemGroup;
     }
 
     @Override

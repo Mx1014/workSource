@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.statistics.event;
 
+import com.everhomes.server.schema.Tables;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,8 @@ import com.everhomes.server.schema.tables.daos.EhStatEventPortalConfigsDao;
 import com.everhomes.server.schema.tables.pojos.EhStatEventPortalConfigs;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+
+import java.util.List;
 
 @Repository
 public class StatEventPortalConfigProviderImpl implements StatEventPortalConfigProvider {
@@ -47,8 +50,25 @@ public class StatEventPortalConfigProviderImpl implements StatEventPortalConfigP
 	public StatEventPortalConfig findStatEventPortalConfigById(Long id) {
 		return ConvertHelper.convert(dao().findById(id), StatEventPortalConfig.class);
 	}
-	
-	// @Override
+
+    @Override
+    public List<StatEventPortalConfig> listPortalTopNavigationBarByStatus(byte configType, byte status) {
+        return context().selectFrom(Tables.EH_STAT_EVENT_PORTAL_CONFIGS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_CONFIGS.CONFIG_TYPE.eq(configType))
+                .and(Tables.EH_STAT_EVENT_PORTAL_CONFIGS.STATUS.eq(status))
+                .fetchInto(StatEventPortalConfig.class);
+    }
+
+    @Override
+    public StatEventPortalConfig findPortalConfig(Integer namespaceId, byte configType, String identifier) {
+        return context().selectFrom(Tables.EH_STAT_EVENT_PORTAL_CONFIGS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_CONFIGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_STAT_EVENT_PORTAL_CONFIGS.CONFIG_TYPE.eq(configType))
+                .and(Tables.EH_STAT_EVENT_PORTAL_CONFIGS.IDENTIFIER.eq(identifier))
+                .fetchAnyInto(StatEventPortalConfig.class);
+    }
+
+    // @Override
 	// public List<StatEventPortalConfig> listStatEventPortalConfig() {
 	// 	return getReadOnlyContext().select().from(Tables.EH_STAT_EVENT_PORTAL_CONFIGS)
 	//			.orderBy(Tables.EH_STAT_EVENT_PORTAL_CONFIGS.ID.asc())
@@ -64,4 +84,8 @@ public class StatEventPortalConfigProviderImpl implements StatEventPortalConfigP
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhStatEventPortalConfigsDao(context.configuration());
 	}
+
+    private DSLContext context() {
+        return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
 }

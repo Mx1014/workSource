@@ -8,6 +8,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.statistics.event.StatPostDeviceCommand;
 import com.everhomes.rest.statistics.event.StatPostDeviceResponse;
+import com.everhomes.rest.statistics.event.StatPostLogCommand;
 import com.everhomes.rest.statistics.event.StatPostLogFileCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,8 @@ public class StatEventController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping(value = "postLog", method = RequestMethod.POST)
     @RestReturn(value = String.class)
-    public RestResponse postLog(HttpServletRequest request) {
-        statEventService.postLog(request);
+    public RestResponse postLog(StatPostLogCommand cmd) {
+        statEventService.postLog(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

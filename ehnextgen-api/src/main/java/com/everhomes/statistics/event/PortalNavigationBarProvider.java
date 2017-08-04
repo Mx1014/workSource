@@ -11,6 +11,7 @@ public interface PortalNavigationBarProvider {
 
 	PortalNavigationBar findPortalNavigationBarById(Long id);
 
-	// List<PortalNavigationBar> listPortalNavigationBar();
+    List<PortalNavigationBar> listPortalNavigationBar();
 
+    List<PortalNavigationBar> listPortalNavigationBarByStatus(byte status);
 }

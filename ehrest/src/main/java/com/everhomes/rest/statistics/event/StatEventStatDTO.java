@@ -5,23 +5,24 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <ul>
- *     <li>stat: 结果{@link com.everhomes.rest.statistics.event.StatKeyValueListDTO}</li>
+ *     <li>items: 结果对象</li>
  * </ul>
  */
 public class StatEventStatDTO {
 
-    @ItemType(StatKeyValueListDTO.class)
-    private List<StatKeyValueListDTO> stat;
+    @ItemType(String.class)
+    private List<Map<String, Object>> items;
 
-    public List<StatKeyValueListDTO> getStat() {
-        return stat;
+    public List<Map<String, Object>> getItems() {
+        return items;
     }
 
-    public void setStat(List<StatKeyValueListDTO> stat) {
-        this.stat = stat;
+    public void setItems(List<Map<String, Object>> items) {
+        this.items = items;
     }
 
     @Override

@@ -11,6 +11,8 @@ public interface StatEventProvider {
 
 	StatEvent findStatEventById(Long id);
 
-	// List<StatEvent> listStatEvent();
+    StatEvent findStatEventByName(String eventName);
+
+    List<StatEvent> listStatEvent();
 
 }

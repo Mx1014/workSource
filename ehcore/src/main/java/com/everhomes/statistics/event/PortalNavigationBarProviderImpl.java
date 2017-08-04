@@ -1,13 +1,6 @@
 // @formatter:off
 package com.everhomes.statistics.event;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -17,10 +10,13 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPortalNavigationBarsDao;
 import com.everhomes.server.schema.tables.pojos.EhPortalNavigationBars;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvider {
@@ -54,14 +50,22 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
 		return ConvertHelper.convert(dao().findById(id), PortalNavigationBar.class);
 	}
 	
-	// @Override
-	// public List<PortalNavigationBar> listPortalNavigationBar() {
-	// 	return getReadOnlyContext().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)
-	//			.orderBy(Tables.EH_PORTAL_NAVIGATION_BARS.ID.asc())
-	//			.fetch().map(r -> ConvertHelper.convert(r, PortalNavigationBar.class));
-	// }
-	
-	private EhPortalNavigationBarsDao rwDao() {
+	@Override
+	public List<PortalNavigationBar> listPortalNavigationBar() {
+        return context().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)
+                .orderBy(Tables.EH_PORTAL_NAVIGATION_BARS.ID.asc())
+                .fetchInto(PortalNavigationBar.class);
+    }
+
+    @Override
+    public List<PortalNavigationBar> listPortalNavigationBarByStatus(byte status) {
+        return context().select().from(Tables.EH_PORTAL_NAVIGATION_BARS)
+                .where(Tables.EH_PORTAL_NAVIGATION_BARS.STATUS.eq(status)) // 已发布状态
+                .orderBy(Tables.EH_PORTAL_NAVIGATION_BARS.ID.asc())
+                .fetchInto(PortalNavigationBar.class);
+    }
+
+    private EhPortalNavigationBarsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhPortalNavigationBarsDao(context.configuration());
 	}
@@ -70,4 +74,8 @@ public class PortalNavigationBarProviderImpl implements PortalNavigationBarProvi
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPortalNavigationBarsDao(context.configuration());
 	}
+
+    private DSLContext context() {
+        return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
 }

@@ -11,6 +11,7 @@ public interface StatEventParamProvider {
 
 	StatEventParam findStatEventParamById(Long id);
 
-	// List<StatEventParam> listStatEventParam();
+    StatEventParam findStatEventParam(String eventName, String paramKey);
 
+    List<StatEventParam> listParam(String eventName, Integer eventVersion);
 }

@@ -1,53 +1,37 @@
 // @formatter:off
 package com.everhomes.rest.statistics.event;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
- *     <li>strategy: 上传策略 {@link com.everhomes.rest.statistics.event.StatLogUploadStrategy}</li>
- *     <li>scope: 需要上传的日志范围 {@link com.everhomes.rest.statistics.event.StatLogUploadScope}</li>
- *     <li>interval: 如果是定时上传,则是间隔时间,单位:秒</li>
- *     <li>access: WIFI, GSM</li>
+ *     <li>logType: 需要上传的日志类型 {@link com.everhomes.rest.statistics.event.StatEventLogType}</li>
+ *     <li>environments: environments {@link com.everhomes.rest.statistics.event.StatLogUploadStrategyEnvironmentDTO}</li>
  * </ul>
  */
 public class StatLogUploadStrategyDTO {
 
-    private String strategy;
-    private Integer scope;
-    private Long interval;
-    private String access;
+    private Byte logType;
+    @ItemType(StatLogUploadStrategyEnvironmentDTO.class)
+    private List<StatLogUploadStrategyEnvironmentDTO> environments;
 
-    public String getStrategy() {
-        return strategy;
+    public Byte getLogType() {
+        return logType;
     }
 
-    public void setStrategy(String strategy) {
-        this.strategy = strategy;
+    public void setLogType(Byte logType) {
+        this.logType = logType;
     }
 
-    public Integer getScope() {
-        return scope;
+    public List<StatLogUploadStrategyEnvironmentDTO> getEnvironments() {
+        return environments;
     }
 
-    public void setScope(Integer scope) {
-        this.scope = scope;
-    }
-
-    public Long getInterval() {
-        return interval;
-    }
-
-    public void setInterval(Long interval) {
-        this.interval = interval;
-    }
-
-    public String getAccess() {
-        return access;
-    }
-
-    public void setAccess(String access) {
-        this.access = access;
+    public void setEnvironments(List<StatLogUploadStrategyEnvironmentDTO> environments) {
+        this.environments = environments;
     }
 
     @Override

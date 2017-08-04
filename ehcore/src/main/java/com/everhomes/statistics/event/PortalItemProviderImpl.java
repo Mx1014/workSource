@@ -1,13 +1,6 @@
 // @formatter:off
 package com.everhomes.statistics.event;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -17,10 +10,13 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPortalItemsDao;
 import com.everhomes.server.schema.tables.pojos.EhPortalItems;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class PortalItemProviderImpl implements PortalItemProvider {
@@ -53,8 +49,16 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	public PortalItem findPortalItemById(Long id) {
 		return ConvertHelper.convert(dao().findById(id), PortalItem.class);
 	}
-	
-	// @Override
+
+    @Override
+    public List<PortalItem> listPortalItem(Integer namespaceId, byte status) {
+        return context().selectFrom(Tables.EH_PORTAL_ITEMS)
+                .where(Tables.EH_PORTAL_ITEMS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PORTAL_ITEMS.STATUS.eq(status))
+                .fetchInto(PortalItem.class);
+    }
+
+    // @Override
 	// public List<PortalItem> listPortalItem() {
 	// 	return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
 	//			.orderBy(Tables.EH_PORTAL_ITEMS.ID.asc())
@@ -70,4 +74,8 @@ public class PortalItemProviderImpl implements PortalItemProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhPortalItemsDao(context.configuration());
 	}
+
+    private DSLContext context() {
+        return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
 }

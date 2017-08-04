@@ -4,7 +4,7 @@ package com.everhomes.statistics.event;
 import java.sql.Timestamp;
 import java.util.List;
 
-public interface StatEventLogContentProvider {
+public interface StatEventContentLogProvider {
 
 	void createStatEventLogContent(StatEventLogContent statEventLogContent);
 
@@ -12,6 +12,6 @@ public interface StatEventLogContentProvider {
 
 	StatEventLogContent findStatEventLogContentById(Long id);
 
-    List<StatEventLogContent> listEventLogContent(Timestamp minTime, Timestamp maxTime);
+    List<StatEventLogContent> listEventLogContent(byte status, Timestamp minTime, Timestamp maxTime);
 
 }

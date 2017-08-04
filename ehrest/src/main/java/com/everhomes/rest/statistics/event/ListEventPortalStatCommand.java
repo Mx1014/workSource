@@ -8,16 +8,19 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
- *     <li>parentId: parentId</li>
- *     <li>startDate: startDate</li>
- *     <li>endDate: endDate</li>
+ *     <li>statType: 统计类型{@link com.everhomes.rest.statistics.event.StatEventPortalStatType}</li>
+ *     <li>parentId: 根据parentId获取下面的门户项目</li>
+ *     <li>startDate: 开始时间戳</li>
+ *     <li>endDate: 结束时间戳</li>
  * </ul>
  */
 public class ListEventPortalStatCommand {
 
     private Integer namespaceId;
 
-    private Byte statType;// 统计类型， 导航栏，门户，工具栏
+    @NotNull
+    private Byte statType;// 统计类型：门户
+    @NotNull
     private Long parentId;
 
     @NotNull

@@ -1,13 +1,6 @@
 // @formatter:off
 package com.everhomes.statistics.event;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -17,10 +10,13 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhStatEventParamsDao;
 import com.everhomes.server.schema.tables.pojos.EhStatEventParams;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class StatEventParamProviderImpl implements StatEventParamProvider {
@@ -53,15 +49,24 @@ public class StatEventParamProviderImpl implements StatEventParamProvider {
 	public StatEventParam findStatEventParamById(Long id) {
 		return ConvertHelper.convert(dao().findById(id), StatEventParam.class);
 	}
-	
-	// @Override
-	// public List<StatEventParam> listStatEventParam() {
-	// 	return getReadOnlyContext().select().from(Tables.EH_STAT_EVENT_PARAMS)
-	//			.orderBy(Tables.EH_STAT_EVENT_PARAMS.ID.asc())
-	//			.fetch().map(r -> ConvertHelper.convert(r, StatEventParam.class));
-	// }
-	
-	private EhStatEventParamsDao rwDao() {
+
+    @Override
+    public StatEventParam findStatEventParam(String eventName, String paramKey) {
+        return context().selectFrom(Tables.EH_STAT_EVENT_PARAMS)
+                .where(Tables.EH_STAT_EVENT_PARAMS.EVENT_NAME.eq(eventName))
+                .and(Tables.EH_STAT_EVENT_PARAMS.PARAM_KEY.eq(paramKey))
+                .fetchAnyInto(StatEventParam.class);
+    }
+
+    @Override
+    public List<StatEventParam> listParam(String eventName, Integer eventVersion) {
+        return context().selectFrom(Tables.EH_STAT_EVENT_PARAMS)
+                .where(Tables.EH_STAT_EVENT_PARAMS.EVENT_NAME.eq(eventName))
+                .and(Tables.EH_STAT_EVENT_PARAMS.EVENT_VERSION.eq(eventVersion))
+                .fetchInto(StatEventParam.class);
+    }
+
+    private EhStatEventParamsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhStatEventParamsDao(context.configuration());
 	}
@@ -70,4 +75,8 @@ public class StatEventParamProviderImpl implements StatEventParamProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhStatEventParamsDao(context.configuration());
 	}
+
+    private DSLContext context() {
+        return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
 }

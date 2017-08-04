@@ -3,11 +3,15 @@ package com.everhomes.rest.statistics.event;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
- *     <li>parentId: parentId</li>
- *     <li>identifier: identifier</li>
+ *     <li>parentId: 门户的item的parentId</li>
+ *     <li>identifier: 为了获取一个layout下的一个itemGroup的所有时间段的统计结果(LayoutName + groupName + itemGroup),顶部导航栏的identifier:TopNavigation, 底部导航栏的identifier:BottomNavigation</li>
+ *     <li>ownerType: ownerType</li>
+ *     <li>ownerId: ownerId</li>
  *     <li>startDate: 开始时间戳</li>
  *     <li>endDate: 结束时间戳</li>
  * </ul>
@@ -15,9 +19,17 @@ import com.everhomes.util.StringHelper;
 public class StatListEventStatCommand {
 
     private Integer namespaceId;
+    @NotNull
     private Long parentId;
-    private String identifier;
+    @NotNull
+    private String identifier;//
+    @NotNull
+    private String ownerType;
+    @NotNull
+    private Long ownerId;
+    @NotNull
     private Long startDate;
+    @NotNull
     private Long endDate;
 
     public Integer getNamespaceId() {
@@ -58,6 +70,22 @@ public class StatListEventStatCommand {
 
     public void setEndDate(Long endDate) {
         this.endDate = endDate;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

@@ -1,11 +1,11 @@
 package com.everhomes.launchpad;
 
-import java.util.List;
-import java.util.Map;
-
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.ui.user.SceneType;
+
+import java.util.List;
+import java.util.Map;
 
 public interface LaunchPadProvider {
     void createLaunchPadItem(LaunchPadItem item);
@@ -35,4 +35,6 @@ public interface LaunchPadProvider {
 	LaunchPadItem findLaunchPadItemByTargetAndScopeAndSence(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId, SceneType sceneType);
     List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String sceneType);
     void createItemServiceCategry(ItemServiceCategry itemServiceCategry);
+
+    List<LaunchPadItem> listLaunchPadItemsByNamespaceId(Integer namespaceId);
 }

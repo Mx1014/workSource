@@ -2,6 +2,7 @@
 package com.everhomes.rest.statistics.event;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.Map;
 
@@ -29,4 +30,72 @@ public class StatEventLogDTO {
     @ItemType(String.class)
     private Map<String, String> param;
 
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public Long getLogId() {
+        return logId;
+    }
+
+    public void setLogId(Long logId) {
+        this.logId = logId;
+    }
+
+    public Long getDeviceTime() {
+        return deviceTime;
+    }
+
+    public void setDeviceTime(Long deviceTime) {
+        this.deviceTime = deviceTime;
+    }
+
+    public String getEventName() {
+        return eventName;
+    }
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
+    }
+
+    public Integer getAcc() {
+        return acc;
+    }
+
+    public void setAcc(Integer acc) {
+        this.acc = acc;
+    }
+
+    public Integer getVal() {
+        return val;
+    }
+
+    public void setVal(Integer val) {
+        this.val = val;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public Map<String, String> getParam() {
+        return param;
+    }
+
+    public void setParam(Map<String, String> param) {
+        this.param = param;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

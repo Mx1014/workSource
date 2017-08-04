@@ -11,6 +11,8 @@ public interface PortalLayoutProvider {
 
 	PortalLayout findPortalLayoutById(Long id);
 
-	// List<PortalLayout> listPortalLayout();
+    List<PortalLayout> listPortalLayoutByStatus(byte status);
+
+    // List<PortalLayout> listPortalLayout();
 
 }
