@@ -76,25 +76,29 @@ INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, 
 	VALUES (316710, UUID(), '19132843825', '杨雷', '', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES (289470, 316710 ,  '0',  '13910755049',  null,  3, UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, `status`, `namespace_id`)
 	VALUES (2157937, 1035718, 'USER', 316710  , 'manager', '杨雷', 0, '13910755049', 3, @namespace_id);
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES (18814, 'EhOrganizations', 1035718, 'EhUsers', 316710  , 1001, 1, UTC_TIMESTAMP());
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_type`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `scope`)
+  VALUES((@acl_id := @acl_id + 1),'EhOrganizations', 1035718, 1, 10, 'EhUsers', 316710, 0, 0, NOW(), @namespace_id,'admin');
+
 
 -- OK
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (316711, UUID(), '19132843826', '孙振华', '', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES (289471, 316711 ,  '0',  '15010499864',  null,  3, UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, `status`, `namespace_id`)
 	VALUES(2157938, 1035718, 'USER', 316711  , 'manager', '孙振华', 0, '15010499864', 3, @namespace_id);
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(18815, 'EhOrganizations', 1035718, 'EhUsers', 316711  , 1001, 1, UTC_TIMESTAMP());
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_type`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `scope`)
+  VALUES((@acl_id := @acl_id + 1),'EhOrganizations', 1035718, 1, 10, 'EhUsers', 316711, 0, 0, NOW(), @namespace_id,'admin');
 
 
-# SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
-# INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
-# 	VALUES((@acl_id := @acl_id + 1),'EhOrganizations','1010579','1','10','311028','0','311028','2017-07-05 16:04:09','@namespace_id','EhUsers','admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 -- 楼栋信息 OK
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`, default_order)
@@ -115,8 +119,8 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 	VALUES (37064, 1035718, 240111044331050363, 239825274387262768, '建国门外大街1号-710', '0');
 
 SELECT max(id) FROM `eh_rentalv2_resource_types` INTO @max_ren_t_id;
-INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@max_ren_t_id := @max_ren_t_id + 1), '会议室预订', 0, NULL, 0, @namespace_id);
-INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@max_ren_t_id := @max_ren_t_id + 1), '电子屏预订', 0, NULL, 0, @namespace_id);
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@max_ren_t_id := @max_ren_t_id + 1), '会议室预订', 0, NULL, 2, @namespace_id);
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@max_ren_t_id := @max_ren_t_id + 1), '电子屏预订', 0, NULL, 2, @namespace_id);
 
 SELECT max(id) FROM `eh_web_menu_scopes` INTO @menu_sc_id;
 INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@menu_sc_id := @menu_sc_id + 1), 40000, '', 'EhNamespaces', @namespace_id, 2);
@@ -134,12 +138,25 @@ INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, 
 INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@menu_sc_id := @menu_sc_id + 1), 40542, '', 'EhNamespaces', @namespace_id, 2);
 INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@menu_sc_id := @menu_sc_id + 1), 40700, '', 'EhNamespaces', @namespace_id, 2);
 
-SET @service_alliance_category_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
-SET @parent_id = @service_alliance_category_id + 1;
+SELECT max(id) FROM `eh_service_alliance_categories` INTO @ser_all_cate_id;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
-    VALUES (@parent_id, 'community', 240111044331050363, '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+  VALUES ((@ser_all_cate_id := @ser_all_cate_id + 1), 'community', '240111044331050363', '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+  VALUES ((@sa_id := @sa_id + 1), '0', 'community', '240111044331050363', '服务联盟', '服务联盟', @ser_all_cate_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
 	VALUES(@namespace_id, 'sms.default.yzx', 1, 'zh_CN', '验证-国贸圈', '111154');
+
+-- NEW --- 08/04 17:59
+SELECT MAX(id) FROM `eh_organization_details` INTO @organization_details_id;
+INSERT INTO `eh_organization_details` (`id`, `organization_id`, `description`, `contact`, `address`, `create_time`, `longitude`, `latitude`, `geohash`, `display_name`)
+VALUES ((@organization_details_id := @organization_details_id + 1), 1035718, NULL, '', '建国门外大街1号', NOW(), NULL, NULL, NULL, '国贸物业管理有限公司');
+
+SELECT MAX(id) FROM `eh_enterprise_community_map` INTO @enterprise_community_map_id;
+INSERT INTO `eh_enterprise_community_map` (`id`, `community_id`, `member_type`, `member_id`, `member_status`, `creator_uid`, `create_time`, `update_time`)
+VALUES ((@enterprise_community_map_id := @enterprise_community_map_id + 1), 240111044331050363, 'enterprise', 1035718, 3, NULL, NOW(), NOW());
+-- NEW END--- 08/04 17:59
 
 SET FOREIGN_KEY_CHECKS = 1;
