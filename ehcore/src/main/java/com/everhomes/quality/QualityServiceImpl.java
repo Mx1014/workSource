@@ -3805,8 +3805,30 @@ public class QualityServiceImpl implements QualityService {
 
 		LOGGER.info("deduct sample id:{}, start time : {}, results: {}",scoreStat.getSampleId(), scoreStat.getUpdateTime(), results);
 		if(results != null) {
+			List<Long> categoryIds = new ArrayList<>();
 			results.forEach(result -> {
-				Double statScore = communitySpecificationStats.get(result.getTargetId());
+				String path = result.getSpecificationPath();
+				String[] paths = path.split("/");
+				categoryIds.add(Long.valueOf(paths[1]));
+			});
+			//一把取出涉及到的类型
+			Map<Long, QualityInspectionSpecifications> categories = qualityProvider.listSpecificationByIds(categoryIds);
+			List<Double> weigths = new ArrayList<>();
+			results.forEach(result -> {
+				categoryIds.forEach(categoryId -> {
+					if(result.getSpecificationPath().contains(categoryId.toString())) {
+						QualityInspectionSpecifications category = categories.get(categoryId.toString());
+						if(category != null) {
+							weigths.add(category.getWeight());
+						}
+					}
+				});
+
+				if(weigths.size() == 0) {
+					weigths.add(1.0);
+				}
+				//扣分等于实际扣分乘以占比
+				Double statScore = communitySpecificationStats.get(result.getTargetId()) * weigths.get(0);
 				if(statScore != null) {
 					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
 					statScore = statScore + result.getTotalScore();
