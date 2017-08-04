@@ -724,4 +724,7 @@ UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvellqRTBaR1kyWT
 -- 迎宾接待.png
 UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNVlUZzVOV1kwWW1ZeE9XWmlOelUzWWpFMk1XWmxOV1l4T0dRMk1XRmhZZw' WHERE id=109989 and namespace_id=999991;
 UPDATE eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvNVlUZzVOV1kwWW1ZeE9XWmlOelUzWWpFMk1XWmxOV1l4T0dRMk1XRmhZZw' WHERE id=109999 and namespace_id=999991;	
-	
+
+-- by dengs, weixin 样式过老，改。 by dengs, 20170710
+UPDATE eh_launch_pad_layouts set layout_json = '{"versionCode": "2017071002","versionName": "4.7.0","layoutName": "ServiceMarketLayout","displayName": "服务市场","groups": [{"groupName": "","widget": "Banners","instanceConfig": {"itemGroup": "Default"},"style": "Default","defaultOrder": 1,"separatorFlag": 0,"separatorHeight": 0},{"groupName": "","widget": "Navigator","instanceConfig": {"itemGroup": "Coupons"},"style": "Gallery","defaultOrder": 2,"separatorFlag": 1,"columnCount":8,"separatorHeight": 16},{"groupName": "","widget": "Bulletins","instanceConfig": {"itemGroup": "Default"},"style": "Default","defaultOrder": 3,"separatorFlag": 1,"separatorHeight": 16},{"groupName": "商家服务","widget": "Navigator","instanceConfig": {"itemGroup": "Bizs"},"style": "Default","defaultOrder": 5,"separatorFlag": 1,"separatorHeight": 16}]}',version_code = 2017071002 where namespace_id = 999991 and name= 'ServiceMarketLayout';
+UPDATE eh_launch_pad_items SET action_data = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999990&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fpromotion%2Fall%3F_k%3Dzlbiz#sign_suffix"}' WHERE item_group = 'Coupons' AND namespace_id = 999991 AND item_name = '优惠';

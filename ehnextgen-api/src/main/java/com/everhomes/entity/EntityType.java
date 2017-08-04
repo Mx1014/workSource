@@ -60,7 +60,8 @@ public enum EntityType {
     ALL("EhAll"),
     LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
-    ORGANIZATION_FILE("EhOrganizationFiles"),
+	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),    
+	ORGANIZATION_FILE("EhOrganizationFiles"),
     CHILD_PROJECT("child_project");
 
     private String code;

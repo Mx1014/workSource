@@ -940,7 +940,7 @@ public class QualityServiceImpl implements QualityService {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(DateHelper.currentGMTTime());
 		Timestamp todayBegin = getDayBegin(cal);
-		Set<Long> taskIds =  qualityProvider.listRecordsTaskIdByOperatorId(user.getId(), todayBegin);
+		Set<Long> taskIds =  qualityProvider.listRecordsTaskIdByOperatorId(user.getId(), todayBegin, targetId);
 
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, user.getId());
 		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
@@ -3763,16 +3763,17 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionTasks> tasks = qualityProvider.listQualityInspectionTasksBySample(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
 
 		if(tasks != null) {
+			LOGGER.info("calculateTasks tasks: {}", tasks);
 			scoreStat.setTaskCount(scoreStat.getTaskCount() + tasks.size());
 			Integer correctionCount = 0;
 			Integer correctionQualifiedCount = 0;
 			for(QualityInspectionTasks task : tasks) {
-				if(QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
-						|| QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
-						|| QualityInspectionTaskResult.CORRECT_DELAY.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
+				if(QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))
+						|| QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))
+						|| QualityInspectionTaskResult.CORRECT_DELAY.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))) {
 					correctionCount ++;
 				}
-				if(QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
+				if(QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getResult()))) {
 					correctionQualifiedCount ++;
 				}
 			}

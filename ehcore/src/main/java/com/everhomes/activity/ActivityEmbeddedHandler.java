@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.everhomes.rest.hotTag.HotFlag;
+import com.everhomes.rest.activity.*;
+import com.everhomes.user.User;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +25,6 @@ import com.everhomes.hotTag.HotTags;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityListResponse;
-import com.everhomes.rest.activity.ActivityLocalStringCode;
-import com.everhomes.rest.activity.ActivityPostCommand;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
-import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.forum.PostContentType;
@@ -278,26 +274,54 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         // 旧版本发布的活动只有officialFlag，新版本发布的活动有categoryId，当然更老的版本两者都没有
         // 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
         // add by tt, 20170116
-        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
-        Long categoryId = cmd.getCategoryId();
-        if (officialFlag != null && officialFlag == OfficialFlag.YES) {
-			categoryId = 1L;
-		}else {
-			if (categoryId == null) {
-				if(officialFlag == null) officialFlag = OfficialFlag.NO;
-				categoryId = officialFlag == OfficialFlag.YES?1L:0L;
+//        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+//        Long categoryId = cmd.getCategoryId();
+//        if (officialFlag != null && officialFlag == OfficialFlag.YES) {
+//			categoryId = 1L;
+//		}else {
+//			if (categoryId == null) {
+//				if(officialFlag == null) officialFlag = OfficialFlag.NO;
+//				categoryId = officialFlag == OfficialFlag.YES?1L:0L;
+//			}else {
+//				if (categoryId.longValue() == 1L) {
+//					officialFlag = OfficialFlag.YES;
+//				}else if (categoryId.longValue() == 0L) {
+//					officialFlag = OfficialFlag.NO;
+//				}else {
+//					// 如果categoryId不是0和1，则表示是新增的入口，不与之前的官方非官方活动对应
+//					officialFlag = OfficialFlag.UNKOWN;
+//				}
+//			}
+//		}
+
+		// 旧版本发布的活动只有officialFlag，新版本发布的活动有categoryId，当然更老的版本两者都没有
+		// 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
+		// add by tt, 20170116
+		// 因为旧版本的app在其他入口的情况下仍然会传OfficialFlag.YES，因此在上面规则的情况下，使用新的方法
+		// 1、OfficialFlag为1时判断categoryId，如果是其他入口则使用OfficialFlag.UNKOWN，不然默认1
+		// 2、officialFlag不是1时，根据categoryId给officialFlag赋值
+		OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+		Long categoryId = cmd.getCategoryId();
+		if(officialFlag == OfficialFlag.YES){
+			if(categoryId != null && categoryId.longValue() == 0) {
+				categoryId = 1L;
 			}else {
-				if (categoryId.longValue() == 1L) {
-					officialFlag = OfficialFlag.YES;
-				}else if (categoryId.longValue() == 0L) {
-					officialFlag = OfficialFlag.NO;
-				}else {
-					// 如果categoryId不是0和1，则表示是新增的入口，不与之前的官方非官方活动对应
-					officialFlag = OfficialFlag.UNKOWN;
-				}
+				officialFlag = OfficialFlag.UNKOWN;
+			}
+		}else{
+			if(categoryId == null){
+				categoryId = 0L;
+				officialFlag = OfficialFlag.NO;
+			}else if(categoryId.longValue() == 0){
+				officialFlag = OfficialFlag.NO;
+			}else if(categoryId.longValue() == 1){
+				officialFlag = OfficialFlag.YES;
+			}else{
+				officialFlag = OfficialFlag.UNKOWN;
 			}
 		}
-        
+
+
         cmd.setOfficialFlag(officialFlag.getCode());
         post.setOfficialFlag(officialFlag.getCode());
         cmd.setCategoryId(categoryId);
@@ -335,6 +359,20 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         } catch (ParseException e) {
         	post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         }
+
+        //发布活动的时候没有选择是否支持微信，则选择改与空间默认的， add by yanjun 20170627
+        if(cmd.getWechatSignup() == null){
+			GetRosterOrderSettingCommand getRosterOrderSettingCommand = new GetRosterOrderSettingCommand();
+			getRosterOrderSettingCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+			RosterOrderSettingDTO rosterOrderSettingDTO = activityService.getRosterOrderSetting(getRosterOrderSettingCommand);
+
+			if(rosterOrderSettingDTO != null){
+				cmd.setWechatSignup(rosterOrderSettingDTO.getWechatSignup());
+			}else{
+				cmd.setWechatSignup(WechatSignupFlag.NO.getCode());
+			}
+
+		}
         
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         

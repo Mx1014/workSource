@@ -13,4 +13,8 @@ public interface FlowConstants {
     Long RESERVER_PLACE = 40050L;
     //仓库管理领用申请模块id
     Long WAREHOUSE_REQUEST = 21000L;
+    Long TALENT_REQUEST = 40730L;
+    
+    //认证模块
+    Long AUTHORIZATION_MODULE = 35000L;
 }

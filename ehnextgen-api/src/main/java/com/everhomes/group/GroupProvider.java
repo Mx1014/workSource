@@ -71,8 +71,10 @@ public interface GroupProvider {
      */
     List<GroupOpRequest> queryGroupOpRequestsByMapReduce(ListingLocator locator, int count, 
         ListingQueryBuilderCallback queryBuilderCallback);
-    
-    List<GroupMember> listGroupMemberByGroupIds(List<Long> groupIds, ListingLocator locator, Integer pageSize,  ListingQueryBuilderCallback queryBuilderCallback);
+
+    List<Group> listGroupByCommunityIds(List<Long> communityIds, ListingQueryBuilderCallback queryBuilderCallback);
+
+    List<GroupMember> listGroupMemberByGroupIds(List<Long> groupIds, ListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
     
     List<Group> listGroupByCommunityId(Long communityId, ListingQueryBuilderCallback queryBuilderCallback);
 	GroupMember findGroupMemberTopOne(Long groupId);
@@ -85,6 +87,4 @@ public interface GroupProvider {
     List<GroupMember> listPublicGroupMembersByStatus(Long groupId, Byte status, Long from, int pageSize, boolean includeCreator, Long creatorId);
 
     List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize);
-	GroupMemberLog findGroupMemberLogByGroupMemberId(Long groupMemberId);
-	void createGroupMemberLog(GroupMemberLog groupMemberLog);
 }

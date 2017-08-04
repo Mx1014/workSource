@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>dateStr: 日期</li>
  * <li>pageAnchor: 分页瞄</li>
  * <li>pageSize: 每页条数</li>
+ * <li>currentOrgId: 当前机构id</li>
+ * <li>communityId: 所属项目id</li>
  * </ul>
  */
 public class SearchTaskStatisticsCommand {
@@ -19,7 +21,25 @@ public class SearchTaskStatisticsCommand {
 	private Long dateStr;
 	private Long pageAnchor;
 	private Integer pageSize;
-	
+	private  Long currentOrgId;
+	private  Long communityId;
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Long getCurrentOrgId() {
+		return currentOrgId;
+	}
+
+	public void setCurrentOrgId(Long currentOrgId) {
+		this.currentOrgId = currentOrgId;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}

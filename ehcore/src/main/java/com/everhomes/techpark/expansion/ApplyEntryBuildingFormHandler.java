@@ -11,7 +11,6 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
 import com.everhomes.rest.techpark.expansion.LeasePromotionFormDataSourceType;
@@ -110,6 +109,7 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
         cmd2.setNamespaceId(cmd.getNamespaceId());
         cmd2.setCommunityId(cmd.getOwnerId());
         cmd2.setFormValues(cmd.getValues());
+        cmd2.setEnterpriseId(cmd.getCurrentOrganizationId());
 
         ApplyEntryResponse response = enterpriseApplyEntryService.applyEntry(cmd2);
         PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);

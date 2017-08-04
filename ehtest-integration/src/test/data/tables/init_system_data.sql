@@ -2558,7 +2558,8 @@ INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `ban
 -- 正在导出表  ehcore_shenye.eh_buildings 的数据：~21 rows (大约)
 /*!40000 ALTER TABLE `eh_buildings` DISABLE KEYS */;
 -- truncate table `eh_buildings`;
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`, `product_type`, `complete_date`, `joinin_date`, `floor_count`, `namespace_building_type`, `namespace_building_token`, `default_order`) VALUES
+
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`, `product_type`, `complete_date`, `joinin_date`, `floor_count`, `namespace_building_type`, `namespace_building_token`,`default_order`) VALUES
 	(177000, 240111044331051300, 'A1', 'A1', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, 1, '2016-04-27 14:52:45', 1, '2016-04-27 14:52:45', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999992, NULL, NULL, NULL, NULL, NULL, NULL, 1),
 	(177001, 240111044331051300, 'A2', 'A2', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, 1, '2016-04-27 14:52:45', 1, '2016-04-27 14:52:45', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999992, NULL, NULL, NULL, NULL, NULL, NULL, 1),
 	(177002, 240111044331051300, 'A3', 'A3', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, 1, '2016-04-27 14:52:45', 1, '2016-04-27 14:52:45', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999992, NULL, NULL, NULL, NULL, NULL, NULL, 1),
@@ -2579,7 +2580,6 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 	(177017, 240111044331051303, 'B', 'B', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, 1, '2016-04-27 14:53:09', 1, '2016-04-27 14:53:09', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999992, NULL, NULL, NULL, NULL, NULL, NULL,1),
 	(177018, 240111044331051303, 'C1', 'C1', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, 1, '2016-04-27 14:53:09', 1, '2016-04-27 14:53:09', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999992, NULL, NULL, NULL, NULL, NULL, NULL,1),
 	(177019, 240111044331051303, 'C2', 'C2', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, 1, '2016-04-27 14:53:09', 1, '2016-04-27 14:53:09', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999992, NULL, NULL, NULL, NULL, NULL, NULL,1),
-	(177109, 240111044331051304, '深业中心大厦', '深业中心大厦', 2107392, NULL, '深业中心', NULL, 114.11492, 22.547031, 'ws10k8xcyr5w', NULL, NULL, 2, 1, NULL, 1, '2016-09-13 12:50:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999992, NULL, NULL, NULL, NULL, NULL, NULL,1);
 /*!40000 ALTER TABLE `eh_buildings` ENABLE KEYS */;
 
 -- 正在导出表  ehcore_shenye.eh_categories 的数据：~192 rows (大约)

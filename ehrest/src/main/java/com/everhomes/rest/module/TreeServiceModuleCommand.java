@@ -16,6 +16,8 @@ public class TreeServiceModuleCommand {
 
 	private Long ownerId;
 
+	private Integer namespaceId;
+
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -32,6 +34,13 @@ public class TreeServiceModuleCommand {
 		this.ownerId = ownerId;
 	}
 
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	@Override
     public String toString() {

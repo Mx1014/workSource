@@ -357,7 +357,7 @@ public class AddressProviderImpl implements AddressProvider {
 	        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
 			.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName));
 		
-	    Record record = step.fetchOne();
+	    Record record = step.fetchAny();
 	    
 		if (record != null) {
 			return ConvertHelper.convert(record, Address.class);

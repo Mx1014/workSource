@@ -249,6 +249,11 @@ public class ParkingServiceImpl implements ParkingService {
 				dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 
 			}else {
+
+				String tag1 = flow.getStringTag1();
+				Integer flowMode = Integer.valueOf(tag1);
+				dto.setFlowMode(flowMode);
+
         		LOGGER.info("parking enabled flow, flow={}", flow);
 				Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
 				LOGGER.info("parking main flow, flow={}", mainFlow);
@@ -256,10 +261,6 @@ public class ParkingServiceImpl implements ParkingService {
 					if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
 						dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 					}
-				}else{
-					String tag1 = flow.getStringTag1();
-					Integer flowMode = Integer.valueOf(tag1);
-					dto.setFlowMode(flowMode);
 				}
         	}
         	

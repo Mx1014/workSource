@@ -154,8 +154,19 @@ public interface PrivilegeConstants {
     long MODULE_ADMIN_UPDATE = 40021L; //修改模块管理员
     long MODULE_ADMIN_DELETE = 40022L; //删除模块管理员
 
-    long MODULE_CONF_RELATION_LIST = 40019L; //模块配置关系列表
-    long MODULE_CONF_RELATION_CREATE = 40020L; //创建模块配置关系
-    long MODULE_CONF_RELATION_UPDATE = 40021L; //修改模块配置关系
-    long MODULE_CONF_RELATION_DELETE = 40022L; //删除模块配置关系
+    long MODULE_CONF_RELATION_LIST = 40023L; //模块配置关系列表
+    long MODULE_CONF_RELATION_CREATE = 40024L; //创建模块配置关系
+    long MODULE_CONF_RELATION_UPDATE = 40025L; //修改模块配置关系
+    long MODULE_CONF_RELATION_DELETE = 40026L; //删除模块配置关系
+
+    // ----------- 物业报修权限 --------------
+    long PMTASK_LIST = 30090L;
+    long PMTASK_AGENCY_SERVICE = 30091L;
+    long PMTASK_SERVICE_CATEGORY_CREATE = 30092L;
+    long PMTASK_SERVICE_CATEGORY_DELETE = 30093L;
+    long PMTASK_DETAIL_CATEGORY_CREATE = 30094L;
+    long PMTASK_DETAIL_CATEGORY_DELETE = 30095L;
+    long PMTASK_TASK_STATISTICS_LIST = 30096L;
+    long PMTASK_ALL_TASK_STATISTICS_LIST = 30097L;
+
 }

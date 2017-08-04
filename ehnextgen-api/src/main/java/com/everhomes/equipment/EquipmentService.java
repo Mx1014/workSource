@@ -66,7 +66,7 @@ public interface EquipmentService {
 	ListEquipmentTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd);
 	
 	StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd);
-	void sendTaskMsg(Long startTime, Long endTime);
+	void sendTaskMsg(Long startTime, Long endTime, Byte groupType);
 	void exportEquipmentsCard(ExportEquipmentsCardCommand cmd, HttpServletResponse response);
 
 	StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd);

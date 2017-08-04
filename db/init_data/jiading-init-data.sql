@@ -387,4 +387,15 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	((@launch_pad_items_id := @launch_pad_items_id+1), 999974, 0, 0, 0, '/home', 'Bizs', '一键上网', '一键上网', 'cs://1/image/aW1hZ2UvTVRvM05qUm1NMlJoTkRsall6Z3laak0xTURWbE1EY3dOMk0zTURka00yTm1OZw', 1, 1, 47, '', 1, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 1, NULL, NULL, 0, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES 
 	((@launch_pad_items_id := @launch_pad_items_id+1), 999974, 0, 0, 0, '/home', 'Bizs', '一键上网', '一键上网', 'cs://1/image/aW1hZ2UvTVRvM05qUm1NMlJoTkRsall6Z3laak0xTURWbE1EY3dOMk0zTURka00yTm1OZw', 1, 1, 47, '', 1, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 1, NULL, NULL, 0, NULL);
+	
+-- 新配置wifi菜单 add by sfyan 20170713
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41100,'', 'EhNamespaces', 999974,2);
+
+-- 新城智慧管家一键上网 图标样式改成方形  by yanjun 20170724
+UPDATE eh_launch_pad_items SET scale_type = 0 WHERE namespace_id = 999974 AND item_name = '一键上网';
+
+-- 新城智慧管家 pad间距和只显示日期  by yanjun 20170724
+UPDATE eh_launch_pad_layouts SET version_code = 2017060604, layout_json = '{"versionCode":"2017060604","versionName":"4.6.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":1},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount": 2},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"date","categoryId":0,"itemGroup":"Default"},"style":"Default","defaultOrder":1}]}'  WHERE namespace_id = 999974;
+
 

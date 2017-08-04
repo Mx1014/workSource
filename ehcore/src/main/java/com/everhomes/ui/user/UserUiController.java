@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.ui.user.*;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,17 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.family.ListNeighborUsersCommand;
 import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
 import com.everhomes.rest.family.ParamType;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
-import com.everhomes.rest.ui.user.GetUserOpPromotionCommand;
+ 
+import com.everhomes.rest.user.ListUserOpPromotionsRespose;
+ 
+import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListAuthFormsResponse;
 import com.everhomes.rest.ui.user.ListContactBySceneRespose;
 import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
@@ -41,9 +49,9 @@ import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.WebTokenGenerator;
 
 /**
@@ -95,7 +103,7 @@ public class UserUiController extends ControllerBase {
     /**
      * <p>根据指定的场景查询通讯录列表。</p>
      * <p>对于左邻版，普通用户查询的是邻居好友列表；对于园区版，查询的是公司通讯录列表；而对于物业管理员场景，查询的是同事列表。</p> 
-     * <p>url:/ui/user/listContactsByScene</p>
+     * <p>url:/ui/user/ </p>
      */
     @RequestMapping(value = "listContactsByScene")
     @RestReturn(value = ListContactBySceneRespose.class)
@@ -126,6 +134,9 @@ public class UserUiController extends ControllerBase {
 					dto.setInitial(r.getInitial());
 					dto.setFullInitial(r.getFullInitial());
 					dto.setFullPinyin(r.getFullPinyin());
+					//增加岗位显示与 detailId added by R 20120713
+					dto.setJobPosition(r.getJobPosition());
+					dto.setDetailId(r.getDetailId());
 					return dto;
 				}).collect(Collectors.toList());
 			}
@@ -292,6 +303,60 @@ public class UserUiController extends ControllerBase {
 	public RestResponse listTouristRelatedScenes() {
 		List<SceneDTO> sceneDtoList = userService.listTouristRelatedScenes();
 		RestResponse response = new RestResponse(sceneDtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+ 
+/*
+    @RequestMapping("getCurrentContactRealInfo")
+    @RestReturn(value=SceneContactV2DTO.class)
+    public RestResponse getCurrentContactRealInfo(GetCurrentContactRealInfoCommand cmd) {
+        SceneContactV2DTO result = userService.getCurrentContactRealInfo(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }*/
+
+    /**
+     * <b>URL: /ui/user/getRelevantContactInfo</b>
+     * <p>获取相关用户的详细信息。</p>
+     * <p>获取用户公司、姓名、部门等信息</p>
+     */
+    @RequestMapping("getRelevantContactInfo")
+    @RestReturn(value=SceneContactV2DTO.class)
+    public RestResponse getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
+        SceneContactV2DTO result = userService.getRelevantContactInfo(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    } 
+	
+	/**
+	 * <b>URL: /ui/user/listAuthForms</b>
+	 * <p>获取家庭认证和公司认证的sourceType,sourceId</p>
+	 */
+	@RequestMapping("listAuthForms")
+	@RestReturn(value=ListAuthFormsResponse.class)
+	public RestResponse listAuthForm() {
+		ListAuthFormsResponse listAuthFormResponse = userService.listAuthForms();
+		RestResponse response = new RestResponse(listAuthFormResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /ui/user/getFamilyButtonStatus</b>
+	 * <p>获取文案,和家庭下button的是否显示</p>
+	 */
+	@RequestMapping("getFamilyButtonStatus")
+	@RestReturn(value=GetFamilyButtonStatusResponse.class)
+	public RestResponse getFamilyButtonStatus() {
+		GetFamilyButtonStatusResponse getFamilyButtonStatusResponse = userService.getFamilyButtonStatus();
+		RestResponse response = new RestResponse(getFamilyButtonStatusResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

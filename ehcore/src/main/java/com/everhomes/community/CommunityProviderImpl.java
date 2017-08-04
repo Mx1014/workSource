@@ -14,7 +14,6 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
@@ -28,9 +27,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-import ch.hsr.geohash.GeoHash;
-
-import com.everhomes.address.Address;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.AccessSpec;
@@ -39,13 +35,9 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.CommunityGeoPointDTO;
-import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.ResourceCategoryStatus;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -55,24 +47,18 @@ import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhBuildingsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
-import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhResourceCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhResourceCategoryAssignmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
-import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhResourceCategories;
 import com.everhomes.server.schema.tables.pojos.EhResourceCategoryAssignments;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhResourceCategoryAssignmentsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -80,6 +66,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.Tuple;
+
+import ch.hsr.geohash.GeoHash;
 
 @Component
 public class CommunityProviderImpl implements CommunityProvider {
@@ -1394,4 +1382,22 @@ public class CommunityProviderImpl implements CommunityProvider {
         });
         return communities;
     }
+
+	@Override
+	public List<Community> listCommunityByNamespaceIdAndName(Integer namespaceId, String communityName) {
+    	 List<Community> result = new ArrayList<Community>();
+
+         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
+             (DSLContext context, Object reducingContext) -> {
+            	 context.select().from(Tables.EH_COMMUNITIES)
+        		 .where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+        		.and(Tables.EH_COMMUNITIES.NAME.eq(communityName)).fetch().map(r ->{
+        			return result.add(ConvertHelper.convert(r,Community.class));
+        		});
+            	 return true;
+             });
+         
+         return result;
+    
+	}
 }

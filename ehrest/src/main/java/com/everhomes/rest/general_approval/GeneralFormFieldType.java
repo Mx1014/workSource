@@ -14,13 +14,14 @@ import org.apache.commons.lang.StringUtils;
  * <li>DATE:日期控件</li>
  * <li>DROP_BOX:下拉框</li>
  * <li>SUBFORM:子表单</li>
+ * <li>CONTACT:企业联系人组件</li>
  * </ul>
  * @author janson
  *
  */
 public enum GeneralFormFieldType {
 	SINGLE_LINE_TEXT("SINGLE_LINE_TEXT"), MULTI_LINE_TEXT("MULTI_LINE_TEXT"), IMAGE("IMAGE"), FILE("FILE"), INTEGER_TEXT("INTEGER_TEXT"),NUMBER_TEXT("NUMBER_TEXT"),DATE("DATE"),
-	DROP_BOX("DROP_BOX"),SUBFORM("SUBFORM");
+	DROP_BOX("DROP_BOX"),SUBFORM("SUBFORM"),CONTACT("CONTACT");
 	
 	private String code;
 	

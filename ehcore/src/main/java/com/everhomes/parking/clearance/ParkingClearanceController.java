@@ -23,7 +23,7 @@ public class ParkingClearanceController extends ControllerBase {
     private ParkingClearanceService parkingClearanceService;
 
     /**
-     * <p>新增车辆放行的申请人员或处理人员</p>
+     * <p>新增车辆放行的申请人员</p>
      * <b>URL: /clearance/createClearanceOperator</b>
      */
     @RequestMapping("createClearanceOperator")
@@ -34,7 +34,7 @@ public class ParkingClearanceController extends ControllerBase {
     }
 
     /**
-     * <p>删除车辆放行的申请人员或处理人员</p>
+     * <p>删除车辆放行的申请人员</p>
      * <b>URL: /clearance/deleteClearanceOperator</b>
      */
     @RequestMapping("deleteClearanceOperator")
@@ -45,7 +45,7 @@ public class ParkingClearanceController extends ControllerBase {
     }
 
     /**
-     * <p>车辆放行的申请人员或处理人员列表</p>
+     * <p>车辆放行的申请人员</p>
      * <b>URL: /clearance/listClearanceOperator</b>
      */
     @RequestMapping("listClearanceOperator")
@@ -65,6 +65,17 @@ public class ParkingClearanceController extends ControllerBase {
     }
 
     /**
+     * <p>删除车辆放行log</p>
+     * <b>URL: /clearance/deleteClearanceLog</b>
+     */
+    @RequestMapping("deleteClearanceLog")
+    @RestReturn(String.class)
+    public RestResponse deleteClearanceLog(DeleteClearanceLogCommand cmd) {
+        parkingClearanceService.deleteClearanceLog(cmd);
+        return success();
+    }
+
+    /**
      * <p>搜索车辆放行log</p>
      * <b>URL: /clearance/searchClearanceLog</b>
      */
@@ -72,6 +83,16 @@ public class ParkingClearanceController extends ControllerBase {
     @RestReturn(SearchClearanceLogsResponse.class)
     public RestResponse searchClearanceLog(SearchClearanceLogCommand cmd) {
         return response(parkingClearanceService.searchClearanceLog(cmd));
+    }
+
+    /**
+     * <p>获取实际来访记录</p>
+     * <b>URL: /clearance/getActualClearanceLog</b>
+     */
+    @RequestMapping("getActualClearanceLog")
+    @RestReturn(value = ParkingActualClearanceLogDTO.class, collection = true)
+    public RestResponse getActualClearanceLog(GetActualClearanceLogCommand cmd) {
+        return response(parkingClearanceService.getActualClearanceLog(cmd));
     }
     
     /**
