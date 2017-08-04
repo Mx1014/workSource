@@ -17,6 +17,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -26,6 +27,8 @@ import com.everhomes.express.guomao.GuoMaoChinaPostResponse;
 import com.everhomes.express.guomao.GuoMaoChinaPostResponseEntity;
 import com.everhomes.parking.Utils;
 import com.everhomes.rest.express.ExpressLogisticsStatus;
+import com.everhomes.rest.express.ExpressOrderStatus;
+import com.everhomes.rest.express.ExpressSendType;
 import com.everhomes.rest.express.ExpressTraceDTO;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.util.RuntimeErrorException;
@@ -55,8 +58,10 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	
 	//java8新加的格式化时间类，是线程安全的
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
-	
 
+	@Autowired
+	private ExpressOrderProvider expressOrderProvider;
+	
 	@Override
 	public String getBillNo(ExpressOrder expressOrder) {
 		// TODO Auto-generated method stub
@@ -247,8 +252,12 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		params.put("appKey",expressCompany.getAppKey());
 	    params.put("timestamp",String.valueOf(System.currentTimeMillis()));
 	    params.put("nonce", String.valueOf((int)(Math.random()*10000)));
-	    params.put("orderNo",expressOrder.getOrderNo());
-	    params.put("sendType",String.valueOf(expressOrder.getSendType()));
+	    if(expressOrder.getOrderNo() != null){
+	    	params.put("orderNo",expressOrder.getOrderNo());
+	    }
+	    if(expressOrder.getSendType() != null){
+	    	params.put("sendType",String.valueOf(expressOrder.getSendType()));
+	    }
 	    params.put("sendName",expressOrder.getSendName());
 	    params.put("sendPhone",expressOrder.getSendPhone());
 	    params.put("sendOrganization",expressOrder.getSendOrganization());
@@ -256,21 +265,37 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	    params.put("sendCity",expressOrder.getSendCity());
 	    params.put("sendCounty",expressOrder.getSendCounty());
 	    params.put("sendDetailAddress",expressOrder.getSendDetailAddress());
-	    params.put("receiveName",expressOrder.getReceiveName());
-	    params.put("receivePhone",expressOrder.getReceivePhone());
-	    params.put("receiveOrganization",expressOrder.getReceiveOrganization());
-	    params.put("receiveProvince",expressOrder.getReceiveProvince());
-	    params.put("receiveCity",expressOrder.getReceiveCity());
-	    params.put("receiveCounty",expressOrder.getReceiveCounty());
-	    params.put("receiveDetailAddress",expressOrder.getReceiveDetailAddress());
-	    params.put("internal",expressOrder.getInternal());
-	    params.put("packageCategory",String.valueOf(expressOrder.getPackageType()));
-	    params.put("insuredPrice",String.valueOf(expressOrder.getInsuredPrice()));
-	    params.put("invoiceCategory",String.valueOf(expressOrder.getInvoiceFlag()));
-	    params.put("invoiceHeader",expressOrder.getInvoiceHead());
-	    params.put("status",String.valueOf(expressOrder.getStatus()));
+	    if(expressOrder.getSendType().byteValue() != ExpressSendType.CITY_EMPTIES.getCode().byteValue()){
+		    params.put("receiveName",expressOrder.getReceiveName());
+		    params.put("receivePhone",expressOrder.getReceivePhone());
+		    params.put("receiveOrganization",expressOrder.getReceiveOrganization());
+		    params.put("receiveProvince",expressOrder.getReceiveProvince());
+		    params.put("receiveCity",expressOrder.getReceiveCity());
+		    params.put("receiveCounty",expressOrder.getReceiveCounty());
+		    params.put("receiveDetailAddress",expressOrder.getReceiveDetailAddress());
+	    }
+	    if(expressOrder.getInternal() != null){
+	    	params.put("internal",expressOrder.getInternal());
+	    }
+	    if(expressOrder.getPackageType() != null){
+	    	params.put("packageCategory",String.valueOf(expressOrder.getPackageType()));
+	    }
+	    if(expressOrder.getInsuredPrice() != null){
+	    	params.put("insuredPrice",String.valueOf(expressOrder.getInsuredPrice()));
+	    }
+	    if(expressOrder.getInvoiceFlag() != null){
+	    	params.put("invoiceCategory",String.valueOf(expressOrder.getInvoiceFlag()));
+	    }
+	    if(expressOrder.getInvoiceHead() != null){
+	    	params.put("invoiceHeader",expressOrder.getInvoiceHead());
+	    }
+	    if(expressOrder.getStatus() != null){
+	    	params.put("status",String.valueOf(expressOrder.getStatus()));
+	    }
 	    params.put("signature", SignatureHelper.computeSignature(params, expressCompany.getAppSecret()));
-		return JSONObject.toJSONString(params);
+		String stringparam = JSONObject.toJSONString(params);
+		LOGGER.info("GuoMaoChinaPostHandler params = {}", stringparam);
+		return stringparam;
 	}
 
 	private String getRequestUpdateOrderJsonParam(ExpressOrder expressOrder, ExpressCompany expressCompany) {
@@ -287,8 +312,12 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 
 	@Override
 	public void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-		// TODO Auto-generated method stub
-		
+		 GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = getOrderDetail(String.valueOf(expressOrder.getSendType()), expressOrder.getBillNo(), expressCompany);
+		 Byte byteStatus = Byte.valueOf(entity.getResponse().getStatus());
+		 if(byteStatus.byteValue() == ExpressOrderStatus.FINISHED.getCode().byteValue()){
+			 expressOrder.setStatus(byteStatus);
+			 expressOrderProvider.updateExpressOrder(expressOrder);
+		 }
 	}
 
 }

@@ -390,6 +390,10 @@ public class ExpressServiceImpl implements ExpressService {
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(cmd.getId());
+		//by dengs,向中国邮政请求订单状态
+		ExpressCompany company = findTopExpressCompany(expressOrder.getExpressCompanyId());
+		ExpressHandler handler = getExpressHandler(company.getId());
+		handler.getOrderStatus(expressOrder, company);
 		if (expressOrder != null) {
 			if (expressOrder.getCreatorUid().longValue() == owner.getUserId().longValue() || checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId())) {
 				return new GetExpressOrderDetailResponse(convertToExpressOrderDTOForDetail(expressOrder));
@@ -462,6 +466,12 @@ public class ExpressServiceImpl implements ExpressService {
 				expressOrder.setPaidFlag(TrueOrFalseFlag.TRUE.getCode());
 				expressOrderProvider.updateExpressOrder(expressOrder);
 			}
+			//TODO 这里是费代码 by dengs.
+			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
+			ExpressHandler handler = getExpressHandler(expressCompany.getId());
+			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
+			handler.updateOrderStatus(expressOrder, expressCompany);
+			
 			createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
 			
 			//调用统一处理订单接口，返回统一订单格式
@@ -810,7 +820,11 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrder.setSendCounty(sendAddress.getCounty());
 		expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
 		ExpressAddress receiveAddress = expressAddressProvider.findExpressAddressById(cmd.getReceiveAddressId());
-		if (receiveAddress != null) {
+		if (receiveAddress == null && cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists receive address: id="+cmd.getReceiveAddressId());
+		}
+		//同城信筒没有收件地址
+		if(cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()){
 			expressOrder.setReceiveName(receiveAddress.getUserName());
 			expressOrder.setReceivePhone(receiveAddress.getPhone());
 			expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
