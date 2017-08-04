@@ -551,6 +551,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                     enterprise.setAddress(cmd.getAddress());
                     organizationProvider.updateOrganizationDetail(enterprise);
                 }
+                //如果是enterprise，要判断是否有直属部门，要同时更新直属部门的名字
+                Organization underOrg = this.organizationProvider.findUnderOrganizationByParentOrgId(parOrg.getId());
+                if(underOrg != null){
+                    underOrg.setName(cmd.getName());
+                    this.organizationProvider.updateOrganization(underOrg);
+                }
 
                 // 创建经理群组
                 Organization managerGroup = this.createManagerGroup(parOrg, parOrg.getId());
