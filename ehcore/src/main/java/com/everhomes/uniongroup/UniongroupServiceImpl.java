@@ -302,6 +302,11 @@ public class UniongroupServiceImpl implements UniongroupService {
         return null;
     }
 
+    @Override
+    public List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
+        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizaitonId());
+    }
+
     private Organization checkOrganization(Long orgId) {
         Organization org = organizationProvider.findOrganizationById(orgId);
         if (org == null) {
