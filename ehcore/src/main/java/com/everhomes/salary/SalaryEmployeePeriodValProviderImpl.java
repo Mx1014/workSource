@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -92,14 +94,14 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 	@Override
 	public Integer countNullSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
 																   String period, Long entityIdShifa) {
-		return getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).join(Tables.EH_SALARY_EMPLOYEES)
+		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).join(Tables.EH_SALARY_EMPLOYEES)
 				.on(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(Tables.EH_SALARY_EMPLOYEES.ID))
 				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ORIGIN_ENTITY_ID.eq(entityIdShifa))
 				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull())
-				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(period))
-				.execute();
+				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(period));
+		return	step.fetchOne().value1();
 //				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeePeriodVal.class)); 
 	}
 
