@@ -3273,10 +3273,6 @@ public class GroupServiceImpl implements GroupService {
 
             String notifyTextForApplicant = localeStringService.getLocalizedString("group", "20003", user.getLocale(), "");
             //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
-            Date now = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-            String hhmm = dateFormat.format( now );
-            sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), hhmm);
 
             sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
 
@@ -3477,11 +3473,6 @@ public class GroupServiceImpl implements GroupService {
             String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, 52, locale, map, "");
             //sendGroupNotificationToExcludeUsers(group.getId(), inviter.getMemberId(), invitee.getMemberId(), notifyTextForOther);
 
-            Date now = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-            String hhmm = dateFormat.format( now );
-            sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), hhmm);
-
             sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForOther);
             //sendGroupNotification(invitee.getMemberId(), null, null, notifyTextForOther, null, null);
         } catch(Exception e) {
@@ -3507,10 +3498,6 @@ public class GroupServiceImpl implements GroupService {
 
             String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, 50, locale, map, "");
 
-            Date now = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-            String hhmm = dateFormat.format( now );
-            sendGroupNotificationToIncludeUser(group.getId(), inviterId, hhmm);
 
             sendGroupNotificationToIncludeUser(group.getId(), inviterId, notifyTextForOther);
         } catch(Exception e) {
@@ -3540,11 +3527,6 @@ public class GroupServiceImpl implements GroupService {
             String scope = GroupNotificationTemplateCode.SCOPE;
             String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, 51, locale, map, "");
 
-            Date now = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-            String hhmm = dateFormat.format( now );
-
-            sendGroupNotification(group.getId(), includeList, null, hhmm, null, null);
             //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
             sendGroupNotification(group.getId(), includeList, null, notifyTextForOther, null, null);
         } catch(Exception e) {
@@ -3870,11 +3852,6 @@ public class GroupServiceImpl implements GroupService {
         int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 55, locale, map, "");
 
-        Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-        String hhmm = dateFormat.format( now );
-
-        sendGroupNotificationToIncludeUser(groupId, opeartorId, hhmm);
         //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
         sendGroupNotificationToIncludeUser(groupId, opeartorId, notifyTextForApplicant);
 
@@ -4779,10 +4756,6 @@ public class GroupServiceImpl implements GroupService {
         int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
         String notifyTextForApplicant = localeStringService.getLocalizedString("group", "20002", locale, "");
         //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
-        Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-        String hhmm = dateFormat.format( now );
-        sendGroupNotificationToIncludeUser(group.getId(), newCreator.getMemberId(), hhmm);
 
         sendGroupNotificationToIncludeUser(group.getId(), newCreator.getMemberId(), notifyTextForApplicant);
 	}
@@ -4802,11 +4775,12 @@ public class GroupServiceImpl implements GroupService {
         int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString("group.notification", 53, locale, map, "");
 
-        Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-        String hhmm = dateFormat.format( now );
+        //发送会话内提示时间
+//        Date now = new Date();
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+//        String hhmm = dateFormat.format( now );
+//        sendGroupNotificationToIncludeUser(group.getId(), creatorId, hhmm);
 
-        sendGroupNotificationToIncludeUser(group.getId(), creatorId, hhmm);
         //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
         sendGroupNotificationToIncludeUser(group.getId(), creatorId, notifyTextForApplicant);
     }
@@ -4819,11 +4793,6 @@ public class GroupServiceImpl implements GroupService {
         String scope = GroupNotificationTemplateCode.SCOPE;
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 54, locale, map, "");
 
-        Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-        String hhmm = dateFormat.format( now );
-
-        sendGroupNotification(group.getId(), null, null, hhmm, null, null);
         //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
         sendGroupNotification(group.getId(), null, null, notifyTextForApplicant, null, null);
     }
