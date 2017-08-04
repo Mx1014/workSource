@@ -730,12 +730,12 @@ public class ExpressServiceImpl implements ExpressService {
 		if (cmd.getReceiveAddressId() == null || cmd.getExpressCompanyId() == null 
 				|| cmd.getSendMode() == null || cmd.getPayType() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters"
-					+ "sendAddressId = null or expressCompanyId = null or sendMode = null or payType = null");
+					+ " receiveAddressId = null or expressCompanyId = null or sendMode = null or payType = null");
 		}
 		//除了同城信筒的校验
 		if(sendType == ExpressSendType.CHINA_POST_PACKAGE || sendType == ExpressSendType.STANDARD || sendType == ExpressSendType.EMS_STANDARD){
 			if(cmd.getSendAddressId() == null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters receiveAddressId = null");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters sendAddressId = null");
 			}
 		}
 		//华润ems快递，参数校验 
@@ -809,31 +809,51 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrder.setOwnerType(owner.getOwnerType().getCode());
 		expressOrder.setOwnerId(owner.getOwnerId());
 		expressOrder.setOrderNo(getOrderNo(owner.getUserId()));
-		ExpressAddress sendAddress = expressAddressProvider.findExpressAddressById(cmd.getSendAddressId());
-		if (sendAddress == null  && cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists send address: id="+cmd.getSendAddressId());
+		if(cmd.getSendAddressId() != null){
+			ExpressAddress sendAddress = expressAddressProvider.findExpressAddressById(cmd.getSendAddressId());
+			if (sendAddress == null  && cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists send address: id="+cmd.getSendAddressId());
+			}
+			//同城信筒没有寄件地址
+			if(cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()){
+				expressOrder.setSendName(sendAddress.getUserName());
+				expressOrder.setSendPhone(sendAddress.getPhone());
+				expressOrder.setSendOrganization(sendAddress.getOrganizationName());
+				expressOrder.setSendProvince(sendAddress.getProvince());
+				expressOrder.setSendCity(sendAddress.getCity());
+				expressOrder.setSendCounty(sendAddress.getCounty());
+				expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
+			}
+		}else{
+			expressOrder.setSendName(cmd.getSendName());
+			expressOrder.setSendPhone(cmd.getSendPhone());
+			expressOrder.setSendOrganization(cmd.getSendOrganization());
+			expressOrder.setSendProvince(cmd.getSendProvince());
+			expressOrder.setSendCity(cmd.getSendCity());
+			expressOrder.setSendCounty(cmd.getSendCounty());
+			expressOrder.setSendDetailAddress(cmd.getSendDetailAddress());
 		}
-		//同城信筒没有寄件地址
-		if(cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()){
-			expressOrder.setSendName(sendAddress.getUserName());
-			expressOrder.setSendPhone(sendAddress.getPhone());
-			expressOrder.setSendOrganization(sendAddress.getOrganizationName());
-			expressOrder.setSendProvince(sendAddress.getProvince());
-			expressOrder.setSendCity(sendAddress.getCity());
-			expressOrder.setSendCounty(sendAddress.getCounty());
-			expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
+		if(cmd.getReceiveAddressId() != null){
+			ExpressAddress receiveAddress = expressAddressProvider.findExpressAddressById(cmd.getReceiveAddressId());
+			if (receiveAddress == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists receive address: id="+cmd.getReceiveAddressId());
+			}
+			expressOrder.setReceiveName(receiveAddress.getUserName());
+			expressOrder.setReceivePhone(receiveAddress.getPhone());
+			expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
+			expressOrder.setReceiveProvince(receiveAddress.getProvince());
+			expressOrder.setReceiveCity(receiveAddress.getCity());
+			expressOrder.setReceiveCounty(receiveAddress.getCounty());
+			expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
+		}else{
+			expressOrder.setReceiveName(cmd.getReceiveName());
+			expressOrder.setReceivePhone(cmd.getReceivePhone());
+			expressOrder.setReceiveOrganization(cmd.getReceiveOrganization());
+			expressOrder.setReceiveProvince(cmd.getReceiveProvince());
+			expressOrder.setReceiveCity(cmd.getReceiveCity());
+			expressOrder.setReceiveCounty(cmd.getReceiveCounty());
+			expressOrder.setReceiveDetailAddress(cmd.getReceiveDetailAddress());
 		}
-		ExpressAddress receiveAddress = expressAddressProvider.findExpressAddressById(cmd.getReceiveAddressId());
-		if (receiveAddress == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists receive address: id="+cmd.getReceiveAddressId());
-		}
-		expressOrder.setReceiveName(receiveAddress.getUserName());
-		expressOrder.setReceivePhone(receiveAddress.getPhone());
-		expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
-		expressOrder.setReceiveProvince(receiveAddress.getProvince());
-		expressOrder.setReceiveCity(receiveAddress.getCity());
-		expressOrder.setReceiveCounty(receiveAddress.getCounty());
-		expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
 		expressOrder.setServiceAddressId(cmd.getServiceAddressId());
 		expressOrder.setExpressCompanyId(cmd.getExpressCompanyId());
 		expressOrder.setSendType(cmd.getSendType());
