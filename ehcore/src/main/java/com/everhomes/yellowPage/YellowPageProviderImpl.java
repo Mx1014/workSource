@@ -10,11 +10,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.yellowPage.DisplayFlagType;
-import com.everhomes.rest.yellowPage.JumpModuleDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentType;
-import com.everhomes.rest.yellowPage.YellowPageStatus;
-import com.everhomes.rest.yellowPage.YellowPageType;
+import com.everhomes.rest.yellowPage.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -229,22 +225,28 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         });
 	}
 
-	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
-			"#categoryId,#keywords}", unless="#result == null")
+//	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
+//			"#categoryId,#keywords,#condition}", unless="#result == null")
 	@Override
 	public List<ServiceAlliances> queryServiceAlliance(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, String keywords) {
+			Long ownerId, Long parentId, Long categoryId, String keywords,Condition condition) {
 		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
- 
-        if (!StringUtils.isEmpty(ownerType) )
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
-        
-        query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
-        
+
+        if (condition == null) {
+			if (!StringUtils.isEmpty(ownerType))
+				query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
+
+			query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+		}else{
+        	condition = condition.or(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType).
+					and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId)));
+        	query.addConditions(condition);
+		}
+
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
             }
@@ -264,6 +266,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         } else {
     		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
 		}
+
+
         //by dengs,按照defaultorder排序，20170525
         query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
         query.addLimit(pageSize);
@@ -280,8 +284,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         }
         return saList;
 	}
-	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
-			"#categoryId,#keywords,#organizationId,#organizationType}", unless="#result == null")
+//	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
+//			"#categoryId,#keywords,#organizationId,#organizationType}", unless="#result == null")
 	@Override
 	public List<ServiceAlliances> queryServiceAlliance(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
@@ -291,15 +295,11 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
         SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
  
-        if (!StringUtils.isEmpty(ownerType) )
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType)
-    				.and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId))
-    				.or(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationId).and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(organizationType)))
-    				);
-        else
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId).or(
-        			Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationId).and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(organizationType))));
-     
+
+		query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+ownerId+"%")
+						.or(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationId).and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(organizationType))
+						.and(Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all")))
+		);
         
         if(locator.getAnchor() != null) {
         	query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
@@ -1051,6 +1051,11 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceAllianceJumpModuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE);
+		Condition condition = (Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.NAMESPACE_ID.eq(namespaceId).and(
+				Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.SIGNAL.ne(SignalEnum.DELETE.getCode()))).
+				or(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.SIGNAL.eq(SignalEnum.APPROVAL.getCode())
+		);
+
 		query.addConditions(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.NAMESPACE_ID.eq(namespaceId));
 
 		query.fetch().map((r) -> {

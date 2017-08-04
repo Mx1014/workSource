@@ -7,6 +7,7 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.yellowPage.JumpModuleDTO;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import org.jooq.Condition;
 
 public interface YellowPageProvider {
  
@@ -23,7 +24,7 @@ public interface YellowPageProvider {
 	
 	
 	List<ServiceAlliances> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
-			String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords);
+												String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords, Condition condition);
 
 	/**
 	 * add by dengs,20170428 不仅查小区，也查询物业公司下的 服务联盟机构

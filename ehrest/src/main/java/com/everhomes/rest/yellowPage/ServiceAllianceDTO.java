@@ -13,6 +13,7 @@ import java.util.List;
  *  <li>parentId: 父id</li>
  *  <li>ownerType: 拥有者类型 参考{@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
  *  <li>ownerId: 拥有者ID</li>
+ *  <li>range:可见范围</li>
  *  <li>name: 企业名称</li>
  *  <li>displayName: 简称</li>
  *  <li>address: 地址</li>
@@ -59,7 +60,11 @@ public class ServiceAllianceDTO {
 	private String   ownerType;
 	@NotNull
 	private Long     ownerId;
-	
+
+	private String   range;
+
+	private String   rangeDisplay;
+
 	private String   name;
 	
 	private String   displayName;
@@ -184,7 +189,23 @@ public class ServiceAllianceDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
+	public String getRange() {
+		return range;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
+	}
+
+	public String getRangeDisplay() {
+		return rangeDisplay;
+	}
+
+	public void setRangeDisplay(String rangeDisplay) {
+		this.rangeDisplay = rangeDisplay;
+	}
+
 	public String getDisplayName() {
 		return displayName;
 	}
