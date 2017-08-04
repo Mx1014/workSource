@@ -44,20 +44,20 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 
 -- OK
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES(240111044331050361, UUID(), 14838, '北京',  14839, '朝阳区', '中国国际贸易中心', '中国国际贸易中心', '建国门外大街1号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 1, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, 190692, 190693, UTC_TIMESTAMP(), @namespace_id);
+	VALUES(240111044331050363, UUID(), 14838, '北京',  14839, '朝阳区', '中国国际贸易中心', '中国国际贸易中心', '建国门外大街1号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 1, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, 190692, 190693, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
-	VALUES(240111044331072756, 240111044331050361, '', 116.464925, 39.915126, 'wx4g44r4mqy3');
+	VALUES(240111044331072756, 240111044331050363, '', 116.464925, 39.915126, 'wx4g44r4mqy3');
 INSERT INTO `eh_organization_communities`(organization_id, community_id)
-	VALUES(1035718, 240111044331050361);
+	VALUES(1035718, 240111044331050363);
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`)
-	VALUES(19927, @namespace_id, 'COMMUNITY', 240111044331050361, UTC_TIMESTAMP());
+	VALUES(19927, @namespace_id, 'COMMUNITY', 240111044331050363, UTC_TIMESTAMP());
 
 
 -- OK
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`)
 	VALUES(1035718, 0, 'PM', '国贸物业管理有限公司', '', '/1035718', 1, 2, 'ENTERPRISE', @namespace_id, 1041997);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES(1143614, 240111044331050361, 'organization', 1035718, 3, 0, UTC_TIMESTAMP());
+	VALUES(1143614, 240111044331050363, 'organization', 1035718, 3, 0, UTC_TIMESTAMP());
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
 	VALUES(1041997, UUID(), '国贸物业管理有限公司', '国贸物业管理有限公司', 1, 1, 1035718, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 190694, 1, @namespace_id);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
@@ -98,21 +98,21 @@ INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, tar
 
 -- 楼栋信息 OK
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`, default_order)
-	VALUES (1960621, 240111044331050361, '国贸大厦A座', '国贸大厦A座', 0, '010-65053868', '建国门外大街1号', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 1);
+	VALUES (1960621, 240111044331050363, '国贸大厦A座', '国贸大厦A座', 0, '010-65053868', '建国门外大街1号', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 1);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`, default_order)
-	VALUES (1960622, 240111044331050361, '国贸大厦B座', '国贸大厦B座', 0, '010-65053868', '建国门外大街1号', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 2);
+	VALUES (1960622, 240111044331050363, '国贸大厦B座', '国贸大厦B座', 0, '010-65053868', '建国门外大街1号', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 2);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`, default_order)
-	VALUES (1960623, 240111044331050361, '国贸写字楼1座', '国贸写字楼1座', 0, '010-65053868', '建国门外大街1号', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 3);
+	VALUES (1960623, 240111044331050363, '国贸写字楼1座', '国贸写字楼1座', 0, '010-65053868', '建国门外大街1号', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 3);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`, default_order)
-	VALUES (1960624, 240111044331050361, '国贸写字楼2座', '国贸写字楼2座', 0, '010-65053868', '建国门外大街1号', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 4);
+	VALUES (1960624, 240111044331050363, '国贸写字楼2座', '国贸写字楼2座', 0, '010-65053868', '建国门外大街1号', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 4);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`, default_order)
-	VALUES (1960625, 240111044331050361, '国贸西楼', '国贸西楼', 0, '010-65053868', '国贸西楼', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 5);
+	VALUES (1960625, 240111044331050363, '国贸西楼', '国贸西楼', 0, '010-65053868', '国贸西楼', 0, 116.464925, 39.915126, 'wx4g44r4mqy3', '甲级写字楼', null, '2', '1', '2017-07-04 17:01:31', '311028', '2017-07-04 17:01:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id, 5);
 
 -- 门牌信息 OK
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
-	VALUES(239825274387262768 ,UUID(),240111044331050361, 14838, '北京市',  14839, '朝阳区' ,'国贸大厦A座-710','国贸大厦A座','710','2','0',UTC_TIMESTAMP(), @namespace_id);
+	VALUES(239825274387262768 ,UUID(),240111044331050363, 14838, '北京市',  14839, '朝阳区' ,'国贸大厦A座-710','国贸大厦A座','710','2','0',UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (37064, 1035718, 240111044331050361, 239825274387262768, '建国门外大街1号-710', '0');
+	VALUES (37064, 1035718, 240111044331050363, 239825274387262768, '建国门外大街1号-710', '0');
 
 SELECT max(id) FROM `eh_rentalv2_resource_types` INTO @max_ren_t_id;
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@max_ren_t_id := @max_ren_t_id + 1), '会议室预订', 0, NULL, 0, @namespace_id);
@@ -137,7 +137,7 @@ INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, 
 SET @service_alliance_category_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
 SET @parent_id = @service_alliance_category_id + 1;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
-    VALUES (@parent_id, 'community', 240111044331050361, '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+    VALUES (@parent_id, 'community', 240111044331050363, '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
 	VALUES(@namespace_id, 'sms.default.yzx', 1, 'zh_CN', '验证-国贸圈', '111154');
