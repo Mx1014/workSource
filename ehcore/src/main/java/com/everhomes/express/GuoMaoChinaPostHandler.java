@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
@@ -28,6 +29,7 @@ import com.everhomes.express.guomao.GuoMaoChinaPostResponseEntity;
 import com.everhomes.parking.Utils;
 import com.everhomes.rest.express.ExpressLogisticsStatus;
 import com.everhomes.rest.express.ExpressOrderStatus;
+import com.everhomes.rest.express.ExpressPackageType;
 import com.everhomes.rest.express.ExpressSendType;
 import com.everhomes.rest.express.ExpressTraceDTO;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
@@ -149,6 +151,11 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 
 	@Override
 	public void createOrder(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		if(expressOrder.getSendType().byteValue() == ExpressSendType.CITY_EMPTIES.getCode().byteValue()){
+			ExpressPackageType packageType = ExpressPackageType.fromCode(expressOrder.getPackageType());
+			expressOrder.setPaySummary(new BigDecimal(packageType.getPrice()));
+			return ;
+		}
 		//生成 请求创建订单 参数
 		String paramsCreateOrder = getRequestCreateOrderJsonParam(expressOrder,expressCompany);
 		//发送 创建订单 请求
@@ -165,23 +172,41 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	
 	@Override
 	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-		//参数
-		String params = getRequestUpdateOrderJsonParam(expressOrder, expressCompany);
-		//发送 创建订单 请求
-		GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = request(params, expressCompany.getOrderUrl()+UPDATE_ORDER_CONTEXT);
-		//验证订单是否生成 
-		checkErrorCode(entity);
-		
-		entity = getOrderDetail(String.valueOf(expressOrder.getSendType()), expressOrder.getBillNo(), expressCompany);
-		
-		if(!entity.getResponse().getStatus().equals(String.valueOf(expressOrder.getStatus()))){
-			LOGGER.error("updateOrderStatus failed, reponse.status = {}, order.status = {}", entity.getResponse().getStatus(),expressOrder.getStatus());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"updateOrderStatus failed, reponse.status = "+entity.getResponse().getStatus()+", order.status = "+expressOrder.getStatus());
+		//同城信筒，此时才创建订单
+		if(expressOrder.getSendType().byteValue() == ExpressSendType.CITY_EMPTIES.getCode().byteValue()){
+			//生成 请求创建订单 参数
+			String paramsCreateOrder = getRequestCreateOrderJsonParam(expressOrder,expressCompany);
+			//发送 创建订单 请求
+			GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = request(paramsCreateOrder, expressCompany.getOrderUrl()+CREATE_ORDER_CONTEXT);
+			//请求code失败
+			checkResponseEntity(entity);
+			
+			expressOrder.setBillNo(entity.getResponse().getBillNo());
+			
+			//通过再次获取订单详情，判断订单是否创建成功。
+			getOrderDetail(entity.getResponse().getSendType(), entity.getResponse().getBillNo(), expressCompany);
+		}else{
+			//参数
+			String params = getRequestUpdateOrderJsonParam(expressOrder, expressCompany);
+			//发送 创建订单 请求
+			GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = request(params, expressCompany.getOrderUrl()+UPDATE_ORDER_CONTEXT);
+			//验证订单是否生成 
+			checkErrorCode(entity);
+			
+			entity = getOrderDetail(String.valueOf(expressOrder.getSendType()), expressOrder.getBillNo(), expressCompany);
+			
+			if(!entity.getResponse().getStatus().equals(String.valueOf(expressOrder.getStatus()))){
+				LOGGER.error("updateOrderStatus failed, reponse.status = {}, order.status = {}", entity.getResponse().getStatus(),expressOrder.getStatus());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"updateOrderStatus failed, reponse.status = "+entity.getResponse().getStatus()+", order.status = "+expressOrder.getStatus());
+			}
 		}
 	}
 	
 	public GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> getOrderDetail(String sendType, String billNo, ExpressCompany expressCompany){
+		if(billNo == null){//同城信筒，存在billNO为空的情况，不做查询
+			return null;
+		}
 		//生成获取订单详情的参数
 		String paramsGetOrder = getRequestGetOrderJsonParam(sendType,billNo,expressCompany);
 		//发送获取订单详情请求
@@ -258,22 +283,23 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	    if(expressOrder.getSendType() != null){
 	    	params.put("sendType",String.valueOf(expressOrder.getSendType()));
 	    }
-	    params.put("sendName",expressOrder.getSendName());
-	    params.put("sendPhone",expressOrder.getSendPhone());
-	    params.put("sendOrganization",expressOrder.getSendOrganization());
-	    params.put("sendProvince",expressOrder.getSendProvince());
-	    params.put("sendCity",expressOrder.getSendCity());
-	    params.put("sendCounty",expressOrder.getSendCounty());
-	    params.put("sendDetailAddress",expressOrder.getSendDetailAddress());
+	    //同城信筒，不传寄件地址
 	    if(expressOrder.getSendType().byteValue() != ExpressSendType.CITY_EMPTIES.getCode().byteValue()){
-		    params.put("receiveName",expressOrder.getReceiveName());
-		    params.put("receivePhone",expressOrder.getReceivePhone());
-		    params.put("receiveOrganization",expressOrder.getReceiveOrganization());
-		    params.put("receiveProvince",expressOrder.getReceiveProvince());
-		    params.put("receiveCity",expressOrder.getReceiveCity());
-		    params.put("receiveCounty",expressOrder.getReceiveCounty());
-		    params.put("receiveDetailAddress",expressOrder.getReceiveDetailAddress());
+		    params.put("sendName",expressOrder.getSendName());
+		    params.put("sendPhone",expressOrder.getSendPhone());
+		    params.put("sendOrganization",expressOrder.getSendOrganization());
+		    params.put("sendProvince",expressOrder.getSendProvince());
+		    params.put("sendCity",expressOrder.getSendCity());
+		    params.put("sendCounty",expressOrder.getSendCounty());
+		    params.put("sendDetailAddress",expressOrder.getSendDetailAddress());
 	    }
+	    params.put("receiveName",expressOrder.getReceiveName());
+	    params.put("receivePhone",expressOrder.getReceivePhone());
+	    params.put("receiveOrganization",expressOrder.getReceiveOrganization());
+	    params.put("receiveProvince",expressOrder.getReceiveProvince());
+	    params.put("receiveCity",expressOrder.getReceiveCity());
+	    params.put("receiveCounty",expressOrder.getReceiveCounty());
+	    params.put("receiveDetailAddress",expressOrder.getReceiveDetailAddress());
 	    if(expressOrder.getInternal() != null){
 	    	params.put("internal",expressOrder.getInternal());
 	    }
@@ -312,10 +338,28 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 
 	@Override
 	public void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		ExpressOrderStatus orderStatus = ExpressOrderStatus.fromCode(expressOrder.getStatus());
+		 if(orderStatus == ExpressOrderStatus.FINISHED){
+			 return ;
+		 }
 		 GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = getOrderDetail(String.valueOf(expressOrder.getSendType()), expressOrder.getBillNo(), expressCompany);
+		 if(entity == null){
+			 return ;
+		 }
+		 boolean isUpdateOrder = false;
+		 //待支付状态，才获取订单的支付金额
+		 if(orderStatus == ExpressOrderStatus.WAITING_FOR_PAY){
+			 if(entity.getResponse().getPaySummary() != null){
+				 isUpdateOrder = true;
+				 expressOrder.setPaySummary(new BigDecimal(entity.getResponse().getPaySummary()));
+			 }
+		 }
 		 Byte byteStatus = Byte.valueOf(entity.getResponse().getStatus());
 		 if(byteStatus.byteValue() == ExpressOrderStatus.FINISHED.getCode().byteValue()){
+			 isUpdateOrder = true;
 			 expressOrder.setStatus(byteStatus);
+		 }
+		 if(isUpdateOrder){
 			 expressOrderProvider.updateExpressOrder(expressOrder);
 		 }
 	}

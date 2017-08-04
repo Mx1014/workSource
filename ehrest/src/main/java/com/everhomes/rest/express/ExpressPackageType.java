@@ -12,18 +12,20 @@ package com.everhomes.rest.express;
  * </ul>
  */
 public enum ExpressPackageType {
-	EXPRESS_LETTER((byte)1,"包装箱"),
-	PACKING_BOX((byte)2,"快递袋"),
-	EXPRESS_BAG((byte)3,"快递封"),
-	SIX_YUAN_EXPRESS_LETTER((byte)4,"6元快递封"),
-	EIGHT_YUAN_EXPRESS_LETTER((byte)5,"8元快递封");
+	EXPRESS_LETTER((byte)1,"包装箱",null),
+	PACKING_BOX((byte)2,"快递袋",null),
+	EXPRESS_BAG((byte)3,"快递封",null),
+	SIX_YUAN_EXPRESS_LETTER((byte)4,"6元快递封", "6"),
+	EIGHT_YUAN_EXPRESS_LETTER((byte)5,"8元快递封", "8");
 	
 	private byte code;
 	private String description;
+	private String price;
 	
-	private ExpressPackageType(byte code, String description) {
+	private ExpressPackageType(byte code, String description, String price) {
 		this.code = code;
 		this.description = description;
+		this.price = price;
 	}
 	
 	public Byte getCode() {
@@ -32,6 +34,10 @@ public enum ExpressPackageType {
 	
 	public String getDescription() {
 		return description;
+	}
+	
+	public String getPrice() {
+		return price;
 	}
 
 	public static ExpressPackageType fromCode(Byte code) {

@@ -471,6 +471,7 @@ public class ExpressServiceImpl implements ExpressService {
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
 			handler.updateOrderStatus(expressOrder, expressCompany);
+			expressOrderProvider.updateExpressOrder(expressOrder);
 			
 			createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
 			
@@ -712,7 +713,7 @@ public class ExpressServiceImpl implements ExpressService {
 		dbProvider.execute(status -> {
 			ExpressCompany expressCompany = findTopExpressCompany(cmd.getExpressCompanyId());
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
-			handler.createOrder(expressOrder, expressCompany);
+			handler.createOrder(expressOrder, expressCompany);//同城信筒并不在此给邮政创建订单，而是在支付之后创建订单
 			expressOrderProvider.createExpressOrder(expressOrder);
 			return null;
 		});
@@ -726,14 +727,14 @@ public class ExpressServiceImpl implements ExpressService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid sendType = " + cmd.getSendType());
 		}
 		//通用参数校验
-		if (cmd.getSendAddressId() == null || cmd.getExpressCompanyId() == null 
+		if (cmd.getReceiveAddressId() == null || cmd.getExpressCompanyId() == null 
 				|| cmd.getSendMode() == null || cmd.getPayType() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters"
 					+ "sendAddressId = null or expressCompanyId = null or sendMode = null or payType = null");
 		}
 		//除了同城信筒的校验
 		if(sendType == ExpressSendType.CHINA_POST_PACKAGE || sendType == ExpressSendType.STANDARD || sendType == ExpressSendType.EMS_STANDARD){
-			if(cmd.getReceiveAddressId() == null){
+			if(cmd.getSendAddressId() == null){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters receiveAddressId = null");
 			}
 		}
@@ -809,30 +810,30 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrder.setOwnerId(owner.getOwnerId());
 		expressOrder.setOrderNo(getOrderNo(owner.getUserId()));
 		ExpressAddress sendAddress = expressAddressProvider.findExpressAddressById(cmd.getSendAddressId());
-		if (sendAddress == null) {
+		if (sendAddress == null  && cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists send address: id="+cmd.getSendAddressId());
 		}
-		expressOrder.setSendName(sendAddress.getUserName());
-		expressOrder.setSendPhone(sendAddress.getPhone());
-		expressOrder.setSendOrganization(sendAddress.getOrganizationName());
-		expressOrder.setSendProvince(sendAddress.getProvince());
-		expressOrder.setSendCity(sendAddress.getCity());
-		expressOrder.setSendCounty(sendAddress.getCounty());
-		expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
+		//同城信筒没有寄件地址
+		if(cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()){
+			expressOrder.setSendName(sendAddress.getUserName());
+			expressOrder.setSendPhone(sendAddress.getPhone());
+			expressOrder.setSendOrganization(sendAddress.getOrganizationName());
+			expressOrder.setSendProvince(sendAddress.getProvince());
+			expressOrder.setSendCity(sendAddress.getCity());
+			expressOrder.setSendCounty(sendAddress.getCounty());
+			expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
+		}
 		ExpressAddress receiveAddress = expressAddressProvider.findExpressAddressById(cmd.getReceiveAddressId());
-		if (receiveAddress == null && cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()) {
+		if (receiveAddress == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists receive address: id="+cmd.getReceiveAddressId());
 		}
-		//同城信筒没有收件地址
-		if(cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()){
-			expressOrder.setReceiveName(receiveAddress.getUserName());
-			expressOrder.setReceivePhone(receiveAddress.getPhone());
-			expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
-			expressOrder.setReceiveProvince(receiveAddress.getProvince());
-			expressOrder.setReceiveCity(receiveAddress.getCity());
-			expressOrder.setReceiveCounty(receiveAddress.getCounty());
-			expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
-		}
+		expressOrder.setReceiveName(receiveAddress.getUserName());
+		expressOrder.setReceivePhone(receiveAddress.getPhone());
+		expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
+		expressOrder.setReceiveProvince(receiveAddress.getProvince());
+		expressOrder.setReceiveCity(receiveAddress.getCity());
+		expressOrder.setReceiveCounty(receiveAddress.getCounty());
+		expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
 		expressOrder.setServiceAddressId(cmd.getServiceAddressId());
 		expressOrder.setExpressCompanyId(cmd.getExpressCompanyId());
 		expressOrder.setSendType(cmd.getSendType());
@@ -922,7 +923,7 @@ public class ExpressServiceImpl implements ExpressService {
 					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 			}
-			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY || expressOrder.getPaySummary() != null) {
+			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
 				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying and express user has not confirmed money");
 			}
 			expressOrder.setStatus(ExpressOrderStatus.CANCELLED.getCode());
