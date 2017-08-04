@@ -359,6 +359,12 @@ public class EmsHandler implements ExpressHandler {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 	

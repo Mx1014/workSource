@@ -285,4 +285,10 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		return JSONObject.toJSONString(params);
 	}
 
+	@Override
+	public void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

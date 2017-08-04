@@ -21,4 +21,6 @@ public interface ExpressHandler {
 	 */
 	void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany);
 	
+	void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany);
+	
 }

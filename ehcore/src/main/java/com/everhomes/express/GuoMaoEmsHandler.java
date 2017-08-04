@@ -239,4 +239,10 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 		});
 	}
 
+	@Override
+	public void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

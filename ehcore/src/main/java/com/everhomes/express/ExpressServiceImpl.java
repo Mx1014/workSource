@@ -810,16 +810,15 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrder.setSendCounty(sendAddress.getCounty());
 		expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
 		ExpressAddress receiveAddress = expressAddressProvider.findExpressAddressById(cmd.getReceiveAddressId());
-		if (receiveAddress == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists receive address: id="+cmd.getReceiveAddressId());
+		if (receiveAddress != null) {
+			expressOrder.setReceiveName(receiveAddress.getUserName());
+			expressOrder.setReceivePhone(receiveAddress.getPhone());
+			expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
+			expressOrder.setReceiveProvince(receiveAddress.getProvince());
+			expressOrder.setReceiveCity(receiveAddress.getCity());
+			expressOrder.setReceiveCounty(receiveAddress.getCounty());
+			expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
 		}
-		expressOrder.setReceiveName(receiveAddress.getUserName());
-		expressOrder.setReceivePhone(receiveAddress.getPhone());
-		expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
-		expressOrder.setReceiveProvince(receiveAddress.getProvince());
-		expressOrder.setReceiveCity(receiveAddress.getCity());
-		expressOrder.setReceiveCounty(receiveAddress.getCounty());
-		expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
 		expressOrder.setServiceAddressId(cmd.getServiceAddressId());
 		expressOrder.setExpressCompanyId(cmd.getExpressCompanyId());
 		expressOrder.setSendType(cmd.getSendType());
