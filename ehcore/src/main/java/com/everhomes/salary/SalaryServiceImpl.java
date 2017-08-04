@@ -756,10 +756,12 @@ public class SalaryServiceImpl implements SalaryService {
             SalaryGroup oldGroup = salaryGroupProvider.findSalaryGroupByOrgId(cmd.getSalaryGroupId(), period);
             if(null == oldGroup ){
                 calculateGroupPeroid(salaryOrg, period, false);
-            }else{
+            } else if (oldGroup.getStatus().equals(SalaryGroupStatus.SENDED.getCode())) {
+                continue;
+            } else {
                 oldGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
                 List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryOrg.getId());
-                calculateMemberPeriodVals(member,oldGroup,salaryGroupEntities,false);
+                calculateMemberPeriodVals(member, oldGroup, salaryGroupEntities, false);
                 salaryGroupProvider.updateSalaryGroup(oldGroup);
             }
             periodCalendar.add(Calendar.MONTH, -1);
