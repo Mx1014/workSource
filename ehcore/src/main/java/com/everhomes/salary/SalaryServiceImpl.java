@@ -22,7 +22,6 @@ import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.uniongroup.ListUniongroupMemberDetailResponse;
 import com.everhomes.uniongroup.UniongroupMemberDetail;
 import com.everhomes.uniongroup.UniongroupService;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -54,7 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1338,7 +1336,7 @@ public class SalaryServiceImpl implements SalaryService {
 		abnormalNumber += unLinkNumber;
 		//判断2:关联了批次,但是实发工资为"-"
 		//查询eh_salary_employee_period_vals 本期 的 实发工资(entity_id=98)数据为null的记录数
-		Integer nullSalaryNumber = salaryEmployeePeriodValProvider.countSalaryEmployeePeriodsByPeriodAndEntity(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getPeriod(), SalaryConstants.ENTITY_ID_SHIFA);
+		Integer nullSalaryNumber = salaryEmployeePeriodValProvider.countNullSalaryEmployeePeriodsByPeriodAndEntity(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getPeriod(), SalaryConstants.ENTITY_ID_SHIFA);
 		abnormalNumber += nullSalaryNumber;
 		return new GetAbnormalEmployeeNumberResponse(abnormalNumber);
 	}

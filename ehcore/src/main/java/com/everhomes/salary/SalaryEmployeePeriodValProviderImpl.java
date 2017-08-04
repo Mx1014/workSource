@@ -90,13 +90,14 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 	}
 
 	@Override
-	public Integer countSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
-			String period, Long entityIdShifa) { 
+	public Integer countNullSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
+																   String period, Long entityIdShifa) {
 		return getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).join(Tables.EH_SALARY_EMPLOYEES)
 				.on(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(Tables.EH_SALARY_EMPLOYEES.ID))
 				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.GROUP_ENTITY_ID.eq(entityIdShifa))
+				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull())
 				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(period))
 				.execute();
 //				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeePeriodVal.class)); 
