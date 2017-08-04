@@ -27,4 +27,6 @@ public interface PunchSchedulingProvider {
 	void deletePunchSchedulingByOwnerAndTarget(String ownerType, Long ownerId, String targetType,
 			Long targetId);
 
+	void deletePunchSchedulingByPunchRuleId(Long id);
+
 }

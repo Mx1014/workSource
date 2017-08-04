@@ -6159,6 +6159,22 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void deletePunchGroup(DeleteCommonCommand cmd) {
 		// TODO Auto-generated method stub
+		 Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
+		 this.organizationProvider.deleteOrganization(organization);
+		 //  组织架构删除薪酬组人员关联及配置
+		 this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getId(),cmd.getOwnerId());
+		 this.uniongroupService.deleteUniongroupMemberDetailByGroupId(cmd.getId(),cmd.getOwnerId());
+		 //删除考勤规则
+		 punchProvider.deletePunchGeopointsByOwnerId(cmd.getId());
+		 punchProvider.deletePunchWifisByOwnerId(cmd.getId());
+		 PunchRule pr = punchProvider.getpunchruleByPunchOrgId(cmd.getId());
+		 punchProvider.deletePunchTimeRuleByPunchOrgId(cmd.getId());
+		 punchProvider.deletePunchSpecialDaysByPunchOrgId(cmd.getId());
+		 punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
+		 punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId());
+		 punchProvider.deletePunchRule(pr);
+         
+         
 		
 	} 
 	@Override
@@ -6213,19 +6229,30 @@ public class PunchServiceImpl implements PunchService {
                 ptr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
                 ptr.setOwnerId(punchOrgId);  
         		ptr.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
-        		punchProvider.createPunchTimeRule(ptr);
         		ptrs.add(ptr);
+        		if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
+        			//固定班次 默认第二天4点
+        			ptr.setDaySplitTimeLong(28*3600*1000L);
+        		}else{
+        			//排班制 是下班时间+弹性时间+结束打卡时间
+        			ptr.setDaySplitTimeLong(timeRule.getPunchTimeIntervals().get(timeRule.getPunchTimeIntervals().size()-1).getLeaveTime()
+        					+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime())
+        					+timeRule.getEndPunchTime());
+        		}
         		if(timeRule.getPunchTimeIntervals().size()==1){
         			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
         			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
         			ptr.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+        			punchProvider.createPunchTimeRule(ptr);
         		}else if(timeRule.getPunchTimeIntervals().size()==2){
         			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
         			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
         			ptr.setNoonLeaveTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime());
         			ptr.setAfternoonArriveTimeLong(timeRule.getPunchTimeIntervals().get(1).getArriveTime());
         			ptr.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(1).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+        			punchProvider.createPunchTimeRule(ptr);
         		}else{
+        			punchProvider.createPunchTimeRule(ptr);
         			for(PunchTimeIntervalDTO interval:timeRule.getPunchTimeIntervals()){
         				PunchTimeInterval ptInterval = ConvertHelper.convert(ptr, PunchTimeInterval.class);
         				ptInterval.setArriveTimeLong(interval.getArriveTime());
@@ -6306,8 +6333,27 @@ public class PunchServiceImpl implements PunchService {
 		return punchGeopoint;
 	}
 	@Override
-	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) {
+	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) { 
+		ListPunchGroupsResponse response = new ListPunchGroupsResponse();
+        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
+        Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
+		response.setAllEmployeeCount(allOrganizationInteger);
+		//TODO: 未关联等吕磊的接口
+		
+
+        //  获取所有批次
+        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.PUNCHGROUP.getCode(), cmd.getOwnerId());
+        
+        List<PunchGroupDTO> punchGroups = organizations.stream().map(r -> {
+        	PunchGroupDTO dto = getPunchGroupDTOByOrg(r);
+            return dto;
+        }).collect(Collectors.toList());
+        response.setPunchGroups(punchGroups);
+		return response;
+	}
+	private PunchGroupDTO getPunchGroupDTOByOrg(Organization r) {
 		// TODO Auto-generated method stub
+		
 		return null;
 	}
 	@Override

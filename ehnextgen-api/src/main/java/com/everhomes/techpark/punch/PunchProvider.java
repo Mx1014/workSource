@@ -298,6 +298,18 @@ public interface PunchProvider {
 	public void createPunchTimeInterval(PunchTimeInterval ptInterval);
 
 	public void createPunchSpecialDay(PunchSpecialDay psd);
+
+	public void deletePunchGeopointsByOwnerId(Long id);
+
+	public void deletePunchWifisByOwnerId(Long id);
+
+	public PunchRule getpunchruleByPunchOrgId(Long id);
+
+	public void deletePunchTimeRuleByPunchOrgId(Long id);
+
+	public void deletePunchSpecialDaysByPunchOrgId(Long id);
+
+	public void deletePunchTimeIntervalByPunchRuleId(Long id);
  
  
  
