@@ -1759,24 +1759,32 @@ public class SalaryServiceImpl implements SalaryService {
      * 计算某批次某期数据
      * */
     private void calculateGroupPeroid(Organization salaryOrg, String period,Boolean returnFlag) {
-        SalaryGroup salaryGroup = new SalaryGroup();
-        salaryGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-                .getTime()));
-        salaryGroup.setSalaryPeriod(period);
-        salaryGroup.setOrganizationGroupId(salaryOrg.getId());
-        salaryGroup.setNamespaceId(salaryOrg.getNamespaceId());
-        salaryGroup.setOwnerType("organization");
-        salaryGroup.setGroupName(salaryOrg.getName());
-        salaryGroup.setOwnerId(punchService.getTopEnterpriseId(salaryOrg.getDirectlyEnterpriseId()));
-        salaryGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
-//        SalaryGroup lastGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryOrg.getId(), lastPeriod);
-        salaryGroup.setEmailContent(salaryOrg.getEmailContent());
-        SalaryGroup oldGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryGroup.getOrganizationGroupId(), salaryGroup.getSalaryPeriod());
-        if (null != oldGroup && oldGroup.getStatus().equals(SalaryGroupStatus.SENDED.getCode())) {
-            return;
+
+        SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryOrg.getId(), salaryGroup.getSalaryPeriod());
+        if(null != salaryGroup ) {
+            if (salaryGroup.getStatus().equals(SalaryGroupStatus.SENDED.getCode())) {
+                return;
+            }
+            salaryGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
+            salaryGroupProvider.updateSalaryGroup(salaryGroup);
+        }else{
+            salaryGroup = new SalaryGroup();
+
+            salaryGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+                    .getTime()));
+            salaryGroup.setSalaryPeriod(period);
+            salaryGroup.setOrganizationGroupId(salaryOrg.getId());
+            salaryGroup.setNamespaceId(salaryOrg.getNamespaceId());
+            salaryGroup.setOwnerType("organization");
+            salaryGroup.setGroupName(salaryOrg.getName());
+            salaryGroup.setOwnerId(punchService.getTopEnterpriseId(salaryOrg.getDirectlyEnterpriseId()));
+            salaryGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
+            salaryGroup.setEmailContent(salaryOrg.getEmailContent());
+            salaryGroupProvider.createSalaryGroup(salaryGroup);
         }
-        salaryGroupProvider.deleteSalaryGroup(salaryGroup.getOrganizationGroupId(), salaryGroup.getSalaryPeriod());
-        salaryGroupProvider.createSalaryGroup(salaryGroup);
+
+//        SalaryGroup lastGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryOrg.getId(), lastPeriod);
+//        salaryGroupProvider.deleteSalaryGroup(salaryGroup.getOrganizationGroupId(), salaryGroup.getSalaryPeriod());
         // 2.循环薪酬组取里面的人员
         List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryOrg.getId());
         List<UniongroupMemberDetailsDTO> members = uniongroupService.listUniongroupMemberDetailsByGroupId(salaryOrg.getId());
@@ -1784,8 +1792,19 @@ public class SalaryServiceImpl implements SalaryService {
             LOGGER.error("salaryOrg no members :" + salaryOrg);
             return;
         }
+        List<Long> detailIds = new ArrayList<>();
+
         for (UniongroupMemberDetailsDTO member : members) {
             calculateMemberPeriodVals(member, salaryGroup, salaryGroupEntities,returnFlag);
+            detailIds.add(member.getDetailId());
+        }
+        List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(salaryGroup.getId(),detailIds);
+        if (null == salaryEmployees) {
+            return;
+        }
+        for (SalaryEmployee employee : salaryEmployees) {
+            salaryEmployeePeriodValProvider.deletePeriodVals(employee.getId());
+            salaryEmployeeProvider.deleteSalaryEmployee(employee);
         }
     }
 

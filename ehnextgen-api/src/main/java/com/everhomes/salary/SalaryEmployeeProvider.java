@@ -34,4 +34,6 @@ public interface SalaryEmployeeProvider {
 	SalaryEmployee findSalaryEmployeeBySalaryGroupIdAndDetailId(Long salaryGroupId, Long memberId);
 
 	SalaryEmployee findSalaryEmployee(Long ownerId, Long detailId, Long id);
+
+	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(Long id, List<Long> detailIds);
 }

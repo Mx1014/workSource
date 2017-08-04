@@ -188,4 +188,13 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 		}
 		return result.get(0);
 	}
+
+	@Override
+	public List<SalaryEmployee> listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(Long salaryPeriodGroupId, List<Long> detailIds) {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId))
+				.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.notIn(detailIds))
+				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+	}
 }
