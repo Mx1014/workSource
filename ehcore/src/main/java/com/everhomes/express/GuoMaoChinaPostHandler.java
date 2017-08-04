@@ -156,6 +156,10 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 			expressOrder.setPaySummary(new BigDecimal(packageType.getPrice()));
 			return ;
 		}
+		transferOrderToChinaPost(expressOrder, expressCompany);
+	}
+	
+	private void transferOrderToChinaPost(ExpressOrder expressOrder, ExpressCompany expressCompany) {
 		//生成 请求创建订单 参数
 		String paramsCreateOrder = getRequestCreateOrderJsonParam(expressOrder,expressCompany);
 		//发送 创建订单 请求
@@ -167,24 +171,13 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		
 		//通过再次获取订单详情，判断订单是否创建成功。
 		getOrderDetail(entity.getResponse().getSendType(), entity.getResponse().getBillNo(), expressCompany);
-	
 	}
-	
+
 	@Override
 	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
 		//同城信筒，此时才创建订单
 		if(expressOrder.getSendType().byteValue() == ExpressSendType.CITY_EMPTIES.getCode().byteValue()){
-			//生成 请求创建订单 参数
-			String paramsCreateOrder = getRequestCreateOrderJsonParam(expressOrder,expressCompany);
-			//发送 创建订单 请求
-			GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = request(paramsCreateOrder, expressCompany.getOrderUrl()+CREATE_ORDER_CONTEXT);
-			//请求code失败
-			checkResponseEntity(entity);
-			
-			expressOrder.setBillNo(entity.getResponse().getBillNo());
-			
-			//通过再次获取订单详情，判断订单是否创建成功。
-			getOrderDetail(entity.getResponse().getSendType(), entity.getResponse().getBillNo(), expressCompany);
+			transferOrderToChinaPost(expressOrder, expressCompany);
 		}else{
 			//参数
 			String params = getRequestUpdateOrderJsonParam(expressOrder, expressCompany);

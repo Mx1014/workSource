@@ -466,7 +466,7 @@ public class ExpressServiceImpl implements ExpressService {
 				expressOrder.setPaidFlag(TrueOrFalseFlag.TRUE.getCode());
 				expressOrderProvider.updateExpressOrder(expressOrder);
 			}
-			//TODO 这里是费代码 by dengs.
+			//TODO 这里是费代码 by dengs.-------------------正式环境需要注释掉-------------
 			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
