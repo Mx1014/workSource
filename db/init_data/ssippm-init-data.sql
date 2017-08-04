@@ -546,4 +546,6 @@ update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-
 -- redmine 10276 add by dengs 20170522
 update eh_launch_pad_items set action_data ='{"itemLocation":"/home","itemGroup":"Bizs"}' WHERE namespace_id = '999977' AND item_name = 'More';
 
+INSERT INTO `eh_namespaces` (`id`, `name`) VALUES (999977, '科技园物业');
+
 SET FOREIGN_KEY_CHECKS = 1;

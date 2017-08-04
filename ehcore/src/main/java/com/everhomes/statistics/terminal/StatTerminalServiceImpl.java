@@ -10,7 +10,6 @@ import com.everhomes.rest.statistics.terminal.*;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sms.DateUtil;
-import com.everhomes.user.OSType;
 import com.everhomes.user.UserActivity;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -562,12 +561,19 @@ public class StatTerminalServiceImpl implements StatTerminalService{
         List<AppVersion> versions = statTerminalProvider.listAppVersions(null);
         statTerminalProvider.deleteTerminalAppVersionStatistics(tDate.toString());
         for (AppVersion version: versions) {
+            // 总用户数量
             Long cumulativeUserNumber = statTerminalProvider.getTerminalCumulativeUserNumber(null, version.getNamespaceId());
+            // 版本用户数量
             Long versionCumulativeUserNumber = statTerminalProvider.getTerminalCumulativeUserNumber(version.getName(), version.getNamespaceId());
+            // 总活跃用户数量
             Long activeUserNumber = statTerminalProvider.getTerminalAppVersionActiveUserNumberByDay(tDate, null, version.getNamespaceId());
+            // 版本活跃用户数量
             Long versionActiveUserNumber = statTerminalProvider.getTerminalAppVersionActiveUserNumberByDay(tDate, version.getName(), version.getNamespaceId());
+            //
             Long versionStartUmber = statTerminalProvider.getTerminalStartNumberByDay(date, version.getName(), version.getNamespaceId());
+            // 版本新增用户
             Long versionNewUserNumber = statTerminalProvider.getTerminalAppVersionNewUserNumberByDay(tDate, version.getName(), version.getNamespaceId());
+
             TerminalAppVersionStatistics appVersionStatistics = new TerminalAppVersionStatistics();
             appVersionStatistics.setAppVersion(version.getName());
             appVersionStatistics.setAppVersionRealm(version.getRealm());

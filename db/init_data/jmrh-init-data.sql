@@ -40,8 +40,8 @@ INSERT INTO `eh_version_realm` VALUES (126, 'iOS_JunMinRongHe', null, UTC_TIMEST
 
 -- eh_version_upgrade_rules ： 我加20 你加40
 -- eh_version_upgrade_rules 现在是 397
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(417,125,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(418,126,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(517,125,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(518,126,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 	
 -- 军民融合域空间
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999972, '军民融合');
@@ -81,6 +81,10 @@ SET @role_assignment_id = (SELECT MAX(id) FROM eh_acl_role_assignments);
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', 1034291, 'EhUsers', 319545  , 1001, 1, UTC_TIMESTAMP());
 
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`) 
+VALUES((@acl_id := @acl_id + 1),'EhOrganizations','1034291','1','10','319545','0','319545','2017-07-05 16:04:09','999972','EhUsers','admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 	VALUES(191580, UUID(), 999972, 2, 'EhGroups', 0,'军民融合论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
@@ -113,31 +117,28 @@ SET @address_id = (SELECT MAX(id) FROM `eh_addresses`);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'A座101','A座','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35745, 1034291, 240111044331050361, @address_id, 'A座101', '0');
+	VALUES (36900, 1034291, 240111044331050361, @address_id, 'A座101', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'B座101','B座','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35746, 1034291, 240111044331050361, @address_id, 'B座101', '0');
+	VALUES (36901, 1034291, 240111044331050361, @address_id, 'B座101', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'C座101','D座','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35747, 1034291, 240111044331050361, @address_id, 'C座101', '0');
+	VALUES (36902, 1034291, 240111044331050361, @address_id, 'C座101', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'D座101','D座','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35748, 1034291, 240111044331050361, @address_id, 'D座101', '0');
+	VALUES (36903, 1034291, 240111044331050361, @address_id, 'D座101', '0');
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES((@address_id := @address_id + 1),UUID(),240111044331050361, 14806, '北京市',  14807, '海淀区' ,'下沉式广场','下沉式广场','101','2','0',UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (35749, 1034291, 240111044331050361, @address_id, '下沉式广场101', '0');
+	VALUES (36904, 1034291, 240111044331050361, @address_id, '下沉式广场101', '0');
 
-INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES (10929, '会议室预订', 0, NULL, 0, 999972);
-
-	
 -- 园区管理员  
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
     VALUES (204875, 999972, 0, '/home', 'Default', '0', '0', '/home', 'Default', 'cs://1/image/aW1hZ2UvTVRvNE5qQXpabVkzTkRFNFpXUXhZV1JtWVRReE1tVXlaVFkzT1dFNFpqVTJPUQ', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
@@ -276,7 +277,6 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40530,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40600,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40750,'', 'EhNamespaces', 999972,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40700,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40800,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40810,'', 'EhNamespaces', 999972,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40830,'', 'EhNamespaces', 999972,2);
@@ -335,6 +335,30 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999972, 'sms.default.yzx', 52, 'zh_CN', '视测会-军民', '90352');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999972, 'sms.default.yzx', 53, 'zh_CN', '申诉-军民', '90348');
 
+-- 缺少数据导致 园区入驻、招租管理出错。20170710 add by dengs
+SET @eh_lease_configs_id = (SELECT MAX(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`, `display_name_str`, `display_order_str`) VALUES((@eh_lease_configs_id := @eh_lease_configs_id + 1),'999972','1','1','1','1','1','1','园区介绍, 虚位以待', '1,2');
+
+-- 20170718 add by dengs
+SET @eh_rentalv2_resource_types_id = (SELECT MAX(id) FROM `eh_rentalv2_resource_types`);
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@eh_rentalv2_resource_types_id := @eh_rentalv2_resource_types_id+1), '会议室预订', 0, NULL, 2, 999972);
+-- 20170719 add by dengs,增加俱乐部分类
+set @eh_categories_id = (select max(id) FROM eh_categories);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'亲子与教育','兴趣/亲子与教育', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'运动与音乐','兴趣/运动与音乐', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'美食与厨艺','兴趣/美食与厨艺', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'美容化妆','兴趣/美容化妆', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'家庭装饰','兴趣/家庭装饰', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'名牌汇','兴趣/名牌汇', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'宠物汇','兴趣/宠物汇', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'旅游摄影','兴趣/旅游摄影', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'老乡群','兴趣/老乡群', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'同事群','兴趣/同事群', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'同学群','兴趣/同学群', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'二手交易','兴趣/二手交易', 0, 2, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'其他','兴趣/其他', 0, 2, UTC_TIMESTAMP(), 999972);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
 

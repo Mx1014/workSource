@@ -1483,6 +1483,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhGeneralFormVals.class, Tables.EH_GENERAL_FORM_VALS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_GENERAL_FORM_VALS.ID.max()).from(Tables.EH_GENERAL_FORM_VALS).fetchOne().value1();
         });
+        syncTableSequence(null, EhYzxSmsLogs.class, Tables.EH_YZX_SMS_LOGS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_YZX_SMS_LOGS.ID.max()).from(Tables.EH_YZX_SMS_LOGS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

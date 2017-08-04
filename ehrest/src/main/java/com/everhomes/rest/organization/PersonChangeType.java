@@ -9,10 +9,11 @@ package com.everhomes.rest.organization;
  * <li>POICHANGE: 职位变动</li>
  * <li>LEVCHANGE: 职级变动</li>
  * <li>LEAVE: 离职</li>
+ * <li>PROBATION: 转为试用</li>
  * </ul>
  */
 public enum PersonChangeType {
-    ENTRY("0"), POSITIVE("1"), DEPCHANGE("2"),POICHANGE("3"),LEVCHANGE("4"), LEAVE("5");
+    ENTRY("0"), POSITIVE("1"), DEPCHANGE("2"),POICHANGE("3"),LEVCHANGE("4"), LEAVE("5"),PROBATION("6");
 
     private String code;
     private PersonChangeType(String code) {

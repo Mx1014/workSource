@@ -17,7 +17,7 @@ import java.util.List;
  * <li>formVersion: 当前版本信息</li>
  * <li>templateType: 模板数据类型。未来表单可能同样的控件有不同的表达方式，则可以用这个类型区分 {@link GeneralFormTemplateType}</li>
  * <li>formName: 表单名字</li>
- * <li>formFields: 表单控件数据 {@link GeneralFormFieldDTO}</li>
+ * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
  * </ul>
  * @author janson
  *

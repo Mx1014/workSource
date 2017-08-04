@@ -87,6 +87,13 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
     protected List<TopicFilterDTO> getTopicQueryFilters(User user, SceneTokenDTO sceneToken, Long organizationId) {
         List<TopicFilterDTO> filterList = new ArrayList<TopicFilterDTO>();
         Organization organization = organizationProvider.findOrganizationById(organizationId);
+
+        //子公司场景下，没有自己的论坛，也没有管理的园区，发现模块会出现异常
+        // TODO 和产品商量 临时处理，子公司使用父公司的的场景   edit by yanjun 20170725
+        while(organization != null && organization.getParentId() != null && organization.getParentId().longValue() != 0){
+            organization = organizationProvider.findOrganizationById(organization.getParentId());
+        }
+
         if(organization == null) {
             LOGGER.error("Organization not found, sceneToken={}", sceneToken);
             return filterList;
@@ -301,6 +308,13 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
     protected List<TopicScopeDTO> getDiscoveryTopicSentScopes(User user, SceneTokenDTO sceneTokenDto, Long organizationId) {
         List<TopicScopeDTO> sentScopeList = new ArrayList<TopicScopeDTO>();
         Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
+
+        //子公司场景下，没有自己的论坛，也没有管理的园区，发现模块会出现异常
+        // TODO 和产品商量 临时处理，子公司使用父公司的的场景   edit by yanjun 20170725
+        while(organization != null && organization.getParentId() != null && organization.getParentId().longValue() != 0){
+            organization = organizationProvider.findOrganizationById(organization.getParentId());
+        }
+
         if(organization == null) {
             LOGGER.error("Organization not found, sceneToken={}", sceneTokenDto);
             return sentScopeList;

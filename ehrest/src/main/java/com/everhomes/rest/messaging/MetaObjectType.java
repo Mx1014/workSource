@@ -25,7 +25,8 @@ public enum MetaObjectType {
     ENTERPRISE_AGREE_TO_JOIN("enterprise.agreeToJoin"),
     ACLINK_AUTH_CHANGED("aclink.authChanged"),
     BIZ_NEW_ORDER("biz.new.order"),
-    MESSAGE_ROUTER("message.router")
+    MESSAGE_ROUTER("message.router"),
+    ENTERPRISE_LEAVE_THE_JOB("enterprise.leaveTheJob")
     ;
     
     private String code;

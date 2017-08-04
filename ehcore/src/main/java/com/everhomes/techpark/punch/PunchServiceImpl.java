@@ -1235,6 +1235,8 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd) {
+
+		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 		String punchTime = datetimeSF.get().format(new Date());
 		return createPunchLog(cmd,punchTime);
 		

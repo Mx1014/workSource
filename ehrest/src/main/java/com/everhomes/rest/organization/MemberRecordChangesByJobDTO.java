@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 /**
  * <ul>
  * <li>operationTime: 修改时间</li>
- * <li>personChangeType: 人员变动类型，参考{@link PersonChangeType}</li>
+ * <li>personChangeType: 人员变动类型，参考{@link com.everhomes.rest.organization.PersonChangeType}</li>
  * <li>reason: 操作备注</li>
  * </ul>
  */

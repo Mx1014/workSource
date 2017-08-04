@@ -1,12 +1,60 @@
 // @formatter:off
 package com.everhomes.user;
 
+import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.geo.GeoHashUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.authorization.AuthorizationErrorCode;
+import com.everhomes.authorization.AuthorizationThirdPartyButton;
+import com.everhomes.authorization.AuthorizationThirdPartyButtonProvider;
+import com.everhomes.authorization.AuthorizationThirdPartyForm;
+import com.everhomes.authorization.AuthorizationThirdPartyFormProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -61,10 +109,8 @@ import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*; 
+import com.everhomes.organization.OrganizationMember; 
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
@@ -83,7 +129,13 @@ import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagePopupFlag;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.UserMessageType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -142,6 +194,99 @@ import java.util.stream.Collectors;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
+import com.everhomes.rest.ui.user.FamilyButtonStatusType;
+import com.everhomes.rest.ui.user.FormSourceDTO;
+import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListAuthFormsResponse;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
+import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
+import com.everhomes.rest.ui.user.SearchTypeDTO;
+import com.everhomes.rest.user.AssumePortalRoleCommand;
+import com.everhomes.rest.user.BorderListResponse;
+import com.everhomes.rest.user.CreateInvitationCommand;
+import com.everhomes.rest.user.CreateUserImpersonationCommand;
+import com.everhomes.rest.user.DeleteUserImpersonationCommand;
+import com.everhomes.rest.user.DeviceIdentifierType;
+import com.everhomes.rest.user.GetBizSignatureCommand;
+import com.everhomes.rest.user.GetMessageSessionInfoCommand;
+import com.everhomes.rest.user.GetSignatureCommandResponse;
+import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.GetUserNotificationSettingCommand;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.InitBizInfoCommand;
+import com.everhomes.rest.user.InitBizInfoDTO;
+import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.rest.user.ListLoginByPhoneCommand;
+import com.everhomes.rest.user.ListRegisterUsersResponse;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.MessageSessionInfoDTO;
+import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
+import com.everhomes.rest.user.SearchUserByNamespaceCommand;
+import com.everhomes.rest.user.SearchUserImpersonationCommand;
+import com.everhomes.rest.user.SearchUserImpersonationResponse;
+import com.everhomes.rest.user.SearchUsersCommand;
+import com.everhomes.rest.user.SearchUsersResponse;
+import com.everhomes.rest.user.SendMessageTestCommand;
+import com.everhomes.rest.user.SetUserAccountInfoCommand;
+import com.everhomes.rest.user.SetUserInfoCommand;
+import com.everhomes.rest.user.SignupCommand;
+import com.everhomes.rest.user.SynThridUserCommand;
+import com.everhomes.rest.user.UpdateUserNotificationSettingCommand;
+import com.everhomes.rest.user.UserCurrentEntity;
+import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserDTO;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserImperInfo;
+import com.everhomes.rest.user.UserImpersonationDTO;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserInvitationsDTO;
+import com.everhomes.rest.user.UserLoginDTO;
+import com.everhomes.rest.user.UserLoginResponse;
+import com.everhomes.rest.user.UserLoginStatus;
+import com.everhomes.rest.user.UserMuteNotificationFlag;
+import com.everhomes.rest.user.UserNotificationSettingDTO;
+import com.everhomes.rest.user.UserNotificationTemplateCode;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.user.ValidatePassCommand;
+import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
+import com.everhomes.rest.user.VerifyAndLogonCommand;
+import com.everhomes.rest.user.admin.InvitatedUsers;
+import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
+import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
+import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
+import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
+import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
+import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
+import com.everhomes.rest.user.admin.SendUserTestMailCommand;
+import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
+import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
+import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsBlackList;
+import com.everhomes.sms.SmsBlackListCreateType;
+import com.everhomes.sms.SmsBlackListProvider;
+import com.everhomes.sms.SmsBlackListStatus;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RandomGenerator;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 /**
  * 
@@ -282,6 +427,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private GroupProvider groupProvider;
+    
+    @Autowired
+    private AuthorizationThirdPartyFormProvider authorizationThirdPartyFormProvider;
+    
+    @Autowired
+    private AuthorizationThirdPartyButtonProvider authorizationThirdPartyButtonProvider;
 
     @Autowired
     private UserIdentifierLogProvider userIdentifierLogProvider;
@@ -876,9 +1027,9 @@ public class UserServiceImpl implements UserService {
 		if(user == null) {
 			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			// 把regionCode的检查加上，之前是没有检查的    add by xq.tian 2017/07/12
-			if(userIdentifier != null && Objects.equals(userIdentifier.getRegionCode(), regionCode)) {
+            if (userIdentifier != null && Objects.equals((userIdentifier.getRegionCode() != null ? userIdentifier.getRegionCode() : 86), regionCode)) {
                 user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
-                if(user == null) {
+                if (user == null) {
                     LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                             namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
                     throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
@@ -887,8 +1038,8 @@ public class UserServiceImpl implements UserService {
                 LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                         namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
                 throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
-			}
-		}
+            }
+        }
 
 		if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
 			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
@@ -1183,9 +1334,10 @@ public class UserServiceImpl implements UserService {
 			foundLoginByLoginType(user, deviceIdentifier, LoginType.USER, ref);
 		}
 
-		UserLogin foundLogin = ref.getFoundLogin();
-		if(foundLogin == null) {
-			foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify);
+        String appVersion = UserContext.current().getVersion();
+        UserLogin foundLogin = ref.getFoundLogin();
+        if(foundLogin == null) {
+            foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify, appVersion);
 			accessor.putMapValueObject(hkeyIndex, ref.getNextLoginId());
 
 			isNew = true;
@@ -1195,6 +1347,7 @@ public class UserServiceImpl implements UserService {
 		foundLogin.setStatus(UserLoginStatus.LOGGED_IN);
 		foundLogin.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 		foundLogin.setPusherIdentify(pusherIdentify);
+		foundLogin.setAppVersion(appVersion);
 		String hkeyLogin = String.valueOf(ref.getNextLoginId());
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
@@ -1302,6 +1455,9 @@ public class UserServiceImpl implements UserService {
 			login.setBorderSessionId(borderSessionId);
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 			accessor.putMapValueObject(hkeyLogin, login);
+
+			// 发布用户切换App到前台事件   add by xq.tian 2017/07/13
+            applicationEventPublisher.publishEvent(new BorderRegisterEvent(login));
 
 			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
 			return login;
@@ -3992,6 +4148,22 @@ public class UserServiceImpl implements UserService {
         log.setStatus(UserAppealLogStatus.WAITING_FOR_APPROVAL.getCode());
 
         userAppealLogProvider.createUserAppealLog(log);
+
+        String home = configProvider.getValue(ConfigConstants.HOME_URL, "");
+
+        // ------------------------------------------------------------------------
+        String wjl = "jinlan.wang@zuolin.com";
+        String xqt = "xq.tian@zuolin.com";
+        String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+        String account = configurationProvider.getValue(0,"mail.smtp.account", "zuolin@zuolin.com");
+
+        String body = String.format("User \"%s(%s)\" has send a appeal, server is \"%s\", please check out. \n[%s]",
+                cmd.getName(), cmd.getOldIdentifier(), home, log.toString());
+        handler.sendMail(0, account, wjl, "User Appeal", body);
+        handler.sendMail(0, account, xqt, "User Appeal", body);
+        // ------------------------------------------------------------------------
+
         return toUserAppealLogDTO(log);
     }
 
@@ -4163,6 +4335,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public ListAuthFormsResponse listAuthForms() {
+		int namespaceId = UserContext.getCurrentNamespaceId();
+		List<AuthorizationThirdPartyForm> list = authorizationThirdPartyFormProvider.listFormSourceByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
+		ListAuthFormsResponse response = new ListAuthFormsResponse();
+		response.setSourceDto(list.stream().map(r->ConvertHelper.convert(r, FormSourceDTO.class)).collect(Collectors.toList()));
+		return response;
+	}
+	@Override
 	public SearchUsersResponse searchUsers(SearchUsersCommand cmd) {
 		SearchUsersResponse resp = new SearchUsersResponse();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
@@ -4183,7 +4363,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return resp;
 	}
-
+ 
     // 参数校验方法
     // 可以校验带bean validation 注解的对象
     // 校验失败, 抛出异常, 异常信息附带参数值信息
@@ -4212,4 +4392,99 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
+		//added by R 20170713, 通讯录2.4增加
+	@Override
+	public SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd) {
+		if (org.springframework.util.StringUtils.isEmpty(cmd.getDetailId())) {
+			//	没有 detailiId 则获取当前用户信息
+			SceneContactV2DTO dto = this.getCurrentContactRealInfo(cmd.getOrganizationId());
+			return dto;
+		} else {
+		    //  有 detailID 则获取详细信息
+			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+			if (detail == null)
+				return null;
+			else {
+				SceneContactV2DTO dto = new SceneContactV2DTO();
+				dto.setUserId(detail.getTargetId());
+				dto.setDetailId(detail.getId());
+				if (!StringUtils.isEmpty(detail.getAvatar()))
+					dto.setContactAvatar(detail.getAvatar());
+				dto.setContactName(detail.getContactName());
+				if (!StringUtils.isEmpty(detail.getEnName()))
+					dto.setContactEnglishName(detail.getEnName());
+				dto.setGender(detail.getGender());
+				dto.setContactToken(detail.getContactToken());
+				if (!StringUtils.isEmpty(detail.getEmail()))
+					dto.setEmail(detail.getEmail());
+				getRelevantContactEnterprise(dto, detail.getOrganizationId());
+				return dto;
+			}
+		}
+	}
+
+	private SceneContactV2DTO getCurrentContactRealInfo(Long organizationId) {
+		User user = UserContext.current().getUser();
+        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(user.getId(), organizationId);
+//		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), organizationId);
+
+		if (members == null)
+			return null;
+		else {
+		    OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(members.get(0).getDetailId());
+		    if(detail == null)
+		        return null;
+			SceneContactV2DTO dto = new SceneContactV2DTO();
+			dto.setUserId(user.getId());
+			dto.setContactName(detail.getContactName());
+			dto.setContactToken(detail.getContactToken());
+			return dto;
+		}
+	} 
+
+    private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
+
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+
+        //  设置公司
+        Organization directlyEnterprise = this.organizationProvider.findOrganizationById(organizationId);
+        OrganizationDetail directlyEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
+        if (directlyEnterpriseDetail != null)
+            dto.setEnterpriseName(directlyEnterpriseDetail.getDisplayName());
+        else
+            dto.setEnterpriseName(directlyEnterprise.getName());
+
+        //  设置部门
+        List<OrganizationDTO> departments = this.organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath());
+        //  设置父部门名称
+        if (departments != null && departments.size() > 0) {
+            for (int i = 0; i < departments.size(); i++) {
+                if (departments.get(i).getParentId().equals(0))
+                    continue;
+                departments.get(i).setParentName(this.organizationProvider.findOrganizationById(departments.get(i).getParentId()).getName());
+            }
+        }
+        dto.setDepartments(departments);
+
+        //  设置岗位
+        dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
+
+    }
+	
+	@Override
+	public GetFamilyButtonStatusResponse getFamilyButtonStatus(){
+		int namespaceId = UserContext.getCurrentNamespaceId();
+		AuthorizationThirdPartyButton buttonstatus = authorizationThirdPartyButtonProvider.getButtonStatusByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
+		GetFamilyButtonStatusResponse response = ConvertHelper.convert(buttonstatus, GetFamilyButtonStatusResponse.class);
+		if(response == null){
+			String document = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+					AuthorizationErrorCode.FAMILY_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.FAMILY_DETAIL_S);
+			String[] documents = document.split("\\|");
+			response = new GetFamilyButtonStatusResponse(documents[0],FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),documents[1],documents[2]);
+		}
+		return response;
+	}
 }

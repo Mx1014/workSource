@@ -2054,6 +2054,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 //计算当天走了多少字 量程+昨天最后一次读数-锚点
                 amount = amount.add(dayCurrReading.subtract(readingAnchor));
+                dayStat.setCurrentAmount(amount);
+                LOGGER.info("dayStat amount : {}", dayStat);
 
                 //获取公式,计算当天的费用
                 EnergyMeterSettingLog priceSetting  = meterSettingLogProvider
@@ -2107,7 +2109,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 if(PriceCalculationType.BLOCK_TARIFF.equals(
                         PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
-                    realCost = calculateBlockTariff(manager,priceSetting,realAmount, costFormula);
+                    realCost = calculateBlockTariff(manager,priceSetting,amount, costFormula);
                 }
 
                 //删除昨天的记录（手工刷的时候）
@@ -2123,7 +2125,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dayStat.setMeterPrice(priceSetting.getSettingValue());
                 dayStat.setLastReading(dayLastReading);
                 dayStat.setCurrentReading(dayCurrReading);
-                dayStat.setCurrentAmount(realAmount);
+//                dayStat.setCurrentAmount(amount);
                 dayStat.setCurrentCost(realCost);
                 dayStat.setResetMeterFlag(resetFlag);
                 dayStat.setChangeMeterFlag(changeFlag);
@@ -2790,14 +2792,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         graphics.setColor(Color.BLACK);
         BufferedImage bimg = null;
         try {
-            graphics.drawString(name, 30, 230);
-            graphics.drawString(number, 30, 270);
+            graphics.drawString(name, 10, 230);
+            graphics.drawString(number, 10, 270);
             bimg = QRCodeEncoder.createQrCode(Base64.encodeBase64String(qrcode.getBytes()), 200, 200, null);
         } catch (Exception e) {
         }
 
         if (bimg != null) {
-            graphics.drawImage(bimg, 0, 0, null);
+            graphics.drawImage(bimg, 60, 0, null);
         }
         graphics.dispose();
 
