@@ -1760,7 +1760,7 @@ public class SalaryServiceImpl implements SalaryService {
      * */
     private void calculateGroupPeroid(Organization salaryOrg, String period,Boolean returnFlag) {
 
-        SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryOrg.getId(), salaryGroup.getSalaryPeriod());
+        SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryOrg.getId(),period);
         if(null != salaryGroup ) {
             if (salaryGroup.getStatus().equals(SalaryGroupStatus.SENDED.getCode())) {
                 return;
