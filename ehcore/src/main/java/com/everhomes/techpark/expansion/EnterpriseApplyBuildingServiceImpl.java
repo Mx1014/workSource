@@ -198,4 +198,21 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			}).collect(Collectors.toList()));
 		}
 	}
+
+	@Override
+	public void updateLeaseBuildingOrder(UpdateLeaseBuildingOrderCommand cmd) {
+		LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(cmd.getId());
+		LeaseBuilding exchangeLeaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(cmd.getExchangeId());
+
+		Long order = leaseBuilding.getDefaultOrder();
+		leaseBuilding.setDefaultOrder(exchangeLeaseBuilding.getDefaultOrder());
+		exchangeLeaseBuilding.setDefaultOrder(order);
+
+		dbProvider.execute((TransactionStatus status) -> {
+			enterpriseApplyBuildingProvider.updateLeaseBuilding(leaseBuilding);
+			enterpriseApplyBuildingProvider.updateLeaseBuilding(exchangeLeaseBuilding);
+
+			return null;
+		});
+	}
 }

@@ -41,9 +41,9 @@ public class UpdateLeasePromotionCommand {
 	private Long id;
 	@NotNull
 	private Long     buildingId;
+	private String buildingName;
 	private String   rentPosition;
 	private String   posterUri;
-//	private String   subject;
 	private String   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
@@ -52,6 +52,7 @@ public class UpdateLeasePromotionCommand {
 
 	private Byte enterTimeFlag;
 	private Long addressId;
+	private String apartmentName;
 	private String orientation;
 	private BigDecimal rentAmount;
 
@@ -66,6 +67,33 @@ public class UpdateLeasePromotionCommand {
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+
+	@ItemType(Long.class)
+	private List<Long> communityIds;
+
+	public List<Long> getCommunityIds() {
+		return communityIds;
+	}
+
+	public void setCommunityIds(List<Long> communityIds) {
+		this.communityIds = communityIds;
+	}
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
 
 	public String getAddress() {
 		return address;

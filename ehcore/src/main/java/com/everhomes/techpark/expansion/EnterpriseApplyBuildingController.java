@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class EnterpriseApplyBuildingController extends ControllerBase{
 
 	@Autowired
-	private EnterpriseApplyEntryService enterpriseApplyEntryService;
+	private EnterpriseApplyBuildingService enterpriseApplyBuildingService;
 	
 	@Autowired
 	private OrganizationService organizationService;
@@ -46,7 +46,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	@RestReturn(value=ListLeaseBuildingsResponse.class)
 	public RestResponse listLeaseBuildings(ListLeaseBuildingsCommand cmd){
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(enterpriseApplyBuildingService.listLeaseBuildings(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -60,7 +60,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	@RestReturn(value=LeaseBuildingDTO.class)
 	public RestResponse createLeaseBuilding(CreateLeaseBuildingCommand cmd){
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(enterpriseApplyBuildingService.createLeaseBuilding(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -73,7 +73,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	@RequestMapping("updateLeaseBuilding")
 	@RestReturn(value=LeaseBuildingDTO.class)
 	public RestResponse updateLeaseBuilding(UpdateLeaseBuildingCommand cmd){
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(enterpriseApplyBuildingService.updateLeaseBuilding(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -87,7 +87,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	@RestReturn(value=LeaseBuildingDTO.class)
 	@RequireAuthentication(false)
 	public RestResponse getLeaseBuildingById(GetLeaseBuildingByIdCommand cmd){
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(enterpriseApplyBuildingService.getLeaseBuildingById(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -101,7 +101,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	@RestReturn(value=String.class)
 	public RestResponse deleteLeaseBuilding(DeleteLeaseBuildingCommand cmd){
 
-
+		enterpriseApplyBuildingService.deleteLeaseBuilding(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -109,13 +109,15 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/updateLeaseBuildingStatus
-	 * <p>修改项目介绍状态
+	 * <b>URL: /techpark/entry/updateLeaseBuildingOrder
+	 * <p>修改项目介绍排序
 	 */
-	@RequestMapping("updateLeaseBuildingStatus")
+	@RequestMapping("updateLeaseBuildingOrder")
 	@RestReturn(value=String.class)
-	public RestResponse updateLeaseBuildingStatus(UpdateLeasePromotionStatusCommand cmd){
-		RestResponse response = new RestResponse(enterpriseApplyEntryService.updateLeasePromotionStatus(cmd));
+	public RestResponse updateLeaseBuildingOrder(UpdateLeaseBuildingOrderCommand cmd){
+
+		enterpriseApplyBuildingService.updateLeaseBuildingOrder(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

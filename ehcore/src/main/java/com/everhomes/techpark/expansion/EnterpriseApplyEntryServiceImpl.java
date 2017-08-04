@@ -888,6 +888,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(EntityType.LEASE_PROMOTION.getCode(), leasePromotion.getId());
 			addAttachments(cmd.getAttachments(), leasePromotion);
 
+			enterpriseApplyBuildingProvider.deleteLeasePromotionCommunity(leasePromotion.getId());
+			if (null != cmd.getCommunityIds()) {
+				cmd.getCommunityIds().forEach(m -> {
+					LeasePromotionCommunity leasePromotionCommunity = new LeasePromotionCommunity();
+					leasePromotionCommunity.setLeasePromotionId(leasePromotion.getId());
+					leasePromotionCommunity.setCommunityId(m);
+					enterpriseApplyBuildingProvider.createLeasePromotionCommunity(leasePromotionCommunity);
+				});
+			}
+
 			BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
 
 			populateRentDTO(dto, leasePromotion);

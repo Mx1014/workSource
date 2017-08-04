@@ -10,6 +10,7 @@ import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,6 +30,7 @@ import javax.validation.Valid;
 @RestDoc(value = "entry controller", site = "ehcore")
 @RestController
 @RequestMapping("/techpark/entry")
+@Validated
 public class EnterpriseApplyEntryController extends ControllerBase{
 
 	@Autowired

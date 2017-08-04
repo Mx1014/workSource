@@ -3,6 +3,7 @@ package com.everhomes.rest.techpark.expansion;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
@@ -33,9 +34,8 @@ public class ListBuildingForRentCommand {
     private Long communityId;
     
     private Byte status;
-    
+	@NotNull
     private Long buildingId;
-	private Byte buildingType;
 
     private String rentType;
 
@@ -46,14 +46,6 @@ public class ListBuildingForRentCommand {
 	private Long userId;
 	private Long organizationId;
 	private String issuerType;
-
-	public Byte getBuildingType() {
-		return buildingType;
-	}
-
-	public void setBuildingType(Byte buildingType) {
-		this.buildingType = buildingType;
-	}
 
 	public Long getOrganizationId() {
 		return organizationId;

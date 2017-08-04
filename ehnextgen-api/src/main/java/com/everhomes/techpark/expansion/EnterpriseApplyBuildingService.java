@@ -16,4 +16,6 @@ public interface EnterpriseApplyBuildingService {
     LeaseBuildingDTO getLeaseBuildingById(GetLeaseBuildingByIdCommand cmd);
 
     void deleteLeaseBuilding(DeleteLeaseBuildingCommand cmd);
+
+    void updateLeaseBuildingOrder(UpdateLeaseBuildingOrderCommand cmd);
 }

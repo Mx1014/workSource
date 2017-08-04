@@ -41,6 +41,7 @@ public class CreateLeasePromotionCommand {
 	@NotNull
 	@Deprecated
 	private Long communityId;
+	@ItemType(Long.class)
 	private List<Long> communityIds;
 	
 	@NotNull
