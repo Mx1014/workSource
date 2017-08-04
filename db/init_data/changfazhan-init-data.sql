@@ -7,10 +7,10 @@ SET @biz_url = 'biz.zuolin.com'; -- 取具体环境的电商服务器连接，�
 SET @namespace_id = 999969;
 
 -- OK
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-VALUES (1660, 'app.agreements.url', CONCAT(@core_url, '/mobile/static/app_agreements/agreements.html?ns=', @namespace_id), 'the relative path for changfazhan app agreements', @namespace_id, NULL);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-VALUES (1661, 'business.url', CONCAT('https://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix'), 'biz access url for changfazhan', @namespace_id, NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+VALUES ('app.agreements.url', CONCAT(@core_url, '/mobile/static/app_agreements/agreements.html?ns=', @namespace_id), 'the relative path for changfazhan app agreements', @namespace_id, NULL);
+# INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+# VALUES (1661, 'business.url', CONCAT('https://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix'), 'biz access url for changfazhan', @namespace_id, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (CONCAT('pmtask.handler-', @namespace_id), 'flow', '', '0', NULL);
 
 
