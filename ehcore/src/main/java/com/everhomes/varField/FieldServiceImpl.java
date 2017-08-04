@@ -1,28 +1,126 @@
 package com.everhomes.varField;
 
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/3.
  */
+@Component
 public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private FieldProvider fieldProvider;
     @Override
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
+        String groupPath = "/"+cmd.getRootGroupId();
+        List<ScopeField> scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getModuleName(), groupPath);
+        if(scopeFields != null && scopeFields.size() > 0) {
+            List<Long> fieldIds = new ArrayList<>();
+            Map<Long, FieldDTO> dtoMap = new HashMap<>();
+            scopeFields.forEach(field -> {
+                fieldIds.add(field.getFieldId());
+                dtoMap.put(field.getFieldId(), ConvertHelper.convert(field, FieldDTO.class));
+            });
+
+            //一把取出scope field对应的所有系统的field 然后把对应信息塞进fielddto中
+            //一把取出所有的scope field对应的scope items信息
+            List<Field> fields = fieldProvider.listFields(fieldIds);
+            List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(fieldIds);
+
+            if(fields != null && fields.size() > 0) {
+                List<FieldDTO> dtos = new ArrayList<>();
+                fields.forEach(field -> {
+                    FieldDTO dto = dtoMap.get(field.getId());
+                    dto.setFieldType(field.getFieldType());
+                    dto.setFieldName(field.getName());
+                    if(fieldItems != null && fieldItems.size() > 0) {
+                        List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
+                        fieldItems.forEach(item -> {
+                            if(field.getId().equals(item.getFieldId())) {
+                                FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
+                                items.add(fieldItem);
+                            }
+                        });
+                        dto.setItems(items);
+                    }
+                    dtos.add(dto);
+                });
+
+                //按default order排序
+                Collections.sort(dtos, (a,b) -> {
+                    return b.getDefaultOrder() - a.getDefaultOrder();
+                });
+                return dtos;
+            }
+        }
         return null;
     }
 
     @Override
     public List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd) {
+        List<ScopeFieldGroup> groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getModuleName());
+        if(groups != null && groups.size() > 0) {
+            List<Long> groupIds = new ArrayList<>();
+            Map<Long, FieldGroupDTO> dtoMap = new HashMap<>();
+            groups.forEach(group -> {
+                groupIds.add(group.getGroupId());
+                dtoMap.put(group.getGroupId(), ConvertHelper.convert(group, FieldGroupDTO.class));
+            });
 
+            //一把取出scope group对应的所有系统的group 然后把parentId塞回dto中
+            List<FieldGroup> fieldGroups = fieldProvider.listFieldGroups(groupIds);
+            List<FieldGroupDTO> dtos = new ArrayList<>();
+            if(fieldGroups != null && fieldGroups.size() > 0) {
+                fieldGroups.forEach(fieldGroup -> {
+                    FieldGroupDTO dto = dtoMap.get(fieldGroup.getId());
+                    dto.setParentId(fieldGroup.getParentId());
+                    dtos.add(dto);
+                });
+            }
+
+            //处理group的树状结构
+            FieldGroupDTO fieldGroupDTO = processFieldGroupnTree(dtos, null);
+            List<FieldGroupDTO> groupDTOs = fieldGroupDTO.getChildrenGroup();
+
+            //按default order排序
+            Collections.sort(groupDTOs, (a,b) -> {
+                return b.getDefaultOrder() - a.getDefaultOrder();
+            });
+
+            return groupDTOs;
+        }
         return null;
     }
+
+    /**
+     * 树状结构
+     * @param dtos
+     * @param dto
+     * @return
+     */
+    private FieldGroupDTO processFieldGroupnTree(List<FieldGroupDTO> dtos, FieldGroupDTO dto) {
+
+        List<FieldGroupDTO> trees = new ArrayList<>();
+        FieldGroupDTO allTreeDTO = ConvertHelper.convert(dto, FieldGroupDTO.class);
+        if(dto != null) {
+            trees.add(allTreeDTO);
+        }
+        for (FieldGroupDTO groupTreeDTO : dtos) {
+            if (groupTreeDTO.getParentId().equals(dto.getGroupId())) {
+                FieldGroupDTO organizationTreeDTO = processFieldGroupnTree(dtos, groupTreeDTO);
+                trees.add(organizationTreeDTO);
+            }
+        }
+
+        dto.setChildrenGroup(trees);
+        return dto;
+    }
+
 }

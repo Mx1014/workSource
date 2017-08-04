@@ -8,17 +8,19 @@ import java.util.List;
 /**
  * <ul>
  *     <li>id: 域下的组id，新加进去的没有</li>
+ *     <li>parentId: 父id</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>moduleName: 组所属的模块类型名</li>
  *     <li>groupId: 在系统组里的id</li>
  *     <li>groupDisplayName: 组名</li>
- *     <li>defaultOrder: 顺序</li>
  *     <li>childrenGroup: 子字段组 参考{@link FieldGroupDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
 public class FieldGroupDTO {
     private Long id;
+
+    private Long parentId;
 
     private Integer namespaceId;
 
@@ -39,6 +41,14 @@ public class FieldGroupDTO {
 
     public void setDefaultOrder(Integer defaultOrder) {
         this.defaultOrder = defaultOrder;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     public String getGroupDisplayName() {
