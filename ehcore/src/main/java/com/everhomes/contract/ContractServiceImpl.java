@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.contract.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +37,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
-import com.everhomes.rest.contract.ListContractsCommand;
-import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.scheduler.RunningFlag;
@@ -356,5 +352,25 @@ public class ContractServiceImpl implements ContractService {
 		}).collect(Collectors.toList());
 		
 		return new ListContractsResponse(null, resultList);
+	}
+
+	@Override
+	public void createContract(CreateContractCommand cmd) {
+
+	}
+
+	@Override
+	public void updateContract(UpdateContractCommand cmd) {
+
+	}
+
+	@Override
+	public void denunciationContract(DenunciationContractCommand cmd) {
+
+	}
+
+	@Override
+	public ContractDetailDTO findContract(FindContractCommand cmd) {
+		return null;
 	}
 }

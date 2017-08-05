@@ -49,6 +49,17 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>修改合同</p>
+	 * <b>URL: /contract/updateContract</b>
+	 */
+	@RequestMapping("updateContract")
+	@RestReturn(String.class)
+	public RestResponse updateContract(UpdateContractCommand cmd){
+		contractService.updateContract(cmd);
+		return new RestResponse();
+	}
+
+	/**
 	 * <p>退约合同</p>
 	 * <b>URL: /contract/denunciationContract</b>
 	 */

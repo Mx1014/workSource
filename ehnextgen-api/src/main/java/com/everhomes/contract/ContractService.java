@@ -13,6 +13,7 @@ public interface ContractService {
 	ListContractsResponse listContractsByOraganizationId(ListContractsByOraganizationIdCommand cmd);
 
 	void createContract(CreateContractCommand cmd);
+	void updateContract(UpdateContractCommand cmd);
 
 	void denunciationContract(DenunciationContractCommand cmd);
 	ContractDetailDTO findContract(FindContractCommand cmd);
