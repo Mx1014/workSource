@@ -44,6 +44,7 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("createContract")
 	@RestReturn(String.class)
 	public RestResponse createContract(CreateContractCommand cmd){
+		contractService.createContract(cmd);
 		return new RestResponse();
 	}
 
@@ -54,6 +55,7 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("denunciationContract")
 	@RestReturn(String.class)
 	public RestResponse denunciationContract(DenunciationContractCommand cmd){
+		contractService.denunciationContract(cmd);
 		return new RestResponse();
 	}
 
@@ -64,7 +66,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("findContract")
 	@RestReturn(ContractDetailDTO.class)
 	public RestResponse findContract(FindContractCommand cmd){
-		return new RestResponse();
+		ContractDetailDTO detail = contractService.findContract(cmd);
+		return new RestResponse(detail);
 	}
 
 	/**

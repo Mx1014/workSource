@@ -1,9 +1,7 @@
 // @formatter:off
 package com.everhomes.contract;
 
-import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
-import com.everhomes.rest.contract.ListContractsCommand;
-import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.*;
 
 public interface ContractService {
 
@@ -13,5 +11,10 @@ public interface ContractService {
 	void contractSchedule();
 
 	ListContractsResponse listContractsByOraganizationId(ListContractsByOraganizationIdCommand cmd);
+
+	void createContract(CreateContractCommand cmd);
+
+	void denunciationContract(DenunciationContractCommand cmd);
+	ContractDetailDTO findContract(FindContractCommand cmd);
 
 }

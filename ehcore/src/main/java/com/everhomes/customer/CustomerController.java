@@ -3,6 +3,7 @@ package com.everhomes.customer;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -12,6 +13,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +30,8 @@ import javax.validation.Valid;
 public class CustomerController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerController.class);
 
+    @Autowired
+    private PropertyMgrService propertyMgrService;
     /**
      * <b>URL: /customer/createCustomer</b>
      * <p>创建新客户</p>
@@ -37,6 +41,8 @@ public class CustomerController extends ControllerBase {
     public RestResponse createCustomer(@Valid CreateCustomerCommand cmd) {
         if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
 
+        } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
+            propertyMgrService.createOrganizationOwner(cmd.getIndividualCustomer());
         }
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
