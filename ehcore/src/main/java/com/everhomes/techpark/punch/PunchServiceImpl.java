@@ -6158,22 +6158,23 @@ public class PunchServiceImpl implements PunchService {
     } 
 	@Override
 	public void deletePunchGroup(DeleteCommonCommand cmd) {
-		// TODO Auto-generated method stub
-		 Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
-		 this.organizationProvider.deleteOrganization(organization);
-		 //  组织架构删除薪酬组人员关联及配置
-		 this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getId(),cmd.getOwnerId());
-		 this.uniongroupService.deleteUniongroupMemberDetailByGroupId(cmd.getId(),cmd.getOwnerId());
-		 //删除考勤规则
-		 punchProvider.deletePunchGeopointsByOwnerId(cmd.getId());
-		 punchProvider.deletePunchWifisByOwnerId(cmd.getId());
-		 PunchRule pr = punchProvider.getpunchruleByPunchOrgId(cmd.getId());
-		 punchProvider.deletePunchTimeRuleByPunchOrgId(cmd.getId());
-		 punchProvider.deletePunchSpecialDaysByPunchOrgId(cmd.getId());
-		 punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
-		 punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId());
-		 punchProvider.deletePunchRule(pr);
-         
+		this.dbProvider.execute((TransactionStatus status) -> {
+			 Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
+			 this.organizationProvider.deleteOrganization(organization);
+			 //  组织架构删除薪酬组人员关联及配置
+			 this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getId(),cmd.getOwnerId());
+			 this.uniongroupService.deleteUniongroupMemberDetailByGroupId(cmd.getId(),cmd.getOwnerId());
+			 //删除考勤规则
+			 punchProvider.deletePunchGeopointsByOwnerId(cmd.getId());
+			 punchProvider.deletePunchWifisByOwnerId(cmd.getId());
+			 PunchRule pr = punchProvider.getpunchruleByPunchOrgId(cmd.getId());
+			 punchProvider.deletePunchTimeRuleByPunchOrgId(cmd.getId());
+			 punchProvider.deletePunchSpecialDaysByPunchOrgId(cmd.getId());
+			 punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
+			 punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId());
+			 punchProvider.deletePunchRule(pr);
+			 return null;
+		});
          
 		
 	} 
@@ -6353,6 +6354,9 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private PunchGroupDTO getPunchGroupDTOByOrg(Organization r) {
 		// TODO Auto-generated method stub
+		PunchRule pr = punchProvider.getpunchruleByPunchOrgId(r.getId());
+		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
+		
 		
 		return null;
 	}
