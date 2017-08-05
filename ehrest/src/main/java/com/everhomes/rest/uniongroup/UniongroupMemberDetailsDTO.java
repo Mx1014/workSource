@@ -11,13 +11,16 @@ import java.sql.Timestamp;
  * <li>groupType: 组类型</li>
  * <li>groupId: 组id</li>
  * <li>detailId: 人员档案id</li>
- * <li>targetId: 用户id</li>
  * <li>targetType: 用户类型</li>
+ * <li>targetId: 用户id</li>
  * <li>organizationId: 公司id</li>
  * <li>contactName: 联系名称</li>
  * <li>contactToken: 联系电话</li>
- * <li>operatorUid: 操作人员id</li>
  * <li>updateTime: 更新时间</li>
+ * <li>operatorUid: 操作人员id</li>
+ * <li>employeeNo: 员工编号</li>
+ * <li>department: 员工部门</li>
+ * <li>jobposition: 员工职位</li>
  * </ul>
  */
 public class UniongroupMemberDetailsDTO {
@@ -33,8 +36,11 @@ public class UniongroupMemberDetailsDTO {
     private String contactToken;
     private Timestamp updateTime;
     private Long operatorUid;
+    private String employeeNo;
 
-    /**add**/
+    /**
+     * add
+     **/
     private String department;
     private String jobposition;
 
@@ -132,6 +138,30 @@ public class UniongroupMemberDetailsDTO {
 
     public void setOperatorUid(Long operatorUid) {
         this.operatorUid = operatorUid;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getJobposition() {
+        return jobposition;
+    }
+
+    public void setJobposition(String jobposition) {
+        this.jobposition = jobposition;
     }
 
     @Override

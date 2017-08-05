@@ -14,4 +14,6 @@ public class SalaryServiceErrorCode {
 
     public static final int ERROR_USER_IS_WRONG = 100005;   //   人员不属于本次核算范围
 
+    public static final int ERROR_SALARY_ENTITY_IS_EMPTY = 100006;   //    薪酬字段项为空
+
 }

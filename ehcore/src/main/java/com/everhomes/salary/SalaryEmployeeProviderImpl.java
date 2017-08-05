@@ -174,4 +174,27 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 		}
 		return result.get(0);
 	}
+
+	@Override
+	public SalaryEmployee findSalaryEmployee(Long ownerId, Long detailId, Long salaryGroupId) {
+		List<SalaryEmployee> result = getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.eq(detailId))
+				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryGroupId))
+				.and(Tables.EH_SALARY_EMPLOYEES.OWNER_ID.eq(ownerId))
+				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+		if (null == result || result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
+
+	@Override
+	public List<SalaryEmployee> listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(Long salaryPeriodGroupId, List<Long> detailIds) {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId))
+				.and(Tables.EH_SALARY_EMPLOYEES.USER_DETAIL_ID.notIn(detailIds))
+				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+	}
 }

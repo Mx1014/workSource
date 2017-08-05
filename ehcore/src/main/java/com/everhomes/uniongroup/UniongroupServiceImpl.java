@@ -213,6 +213,28 @@ public class UniongroupServiceImpl implements UniongroupService {
         return null;
     }
 
+    //  将 pojo 转换为 DTO 对象
+    private UniongroupMemberDetailsDTO convertUniongroupMemberToDTO(UniongroupMemberDetail detail){
+        UniongroupMemberDetailsDTO dto = ConvertHelper.convert(detail,UniongroupMemberDetailsDTO.class);
+        String departments = "";
+        String jobPositions = "";
+        if(detail.getDepartment()!=null){
+            for(Long key : detail.getDepartment().keySet()){
+                departments += detail.getDepartment().get(key) + ",";
+            }
+            departments = departments.substring(0,departments.length()-1);
+        }
+        if(detail.getJobPosition()!=null){
+            for(Long key : detail.getJobPosition().keySet()){
+                jobPositions += detail.getJobPosition().get(key) + ",";
+            }
+            jobPositions = jobPositions.substring(0,jobPositions.length()-1);
+        }
+        dto.setDepartment(departments);
+        dto.setJobposition(jobPositions);
+        return dto;
+    }
+
     @Override
     public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd) {
 
@@ -220,7 +242,8 @@ public class UniongroupServiceImpl implements UniongroupService {
         List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId(), cmd.getOwnerId());
         if (details != null) {
             return details.stream().map(r -> {
-                return ConvertHelper.convert(r, UniongroupMemberDetailsDTO.class);
+                UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(r);
+                return dto;
             }).collect(Collectors.toList());
         }
         return null;
@@ -233,7 +256,8 @@ public class UniongroupServiceImpl implements UniongroupService {
         List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(groupId);
         if (details != null) {
             return details.stream().map(r -> {
-                return ConvertHelper.convert(r, UniongroupMemberDetailsDTO.class);
+                UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(r);
+                return dto;
             }).collect(Collectors.toList());
         }
         return null;
@@ -269,12 +293,18 @@ public class UniongroupServiceImpl implements UniongroupService {
         ListUniongroupMemberDetailResponse response = new ListUniongroupMemberDetailResponse();
 
         if (list != null && list.size() > 0) {
-            response.setPageAnchor(search_cmd.getPageAnchor());
+            if (search_cmd.getPageAnchor().longValue() != 0L)
+                response.setPageAnchor(search_cmd.getPageAnchor());
             response.setPageSize(search_cmd.getPageSize());
             response.setUniongroupMemberDetailList(list);
             return response;
         }
         return null;
+    }
+
+    @Override
+    public List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
+        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizaitonId());
     }
 
     private Organization checkOrganization(Long orgId) {
@@ -495,5 +525,14 @@ public class UniongroupServiceImpl implements UniongroupService {
             }
         }
         return false;
+    }
+
+    @Override
+    public UniongroupMemberDetailsDTO findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId){
+        //  查找用户
+        UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId,detailId);
+        //  转换对象
+        UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(detail);
+        return dto;
     }
 }

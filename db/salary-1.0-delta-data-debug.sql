@@ -6,7 +6,6 @@ INSERT INTO `eh_salary_entity_categories` (`id`, `namespace_id`, `category_name`
 INSERT INTO `eh_salary_entity_categories` (`id`, `namespace_id`, `category_name`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES('5','0','合计项\r\n','2','1','2017-06-22 18:23:54',NULL,NULL);
 
 
-
 INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('1',NULL,NULL,'0','1','0','1','基础信息','工号','0','信息模板1','1',NULL,NULL,'2');
 INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('2',NULL,NULL,'0','0','0','1','基础信息','工资月份','1','信息模板1','2',NULL,NULL,'2');
 INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('3',NULL,NULL,'0','0','0','1','基础信息','发放日期','1','信息模板1','3',NULL,NULL,'2');
@@ -85,8 +84,8 @@ INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `names
 INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('76',NULL,NULL,'0','0','1','4','应扣项','请假扣款','1','数值模板1','76',NULL,NULL,'2');
 INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('77',NULL,NULL,'0','0','1','4','应扣项','旷工扣款','1','数值模板1','77',NULL,NULL,'2');
 INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('78',NULL,NULL,'0','0','1','4','应扣项','扣绩效','1','数值模板1','78',NULL,NULL,'2');
-INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('79',NULL,NULL,'0','0','1','4','应扣项','扣社保（个人）','1','数值模板1','79',NULL,NULL,'2');
-INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('80',NULL,NULL,'0','0','1','4','应扣项','扣住房（个人）','1','数值模板1','80',NULL,NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('79',NULL,NULL,'0','0','1','4','应扣项','扣社保_个人','1','数值模板1','79',NULL,NULL,'2');
+INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('80',NULL,NULL,'0','0','1','4','应扣项','扣住房_个人','1','数值模板1','80',NULL,NULL,'2');
 INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('81',NULL,NULL,'0','0','1','4','应扣项','借支','1','数值模板1','81',NULL,NULL,'2');
 INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('82',NULL,NULL,'0','0','1','4','应扣项','凉茶费','1','数值模板1','82',NULL,NULL,'2');
 INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `namespace_id`, `default_flag`, `type`, `category_id`, `category_name`, `name`, `editable_flag`, `template_name`, `default_order`, `creator_uid`, `create_time`, `status`) VALUES('83',NULL,NULL,'0','0','1','4','应扣项','扣电费','1','数值模板1','83',NULL,NULL,'2');
@@ -109,24 +108,25 @@ INSERT INTO `eh_salary_default_entities` (`id`, `owner_type`, `owner_id`, `names
 -- 邮件模板
 SET @id = (SELECT MAX(id)FROM eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'salary.mail','1','zh_CN','邮件模板','<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>工资发放</title></head><body>${emailContent}<br><br>${entityTable}</body></html>',0); 
-
-
-
+ 
 -- 增加薪酬管理菜单
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES('51200','薪酬管理','50000',NULL,NULL,'0','2','/50000/51200','park','592','51200');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES('51210','批次设置','51200',NULL,'react:/salary-management/batch-setting','0','2','/50000/51200/51210','park','592','51200');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES('51220','员工工资','51200',NULL,'react:/salary-management/batch-salary','0','2','/50000/51200/51220','park','593','51200');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES('51230','工资发放','51200',NULL,'access_group/inside','0','2','/50000/51200/51230','park','594','51203');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES('51231','核算阶段','51230',NULL,'react:/salary-management/salary-check','0','2','/50000/51200/51230/51231','park','595','51200');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES('51232','发放阶段','51230',NULL,'react:/salary-management/salary-pay','0','2','/50000/51200/51230/51232','park','596','51200');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-VALUES('51240','发放历史','51200',NULL,'react:/salary-management/pay-history','0','2','/50000/51200/51240','park','597','51200');
+-- 园区管理员
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51200','薪酬管理','50000',NULL,NULL,'0','2','/50000/51200','park','592','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51210','批次设置','51200',NULL,'react:/salary-management/batch-setting','0','2','/50000/51200/51210','park','592','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51220','员工工资','51200',NULL,'react:/salary-management/batch-salary','0','2','/50000/51200/51220','park','593','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51230','工资发放','51200',NULL,'access_group/inside','0','2','/50000/51200/51230','park','594','51203','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51231','核算阶段','51230',NULL,'react:/salary-management/salary-check','0','2','/50000/51200/51230/51231','park','595','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51232','发放阶段','51230',NULL,'react:/salary-management/salary-pay','0','2','/50000/51200/51230/51232','park','596','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('51240','发放历史','51200',NULL,'react:/salary-management/pay-history','0','2','/50000/51200/51240','park','597','51200','0',NULL,'module');
+
+-- 企业管理员
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('501200','薪酬管理','500000',NULL,NULL,'0','2','/500000/501200','organization','592','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('501210','批次设置','501200',NULL,'react:/salary-management/batch-setting','0','2','/500000/501200/501210','organization','592','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('501220','员工工资','501200',NULL,'react:/salary-management/batch-salary','0','2','/500000/501200/501220','organization','593','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('501230','工资发放','501200',NULL,'access_group/inside','0','2','/500000/501200/501230','organization','594','51203','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('501231','核算阶段','501230',NULL,'react:/salary-management/salary-check','0','2','/500000/501200/501230/501231','organization','595','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('501232','发放阶段','501230',NULL,'react:/salary-management/salary-pay','0','2','/500000/501200/501230/501232','organization','596','51200','0',NULL,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES('501240','发放历史','501200',NULL,'react:/salary-management/pay-history','0','2','/500000/501200/501240','organization','597','51200','0',NULL,'module');
 
 -- 给域空间加菜单 
 -- volgo
@@ -138,6 +138,15 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'51231','','EhNamespaces','1','2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'51232','','EhNamespaces','1','2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'51240','','EhNamespaces','1','2');
+ 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'501200','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'501210','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'501220','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'501230','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'501231','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'501232','','EhNamespaces','1','2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'501240','','EhNamespaces','1','2');
+
 
 
 -- 加菜单权限
@@ -174,4 +183,9 @@ VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privileges_id,
 SET @locale_id = (SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100001','zh_CN','没有文件');
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100002','zh_CN','姓名为空');
-INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100003','zh_CN','手机号码有误');
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100003','zh_CN','手机号码有误或不属于本薪酬组范围');
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100004','zh_CN','没有实发工资');
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100005','zh_CN','人员不属于本次核算范围');
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`) VALUES ((@locale_id := @locale_id + 1),'salarygroup','100006','zh_CN','需完整填写表格');
+
+

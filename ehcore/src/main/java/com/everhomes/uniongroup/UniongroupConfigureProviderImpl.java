@@ -6,6 +6,11 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationMemberDetailsMapper;
+import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -385,6 +390,20 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
                 .fetchInto(Object[].class);
     }
+
+    @Override
+    public List listDetailNotInUniongroup(Integer namespaceId, Long organizationId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+        TableLike t1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t1");
+        TableLike t2 = Tables.EH_UNIONGROUP_MEMBER_DETAILS.as("t2");
+        SelectJoinStep step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id")));
+        Condition condition = t1.field("organization_id").eq(organizationId).and(t1.field("namespace_id").eq(namespaceId)).and(t2.field("detail_id").isNull());
+        List<OrganizationMemberDetails> details = step.where(condition).fetch().map(new OrganizationMemberDetailsMapper());
+        step.close();
+        return details;
+    }
+
     /**
      * Configure
      **/

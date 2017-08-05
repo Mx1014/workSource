@@ -93,4 +93,21 @@ public class UniongroupController extends ControllerBase {
         return res;
     }
 
+
+    /**
+     * <p>获取一个公司内未关联薪酬组的人</p>
+     * <b>URL: /uniongroup/listDetailNotInUniongroup</b>
+     */
+    @RequestMapping("listDetailNotInUniongroup")
+    @RestReturn(value = UniongroupMemberDetailsDTO.class, collection = true)
+    public RestResponse listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd){
+        RestResponse response = new RestResponse(uniongroupService.listDetailNotInUniongroup(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+
 }
