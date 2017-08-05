@@ -359,7 +359,7 @@ class PmTaskCommonServiceImpl {
         PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
 
         //查询服务类型
-        Category category = categoryProvider.findCategoryById(task.getCategoryId());
+            Category category = categoryProvider.findCategoryById(task.getCategoryId());
         Category taskCategory = checkCategory(task.getTaskCategoryId());
         if(null != category)
             dto.setCategoryName(category.getName());
