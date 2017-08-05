@@ -3812,27 +3812,27 @@ public class QualityServiceImpl implements QualityService {
 				String[] paths = path.split("/");
 				categoryIds.add(Long.valueOf(paths[1]));
 			});
+			LOGGER.info("categoryIds: {}", categoryIds);
 			//一把取出涉及到的类型
 			Map<Long, QualityInspectionSpecifications> categories = qualityProvider.listSpecificationByIds(categoryIds);
 			results.forEach(result -> {
-				categoryIds.forEach(categoryId -> {
-					Double weight = 1.0;
+				Double weight = 1.0;
+				for(Long categoryId : categoryIds) {
 					if(result.getSpecificationPath().contains(categoryId.toString())) {
 						if(categories.get(categoryId.toString()) != null) {
-							weight = categories.get(categoryId.toString()).getWeight()
+							weight = categories.get(categoryId.toString()).getWeight();
 						}
 					}
-
-					//扣分等于实际扣分乘以占比
-					LOGGER.info("result: {}, weight: {}", result, weight);
-					Double statScore = communitySpecificationStats.get(result.getTargetId()) * weight;
-					if(statScore != null) {
-						scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
-						statScore = statScore + result.getTotalScore();
-						communitySpecificationStats.put(result.getTargetId(), statScore);
-					}
-				});
-
+				}
+				
+				//扣分等于实际扣分乘以占比
+				LOGGER.info("result: {}, weight: {}", result, weight);
+				Double statScore = communitySpecificationStats.get(result.getTargetId()) * weight;
+				if(statScore != null) {
+					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
+					statScore = statScore + result.getTotalScore();
+					communitySpecificationStats.put(result.getTargetId(), statScore);
+				}
 
 			});
 		}
