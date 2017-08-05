@@ -3131,15 +3131,16 @@ public class QualityServiceImpl implements QualityService {
 		taskIds = sortedMap.keySet();
        
 		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIds);
+		//去掉cache之后 改为一把取record 如果还是有问题那么不是cache的错 可能是record没有塞进去
+		Map<Long, QualityInspectionTaskRecords> recordsMap = qualityProvider.listLastRecordByTaskIds(taskIds);
 
-		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+		List<QualityInspectionTaskRecords> records = new ArrayList<>();
         for(QualityInspectionTasks task : tasks) {
-        	QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
-        	if(record != null) {
-        		task.setRecord(record);
-            	records.add(task.getRecord());
-        	}
-        	
+			QualityInspectionTaskRecords record = recordsMap.get(task.getId());
+			if(record != null) {
+				task.setRecord(recordsMap.get(task.getId()));
+				records.add(recordsMap.get(task.getId()));
+			}
         }
 
 		this.qualityProvider.populateRecordAttachments(records);
