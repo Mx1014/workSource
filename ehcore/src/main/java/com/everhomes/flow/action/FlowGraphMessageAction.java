@@ -50,6 +50,7 @@ public class FlowGraphMessageAction extends FlowGraphAction {
 		dto.setTimeoutAtTick(timeoutAtTick);
 		dto.setRemindTick(remindTick);
 		dto.setRemindCount(remindCount);
+		dto.setSubjectId(ctx.getCurrentEvent().getSubject().getId());// 为了在发消息的时候可以拿到用户输入的内容
 
 		if(ctx.getOperator() != null) {
 			dto.setOperatorId(ctx.getOperator().getId());
