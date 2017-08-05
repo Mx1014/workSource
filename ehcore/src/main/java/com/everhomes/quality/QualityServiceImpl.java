@@ -3131,15 +3131,16 @@ public class QualityServiceImpl implements QualityService {
 		taskIds = sortedMap.keySet();
        
 		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIds);
+		//去掉cache之后 改为一把取record 如果还是有问题那么不是cache的错 可能是record没有塞进去
+		Map<Long, QualityInspectionTaskRecords> recordsMap = qualityProvider.listLastRecordByTaskIds(taskIds);
 
-		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+		List<QualityInspectionTaskRecords> records = new ArrayList<>();
         for(QualityInspectionTasks task : tasks) {
-        	QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
-        	if(record != null) {
-        		task.setRecord(record);
-            	records.add(task.getRecord());
-        	}
-        	
+			QualityInspectionTaskRecords record = recordsMap.get(task.getId());
+			if(record != null) {
+				task.setRecord(recordsMap.get(task.getId()));
+				records.add(recordsMap.get(task.getId()));
+			}
         }
 
 		this.qualityProvider.populateRecordAttachments(records);
@@ -3805,8 +3806,30 @@ public class QualityServiceImpl implements QualityService {
 
 		LOGGER.info("deduct sample id:{}, start time : {}, results: {}",scoreStat.getSampleId(), scoreStat.getUpdateTime(), results);
 		if(results != null) {
+			List<Long> categoryIds = new ArrayList<>();
 			results.forEach(result -> {
-				Double statScore = communitySpecificationStats.get(result.getTargetId());
+				String path = result.getSpecificationPath();
+				String[] paths = path.split("/");
+				categoryIds.add(Long.valueOf(paths[1]));
+			});
+			//一把取出涉及到的类型
+			Map<Long, QualityInspectionSpecifications> categories = qualityProvider.listSpecificationByIds(categoryIds);
+			List<Double> weigths = new ArrayList<>();
+			results.forEach(result -> {
+				categoryIds.forEach(categoryId -> {
+					if(result.getSpecificationPath().contains(categoryId.toString())) {
+						QualityInspectionSpecifications category = categories.get(categoryId.toString());
+						if(category != null) {
+							weigths.add(category.getWeight());
+						}
+					}
+				});
+
+				if(weigths.size() == 0) {
+					weigths.add(1.0);
+				}
+				//扣分等于实际扣分乘以占比
+				Double statScore = communitySpecificationStats.get(result.getTargetId()) * weigths.get(0);
 				if(statScore != null) {
 					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
 					statScore = statScore + result.getTotalScore();

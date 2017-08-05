@@ -93,3 +93,50 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999983, 0, 0, 
 
 -- 修复组织架构的历史数据
 update eh_organization_members SET visible_flag = 0 WHERE visible_flag = null;
+
+-- 资源预约 add by sw 20170802
+UPDATE eh_rentalv2_orders set requestor_organization_id = organization_id;
+UPDATE eh_rentalv2_orders o join eh_organization_communities c on o.community_id = c.community_id set o.organization_id = c.organization_id;
+
+-- by dengs,张江高科用户认证 url改变
+UPDATE `eh_authorization_third_party_forms` SET `authorization_url`='http://139.129.220.146:3578/openapi/user/Authenticate' WHERE id in (1,2);
+
+-- 重新迁移user_organization表
+DELETE FROM eh_user_organizations;
+
+SET @user_organization_id = 0;
+
+INSERT INTO eh_user_organizations (
+    id,
+    namespace_id,
+    user_id,
+    organization_id,
+    STATUS,
+    group_type,
+    group_path,
+    update_time,
+    visible_flag
+) SELECT
+    (
+        @user_organization_id := @user_organization_id + 1
+    ),
+    ifnull(eom.namespace_id, 0),
+    eom.target_id,
+    eom.organization_id,
+    eom. STATUS,
+    eom.group_type,
+    eom.group_path,
+    eom.update_time,
+    eom.visible_flag
+FROM
+    eh_organization_members eom
+LEFT JOIN eh_organizations eo ON eom.organization_id = eo.id
+WHERE
+    eom.group_type = 'ENTERPRISE'
+AND eom.target_type = 'USER'
+AND (eom.status = '3' or eom.`status` = '1')
+GROUP BY
+    eom.organization_id,
+    eom.contact_token
+ORDER BY
+    eom.id;

@@ -55,6 +55,7 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.address.AddressAdminStatus;
@@ -5570,6 +5571,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                             if (list != null && list.size() > 0) {
                                 list = list.stream()
                                         .filter(member -> OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE)
+                                        .filter(member -> OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER)
                                         // .limit(1)
                                         .map(member -> {
                                             member.setOperatorUid(r.getOperatorUid());
@@ -6509,19 +6511,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 
             //添加管理员
-			if (orgAdminAccounts.get(org.getId()) == null) {
-				deleteOrganizationAllAdmins(org.getId());
-				orgAdminAccounts.put(org.getId(), new ArrayList<>());
-			}
-			if (!orgAdminAccounts.get(org.getId()).contains(data.getAdminToken())) {
-			CreateOrganizationAccountCommand accountCommand = new CreateOrganizationAccountCommand();
-			accountCommand.setOrganizationId(org.getId());
-			accountCommand.setAccountPhone(data.getAdminToken());
-			accountCommand.setAccountName(data.getAdminName());
-			if(!StringUtils.isEmpty(accountCommand.getAccountPhone())){
-				this.createOrganizationAccount(accountCommand, RoleConstants.ENTERPRISE_SUPER_ADMIN);
-				}
-				orgAdminAccounts.get(org.getId()).add(data.getAdminToken());
+            if (orgAdminAccounts.get(org.getId()) == null) {
+                deleteOrganizationAllAdmins(org.getId());
+                orgAdminAccounts.put(org.getId(), new ArrayList<>());
+            }
+            if (!orgAdminAccounts.get(org.getId()).contains(data.getAdminToken())) {
+                if (!StringUtils.isEmpty(data.getAdminToken())) {
+                    CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
+                    createOrganizationAdminCommand.setOrganizationId(org.getId());
+                    createOrganizationAdminCommand.setContactToken(data.getAdminToken());
+                    createOrganizationAdminCommand.setContactName(data.getAdminName());
+                    rolePrivilegeService.createOrganizationAdmin(createOrganizationAdminCommand, namespaceId);
+                }
+                orgAdminAccounts.get(org.getId()).add(data.getAdminToken());
             }
 
         }

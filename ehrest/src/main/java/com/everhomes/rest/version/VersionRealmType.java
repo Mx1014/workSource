@@ -55,6 +55,10 @@ package com.everhomes.rest.version;
  * <li>IOS_UPARK("iOS_UPark"): 张江高科iOS版APP</li>
  * <li>ANDROID_GDWY("Android_GDWY"): 东莞互联网产业园 Android版APP</li>
  * <li>IOS_GDWY("iOS_GDWY"): 东莞互联网产业园 iOS版APP</li>
+ * <li>ANDROID_GUOMAO("Android_Guomao"): 国贸</li>
+ * <li>IOS_GUOMAO("iOS_Guomao"): 国贸</li>
+ * <li>ANDROID_CHANGFAZHAN("Android_Changfazhan"): 昌发展</li>
+ * <li>IOS_CHANGFAZHAN("iOS_Changfazhan"): 昌发展</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -127,8 +131,12 @@ public enum VersionRealmType {
     ANDROID_UPARK("Android_UPark"),
     IOS_UPARK("iOS_UPark"),
     ANDROID_GDWY("Android_GDWY"),
-    IOS_GDWY("iOS_GDWY");
-    
+    IOS_GDWY("iOS_GDWY"),
+    ANDROID_GUOMAO("Android_Guomao"),
+    IOS_GUOMAO("iOS_Guomao"),
+    ANDROID_CHANGFAZHAN("Android_Changfazhan"),
+    IOS_CHANGFAZHAN("iOS_Changfazhan");
+
     private String code;
     private VersionRealmType(String code) {
         this.code = code;
