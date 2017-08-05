@@ -1,6 +1,7 @@
 package com.everhomes.pmtask;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -13,6 +14,7 @@ import com.everhomes.flow.FlowEventLogProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.zjgk.ZjgkJsonEntity;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
@@ -65,17 +67,16 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
         String url = configProvider.getValue("pmtask.zjgk.url", "");
         Map<String, String> params = generateParams(task);
 
-        ZjgkJsonEntity<List<ZjgkResponse>> entity = new ZjgkJsonEntity<List<ZjgkResponse>>();
+        ZjgkJsonEntity entity = new ZjgkJsonEntity();
 
 
         String jsonStr = null;
         try {
             jsonStr = HttpUtils.post(url, params, 20, "UTF-8");
             //向第张江认证。
-            entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
+            entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity>(){});
         } catch (Exception e) {
             e.printStackTrace();
-            entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SEND_REQUEST_EXCEPTION);
             entity.setErrorDescription("请求失败");
         }
 
