@@ -3819,8 +3819,10 @@ public class QualityServiceImpl implements QualityService {
 				Double weight = 1.0;
 				for(Long categoryId : categoryIds) {
 					if(result.getSpecificationPath().contains(categoryId.toString())) {
-						if(categories.get(categoryId.toString()) != null) {
-							weight = categories.get(categoryId.toString()).getWeight();
+						LOGGER.info("contains categoryid: {}", categoryId);
+						if(categories.get(categoryId) != null) {
+							LOGGER.info("get category by id: {}", categoryId);
+							weight = categories.get(categoryId).getWeight();
 						}
 					}
 				}
