@@ -29,6 +29,22 @@ public class CustomerController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerController.class);
 
     /**
+     * <b>URL: /customer/createCustomer</b>
+     * <p>创建新客户</p>
+     */
+    @RequestMapping("createCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomer(@Valid CreateCustomerCommand cmd) {
+        if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
+
+        }
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /customer/createEnterpriseCustomer</b>
      * <p>创建企业客户</p>
      */
