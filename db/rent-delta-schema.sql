@@ -7,6 +7,8 @@ ALTER TABLE eh_buildings DROP COLUMN telecommunication_description;
 ALTER TABLE eh_buildings DROP COLUMN air_condition_description;
 ALTER TABLE eh_buildings DROP COLUMN security_description;
 ALTER TABLE eh_buildings DROP COLUMN fire_control_description;
+ALTER TABLE eh_buildings DROP COLUMN general_form_id;
+ALTER TABLE eh_buildings DROP COLUMN custom_form_flag;
 
 ALTER TABLE `eh_lease_promotion_attachments` ADD COLUMN `owner_type` VARCHAR(128) NOT NULL AFTER `id`;
 ALTER TABLE `eh_lease_promotion_attachments` CHANGE COLUMN `lease_id` `owner_id` BIGINT NOT NULL AFTER `id`;
@@ -54,7 +56,7 @@ CREATE TABLE `eh_lease_buildings` (
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'uid of the user who process the address',
   `operate_time` datetime DEFAULT NULL,
-  `delete_flag` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: forbidden 1: support delete',
+  `delete_flag` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: forbidden 1: support delete',
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_community_id_name` (`community_id`,`name`)
