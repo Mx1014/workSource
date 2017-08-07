@@ -6199,39 +6199,55 @@ public class PunchServiceImpl implements PunchService {
         command.setTargets(cmd.getTargets()); 
         this.uniongroupService.saveUniongroupConfigures(command);
         //打卡地点和wifi
-        if(null != cmd.getPunchGeoPoints()){
-        	for(PunchGeoPointDTO point:cmd.getPunchGeoPoints()){
-        		PunchGeopoint punchGeopoint =convertDTO2GeoPoint(point);
-        		punchGeopoint.setOwnerId(punchOrg.getId());  
-        		punchProvider.createPunchGeopoint(punchGeopoint);
-        	}
-        }
-        if(null != cmd.getWifis()){
-        	for(PunchWiFiDTO wifi:cmd.getWifis()){ 
-        		PunchWifi punchWifi = convertDTO2Wifi(wifi); 
-        		punchWifi.setOwnerId(punchOrg.getId());  
-        		punchProvider.createPunchWifi(punchWifi);
-        	}
-        }
-        
-        //打卡时间
-		savePunchTimeRule(cmd, punchOrg.getId());
-		
-		return null;
-	} 
+        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
 
-	private void savePunchTimeRule(AddPunchGroupCommand cmd, Long punchOrgId) {
         PunchRule pr = ConvertHelper.convert(cmd, PunchRule.class);
         pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
         pr.setOwnerId(cmd.getOwnerId());  
         pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
         pr.setName(cmd.getGroupName());
         pr.setRuleType(cmd.getRuleType());
-        pr.setPunchOrganizationId(punchOrgId);  
-        punchProvider.createPunchRule(pr);
+        pr.setPunchOrganizationId( punchOrg.getId());  
+        punchProvider.createPunchRule(pr); 
+        //打卡时间
+		savePunchTimeRule(ConvertHelper.convert(cmd, PunchGroupDTO.class),pr);
+		
+		return null;
+	} 
+	/**
+	 * 根据orgId,先删除后添加
+	 * */
+	private void saveGeopointsAndWifis(Long orgId, List<PunchGeoPointDTO> punchGeoPoints,
+			List<PunchWiFiDTO> wifis) {
+		punchProvider.deletePunchGeopointsByOwnerId(orgId);
+		punchProvider.deletePunchWifisByOwnerId(orgId);
+		if(null != punchGeoPoints){
+        	for(PunchGeoPointDTO point:punchGeoPoints){
+        		PunchGeopoint punchGeopoint =convertDTO2GeoPoint(point);
+        		punchGeopoint.setOwnerId(orgId);  
+        		punchProvider.createPunchGeopoint(punchGeopoint);
+        	}
+        }
+        if(null != wifis){
+        	for(PunchWiFiDTO wifi: wifis){ 
+        		PunchWifi punchWifi = convertDTO2Wifi(wifi); 
+        		punchWifi.setOwnerId(orgId);  
+        		punchProvider.createPunchWifi(punchWifi);
+        	}
+        }
+	}
+	/**
+	 * 根据pr ,先删除再添加打卡时间,排班,特殊日期
+	 * */
+	private void savePunchTimeRule(PunchGroupDTO punchGroupDTO, PunchRule pr) {
+		Long punchOrgId = pr.getPunchOrganizationId();
+		punchProvider.deletePunchTimeRuleByPunchOrgId(punchOrgId);
+		punchProvider.deletePunchSpecialDaysByPunchOrgId(punchOrgId);
+		punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
+		punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId());
         List<PunchTimeRule> ptrs = new ArrayList<>();
-        if(null != cmd.getTimeRules()){
-        	for(PunchTimeRuleDTO timeRule:cmd.getTimeRules()){
+        if(null != punchGroupDTO.getTimeRules()){
+        	for(PunchTimeRuleDTO timeRule:punchGroupDTO.getTimeRules()){
         		if(timeRule.getPunchTimeIntervals() == null || timeRule.getPunchTimeIntervals().size() == 0)
         			continue;
         		PunchTimeRule ptr =ConvertHelper.convert(timeRule, PunchTimeRule.class);
@@ -6276,11 +6292,11 @@ public class PunchServiceImpl implements PunchService {
         }
         
         //特殊日期
-        if(null != cmd.getSpecialDays()){
-        	for(PunchSpecialDayDTO specialDayDTO : cmd.getSpecialDays()){
+        if(null != punchGroupDTO.getSpecialDays()){
+        	for(PunchSpecialDayDTO specialDayDTO : punchGroupDTO.getSpecialDays()){
         		PunchSpecialDay psd =ConvertHelper.convert(specialDayDTO, PunchSpecialDay.class);
         		psd.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-        		psd.setOwnerId(cmd.getOwnerId());  
+        		psd.setOwnerId(punchGroupDTO.getOwnerId());  
         		psd.setPunchRuleId(pr.getId());
         		psd.setPunchOrganizationId(punchOrgId);  
         		psd.setRuleDate(new java.sql.Date(specialDayDTO.getRuleDate())); 
@@ -6289,8 +6305,8 @@ public class PunchServiceImpl implements PunchService {
         	}
         }
         //排班
-        if(cmd.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && cmd.getSchedulings() != null){
-        	for(PunchSchedulingDTO monthScheduling : cmd.getSchedulings()){
+        if(punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null){
+        	for(PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()){
         		monthScheduling.getEmployees().stream().map(r->{
         			saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
         			return null;
@@ -6377,6 +6393,7 @@ public class PunchServiceImpl implements PunchService {
 	private PunchGroupDTO getPunchGroupDTOByOrg(Organization r) {
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(r.getId());
 		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
+		dto.setId(pr.getPunchOrganizationId());
 		Integer totalCount = uniongroupService.countUnionGroupMemberDetailsByOrgId(r.getNamespaceId(),r.getId());
 		dto.setEmployeeCount(totalCount);
 		//TODO: 关联 人员和机构
@@ -6420,10 +6437,10 @@ public class PunchServiceImpl implements PunchService {
 	        //特殊日期
 			List<PunchSpecialDay> specialDays = punchProvider.listPunchSpecailDaysByOrgId(pr.getPunchOrganizationId());
 			if(null != specialDays ){
-				dto.setSpecialDay(new ArrayList<>());
+				dto.setSpecialDays(new ArrayList<>());
 				for(PunchSpecialDay specialDay : specialDays){
 					PunchSpecialDayDTO dto1 =ConvertHelper.convert(specialDay, PunchSpecialDayDTO.class);
-					dto.getSpecialDay().add(dto1);
+					dto.getSpecialDays().add(dto1);
 				}
 			}
 		} 
@@ -6538,7 +6555,32 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
-		// TODO Auto-generated method stub
+		//
+		//获取考勤组
+		Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
+		punchOrg.setName(cmd.getGroupName());
+		organizationProvider.updateOrganization(punchOrg);
+		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
+		//添加关联
+		SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
+        command.setGroupId(punchOrg.getId());
+        command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
+        command.setEnterpriseId(cmd.getOwnerId());
+        command.setTargets(cmd.getTargets()); 
+        this.uniongroupService.saveUniongroupConfigures(command);
+        //打卡地点和wifi
+        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
+        
+        //打卡时间,特殊日期,排班等
+        pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+        pr.setOwnerId(cmd.getOwnerId());  
+        pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
+        pr.setName(cmd.getGroupName());
+        pr.setRuleType(cmd.getRuleType());
+        pr.setPunchOrganizationId( punchOrg.getId());  
+        punchProvider.updatePunchRule(pr); 
+        
+        savePunchTimeRule(cmd, pr);
 		return null;
 	}
 	@Override

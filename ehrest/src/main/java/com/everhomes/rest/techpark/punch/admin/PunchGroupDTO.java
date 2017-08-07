@@ -11,7 +11,7 @@ import com.everhomes.rest.uniongroup.UniongroupTarget;
 import com.everhomes.util.StringHelper;
 /**
  * <ul> 
- * <li>id：id</li>
+ * <li>id：考勤组的id</li>
  * <li>ownerType：所属对象类型organization</li>
  * <li>ownerId：所属对象id</li>
  * <li>groupName：规则名(考勤组名)</li>
@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchGeoPoints: 地点规则 {@link com.everhomes.rest.techpark.punch.PunchGeoPointDTO}</li>
  * <li>wifis: wifi规则{@link com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO}</li>
  * <li>timeRule: 上班时间{@link com.everhomes.rest.techpark.punch.PunchTimeRuleDTO}</li>
- * <li>specialDay: 特殊日期列表 {@link com.everhomes.rest.techpark.punch.admin.PunchSpecialDayDTO}</li>
+ * <li>specialDays: 特殊日期列表 {@link com.everhomes.rest.techpark.punch.admin.PunchSpecialDayDTO}</li>
  * <li>schedulings: 排班列表{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO}</li>
  * <li>chinaHolidayFlag: 使用中国法定假日falg  0-否 1-是 </li>
  * <li>employeeCount: 总人数 </li>
@@ -57,7 +57,7 @@ public class PunchGroupDTO {
 	private  List<PunchTimeRuleDTO> timeRules;
 	  
 	@ItemType(PunchSpecialDayDTO.class)
-	private List<PunchSpecialDayDTO> specialDay;
+	private List<PunchSpecialDayDTO> specialDays;
 	
 
 	@ItemType(PunchSchedulingDTO.class)
@@ -76,6 +76,22 @@ public class PunchGroupDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getPunchOriganizationId() {
+		return punchOriganizationId;
+	}
+
+	public void setPunchOriganizationId(Long punchOriganizationId) {
+		this.punchOriganizationId = punchOriganizationId;
 	}
 
 	public String getOwnerType() {
@@ -133,32 +149,22 @@ public class PunchGroupDTO {
 	public void setWifis(List<PunchWiFiDTO> wifis) {
 		this.wifis = wifis;
 	}
- 
 
-	public Byte getChinaHolidayFlag() {
-		return chinaHolidayFlag;
+	public List<PunchTimeRuleDTO> getTimeRules() {
+		return timeRules;
 	}
 
-	public void setChinaHolidayFlag(Byte chinaHolidayFlag) {
-		this.chinaHolidayFlag = chinaHolidayFlag;
-	}
- 
-
-	public Long getId() {
-		return id;
+	public void setTimeRules(List<PunchTimeRuleDTO> timeRules) {
+		this.timeRules = timeRules;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public List<PunchSpecialDayDTO> getSpecialDays() {
+		return specialDays;
 	}
 
-	public Long getPunchOriganizationId() {
-		return punchOriganizationId;
+	public void setSpecialDays(List<PunchSpecialDayDTO> specialDays) {
+		this.specialDays = specialDays;
 	}
-
-	public void setPunchOriganizationId(Long punchOriganizationId) {
-		this.punchOriganizationId = punchOriganizationId;
-	} 
 
 	public List<PunchSchedulingDTO> getSchedulings() {
 		return schedulings;
@@ -168,8 +174,28 @@ public class PunchGroupDTO {
 		this.schedulings = schedulings;
 	}
 
-	public List<PunchSpecialDayDTO> getSpecialDay() {
-		return specialDay;
+	public Byte getChinaHolidayFlag() {
+		return chinaHolidayFlag;
+	}
+
+	public void setChinaHolidayFlag(Byte chinaHolidayFlag) {
+		this.chinaHolidayFlag = chinaHolidayFlag;
+	}
+
+	public Integer getEmployeeCount() {
+		return employeeCount;
+	}
+
+	public void setEmployeeCount(Integer employeeCount) {
+		this.employeeCount = employeeCount;
+	}
+
+	public Integer getUnSchedulingCount() {
+		return unSchedulingCount;
+	}
+
+	public void setUnSchedulingCount(Integer unSchedulingCount) {
+		this.unSchedulingCount = unSchedulingCount;
 	}
 
 	public Long getOperatorUid() {
@@ -195,34 +221,6 @@ public class PunchGroupDTO {
 	public void setOperateTime(Long operateTime) {
 		this.operateTime = operateTime;
 	}
-
-	public void setSpecialDay(List<PunchSpecialDayDTO> specialDay) {
-		this.specialDay = specialDay;
-	}
-
-	public Integer getEmployeeCount() {
-		return employeeCount;
-	}
-
-	public void setEmployeeCount(Integer employeeCount) {
-		this.employeeCount = employeeCount;
-	}
-
-	public Integer getUnSchedulingCount() {
-		return unSchedulingCount;
-	}
-
-	public void setUnSchedulingCount(Integer unSchedulingCount) {
-		this.unSchedulingCount = unSchedulingCount;
-	}
-
-	public List<PunchTimeRuleDTO> getTimeRules() {
-		return timeRules;
-	}
-
-	public void setTimeRules(List<PunchTimeRuleDTO> timeRules) {
-		this.timeRules = timeRules;
-	}
-
+ 
  
 }
