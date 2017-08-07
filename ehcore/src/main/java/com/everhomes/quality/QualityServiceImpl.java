@@ -3829,10 +3829,10 @@ public class QualityServiceImpl implements QualityService {
 
 				//扣分等于实际扣分乘以占比
 				LOGGER.info("result: {}, weight: {}", result, weight);
-				Double statScore = communitySpecificationStats.get(result.getTargetId()) * weight;
+				Double statScore = communitySpecificationStats.get(result.getTargetId());
 				if(statScore != null) {
-					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
-					statScore = statScore + result.getTotalScore();
+					scoreStat.setDeductScore(scoreStat.getDeductScore() + (result.getTotalScore() * weight));
+					statScore = statScore + (result.getTotalScore() * weight);
 					communitySpecificationStats.put(result.getTargetId(), statScore);
 				}
 
