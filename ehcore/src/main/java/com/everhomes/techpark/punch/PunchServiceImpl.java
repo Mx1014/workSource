@@ -73,6 +73,7 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -89,6 +90,7 @@ import com.everhomes.rest.organization.OperationType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
@@ -198,6 +200,7 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.uniongroup.UniongroupConfigureProvider;
 import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -259,6 +262,8 @@ public class PunchServiceImpl implements PunchService {
 	@Autowired
 	private DbProvider dbProvider;
 
+	@Autowired
+	private UniongroupConfigureProvider uniongroupConfigureProvider;
 	@Autowired
     private UniongroupService uniongroupService;
 	
@@ -6341,8 +6346,12 @@ public class PunchServiceImpl implements PunchService {
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
         Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
 		response.setAllEmployeeCount(allOrganizationInteger);
-		//TODO: 未关联人数 等吕磊的接口
-		
+		// 未关联人数 
+		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId());
+		if (null != details && details.size()>0)
+			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
+				return ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
+			}).collect(Collectors.toList()));
 
         //  获取所有批次
         List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.PUNCHGROUP.getCode(), cmd.getOwnerId());

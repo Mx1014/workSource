@@ -10,6 +10,7 @@ import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -535,4 +536,14 @@ public class UniongroupServiceImpl implements UniongroupService {
         UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(detail);
         return dto;
     }
+
+	@Override
+	public Object distributionUniongroupToDetail(DistributionUniongroupToDetailCommand cmd) {
+		if(null != cmd.getDetailIds()){
+			for(Long detailId : cmd.getDetailIds()){
+				distributionUniongroupToDetail(cmd.getOwnerId(), detailId, cmd.getOrganizationGroupId());
+			}
+		}
+		return null;
+	}
 }

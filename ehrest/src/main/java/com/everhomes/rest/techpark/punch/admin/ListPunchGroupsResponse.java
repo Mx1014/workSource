@@ -5,6 +5,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.util.StringHelper;
@@ -25,7 +26,7 @@ public class ListPunchGroupsResponse {
 	private List<PunchGroupDTO> punchGroups;
 
 	@ItemType(OrganizationMemberDTO.class)
-	private List<OrganizationMemberDTO> unjoinPunchGroupEmployees;
+	private List<OrganizationMemberDetailDTO> unjoinPunchGroupEmployees;
 	
 	private Integer allEmployeeCount;
 
@@ -58,13 +59,14 @@ public class ListPunchGroupsResponse {
 		this.allEmployeeCount = allEmployeeCount;
 	}
 
-	public List<OrganizationMemberDTO> getUnjoinPunchGroupEmployees() {
+	public List<OrganizationMemberDetailDTO> getUnjoinPunchGroupEmployees() {
 		return unjoinPunchGroupEmployees;
 	}
 
-	public void setUnjoinPunchGroupEmployees(List<OrganizationMemberDTO> unjoinPunchGroupEmployees) {
+	public void setUnjoinPunchGroupEmployees(List<OrganizationMemberDetailDTO> unjoinPunchGroupEmployees) {
 		this.unjoinPunchGroupEmployees = unjoinPunchGroupEmployees;
 	}
+ 
  
  
 

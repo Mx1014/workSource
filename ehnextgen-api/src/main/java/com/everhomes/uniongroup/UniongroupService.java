@@ -66,4 +66,6 @@ public interface UniongroupService {
 
     /**通过 detailId 查找其信息**/
     UniongroupMemberDetailsDTO findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId);
+
+	public Object distributionUniongroupToDetail(DistributionUniongroupToDetailCommand cmd);
 }

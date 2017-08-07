@@ -108,6 +108,21 @@ public class UniongroupController extends ControllerBase {
     }
 
 
+    /**
+     * <p>将人员添加进入某薪酬组/考勤组 </p>
+     * <b>URL: /uniongroup/distributionUniongroupToDetail</b>
+     */
+    @RequestMapping("distributionUniongroupToDetail")
+    @RestReturn(value =String.class)
+    public RestResponse distributionUniongroupToDetail(DistributionUniongroupToDetailCommand cmd){
+    	uniongroupService.distributionUniongroupToDetail(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 
 
 }
