@@ -132,6 +132,7 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
                 .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.ORIGIN_ENTITY_ID.eq(Long.valueOf("98")))
 				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.SALARY_VALUE.isNotNull())
                 .fetchInto(Object[].class);
         return objects;
     }
