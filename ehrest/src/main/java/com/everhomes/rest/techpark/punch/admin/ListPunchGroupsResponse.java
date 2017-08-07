@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * 列出资源列表返回值(根据图标和园区)
  * <li>nextPageAnchor: 分页，下一页锚点</li>
  * <li>punchGroups: 结果{@link com.everhomes.rest.techpark.punch.admin.PunchGroupDTO}</li>
- * <li>unjoinPunchGroupEmployees: 未设置考勤的员工列表 {@link com.everhomes.rest.organization.OrganizationMemberDTO}</li>
+ * <li>unjoinPunchGroupEmployees: 未设置考勤的员工列表 {@link com.everhomes.rest.organization.OrganizationMemberDetailDTO}</li>
  * <li>allEmployeeCount: 总人数</li>
  * </ul>
  */
