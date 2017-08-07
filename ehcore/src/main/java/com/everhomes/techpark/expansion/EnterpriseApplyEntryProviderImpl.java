@@ -214,6 +214,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		leasePromotion.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		leasePromotion.setUpdateUid(UserContext.currentUserId());
 		dao.update(leasePromotion);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLeasePromotions.class, null);
 		return true;
