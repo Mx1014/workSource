@@ -94,7 +94,7 @@ public class FieldServiceImpl implements FieldService {
             //处理group的树状结构
             FieldGroupDTO fieldGroupDTO = processFieldGroupnTree(dtos, null);
             List<FieldGroupDTO> groupDTOs = fieldGroupDTO.getChildrenGroup();
-
+            LOGGER.info("groupDTOs: {}", groupDTOs);
             //按default order排序
             Collections.sort(groupDTOs, (a,b) -> {
                 return b.getDefaultOrder() - a.getDefaultOrder();
@@ -112,7 +112,6 @@ public class FieldServiceImpl implements FieldService {
      * @return
      */
     private FieldGroupDTO processFieldGroupnTree(List<FieldGroupDTO> dtos, FieldGroupDTO dto) {
-
         List<FieldGroupDTO> trees = new ArrayList<>();
 
         if(dto == null) {
@@ -122,7 +121,6 @@ public class FieldServiceImpl implements FieldService {
         FieldGroupDTO allTreeDTO = ConvertHelper.convert(dto, FieldGroupDTO.class);
         trees.add(allTreeDTO);
         for (FieldGroupDTO groupTreeDTO : dtos) {
-            LOGGER.info("groupTreeDTO: {}, dto: {}", groupTreeDTO, dto);
             if (groupTreeDTO.getParentId().equals(dto.getGroupId())) {
                 FieldGroupDTO organizationTreeDTO = processFieldGroupnTree(dtos, groupTreeDTO);
                 trees.add(organizationTreeDTO);
