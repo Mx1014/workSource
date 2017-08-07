@@ -30,6 +30,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
  * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
  * <li>visibleRegionId: 区域范围类型对应的ID</li>
+ * <li>visibleRegionIds: 区域范围类型对应的IDs。新版的活动发布时出现了范围的概念，比如“园区A、园区C和小区A”。visibleRegionId和visibleRegionIds只传一个</li>
  * <li>longitude: 帖子内容涉及到的经度如活动</li>
  * <li>latitude: 帖子内容涉及到的纬度如活动</li>
  * <li>subject: 帖子标题</li>
@@ -50,6 +51,8 @@ import com.everhomes.util.StringHelper;
  * <li>maxQuantity: 限制人数</li>
  * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
  * <li>tag: 帖子标签</li>
+ * <li>cloneFlag: 克隆标识，参考{@link com.everhomes.rest.forum.PostCloneFlag}</li>
+ * <li>realPostId: 真身帖的Id</li>
  * </ul>
  */
 public class NewTopicCommand {
@@ -75,6 +78,9 @@ public class NewTopicCommand {
     private Byte visibleRegionType;
 
     private Long visibleRegionId;
+
+    @ItemType(Long.class)
+    private List<Long> visibleRegionIds;
     
     private Double longitude;
     
@@ -116,6 +122,10 @@ public class NewTopicCommand {
     private Byte status;
 
     private String tag;
+
+    private Byte cloneFlag;
+
+    private Long realPostId;
     
 	public Long getOldId() {
 		return oldId;
@@ -208,6 +218,14 @@ public class NewTopicCommand {
         this.visibleRegionId = visibleRegionId;
     }
 
+    public List<Long> getVisibleRegionIds() {
+        return visibleRegionIds;
+    }
+
+    public void setVisibleRegionIds(List<Long> visibleRegionIds) {
+        this.visibleRegionIds = visibleRegionIds;
+    }
+
     public Double getLongitude() {
 		return longitude;
 	}
@@ -296,7 +314,6 @@ public class NewTopicCommand {
         this.privateFlag = privateFlag;
     }
     
-    
 
     public Long getStartTime() {
 		return startTime;
@@ -352,6 +369,22 @@ public class NewTopicCommand {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public Byte getCloneFlag() {
+        return cloneFlag;
+    }
+
+    public void setCloneFlag(Byte cloneFlag) {
+        this.cloneFlag = cloneFlag;
+    }
+
+    public Long getRealPostId() {
+        return realPostId;
+    }
+
+    public void setRealPostId(Long realPostId) {
+        this.realPostId = realPostId;
     }
 
     @Override

@@ -85,6 +85,7 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+import javafx.geometry.Pos;
 import net.greghaines.jesque.Job;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
@@ -222,7 +223,35 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
-        return createTopic(cmd, UserContext.current().getUser().getId());
+        //这个原来只用一行代码的方法终于要发挥他的作用啦。
+        PostDTO dto = new PostDTO();
+
+
+        if(cmd.getVisibleRegionIds() != null && cmd.getVisibleRegionIds().size() == 1){
+            cmd.setVisibleRegionId(cmd.getVisibleRegionIds().get(0));
+            cmd.setVisibleRegionIds(null);
+        }
+
+        //if发送到一个特定对象的帖子或者全部范围的帖子, else发送到多个目标的帖子
+        if(cmd.getVisibleRegionId() != null || cmd.getVisibleRegionType() == VisibleRegionType.ALL.getCode()){
+            dto = createTopic(cmd, UserContext.current().getUser().getId());
+        }else if(cmd.getVisibleRegionIds() != null && cmd.getVisibleRegionIds().size() > 1){
+
+            cmd.setVisibleRegionId(null);
+            cmd.setCloneFlag(PostCloneFlag.REAL.getCode());
+            dto = createTopic(cmd, UserContext.current().getUser().getId());
+
+            for(int i= 0; i<cmd.getVisibleRegionIds().size(); i++){
+
+                cmd.setVisibleRegionId(cmd.getVisibleRegionIds().get(i));
+                cmd.setCloneFlag(PostCloneFlag.CLONE.getCode());
+                cmd.setRealPostId(dto.getId());
+                createTopic(cmd, UserContext.current().getUser().getId());
+            }
+
+        }
+
+        return dto;
     }
 
     @Override
