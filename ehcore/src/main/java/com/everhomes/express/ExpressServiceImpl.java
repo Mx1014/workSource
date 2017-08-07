@@ -726,17 +726,12 @@ public class ExpressServiceImpl implements ExpressService {
 		if(sendType == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid sendType = " + cmd.getSendType());
 		}
+		//接受地址和寄送地址不校验，因为存在地址为临时使用的情况。
 		//通用参数校验
-		if (cmd.getReceiveAddressId() == null || cmd.getExpressCompanyId() == null 
+		if (cmd.getExpressCompanyId() == null 
 				|| cmd.getSendMode() == null || cmd.getPayType() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters"
 					+ " receiveAddressId = null or expressCompanyId = null or sendMode = null or payType = null");
-		}
-		//除了同城信筒的校验
-		if(sendType == ExpressSendType.CHINA_POST_PACKAGE || sendType == ExpressSendType.STANDARD || sendType == ExpressSendType.EMS_STANDARD){
-			if(cmd.getSendAddressId() == null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters sendAddressId = null");
-			}
 		}
 		//华润ems快递，参数校验 
 		if (sendType == ExpressSendType.STANDARD){
@@ -825,6 +820,11 @@ public class ExpressServiceImpl implements ExpressService {
 				expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
 			}
 		}else{
+			if(cmd.getSendName() == null || cmd.getSendPhone() == null ||
+					cmd.getSendProvince() == null || cmd.getSendCity() == null || 
+					cmd.getSendCounty() == null || cmd.getSendDetailAddress() == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild send address params");
+			}
 			expressOrder.setSendName(cmd.getSendName());
 			expressOrder.setSendPhone(cmd.getSendPhone());
 			expressOrder.setSendOrganization(cmd.getSendOrganization());
@@ -846,6 +846,11 @@ public class ExpressServiceImpl implements ExpressService {
 			expressOrder.setReceiveCounty(receiveAddress.getCounty());
 			expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
 		}else{
+			if(cmd.getReceiveName() == null || cmd.getReceivePhone() == null ||
+					cmd.getReceiveProvince() == null || cmd.getReceiveCity() == null || 
+					cmd.getReceiveCounty() == null || cmd.getReceiveDetailAddress() == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild receive address params");
+			}
 			expressOrder.setReceiveName(cmd.getReceiveName());
 			expressOrder.setReceivePhone(cmd.getReceivePhone());
 			expressOrder.setReceiveOrganization(cmd.getReceiveOrganization());
