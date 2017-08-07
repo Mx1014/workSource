@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactToken：成员标识</li>
  * <li>contactDescription：描述</li>
  * <li>status：状态</li>
+ * <li>department：部门</li>
  * </ul>
  */
 public class OrganizationMemberDetailDTO {
@@ -34,6 +35,7 @@ public class OrganizationMemberDetailDTO {
 	private String   avatar;
 	private Long   employeeNo;
 	private Byte   gender;
+	private String department;
 	
 	private OrganizationDetailDTO organizationDetailDTO;
 	
@@ -226,4 +228,16 @@ public class OrganizationMemberDetailDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	public String getDepartment() {
+		return department;
+	}
+
+
+
+	public void setDepartment(String department) {
+		this.department = department;
+	}
 }

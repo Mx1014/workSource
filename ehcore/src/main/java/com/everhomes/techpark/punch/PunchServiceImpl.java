@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import ch.qos.logback.core.joran.conditional.ElseAction;
@@ -6350,7 +6351,17 @@ public class PunchServiceImpl implements PunchService {
 		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId());
 		if (null != details && details.size()>0)
 			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
-				return ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
+				OrganizationMemberDetailDTO dto = ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
+				Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(),r.getId(),OrganizationGroupType.DEPARTMENT.getCode());
+		        String department = ""; 
+		        if(!StringUtils.isEmpty(departMap)){
+		            for(Long k : departMap.keySet()){
+		                department += (departMap.get(k) + ",");
+		            }
+		            department = department.substring(0,department.length()-1);
+		        }
+		        dto.setDepartment(department);
+				return dto;
 			}).collect(Collectors.toList()));
 
         //  获取所有批次
