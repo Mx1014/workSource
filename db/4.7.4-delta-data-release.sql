@@ -140,3 +140,6 @@ GROUP BY
     eom.contact_token
 ORDER BY
     eom.id;
+
+-- by dengs,修改张江表单
+update eh_general_forms SET template_text = '[{"dataSourceType": "USER_PHONE", "fieldDesc": "请输入手机号码", "fieldDisplayName": "手机号", "fieldExtra": "{\\"limitWord\\":50}", "fieldName": "phone", "fieldType": "NUMBER_TEXT", "renderType": "DEFAULT", "requiredFlag": 1, "validatorType": "TEXT_LIMIT", "visibleType": "READONLY"}, {"fieldDesc": "请输入真实姓名", "fieldDisplayName": "姓名", "fieldExtra": "{\\"limitWord\\":50}", "fieldName": "name", "fieldType": "SINGLE_LINE_TEXT", "renderType": "DEFAULT", "requiredFlag": 1, "validatorType": "TEXT_LIMIT", "visibleType": "EDITABLE"}, {"fieldDesc": "证件类型", "fieldDisplayName": "证件类型", "fieldExtra": "{\\"selectValue\\":[\\"身份证\\"]}", "fieldName": "certificateType", "fieldType": "DROP_BOX", "renderType": "DEFAULT", "requiredFlag": 1, "validatorType": "TEXT_LIMIT", "visibleType": "EDITABLE"}, {"fieldDesc": "请输入证件号码", "fieldDisplayName": "证件号码", "fieldExtra": "{\\"limitWord\\":50}", "fieldName": "certificateNo", "fieldType": "MULTI_LINE_TEXT", "renderType": "DEFAULT", "requiredFlag": 1, "validatorType": "TEXT_LIMIT", "visibleType": "EDITABLE"}]' WHERE namespace_id = 999971 AND owner_type = 'personal_auth';
