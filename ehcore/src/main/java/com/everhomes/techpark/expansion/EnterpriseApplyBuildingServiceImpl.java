@@ -44,7 +44,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 	@Autowired
 	private ContentServerService contentServerService;
-
+	@Autowired
 	private ConfigurationProvider configProvider;
 
 	@Override
