@@ -3,4 +3,3 @@ ALTER TABLE `eh_forum_posts` ADD COLUMN `clone_flag`  tinyint(4) NULL COMMENT 'c
 ALTER TABLE `eh_forum_posts` ADD COLUMN `real_post_id`  bigint(20) NULL COMMENT 'if this is clone post, then it should have a real post id';
 
 ALTER TABLE `eh_activities` ADD COLUMN `clone_flag`  tinyint(4) NULL COMMENT 'clone_flag post 0-real post, 1-clone post';
-ALTER TABLE `eh_activities` ADD COLUMN `real_post_id`  bigint(20) NULL COMMENT 'if this is clone post, then it should have a real post id';
