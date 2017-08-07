@@ -54,7 +54,8 @@ CREATE TABLE `eh_lease_buildings` (
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'uid of the user who process the address',
   `operate_time` datetime DEFAULT NULL,
-
+  `delete_flag` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: forbidden 1: support delete',
+  
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_community_id_name` (`community_id`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
