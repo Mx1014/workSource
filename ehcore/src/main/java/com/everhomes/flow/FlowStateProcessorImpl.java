@@ -306,7 +306,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			event.fire(ctx);
 		}
 		FlowGraphNode nextNode = ctx.getNextNode();
-		if(ctx.getStepType() != null && currentNode != nextNode) {
+		if(ctx.getStepType() != null && currentNode != nextNode && nextNode != null) {
 			try {
 				if(currentNode != null) {
 					//Only leave once time
