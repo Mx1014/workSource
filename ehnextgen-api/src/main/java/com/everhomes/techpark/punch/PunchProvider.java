@@ -303,13 +303,23 @@ public interface PunchProvider {
 
 	public void deletePunchWifisByOwnerId(Long id);
 
-	public PunchRule getpunchruleByPunchOrgId(Long id);
+	public PunchRule getPunchruleByPunchOrgId(Long id);
 
 	public void deletePunchTimeRuleByPunchOrgId(Long id);
 
 	public void deletePunchSpecialDaysByPunchOrgId(Long id);
 
 	public void deletePunchTimeIntervalByPunchRuleId(Long id);
+
+	public List<PunchTimeRule> listPunchTimeRuleByOwner(String ownerType, Long ownerId);
+
+	public List<PunchTimeInterval> listPunchTimeIntervalByTimeRuleId(Long timeRuleId);
+
+	public List<PunchGeopoint> listPunchGeopointsByOwner(String ownerType, Long ownerId);
+
+	public List<PunchWifi> listPunchWifsByOwner(String ownerType, Long ownerId);
+
+	public List<PunchSpecialDay> listPunchSpecailDaysByOrgId(Long punchOrganizationId);
  
  
  

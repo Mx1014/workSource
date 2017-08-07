@@ -18,6 +18,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.techpark.punch.admin.PunchTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPunchSchedulingsDao;
@@ -25,6 +26,7 @@ import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.TargetType;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -153,5 +155,27 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 		step.execute();
 	 
 		
+	}
+
+	@Override
+	public void deletePunchSchedulingByPunchRuleId(Long id) { 
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(id); 
+		step.where(condition);
+		LOGGER.debug(step.toString());
+		step.execute();
+	}
+
+	@Override
+	public Integer countSchedulingUser(Long ruleId, java.sql.Date start, java.sql.Date end) {
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectDistinct(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID)
+				.from(Tables.EH_PUNCH_SCHEDULINGS)
+				.where(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(PunchTargetType.USER.getCode()))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(ruleId))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(start))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(end))
+				.fetchCount();
 	}
 }

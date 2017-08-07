@@ -88,7 +88,9 @@ import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchSpecialDaysRecord;
 import com.everhomes.server.schema.tables.records.EhPunchStatisticsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchTimeIntervalsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchTimeRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifiRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifisRecord;
@@ -2507,16 +2509,11 @@ long id = sequenceProvider.getNextSequence(key);
 	public Integer countPunchLogDevice(Long userId, Long companyId,
 			Date beginDate, Date endDate) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		Result<Record1<String>> records = context.selectDistinct(Tables.EH_PUNCH_LOGS.IDENTIFICATION).from(Tables.EH_PUNCH_LOGS)
+		return context.selectDistinct(Tables.EH_PUNCH_LOGS.IDENTIFICATION).from(Tables.EH_PUNCH_LOGS)
 				.where(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId))
 				.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(companyId))
 				.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(beginDate, endDate))
-				.fetch();
-		
-		if (records != null) {
-			return records.size();
-		}
-		return 0;
+				.fetchCount();  
 	}
 
 	@Override
@@ -2553,6 +2550,143 @@ long id = sequenceProvider.getNextSequence(key);
 		 EhPunchSpecialDaysDao dao = new EhPunchSpecialDaysDao(context.configuration());
 		 dao.insert(psd);  
 		
+	}
+
+	@Override
+	public void deletePunchGeopointsByOwnerId(Long id) { 
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchGeopointsRecord> step = context.delete(Tables.EH_PUNCH_GEOPOINTS);
+		Condition condition = Tables.EH_PUNCH_GEOPOINTS.OWNER_ID.equal(id); 
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
+	public void deletePunchWifisByOwnerId(Long id) {
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchWifisRecord> step = context.delete(Tables.EH_PUNCH_WIFIS);
+		Condition condition = Tables.EH_PUNCH_WIFIS.OWNER_ID.equal(id); 
+		step.where(condition);
+		step.execute();
+		
+	}
+
+	@Override
+	public PunchRule getPunchruleByPunchOrgId(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_PUNCH_RULES)
+				.where(Tables.EH_PUNCH_RULES.PUNCH_ORGANIZATION_ID.eq(id)) 
+				.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, PunchRule.class);
+		}
+		return null;
+	}
+
+	@Override
+	public void deletePunchTimeRuleByPunchOrgId(Long id) {
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+			DeleteWhereStep<EhPunchRulesRecord> step = context.delete(Tables.EH_PUNCH_RULES);
+			Condition condition = Tables.EH_PUNCH_RULES.PUNCH_ORGANIZATION_ID.equal(id); 
+			step.where(condition);
+			step.execute();
+	}
+
+	@Override
+	public void deletePunchSpecialDaysByPunchOrgId(Long id) {
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+			DeleteWhereStep<EhPunchSpecialDaysRecord> step = context.delete(Tables.EH_PUNCH_SPECIAL_DAYS);
+			Condition condition = Tables.EH_PUNCH_SPECIAL_DAYS.PUNCH_ORGANIZATION_ID.equal(id); 
+			step.where(condition);
+			step.execute();
+	}
+
+	@Override
+	public void deletePunchTimeIntervalByPunchRuleId(Long id) { 
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+			DeleteWhereStep<EhPunchTimeIntervalsRecord> step = context.delete(Tables.EH_PUNCH_TIME_INTERVALS);
+			Condition condition = Tables.EH_PUNCH_TIME_INTERVALS.PUNCH_RULE_ID.equal(id); 
+			step.where(condition);
+			step.execute();
+		
+	}
+
+	@Override
+	public List<PunchTimeRule> listPunchTimeRuleByOwner(String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_TIME_RULES);
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)
+				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId)); 
+		step.where(condition);
+		List<PunchTimeRule> result = step
+				.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchTimeRule.class);
+				});
+		return result;
+	}
+
+	@Override
+	public List<PunchTimeInterval> listPunchTimeIntervalByTimeRuleId(Long timeRuleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_TIME_INTERVALS);
+		Condition condition = Tables.EH_PUNCH_TIME_INTERVALS.TIME_RULE_ID.equal(timeRuleId) ; 
+		step.where(condition);
+		List<PunchTimeInterval> result = step
+				.orderBy(Tables.EH_PUNCH_TIME_INTERVALS.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchTimeInterval.class);
+				});
+		return result;
+	}
+
+	@Override
+	public List<PunchGeopoint> listPunchGeopointsByOwner(String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_GEOPOINTS);
+		Condition condition = Tables.EH_PUNCH_GEOPOINTS.OWNER_TYPE.equal(ownerType)
+				.and(Tables.EH_PUNCH_GEOPOINTS.OWNER_ID.equal(ownerId)); 
+		step.where(condition);
+		List<PunchGeopoint> result = step
+				.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchGeopoint.class);
+				});
+		return result;
+	}
+
+	@Override
+	public List<PunchWifi> listPunchWifsByOwner(String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_WIFIS);
+		Condition condition = Tables.EH_PUNCH_WIFIS.OWNER_TYPE.equal(ownerType)
+				.and(Tables.EH_PUNCH_WIFIS.OWNER_ID.equal(ownerId)); 
+		step.where(condition);
+		List<PunchWifi> result = step
+				.orderBy(Tables.EH_PUNCH_WIFIS.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchWifi.class);
+				});
+		return result;
+	}
+
+	@Override
+	public List<PunchSpecialDay> listPunchSpecailDaysByOrgId(Long punchOrganizationId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_SPECIAL_DAYS);
+		Condition condition = Tables.EH_PUNCH_SPECIAL_DAYS.PUNCH_ORGANIZATION_ID.equal(punchOrganizationId) ; 
+		step.where(condition);
+		List<PunchSpecialDay> result = step
+				.orderBy(Tables.EH_PUNCH_SPECIAL_DAYS.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchSpecialDay.class);
+				});
+		return result;
 	};
 	
 }

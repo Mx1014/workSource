@@ -45,6 +45,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+import ch.qos.logback.core.joran.conditional.ElseAction;
+
 import com.everhomes.approval.ApprovalCategory;
 import com.everhomes.approval.ApprovalCategoryProvider;
 import com.everhomes.approval.ApprovalDayActualTimeProvider;
@@ -6167,7 +6169,7 @@ public class PunchServiceImpl implements PunchService {
 			 //删除考勤规则
 			 punchProvider.deletePunchGeopointsByOwnerId(cmd.getId());
 			 punchProvider.deletePunchWifisByOwnerId(cmd.getId());
-			 PunchRule pr = punchProvider.getpunchruleByPunchOrgId(cmd.getId());
+			 PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 			 punchProvider.deletePunchTimeRuleByPunchOrgId(cmd.getId());
 			 punchProvider.deletePunchSpecialDaysByPunchOrgId(cmd.getId());
 			 punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
@@ -6339,7 +6341,7 @@ public class PunchServiceImpl implements PunchService {
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
         Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
 		response.setAllEmployeeCount(allOrganizationInteger);
-		//TODO: 未关联等吕磊的接口
+		//TODO: 未关联人数 等吕磊的接口
 		
 
         //  获取所有批次
@@ -6353,12 +6355,166 @@ public class PunchServiceImpl implements PunchService {
 		return response;
 	}
 	private PunchGroupDTO getPunchGroupDTOByOrg(Organization r) {
-		// TODO Auto-generated method stub
-		PunchRule pr = punchProvider.getpunchruleByPunchOrgId(r.getId());
+		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(r.getId());
 		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
+		Integer totalCount = uniongroupService.countUnionGroupMemberDetailsByOrgId(r.getNamespaceId(),r.getId());
+		dto.setEmployeeCount(totalCount);
+		//TODO: 关联 人员和机构
 		
+		//打卡时间
+		List<PunchTimeRule> timeRules = punchProvider.listPunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),r.getId());
+		if(null != timeRules && timeRules.size() > 0)
+			dto.setTimeRules(timeRules.stream().map(r1 -> {
+				PunchTimeRuleDTO dto1 = ConvertPunchTimeRule2DTO(r1) ;
+	            return dto1;
+	        }).collect(Collectors.toList()));
 		
+		//打卡地点和WiFi 
+		dto.setPunchGeoPoints(new ArrayList<>());
+		dto.setWifis(new ArrayList<>());
+		List<PunchGeopoint> points = punchProvider.listPunchGeopointsByOwner(PunchOwnerType.ORGANIZATION.getCode(),r.getId());
+		if(null != points)
+			for(PunchGeopoint point:points){
+				PunchGeoPointDTO dto1 = ConvertHelper.convert(point, PunchGeoPointDTO.class);
+				dto.getPunchGeoPoints().add(dto1);
+			}
+		List<PunchWifi> wifis = punchProvider.listPunchWifsByOwner(PunchOwnerType.ORGANIZATION.getCode(),r.getId());
+		if(null != wifis)
+			for(PunchWifi wifi : wifis ){
+				PunchWiFiDTO dto1 = ConvertHelper.convert(wifi, PunchWiFiDTO.class);
+				dto.getWifis().add(dto1);
+			}
+		
+		//排班和非排班的特殊处理
+		if(pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())){
+			Calendar start = Calendar.getInstance();
+			start.set(Calendar.DAY_OF_MONTH, 1);
+			Calendar end = Calendar.getInstance();
+			end.add(Calendar.MONTH, 1);
+			Integer linkedCount = punchSchedulingProvider.countSchedulingUser(pr.getId(),new java.sql.Date(start.getTimeInMillis()),new java.sql.Date(end.getTimeInMillis()));
+			dto.setUnSchedulingCount(totalCount - linkedCount);
+			//排班
+			List<PunchSchedulingDTO> schedulings = processschedulings(pr,new java.sql.Date(start.getTimeInMillis()),new java.sql.Date(end.getTimeInMillis()));
+			dto.setSchedulings(schedulings);
+		}else{
+	        //特殊日期
+			List<PunchSpecialDay> specialDays = punchProvider.listPunchSpecailDaysByOrgId(pr.getPunchOrganizationId());
+			if(null != specialDays ){
+				dto.setSpecialDay(new ArrayList<>());
+				for(PunchSpecialDay specialDay : specialDays){
+					PunchSpecialDayDTO dto1 =ConvertHelper.convert(specialDay, PunchSpecialDayDTO.class);
+					dto.getSpecialDay().add(dto1);
+				}
+			}
+		} 
+		return dto;
+	}
+	private List<PunchSchedulingDTO> processschedulings(PunchRule pr, java.sql.Date startDate,
+			java.sql.Date endDate) { 
+		List<PunchSchedulingDTO> result = new ArrayList<PunchSchedulingDTO>();
+		PunchSchedulingDTO dto = new PunchSchedulingDTO();
+		dto.setMonth(startDate.getTime());
+		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+					SelectQuery<? extends Record> query) { 
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(startDate));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(endDate));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull());
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(pr.getId())); 
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(PunchTargetType.USER.getCode()));
+				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.asc());
+				return null;
+			}
+		});
+		if(null != schedulings){
+			Map<Long, List<PunchScheduling>> scheMap = new HashMap<>();
+			for(PunchScheduling sche : schedulings){
+				if(scheMap.get(sche.getTargetId()) == null)
+					scheMap.put(sche.getTargetId(), new ArrayList<PunchScheduling>()); 
+				scheMap.get(sche.getTargetId()).add(sche);
+			}
+			List<PunchSchedulingEmployeeDTO> employeeDTOs = new ArrayList<PunchSchedulingEmployeeDTO>();
+			//循环每个人
+			for(Long userId : scheMap.keySet()){
+				PunchSchedulingEmployeeDTO employeeDTO = new PunchSchedulingEmployeeDTO();
+				employeeDTO.setDaySchedulings(new ArrayList<>());
+				Organization organization = organizationProvider.findOrganizationById(pr.getOwnerId()); 
+				employeeDTO.setUserId(userId);
+				OrganizationMember member = findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
+				if (null == member ) {
+					employeeDTO.setContactName("无此人");
+				} else {
+					employeeDTO.setContactName(member.getContactName());
+				} 
+				//循环每个人这个月每一天
+				Calendar start = Calendar.getInstance();
+				start.setTime(startDate);
+				Calendar end = Calendar.getInstance();
+				end.setTime(endDate);
+				for(;start.before(end);start.add(Calendar.DAY_OF_MONTH, 1)){
+					PunchScheduling scheduling = findSchedlingByDate(scheMap.get(userId),new java.sql.Date(start.getTimeInMillis()));
+					if(null != scheduling){
+						PunchTimeRule ptr = punchProvider.findPunchTimeRuleById(scheduling.getTimeRuleId());
+						if(null != ptr){
+							employeeDTO.getDaySchedulings().add(ptr.getName()); 
+						}
+						else{
+							employeeDTO.getDaySchedulings().add(""); 
+						}
+					}
+					else{
+						employeeDTO.getDaySchedulings().add(""); 
+					}
+				}
+				employeeDTOs.add(employeeDTO);
+			}
+			dto.setEmployees(employeeDTOs);
+		}
+		result.add(dto);
+		return result;
+	} 
+	private PunchScheduling findSchedlingByDate(List<PunchScheduling> list, java.sql.Date date) {
+		if(null != list)
+			for(PunchScheduling sche : list){
+				if(sche.getRuleDate().equals(date) && sche.getTimeRuleId()!=null)
+					return sche;
+			}
 		return null;
+	}
+	private PunchTimeRuleDTO ConvertPunchTimeRule2DTO(PunchTimeRule r) { 
+		PunchTimeRuleDTO dto = ConvertHelper.convert(r, PunchTimeRuleDTO.class);
+		dto.setFlexTime(r.getFlexTimeLong());
+		dto.setAfternoonArriveTime(r.getAfternoonArriveTimeLong());
+		dto.setBeginPunchTime(r.getBeginPunchTime());
+		dto.setEndPunchTime(r.getEndPunchTime());
+		dto.setAfternoonArriveTime(r.getAfternoonArriveTimeLong());
+		dto.setPunchTimeIntervals(new ArrayList<>());
+		if(r.getPunchTimesPerDay().equals((byte)2)){
+			PunchTimeIntervalDTO intervalDTO = new PunchTimeIntervalDTO();
+			intervalDTO.setArriveTime(r.getStartEarlyTimeLong());
+			intervalDTO.setLeaveTime(r.getStartEarlyTimeLong() +r.getWorkTimeLong());
+			dto.getPunchTimeIntervals().add(intervalDTO);
+		}else if(r.getPunchTimesPerDay().equals((byte)2)){
+			PunchTimeIntervalDTO intervalDTO = new PunchTimeIntervalDTO();
+			intervalDTO.setArriveTime(r.getStartEarlyTimeLong());
+			intervalDTO.setLeaveTime(r.getNoonLeaveTimeLong());
+			dto.getPunchTimeIntervals().add(intervalDTO);
+			intervalDTO = new PunchTimeIntervalDTO();
+			intervalDTO.setArriveTime(r.getAfternoonArriveTimeLong());
+			intervalDTO.setLeaveTime(r.getStartEarlyTimeLong() +r.getWorkTimeLong());
+			dto.getPunchTimeIntervals().add(intervalDTO);
+		}
+		else{
+			List<PunchTimeInterval> intervals = punchProvider.listPunchTimeIntervalByTimeRuleId(r.getId());
+			if(null != intervals)
+				for(PunchTimeInterval interval : intervals){
+					PunchTimeIntervalDTO intervalDTO = ConvertHelper.convert(interval, PunchTimeIntervalDTO.class); 
+					dto.getPunchTimeIntervals().add(intervalDTO);
+				}
+		}
+		
+		return dto;
 	}
 	@Override
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
