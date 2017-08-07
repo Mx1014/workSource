@@ -2689,3 +2689,22 @@ VALUES ((@max_id := @max_id + 1), 999984, 0, 0, 0, '/home', 'Bizs', 'PARKING_REC
 -- #13496 add by xq.tian 2017/08/03
 select max(id) from `eh_web_menu_scopes` into @max_id;
 INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@max_id := @max_id + 1), 56161, '', 'EhNamespaces', 999984, 2);
+
+SELECT max(id) FROM `eh_web_menu_scopes` INTO @menu_sc_id;
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 40800, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 40810, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 40840, '', 'EhNamespaces', 999984, 2);
+SELECT max(id) FROM `eh_web_menu_scopes` INTO @menu_sc_id;
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 50660, '', 'EhNamespaces', 999984, 2);
+SELECT max(id) FROM `eh_web_menu_scopes` INTO @menu_sc_id;
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 41300, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 41310, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 41320, '', 'EhNamespaces', 999984, 2);
+update eh_web_menus set status=2 where id in(41300, 41310, 41320);
