@@ -21,8 +21,8 @@ public class FlowVarsTextButtonUserInputContent implements FlowVariableTextResol
 	public String variableTextRender(FlowCaseState ctx, String variable) {
         FlowSubject subject = ctx.getCurrentEvent().getSubject();
         if (subject != null) {
-            return subject.getContent().trim();
+            return subject.getContent();
         }
-        return "";
+        return null;
     }
 }
