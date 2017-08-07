@@ -18,4 +18,6 @@ public interface EnterpriseApplyBuildingService {
     void deleteLeaseBuilding(DeleteLeaseBuildingCommand cmd);
 
     void updateLeaseBuildingOrder(UpdateLeaseBuildingOrderCommand cmd);
+
+    void syncLeaseBuildings(ListLeaseBuildingsCommand cmd);
 }

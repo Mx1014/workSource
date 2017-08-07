@@ -78,7 +78,6 @@ public class BuildingDTO {
 	
 	private String description;
 
-	private String posterUri;
 	private String posterUrl;
 	
 	private Long operatorUid;
@@ -371,14 +370,6 @@ public class BuildingDTO {
 
 	public void setAttachments(List<BuildingAttachmentDTO> attachments) {
 		this.attachments = attachments;
-	}
-
-	public String getPosterUri() {
-		return posterUri;
-	}
-
-	public void setPosterUri(String posterUri) {
-		this.posterUri = posterUri;
 	}
 
 	public String getPosterUrl() {

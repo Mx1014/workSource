@@ -1,16 +1,21 @@
 package com.everhomes.techpark.expansion;
 
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -49,6 +54,10 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	private ContentServerService contentServerService;
 	@Autowired
 	private ConfigurationProvider configProvider;
+	@Autowired
+	private CommunityProvider communityProvider;
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 	@Override
 	public ListLeaseBuildingsResponse listLeaseBuildings(ListLeaseBuildingsCommand cmd) {
@@ -95,7 +104,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		leaseBuilding.setNamespaceId(UserContext.getCurrentNamespaceId());
 		leaseBuilding.setStatus(LeaseBulidingStatus.ACTIVE.getCode());
-
+		leaseBuilding.setDeleteFlag((byte) 1);
 		dbProvider.execute((TransactionStatus status) -> {
 			enterpriseApplyBuildingProvider.createLeaseBuilding(leaseBuilding);
 			addAttachments(cmd.getAttachments(), leaseBuilding);
@@ -180,6 +189,13 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		populatePostUrl(dto, leaseBuilding.getPosterUri());
 		populateLeaseBuildingAttachments(dto, attachments);
 		processDetailUrl(dto);
+
+		if (null != leaseBuilding.getBuildingId()) {
+			Building building = communityProvider.findBuildingById(leaseBuilding.getBuildingId());
+			if (null != building) {
+				dto.setBuildingName(building.getName());
+			}
+		}
 	}
 
 	private void addAttachments(List<BuildingForRentAttachmentDTO> attachments, LeaseBuilding leaseBuilding) {
@@ -239,5 +255,33 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 			return null;
 		});
+	}
+
+	@Override
+	public void syncLeaseBuildings(ListLeaseBuildingsCommand cmd) {
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+
+		List<LeaseBuilding> existLeaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(cmd.getNamespaceId(),
+				cmd.getCommunityId(), null, null);
+
+		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, Integer.MAX_VALUE,
+				cmd.getCommunityId(), cmd.getNamespaceId());
+
+		List<LeaseBuilding> leaseBuildings = buildings.stream().filter(r ->
+			existLeaseBuildings.stream().noneMatch(e -> e.getBuildingId().equals(r.getId()))
+			).map(r -> {
+			long id = sequenceProvider.getNextSequence(NameMapper
+					.getSequenceDomainFromTablePojo(EhLeaseBuildings.class));
+			LeaseBuilding building = ConvertHelper.convert(r, LeaseBuilding.class);
+			building.setId(id);
+			building.setBuildingId(r.getId());
+			building.setManagerContact(r.getContact());
+			building.setDeleteFlag((byte)0);
+			building.setDefaultOrder(id);
+			return building;
+		}).collect(Collectors.toList());
+
+		enterpriseApplyBuildingProvider.createLeaseBuildings(leaseBuildings);
 	}
 }

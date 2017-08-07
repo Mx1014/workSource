@@ -122,4 +122,19 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /techpark/entry/syncLeaseBuildings
+	 * <p>同步楼栋 产品定义，有域空间要用招租管理时，同步项目管理楼栋到招租管理的项目介绍
+	 */
+	@RequestMapping("syncLeaseBuildings")
+	@RestReturn(value=String.class)
+	public RestResponse syncLeaseBuildings(ListLeaseBuildingsCommand cmd){
+
+		enterpriseApplyBuildingService.syncLeaseBuildings(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

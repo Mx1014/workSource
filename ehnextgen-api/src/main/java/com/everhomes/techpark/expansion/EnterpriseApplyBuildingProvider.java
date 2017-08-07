@@ -23,4 +23,6 @@ public interface EnterpriseApplyBuildingProvider {
 
     Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName);
 
+    void createLeaseBuildings(List<LeaseBuilding> leaseBuildings);
+
 }

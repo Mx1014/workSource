@@ -603,31 +603,13 @@ public class CommunityServiceImpl implements CommunityService {
         	buildings.remove(buildings.size() - 1);
             nextPageAnchor = buildings.get(buildings.size() - 1).getId();
         }
-        
-        populateBuildings(buildings);
-        
-        List<BuildingDTO> dtoList = buildings.stream().map((r) -> {
-        	
-        	BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);  
-        	
-        	dto.setBuildingName(dto.getName());
-        	
-        	dto.setName(org.springframework.util.StringUtils.isEmpty(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
-        	
-        	if(null != dto.getManagerUid()){
-        		OrganizationMember member = organizationProvider.findOrganizationMemberById(dto.getManagerUid());
-        		if(null != member){
-        			dto.setManagerNickName(member.getContactName());
-        			//modify by wh 2016-11-8 加了管理员电话新字段
-        			//dto.setContact(member.getContactToken());
-        			dto.setManagerContact(member.getContactToken());
-        		}
-        	}
 
-			//TODO: set detail url
-			processDetailUrl(dto);
-        	populateBuildingDTO(dto);
-        	
+        List<BuildingDTO> dtoList = buildings.stream().map((r) -> {
+
+        	BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);
+
+			populateBuilding(dto, r);
+
         	return dto;
         }).collect(Collectors.toList());
         
@@ -641,25 +623,67 @@ public class CommunityServiceImpl implements CommunityService {
 
 		detailUrl = String.format(detailUrl, dto.getId());
 
-//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
 		dto.setDetailUrl(homeUrl + detailUrl);
 
 	}
 
-    private void populateBuildingDTO(BuildingDTO building) {
-        if(building == null) {
-            return;
-        }
-        
-        String posterUrl = building.getPosterUri();
-        if(posterUrl != null && posterUrl.length() > 0) {
-            try{
-                String url = contentServerService.parserUri(posterUrl, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                building.setPosterUrl(url);
-            }catch(Exception e){
-                LOGGER.error("Failed to parse poster uri of building, building=" + building, e);
+	@Override
+	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
+		
+		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
+		if(building != null) {
+            if(BuildingStatus.ACTIVE != BuildingStatus.fromCode(building.getStatus())) {
+            	
+        		LOGGER.error("Building already deleted");
+        		throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
+        				BuildingServiceErrorCode.ERROR_BUILDING_DELETED, "Building already deleted");
             }
+			this.communityProvider.populateBuildingAttachments(building);
+
+			BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
+
+			populateBuilding(dto, building);
+
+			return dto;
+		}else {
+            LOGGER.error("Building not found");
+            throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
+            		BuildingServiceErrorCode.ERROR_BUILDING_NOT_FOUND, "Building not found");
         }
+	}
+
+	/**
+	 * 填充楼栋信息
+	 */
+	 private void populateBuilding(BuildingDTO dto, Building building) {
+		 if(building == null) {
+            if(LOGGER.isInfoEnabled()) {
+                LOGGER.info("The building is null");
+            }
+		 } else {
+
+			 dto.setBuildingName(dto.getName());
+			 dto.setName(StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
+
+		     String posterUri = building.getPosterUri();
+             if(posterUri != null && posterUri.length() > 0) {
+                 try{
+                     String url = contentServerService.parserUri(posterUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+					 dto.setPosterUrl(url);
+                 }catch(Exception e){
+                     LOGGER.error("Failed to parse building poster uri, buildingId=" + building.getId() + ", posterUri=" + posterUri, e);
+                 }
+             } 
+		     
+//			 populateBuildingCreatorInfo(building);
+			 populateBuildingManagerInfo(dto);
+//			 populateBuildingOperatorInfo(building);
+
+			 populateBuildingAttachments(dto, building.getAttachments());
+
+			 processDetailUrl(dto);
+
+//			 populateFormInfo(dto);
 
 //		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
 //		cmd.setSourceType(EntityType.BUILDING.getCode());
@@ -676,75 +700,12 @@ public class CommunityServiceImpl implements CommunityService {
 //				building.setRequestFormId(request.getSourceId());
 //			}
 //		}
-    }
-	@Override
-	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
-		
-		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
-		if(building != null) {
-            if(BuildingStatus.ACTIVE != BuildingStatus.fromCode(building.getStatus())) {
-            	
-        		LOGGER.error("Building already deleted");
-        		throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
-        				BuildingServiceErrorCode.ERROR_BUILDING_DELETED, "Building already deleted");
-            }
-			this.communityProvider.populateBuildingAttachments(building);
-	        populateBuilding(building);
-
-			BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
-			populateFormInfo(dto);
-
-			return dto;
-		}else {
-            LOGGER.error("Building not found");
-            throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
-            		BuildingServiceErrorCode.ERROR_BUILDING_NOT_FOUND, "Building not found");
-        }
-	}
-	
-	private void populateBuildings(List<Building> buildingList) {
-        if(buildingList == null || buildingList.size() == 0) {
-            if(LOGGER.isInfoEnabled()) {
-                LOGGER.info("The building list is empty");
-            }
-            return;
-        } else {
-            for(Building building : buildingList) {
-            	populateBuilding(building);
-            }
-        }
-    }
-
-	/**
-	 * 填充楼栋信息
-	 */
-	 private void populateBuilding(Building building) {
-		 if(building == null) {
-            if(LOGGER.isInfoEnabled()) {
-                LOGGER.info("The building is null");
-            }
-		 } else {
-		     String posterUri = building.getPosterUri();
-             if(posterUri != null && posterUri.length() > 0) {
-                 try{
-                     String url = contentServerService.parserUri(posterUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                     building.setPosterUrl(url);
-                 }catch(Exception e){
-                     LOGGER.error("Failed to parse building poster uri, buildingId=" + building.getId() + ", posterUri=" + posterUri, e);
-                 }
-             } 
-		     
-			 populateBuildingCreatorInfo(building);
-			 populateBuildingManagerInfo(building);
-			 populateBuildingOperatorInfo(building);
-             
-			 populateBuildingAttachements(building, building.getAttachments());
 	        
 		 }
 	 }
 	 
 	 
-	 private void populateBuildingCreatorInfo(Building building) {
+	 private void populateBuildingCreatorInfo(BuildingDTO building) {
 		 
 		 String creatorNickName = building.getCreatorNickName();
          String creatorAvatar = building.getCreatorAvatar();
@@ -766,30 +727,24 @@ public class CommunityServiceImpl implements CommunityService {
 		 
 	 }
 	 
-	 private void populateBuildingManagerInfo(Building building) {
-		 
-		 String managerNickName = building.getManagerNickName();
-         String managerAvatar = building.getManagerAvatar();
+	 private void populateBuildingManagerInfo(BuildingDTO building) {
+
          if(null == building.getManagerUid()){
         	 return;
          }
-         User manager = userProvider.findUserById(building.getManagerUid());
-         if(manager != null) {
-             if(managerNickName == null || managerNickName.trim().length() == 0) {
-            	 building.setManagerNickName(manager.getNickName());
-             }
-             if(managerAvatar == null || managerAvatar.trim().length() == 0) {
-            	 building.setManagerAvatar(manager.getAvatar());
-             }
-         }
-         managerAvatar = building.getManagerAvatar();
-         if(managerAvatar != null && managerAvatar.length() > 0) {
-             String avatarUrl = contentServerService.parserUri(managerAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-             building.setManagerAvatarUrl(avatarUrl);
-         }
+
+		 OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+		 if(null != member){
+			 building.setManagerNickName(member.getContactName());
+			 building.setManagerName(member.getContactName());
+			 //modify by wh 2016-11-8 加了管理员电话新字段
+			 //dto.setContact(member.getContactToken());
+			 building.setManagerContact(member.getContactToken());
+		 }
+
 	 }
 
-	 private void populateBuildingOperatorInfo(Building building) {
+	 private void populateBuildingOperatorInfo(BuildingDTO building) {
 	 
 		 String operatorNickName = building.getOperateNickName();
          String operatorAvatar = building.getOperateAvatar();
@@ -812,7 +767,7 @@ public class CommunityServiceImpl implements CommunityService {
          }
 	 }
 	 
-	 private void populateBuildingAttachements(Building building, List<BuildingAttachment> attachmentList) {
+	 private void populateBuildingAttachments(BuildingDTO building, List<BuildingAttachment> attachmentList) {
 	 
 		 if(attachmentList == null || attachmentList.size() == 0) {
 	            if(LOGGER.isInfoEnabled()) {
@@ -820,12 +775,12 @@ public class CommunityServiceImpl implements CommunityService {
 	            }
 		 } else {
 	            for(BuildingAttachment attachment : attachmentList) {
-	                populateBuildingAttachement(building, attachment);
+					populateBuildingAttachment(building, attachment);
 	            }
 		 }
 	 }
 	 
-	 private void populateBuildingAttachement(Building building, BuildingAttachment attachment) {
+	 private void populateBuildingAttachment(BuildingDTO building, BuildingAttachment attachment) {
         
 		 if(attachment == null) {
 			 if(LOGGER.isInfoEnabled()) {
@@ -842,7 +797,7 @@ public class CommunityServiceImpl implements CommunityService {
 				 }
 			 } else {
 				 if(LOGGER.isWarnEnabled()) {
-					 LOGGER.warn("The content uri is empty, attchmentId=" + attachment.getId());
+					 LOGGER.warn("The content uri is empty, attachmentId=" + attachment.getId());
 				 }
 			 }
 		 }
@@ -853,15 +808,7 @@ public class CommunityServiceImpl implements CommunityService {
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
 		Building building = ConvertHelper.convert(cmd, Building.class);
-//		building.setAddress(cmd.getAddress());
-//		building.setAliasName(cmd.getAliasName());
-//		building.setAreaSize(cmd.getAreaSize());
-//		building.setCommunityId(cmd.getCommunityId());
-//		building.setContact(cmd.getContact());
-//		building.setDescription(cmd.getDescription());
-//		building.setManagerUid(cmd.getManagerUid());
-//		building.setName(cmd.getName());
-//		building.setPosterUri(cmd.getPosterUri());
+
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		building.setNamespaceId(null == cmd.getNamespaceId() ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId());
 		if(StringUtils.isNotBlank(cmd.getGeoString())){
@@ -882,8 +829,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 				LOGGER.info("add building");
 				this.communityProvider.createBuilding(userId, building);
-				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
-						building.getId(), cmd.getCustomFormFlag());
+//				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
+//						building.getId(), cmd.getCustomFormFlag());
 			} else {
 				LOGGER.info("update building");
 				building.setId(cmd.getId());
@@ -893,18 +840,18 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setNamespaceId(b.getNamespaceId());
 				this.communityProvider.updateBuilding(building);
 
-				generalFormValProvider.deleteGeneralFormVals(EntityType.BUILDING.getCode(), building.getId());
-				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
-						building.getId(), cmd.getCustomFormFlag());
+//				generalFormValProvider.deleteGeneralFormVals(EntityType.BUILDING.getCode(), building.getId());
+//				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
+//						building.getId(), cmd.getCustomFormFlag());
 			}
+			processBuildingAttachments(userId, cmd.getAttachments(), building);
+
 			return null;
 		});
-		processBuildingAttachments(userId, cmd.getAttachments(), building);
-		
-		populateBuilding(building);
 
 		BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
 
+		populateBuilding(dto, building);
 //		populateFormInfo(dto);
 		return dto;
 		

@@ -944,13 +944,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public boolean updateLeasePromotionStatus(UpdateLeasePromotionStatusCommand cmd){
 		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
 		
-//		if(LeasePromotionStatus.RENTAL.getCode() == cmd.getStatus()){
-//			if(LeasePromotionStatus.RENTING.getCode() != leasePromotion.getStatus()){
-//				LOGGER.error("Status can not be modified. cause:data status ="+ leasePromotion.getStatus());
-//				throw errorWith(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.ERROR_UPDATE_STATUS,
-//						"Status can not be modified.");
-//			}
-//		}
+		if(leasePromotion == null){
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter.");
+		}
 		
 		return enterpriseApplyEntryProvider.updateLeasePromotionStatus(cmd.getId(), cmd.getStatus());
 		

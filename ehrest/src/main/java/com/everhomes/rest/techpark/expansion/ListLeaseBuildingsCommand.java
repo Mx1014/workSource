@@ -4,9 +4,18 @@ package com.everhomes.rest.techpark.expansion;
 import com.everhomes.util.StringHelper;
 
 public class ListLeaseBuildingsCommand {
+    private Integer namespaceId;
     private Long communityId;
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getCommunityId() {
         return communityId;

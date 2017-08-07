@@ -21,7 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author sw on 2017/8/3.
@@ -96,6 +99,16 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
         leaseBuilding.setCreatorUid(UserContext.currentUserId());
         leaseBuilding.setDefaultOrder(id);
         dao.insert(leaseBuilding);
+    }
+
+    @Override
+    public void createLeaseBuildings(List<LeaseBuilding> leaseBuildings) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhLeaseBuildingsDao dao = new EhLeaseBuildingsDao(context.configuration());
+
+        dao.insert(leaseBuildings.stream().map(r -> ConvertHelper.convert(r, EhLeaseBuildings.class)).collect(Collectors.toList()));
     }
 
     @Override

@@ -12,6 +12,8 @@ public class LeaseBuildingDTO {
     private Long id;
     private Integer namespaceId;
     private Long communityId;
+    private Long buildingId;
+    private String buildingName;
     private String name;
     private String aliasName;
     private String managerName;
@@ -28,9 +30,34 @@ public class LeaseBuildingDTO {
     private Byte customFormFlag;
     private Long defaultOrder;
     private String detailUrl;
+    private Byte deleteFlag;
 
     @ItemType(BuildingForRentAttachmentDTO.class)
     private List<BuildingForRentAttachmentDTO> attachments;
+
+    public Byte getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(Byte deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
 
     public String getDetailUrl() {
         return detailUrl;
