@@ -1,6 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -34,6 +35,18 @@ public class LeaseBuildingDTO {
 
     @ItemType(BuildingForRentAttachmentDTO.class)
     private List<BuildingForRentAttachmentDTO> attachments;
+
+
+    @ItemType(PostApprovalFormItem.class)
+    private List<PostApprovalFormItem> formValues;
+
+    public List<PostApprovalFormItem> getFormValues() {
+        return formValues;
+    }
+
+    public void setFormValues(List<PostApprovalFormItem> formValues) {
+        this.formValues = formValues;
+    }
 
     public Byte getDeleteFlag() {
         return deleteFlag;

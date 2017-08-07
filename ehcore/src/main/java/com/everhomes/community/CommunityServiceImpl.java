@@ -682,25 +682,6 @@ public class CommunityServiceImpl implements CommunityService {
 			 populateBuildingAttachments(dto, building.getAttachments());
 
 			 processDetailUrl(dto);
-
-//			 populateFormInfo(dto);
-
-//		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
-//		cmd.setSourceType(EntityType.BUILDING.getCode());
-//		cmd.setSourceId(building.getId());
-//		cmd.setOriginFieldFlag(NormalFlag.NEED.getCode());
-//
-//		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
-//		building.setFormValues(formValues);
-//
-//		if (LeasePromotionFlag.ENABLED.getCode() == building.getCustomFormFlag()) {
-//			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(building.getNamespaceId(),
-//					building.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
-//			if (null != request) {
-//				building.setRequestFormId(request.getSourceId());
-//			}
-//		}
-	        
 		 }
 	 }
 	 
@@ -852,39 +833,10 @@ public class CommunityServiceImpl implements CommunityService {
 		BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
 
 		populateBuilding(dto, building);
-//		populateFormInfo(dto);
+
 		return dto;
-		
 	}
 
-	private void populateFormInfo(BuildingDTO dto) {
-		GetGeneralFormValuesCommand cmdValues = new GetGeneralFormValuesCommand();
-		cmdValues.setSourceType(EntityType.BUILDING.getCode());
-		cmdValues.setSourceId(dto.getId());
-		cmdValues.setOriginFieldFlag(NormalFlag.NEED.getCode());
-		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmdValues);
-		dto.setFormValues(formValues);
-
-		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
-			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(dto.getNamespaceId(),
-					dto.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
-			if (null != request) {
-				dto.setRequestFormId(request.getSourceId());
-			}
-		}
-	}
-
-	private void addGeneralFormInfo(Long generalFormId, List<PostApprovalFormItem> formValues, String sourceType,
-		Long sourceId, Byte customFormFlag) {
-		if (LeasePromotionFlag.ENABLED.getCode() == customFormFlag) {
-			addGeneralFormValuesCommand cmd = new addGeneralFormValuesCommand();
-			cmd.setGeneralFormId(generalFormId);
-			cmd.setValues(formValues);
-			cmd.setSourceId(sourceId);
-			cmd.setSourceType(sourceType);
-			generalFormService.addGeneralFormValues(cmd);
-		}
-	}
 	@Override
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
 		

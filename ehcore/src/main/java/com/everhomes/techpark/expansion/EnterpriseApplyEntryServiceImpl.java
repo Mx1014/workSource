@@ -7,6 +7,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigConstants;
@@ -36,6 +37,7 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
@@ -937,9 +939,23 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		populateRentDTO(dto, leasePromotion);
 
+		dto.setProjectDTOS(getProjectDTOs(id));
+
 		return dto;
 	}
-	
+
+	private List<ProjectDTO> getProjectDTOs(Long id) {
+		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeasePromotionCommunities(id);
+		Map<Long, Community> temp = communityProvider.listCommunitiesByIds(communityIds);
+		return temp.values().stream().map(r -> {
+			ProjectDTO projectDTO = new ProjectDTO();
+			projectDTO.setProjectId(r.getId());
+			projectDTO.setProjectName(r.getName());
+
+			return projectDTO;
+		}).collect(Collectors.toList());
+	}
+
 	@Override
 	public boolean updateLeasePromotionStatus(UpdateLeasePromotionStatusCommand cmd){
 		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());

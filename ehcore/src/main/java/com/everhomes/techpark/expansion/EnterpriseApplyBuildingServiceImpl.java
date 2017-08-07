@@ -11,8 +11,10 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
@@ -37,19 +39,14 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 	@Autowired
 	private EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider;
-
 	@Autowired
 	private DbProvider dbProvider;
-
 	@Autowired
 	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
-
 	@Autowired
 	private GeneralFormService generalFormService;
-
 	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
-
 	@Autowired
 	private ContentServerService contentServerService;
 	@Autowired
@@ -150,6 +147,18 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		return dto;
 	}
 
+	private void populateFormInfo(LeaseBuildingDTO dto) {
+		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
+
+			GetGeneralFormValuesCommand cmdValues = new GetGeneralFormValuesCommand();
+			cmdValues.setSourceType(EntityType.BUILDING.getCode());
+			cmdValues.setSourceId(dto.getId());
+			cmdValues.setOriginFieldFlag(NormalFlag.NEED.getCode());
+			List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmdValues);
+			dto.setFormValues(formValues);
+		}
+	}
+
 	private void addGeneralFormInfo(Long generalFormId, List<PostApprovalFormItem> formValues, String sourceType,
 									Long sourceId, Byte customFormFlag) {
 		if (LeasePromotionFlag.ENABLED.getCode() == customFormFlag) {
@@ -189,6 +198,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		populatePostUrl(dto, leaseBuilding.getPosterUri());
 		populateLeaseBuildingAttachments(dto, attachments);
 		processDetailUrl(dto);
+		//表单信息
+		populateFormInfo(dto);
 
 		if (null != leaseBuilding.getBuildingId()) {
 			Building building = communityProvider.findBuildingById(leaseBuilding.getBuildingId());

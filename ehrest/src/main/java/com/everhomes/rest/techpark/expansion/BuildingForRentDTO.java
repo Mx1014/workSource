@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 
 /**
@@ -83,7 +84,19 @@ public class BuildingForRentDTO {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
 
+	@ItemType(ProjectDTO.class)
+	private List<ProjectDTO> projectDTOS;
+
 //	private Long requestFormId;
+
+
+	public List<ProjectDTO> getProjectDTOS() {
+		return projectDTOS;
+	}
+
+	public void setProjectDTOS(List<ProjectDTO> projectDTOS) {
+		this.projectDTOS = projectDTOS;
+	}
 
 	public Long getLeasePromotionFormId() {
 		return leasePromotionFormId;

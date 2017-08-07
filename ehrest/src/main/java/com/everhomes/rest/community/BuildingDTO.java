@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
 
 /**
  * 
@@ -107,46 +106,6 @@ public class BuildingDTO {
 	
 	@ItemType(BuildingAttachmentDTO.class)
 	private List<BuildingAttachmentDTO> attachments;
-
-	@ItemType(PostApprovalFormItem.class)
-	private List<PostApprovalFormItem> formValues;
-
-	private Long generalFormId;
-	private Byte customFormFlag;
-
-	private Long requestFormId;
-
-	public Long getRequestFormId() {
-		return requestFormId;
-	}
-
-	public void setRequestFormId(Long requestFormId) {
-		this.requestFormId = requestFormId;
-	}
-
-	public Long getGeneralFormId() {
-		return generalFormId;
-	}
-
-	public void setGeneralFormId(Long generalFormId) {
-		this.generalFormId = generalFormId;
-	}
-
-	public Byte getCustomFormFlag() {
-		return customFormFlag;
-	}
-
-	public void setCustomFormFlag(Byte customFormFlag) {
-		this.customFormFlag = customFormFlag;
-	}
-
-	public List<PostApprovalFormItem> getFormValues() {
-		return formValues;
-	}
-
-	public void setFormValues(List<PostApprovalFormItem> formValues) {
-		this.formValues = formValues;
-	}
 
 	public String getDetailUrl() {
 		return detailUrl;
