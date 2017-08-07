@@ -115,9 +115,11 @@ public class FieldServiceImpl implements FieldService {
 
         List<FieldGroupDTO> trees = new ArrayList<>();
         FieldGroupDTO allTreeDTO = ConvertHelper.convert(dto, FieldGroupDTO.class);
-        if(dto != null) {
-            trees.add(allTreeDTO);
+        if(dto == null) {
+            allTreeDTO = new FieldGroupDTO();
+            allTreeDTO.setGroupId(0L);
         }
+        trees.add(allTreeDTO);
         for (FieldGroupDTO groupTreeDTO : dtos) {
             LOGGER.info("groupTreeDTO: {}, dto: {}", groupTreeDTO, dto);
             if (groupTreeDTO.getParentId().equals(dto.getGroupId())) {
