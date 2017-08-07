@@ -9586,6 +9586,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<String> groupTypeList = new ArrayList<String>();
         groupTypeList.add(OrganizationGroupType.GROUP.getCode());
         groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypeList.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
         groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 
         List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypeList);
