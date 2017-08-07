@@ -1632,8 +1632,9 @@ public class FlowServiceImpl implements FlowService {
         }
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.current().getUser().getId());
         FlowCaseState ctx = flowStateProcessor.prepareButtonFire(userInfo, cmd);
-        flowStateProcessor.step(ctx, ctx.getCurrentEvent());
-
+        if (ctx.isContinueStep()) {
+            flowStateProcessor.step(ctx, ctx.getCurrentEvent());
+        }
         FlowButton btn = flowButtonProvider.getFlowButtonById(cmd.getButtonId());
         return ConvertHelper.convert(btn, FlowButtonDTO.class);
     }
