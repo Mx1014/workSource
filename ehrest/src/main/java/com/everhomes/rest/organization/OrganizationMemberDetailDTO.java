@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
 
+ * <li>id：成员的detailId</li>
  * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>memberGroup：组织角色类型 参考{@link com.everhomes.rest.organization.pm.PmMemberGroup}</li>
