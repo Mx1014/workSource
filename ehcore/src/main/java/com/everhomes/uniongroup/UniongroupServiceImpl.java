@@ -374,8 +374,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public void reallocatedUnion(Long enterpriseId, List<Long> departmentIds, OrganizationMember organizationMember) {
-//        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Integer namespaceId = 1000000;
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        Integer namespaceId = 1000000;
         //根据层级关系将departmentIds排序
         Organization organization = checkOrganization(enterpriseId);
         List<Organization> departments = this.organizationProvider.listOrganizationsByIds(departmentIds);
