@@ -118,8 +118,8 @@ public class FieldServiceImpl implements FieldService {
             dto = new FieldGroupDTO();
             dto.setGroupId(0L);
         }
-        FieldGroupDTO allTreeDTO = ConvertHelper.convert(dto, FieldGroupDTO.class);
-        trees.add(allTreeDTO);
+//        FieldGroupDTO allTreeDTO = ConvertHelper.convert(dto, FieldGroupDTO.class);
+//        trees.add(allTreeDTO);
         for (FieldGroupDTO groupTreeDTO : dtos) {
             if (groupTreeDTO.getParentId().equals(dto.getGroupId())) {
                 FieldGroupDTO organizationTreeDTO = processFieldGroupnTree(dtos, groupTreeDTO);
