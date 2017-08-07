@@ -52,7 +52,7 @@ public class FieldServiceImpl implements FieldService {
                         });
                         //按default order排序
                         Collections.sort(items, (a,b) -> {
-                            return b.getDefaultOrder() - a.getDefaultOrder();
+                            return a.getDefaultOrder() - b.getDefaultOrder();
                         });
                         dto.setItems(items);
                     }
@@ -61,7 +61,7 @@ public class FieldServiceImpl implements FieldService {
 
                 //按default order排序
                 Collections.sort(dtos, (a,b) -> {
-                    return b.getDefaultOrder() - a.getDefaultOrder();
+                    return a.getDefaultOrder() - b.getDefaultOrder();
                 });
                 return dtos;
             }
@@ -97,7 +97,7 @@ public class FieldServiceImpl implements FieldService {
             LOGGER.info("groupDTOs: {}", groupDTOs);
             //按default order排序
             Collections.sort(groupDTOs, (a,b) -> {
-                return b.getDefaultOrder() - a.getDefaultOrder();
+                return a.getDefaultOrder() - b.getDefaultOrder();
             });
 
             return groupDTOs;
