@@ -27,9 +27,18 @@ public class LeaseBuildingDTO {
     private Long generalFormId;
     private Byte customFormFlag;
     private Long defaultOrder;
+    private String detailUrl;
 
     @ItemType(BuildingForRentAttachmentDTO.class)
     private List<BuildingForRentAttachmentDTO> attachments;
+
+    public String getDetailUrl() {
+        return detailUrl;
+    }
+
+    public void setDetailUrl(String detailUrl) {
+        this.detailUrl = detailUrl;
+    }
 
     public List<BuildingForRentAttachmentDTO> getAttachments() {
         return attachments;

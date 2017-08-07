@@ -11,12 +11,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectOffsetStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -826,26 +821,26 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public Boolean verifyBuildingName(Long communityId, String buildingName) {
-		int namespaceId = UserContext.getCurrentNamespaceId(null);
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
-		List<Building> buildings = new ArrayList<Building>();
-        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
-    
-        query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
-        query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
-       
-        
-        
-        query.fetch().map((EhBuildingsRecord record) -> {
-        	buildings.add(ConvertHelper.convert(record, Building.class));
-        	return null;
-        });
-        
-        if(buildings.size() > 0)
-        	return false;
-        
-		return true;
+		int namespaceId = UserContext.getCurrentNamespaceId();
+
+        final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhBuildings.class), null,
+                (DSLContext context, Object reducingContext)-> {
+
+                    SelectJoinStep<Record1<Integer>> query = context.selectCount()
+                            .from(Tables.EH_BUILDINGS);
+
+                    Condition condition = Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId);
+                    condition = condition.and(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+                    condition = condition.and(Tables.EH_BUILDINGS.NAME.eq(buildingName));
+
+                    count[0] = query.where(condition).fetchOneInto(Integer.class);
+                    return true;
+                });
+        if(count[0] > 0) {
+            return false;
+        }
+        return true;
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseAttachment;
@@ -586,8 +587,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
         map.put("sourceType", defaultIfNull(sourceTypeName,""));
 
-        return localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE,
-                ExpansionLocalStringCode.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
+        return localeTemplateService.getLocaleTemplateString(ApplyEntryErrorCodes.SCOPE,
+                ApplyEntryErrorCodes.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
     }
 
     private Object defaultIfNull(Object obj, Object defaultValue) {
@@ -943,13 +944,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public boolean updateLeasePromotionStatus(UpdateLeasePromotionStatusCommand cmd){
 		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
 		
-		if(LeasePromotionStatus.RENTAL.getCode() == cmd.getStatus()){
-			if(LeasePromotionStatus.RENTING.getCode() != leasePromotion.getStatus()){
-				LOGGER.error("Status can not be modified. cause:data status ="+ leasePromotion.getStatus());
-				throw errorWith(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.ERROR_UPDATE_STATUS,
-						"Status can not be modified.");
-			}
-		}
+//		if(LeasePromotionStatus.RENTAL.getCode() == cmd.getStatus()){
+//			if(LeasePromotionStatus.RENTING.getCode() != leasePromotion.getStatus()){
+//				LOGGER.error("Status can not be modified. cause:data status ="+ leasePromotion.getStatus());
+//				throw errorWith(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.ERROR_UPDATE_STATUS,
+//						"Status can not be modified.");
+//			}
+//		}
 		
 		return enterpriseApplyEntryProvider.updateLeasePromotionStatus(cmd.getId(), cmd.getStatus());
 		
@@ -1135,13 +1136,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
                 if (null != leaseIssuer) {
                     LOGGER.error("LeaseIssuer exist, cmd={}", cmd);
-                    throw errorWith(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, ExpansionLocalStringCode.LEASE_ISSUER_EXIST,
+                    throw errorWith(ApplyEntryErrorCodes.SCOPE_APPLY_TYPE, ApplyEntryErrorCodes.LEASE_ISSUER_EXIST,
                             "LeaseIssuer exist.");
                 }
 
                 if (null == cmd.getAddressIds()) {
                     LOGGER.error("Invalid addressIds param, cmd={}", cmd);
-                    throw errorWith(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, ExpansionLocalStringCode.LEASE_ISSUER_EXIST,
+                    throw errorWith(ApplyEntryErrorCodes.SCOPE_APPLY_TYPE, ApplyEntryErrorCodes.LEASE_ISSUER_EXIST,
                             "Invalid addressIds param.");
                 }
 

@@ -1,6 +1,8 @@
 package com.everhomes.techpark.expansion;
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -12,6 +14,7 @@ import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -71,7 +74,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		if(size != pageSize){
 			response.setNextPageAnchor(null);
 		}else{
-			response.setNextPageAnchor(leaseBuildings.get(size - 1).getId());
+			response.setNextPageAnchor(leaseBuildings.get(size - 1).getDefaultOrder());
 		}
 
 		return response;
@@ -79,8 +82,18 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 	@Override
 	public LeaseBuildingDTO createLeaseBuilding(CreateLeaseBuildingCommand cmd) {
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		//检查楼栋名
+		if (!enterpriseApplyBuildingProvider.verifyBuildingName(namespaceId, cmd.getCommunityId(), cmd.getName())) {
+			throw RuntimeErrorException.errorWith(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.ERROR_BUILDING_NAME_EXIST,
+					"Building name exist");
+		}
+
 		LeaseBuilding leaseBuilding = ConvertHelper.convert(cmd, LeaseBuilding.class);
 
+		leaseBuilding.setNamespaceId(UserContext.getCurrentNamespaceId());
 		leaseBuilding.setStatus(LeaseBulidingStatus.ACTIVE.getCode());
 
 		dbProvider.execute((TransactionStatus status) -> {
@@ -155,6 +168,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	@Override
 	public void deleteLeaseBuilding(DeleteLeaseBuildingCommand cmd) {
 		LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(cmd.getId());
+		leaseBuilding.setStatus(LeaseBulidingStatus.INACTIVE.getCode());
 		enterpriseApplyBuildingProvider.updateLeaseBuilding(leaseBuilding);
 
 	}
@@ -165,6 +179,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		populatePostUrl(dto, leaseBuilding.getPosterUri());
 		populateLeaseBuildingAttachments(dto, attachments);
+		processDetailUrl(dto);
 	}
 
 	private void addAttachments(List<BuildingForRentAttachmentDTO> attachments, LeaseBuilding leaseBuilding) {
@@ -177,6 +192,16 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
 			});
 		}
+	}
+
+	private void processDetailUrl(LeaseBuildingDTO dto) {
+		String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
+		String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_BUILDING_DETAIL_URL, "");
+
+		detailUrl = String.format(detailUrl, dto.getId());
+
+		dto.setDetailUrl(homeUrl + detailUrl);
+
 	}
 
 	private void populatePostUrl(LeaseBuildingDTO dto, String uri) {

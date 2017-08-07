@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.techpark.expansion.LeaseBulidingStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLeaseBuildingsDao;
@@ -15,9 +16,7 @@ import com.everhomes.server.schema.tables.records.EhLeaseBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhLeasePromotionCommunitiesRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,14 +48,37 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
 
         query.addConditions(Tables.EH_LEASE_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_LEASE_BUILDINGS.COMMUNITY_ID.eq(communityId));
-
-        query.addOrderBy(Tables.EH_LEASE_BUILDINGS.ID.asc());
+        query.addConditions(Tables.EH_LEASE_BUILDINGS.STATUS.eq(LeaseBulidingStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_LEASE_BUILDINGS.DEFAULT_ORDER.asc());
 
         if (null != pageSize) {
             query.addLimit(pageSize);
         }
 
         return query.fetch().map(r -> ConvertHelper.convert(r, LeaseBuilding.class));
+    }
+
+    @Override
+    public Boolean verifyBuildingName(Integer namespaceId, Long communityId, String buildingName) {
+
+        final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readWrite(), null,
+                (DSLContext context, Object reducingContext)-> {
+
+                    SelectJoinStep<Record1<Integer>> query = context.selectCount()
+                            .from(Tables.EH_LEASE_BUILDINGS);
+
+                    Condition condition = Tables.EH_LEASE_BUILDINGS.COMMUNITY_ID.eq(communityId);
+                    condition = condition.and(Tables.EH_LEASE_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+                    condition = condition.and(Tables.EH_LEASE_BUILDINGS.NAME.eq(buildingName));
+
+                    count[0] = query.where(condition).fetchOneInto(Integer.class);
+                    return true;
+                });
+        if(count[0] > 0) {
+            return false;
+        }
+        return true;
     }
 
     @Override
