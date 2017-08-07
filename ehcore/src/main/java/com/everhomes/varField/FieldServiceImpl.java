@@ -3,10 +3,12 @@ package com.everhomes.varField;
 import com.everhomes.rest.varField.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
  */
 @Component
 public class FieldServiceImpl implements FieldService {
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(FieldServiceImpl.class);
 
     @Autowired
     private FieldProvider fieldProvider;
@@ -116,6 +119,7 @@ public class FieldServiceImpl implements FieldService {
             trees.add(allTreeDTO);
         }
         for (FieldGroupDTO groupTreeDTO : dtos) {
+            LOGGER.info("groupTreeDTO: {}, dto: {}", groupTreeDTO, dto);
             if (groupTreeDTO.getParentId().equals(dto.getGroupId())) {
                 FieldGroupDTO organizationTreeDTO = processFieldGroupnTree(dtos, groupTreeDTO);
                 trees.add(organizationTreeDTO);
