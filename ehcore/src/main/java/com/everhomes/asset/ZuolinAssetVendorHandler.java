@@ -258,6 +258,13 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         return dto;
     }
 
+    @Override
+    public List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName) {
+        List<ListSettledBillDTO> list = assetProvider.listSettledBill(currentNamespaceId,ownerId,ownerType,addressName, addressId, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName);
+        if (list == null) return null;
+        return list;
+    }
+
     private List<SimpleAssetBillDTO> convertAssetBillToSimpleDTO(List<AssetBill> bills) {
         List<SimpleAssetBillDTO> dtos =  bills.stream().map(bill -> {
             SimpleAssetBillDTO dto = ConvertHelper.convert(bill, SimpleAssetBillDTO.class);

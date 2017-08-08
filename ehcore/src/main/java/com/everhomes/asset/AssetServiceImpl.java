@@ -175,6 +175,29 @@ public class AssetServiceImpl implements AssetService {
         return dtoList;
     }
 
+    @Override
+    public ListSettledBillResponse listSettledBill(ListSettledBillCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        ListSettledBillResponse response = new ListSettledBillResponse();
+        if (cmd.getPageAnchor() == null) {
+            cmd.setPageAnchor(0l);
+        }
+        if(cmd.getPageSize() == null){
+            cmd.setPageSize(20);
+        }
+        int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
+        List<ListSettledBillDTO> list = handler.listSettledBill(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getAddressName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName());
+        response.setListSettledBillDTOs(list);
+        if(list.size() != cmd.getPageSize()){
+            response.setNextPageAnchor(null);
+        }else{
+            response.setNextPageAnchor(cmd.getPageAnchor());
+        }
+        return response;
+    }
+
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
         String key = String.format("pmbill:kexing:latest-selected-organization: %s:%s", UserContext.getCurrentNamespaceId(), UserContext.current().getUser().getId());

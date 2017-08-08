@@ -9,16 +9,15 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetBillStatus;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.ListSettledBillDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.daos.EhAssetBillTemplateFieldsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
-import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetVendorRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -34,7 +33,9 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -434,5 +435,83 @@ public class AssetProviderImpl implements AssetProvider {
         }
 
         return query.fetchAnyInto(AssetBill.class);
+    }
+
+    @Override
+    public List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName) {
+        List<ListSettledBillDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
+        query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        if (addressId != null) {
+            Map<Long,String> IdAndTypes = new HashMap<>();
+            context.select(Tables.EH_USERS.ID).from(Tables.EH_USERS).where(Tables.EH_USERS.ADDRESS_ID.eq(addressId)).fetch().map(r -> {
+                IdAndTypes.put(r.getValue(Tables.EH_USERS.ID),"individual");
+                return null;});
+            context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.ADDRESS_ID.eq(addressId)).fetch().map(r -> {
+                IdAndTypes.put(r.getValue(Tables.EH_USERS.ID),"organization");
+                return null;
+            });
+            for(Map.Entry<Long,String> entry : IdAndTypes.entrySet()){
+                query.addConditions(t.OWNER_TYPE.eq(entry.getValue()).and(t.OWNER_ID.eq(entry.getKey())));
+            }
+        }
+        if(billGroupId!=null) {
+            query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
+        }
+        if(billStatus!=null) {
+            query.addConditions(t.STATUS.eq(billStatus));
+        }
+        if(dateStrBegin!=null) {
+            query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
+        }
+        if(dateStrEnd!=null) {
+            query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
+        }
+        if(targetName!=null) {
+            query.addConditions(t.TARGETNAME.like("%"+targetName+"%"));
+        }
+        query.addOrderBy(t.DATE_STR.asc());
+        query.addGroupBy(t.TARGETNAME);
+        query.addLimit(pageOffSet,pageSize);
+        query.fetch().map(r -> {
+            ListSettledBillDTO dto = new ListSettledBillDTO();
+            if(addressName!=null){
+                dto.setAddressName(addressName);
+            }else{
+                String buildingApartmentName = "";
+                if (r.getValue(t.TARGET_TYPE).equals("individual")){
+                    buildingApartmentName = context.select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME).from(Tables.EH_USERS,Tables.EH_ADDRESSES).where(Tables.EH_USERS.ID.eq(r.getValue(t.TARGET_ID)))
+                            .and(Tables.EH_USERS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID)).fetchOne(0,String.class);
+                } else if (r.getValue(t.TARGET_TYPE).equals("organization")) {
+                    buildingApartmentName = context.select(Tables.EH_ORGANIZATIONS.ADDRESS_ID).from(Tables.EH_ORGANIZATIONS,Tables.EH_ADDRESSES).where(Tables.EH_ORGANIZATIONS.ID.eq(r.getValue(t.TARGET_ID)))
+                            .and(Tables.EH_ORGANIZATIONS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID)).fetchOne(0,String.class);
+                }
+            }
+            dto.setAmountOwed(r.getAmountOwed());
+            dto.setAmountReceivable(r.getAmountReceivable());
+            dto.setAmountReceived(r.getAmountReceived());
+            if(billGroupName!=null) {
+                dto.setBillGroupName(billGroupName);
+            }else{
+                String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS).where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
+                dto.setBillGroupName(billGroupNameFound);
+            }
+            dto.setBillId(r.getValue(t.ID));
+            dto.setBillStatus(r.getValue(t.STATUS));
+            dto.setNoticeTel(r.getValue(t.NOTICETEL));
+            dto.setNoticeTimes(r.getNoticeTimes());
+            dto.setDateStr(r.getDateStr());
+            dto.setTargetName(r.getTargetname());
+            dto.setTargetId(r.getTargetId());
+            dto.setTargetType(r.getTargetType());
+            dto.setOwnerId(r.getOwnerId());
+            dto.setOwnerType(r.getOwnerType());
+            list.add(dto);
+            return null;});
+        return list;
     }
 }

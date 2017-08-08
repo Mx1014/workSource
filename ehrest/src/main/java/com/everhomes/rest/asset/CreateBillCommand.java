@@ -1,0 +1,109 @@
+//@formatter:off
+package com.everhomes.rest.asset;
+
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+import java.util.Date;
+import java.util.List;
+
+/**
+ *<ul>
+ * <li>ownerType:所属者type</li>
+ * <li>ownerId:所属者id</li>
+ * <li>dateStr:账期</li>
+ * <li>contractNO:合同号</li>
+ * <li>addressId:楼栋门牌id</li>
+ * <li>targetType:客户类别</li>
+ * <li>targetId:客户id</li>
+ * <li>noticeTel:催缴电话</li>
+ * <li>targetName:客户名称</li>
+ * <li>billGroupDTOList:账单组列表，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ *</ul>
+ */
+public class CreateBillCommand {
+    private String ownerType;
+    private String ownerId;
+    private Date dateStr;
+    private String contractNO;
+    private Long addressId;
+    private String noticeTel;
+    private String targetName;
+    @ItemType(BillGroupDTO.class)
+    private List<BillGroupDTO> billGroupDTOList;
+
+    public CreateBillCommand() {
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Date getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(Date dateStr) {
+        this.dateStr = dateStr;
+    }
+
+    public String getContractNO() {
+        return contractNO;
+    }
+
+    public void setContractNO(String contractNO) {
+        this.contractNO = contractNO;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public List<BillGroupDTO> getBillGroupDTOList() {
+        return billGroupDTOList;
+    }
+
+    public void setBillGroupDTOList(List<BillGroupDTO> billGroupDTOList) {
+        this.billGroupDTOList = billGroupDTOList;
+    }
+
+    public String getNoticeTel() {
+        return noticeTel;
+    }
+
+    public void setNoticeTel(String noticeTel) {
+        this.noticeTel = noticeTel;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
+    }
+
+
+}

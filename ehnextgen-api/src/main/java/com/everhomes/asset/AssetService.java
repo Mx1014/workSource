@@ -30,4 +30,6 @@ public interface AssetService {
 
     AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
     List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
+
+    ListSettledBillResponse listSettledBill(ListSettledBillCommand cmd);
 }

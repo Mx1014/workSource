@@ -1,11 +1,9 @@
 package com.everhomes.asset;
 
-import com.everhomes.rest.asset.AssetBillStatDTO;
-import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
-import com.everhomes.rest.asset.GetAssetBillStatCommand;
-import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
+import com.everhomes.rest.asset.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Created by ying.xiong on 2017/4/11.
@@ -21,4 +19,5 @@ public interface AssetVendorHandler {
 
     AssetBillStatDTO getAssetBillStat(String tenantType, Long tenantId, Long addressId);
 
+    List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName);
 }

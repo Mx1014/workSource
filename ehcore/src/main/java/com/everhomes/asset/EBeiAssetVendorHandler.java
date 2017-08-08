@@ -117,6 +117,11 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return dto;
     }
 
+    @Override
+    public List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName) {
+        return null;
+    }
+
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
         try {
