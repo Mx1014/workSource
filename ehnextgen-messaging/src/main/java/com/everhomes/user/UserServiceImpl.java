@@ -1,60 +1,13 @@
 // @formatter:off
 package com.everhomes.user;
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.authorization.AuthorizationErrorCode;
-import com.everhomes.authorization.AuthorizationThirdPartyButton;
-import com.everhomes.authorization.AuthorizationThirdPartyButtonProvider;
-import com.everhomes.authorization.AuthorizationThirdPartyForm;
-import com.everhomes.authorization.AuthorizationThirdPartyFormProvider;
+import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -71,6 +24,7 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -109,8 +63,7 @@ import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
-import com.everhomes.organization.*; 
-import com.everhomes.organization.OrganizationMember; 
+import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
@@ -120,7 +73,9 @@ import com.everhomes.rest.address.ClaimedAddressInfo;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.ShopDTO;
+import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.GetCommunityAuthPopupConfigCommand;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -129,16 +84,13 @@ import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagePopupFlag;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.UserMessageType;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
@@ -194,99 +146,6 @@ import java.util.stream.Collectors;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
-import com.everhomes.rest.ui.user.ContentBriefDTO;
-import com.everhomes.rest.ui.user.FamilyButtonStatusType;
-import com.everhomes.rest.ui.user.FormSourceDTO;
-import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListAuthFormsResponse;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.ui.user.SearchTypeDTO;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.CreateInvitationCommand;
-import com.everhomes.rest.user.CreateUserImpersonationCommand;
-import com.everhomes.rest.user.DeleteUserImpersonationCommand;
-import com.everhomes.rest.user.DeviceIdentifierType;
-import com.everhomes.rest.user.GetBizSignatureCommand;
-import com.everhomes.rest.user.GetMessageSessionInfoCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.GetUserNotificationSettingCommand;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.InitBizInfoCommand;
-import com.everhomes.rest.user.InitBizInfoDTO;
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.rest.user.ListLoginByPhoneCommand;
-import com.everhomes.rest.user.ListRegisterUsersResponse;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.MessageSessionInfoDTO;
-import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
-import com.everhomes.rest.user.SearchUserByNamespaceCommand;
-import com.everhomes.rest.user.SearchUserImpersonationCommand;
-import com.everhomes.rest.user.SearchUserImpersonationResponse;
-import com.everhomes.rest.user.SearchUsersCommand;
-import com.everhomes.rest.user.SearchUsersResponse;
-import com.everhomes.rest.user.SendMessageTestCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.SynThridUserCommand;
-import com.everhomes.rest.user.UpdateUserNotificationSettingCommand;
-import com.everhomes.rest.user.UserCurrentEntity;
-import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.rest.user.UserDTO;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserImperInfo;
-import com.everhomes.rest.user.UserImpersonationDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserLoginDTO;
-import com.everhomes.rest.user.UserLoginResponse;
-import com.everhomes.rest.user.UserLoginStatus;
-import com.everhomes.rest.user.UserMuteNotificationFlag;
-import com.everhomes.rest.user.UserNotificationSettingDTO;
-import com.everhomes.rest.user.UserNotificationTemplateCode;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
-import com.everhomes.rest.user.ValidatePassCommand;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.admin.InvitatedUsers;
-import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
-import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
-import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
-import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.SendUserTestMailCommand;
-import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
-import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
-import com.everhomes.rest.user.admin.UsersWithAddrResponse;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsBlackList;
-import com.everhomes.sms.SmsBlackListCreateType;
-import com.everhomes.sms.SmsBlackListProvider;
-import com.everhomes.sms.SmsBlackListStatus;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RandomGenerator;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
 
 /**
  * 
@@ -445,6 +304,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
+
+    @Autowired
+    private CommunityService communityService;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -2858,6 +2720,14 @@ public class UserServiceImpl implements UserService {
 				sceneList.add(communityScene);
 			}
 		}
+
+		// 用户认证里的弹窗配置   add by xq.tian 2017/08/08
+        for (SceneDTO sceneDTO : sceneList) {
+            GetCommunityAuthPopupConfigCommand cmd1 = new GetCommunityAuthPopupConfigCommand();
+            cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+            CommunityAuthPopupConfigDTO communityAuthPopupConfig = communityService.getCommunityAuthPopupConfig(cmd1);
+            sceneDTO.setAuthPopupConfig(communityAuthPopupConfig.getStatus());
+        }
 
 		return sceneList;
 	}

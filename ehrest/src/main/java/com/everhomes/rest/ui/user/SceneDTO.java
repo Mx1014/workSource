@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>avatarUrl: 显示头像URL</li>
  * <li>sceneType: 场景类型，由该值来判断属于哪个场景，为了客户端操作简单，客户端可以直接使用该值替代entityType，也就是每种场景背后对应的实体对象是固定的，
  *     根据场景类型中的定义{@link com.everhomes.rest.ui.user.SceneType}</li>
+ * <li>authPopupConfig: 认证弹窗配置</li>
  * </ul>
  */
 public class SceneDTO {
@@ -28,6 +29,7 @@ public class SceneDTO {
     private String avatar;
     private String avatarUrl;
     private String sceneType;
+    private Byte authPopupConfig;
 
     public String getSceneToken() {
         return sceneToken;
@@ -91,6 +93,14 @@ public class SceneDTO {
 
     public void setSceneType(String sceneType) {
         this.sceneType = sceneType;
+    }
+
+    public Byte getAuthPopupConfig() {
+        return authPopupConfig;
+    }
+
+    public void setAuthPopupConfig(Byte authPopupConfig) {
+        this.authPopupConfig = authPopupConfig;
     }
 
     @Override
