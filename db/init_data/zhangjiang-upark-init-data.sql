@@ -141,7 +141,7 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES(@community_id+1, UUID(), @shi_id, '上海市',  @qu_id, '浦东新区', '人才公寓', '人才公寓', '上海市浦东新区盛夏路58弄', NULL, '天之骄子人才公寓由上海张江集成电路产业区开发有限公司开发经营，位于上海浦东新区盛夏路58弄，东邻盛夏路，西面为45米宽生态河道吕家浜，北抵金秋路，总出租面积119979.41平方米。公寓为精装修房源，配置全新家具，并有游泳池、室内篮球场等，满足社区内不同层次人群的生活需求。',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 214, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', @forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @eh_namespace_id);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
-	VALUES(@community_geopoint_id+1, @community_id, '', 121.5912, 31.211962, 'wtw3wcunb76j');
+	VALUES(@community_geopoint_id+1, @community_id+1, '', 121.5912, 31.211962, 'wtw3wcunb76j');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(@organization_id, @community_id+1);
 -- 人才公寓楼栋	
