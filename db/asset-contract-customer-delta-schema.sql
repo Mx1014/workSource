@@ -1,3 +1,20 @@
+-- 张江高科同步数据备份表
+DROP TABLE IF EXISTS `eh_zj_syncdata_backup`;
+CREATE TABLE `eh_zj_syncdata_backup` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `data_type` TINYINT NOT NULL COMMENT '1: community, 2: building, 3: apartment',
+  `next_page_offset` INTEGER COMMENT 'next page offset',
+  `data` LONGTEXT COMMENT 'data list',
+  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
+  `create_time` DATETIME,
+  `creator_uid` BIGINT,
+  `update_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- In some module, there are one or more tables which have lots of fields, it need to be grouped to be more readable in the view,
 -- this table will store these groups. The groups may be hierarchical, mainly for subgroups.
 -- DROP TABLE IF EXISTS `eh_var_field_groups`;
