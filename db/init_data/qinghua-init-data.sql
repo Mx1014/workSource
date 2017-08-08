@@ -2708,3 +2708,6 @@ VALUES ((@menu_sc_id := @menu_sc_id + 1), 41310, '', 'EhNamespaces', 999984, 2);
 INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
 VALUES ((@menu_sc_id := @menu_sc_id + 1), 41320, '', 'EhNamespaces', 999984, 2);
 update eh_web_menus set status=2 where id in(41300, 41310, 41320);
+
+-- 停车缴费 add by sw 20170808
+UPDATE eh_parking_lots set vendor_name = 'JIN_YI' where id = 10007;

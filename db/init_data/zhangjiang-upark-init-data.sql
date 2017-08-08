@@ -1233,3 +1233,7 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 	
 --  更新广场图标
 UPDATE eh_launch_pad_items SET apply_policy = 3 WHERE namespace_id = 999971;
+
+-- 招租管理配置 add by sw 20170808
+UPDATE eh_lease_configs set rent_amount_flag = 0, renew_flag = 0, issuer_manage_flag =0, issuing_lease_flag =0, area_search_flag = 1, park_indroduce_flag = 1, display_name_str= '办公招租,商户招租',display_order_str='1,2' where namespace_id = 999971;
+

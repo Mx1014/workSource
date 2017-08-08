@@ -99,3 +99,7 @@ GROUP BY
     eom.contact_token
 ORDER BY
     eom.id;
+
+-- 资源预约 add by sw 20170808
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
+	VALUES ('rental', '14000', 'zh_CN', '请补充线下模式负责人信息！');
