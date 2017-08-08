@@ -943,9 +943,9 @@ public class PunchAdminController extends ControllerBase {
 	 */
 	@RequestMapping("transforSceneToken")
 	@RestReturn(value = SceneTokenDTO.class)
-	public RestResponse transforSceneToken(@Valid ListPunchDetailsCommand cmd) { 
-		SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-		RestResponse response = new RestResponse( );
+	public RestResponse transforSceneToken(@Valid TransforSceneTokenCommand cmd) { 
+		SceneTokenDTO sceneToken = userService.checkSceneToken(cmd.getUserId(), cmd.getSceneToken());
+		RestResponse response = new RestResponse(sceneToken);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
