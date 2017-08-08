@@ -3931,19 +3931,26 @@ public class ActivityServiceImpl implements ActivityService {
         		activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(cmd.getContentCategoryId()));
 			}
 		}
-        
+
         // 可见性条件：如果有当前小区/园区，则加上小区条件；如果有对应的管理机构，则加上机构条件；这两个条件为或的关系；
         Condition communityCondition = null;
         if(communityIdList != null) {
             communityCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
             communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.in(communityIdList));
+
+            //查询全部时不要各个园区的Clone活动，因为有一个范围是“全部”的clone活动  add by yanjun 20170807
+			communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode()));
         }
         Condition orgCondition = null;
         if(organizationId != null) {
             orgCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
             orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(organizationId));
+			//查询全部时不要各个公司的Clone活动，因为有一个范围是“全部”的clone活动  add by yanjun 20170807
+			orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode()));
         }
-        Condition visibleCondition = communityCondition;
+
+		//增加获取发送到全部的活动，包括一般活动和clone活动  add by yanjun 20170807
+        Condition visibleCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
         if(visibleCondition == null) {
             visibleCondition = orgCondition;
         } else {
@@ -4022,6 +4029,13 @@ public class ActivityServiceImpl implements ActivityService {
                 if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
                     return null;
                 }
+
+                // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
+				if(PostCloneFlag.fromCode(activity.getCloneFlag()) == PostCloneFlag.CLONE){
+					post = forumProvider.findPostById(post.getRealPostId());
+					activity = activityProvider.findSnapshotByPostId(post.getId());
+				}
+
                 if (activity.getPosterUri() == null) {
                     this.forumProvider.populatePostAttachments(post);
                     List<Attachment> attachmentList = post.getAttachments();
@@ -4072,6 +4086,12 @@ public class ActivityServiceImpl implements ActivityService {
                 if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
                     return null;
                 }
+
+				// 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
+				if(PostCloneFlag.fromCode(activity.getCloneFlag()) == PostCloneFlag.CLONE){
+					post = forumProvider.findPostById(post.getRealPostId());
+					activity = activityProvider.findSnapshotByPostId(post.getId());
+				}
                 if (activity.getPosterUri() == null) {
                     this.forumProvider.populatePostAttachments(post);
                     List<Attachment> attachmentList = post.getAttachments();

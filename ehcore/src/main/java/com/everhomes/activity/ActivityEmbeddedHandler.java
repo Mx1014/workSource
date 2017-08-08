@@ -263,6 +263,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         if(cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
+
+        //保证帖子和活动的clone状态是一致的  add by yanjun 20170807
+        cmd.setCloneFlag(post.getCloneFlag());
+
         
 //        if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
 //			cmd.setOfficialFlag(OfficialFlag.NO.getCode());

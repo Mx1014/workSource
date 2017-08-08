@@ -226,29 +226,32 @@ public class ForumServiceImpl implements ForumService {
         //这个原来只用一行代码的方法终于要发挥他的作用啦。
         PostDTO dto = new PostDTO();
 
-
         if(cmd.getVisibleRegionIds() != null && cmd.getVisibleRegionIds().size() == 1){
             cmd.setVisibleRegionId(cmd.getVisibleRegionIds().get(0));
             cmd.setVisibleRegionIds(null);
         }
 
-        //if发送到一个特定对象的帖子或者全部范围的帖子, else发送到多个目标的帖子
+        //发送到一个特定对象的帖子或者全部范围的帖子
         if(cmd.getVisibleRegionId() != null || cmd.getVisibleRegionType() == VisibleRegionType.ALL.getCode()){
             dto = createTopic(cmd, UserContext.current().getUser().getId());
         }else if(cmd.getVisibleRegionIds() != null && cmd.getVisibleRegionIds().size() > 1){
 
+            //else发送到多个目标的帖子，需要发送一个真身帖，一个全部范围的帖子，以及各个目标的帖子
             cmd.setVisibleRegionId(null);
             cmd.setCloneFlag(PostCloneFlag.REAL.getCode());
             dto = createTopic(cmd, UserContext.current().getUser().getId());
 
-            for(int i= 0; i<cmd.getVisibleRegionIds().size(); i++){
+            cmd.setCloneFlag(PostCloneFlag.CLONE.getCode());
+            cmd.setRealPostId(dto.getId());
 
+            for(int i= 0; i<cmd.getVisibleRegionIds().size(); i++){
                 cmd.setVisibleRegionId(cmd.getVisibleRegionIds().get(i));
-                cmd.setCloneFlag(PostCloneFlag.CLONE.getCode());
-                cmd.setRealPostId(dto.getId());
                 createTopic(cmd, UserContext.current().getUser().getId());
             }
 
+            cmd.setVisibleRegionId(null);
+            cmd.setVisibleRegionType(VisibleRegionType.ALL.getCode());
+            createTopic(cmd, UserContext.current().getUser().getId());
         }
 
         return dto;
@@ -1441,9 +1444,22 @@ public class ForumServiceImpl implements ForumService {
 	         
 	         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
 	         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+
+             //查询全部时不要各个园区的Clone帖子，因为有一个范围是“全部”的clone帖子  add by yanjun 20170807
+             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode()));
+
 	         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
 	         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
-	         Condition condition = communityCondition.or(regionCondition).and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
+
+             //查询全部时不要各个公司的Clone帖子，因为有一个范围是“全部”的clone帖子  add by yanjun 20170807
+             regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode()));
+
+             //增加获取发送到全部的活动，包括一般活动和clone活动  add by yanjun 20170807
+	         Condition condition = communityCondition
+                     .or(regionCondition)
+                     .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()))
+                     .and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
+
 	         if(null != cmd.getEmbeddedAppId()){
 	        	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
 	        	 //如果是活动且查询官方活动，则加上官方活动条件
@@ -1702,6 +1718,11 @@ public class ForumServiceImpl implements ForumService {
             
             return query;
         });
+
+        // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
+        populateRealPost(posts);
+
+
         this.forumProvider.populatePostAttachments(posts);
         
         locator.setAnchor(null);
@@ -2957,6 +2978,11 @@ public class ForumServiceImpl implements ForumService {
 
         //添加标签普通话题的标签通过此字段从前台出来。 add by yanjun 20170613
         post.setTag(cmd.getTag());
+
+        //设置帖子的克隆状态和真身帖   add by yanjun 20170807
+        post.setCloneFlag(cmd.getCloneFlag());
+        post.setRealPostId(cmd.getRealPostId());
+
         
         return post;
     }
@@ -5409,9 +5435,20 @@ public class ForumServiceImpl implements ForumService {
                 if(!StringUtils.isEmpty(cmd.getTag())){
                     query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
                 }
+
+                //此处根据论坛查帖子，clone帖子查询发送到“全部”的帖子   add by yanjun 20170807
+                Condition cloneCondition = Tables.EH_FORUM_POSTS.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode())
+                        .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+                query.addConditions(cloneCondition);
+
                 
                 return query;
             }, new PostCreateTimeDescComparator());
+
+
+            // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170808
+            populateRealPost(posts);
+
 
             Long nextPageAnchor = null;
             // 在queryPosts已经进行附件填充，故可去掉 by lqs 20160429
@@ -5840,5 +5877,17 @@ public class ForumServiceImpl implements ForumService {
 		});
 		
 	}
+
+    // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
+	private void populateRealPost(List<Post> posts){
+        if(posts != null && posts.size()> 0){
+            for(int i = 0; i < posts.size(); i++){
+                if(PostCloneFlag.fromCode(posts.get(i).getCloneFlag()) == PostCloneFlag.CLONE){
+                    Post temp = forumProvider.findPostById(posts.get(i).getRealPostId());
+                    posts.set(i, temp);
+                }
+            }
+        }
+    }
     
 }
