@@ -1,18 +1,85 @@
--- 停车充值 add by sw 20170703
-ALTER TABLE eh_parking_recharge_orders ADD COLUMN `parking_time` INT DEFAULT NULL COMMENT 'parking-time';
-ALTER TABLE eh_parking_recharge_orders ADD COLUMN `error_description` TEXT DEFAULT NULL COMMENT 'error description';
-ALTER TABLE eh_parking_recharge_orders ADD COLUMN `error_description_json` TEXT DEFAULT NULL COMMENT 'error description';
 
-ALTER TABLE eh_parking_recharge_orders ADD COLUMN `refund_time` datetime DEFAULT NULL COMMENT 'refund time';
-ALTER TABLE eh_parking_recharge_orders ADD COLUMN `delay_time` INT DEFAULT NULL COMMENT 'delay time';
+DROP TABLE IF EXISTS `eh_authorization_third_party_forms`;
+CREATE TABLE `eh_authorization_third_party_forms` (
+  `id` BIGINT NOT NULL COMMENT 'id for records',
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `source_type` VARCHAR(32) COMMENT 'zj_personal_auth zj_organization_auth,form ownertype',
+  `source_id` BIGINT COMMENT 'form owner id',
+  `authorization_url` VARCHAR(512) COMMENT 'third party authorization url',
+  `app_key` VARCHAR(128) COMMENT 'app key',
+  `secret_key` VARCHAR(512) COMMENT 'secret_key',
+  `title` VARCHAR(512) COMMENT 'form title',
+  `detail` VARCHAR(512) COMMENT 'form detail',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 增加详情字段 by st.zheng
+ALTER TABLE `eh_rentalv2_items` ADD COLUMN `description` VARCHAR(1024) NULL DEFAULT NULL AFTER `item_type`;
+-- 创建 审批表 by st.zheng
+CREATE TABLE `eh_community_approve` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL,
+  `organization_id` bigint(20) NOT NULL,
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `module_id` bigint(20) DEFAULT NULL,
+  `module_type` varchar(64) DEFAULT NULL,
+  `project_id` bigint(20) DEFAULT '0',
+  `project_type` varchar(64) DEFAULT NULL,
+  `approve_name` varchar(64) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `form_origin_id` bigint(20) DEFAULT NULL,
+  `form_version` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE eh_parking_lots ADD COLUMN `contact` VARCHAR(128) DEFAULT NULL COMMENT 'service contact';
+-- 创建申请表 by st.zheng
+CREATE TABLE `eh_community_approve_requests` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `organization_id` bigint(20) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `module_id` bigint(20) DEFAULT NULL,
+  `module_type` varchar(64) DEFAULT NULL,
+  `flow_case_id` bigint(20) DEFAULT '0',
+  `form_origin_id` bigint(20) DEFAULT NULL,
+  `form_version` bigint(20) DEFAULT NULL,
+  `approve_id` bigint(20) DEFAULT '0',
+  `approve_name` varchar(64) DEFAULT NULL,
+  `requestor_name` varchar(64) DEFAULT NULL,
+  `requestor_phone` varchar(64) DEFAULT NULL,
+  `requestor_company` varchar(64) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-ALTER TABLE eh_parking_recharge_orders CHANGE old_expired_time start_period datetime;
-ALTER TABLE eh_parking_recharge_orders CHANGE new_expired_time end_period datetime;
-
+CREATE TABLE `eh_authorization_third_party_buttons` (
+  `id` BIGINT NOT NULL COMMENT 'id for records',
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'Ehnamespace',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `title` VARCHAR(128) COMMENT 'ren cai gong yu',
+  `modify_flag` TINYINT COMMENT '0,hidden,1,show',
+  `families_flag` TINYINT COMMENT '0,hidden,1,show',
+  `qrcode_flag` TINYINT COMMENT '0,hidden,1,show',
+  `delete_flag` TINYINT COMMENT '0,hidden,1,show',
+  `blank_detail` VARCHAR(128) COMMENT 'ni hai mei jia ru jia ting',
+  `button_detail` VARCHAR(128) COMMENT 'shen qing ren zheng ',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- merge from forum-2.0 by yanjun 20170703
 -- 投票增加标签字段  add by yanjun 20170613
@@ -193,7 +260,7 @@ CREATE TABLE `eh_user_organizations` (
 CREATE TABLE `eh_rentalv2_price_rules` (
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'default, resource, cell',
-  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'default_rule_id, resource_id, cell_id',  
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'default_rule_id, resource_id, cell_id',
   `rental_type` TINYINT COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天 4按月',
   `workday_price` DECIMAL(10,2) COMMENT '工作日价格',
   `weekend_price` DECIMAL(10,2) COMMENT '周末价格',
@@ -209,7 +276,7 @@ CREATE TABLE `eh_rentalv2_price_rules` (
   `cell_end_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'cells end id',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -217,110 +284,25 @@ CREATE TABLE `eh_rentalv2_price_rules` (
 ALTER TABLE `eh_rentalv2_resource_types` ADD COLUMN `unauth_visible` TINYINT DEFAULT '0';
 
 -- 添加索引 add by sfyan 20170703
--- ALTER TABLE `eh_user_activities` ADD INDEX user_activitie_user_id ( `uid` );
+ALTER TABLE `eh_user_activities` ADD INDEX user_activitie_user_id ( `uid` );
 ALTER TABLE `eh_user_organizations` ADD INDEX user_organization_user_id (`user_id`);
 ALTER TABLE `eh_user_organizations` ADD INDEX user_organization_organization_id (`organization_id`);
 ALTER TABLE `eh_organization_details` ADD INDEX organization_detail_orgnaization_id (`organization_id`);
 ALTER TABLE `eh_organization_addresses` ADD INDEX organization_address_orgnaization_id (`organization_id`);
 
-
--- 短信黑名单  add by xq.tian  2017/07/04
--- DROP TABLE IF EXISTS `eh_sms_black_lists`;
-CREATE TABLE `eh_sms_black_lists` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `contact_token` VARCHAR(32) NOT NULL COMMENT 'contact token',
-  `reason` VARCHAR(128) DEFAULT NULL COMMENT 'reason',
-  `status` TINYINT NOT NULL DEFAULT '1' COMMENT '0: pass, 1: block',
-  `create_type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: Created by system, 1: Manually created',
-  `creator_uid` BIGINT DEFAULT NULL,
-  `create_time` DATETIME(3) DEFAULT NULL,
-  `update_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `u_eh_contact_token` (`contact_token`)
+DROP TABLE IF EXISTS `eh_organization_member_logs`;
+CREATE TABLE `eh_organization_member_logs` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of the record',
+  `namespace_id` INTEGER DEFAULT 0,
+  `organization_id` BIGINT,
+  `user_id` BIGINT COMMENT 'organization member target id (type user)',
+  `contact_name` VARCHAR(64),
+  `contact_type` TINYINT DEFAULT 0 COMMENT '0: mobile, 1: email',
+  `contact_token` VARCHAR(128) COMMENT 'phone number or email address',
+  `operation_type` TINYINT DEFAULT 0 COMMENT '0-退出企业 1-加入企业',
+  `request_type` TINYINT DEFAULT 0 COMMENT '0-管理员操作 1-用户操作',
+  `operate_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `contact_description` TEXT,
+  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-
-
-
---
--- 权限管理  merge wuyeprivilege  add by sfyan 20170705
---
-ALTER TABLE `eh_web_menus` ADD `level` int(11) NOT NULL DEFAULT '0';
-ALTER TABLE `eh_web_menus` ADD `condition_type` varchar(32) DEFAULT NULL;
-ALTER TABLE `eh_web_menus` ADD `category` varchar(32) DEFAULT NULL;
-
-ALTER TABLE `eh_service_module_assignments` ADD `all_module_flag` tinyint(4) COMMENT '0 not all, 1 all';
-ALTER TABLE `eh_service_module_assignments` ADD `include_child_flag` tinyint(4) COMMENT '0 not include, 1 include';
-ALTER TABLE `eh_service_module_assignments` ADD `relation_id` bigint(20) NOT NULL;
-
-
--- 授权表，包括模块管理员角色管理员授权
-CREATE TABLE `eh_authorizations` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `target_type` varchar(32) NOT NULL COMMENT 'EhOrganizations, EhUsers',
-  `target_id` bigint(20) NOT NULL,
-  `target_name` varchar(128),
-  `owner_type` varchar(32) NOT NULL COMMENT 'EhOrganizations, EhCommunities',
-  `owner_id` bigint(20) NOT NULL,
-  `auth_type` varchar(64) NOT NULL COMMENT 'EhServiceModules, EhRoles',
-  `auth_id` bigint(20) NOT NULL,
-  `identity_type` varchar(64) NOT NULL COMMENT 'manage, ordinary',
-  `all_flag` tinyint(4) COMMENT '0 not all, 1 all',
-  `scope` varchar(128) DEFAULT NULL,
-  `creator_uid` bigint(20) NOT NULL,
-  `create_time` datetime DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL,
-  `operator_uid` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 用户授权关系
-CREATE TABLE `eh_authorization_relations` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `owner_type` varchar(32) NOT NULL COMMENT 'EhOrganizations, EhCommunities',
-  `owner_id` bigint(20) NOT NULL,
-  `module_id` bigint(20) NOT NULL,
-  `target_json` text,
-  `project_json` text,
-  `privilege_json` text,
-  `all_flag` tinyint(4) COMMENT '0 not all, 1 all',
-  `all_project_flag` tinyint(4) COMMENT '0 not all, 1 all',
-  `creator_uid` bigint(20) NOT NULL,
-  `create_time` datetime DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL,
-  `operator_uid` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 业务授权关系授权表
-CREATE TABLE `eh_service_module_assignment_relations` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `owner_type` varchar(32) NOT NULL COMMENT 'EhOrganizations, EhCommunities',
-  `owner_id` bigint(20) NOT NULL,
-  `all_module_flag` tinyint(4) COMMENT '0 not all, 1 all',
-  `all_project_flag` tinyint(4) COMMENT '0 not all, 1 all',
-  `target_json` text,
-  `project_json` text,
-  `module_json` text,
-  `update_time` datetime DEFAULT NULL,
-  `operator_uid` bigint(20) NOT NULL,
-  `creator_uid` bigint(20) NOT NULL,
-  `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 域名配置表
-CREATE TABLE `eh_domains` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `portal_type` varchar(32) NOT NULL COMMENT 'zuolin, pm, enterprise, user',
-  `portal_id` bigint(20) NOT NULL,
-  `domain` varchar(32) NOT NULL COMMENT 'domain',
-  `create_uid` bigint(20) NOT NULL,
-  `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

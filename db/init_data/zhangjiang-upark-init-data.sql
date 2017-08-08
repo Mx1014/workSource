@@ -1234,7 +1234,13 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 --  更新广场图标
 UPDATE eh_launch_pad_items SET apply_policy = 3 WHERE namespace_id = 999971;
 
+
 -- 加app url
 SET @app_url_id = (SELECT MAX(id) FROM `eh_service_module_scopes`); 
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@app_url_id := @app_url_id + 1), '999977', '创梦云', '2', '', '', '移动平台聚合服务，助力园区效能提升');
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@app_url_id := @app_url_id + 1), '999977', '创梦云', '1', '', '', '移动平台聚合服务，助力园区效能提升');
+
+-- 招租管理配置 add by sw 20170808
+UPDATE eh_lease_configs set rent_amount_flag = 0, renew_flag = 0, issuer_manage_flag =0, issuing_lease_flag =0, area_search_flag = 1, park_indroduce_flag = 1, display_name_str= '办公招租,商户招租',display_order_str='1,2' where namespace_id = 999971;
+
+
