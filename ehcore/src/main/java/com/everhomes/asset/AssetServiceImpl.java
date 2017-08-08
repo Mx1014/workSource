@@ -181,8 +181,8 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListSettledBillResponse response = new ListSettledBillResponse();
-        if (cmd.getPageAnchor() == null) {
-            cmd.setPageAnchor(0l);
+        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
+            cmd.setPageAnchor(1l);
         }
         if(cmd.getPageSize() == null){
             cmd.setPageSize(20);

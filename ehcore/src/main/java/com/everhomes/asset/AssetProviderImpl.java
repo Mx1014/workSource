@@ -465,12 +465,13 @@ public class AssetProviderImpl implements AssetProvider {
         if(billStatus!=null) {
             query.addConditions(t.STATUS.eq(billStatus));
         }
-        if(dateStrBegin!=null) {
-            query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
-        }
-        if(dateStrEnd!=null) {
-            query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
-        }
+//        if(dateStrBegin!=null) {
+//            //这里应该预防dateStr的不符合规则，所以要有正则表达式，先不加
+//            query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
+//        }
+//        if(dateStrEnd!=null) {
+//            query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
+//        }
         if(targetName!=null) {
             query.addConditions(t.TARGETNAME.like("%"+targetName+"%"));
         }
