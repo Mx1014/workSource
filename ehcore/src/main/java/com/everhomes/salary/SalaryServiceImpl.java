@@ -695,6 +695,10 @@ public class SalaryServiceImpl implements SalaryService {
     //  变更员工薪酬组
     @Override
     public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
+
+        //现在先取到现在的薪酬批次
+        //薪酬批次和cmd中的比较,如果不一样需要刷,一样,不刷
+        //删除之前批次的
 	    //  1.更新该员工在组织架构的关联及configure
         this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(),cmd.getDetailId(),cmd.getSalaryGroupId());
 /*
@@ -751,19 +755,19 @@ public class SalaryServiceImpl implements SalaryService {
         Calendar periodCalendar = Calendar.getInstance();
         // TODO: 荣楠来做 通过cmd的信息拿member的DTO
         UniongroupMemberDetailsDTO member = uniongroupService.findUniongroupMemberDetailByDetailId(UserContext.getCurrentNamespaceId(),cmd.getUserDetailId());
-        for(int i = 0;i<=5;i++){
-            String period = monthSF.get().format(periodCalendar.getTime());
-            SalaryGroup oldGroup = salaryGroupProvider.findSalaryGroupByOrgId(cmd.getSalaryGroupId(), period);
-            if(null == oldGroup ){
-                calculateGroupPeroid(salaryOrg, period, false);
-            } else if (oldGroup.getStatus().equals(SalaryGroupStatus.SENDED.getCode())) {
-                continue;
-            } else {
-                oldGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
-                List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryOrg.getId());
-                calculateMemberPeriodVals(member, oldGroup, salaryGroupEntities, false);
-                salaryGroupProvider.updateSalaryGroup(oldGroup);
-            }
+            for(int i = 0;i<=5;i++){
+                String period = monthSF.get().format(periodCalendar.getTime());
+                SalaryGroup oldGroup = salaryGroupProvider.findSalaryGroupByOrgId(cmd.getSalaryGroupId(), period);
+                if(null == oldGroup ){
+                    calculateGroupPeroid(salaryOrg, period, false);
+                } else if (oldGroup.getStatus().equals(SalaryGroupStatus.SENDED.getCode())) {
+                    continue;
+                } else {
+                    oldGroup.setStatus(SalaryGroupStatus.UNCHECK.getCode());
+                    List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryOrg.getId());
+                    calculateMemberPeriodVals(member, oldGroup, salaryGroupEntities, false);
+                    salaryGroupProvider.updateSalaryGroup(oldGroup);
+                }
             periodCalendar.add(Calendar.MONTH, -1);
         }
     }
