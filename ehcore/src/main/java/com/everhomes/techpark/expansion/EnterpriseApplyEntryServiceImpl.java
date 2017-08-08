@@ -714,7 +714,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		//TODO: set detail url
 		processDetailUrl(dto);
 
-		if (null != leasePromotion.getAddressId()) {
+		if (null != leasePromotion.getAddressId() && leasePromotion.getAddressId() != 0L) {
 			Address address = addressProvider.findAddressById(leasePromotion.getAddressId());
 			if (null != address) {
 				dto.setApartmentName(address.getApartmentName());
