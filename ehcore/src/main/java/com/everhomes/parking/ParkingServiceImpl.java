@@ -1642,7 +1642,7 @@ public class ParkingServiceImpl implements ParkingService {
 			LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
 					cmd, refundCmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 					"bill refund error");
 		}
 	}
