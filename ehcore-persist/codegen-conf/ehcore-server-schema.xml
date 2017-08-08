@@ -178,7 +178,8 @@
         eh_authorization_third_party_forms | eh_authorization_third_party_records | eh_authorization_third_party_buttons |
         eh_user_identifier_logs | eh_user_appeal_logs |
         eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve|
-            eh_community_approve_requests
+            eh_community_approve_requests |
+            eh_payment_bills | eh_payment_bill_groups | eh_payment_bill_groups_rules | eh_payment_bill_items | eh_payment_bill_notice_records | eh_payment_charging_items | eh_payment_charging_standards | eh_payment_exemption_items | eh_payment_variables | eh_payment_charging_standards_scopes | eh_payment_charging_item_scopes
 
 
         </includes>
