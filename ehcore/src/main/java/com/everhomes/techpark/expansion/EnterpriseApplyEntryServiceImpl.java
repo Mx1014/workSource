@@ -711,7 +711,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
 	private void populateRentDTO(BuildingForRentDTO dto, LeasePromotion leasePromotion) {
-		//TODO: set detail url
+
 		processDetailUrl(dto);
 
 		if (null != leasePromotion.getAddressId() && leasePromotion.getAddressId() != 0L) {
@@ -721,9 +721,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}
 		}
 
-		Building building = communityProvider.findBuildingById(dto.getBuildingId());
-		if(null != building){
-			dto.setBuildingName(building.getName());
+		if (null != dto.getBuildingId() && dto.getBuildingId() != 0L) {
+			LeaseBuilding building = enterpriseApplyBuildingProvider.findLeaseBuildingById(dto.getBuildingId());
+			if(null != building){
+				dto.setBuildingName(building.getName());
+			}
 		}
 
 		Long userId = UserContext.currentUserId();
