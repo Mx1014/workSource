@@ -22,7 +22,23 @@ public class FieldServiceImpl implements FieldService {
     private FieldProvider fieldProvider;
     @Override
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
-        List<ScopeField> scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getModuleName(), cmd.getGroupId());
+        List<FieldDTO> dtos = null;
+        if(cmd.getNamespaceId() == null) {
+            List<Field> fields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+            if(fields != null && fields.size() > 0) {
+                dtos = fields.stream().map(field -> {
+                    return ConvertHelper.convert(field, FieldDTO.class);
+                }).collect(Collectors.toList());
+            }
+        } else {
+            dtos = listScopeFields(cmd);
+        }
+
+        return dtos;
+    }
+
+    private List<FieldDTO> listScopeFields(ListFieldCommand cmd) {
+        List<ScopeField> scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getModuleName(), cmd.getGroupPath());
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
             Map<Long, FieldDTO> dtoMap = new HashMap<>();
@@ -71,6 +87,22 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd) {
+        List<FieldGroupDTO> dtos = null;
+        if(cmd.getNamespaceId() == null) {
+            List<FieldGroup> groups = fieldProvider.listFieldGroups(cmd.getModuleName());
+            if(groups != null && groups.size() > 0) {
+                dtos = groups.stream().map(group -> {
+                    return ConvertHelper.convert(group, FieldGroupDTO.class);
+                }).collect(Collectors.toList());
+            }
+        } else {
+            dtos = listScopeFieldGroups(cmd);
+        }
+
+        return dtos;
+    }
+
+    private List<FieldGroupDTO> listScopeFieldGroups(ListFieldGroupCommand cmd) {
         List<ScopeFieldGroup> groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getModuleName());
         if(groups != null && groups.size() > 0) {
             List<Long> groupIds = new ArrayList<>();
@@ -87,6 +119,7 @@ public class FieldServiceImpl implements FieldService {
                 fieldGroups.forEach(fieldGroup -> {
                     FieldGroupDTO dto = dtoMap.get(fieldGroup.getId());
                     dto.setParentId(fieldGroup.getParentId());
+                    dto.setGroupPath(fieldGroup.getPath());
                     dtos.add(dto);
                 });
             }

@@ -47,13 +47,26 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeField> listScopeFields(Integer namespaceId, String moduleName, Long groupId) {
+    public List<FieldGroup> listFieldGroups(String moduleName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<FieldGroup> groups = context.select().from(Tables.EH_VAR_FIELD_GROUPS)
+                .where(Tables.EH_VAR_FIELD_GROUPS.MODULE_NAME.eq(moduleName))
+                .fetch().map((record)-> {
+                    return ConvertHelper.convert(record, FieldGroup.class);
+                });
+
+        return groups;
+    }
+
+    @Override
+    public List<ScopeField> listScopeFields(Integer namespaceId, String moduleName, String groupPath) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<ScopeField> fields = context.select().from(Tables.EH_VAR_FIELD_SCOPES)
                 .where(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_VAR_FIELD_SCOPES.MODULE_NAME.eq(moduleName))
-                .and(Tables.EH_VAR_FIELD_SCOPES.GROUP_ID.eq(groupId))
+                .and(Tables.EH_VAR_FIELD_SCOPES.GROUP_PATH.like(groupPath + "%"))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, ScopeField.class);
                 });
@@ -67,6 +80,20 @@ public class FieldProviderImpl implements FieldProvider {
 
         List<Field> fields = context.select().from(Tables.EH_VAR_FIELDS)
                 .where(Tables.EH_VAR_FIELDS.ID.in(ids))
+                .fetch().map((record)-> {
+                    return ConvertHelper.convert(record, Field.class);
+                });
+
+        return fields;
+    }
+
+    @Override
+    public List<Field> listFields(String moduleName, String groupPath) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<Field> fields = context.select().from(Tables.EH_VAR_FIELDS)
+                .where(Tables.EH_VAR_FIELDS.MODULE_NAME.eq(moduleName))
+                .and(Tables.EH_VAR_FIELDS.GROUP_PATH.like(groupPath+"%"))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, Field.class);
                 });

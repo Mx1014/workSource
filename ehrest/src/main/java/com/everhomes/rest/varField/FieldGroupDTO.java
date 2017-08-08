@@ -12,6 +12,7 @@ import java.util.List;
  *     <li>namespaceId: 域空间id</li>
  *     <li>moduleName: 组所属的模块类型名</li>
  *     <li>groupId: 在系统组里的id</li>
+ *     <li>groupPath: 在系统组里的path</li>
  *     <li>groupDisplayName: 组名</li>
  *     <li>childrenGroup: 子字段组 参考{@link FieldGroupDTO}</li>
  * </ul>
@@ -28,12 +29,22 @@ public class FieldGroupDTO {
 
     private Long groupId;
 
+    private String groupPath;
+
     private String groupDisplayName;
 
     private Integer defaultOrder;
 
     @ItemType(FieldGroupDTO.class)
     private List<FieldGroupDTO> childrenGroup;
+
+    public String getGroupPath() {
+        return groupPath;
+    }
+
+    public void setGroupPath(String groupPath) {
+        this.groupPath = groupPath;
+    }
 
     public Integer getDefaultOrder() {
         return defaultOrder;

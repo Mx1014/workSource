@@ -89,6 +89,7 @@ CREATE TABLE `eh_var_field_scopes` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
   `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_field_groups',
+  `group_path` VARCHAR(128) COMMENT 'path from the root',
   `field_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_fields',
   `field_param` VARCHAR(128) COMMENT '',
   `field_display_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the field name, it will use the name in eh_var_fields if not defined',

@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>namespaceId: 域空间id</li>
  *     <li>moduleName: 模块名</li>
- *     <li>groupId: 所属字段组在系统中的id</li>
+ *     <li>groupPath: 所属字段组在系统中的path</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -15,7 +15,9 @@ public class ListFieldCommand {
 
     private String moduleName;
 
-    private Long groupId;
+//    private Long groupId;
+
+    private String groupPath;
 
     public String getModuleName() {
         return moduleName;
@@ -25,12 +27,12 @@ public class ListFieldCommand {
         this.moduleName = moduleName;
     }
 
-    public Long getGroupId() {
-        return groupId;
+    public String getGroupPath() {
+        return groupPath;
     }
 
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+    public void setGroupPath(String groupPath) {
+        this.groupPath = groupPath;
     }
 
     public Integer getNamespaceId() {
