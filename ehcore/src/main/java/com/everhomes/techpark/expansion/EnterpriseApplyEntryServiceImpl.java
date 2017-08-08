@@ -1,5 +1,6 @@
 package com.everhomes.techpark.expansion;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -19,6 +20,8 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.group.Group;
@@ -149,6 +152,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	private GeneralFormService generalFormService;
 	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	private GeneralFormProvider generalFormProvider;
 
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
@@ -1426,11 +1431,21 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			dto = new LeaseFormRequestDTO();
 			dto.setCustomFormFlag(LeasePromotionFlag.DISABLED.getCode());
 		}else {
-			dto.setCustomFormFlag(LeasePromotionFlag.ENABLED.getCode());
-			GetTemplateByFormIdCommand getTemplateByFormIdCommand = new GetTemplateByFormIdCommand();
-			getTemplateByFormIdCommand.setFormId(request.getSourceId());
-			GeneralFormDTO form = generalFormService.getTemplateByFormId(getTemplateByFormIdCommand);
-			dto.setForm(form);
+//			GetTemplateByFormIdCommand getTemplateByFormIdCommand = new GetTemplateByFormIdCommand();
+//			getTemplateByFormIdCommand.setFormId(request.getSourceId());
+//			GeneralFormDTO form = generalFormService.getTemplateByFormId(getTemplateByFormIdCommand);
+
+			GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(request.getSourceId());
+
+			if (form != null) {
+				GeneralFormDTO formDTO = ConvertHelper.convert(form, GeneralFormDTO.class);
+				List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+				formDTO.setFormFields(fieldDTOs);
+
+				dto.setForm(formDTO);
+
+				dto.setCustomFormFlag(LeasePromotionFlag.ENABLED.getCode());
+			}
 		}
 
 		return dto;

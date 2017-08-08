@@ -32,6 +32,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * 清华信息港 停车
+ */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "JIN_YI")
 public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JinyiParkingVendorHandler.class);

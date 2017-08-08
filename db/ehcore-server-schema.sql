@@ -1635,7 +1635,46 @@ CREATE TABLE `eh_communities`(
   KEY `i_eh_community_stag2` (`string_tag2`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_community_approve`;
+CREATE TABLE `eh_community_approve` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `organization_id` BIGINT NOT NULL,
+  `owner_id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT,
+  `module_type` VARCHAR(64),
+  `project_id` BIGINT DEFAULT '0',
+  `project_type` VARCHAR(64),
+  `approve_name` VARCHAR(64),
+  `status` TINYINT NOT NULL DEFAULT '1',
+  `form_origin_id` BIGINT,
+  `form_version` BIGINT,
+  `update_time` DATETIME,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_community_approve_requests`;
+CREATE TABLE `eh_community_approve_requests` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `organization_id` BIGINT NOT NULL DEFAULT '0',
+  `owner_id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT,
+  `module_type` VARCHAR(64),
+  `flow_case_id` BIGINT DEFAULT '0',
+  `form_origin_id` BIGINT,
+  `form_version` BIGINT,
+  `approve_id` BIGINT DEFAULT '0',
+  `approve_name` VARCHAR(64),
+  `requestor_name` VARCHAR(64),
+  `requestor_phone` VARCHAR(64),
+  `requestor_company` VARCHAR(64),
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 --
 -- member of eh_communities partition
 --
@@ -8380,6 +8419,7 @@ CREATE TABLE `eh_rentalv2_items` (
   `default_order` INTEGER COMMENT '排序字段',
   `img_uri` VARCHAR(1024) COMMENT '图片uri',
   `item_type` TINYINT COMMENT '1购买型 2租用型',
+  `description` VARCHAR(1024),
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -8498,6 +8538,7 @@ CREATE TABLE `eh_rentalv2_orders` (
   `offline_cashier_address` VARCHAR(200),
   `offline_payee_uid` BIGINT,
   `flow_case_id` BIGINT COMMENT 'id of the flow_case',
+  `requestor_organization_id` BIGINT COMMENT 'id of the requestor organization',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
