@@ -1,13 +1,35 @@
 package com.everhomes.openapi;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.building.Building;
+import com.everhomes.building.BuildingProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.ebei.EbeiJsonEntity;
+import com.everhomes.pmtask.ebei.EbeiResult;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.NamespaceAddressType;
+import com.everhomes.rest.address.NamespaceBuildingType;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.openapi.shenzhou.DataType;
+import com.everhomes.rest.openapi.shenzhou.ShenzhouJsonEntity;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -21,8 +43,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by ying.xiong on 2017/8/7.
@@ -32,9 +58,14 @@ public class ZJGKOpenServiceImpl {
     private final static Logger LOGGER = LoggerFactory.getLogger(ZJGKOpenServiceImpl.class);
     private CloseableHttpClient httpclient = null;
 
+    private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1);
+
     private String appKey = "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21";
     private String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
 
+    private static final String PAGE_SIZE = "20";
+    private static final String SUCCESS_CODE = "200";
+    private static final Integer NAMESPACE_ID = 999971;
 
     private static final String SYNC_COMMUNITIES = "/openapi/syncCommunities";
     private static final String SYNC_BUILDINGS = "/openapi/syncBuildings";
@@ -48,31 +79,210 @@ public class ZJGKOpenServiceImpl {
     @Autowired
     private AppProvider appProvider;
 
+    @Autowired
+    private ZjSyncdataBackupProvider zjSyncdataBackupProvider;
+
+    @Autowired
+    private BuildingProvider buildingProvider;
+
+    @Autowired
+    private AddressProvider addressProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
 
     @Scheduled(cron="0 0 1 * * ?")
     public void syncData() {
-        Map<String, String> params = generateParams();
-        String communities = postToShenzhou(params, SYNC_COMMUNITIES, null);
-        String buildings = postToShenzhou(params, SYNC_BUILDINGS, null);
-        String apartments = postToShenzhou(params, SYNC_APARTMENTS, null);
-        String enterprises = postToShenzhou(params, SYNC_ENTERPRISES, null);
-        String individuals = postToShenzhou(params, SYNC_INDIVIDUALS, null);
+//        Map<String, String> params = generateParams();
+//        String communities = postToShenzhou(params, SYNC_COMMUNITIES, null);
+//        String buildings = postToShenzhou(params, SYNC_BUILDINGS, null);
+//        String apartments = postToShenzhou(params, SYNC_APARTMENTS, null);
+//        String enterprises = postToShenzhou(params, SYNC_ENTERPRISES, null);
+//        String individuals = postToShenzhou(params, SYNC_INDIVIDUALS, null);
+        syncCommunities("0");
+        syncBuildings("0");
+        syncApartments("0");
+        syncEnterprises("0");
+        syncIndividuals("0");
     }
 
-    private Map<String, String> generateParams() {
+    private void syncCommunities(String pageOffset) {
+        Map<String, String> params = generateParams(pageOffset);
+        String communities = postToShenzhou(params, SYNC_COMMUNITIES, null);
+
+        ShenzhouJsonEntity<List<CommunityDTO>> entity = JSONObject.parseObject(communities, new TypeReference<ShenzhouJsonEntity<List<CommunityDTO>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
+            List<CommunityDTO> dtos = entity.getData();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(entity, DataType.COMMUNITY.getCode());
+
+                //数据有下一页则继续请求
+                if(entity.getNextPageOffset() != null) {
+                    syncCommunities(entity.getNextPageOffset().toString());
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(entity.getNextPageOffset() == null) {
+                syncDataToDb(DataType.COMMUNITY.getCode());
+            }
+        }
+    }
+
+    private void syncBuildings(String pageOffset) {
+        Map<String, String> params = generateParams(pageOffset);
+        String buildings = postToShenzhou(params, SYNC_BUILDINGS, null);
+
+        ShenzhouJsonEntity<List<BuildingDTO>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<BuildingDTO>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
+            List<BuildingDTO> dtos = entity.getData();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(entity, DataType.BUILDING.getCode());
+
+                //数据有下一页则继续请求
+                if(entity.getNextPageOffset() != null) {
+                    syncBuildings(entity.getNextPageOffset().toString());
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(entity.getNextPageOffset() == null) {
+                syncDataToDb(DataType.BUILDING.getCode());
+            }
+        }
+    }
+
+    private void syncApartments(String pageOffset) {
+        Map<String, String> params = generateParams(pageOffset);
+        String buildings = postToShenzhou(params, SYNC_APARTMENTS, null);
+
+        ShenzhouJsonEntity<List<ApartmentDTO>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<ApartmentDTO>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
+            List<ApartmentDTO> dtos = entity.getData();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(entity, DataType.APARTMENT.getCode());
+
+                //数据有下一页则继续请求
+                if(entity.getNextPageOffset() != null) {
+                    syncApartments(entity.getNextPageOffset().toString());
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(entity.getNextPageOffset() == null) {
+                syncDataToDb(DataType.APARTMENT.getCode());
+            }
+        }
+    }
+
+    private void syncEnterprises(String pageOffset) {
+        Map<String, String> params = generateParams(pageOffset);
+        String buildings = postToShenzhou(params, SYNC_ENTERPRISES, null);
+
+        ShenzhouJsonEntity<List<EnterpriseDTO>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<EnterpriseDTO>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
+            List<EnterpriseDTO> dtos = entity.getData();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(entity, DataType.ENTERPRISE.getCode());
+
+                //数据有下一页则继续请求
+                if(entity.getNextPageOffset() != null) {
+                    syncEnterprises(entity.getNextPageOffset().toString());
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(entity.getNextPageOffset() == null) {
+                syncDataToDb(DataType.ENTERPRISE.getCode());
+            }
+        }
+    }
+
+    private void syncIndividuals(String pageOffset) {
+        Map<String, String> params = generateParams(pageOffset);
+        String buildings = postToShenzhou(params, SYNC_INDIVIDUALS, null);
+
+        ShenzhouJsonEntity<List<OrganizationOwnerDTO>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<OrganizationOwnerDTO>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
+            List<OrganizationOwnerDTO> dtos = entity.getData();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(entity, DataType.INDIVIDUAL.getCode());
+
+                //数据有下一页则继续请求
+                if(entity.getNextPageOffset() != null) {
+                    syncIndividuals(entity.getNextPageOffset().toString());
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(entity.getNextPageOffset() == null) {
+                syncDataToDb(DataType.INDIVIDUAL.getCode());
+            }
+        }
+    }
+
+    private Map<String, String> generateParams(String pageOffset) {
         Map<String, String> params= new HashMap<String,String>();
         params.put("appKey", appKey);
         params.put("timestamp", ""+System.currentTimeMillis());
         params.put("nonce", ""+(long)(Math.random()*100000));
         String signature = SignatureHelper.computeSignature(params, secretKey);
         params.put("signature", signature);
+        params.put("pageOffset", pageOffset);
+        params.put("pageSize", PAGE_SIZE);
 
         return params;
     }
 
-    public String postToShenzhou(Map<String, String> params, String method, Map<String, String> headers) {
+    private void syncData(ShenzhouJsonEntity entity, Byte dataType) {
+        ZjSyncdataBackup backup = new ZjSyncdataBackup();
+        backup.setNamespaceId(NAMESPACE_ID);
+        backup.setDataType(dataType);
+        backup.setNextPageOffset(entity.getNextPageOffset());
+        backup.setData(entity.getData().toString());
+        backup.setStatus(CommonStatus.ACTIVE.getCode());
+        backup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        backup.setCreatorUid(1L);
+        backup.setUpdateTime(backup.getCreateTime());
 
-        String shenzhouUrl = configurationProvider.getValue(999971, "shenzhou.host.url", "");
+        zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
+
+    }
+
+    private void syncDataToDb(Byte dataType) {
+        queueThreadPool.execute(()->{
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("dataType {} enter into thread=================", dataType);
+            }
+
+            List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, dataType);
+            if (backupList == null || backupList.isEmpty()) {
+                return ;
+            }
+            try {
+                updateAllDate(dataType, NAMESPACE_ID , backupList);
+            } finally {
+                zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+            }
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("dataType {} get out thread=================", dataType);
+            }
+        });
+    }
+
+    private String postToShenzhou(Map<String, String> params, String method, Map<String, String> headers) {
+
+        String shenzhouUrl = configurationProvider.getValue(NAMESPACE_ID, "shenzhou.host.url", "");
         HttpPost httpPost = new HttpPost(shenzhouUrl + method);
         CloseableHttpResponse response = null;
 
@@ -110,5 +320,82 @@ public class ZJGKOpenServiceImpl {
             LOGGER.debug("Data from shenzhou, param={}, json={}", params, json);
 
         return json;
+    }
+
+    //基本思路：来自神州数码的数据：在我们数据中不在同步数据里的，删除；两边都在的，更新；不在我们数据库中，在同步数据里的，插入；
+    private void updateAllDate(Byte dataType, Integer namespaceId,
+                               List<ZjSyncdataBackup> backupList) {
+        DataType zjDataType = DataType.fromCode(dataType);
+        switch (zjDataType) {
+            case COMMUNITY:
+                syncAllCommunities(namespaceId, backupList);
+                break;
+            case BUILDING:
+			    syncAllBuildings(namespaceId, backupList);
+                break;
+            case APARTMENT:
+                syncAllApartments(namespaceId, backupList);
+                break;
+            case ENTERPRISE:
+                syncAllEnterprises(namespaceId, backupList);
+                break;
+            case INDIVIDUAL:
+                syncAllIndividuals(namespaceId, backupList);
+                break;
+
+            default:
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "error data type");
+        }
+    }
+
+    private void syncAllApartments(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
+        //楼栋的同步按照从门牌中提取来同步
+        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+        List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceAddressType.JINDIE.getCode());
+        List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+        formatCustomerBuildingName(theirApartmentList);
+        List<CustomerBuilding> theirBuildingList = fetchBuildingsFromApartments(theirApartmentList);
+        List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
+        dbProvider.execute(s->{
+            syncAllApartments(appNamespaceMapping, myApartmentList, theirApartmentList);
+            return true;
+        });
+    }
+
+    private void syncAllApartments(AppNamespaceMapping appNamespaceMapping, List<Address> myApartmentList, List<CustomerApartment> theirApartmentList) {
+        // 如果两边都有，更新；如果我们有，他们没有，删除；
+        for (Address myApartment : myApartmentList) {
+            CustomerApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
+            if (customerApartment != null) {
+                updateAddress(myApartment, customerApartment);
+            }else {
+                deleteAddress(myApartment);
+            }
+        }
+        // 如果他们有，我们没有，插入
+        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+        if (theirApartmentList != null) {
+            for (CustomerApartment customerApartment : theirApartmentList) {
+                if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+                    continue;
+                }
+                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+                Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+                if (address == null) {
+                    insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+                }else {
+                    updateAddress(address, customerApartment);
+                }
+            }
+        }
+
+        // 同步完地址后更新community表中的门牌总数，add by tt, 20170308
+        Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
+        Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
+        if (community.getAptCount().intValue() != count.intValue()) {
+            community.setAptCount(count);
+            communityProvider.updateCommunity(community);
+        }
     }
 }
