@@ -425,4 +425,10 @@ public interface OrganizationProvider {
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 	
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
+
+	List listOrganizationMembersGroupByToken();
+
+	List listOrganizationMemberByToken(String token);
+
+	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
 }
