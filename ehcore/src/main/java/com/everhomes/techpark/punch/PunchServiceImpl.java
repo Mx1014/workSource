@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.scheduler.RunningFlag;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -84,56 +85,6 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
-import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
-import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
-import com.everhomes.rest.techpark.punch.ApprovalStatus;
-import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
-import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
-import com.everhomes.rest.techpark.punch.ClockCode;
-import com.everhomes.rest.techpark.punch.DateStatus;
-import com.everhomes.rest.techpark.punch.DeletePunchRuleCommand;
-import com.everhomes.rest.techpark.punch.ExceptionProcessStatus;
-import com.everhomes.rest.techpark.punch.ExceptionStatus;
-import com.everhomes.rest.techpark.punch.ExtDTO;
-import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
-import com.everhomes.rest.techpark.punch.GetPunchRuleCommand;
-import com.everhomes.rest.techpark.punch.GetPunchRuleCommandResponse;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.NormalFlag;
-import com.everhomes.rest.techpark.punch.PunchClockCommand;
-import com.everhomes.rest.techpark.punch.PunchClockResponse;
-import com.everhomes.rest.techpark.punch.PunchCountDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
-import com.everhomes.rest.techpark.punch.PunchGeoPointDTO;
-import com.everhomes.rest.techpark.punch.PunchLogDTO;
-import com.everhomes.rest.techpark.punch.PunchLogsDay;
-import com.everhomes.rest.techpark.punch.PunchLogsMonthList;
-import com.everhomes.rest.techpark.punch.PunchOwnerType;
-import com.everhomes.rest.techpark.punch.PunchRquestType;
-import com.everhomes.rest.techpark.punch.PunchRuleDTO;
-import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
-import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
-import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
-import com.everhomes.rest.techpark.punch.PunchStatus;
-import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
-import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
-import com.everhomes.rest.techpark.punch.PunchUserStatus;
-import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
-import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
@@ -4202,7 +4153,7 @@ public class PunchServiceImpl implements PunchService {
 		
 		return response;
 	} 
-	
+	@Override
 	public List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
 		//找到所有子部门 下面的用户
 		 
@@ -6073,4 +6024,39 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return response;
 	}
+
+	//  punch 2.8 added by R 20170725
+	@Override
+	public ListPunchSupportiveAddressCommandResponse listPunchSupportiveAddress(ListPunchSupportiveAddressCommand cmd){
+
+        ListPunchSupportiveAddressCommandResponse response = new ListPunchSupportiveAddressCommandResponse();
+
+	    Long userId = UserContext.current().getUser().getId();
+        PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
+        if (null == pr  )
+            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                    PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+                    "公司没有设置打卡规则");
+        //  查询用户对应的wifi mac地址
+        List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
+        //  查询用户对应的经纬度信息
+        List<PunchGeopoint> punchGeopoints = punchProvider
+                .listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
+
+        if(wifis != null){
+            response.setWifis(wifis.stream().map(r ->{
+                PunchWiFiDTO dto = ConvertHelper.convert(r,PunchWiFiDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+
+        if(punchGeopoints != null){
+            response.setGeoPoints(punchGeopoints.stream().map(r ->{
+                PunchGeoPointDTO dto = ConvertHelper.convert(r,PunchGeoPointDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+
+        return response;
+    }
 }

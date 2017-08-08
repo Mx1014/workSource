@@ -342,11 +342,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("creatorName", 1.2f)
+                    .field("serviceOrganization", 1.1f)
                     .field("creatorOrganization", 1.0f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("creatorName").addHighlightedField("creatorOrganization");
+            builder.addHighlightedField("creatorName").addHighlightedField("serviceOrganization").addHighlightedField("creatorOrganization");
             
         }
         

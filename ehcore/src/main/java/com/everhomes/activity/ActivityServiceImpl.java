@@ -1191,15 +1191,27 @@ public class ActivityServiceImpl implements ActivityService {
 			String fileName = String.format("报名信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
 			List<String> propertyNames = new ArrayList<String>(Arrays.asList("order", "phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText", "email",
-					"typeText", "signupTime", "sourceFlagText"));
-			List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "邮箱", "类型", "报名时间", "报名来源"));
+					"signupTime", "sourceFlagText", "signupStatusText"));
+			List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "邮箱", "报名时间", "报名来源", "报名状态"));
 			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 20, 20, 20, 10, 20, 20, 10, 20, 20, 20, 20));
 			
-			if (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
-				propertyNames.add("confirmFlagText");
-				titleNames.add("报名确认");
-				titleSizes.add(20);
+//			if (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
+//				propertyNames.add("confirmFlagText");
+//				titleNames.add("报名确认");
+//				titleSizes.add(20);
+//			}
+
+			if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
+				propertyNames.add("payAmount");
+				titleNames.add("已付金额");
+				titleSizes.add(10);
+
+				propertyNames.add("refundAmount");
+				titleNames.add("已退金额");
+				titleSizes.add(10);
 			}
+
+
 			if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
 				propertyNames.add("checkinFlagText");
 				titleNames.add("是否签到");
@@ -1238,6 +1250,22 @@ public class ActivityServiceImpl implements ActivityService {
 		signupInfoDTO.setConfirmFlagText(configFlagText);
 		
 		signupInfoDTO.setCheckinFlagText(CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag())==null?CheckInStatus.UN_CHECKIN.getText():CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag()).getText());
+
+		// 增加 报名状态信息
+		if(roster.getStatus() == null ){
+			signupInfoDTO.setSignupStatusText("未知");
+		}else if(roster.getStatus() == ActivityRosterStatus.CANCEL.getCode()){
+			signupInfoDTO.setSignupStatusText("已取消");
+		}else if(roster.getStatus() == ActivityRosterStatus.REJECT.getCode()){
+			signupInfoDTO.setSignupStatusText("已驳回");
+		}else if(roster.getStatus() == ActivityRosterStatus.NORMAL.getCode()){
+			if(roster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode()){
+				signupInfoDTO.setSignupStatusText("已确认");
+			}else if(roster.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode()){
+				signupInfoDTO.setSignupStatusText("待确认");
+			}
+		}
+
 		return signupInfoDTO;
 	}
 
@@ -1552,7 +1580,7 @@ public class ActivityServiceImpl implements ActivityService {
 			LOGGER.error("Refund failed from vendor, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}", 
 					roster.getOrderNo(), userId, activity.getId(), refundCmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 							"bill  refound error"); 
 		}
 		long endTime = System.currentTimeMillis();
@@ -4672,7 +4700,7 @@ public class ActivityServiceImpl implements ActivityService {
 					rosterOrderSetting.getTime(), rosterOrderSetting.getWechatSignup());
 		}
 		
-		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L, WechatSignupFlag.NO.getCode());
+		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L, WechatSignupFlag.YES.getCode());
 	}
 	
 

@@ -11,6 +11,7 @@ import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.parking.jinyi.JinyiCard;
 import com.everhomes.parking.jinyi.JinyiClearance;
 import com.everhomes.parking.jinyi.JinyiJsonEntity;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -31,6 +32,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * 清华信息港 停车
+ */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "JIN_YI")
 public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JinyiParkingVendorHandler.class);
@@ -218,7 +222,8 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 		json.put("plateno", order.getPlateNumber());
 		json.put("receivable", order.getPrice());
 		json.put("calcid", order.getOrderToken());
-		json.put("paymenttype", 1209);
+		//1209 :微信 1210 :支付宝
+		json.put("paymenttype", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? 1210 : 1209);
 
 		return json;
 	}

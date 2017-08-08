@@ -60,7 +60,38 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	
 	private String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
 	
-	private static final String[] communites = {"上海张江高科技园区开发股份有限公司"};
+	private String[] communites = {"人才公寓"};
+
+	private enum CertificateType{
+		ID_CARD_NO("身份证", "1");
+
+		private String type;
+		private String code;
+
+		public String getType() {
+			return type;
+		}
+
+		public String getCode() {
+			return code;
+		}
+
+		CertificateType(String type, String code){
+			this.type = type;
+			this.code = code;
+		}
+		public static CertificateType fromType(String type) {
+			if (type != null && !type.isEmpty()) {
+				for (CertificateType certificateType : CertificateType.values()) {
+					if (certificateType.getType().equals(type)) {
+						return certificateType;
+					}
+				}
+			}
+			return null;
+		}
+
+	}
 	
     @Autowired
     private CommunityProvider communityProvider;
@@ -146,7 +177,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	//生成调试对象。
 	private ZjgkJsonEntity<List<ZjgkResponse>> generateBebugEntity(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		List<ZjgkResponse> responses = new ArrayList<>();
-		if(length == 1){
+		if(length == 18){
 			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SUCCESS);
 			entity.setErrorDescription("认证成功");
 			ZjgkResponse response = new ZjgkResponse();
@@ -169,6 +200,8 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	//获取对应的对接放的url，appkey,secretkey
 	private void getSettinginfo(PostGeneralFormCommand cmd) {
 		this.isdebug = configProvider.getBooleanValue("debug.flag",false);
+		String stringCommunity = configProvider.getValue("zj_communites","人才公寓");
+		this.communites = stringCommunity.split(",");
 		AuthorizationThirdPartyForm setting = authorizationThirdPartyFormProvider.getFormSource(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getSourceType(),cmd.getSourceId());
 		this.url = setting.getAuthorizationUrl();
 		this.appKey = setting.getAppKey();
@@ -462,13 +495,13 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	private Map<String, String> generateParams(PostGeneralFormCommand cmd, String type){
 		List<PostApprovalFormItem> values = cmd.getValues();
 		Map<String, String> params= new HashMap<String,String>();
-		params.put("organizationCode","1232123");
-		params.put("organizationContact","Test");
-		params.put("organizationPhone","1234567890");
-		params.put("phone","18761600673");
-		params.put("name","dsf");
-		params.put("certificateType","1");
-		params.put("certificateNo","321201199307070219");
+//		params.put("organizationCode","1232123");
+//		params.put("organizationContact","Test");
+//		params.put("organizationPhone","1234567890");
+//		params.put("phone","18761600673");
+//		params.put("name","dsf");
+//		params.put("certificateType","1");
+//		params.put("certificateNo","321201199307070219");
 		for (PostApprovalFormItem item : values) {
 			GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(item.getFieldType());
 			switch (fieldType) {
@@ -485,7 +518,8 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 				break;
 			}
 			if(item.getFieldName().equals("certificateType")){
-				params.put(item.getFieldName(), "1");
+//				params.put(item.getFieldName(), "1");
+				params.put(item.getFieldName(), CertificateType.fromType(item.getFieldValue()).getCode());
 			}
 		}
 		params.put("appKey", appKey);
