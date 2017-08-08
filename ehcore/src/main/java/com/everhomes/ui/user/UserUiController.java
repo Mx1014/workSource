@@ -1,20 +1,6 @@
 // @formatter:off
 package com.everhomes.ui.user;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.ui.user.*;
-import com.everhomes.util.RequireAuthentication;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.activity.ActivityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -32,27 +18,20 @@ import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
- 
-import com.everhomes.rest.user.ListUserOpPromotionsRespose;
- 
-import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListAuthFormsResponse;
-import com.everhomes.rest.ui.user.ListContactBySceneRespose;
-import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
-import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-import com.everhomes.rest.ui.user.SceneContactDTO;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
+import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.WebTokenGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <ul>
@@ -234,7 +213,7 @@ public class UserUiController extends ControllerBase {
     
     /**
      * <b>URL: /ui/user/setCurrentCommunityForScene</b>
-     * <p>设置当前小区以获得场景。</p>
+     * <p>设置当前小区以获得场景</p>
      */
     @RequestMapping("setCurrentCommunityForScene")
     @RestReturn(value=SceneDTO.class, collection=true)
@@ -246,7 +225,7 @@ public class UserUiController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /ui/user/listNearbyActivitiesByScene</b>
      * <p>根据场景、类型查询周边/同城活动</p>
