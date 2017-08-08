@@ -35,6 +35,11 @@ public interface UniongroupService {
      **/
     public ListUniongroupMemberDetailResponse listUniongroupMemberDetailsWithCondition(ListUniongroupMemberDetailsWithConditionCommand cmd);
 
+    /**
+     * 查询一个公司下没有分配薪酬组的人
+     **/
+    List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd);
+
     public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId);
     /**
      * 根据薪酬组id获取相关人数

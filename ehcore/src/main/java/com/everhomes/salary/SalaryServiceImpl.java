@@ -285,21 +285,24 @@ public class SalaryServiceImpl implements SalaryService {
             salaryEmployeeOriginValProvider.deleteSalaryEmployeeValsByGroupIdNotInOriginIds(cmd.getSalaryGroupId(), entityIds);
             response.setSalaryGroupEntity(salaryGroupEntities);
 
+            caculate(cmd.getSalaryGroupId());
 
-
-            //计算之前六个月的period
-            Organization salaryOrg = organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
-            Calendar periodCalendar = Calendar.getInstance();
-            for(int i = 0;i<=5;i++){
-                String period = monthSF.get().format(periodCalendar.getTime());
-                //只要未发放就重新刷
-                calculateGroupPeroid(salaryOrg, period,false);
-                periodCalendar.add(Calendar.MONTH, -1);
-            }
             return response;
         }
 		return null;
 	}
+
+	private void caculate(Long salaryGroupId){
+        //计算之前六个月的period
+        Organization salaryOrg = organizationProvider.findOrganizationById(salaryGroupId);
+        Calendar periodCalendar = Calendar.getInstance();
+        for(int i = 0;i<=5;i++){
+            String period = monthSF.get().format(periodCalendar.getTime());
+            //只要未发放就重新刷
+            calculateGroupPeroid(salaryOrg, period,false);
+            periodCalendar.add(Calendar.MONTH, -1);
+        }
+    }
 
     @Override
     public void deleteSalaryGroup(DeleteSalaryGroupCommand cmd) {
