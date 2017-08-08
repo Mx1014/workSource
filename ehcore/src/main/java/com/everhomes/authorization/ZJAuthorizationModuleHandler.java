@@ -60,7 +60,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	
 	private String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
 	
-	private static final String[] communites = {"上海张江高科技园区开发股份有限公司"};
+	private String[] communites = {"人才公寓"};
 	
     @Autowired
     private CommunityProvider communityProvider;
@@ -146,7 +146,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	//生成调试对象。
 	private ZjgkJsonEntity<List<ZjgkResponse>> generateBebugEntity(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		List<ZjgkResponse> responses = new ArrayList<>();
-		if(length == 1){
+		if(length == 18){
 			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SUCCESS);
 			entity.setErrorDescription("认证成功");
 			ZjgkResponse response = new ZjgkResponse();
@@ -169,6 +169,8 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	//获取对应的对接放的url，appkey,secretkey
 	private void getSettinginfo(PostGeneralFormCommand cmd) {
 		this.isdebug = configProvider.getBooleanValue("debug.flag",false);
+		String stringCommunity = configProvider.getValue("zj_communites","人才公寓");
+		this.communites = stringCommunity.split(",");
 		AuthorizationThirdPartyForm setting = authorizationThirdPartyFormProvider.getFormSource(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getSourceType(),cmd.getSourceId());
 		this.url = setting.getAuthorizationUrl();
 		this.appKey = setting.getAppKey();
