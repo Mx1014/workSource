@@ -8,6 +8,7 @@ import com.everhomes.rest.techpark.punch.admin.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,7 @@ import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserService;
+import com.everhomes.util.RequireAuthentication;
 @RestDoc(value = "Punch controller", site = "ehccore")
 @RestController
 @RequestMapping("/punch")
@@ -942,6 +944,7 @@ public class PunchAdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("transforSceneToken")
+	@RequireAuthentication(false)
 	@RestReturn(value = SceneTokenDTO.class)
 	public RestResponse transforSceneToken(@Valid TransforSceneTokenCommand cmd) { 
 		SceneTokenDTO sceneToken = userService.checkSceneToken(cmd.getUserId(), cmd.getSceneToken());
