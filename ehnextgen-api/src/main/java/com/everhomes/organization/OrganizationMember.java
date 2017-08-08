@@ -39,6 +39,8 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
 	private Byte employeeType;
 
+    private Long enterpriserId;
+
     public OrganizationMember() {
     }
 
@@ -181,5 +183,13 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getEnterpriserId() {
+        return enterpriserId;
+    }
+
+    public void setEnterpriserId(Long enterpriserId) {
+        this.enterpriserId = enterpriserId;
     }
 }
