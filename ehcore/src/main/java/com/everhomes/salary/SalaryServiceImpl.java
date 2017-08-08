@@ -686,6 +686,11 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		//现在先取到现在的薪酬批次
+        //薪酬批次和cmd中的比较,如果不一样需要刷,一样,不刷
+        //删除之前批次的
+
 
         //  1.查询该人员之前的 salaryGroupId 并保存
         UniongroupMemberDetailsDTO dto = this.uniongroupService.findUniongroupMemberDetailByDetailId(UserContext.getCurrentNamespaceId(),cmd.getDetailId());
