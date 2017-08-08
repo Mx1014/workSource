@@ -320,7 +320,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				ctx.setContinueStep(false);
 
 				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+//				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 				pmTaskProvider.updateTask(task);
 			}
 		}
