@@ -498,7 +498,7 @@ public interface OrganizationService {
 
 	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
 													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
-    List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId);
+    Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId);
 
     void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
 

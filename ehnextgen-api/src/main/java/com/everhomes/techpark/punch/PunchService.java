@@ -4,9 +4,11 @@ import java.sql.Time;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.techpark.punch.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -83,6 +85,8 @@ public interface PunchService {
 
 	public ListMonthPunchLogsCommandResponse listMonthPunchLogs(
 			ListMonthPunchLogsCommand cmd);
+
+	List<Long> listDptUserIds(Organization org, Long ownerId, String userName, Byte includeSubDpt);
 
 	public HttpServletResponse exportPunchDetails(
 			ListPunchDetailsCommand cmd,
