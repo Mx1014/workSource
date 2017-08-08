@@ -6579,7 +6579,7 @@ public class PunchServiceImpl implements PunchService {
         pr.setRuleType(cmd.getRuleType());
         pr.setPunchOrganizationId( punchOrg.getId());  
         punchProvider.updatePunchRule(pr); 
-        
+       
         savePunchTimeRule(cmd, pr);
 		return null;
 	}
