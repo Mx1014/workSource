@@ -27,7 +27,9 @@ public class FieldServiceImpl implements FieldService {
             List<Field> fields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
             if(fields != null && fields.size() > 0) {
                 dtos = fields.stream().map(field -> {
-                    return ConvertHelper.convert(field, FieldDTO.class);
+                    FieldDTO dto = ConvertHelper.convert(field, FieldDTO.class);
+                    dto.setFieldDisplayName(field.getDisplayName());
+                    return dto;
                 }).collect(Collectors.toList());
             }
         } else {
@@ -92,7 +94,9 @@ public class FieldServiceImpl implements FieldService {
             List<FieldGroup> groups = fieldProvider.listFieldGroups(cmd.getModuleName());
             if(groups != null && groups.size() > 0) {
                 dtos = groups.stream().map(group -> {
-                    return ConvertHelper.convert(group, FieldGroupDTO.class);
+                    FieldGroupDTO dto = ConvertHelper.convert(group, FieldGroupDTO.class);
+                    dto.setGroupDisplayName(group.getTitle());
+                    return dto;
                 }).collect(Collectors.toList());
             }
         } else {
