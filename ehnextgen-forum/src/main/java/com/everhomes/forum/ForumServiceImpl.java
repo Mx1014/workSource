@@ -1445,14 +1445,16 @@ public class ForumServiceImpl implements ForumService {
 	         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
 	         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
 
-             //查询全部时不要各个园区的Clone帖子，因为有一个范围是“全部”的clone帖子  add by yanjun 20170807
-             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode()));
+             //查询全部时各个园区只查正常帖，因为有一个范围是“全部”的clone帖子  add by yanjun 20170807
+             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
+                     .or(Tables.EH_FORUM_POSTS.CLONE_FLAG.isNull()));
 
 	         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
 	         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
 
-             //查询全部时不要各个公司的Clone帖子，因为有一个范围是“全部”的clone帖子  add by yanjun 20170807
-             regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode()));
+             //查询全部时各个公司只查正常帖，因为有一个范围是“全部”的clone帖子  add by yanjun 20170807
+             regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
+                     .or(Tables.EH_FORUM_POSTS.CLONE_FLAG.isNull()));
 
              //增加获取发送到全部的活动，包括一般活动和clone活动  add by yanjun 20170807
 	         Condition condition = communityCondition
@@ -5436,9 +5438,11 @@ public class ForumServiceImpl implements ForumService {
                     query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
                 }
 
-                //此处根据论坛查帖子，clone帖子查询发送到“全部”的帖子   add by yanjun 20170807
-                Condition cloneCondition = Tables.EH_FORUM_POSTS.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode())
+                //此处根据论坛查帖子，需要的是正常的帖子和发送到“全部”的帖子   add by yanjun 20170807
+                Condition cloneCondition = Tables.EH_FORUM_POSTS.CLONE_FLAG.isNull()
+                        .or(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()))
                         .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+
                 query.addConditions(cloneCondition);
 
                 

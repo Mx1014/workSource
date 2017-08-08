@@ -3939,14 +3939,16 @@ public class ActivityServiceImpl implements ActivityService {
             communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.in(communityIdList));
 
             //查询全部时不要各个园区的Clone活动，因为有一个范围是“全部”的clone活动  add by yanjun 20170807
-			communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode()));
+			communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
+					.or(Tables.EH_ACTIVITIES.CLONE_FLAG.isNull()));
         }
         Condition orgCondition = null;
         if(organizationId != null) {
             orgCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
             orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(organizationId));
 			//查询全部时不要各个公司的Clone活动，因为有一个范围是“全部”的clone活动  add by yanjun 20170807
-			orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.ne(PostCloneFlag.CLONE.getCode()));
+			orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
+					.or(Tables.EH_ACTIVITIES.CLONE_FLAG.isNull()));
         }
 
 		//增加获取发送到全部的活动，包括一般活动和clone活动  add by yanjun 20170807
