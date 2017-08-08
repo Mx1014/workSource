@@ -24,6 +24,7 @@ public class LeaseBuildingDTO {
     private String address;
     private Double areaSize;
     private String description;
+    private String posterUri;
     private String posterUrl;
     private Byte status;
     private String trafficDescription;
@@ -36,9 +37,16 @@ public class LeaseBuildingDTO {
     @ItemType(BuildingForRentAttachmentDTO.class)
     private List<BuildingForRentAttachmentDTO> attachments;
 
-
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> formValues;
+
+    public String getPosterUri() {
+        return posterUri;
+    }
+
+    public void setPosterUri(String posterUri) {
+        this.posterUri = posterUri;
+    }
 
     public List<PostApprovalFormItem> getFormValues() {
         return formValues;

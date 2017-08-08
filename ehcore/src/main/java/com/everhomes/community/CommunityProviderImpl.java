@@ -787,6 +787,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhBuildings.class, building.getId()));
         EhBuildingsDao dao = new EhBuildingsDao(context.configuration());
+
         dao.update(building);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBuildings.class, building.getId());

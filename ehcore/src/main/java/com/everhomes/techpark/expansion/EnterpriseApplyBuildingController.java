@@ -32,12 +32,6 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	@Autowired
 	private EnterpriseApplyBuildingService enterpriseApplyBuildingService;
 	
-	@Autowired
-	private OrganizationService organizationService;
-
-	@Autowired
-	private GeneralFormService generalFormService;
-	
 	/**
 	 * <b>URL: /techpark/entry/listLeaseBuildings
 	 * <p>项目介绍列表

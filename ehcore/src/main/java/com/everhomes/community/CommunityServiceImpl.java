@@ -16,8 +16,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
-import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.group.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -42,17 +40,12 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionServiceErrorCode;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -60,10 +53,7 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
-import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.user.*;
-import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
@@ -160,12 +150,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private  RolePrivilegeService rolePrivilegeService;
-	@Autowired
-	private GeneralFormService generalFormService;
-	@Autowired
-	private GeneralFormValProvider generalFormValProvider;
-	@Autowired
-	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
 
 	@Autowired
 	private  ImportFileService importFileService;
@@ -802,28 +786,22 @@ public class CommunityServiceImpl implements CommunityService {
 			building.setGeohash(geohash);
 		}
 		
-		User user = UserContext.current().getUser();
-		long userId = user.getId();
+		Long userId = UserContext.currentUserId();
 
 		dbProvider.execute((TransactionStatus status) -> {
 			if (cmd.getId() == null) {
 
-				LOGGER.info("add building");
+				LOGGER.info("add building, cmd={}", cmd);
 				this.communityProvider.createBuilding(userId, building);
-//				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
-//						building.getId(), cmd.getCustomFormFlag());
+
 			} else {
-				LOGGER.info("update building");
-				building.setId(cmd.getId());
+				LOGGER.info("update building, cmd={}", cmd);
 				Building b = this.communityProvider.findBuildingById(cmd.getId());
 				building.setCreatorUid(b.getCreatorUid());
 				building.setCreateTime(b.getCreateTime());
 				building.setNamespaceId(b.getNamespaceId());
 				this.communityProvider.updateBuilding(building);
 
-//				generalFormValProvider.deleteGeneralFormVals(EntityType.BUILDING.getCode(), building.getId());
-//				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
-//						building.getId(), cmd.getCustomFormFlag());
 			}
 			processBuildingAttachments(userId, cmd.getAttachments(), building);
 
@@ -852,13 +830,12 @@ public class CommunityServiceImpl implements CommunityService {
 		return isValid;
 	}
 	
-    private void processBuildingAttachments(long userId, List<AttachmentDescriptor> attachmentList, Building building) {
-        List<BuildingAttachment> results = null;
-        
+    private void processBuildingAttachments(Long userId, List<AttachmentDescriptor> attachmentList, Building building) {
+
         this.communityProvider.deleteBuildingAttachmentsByBuildingId(building.getId());
         
         if(attachmentList != null) {
-            results = new ArrayList<BuildingAttachment>();
+			List<BuildingAttachment> results = new ArrayList<BuildingAttachment>();
             
             BuildingAttachment attachment = null;
             for(AttachmentDescriptor descriptor : attachmentList) {
@@ -874,8 +851,7 @@ public class CommunityServiceImpl implements CommunityService {
                 	this.communityProvider.createBuildingAttachment(attachment);
                     results.add(attachment);
                 } catch(Exception e) {
-                    LOGGER.error("Failed to save the attachment, userId=" + userId 
-                        + ", attachment=" + attachment, e);
+                    LOGGER.error("Failed to save the attachment, userId={}, attachment={}", userId, attachment, e);
                 }
             }
             
@@ -2979,10 +2955,7 @@ public class CommunityServiceImpl implements CommunityService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"ResourceType cannot be null.");
         }
-		
-//    	ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
-//		checkResourceCategoryIsNull(category);
-		
+
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
 				namespaceId);
@@ -3076,28 +3049,12 @@ public class CommunityServiceImpl implements CommunityService {
 	public List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		
-//		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
-//		String path = null;
-//		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
-//		if(null != cmd.getParentId()) {
-//			ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(cmd.getParentId());
-//			checkResourceCategoryIsNull(resourceCategory);
-//			path = resourceCategory.getPath();
-//		}
-		
 		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getParentId(), null, ResourceCategoryType.CATEGORY.getCode())
 			.stream().map(r -> {
 				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
 				
 				return dto;
 			}).collect(Collectors.toList());
-		
-//		for(ResourceCategoryDTO s: temp) {
-//			getChildCategories(temp, s);
-//			if(s.getParentId() == parentId) {
-//				result.add(s);
-//			}
-//		}
 		
 		return temp;
 	}
@@ -3109,12 +3066,12 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ResourceCategoryDTO> list = listTreeResourceCategories(cmd);
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 
-		setresourceDTOs(list, namespaceId);
+		setResourceDTOs(list, namespaceId);
 		
 		return list;
 	}
 	
-	private void setresourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
+	private void setResourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
 		if(null != list) {
 			for(ResourceCategoryDTO r: list) {
 				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(r.getId(), namespaceId);
@@ -3124,7 +3081,7 @@ public class CommunityServiceImpl implements CommunityService {
 					dto.setResourceName(community.getName());
 					return dto;
 				}).collect(Collectors.toList());
-				setresourceDTOs(r.getCategoryDTOs(), namespaceId);
+				setResourceDTOs(r.getCategoryDTOs(), namespaceId);
 				r.setResourceDTOs(resourceDTOs);
 			}
 		}

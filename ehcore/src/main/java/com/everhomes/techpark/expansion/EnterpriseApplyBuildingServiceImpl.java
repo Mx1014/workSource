@@ -245,7 +245,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 				BuildingForRentAttachmentDTO d = new BuildingForRentAttachmentDTO();
 				d.setContentUrl(url);
-
+				d.setContentUri(a.getContentUri());
 				return d;
 			}).collect(Collectors.toList()));
 		}
