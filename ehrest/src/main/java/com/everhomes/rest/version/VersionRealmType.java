@@ -62,36 +62,36 @@ package com.everhomes.rest.version;
  * </ul>
  */
 public enum VersionRealmType {
-    ANDROID("Android"), 
-    IOS("iOS"), 
-    ANDROID_TECHPARK("Android_Techpark"), 
-    IOS_TECHPARK("iOS_Techpark"), 
-    ANDROID_XUNMEI("Android_Xunmei"), 
-    IOS_XUNMEI("iOS_Xunmei"), 
-    ANDROID_HWPARK("Android_Hwpark"), 
-    IOS_HWPARK("iOS_Hwpark"), 
-    ANDROID_ISERVICE("Android_IService"), 
-    IOS_ISERVICE("iOS_IService"), 
+    ANDROID("Android"),
+    IOS("iOS"),
+    ANDROID_TECHPARK("Android_Techpark"),
+    IOS_TECHPARK("iOS_Techpark"),
+    ANDROID_XUNMEI("Android_Xunmei"),
+    IOS_XUNMEI("iOS_Xunmei"),
+    ANDROID_HWPARK("Android_Hwpark"),
+    IOS_HWPARK("iOS_Hwpark"),
+    ANDROID_ISERVICE("Android_IService"),
+    IOS_ISERVICE("iOS_IService"),
     ANDROID_SHUNICOM("Android_ShUnicom"),
-    IOS_SHUNICOM("iOS_ShUnicom"), 
-    ANDROID_JYJY("Android_JYJY"), 
+    IOS_SHUNICOM("iOS_ShUnicom"),
+    ANDROID_JYJY("Android_JYJY"),
     IOS_JYJY("iOS_JYJY"),
-    ANDROID_VIDEOCONF("Android_Videoconf"), 
+    ANDROID_VIDEOCONF("Android_Videoconf"),
     IOS_VIDEOCONF("iOS_Videoconf"),
-    ANDROID_LONGGANG("Android_Longgang"), 
+    ANDROID_LONGGANG("Android_Longgang"),
     IOS_LONGGANG("iOS_Longgang"),
-    ANDROID_HAIAN("Android_Haian"), 
+    ANDROID_HAIAN("Android_Haian"),
     IOS_HAIAN("iOS_Haian"),
     H5_QUALITY("quality"),
-    ANDROID_SHENYE("Android_Shenye"), 
+    ANDROID_SHENYE("Android_Shenye"),
     IOS_SHENYE("iOS_Shenye"),
-    ANDROID_JINDI("Android_Jindi"), 
+    ANDROID_JINDI("Android_Jindi"),
     IOS_JINDI("iOS_Jindi"),
-    ANDROID_CHUNENG("Android_Chuneng"), 
+    ANDROID_CHUNENG("Android_Chuneng"),
     IOS_CHUNENG("iOS_Chuneng"),
-    ANDROID_WEIXINLINK("Android_WeixinLink"), 
+    ANDROID_WEIXINLINK("Android_WeixinLink"),
     IOS_WEIXINLINK("iOS_WeixinLink"),
-    ANDROID_IBASE("Android_Ibase"), 
+    ANDROID_IBASE("Android_Ibase"),
     IOS_IBASE("iOS_Ibase"),
     BIZ("biz"),
     ANDROID_ATMINI("Android_AtMini"),
@@ -135,17 +135,22 @@ public enum VersionRealmType {
     ANDROID_GUOMAO("Android_Guomao"),
     IOS_GUOMAO("iOS_Guomao"),
     ANDROID_CHANGFAZHAN("Android_Changfazhan"),
-    IOS_CHANGFAZHAN("iOS_Changfazhan");
+    IOS_CHANGFAZHAN("iOS_Changfazhan"),
+
+    ANDROID_VANKE_XSH("Android_Vanke_XSH"),
+    IOS_VANKE_XSH("iOS_Vanke_XSH"),
+    ANDROID_OA("Android_OA"),
+    IOS_OA("iOS_OA");
 
     private String code;
     private VersionRealmType(String code) {
         this.code = code;
     }
-    
+
     public String getCode() {
         return this.code;
     }
-    
+
     public static VersionRealmType fromCode(String code) {
         if(code != null) {
             for(VersionRealmType value : VersionRealmType.values()) {
@@ -154,7 +159,7 @@ public enum VersionRealmType {
                 }
             }
         }
-        
+
         return null;
     }
 }
