@@ -64,7 +64,7 @@ INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`)
 	VALUES(1024527, 0, 'PM', '广东网游科技发展有限公司', '广东网游网络科技有限公司是互联网产业园开发商，拥有成熟的产业园运营体系，以及专业的运营团队。也是东莞网络文化协会会长，群聚东莞地区乃至全国影响力最大的知名网站、论坛、新媒体渠道的行业协会。', '/1024527', 1, 2, 'ENTERPRISE', 999970, 1041934);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
-	VALUES(1142545, 240111044331050367, 'organization', 1024527, 3, 0, UTC_TIMESTAMP());
+	VALUES(1152615, 240111044331050367, 'organization', 1024527, 3, 0, UTC_TIMESTAMP());
 	
 
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
@@ -79,7 +79,7 @@ INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_i
 	VALUES(2166723, 1024527, 'USER', 316703  , 'manager', '林毓群', 0, '13751356670', 3, 999970, @organization_member_details_id, 'ENTERPRISE', '/1024527');
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES(18705, 'EhOrganizations', 1024527, 'EhUsers', 316703  , 1001, 1, UTC_TIMESTAMP());
+	VALUES(19325, 'EhOrganizations', 1024527, 'EhUsers', 316703  , 1001, 1, UTC_TIMESTAMP());
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`) VALUES((@acl_id := @acl_id + 1),'EhOrganizations','1024527','1','10','316703','0','316703','2017-07-27 10:04:09','999970','EhUsers','admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
