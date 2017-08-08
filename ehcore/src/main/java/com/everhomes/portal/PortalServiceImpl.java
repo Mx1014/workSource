@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -1474,6 +1475,7 @@ public class PortalServiceImpl implements PortalService {
 				item.setActionType(moduleApp.getActionType());
 				item.setActionData(moduleApp.getInstanceConfig());
 			}
+			setItemModuleAppActionData(item, instanceConfig.getModuleAppId());
 		}
 		for (SceneType sceneType: SceneType.values()) {
 			if(sceneType == SceneType.PARK_TOURIST ||
@@ -1584,10 +1586,20 @@ public class PortalServiceImpl implements PortalService {
 
 	private void setItemModuleAppActionData(LaunchPadItem item, String actionData){
 		ModuleAppActionData data = (ModuleAppActionData)StringHelper.fromJsonString(actionData, ModuleAppActionData.class);
-		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(data.getModuleAppId());
+		setItemModuleAppActionData(item, data.getModuleAppId());
+	}
+
+	private void setItemModuleAppActionData(LaunchPadItem item, Long moduleAppId){
+		ServiceModuleApp moduleApp = serviceModuleAppProvider.findServiceModuleAppById(moduleAppId);
 		if(null != moduleApp){
+			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
 			item.setActionType(moduleApp.getActionType());
-			item.setActionData(moduleApp.getInstanceConfig());
+			if(null != handler){
+				String actionData = handler.publish(moduleApp.getInstanceConfig());
+				item.setActionData(actionData);
+			}else{
+				item.setActionData(moduleApp.getInstanceConfig());
+			}
 		}
 	}
 
@@ -1949,6 +1961,16 @@ public class PortalServiceImpl implements PortalService {
 		return scope;
 	}
 
+	private PortalPublishHandler getPortalPublishHandler(Long moduleId) {
+		PortalPublishHandler handler = null;
+
+		if(moduleId != null && moduleId.longValue() > 0) {
+			String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
+			handler = PlatformContext.getComponent(handlerPrefix + moduleId);
+		}
+
+		return handler;
+	}
 
 	public static void main(String[] args) {
 //		PortalItemGroupJson[] jsons = (PortalItemGroupJson[])StringHelper.fromJsonString("[{\"label\":\"应用\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Navigator\",\"style\":\"Metro\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"cs://\"},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"横幅广告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"公告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"运营模块\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"OPPush\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"titleFlag\":0,\"title\":\"标题\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"无时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News_Flash\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"timeWidgetStyle\":\"date\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"分页签\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Tabs\",\"style\":\"Pure_text\",\"defaultOrder\":0,\"description\":\"描述\"}]", PortalItemGroupJson[].class);
