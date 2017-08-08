@@ -3812,29 +3812,30 @@ public class QualityServiceImpl implements QualityService {
 				String[] paths = path.split("/");
 				categoryIds.add(Long.valueOf(paths[1]));
 			});
+			LOGGER.info("categoryIds: {}", categoryIds);
 			//一把取出涉及到的类型
 			Map<Long, QualityInspectionSpecifications> categories = qualityProvider.listSpecificationByIds(categoryIds);
-			List<Double> weigths = new ArrayList<>();
 			results.forEach(result -> {
-				categoryIds.forEach(categoryId -> {
+				Double weight = 1.0;
+				for(Long categoryId : categoryIds) {
 					if(result.getSpecificationPath().contains(categoryId.toString())) {
-						QualityInspectionSpecifications category = categories.get(categoryId.toString());
-						if(category != null) {
-							weigths.add(category.getWeight());
+						LOGGER.info("contains categoryid: {}", categoryId);
+						if(categories.get(categoryId) != null) {
+							LOGGER.info("get category by id: {}", categoryId);
+							weight = categories.get(categoryId).getWeight();
 						}
 					}
-				});
-
-				if(weigths.size() == 0) {
-					weigths.add(1.0);
 				}
+
 				//扣分等于实际扣分乘以占比
-				Double statScore = communitySpecificationStats.get(result.getTargetId()) * weigths.get(0);
+				LOGGER.info("result: {}, weight: {}", result, weight);
+				Double statScore = communitySpecificationStats.get(result.getTargetId());
 				if(statScore != null) {
-					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
-					statScore = statScore + result.getTotalScore();
+					scoreStat.setDeductScore(scoreStat.getDeductScore() + (result.getTotalScore() * weight));
+					statScore = statScore + (result.getTotalScore() * weight);
 					communitySpecificationStats.put(result.getTargetId(), statScore);
 				}
+
 			});
 		}
 		//按map的value排序 第一个和最后一个是扣分最少和最多的项目

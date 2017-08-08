@@ -52,47 +52,47 @@ import com.everhomes.util.StringHelper;
 @Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+999971)
 public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler {
 //	private static final Logger LOGGER = LoggerFactory.getLogger(ZJAuthorizationModuleHandler.class);
-	   
-	
+
+
 	private String url = "http://139.129.220.146:3578/openapi/Authenticate";
-	
+
 	private String appKey = "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21";
-	
+
 	private String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
-	
-	private static final String[] communites = {"上海张江高科技园区开发股份有限公司"};
-	
+
+	private String[] communites = {"人才公寓"};
+
     @Autowired
     private CommunityProvider communityProvider;
-	
+
 	@Autowired
 	public FlowService flowService;
-	
+
 	@Autowired
 	public FamilyService familyService;
-	
+
     @Autowired
     private AddressService addressService;
-    
+
     @Autowired
     private DbProvider dbProvider;
-    
+
     @Autowired
     private AuthorizationThirdPartyRecordProvider authorizationProvider;
-	
+
 	@Autowired
 	private LocaleStringService localeStringService;
-    
+
     @Autowired
     private AuthorizationThirdPartyFormProvider authorizationThirdPartyFormProvider;
-    
+
     @Autowired
     private ConfigurationProvider configProvider;
-    
+
     private boolean isdebug;
-    
+
     private int length;
-    
+
     private boolean isdebug(){
     	return isdebug;
     }
@@ -100,12 +100,12 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	public PostGeneralFormDTO personalAuthorization(PostGeneralFormCommand cmd) {
 		return authorization(cmd,PERSONAL_AUTHORIZATION);
 	}
-	
+
 	@Override
 	public PostGeneralFormDTO organiztionAuthorization(PostGeneralFormCommand cmd) {
 		return authorization(cmd,ORGANIZATION_AUTHORIZATION);
 	}
-	
+
 	public PostGeneralFormDTO authorization(PostGeneralFormCommand cmd, String type) {
 		getSettinginfo(cmd);
 		Map<String, String> params = generateParams(cmd,type);
@@ -139,14 +139,14 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		record.setFlowCaseId(flowCase.getId());
 		//记录认证参数和结果，提供给工作流使用
 		createRecords(record,type);
-		
+
 		return processGeneralFormDTO(cmd,entity,type,flowCase);
 	}
-	
+
 	//生成调试对象。
 	private ZjgkJsonEntity<List<ZjgkResponse>> generateBebugEntity(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		List<ZjgkResponse> responses = new ArrayList<>();
-		if(length == 1){
+		if(length == 18){
 			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SUCCESS);
 			entity.setErrorDescription("认证成功");
 			ZjgkResponse response = new ZjgkResponse();
@@ -164,11 +164,13 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		}
 		entity.setResponse(responses);
 		return entity;
-		
+
 	}
 	//获取对应的对接放的url，appkey,secretkey
 	private void getSettinginfo(PostGeneralFormCommand cmd) {
 		this.isdebug = configProvider.getBooleanValue("debug.flag",false);
+		String stringCommunity = configProvider.getValue("zj_communites","人才公寓");
+		this.communites = stringCommunity.split(",");
 		AuthorizationThirdPartyForm setting = authorizationThirdPartyFormProvider.getFormSource(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),cmd.getSourceType(),cmd.getSourceId());
 		this.url = setting.getAuthorizationUrl();
 		this.appKey = setting.getAppKey();
@@ -197,12 +199,12 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
         item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
         item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
 //        if(PERSONAL_AUTHORIZATION.equals(type)){
-//        	String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+//        	String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE,
 //    				AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL_S);
 //    		String[] documentflows = documentflow.split("\\|");
 //        	item.setFieldValue(generalContent(entity,documentflows));
 //		}else{
-//			String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+//			String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE,
 //    				AuthorizationErrorCode.ORGANIZATION_BACK_CODE_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.ORGANIZATION_BACK_CODE_DETAIL_S);
 //    		String[] documentflows = documentflow.split("\\|");
 //        	item.setFieldValue(generalContent(entity,documentflows));
@@ -214,9 +216,9 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
         dto.getValues().addAll(items);
         return dto;
 	}
-	
+
 	//表单提交，对接工作流之后的url，返回给客户端跳转
-	private String processFlowURL(Long flowCaseId, String string, Long moduleId) { 
+	private String processFlowURL(Long flowCaseId, String string, Long moduleId) {
 		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+string+"&moduleId="+moduleId  ;
 	}
 
@@ -272,7 +274,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		}
 		return generateUserAuthorizationRecord(cmd,params,authorizationType,entity);
 	}
-	
+
 	private long generateRandomNumber(int n){
 		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
 	}
@@ -316,7 +318,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		batchCmd.setMembers(members);
 		return batchCmd;
 	}
-	
+
 	//在记录
 	private boolean isInleaveRecord(AuthorizationThirdPartyRecord record, long addressId){
 		ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
@@ -371,7 +373,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	}
 
 	private FlowCase createWorkFlow(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity, String authorizationType, Map<String, String> params) {
-		
+
 		GeneralModuleInfo ga = new GeneralModuleInfo();
 
 		ga.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -383,12 +385,12 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		ga.setProjectType(EntityType.NAMESPACE.getCode());
 		ga.setOrganizationId(Long.valueOf(authorizationType));//用来存认证类型type
 
-		
+
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 		createFlowCaseCommand.setApplyUserId(UserContext.current().getUser().getId());
 		createFlowCaseCommand.setReferId(cmd.getOwnerId());
 		createFlowCaseCommand.setReferType(cmd.getOwnerType());
-		String document = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+		String document = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE,
 				AuthorizationErrorCode.WORK_FLOW_TITLE, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.WORK_FLOW_TITLE_S);
 		String[] documents = document.split("\\|");
 		if(authorizationType == PERSONAL_AUTHORIZATION){
@@ -400,7 +402,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		}
 //		createFlowCaseCommand.setProjectId(cmd.getOwnerId());
 //		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
-		
+
 		FlowCase flowcase = flowService.createDumpFlowCase(ga, createFlowCaseCommand);
 		return flowcase;
 	}
@@ -443,7 +445,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 //		else{
 //			buffer.append("\n").append(documentflows[5]).append(entity.getErrorCode()).append(" ");
 //		}
-//		
+//
 //		if(list!=null && list.size()>0){
 //			for (ZjgkResponse zjgkResponse : list) {
 //				if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.EXIST_COMMUNITY){
@@ -453,7 +455,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 //				}else if(zjgkResponse.getExistCommunityFlag() == ZjgkResponse.MULTI_COMMUNITY){
 //					buffer.append(documentflows[8]).append(zjgkResponse.getCommunityName()).append(documentflows[9]).append("\n");
 //				}
-//				
+//
 //			}
 //		}
 //		return buffer.toString();
@@ -495,7 +497,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		String signature = SignatureHelper.computeSignature(params, secretKey);
 		params.put("signature", signature);
 		return params;
-		
+
 	}
 
 }
