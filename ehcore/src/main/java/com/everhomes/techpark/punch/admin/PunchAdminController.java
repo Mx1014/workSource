@@ -668,7 +668,24 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: punch/getPunchGroup</b>
+	 * <p>
+	 * 列出打卡规则(考勤组)
+	 * </p>
+	 */
+	@RequestMapping("getPunchGroup")
+	@RestReturn(value = PunchGroupDTO.class)
+	public RestResponse getPunchGroup(@Valid GetPunchGroupCommand cmd) {
+		PunchGroupDTO commandResponse = punchService.getPunchGroup(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
 	/**
 	 * <b>URL: punch/listPunchGroups</b>
 	 * <p>
@@ -685,6 +702,7 @@ public class PunchAdminController extends ControllerBase {
 		return response;
 	}
 
+	
 	/**
 	 * <b>URL: punch/updatePunchGroup</b>
 	 * <p>

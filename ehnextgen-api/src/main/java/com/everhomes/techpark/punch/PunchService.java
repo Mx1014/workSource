@@ -20,6 +20,7 @@ import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
+import com.everhomes.rest.techpark.punch.admin.GetPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
@@ -235,5 +236,7 @@ public interface PunchService {
 	public void deletePunchGroup(DeleteCommonCommand cmd);
 
 	public GetPunchTypeResponse getPunchType(GetPunchTypeCommand cmd);
+
+	public PunchGroupDTO getPunchGroup(GetPunchGroupCommand cmd);
 
 }
