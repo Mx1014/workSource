@@ -212,8 +212,10 @@ public class UserActivityServiceImpl implements UserActivityService {
         activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
         activity.setNamespaceId(UserContext.getCurrentNamespaceId());
         activity.setVersionRealm(UserContext.current().getVersionRealm());
-        if (user != null)
-        	userActivityProvider.addActivity(activity, user.getId());
+
+        // @see com.everhomes.statistics.terminal.BorderRegisterListener comment by xq.tian 2017/07/14
+        // if (user != null)
+        // 	userActivityProvider.addActivity(activity, user.getId());
 
         // 增加版本号 用于运营统计 by sfyan 20170117
         String type = OSType.fromCode(activity.getOsType().toString()).name().toLowerCase();
@@ -616,7 +618,14 @@ public class UserActivityServiceImpl implements UserActivityService {
         locator.setAnchor(cmd.getPageAnchor());
         
         List<UserPost> result = userActivityProvider.listPostedTopics(uid, UserFavoriteTargetType.TOPIC.getCode(), locator, pageSize + 1);
-        
+
+        Long nextPageAnchor = locator.getAnchor();
+
+        // 去除最后一条数据返回pageSize  add by yanjun 20170802
+        if(result != null && result.size() > pageSize) {
+            result.remove(pageSize);
+        }
+
         if (CollectionUtils.isEmpty(result)) {
         	ListPostResponse response = new ListPostResponse();
             response.setPostDtos(new ArrayList<PostDTO>());
@@ -639,7 +648,6 @@ public class UserActivityServiceImpl implements UserActivityService {
 //        Collections.reverse(ids);
         List<PostDTO> posts = forumService.getTopicById(ids, cmd.getCommunityId(), false, true);
         
-        Long nextPageAnchor = locator.getAnchor();
         ListPostResponse response = new ListPostResponse();
         response.setPostDtos(posts);
         response.setNextPageAnchor(nextPageAnchor);
@@ -1117,6 +1125,12 @@ public class UserActivityServiceImpl implements UserActivityService {
 //        }
         
         Long nextPageAnchor = locator.getAnchor();
+
+        // 去除最后一条数据返回pageSize  add by yanjun 20170802
+        if(result != null && result.size() > pageSize) {
+            result.remove(pageSize);
+        }
+
         List<Long> ids = result.stream().map(r -> r.getTargetId()).collect(Collectors.toList());
         // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
         // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后不需要再额外排序 by lqs 20160928   

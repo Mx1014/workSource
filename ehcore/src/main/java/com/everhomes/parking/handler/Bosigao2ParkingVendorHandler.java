@@ -2,12 +2,12 @@
 package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import com.bosigao2.ParkWebService;
-import com.bosigao2.ParkWebServiceSoap;
-import com.bosigao2.rest.Bosigao2CardInfo;
-import com.bosigao2.rest.Bosigao2GetCardCommand;
-import com.bosigao2.rest.Bosigao2RechargeCommand;
-import com.bosigao2.rest.Bosigao2ResultEntity;
+import com.everhomes.parking.bosigao2.ParkWebService;
+import com.everhomes.parking.bosigao2.ParkWebServiceSoap;
+import com.everhomes.parking.bosigao2.rest.Bosigao2CardInfo;
+import com.everhomes.parking.bosigao2.rest.Bosigao2GetCardCommand;
+import com.everhomes.parking.bosigao2.rest.Bosigao2RechargeCommand;
+import com.everhomes.parking.bosigao2.rest.Bosigao2ResultEntity;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
@@ -35,6 +35,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 深业 停车
+ */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO2")
 public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao2ParkingVendorHandler.class);

@@ -1401,6 +1401,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
+
 		//创建管理员不再返回member
 		organizationService.createOrganizationAccount(command, roleId, namespaceId);
 
@@ -1538,7 +1539,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setContactToken(member.getContactToken());
 						dto.setTargetType(PmMemberTargetType.USER.getCode());
 					}
-					dtos.add(dto);
+					if(dto.getId() != null){
+						dtos.add(dto);
+					}
+
 				}
 			}
 		}
@@ -1574,7 +1578,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setContactToken(member.getContactToken());
 						dto.setTargetType(PmMemberTargetType.USER.getCode());
 					}
-					dtos.add(dto);
+					if(dto.getId() != null){
+						dtos.add(dto);
+					}
 				}
 			}
 		}

@@ -7,8 +7,11 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
+import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.parking.jinyi.JinyiCard;
+import com.everhomes.parking.jinyi.JinyiClearance;
 import com.everhomes.parking.jinyi.JinyiJsonEntity;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -29,6 +32,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * 清华信息港 停车
+ */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "JIN_YI")
 public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JinyiParkingVendorHandler.class);
@@ -36,6 +42,10 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	private static final String GET_CARD = "parkingjet.open.s2s.parkingfee.month.calcfee.plateno";
 	private static final String CREATE_ORDER = "parkingjet.open.s2s.parkingfee.month.order.create";
 	private static final String NOTIFY = "parkingjet.open.s2s.parkingfee.month.payresult.notify";
+	//申请短期证
+	private static final String APPLY_TEMP_CARD = "parkingjet.open.s2s.shorttermcard.apply.order";
+	//获取短期证车辆的通行纪录
+	private static final String GET_TEMP_CARD_LOGS = "parkingjet.open.s2s.shorttermcard.apply.order.parkingrecord";
 
 	//金溢初始一个月
 	private static final int MONTH_COUNT = 1;
@@ -43,10 +53,10 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-//	static String url = "http://tgd.poapi.parkingjet.cn:8082/CommonOpenApi/default.ashx";
-//	static String appid = "201706221000";
-//	static String appkey = "qyruirxn20145601739";
-//	static String parkingid = "0755000120170301000000000003";
+//	static String url = "HTTP://TGD.POAPI.PARKINGJET.CN:8082/COMMONOPENAPI/DEFAULT.ASHX";
+//	STATIC STRING APPID = "201706221000";
+//	STATIC STRING APPKEY = "QYRUIRXN20145601739";
+//	STATIC STRING PARKINGID = "0755000120170301000000000003";
 
 	@Autowired
 	private ParkingProvider parkingProvider;
@@ -212,7 +222,8 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 		json.put("plateno", order.getPlateNumber());
 		json.put("receivable", order.getPrice());
 		json.put("calcid", order.getOrderToken());
-		json.put("paymenttype", 1209);
+		//1209 :微信 1210 :支付宝
+		json.put("paymenttype", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? 1210 : 1209);
 
 		return json;
 	}
@@ -392,5 +403,64 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
 
 		return null;
+	}
+
+	public String applyTempCard(ParkingClearanceLog log) {
+
+		Map<String, String> params = createGeneralParam(APPLY_TEMP_CARD, createApplyTempCardParam(log));
+		String url = configProvider.getValue("parking.zijing.url", "");
+		String responseJson = Utils.post(url, params);
+
+
+		JinyiJsonEntity<String> jsonEntity = JSONObject.parseObject(responseJson, new TypeReference<JinyiJsonEntity<String>>(){});
+
+		if(jsonEntity.isSuccess()) {
+			return jsonEntity.getData();
+		}
+
+		return null;
+	}
+
+	public List<JinyiClearance> getTempCardLogs(ParkingClearanceLog log) {
+
+		Map<String, String> params = createGeneralParam(GET_TEMP_CARD_LOGS, createGetTempCardLogsParam(log.getLogToken()));
+		String url = configProvider.getValue("parking.zijing.url", "");
+		String responseJson = Utils.post(url, params);
+
+
+		JinyiJsonEntity<List<JinyiClearance>> jsonEntity = JSONObject.parseObject(responseJson, new TypeReference<JinyiJsonEntity<List<JinyiClearance>>>(){});
+
+		if(jsonEntity.isSuccess()) {
+			//存入申请记录中
+			log.setLogJson(responseJson);
+			return jsonEntity.getData();
+		}
+
+		return null;
+	}
+
+	private JSONObject createApplyTempCardParam(ParkingClearanceLog log) {
+		JSONObject json = new JSONObject();
+		String parkingid = configProvider.getValue("parking.zijing.parkingid", "");
+		json.put("parkingid", parkingid);
+		json.put("plateno", log.getPlateNumber());
+		json.put("thirddataid", log.getId());
+		Timestamp clearanceTime = log.getClearanceTime();
+		LocalDateTime start = clearanceTime.toLocalDateTime();
+
+		LocalDateTime end = clearanceTime.toLocalDateTime();
+		//加一天 减一秒
+		end.plusDays(1L);
+		end.minusSeconds(1L);
+		json.put("effectivedate", start.format(dtf2));
+		json.put("expiredate", end.format(dtf2));
+		return json;
+	}
+
+	private JSONObject createGetTempCardLogsParam(String logToken) {
+		JSONObject json = new JSONObject();
+		json.put("pj_shorttermcardid", logToken);
+
+		return json;
 	}
 }

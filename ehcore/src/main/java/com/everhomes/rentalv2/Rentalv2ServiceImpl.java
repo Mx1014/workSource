@@ -1364,6 +1364,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		} 
 		siteItemDTO.setItemName(item.getName());
 		siteItemDTO.setItemPrice(item.getPrice());
+		siteItemDTO.setDescription(item.getDescription());
 		siteItemDTO.setImgUrl(this.contentServerService.parserUri(siteItemDTO.getImgUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 		return siteItemDTO;
 	}
@@ -1450,7 +1451,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			RentalOrder rentalBill = ConvertHelper.convert(rs, RentalOrder.class);
 			//设置当前场景公司id
-			rentalBill.setOrganizationId(orgId);
+			rentalBill.setRequestorOrganizationId(orgId);
 			if(null== rs.getCancelTime())
 				rentalBill.setCancelTime(new Timestamp(0));
 			else
@@ -5409,6 +5410,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		siteItem.setItemType(cmd.getItemType());
 		siteItem.setName(cmd.getItemName());
 		siteItem.setPrice(cmd.getItemPrice());
+		siteItem.setDescription(cmd.getDescription());
 		rentalv2Provider.updateRentalSiteItem(siteItem);
 	}
 

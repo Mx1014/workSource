@@ -49,6 +49,7 @@ public enum CoordinationLocks {
     PARKING_UPDATE_ORDER_STATUS("parking.update.order.status"),
 
     PARKING_CLEARANCE_LOG("parking.clearance.log"),
+    PARKING_CLEARANCE_LOG_STATISTICS("parking.clearance.log.statistics"),
     PARKING_CLEARANCE_OPERATOR("parking.clearance.operator"),
 
     ENERGY_DAY_STAT_SCHEDULE("energy.day.stat.schedule"),

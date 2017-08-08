@@ -816,7 +816,7 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		return result.get(0);
 	}
-	@Caching(evict={@CacheEvict(value="listRecordsByOperatorId", key="#record.operatorId")})
+//	@Caching(evict={@CacheEvict(value="listRecordsByOperatorId", key="#record.operatorId")})
 	@Override
 	public void createQualityInspectionTaskRecords(QualityInspectionTaskRecords record) {
 
@@ -2123,7 +2123,7 @@ public class QualityProviderImpl implements QualityProvider {
 		return result;
 	}
 
-	@Cacheable(value="listRecordsByOperatorId", key="{#operatorId}", unless="#result.size() == 0")
+//	@Cacheable(value="listRecordsByOperatorId", key="{#operatorId}", unless="#result.size() == 0")
 	@Override
 	public List<QualityInspectionTaskRecords> listRecordsByOperatorId(Long operatorId, Timestamp createTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2780,5 +2780,41 @@ public class QualityProviderImpl implements QualityProvider {
 			return  null;
 		}
 		return result.get(0);
+	}
+
+	@Override
+	public Map<Long, QualityInspectionSpecifications> listSpecificationByIds(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.ID.in(ids));
+
+		Map<Long, QualityInspectionSpecifications> result = new HashMap<>();
+		query.fetch().map((r) -> {
+			result.put(r.getId(), ConvertHelper.convert(r, QualityInspectionSpecifications.class));
+			return null;
+		});
+
+		return result;
+	}
+
+	@Override
+	public Map<Long, QualityInspectionTaskRecords> listLastRecordByTaskIds(Set<Long> taskIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.in(taskIds));
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.desc());
+
+		Map<Long, QualityInspectionTaskRecords> result = new HashMap<>();
+		query.fetch().map((r) -> {
+			QualityInspectionTaskRecords record = result.get(r.getTaskId());
+			if(record == null) {
+				result.put(r.getTaskId(), ConvertHelper.convert(r, QualityInspectionTaskRecords.class));
+			}else if(record != null && record.getCreateTime().before(r.getCreateTime())) {
+				result.put(r.getTaskId(), ConvertHelper.convert(r, QualityInspectionTaskRecords.class));
+			}
+			return null;
+		});
+
+		return result;
 	}
 }

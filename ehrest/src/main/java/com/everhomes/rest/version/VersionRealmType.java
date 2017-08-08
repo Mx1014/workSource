@@ -53,6 +53,12 @@ package com.everhomes.rest.version;
  * <li>IOS_TEEC("iOS_TEEC"): 嘉定新城 iOS版APP</li>
  * <li>ANDROID_UPARK("Android_UPark"): 张江高科 Android版APP</li>
  * <li>IOS_UPARK("iOS_UPark"): 张江高科iOS版APP</li>
+ * <li>ANDROID_GDWY("Android_GDWY"): 东莞互联网产业园 Android版APP</li>
+ * <li>IOS_GDWY("iOS_GDWY"): 东莞互联网产业园 iOS版APP</li>
+ * <li>ANDROID_GUOMAO("Android_Guomao"): 国贸</li>
+ * <li>IOS_GUOMAO("iOS_Guomao"): 国贸</li>
+ * <li>ANDROID_CHANGFAZHAN("Android_Changfazhan"): 昌发展</li>
+ * <li>IOS_CHANGFAZHAN("iOS_Changfazhan"): 昌发展</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -66,7 +72,7 @@ public enum VersionRealmType {
     IOS_HWPARK("iOS_Hwpark"), 
     ANDROID_ISERVICE("Android_IService"), 
     IOS_ISERVICE("iOS_IService"), 
-    ANDROID_SHUNICOM("Android_ShUnicom"), 
+    ANDROID_SHUNICOM("Android_ShUnicom"),
     IOS_SHUNICOM("iOS_ShUnicom"), 
     ANDROID_JYJY("Android_JYJY"), 
     IOS_JYJY("iOS_JYJY"),
@@ -118,9 +124,19 @@ public enum VersionRealmType {
     IOS_RONGCHAO("iOS_Rongchao"),
     ANDROID_TEEC("Android_TEEC"),
     IOS_TEEC("iOS_TEEC"),
+    ANDROID_JUNMINRONGHE("Android_JunMinRongHe"),
+    IOS_JUNMINRONGHE("iOS_JunMinRongHe"),
+    ANDROID_BAOJIEZHIGU("Android_BaoJiEZhiGu"),
+    IOS_BAOJIEZHIGU("iOS_BaoJiEZhiGu"),
     ANDROID_UPARK("Android_UPark"),
-    IOS_UPARK("iOS_UPark");
-    
+    IOS_UPARK("iOS_UPark"),
+    ANDROID_GDWY("Android_GDWY"),
+    IOS_GDWY("iOS_GDWY"),
+    ANDROID_GUOMAO("Android_Guomao"),
+    IOS_GUOMAO("iOS_Guomao"),
+    ANDROID_CHANGFAZHAN("Android_Changfazhan"),
+    IOS_CHANGFAZHAN("iOS_Changfazhan");
+
     private String code;
     private VersionRealmType(String code) {
         this.code = code;
