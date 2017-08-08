@@ -313,7 +313,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-			if ("FLOWCOMPLETED".equals(nodeType)) {
+			if ("ASSIGNING".equals(nodeType)) {
 				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
 				stepDTO.setFlowCaseId(flowCase.getId());
 				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
