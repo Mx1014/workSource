@@ -1495,7 +1495,6 @@ public class SequenceServiceImpl implements SequenceService {
         	return dbContext.select(Tables.EH_YZX_SMS_LOGS.ID.max()).from(Tables.EH_YZX_SMS_LOGS).fetchOne().value1();
         });
 
-<<<<<<< HEAD
         syncTableSequence(null, EhPortalLayouts.class, Tables.EH_PORTAL_LAYOUTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PORTAL_LAYOUTS.ID.max()).from(Tables.EH_PORTAL_LAYOUTS).fetchOne().value1();
         });
