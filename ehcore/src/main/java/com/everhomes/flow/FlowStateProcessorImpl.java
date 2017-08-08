@@ -215,8 +215,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 				|| flowCase.getStatus().equals(FlowCaseStatus.INVALID.getCode())
 				|| flowCase.getStatus().equals(FlowCaseStatus.FINISHED.getCode())
 				|| flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS,
-                    "flowcase noexists, flowCaseId=" + flowCase);
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR,
+                    "flowcase noexists, flowCaseId=" + cmd.getFlowCaseId());
 		}
 		
 		if(cmd.getStepCount() != null && !cmd.getStepCount().equals(flowCase.getStepCount())) {

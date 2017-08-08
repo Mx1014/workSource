@@ -5313,4 +5313,5 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@address_mapping_id := @address_mapping_id + 1), @organization_id, @community_id, @address_id, '西海明珠大厦-2518', '0');
 
 
-
+-- #13415 add by xq.tian  2017/08/03
+UPDATE `eh_launch_pad_items` SET `action_type` = 56, `item_name` = 'FLOW_TASK' WHERE `action_type` = 51 AND `item_name` = 'PM_TASK' AND `namespace_id` = 999993 AND `item_group` = 'Bizs';
