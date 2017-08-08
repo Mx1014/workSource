@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.techpark.punch.admin.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,9 @@ import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
 import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.user.UserService;
 @RestDoc(value = "Punch controller", site = "ehccore")
 @RestController
 @RequestMapping("/punch")
@@ -31,6 +34,8 @@ public class PunchAdminController extends ControllerBase {
 
 	@Autowired
 	private PunchService punchService;
+	@Autowired
+	private UserService userService;
 	
 //	/**
 //	 * <b>URL: /punch/addPunchTimeRule</b>
@@ -925,6 +930,21 @@ public class PunchAdminController extends ControllerBase {
 	@RestReturn(value = ListPunchDetailsResponse.class)
 	public RestResponse refreshPunchDayLogs(@Valid ListPunchDetailsCommand cmd) {
 		punchService.refreshPunchDayLogs(cmd);
+		RestResponse response = new RestResponse( );
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: punch/transforSceneToken</b>
+	 * <p>
+	 *  
+	 * </p>
+	 */
+	@RequestMapping("transforSceneToken")
+	@RestReturn(value = SceneTokenDTO.class)
+	public RestResponse transforSceneToken(@Valid ListPunchDetailsCommand cmd) { 
+		SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 		RestResponse response = new RestResponse( );
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
