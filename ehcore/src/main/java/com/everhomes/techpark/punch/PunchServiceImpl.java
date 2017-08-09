@@ -148,6 +148,7 @@ import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
+import com.everhomes.rest.techpark.punch.PunchType;
 import com.everhomes.rest.techpark.punch.PunchUserStatus;
 import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ViewFlags;
@@ -195,7 +196,10 @@ import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.uniongroup.GetUniongroupConfiguresCommand;
 import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
+import com.everhomes.rest.uniongroup.UniongroupConfiguresDTO;
+import com.everhomes.rest.uniongroup.UniongroupTarget;
 import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -1315,6 +1319,11 @@ public class PunchServiceImpl implements PunchService {
 		punchLog.setUserId(userId);
 		punchLog.setPunchTime(Timestamp.valueOf(punchTime));
 		Calendar punCalendar = Calendar.getInstance();
+		List<Integer> punchTypeList = getPunchType(userId,cmd.getEnterpriseId(),punchLog.getPunchTime());
+		if(null!=punchTypeList){
+			punchLog.setPunchType(punchTypeList.get(0).byteValue());
+			punchLog.setPunchIntervalNo(punchTypeList.get(1));
+		}
 		try {
 			punCalendar.setTime(datetimeSF.get().parse(punchTime));
 		} catch (ParseException e) {
@@ -6488,7 +6497,19 @@ public class PunchServiceImpl implements PunchService {
 		Integer totalCount = uniongroupService.countUnionGroupMemberDetailsByOrgId(r.getNamespaceId(),r.getId());
 		dto.setEmployeeCount(totalCount);
 		//TODO: 关联 人员和机构
-		
+		GetUniongroupConfiguresCommand cmd1 = new GetUniongroupConfiguresCommand();
+		cmd1.setGroupId(r.getId());
+		List<UniongroupConfiguresDTO> resp = uniongroupService.getConfiguresListByGroupId(cmd1);
+		dto.setTargets(new ArrayList<UniongroupTarget>());
+		if(null != resp){
+			for (UniongroupConfiguresDTO obj : resp){
+				UniongroupTarget target = new UniongroupTarget();
+				target.setName(obj.getCurrentName());
+				target.setId(obj.getCurrentId());
+				target.setType(obj.getCurrentType());
+				dto.getTargets().add(target);
+			}
+		}
 		//打卡时间
 		List<PunchTimeRule> timeRules = punchProvider.listPunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),r.getId());
 		if(null != timeRules && timeRules.size() > 0)
@@ -6681,11 +6702,16 @@ public class PunchServiceImpl implements PunchService {
 		GetPunchTypeResponse response = new GetPunchTypeResponse();
 		Long userId = UserContext.current().getUser().getId();
 		Date punchTime = new Date();
-		response.setPunchType(getPunchType(userId,cmd.getEnterpriseId(),punchTime));
+		response.setPunchType(getPunchType(userId,cmd.getEnterpriseId(),punchTime).get(0).byteValue());
 		return response;
 	}
-	private Byte getPunchType(Long userId, Long enterpriseId, Date punchTime) {
-		// TODO Auto-generated method stub 
+	static final Long ONE_DAY_MS = 24*3600*1000L;
+	/**
+	 * 获取打卡状态: 
+	 * list: 元素0 : 上班打卡/下班打卡/不用打卡 元素1:第几次排班的打卡
+	 * */
+	private List<Integer> getPunchType(Long userId, Long enterpriseId, Date punchTime) {
+		List<Integer> result = new ArrayList<Integer>();
 		// 获取打卡规则->timerule
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, userId);
 		if (null == pr  )
@@ -6693,16 +6719,171 @@ public class PunchServiceImpl implements PunchService {
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
  				"公司没有设置打卡规则");
 		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
-		if(null == ptr)
-			return null;
+		if(null == ptr){
+			//不用打卡 返回2,0
+			result.add(Integer.valueOf(PunchType.NOT_WORKTIME.getCode()));
+			result.add(0);
+			return result;
+		}
 		Calendar punCalendar = Calendar.getInstance(); 
 		punCalendar.setTime(punchTime); 
 		//把当天的时分秒转换成Long型
 		Long punchTimeLong = punCalendar.get(Calendar.HOUR_OF_DAY)*3600*1000L; //hour
 		punchTimeLong += punCalendar.get(Calendar.MINUTE)*60*1000L; //min
 		punchTimeLong += punCalendar.get(Calendar.SECOND)*1000L;//second
-		
-		if(ptr.getp)
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchTime),
+				ClockCode.SUCESS.getCode());
+		int punchIntevalNo = 1;
+		if(ptr.getPunchTimesPerDay().equals((byte)2)){
+			//对于2次打卡:
+			//如果时间在最早上班打卡之后,在最晚下班打卡之前 没有上班打卡  则是上班打卡,如果有上班打卡没有下班打卡则是下班打卡,否则不打卡
+			if(punchTimeLong > (ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))
+					&& punchTimeLong < (ptr.getStartLateTimeLong()+ptr.getWorkTimeLong()+timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS))){
+				PunchLog onDutyPunch = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntevalNo);
+				if(null == onDutyPunch){
+					result.add((int)PunchType.ON_DUTY.getCode());
+					result.add(punchIntevalNo); 
+					return result ;
+				}
+				PunchLog offDutyPunch = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntevalNo);
+				if(null == offDutyPunch){
+					result.add((int)PunchType.OFF_DUTY.getCode());
+					result.add(punchIntevalNo); 
+					return result ;
+				}else{ 
+					result.add((int)PunchType.NOT_WORKTIME.getCode());
+					result.add(punchIntevalNo); 
+					return result ;
+				}
+			}
+		}else if(ptr.getPunchTimesPerDay().equals((byte)4)){
+			//对于4次打卡:如果在在最早上班打卡之后 下午上班之前则是第一段打卡,如果没有第一段上班打卡就是上班打卡,有上班打卡没有下班打卡就是下班打卡,否则则是第二段上班打卡
+			//第二段打卡:如果有第二段上班打卡则是第二段上班打卡,如果有第二段上班打卡没有第二段下班打卡则是下班打卡,否则不打卡
+			if(punchTimeLong > (ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))
+					&& punchTimeLong < ptr.getAfternoonArriveTimeLong()){
+				PunchLog onDutyPunch = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntevalNo);
+				if(null == onDutyPunch){
+					result.add((int)PunchType.ON_DUTY.getCode());
+					result.add(punchIntevalNo); 
+					return result ;
+				}
+				PunchLog offDutyPunch = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntevalNo);
+				if(null == offDutyPunch){
+					result.add((int)PunchType.OFF_DUTY.getCode());
+					result.add(punchIntevalNo); 
+					return result ;
+				}else{ 
+					punchIntevalNo++;
+				}
+			}else if(punchTimeLong < (ptr.getStartLateTimeLong()+ptr.getWorkTimeLong()+timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS))){
+				PunchLog onDutyPunch = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntevalNo);
+				if(null == onDutyPunch){
+					result.add((int)PunchType.ON_DUTY.getCode());
+					result.add(punchIntevalNo); 
+					return result ;
+				}
+				PunchLog offDutyPunch = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntevalNo);
+				if(null == offDutyPunch){
+					result.add((int)PunchType.OFF_DUTY.getCode());
+					result.add(punchIntevalNo); 
+					return result ;
+				}else{ 
+					result.add((int)PunchType.NOT_WORKTIME.getCode());
+					result.add(punchIntevalNo); 
+					return result ;
+				}
+			}
+		}else{
+			//对于多次打卡
+			List<PunchTimeInterval> intervals = punchProvider.listPunchTimeIntervalByTimeRuleId(ptr.getId());
+			if(null == intervals )
+				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+	 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+	 				"公司没有设置打卡时间段");
+			for(int i =0 ;i<intervals.size();i++){
+				//循环每一次打卡
+				punchIntevalNo=i+1;
+				if(i == 0){
+					//第一次: 如果时间在最早打卡后 下一次上班打卡之前为本次打卡
+					if(punchTimeLong > (intervals.get(i).getArriveTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))
+							&& punchTimeLong < intervals.get(i+1).getArriveTimeLong()){
+						PunchLog onDutyPunch = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntevalNo);
+						if(null == onDutyPunch){
+							result.add((int)PunchType.ON_DUTY.getCode());
+							result.add(punchIntevalNo); 
+							return result ;
+						}
+						PunchLog offDutyPunch = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntevalNo);
+						if(null == offDutyPunch){
+							result.add((int)PunchType.OFF_DUTY.getCode());
+							result.add(punchIntevalNo); 
+							return result ;
+						}else{ 
+							 continue;
+						}
+					}
+				}else if (i == intervals.size()-1){
+					//最后一次  如果打卡时间比本次下班时间+最晚下班时间早  则是本次打卡否则
+					if(  punchTimeLong < intervals.get(i).getLeaveTimeLong()+timeIsNull(ptr.getEndPunchTime(),ONE_DAY_MS)){
+						PunchLog onDutyPunch = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntevalNo);
+						if(null == onDutyPunch){
+							result.add((int)PunchType.ON_DUTY.getCode());
+							result.add(punchIntevalNo); 
+							return result ;
+						}
+						PunchLog offDutyPunch = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntevalNo);
+						if(null == offDutyPunch){
+							result.add((int)PunchType.OFF_DUTY.getCode());
+							result.add(punchIntevalNo); 
+							return result ;
+						}else{ 
+							result.add((int)PunchType.NOT_WORKTIME.getCode());
+							result.add(punchIntevalNo); 
+							return result ;
+						}
+					}
+				}else{
+					//中间的
+					//如果时间在下一次上班打卡之前则是本次打卡
+					//如果本次没有上班打卡,则是本次上班打卡.
+					//本次有上班打卡,没有下班打卡,则是本次下班打卡,否则是下次打卡
+					if(punchTimeLong < intervals.get(i+1).getArriveTimeLong()){
+						PunchLog onDutyPunch = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntevalNo);
+						if(null == onDutyPunch){
+							result.add((int)PunchType.ON_DUTY.getCode());
+							result.add(punchIntevalNo); 
+							return result ;
+						}
+						PunchLog offDutyPunch = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntevalNo);
+						if(null == offDutyPunch){
+							result.add((int)PunchType.OFF_DUTY.getCode());
+							result.add(punchIntevalNo); 
+							return result ;
+						}else{ 
+							 continue;
+						}
+					}
+					
+				} 
+			}
+		}
+		return result;
+	}
+	private PunchLog findPunchLog(List<PunchLog> punchLogs, Byte onDuty, Integer punchIntevalNo) {
+		if(null == punchLogs)
+			return null;
+		for(PunchLog log : punchLogs){
+			if(log.getPunchType().equals(onDuty)){
+				if(punchIntevalNo !=null && !log.getPunchIntervalNo().equals(punchIntevalNo)){
+					return null;
+				}else{
+					return log;
+				}
+			}
+		}
 		return null;
+	}
+	private Long timeIsNull(Long value, Long defaultValue) {
+		 return value==null?defaultValue:value;
 	}
 }

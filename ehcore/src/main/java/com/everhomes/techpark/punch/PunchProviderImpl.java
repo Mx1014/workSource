@@ -2635,7 +2635,7 @@ long id = sequenceProvider.getNextSequence(key);
 		Condition condition = Tables.EH_PUNCH_TIME_INTERVALS.TIME_RULE_ID.equal(timeRuleId) ; 
 		step.where(condition);
 		List<PunchTimeInterval> result = step
-				.orderBy(Tables.EH_PUNCH_TIME_INTERVALS.ID.asc()).fetch()
+				.orderBy(Tables.EH_PUNCH_TIME_INTERVALS.ARRIVE_TIME_LONG.asc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, PunchTimeInterval.class);
 				});
@@ -2687,6 +2687,43 @@ long id = sequenceProvider.getNextSequence(key);
 					return ConvertHelper.convert(r, PunchSpecialDay.class);
 				});
 		return result;
+	}
+
+	@Override
+	public PunchSpecialDay findSpecialDayByDateAndOrgId(Long punchOrganizationId,
+			java.util.Date date) {
+		try{ 
+	        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+	
+	        PunchSpecialDay  result = context.select().from(Tables.EH_PUNCH_SPECIAL_DAYS)
+	            .where(Tables.EH_PUNCH_SPECIAL_DAYS.PUNCH_ORGANIZATION_ID.eq(punchOrganizationId))
+	            .and(Tables.EH_PUNCH_SPECIAL_DAYS.RULE_DATE.eq(new java.sql.Date(date.getTime())))
+	            .fetchAny().map((r) -> {
+	                return ConvertHelper.convert(r, PunchSpecialDay.class);
+	            });
+	
+	        return result ;
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+	}
+
+	@Override
+	public PunchHoliday findHolidayByDate(Date punchDate) {
+		try{ 
+	        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+	
+	        PunchHoliday  result = context.select().from(Tables.EH_PUNCH_HOLIDAYS)
+	            .where(Tables.EH_PUNCH_HOLIDAYS.RULE_DATE.eq(new java.sql.Date(punchDate.getTime())))
+	            .fetchAny().map((r) -> {
+	                return ConvertHelper.convert(r, PunchHoliday.class);
+	            }); 
+	        return result ;
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
 	};
 	
 }
