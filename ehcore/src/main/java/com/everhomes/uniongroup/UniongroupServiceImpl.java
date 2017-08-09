@@ -43,7 +43,6 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-//        Integer namespaceId = 1000000;
 
         //已存在（即已分配薪酬组的）的部门集合
         List<Long> old_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId());
@@ -62,7 +61,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         List<UniongroupTarget> targets = cmd.getTargets();
         if (targets != null) {
             targets.stream().filter(r -> {
-                return r.getId() != null && r.getType() != null;
+                return r.getId() != null && r.getType() != null ;
             }).map(r -> {
                 //------------------------------重复项过滤规则：后更新的规则覆盖先更新的规则------------------------------
                 UniongroupConfigures old_uc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, r.getId());
@@ -464,7 +463,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, detailId);
         if (uniongroupConfigures != null)
             this.uniongroupConfigureProvider.deleteUniongroupConfigres(uniongroupConfigures);
-        UniongroupMemberDetail uniongroupMemberDetail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId);
+        UniongroupMemberDetail uniongroupMemberDetail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, UniongroupType.SALARYGROUP.getCode());
         this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
         //2.删除搜索引擎中的失效索引
         this.uniongroupSearcher.deleteById(uniongroupMemberDetail.getId());
@@ -490,7 +489,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             this.uniongroupConfigureProvider.createUniongroupConfigures(uc);
 
             //关系表
-            UniongroupMemberDetail old_detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId);
+            UniongroupMemberDetail old_detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, UniongroupType.SALARYGROUP.getCode());
             this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
             UniongroupMemberDetail uniongroupMemberDetails = new UniongroupMemberDetail();
             uniongroupMemberDetails.setGroupId(groupId);
@@ -531,7 +530,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public UniongroupMemberDetailsDTO findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId){
         //  查找用户
-        UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId,detailId);
+        UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId,detailId, UniongroupType.SALARYGROUP.getCode());
         //  转换对象
         UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(detail);
         return dto;
