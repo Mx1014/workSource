@@ -3938,21 +3938,37 @@ public class ActivityServiceImpl implements ActivityService {
             communityCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
             communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.in(communityIdList));
 
-            //查询全部时不要各个园区的Clone活动，因为有一个范围是“全部”的clone活动  add by yanjun 20170807
-			communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
-					.or(Tables.EH_ACTIVITIES.CLONE_FLAG.isNull()));
+            //范围帖子会在各个目标发一个clone帖子，同时有一个发送到全部clone帖子，还有一个发送到全部的real真身帖子  add by yanjun 20170807
+			if(communityIdList.size() == 1){
+				//单个 -- 发送到单个目标的（clone、正常），或者发送到“全部”（正常）
+				communityCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+			}else{
+				//全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）
+				communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
+						.or(Tables.EH_ACTIVITIES.CLONE_FLAG.isNull()));
+				communityCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+			}
+
         }
         Condition orgCondition = null;
         if(organizationId != null) {
             orgCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
             orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(organizationId));
-			//查询全部时不要各个公司的Clone活动，因为有一个范围是“全部”的clone活动  add by yanjun 20170807
-			orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
-					.or(Tables.EH_ACTIVITIES.CLONE_FLAG.isNull()));
+
+			//范围帖子会在各个目标发一个clone帖子，同时有一个发送到全部clone帖子，还有一个发送到全部的real真身帖子  add by yanjun 20170807
+			if(communityIdList.size() == 1){
+				//单个 -- 发送到单个目标的（clone、正常），或者发送到“全部”（正常）
+				orgCondition = orgCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+			}else{
+				//全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）
+				orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
+						.or(Tables.EH_ACTIVITIES.CLONE_FLAG.isNull()));
+				orgCondition = orgCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+			}
+
         }
 
-		//增加获取发送到全部的活动，包括一般活动和clone活动  add by yanjun 20170807
-        Condition visibleCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+        Condition visibleCondition = communityCondition;
         if(visibleCondition == null) {
             visibleCondition = orgCondition;
         } else {
