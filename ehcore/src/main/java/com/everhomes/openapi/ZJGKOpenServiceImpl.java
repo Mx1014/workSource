@@ -518,11 +518,12 @@ public class ZJGKOpenServiceImpl {
     private void syncAllBuildings(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
         dbProvider.execute(s->{
             //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
-            List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(namespaceId, appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
+            List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(namespaceId, NamespaceBuildingType.SHENZHOU.getCode());
             List<ZJBuilding> theirBuildingList = mergeBackupList(backupList, ZJBuilding.class);
-            syncAllBuildings(appNamespaceMapping, myBuildingList, theirBuildingList);
+            syncAllBuildings(namespaceId, myBuildingList, theirBuildingList);
             return true;
         });
+
     }
 
     private void syncAllBuildings(Integer namespaceId, List<Building> myBuildingList, List<ZJBuilding> theirBuildingList) {
@@ -538,14 +539,14 @@ public class ZJGKOpenServiceImpl {
         // 如果他们有，我们没有，插入
         // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
         if (theirBuildingList != null) {
-            for (CustomerBuilding customerBuilding : theirBuildingList) {
+            for (ZJBuilding customerBuilding : theirBuildingList) {
                 if ((customerBuilding.getDealed() != null && customerBuilding.getDealed().booleanValue() == true) || StringUtils.isBlank(customerBuilding.getBuildingName())) {
                     continue;
                 }
                 // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
+                Building building = buildingProvider.findBuildingByName(namespaceId, customerBuilding.getCommunityId(), customerBuilding.getBuildingName());
                 if (building == null) {
-                    insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+                    insertBuilding(namespaceId, customerBuilding);
                 }else {
                     updateBuilding(building, customerBuilding);
                 }
@@ -553,13 +554,13 @@ public class ZJGKOpenServiceImpl {
         }
     }
 
-    private void insertBuilding(Integer namespaceId, Long communityId, ZJBuilding customerBuilding) {
+    private void insertBuilding(Integer namespaceId, ZJBuilding customerBuilding) {
         if (StringUtils.isBlank(customerBuilding.getBuildingName())) {
             return;
         }
         Building building = new Building();
 
-        building.setCommunityId(communityId);
+        building.setCommunityId(customerBuilding.getCommunityId());
         building.setName(customerBuilding.getBuildingName());
         building.setAliasName(customerBuilding.getBuildingName());
         building.setStatus(CommonStatus.ACTIVE.getCode());

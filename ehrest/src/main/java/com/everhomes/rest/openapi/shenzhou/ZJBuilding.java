@@ -6,6 +6,7 @@ package com.everhomes.rest.openapi.shenzhou;
 public class ZJBuilding {
     private String buildingName;
     private String communityIdentifier;
+    private Long communityId;
     private String buildingIdentifier;
     private String contact;
     private String address;
@@ -18,6 +19,14 @@ public class ZJBuilding {
     private Double sharedArea;
     private Double chargeArea;
     private Boolean dealed;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Boolean getDealed() {
         return dealed;
