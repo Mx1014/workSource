@@ -4143,9 +4143,9 @@ public class PunchServiceImpl implements PunchService {
 	public UniongroupMemberDetail findUserMemberDetail(Long userId,Long organizationId){
 		List<OrganizationMember> orgMembers = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, organizationId);
 		if(null == orgMembers || orgMembers.size() == 0 )
-			return null;
-		//TODO : 通过detail id 拿薪酬组
-		UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(orgMembers.get(0).getNamespaceId(),orgMembers.get(0).getDetailId());
+			return null; 
+		UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(orgMembers.get(0).getNamespaceId(),
+				orgMembers.get(0).getDetailId(), UniongroupType.PUNCHGROUP.getCode());
 		return detail;
 	}
 	/**找到用户的打卡总规则*/ 
@@ -6623,7 +6623,7 @@ public class PunchServiceImpl implements PunchService {
 			intervalDTO.setArriveTime(r.getStartEarlyTimeLong());
 			intervalDTO.setLeaveTime(r.getStartEarlyTimeLong() +r.getWorkTimeLong());
 			dto.getPunchTimeIntervals().add(intervalDTO);
-		}else if(r.getPunchTimesPerDay().equals((byte)2)){
+		}else if(r.getPunchTimesPerDay().equals((byte)4)){
 			PunchTimeIntervalDTO intervalDTO = new PunchTimeIntervalDTO();
 			intervalDTO.setArriveTime(r.getStartEarlyTimeLong());
 			intervalDTO.setLeaveTime(r.getNoonLeaveTimeLong());
@@ -6688,8 +6688,21 @@ public class PunchServiceImpl implements PunchService {
 		// TODO Auto-generated method stub 
 		// 获取打卡规则->timerule
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, userId);
-		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
-		// 排班制/固定班次 
+		if (null == pr  )
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+ 				"公司没有设置打卡规则");
+		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
+		if(null == ptr)
+			return null;
+		Calendar punCalendar = Calendar.getInstance(); 
+		punCalendar.setTime(punchTime); 
+		//把当天的时分秒转换成Long型
+		Long punchTimeLong = punCalendar.get(Calendar.HOUR_OF_DAY)*3600*1000L; //hour
+		punchTimeLong += punCalendar.get(Calendar.MINUTE)*60*1000L; //min
+		punchTimeLong += punCalendar.get(Calendar.SECOND)*1000L;//second
+		
+		if(ptr.getp)
 		return null;
 	}
 }
