@@ -12,6 +12,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.ebei.EbeiJsonEntity;
@@ -24,6 +25,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.ShenzhouJsonEntity;
+import com.everhomes.rest.openapi.shenzhou.ZJCommunity;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
 import com.everhomes.util.DateHelper;
@@ -44,6 +46,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +96,9 @@ public class ZJGKOpenServiceImpl {
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private DbProvider dbProvider;
 
 
     @Scheduled(cron="0 0 1 * * ?")
@@ -347,6 +353,73 @@ public class ZJGKOpenServiceImpl {
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                         "error data type");
         }
+    }
+
+    private <T> List<T> mergeBackupList(List<ZjSyncdataBackup> backupList, Class<T> targetClz) {
+        List<T> resultList = new ArrayList<>();
+        for (ZjSyncdataBackup syncdataBackup : backupList) {
+            if (StringUtils.isNotBlank(syncdataBackup.getData())) {
+                List<T> list = JSONObject.parseArray(syncdataBackup.getData(), targetClz);
+                if (list != null) {
+                    resultList.addAll(list);
+                }
+            }
+        }
+        return resultList;
+    }
+
+    private void syncAllCommunities(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
+        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+        List<Community> myCommunityList = communityProvider.listCommunityByNamespaceType(namespaceId, NamespaceAddressType.SHENZHOU.getCode());
+        List<ZJCommunity> theirCommunityList = mergeBackupList(backupList, ZJCommunity.class);
+        dbProvider.execute(s->{
+            syncAllCommunities(namespaceId, myCommunityList, theirCommunityList);
+            return true;
+        });
+    }
+
+    private void syncAllCommunities(Integer namespaceId, List<Community> myCommunityList, List<ZJCommunity> theirCommunityList) {
+        Long defaultForumId = ;
+        Long feedbackForumId = ;
+        // 如果两边都有，更新；如果我们有，他们没有，删除；
+        for (Community myCommunity : myCommunityList) {
+            ZJCommunity zjCommunity = findFromTheirCommunityList(myCommunity, theirCommunityList);
+            if (zjCommunity != null) {
+                updateCommunity(myCommunity, zjCommunity);
+            }else {
+                deleteCommunity(myCommunity);
+            }
+        }
+        // 如果他们有，我们没有，插入
+        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+        if (theirCommunityList != null) {
+            for (ZJCommunity customerApartment : theirCommunityList) {
+                if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+                    continue;
+                }
+                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+                Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+                if (address == null) {
+                    insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+                }else {
+                    updateAddress(address, customerApartment);
+                }
+            }
+        }
+
+
+    }
+
+    private ZJCommunity findFromTheirCommunityList(Community myCommunity, List<ZJCommunity> theirCommunityList) {
+        if (theirCommunityList != null) {
+            for (ZJCommunity zjCommunity : theirCommunityList) {
+                if (myCommunity.getCommunityIdentifier().equals(zjCommunity.getCommunityIdentifier())) {
+                    zjCommunity.setDealed(true);
+                    return zjCommunity;
+                }
+            }
+        }
+        return null;
     }
 
     private void syncAllApartments(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
