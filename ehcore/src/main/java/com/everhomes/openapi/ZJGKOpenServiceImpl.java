@@ -29,6 +29,7 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.ShenzhouJsonEntity;
+import com.everhomes.rest.openapi.shenzhou.ZJBuilding;
 import com.everhomes.rest.openapi.shenzhou.ZJCommunity;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.search.CommunitySearcher;
@@ -345,8 +346,8 @@ public class ZJGKOpenServiceImpl {
             case COMMUNITY:
                 syncAllCommunities(namespaceId, backupList);
                 break;
-//            case BUILDING:
-//			    syncAllBuildings(namespaceId, backupList);
+            case BUILDING:
+			    syncAllBuildings(namespaceId, backupList);
 //                break;
 //            case APARTMENT:
 //                syncAllApartments(namespaceId, backupList);
@@ -512,7 +513,122 @@ public class ZJGKOpenServiceImpl {
         String geohash= GeoHashUtils.encode(zjcommunity.getLatitude(), zjcommunity.getLongitude());
         geoPoint.setGeohash(geohash);
         communityProvider.updateCommunityGeoPoint(geoPoint);
+    }
 
+    private void syncAllBuildings(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
+        dbProvider.execute(s->{
+            //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+            List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(namespaceId, appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
+            List<ZJBuilding> theirBuildingList = mergeBackupList(backupList, ZJBuilding.class);
+            syncAllBuildings(appNamespaceMapping, myBuildingList, theirBuildingList);
+            return true;
+        });
+    }
+
+    private void syncAllBuildings(Integer namespaceId, List<Building> myBuildingList, List<ZJBuilding> theirBuildingList) {
+        // 如果两边都有，更新；如果我们有，他们没有，删除；
+        for (Building myBuilding : myBuildingList) {
+            ZJBuilding customerBuilding = findFromTheirBuildingList(myBuilding, theirBuildingList);
+            if (customerBuilding != null) {
+                updateBuilding(myBuilding, customerBuilding);
+            }else {
+                deleteBuilding(myBuilding);
+            }
+        }
+        // 如果他们有，我们没有，插入
+        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+        if (theirBuildingList != null) {
+            for (CustomerBuilding customerBuilding : theirBuildingList) {
+                if ((customerBuilding.getDealed() != null && customerBuilding.getDealed().booleanValue() == true) || StringUtils.isBlank(customerBuilding.getBuildingName())) {
+                    continue;
+                }
+                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+                Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
+                if (building == null) {
+                    insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+                }else {
+                    updateBuilding(building, customerBuilding);
+                }
+            }
+        }
+    }
+
+    private void insertBuilding(Integer namespaceId, Long communityId, ZJBuilding customerBuilding) {
+        if (StringUtils.isBlank(customerBuilding.getBuildingName())) {
+            return;
+        }
+        Building building = new Building();
+
+        building.setCommunityId(communityId);
+        building.setName(customerBuilding.getBuildingName());
+        building.setAliasName(customerBuilding.getBuildingName());
+        building.setStatus(CommonStatus.ACTIVE.getCode());
+        building.setCreatorUid(1L);
+        building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        building.setOperatorUid(1L);
+        building.setOperateTime(building.getCreateTime());
+        building.setNamespaceId(namespaceId);
+        building.setContact(customerBuilding.getContact());
+        building.setAddress(customerBuilding.getAddress());
+        building.setConstructionCompany(customerBuilding.getConstructionCompany());
+        building.setDescription(customerBuilding.getDescription());
+        building.setAreaSize(customerBuilding.getAreaSize());
+        building.setSharedArea(customerBuilding.getSharedArea());
+        building.setChargeArea(customerBuilding.getChargeArea());
+        building.setBuildArea(customerBuilding.getBuildArea());
+        building.setRentArea(customerBuilding.getRentArea());
+        if(customerBuilding.getFloorCount() != null) {
+            building.setFloorCount(String.valueOf(customerBuilding.getFloorCount()));
+        }
+        building.setNamespaceBuildingType(NamespaceBuildingType.SHENZHOU.getCode());
+        building.setNamespaceBuildingToken(customerBuilding.getBuildingIdentifier());
+        buildingProvider.createBuilding(building);
+
+    }
+
+    private void deleteBuilding(Building building) {
+        if (CommonStatus.fromCode(building.getStatus()) != CommonStatus.INACTIVE) {
+            building.setOperatorUid(1L);
+            building.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            building.setStatus(CommonStatus.INACTIVE.getCode());
+            buildingProvider.updateBuilding(building);
+        }
+    }
+
+    private void updateBuilding(Building building, ZJBuilding customerBuilding) {
+        building.setName(customerBuilding.getBuildingName());
+        building.setAliasName(customerBuilding.getBuildingName());
+        building.setContact(customerBuilding.getContact());
+        building.setAddress(customerBuilding.getAddress());
+        building.setConstructionCompany(customerBuilding.getConstructionCompany());
+        building.setDescription(customerBuilding.getDescription());
+        building.setAreaSize(customerBuilding.getAreaSize());
+        building.setSharedArea(customerBuilding.getSharedArea());
+        building.setChargeArea(customerBuilding.getChargeArea());
+        building.setBuildArea(customerBuilding.getBuildArea());
+        building.setRentArea(customerBuilding.getRentArea());
+        if(customerBuilding.getFloorCount() != null) {
+            building.setFloorCount(String.valueOf(customerBuilding.getFloorCount()));
+        }
+
+        building.setOperatorUid(1L);
+        building.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        building.setNamespaceBuildingToken(customerBuilding.getBuildingIdentifier());
+        building.setStatus(CommonStatus.ACTIVE.getCode());
+        buildingProvider.updateBuilding(building);
+
+    }
+
+    private ZJBuilding findFromTheirBuildingList(Building myBuilding, List<ZJBuilding> theirBuildingList) {
+        if (theirBuildingList != null) {
+            for (ZJBuilding customerBuilding : theirBuildingList) {
+                if (myBuilding.getName().equals(customerBuilding.getBuildingName())) {
+                    customerBuilding.setDealed(true);
+                    return customerBuilding;
+                }
+            }
+        }
+        return null;
     }
 
 //    private void syncAllApartments(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
