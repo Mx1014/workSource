@@ -3941,11 +3941,11 @@ public class ActivityServiceImpl implements ActivityService {
             //范围帖子会在各个目标发一个clone帖子，同时有一个发送到全部clone帖子，还有一个发送到全部的real真身帖子  add by yanjun 20170807
 			if(communityIdList.size() == 1){
 				//单个 -- 发送到单个目标的（clone、正常），或者发送到“全部”（正常）
-				communityCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+				communityCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+						.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())));
 			}else{
 				//全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）
-				communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
-						.or(Tables.EH_ACTIVITIES.CLONE_FLAG.isNull()));
+				communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 				communityCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
 			}
 
@@ -3958,11 +3958,11 @@ public class ActivityServiceImpl implements ActivityService {
 			//范围帖子会在各个目标发一个clone帖子，同时有一个发送到全部clone帖子，还有一个发送到全部的real真身帖子  add by yanjun 20170807
 			if(communityIdList.size() == 1){
 				//单个 -- 发送到单个目标的（clone、正常），或者发送到“全部”（正常）
-				orgCondition = orgCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+				orgCondition = orgCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+						.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())));
 			}else{
 				//全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）
-				orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
-						.or(Tables.EH_ACTIVITIES.CLONE_FLAG.isNull()));
+				orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 				orgCondition = orgCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
 			}
 
