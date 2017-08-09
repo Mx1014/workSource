@@ -73,9 +73,7 @@ import com.everhomes.rest.address.ClaimedAddressInfo;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.ShopDTO;
-import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.community.GetCommunityAuthPopupConfigCommand;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -2720,14 +2718,6 @@ public class UserServiceImpl implements UserService {
 				sceneList.add(communityScene);
 			}
 		}
-
-		// 用户认证里的弹窗配置   add by xq.tian 2017/08/08
-        for (SceneDTO sceneDTO : sceneList) {
-            GetCommunityAuthPopupConfigCommand cmd1 = new GetCommunityAuthPopupConfigCommand();
-            cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-            CommunityAuthPopupConfigDTO communityAuthPopupConfig = communityService.getCommunityAuthPopupConfig(cmd1);
-            sceneDTO.setAuthPopupConfig(communityAuthPopupConfig.getStatus());
-        }
 
 		return sceneList;
 	}
