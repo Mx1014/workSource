@@ -554,6 +554,8 @@ public class ActivityServiceImpl implements ActivityService {
 			 return;
 		 }
 
+		 LOGGER.info("UserContext current getVersion , version = {}", version);
+
 		 if(version == null){
 			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
