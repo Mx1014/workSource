@@ -227,6 +227,8 @@ public class SalaryServiceImpl implements SalaryService {
                 return r;
             }).collect(Collectors.toList()));
         }
+
+        recaculateGroupPeriod(salaryOrgId, true);
         return response;
     }
 
@@ -811,7 +813,7 @@ public class SalaryServiceImpl implements SalaryService {
         //计算之前六个月的period
         Organization salaryOrg = organizationProvider.findOrganizationById(salaryGroupId);
         Calendar periodCalendar = Calendar.getInstance();
-        for(int i = 0;i<=1;i++){
+        for(int i = 0;i<=5;i++){
             String period = monthSF.get().format(periodCalendar.getTime());
             //只要未发放就重新刷
             calculateGroupPeroid(salaryOrg, period,flag);
