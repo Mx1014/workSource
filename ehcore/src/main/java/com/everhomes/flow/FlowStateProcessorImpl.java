@@ -499,6 +499,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case NO_STEP:
 			break;
 		case APPROVE_STEP:
+			case END_STEP:
 			ctx.getFlowCase().setStatus(FlowCaseStatus.FINISHED.getCode());
 			break;
 		case EVALUATE_STEP:
