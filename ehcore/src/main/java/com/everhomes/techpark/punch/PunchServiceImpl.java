@@ -572,7 +572,9 @@ public class PunchServiceImpl implements PunchService {
 		return ExceptionStatus.EXCEPTION.getCode();
 	}
 
-
+	/**
+	 * 刷新取某人某日的打卡日状态 
+	 * */
 	private PunchDayLog refreshPunchDayLog(Long userId, Long companyId1,
 			Calendar logDay) throws ParseException {
 		Long companyId = getTopEnterpriseId(companyId1);
@@ -585,7 +587,8 @@ public class PunchServiceImpl implements PunchService {
 		if (null == pdl) {
 			return null;
 		}
-		
+		newPunchDayLog.setStatusList(pdl.getStatusList());
+		newPunchDayLog.setPunchCount(pdl.getPunchCount());
 		newPunchDayLog.setUserId(userId);
 		newPunchDayLog.setEnterpriseId(companyId);
 		newPunchDayLog.setCreatorUid(userId);
@@ -816,6 +819,7 @@ public class PunchServiceImpl implements PunchService {
 				companyId, dateSF.get().format(logDay.getTime()),
 				ClockCode.SUCESS.getCode());
 		if(null != punchLogs){
+			pdl.setPunchCount(punchLogs.size());
 			for (PunchLog log : punchLogs){
 				pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
 			}
@@ -1309,9 +1313,7 @@ public class PunchServiceImpl implements PunchService {
 		// new Date()为获取当前系统时间为打卡时间
 		PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
 		punchLog.setUserId(userId);
-		
 		punchLog.setPunchTime(Timestamp.valueOf(punchTime));
-
 		Calendar punCalendar = Calendar.getInstance();
 		try {
 			punCalendar.setTime(datetimeSF.get().parse(punchTime));
@@ -1323,8 +1325,6 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
  				"公司没有设置打卡规则");
-		
-
 		//把当天的时分秒转换成Long型
 		Long punchTimeLong = punCalendar.get(Calendar.HOUR_OF_DAY)*3600*1000L; //hour
 		punchTimeLong += punCalendar.get(Calendar.MINUTE)*60*1000L; //min
@@ -6676,9 +6676,19 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public GetPunchTypeResponse getPunchType(GetPunchTypeCommand cmd) {
-		// TODO Auto-generated method stub
+		// 
+		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
+		GetPunchTypeResponse response = new GetPunchTypeResponse();
+		Long userId = UserContext.current().getUser().getId();
+		Date punchTime = new Date();
+		response.setPunchType(getPunchType(userId,cmd.getEnterpriseId(),punchTime));
+		return response;
+	}
+	private Byte getPunchType(Long userId, Long enterpriseId, Date punchTime) {
+		// TODO Auto-generated method stub 
 		// 获取打卡规则->timerule
-		
+		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, userId);
+		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
 		// 排班制/固定班次 
 		return null;
 	}

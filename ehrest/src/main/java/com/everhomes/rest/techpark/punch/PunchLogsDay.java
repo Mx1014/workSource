@@ -75,7 +75,9 @@ public class PunchLogsDay{
     private Long afternoonArriveTime;
     //added by wh 增加状态说明文字
     private String statuString;
-
+    //added by wh 增加3.0 的字段
+    private String statusList;
+    private Integer punchCount;
 	public Byte getMorningPunchStatus() {
 		return morningPunchStatus;
 	}
@@ -429,6 +431,30 @@ public class PunchLogsDay{
 
 	public void setStatuString(String statuString) {
 		this.statuString = statuString;
+	}
+
+
+
+	public String getStatusList() {
+		return statusList;
+	}
+
+
+
+	public void setStatusList(String statusList) {
+		this.statusList = statusList;
+	}
+
+
+
+	public Integer getPunchCount() {
+		return punchCount;
+	}
+
+
+
+	public void setPunchCount(Integer punchCount) {
+		this.punchCount = punchCount;
 	}
 
 
