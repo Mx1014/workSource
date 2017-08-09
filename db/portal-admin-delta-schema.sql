@@ -21,7 +21,7 @@ CREATE TABLE `eh_service_module_apps` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `name` varchar(64) DEFAULT NULL,
-  `module_id` bigint(20) NOT NULL,
+  `module_id` bigint(20),
   `instance_config` text COMMENT '应用入口需要的配置参数',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
   `action_type` tinyint(4) DEFAULT NULL,

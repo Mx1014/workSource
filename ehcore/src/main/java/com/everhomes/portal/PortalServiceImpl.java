@@ -1694,6 +1694,12 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		List<LaunchPadLayout> padLayouts = launchPadProvider.getLaunchPadLayouts(name, namespaceId);
 		PortalLayout layout = null;
+		if(padLayouts.size() == 0){
+			LOGGER.error("Unable to find the lunch pad layout. namespaceId = {}, location = {}, layoutName = {}", namespaceId, location, name);
+			layout = new PortalLayout();
+			layout.setId(0L);
+		}
+
 		for (LaunchPadLayout padLayout: padLayouts) {
 			layout = portalLayoutProvider.getPortalLayout(padLayout.getNamespaceId(), name);
 			if(null == layout){
@@ -1873,7 +1879,7 @@ public class PortalServiceImpl implements PortalService {
 					item.setActionType(PortalItemActionType.LAYOUT.getCode());
 					if(!StringUtils.isEmpty(padItem.getActionData())){
 						NavigationActionData data = (NavigationActionData)StringHelper.fromJsonString(padItem.getActionData(), NavigationActionData.class);
-						PortalLayout layout = syncLayout(item.getNamespaceId(), item.getItemLocation(), data.getLayoutName());
+						PortalLayout layout = syncLayout(item.getNamespaceId(), data.getItemLocation(), data.getLayoutName());
 						LayoutActionData actionData = new LayoutActionData();
 						actionData.setLayoutId(layout.getId());
 						item.setActionData(StringHelper.toJsonString(actionData));
