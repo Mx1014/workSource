@@ -862,6 +862,7 @@ public class GroupServiceImpl implements GroupService {
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(orgId);
         command.setPageSize(1);
+        command.setIsSignedup((byte)1);
         ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
         if(res != null && res.getTotalCount() != null){
             return res.getTotalCount().longValue();
