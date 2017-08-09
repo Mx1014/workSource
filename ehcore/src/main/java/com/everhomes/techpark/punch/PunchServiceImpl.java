@@ -35,6 +35,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.tools.ant.taskdefs.Java;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -203,6 +204,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.uniongroup.UniongroupConfigureProvider;
+import com.everhomes.uniongroup.UniongroupMemberDetail;
 import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -615,7 +617,6 @@ public class PunchServiceImpl implements PunchService {
  
 	private Byte getDeviceChangeFlag(Long userId, java.sql.Date punchDate,
 			Long companyId) {
-		// TODO Auto-generated method stub
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(punchDate);
 		cal.add(Calendar.DAY_OF_MONTH, -1);
@@ -700,7 +701,7 @@ public class PunchServiceImpl implements PunchService {
 		pdl.setPunchStatus(punchDayLog.getStatus());
 		//通过打卡记录计算状态
 		// 如果是非工作日和当天，则异常为normal
-		if (!isWorkDay(logDay.getTime(),pr)
+		if (!isWorkDay(logDay.getTime(),pr,userId)
 				|| dateSF.get().format(now).equals(dateSF.get().format(logDay.getTime()))) {
 			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		} else {
@@ -826,7 +827,7 @@ public class PunchServiceImpl implements PunchService {
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"have no punch rule");
 
-		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(),logDay.getTime());
+		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr,logDay.getTime(),userId);
 		//没有规则就是没有排班,就是非工作日
 		if (null == punchTimeRule){
 			pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
@@ -882,7 +883,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 
 		//非工作日按照两次计算工作时长
-		if(!isWorkDay(logDay.getTime(),pr) || PunchTimesPerDay.TWICE.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
+		if(!isWorkDay(logDay.getTime(),pr,userId) || PunchTimesPerDay.TWICE.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
 			if (punchLogs.size() == 1) {
 				// 如果只有一次打卡
 				punchDayLog.setArriveTime(getDAOTime(punchLogs.get(0).getPunchTime().getTime()));
@@ -997,7 +998,7 @@ public class PunchServiceImpl implements PunchService {
 			
 			}
 			// 如果是当日，则设置打卡考勤为正常并返回
-			if (!isWorkDay(logDay.getTime(),pr)){
+			if (!isWorkDay(logDay.getTime(),pr,userId)){
 				pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 				pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
 				pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
@@ -1152,7 +1153,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 			punchDayLog.setWorkTime(convertTime(realWorkTime));
 			// 如果是当日，则设置打卡考勤为正常并返回
-			if (!isWorkDay(logDay.getTime(),pr)){
+			if (!isWorkDay(logDay.getTime(),pr,userId)){
 				pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
 				pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
@@ -1330,12 +1331,12 @@ public class PunchServiceImpl implements PunchService {
 		punchTimeLong += punCalendar.get(Calendar.SECOND)*1000L;//second
 		
 //				punchProvider.getPunchTimeRuleById(pr.getTimeRuleId());
-		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr.getId(),punCalendar.getTime());
+		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr,punCalendar.getTime(),userId);
 		 
 		Calendar yesterday = Calendar.getInstance(); 
 		yesterday.setTime(punCalendar.getTime());
 		yesterday.add(Calendar.DATE, -1);
-		PunchTimeRule yesterdayPtr = getPunchTimeRuleByRuleIdAndDate(pr.getId(),yesterday.getTime());
+		PunchTimeRule yesterdayPtr = getPunchTimeRuleByRuleIdAndDate(pr,yesterday.getTime(),userId);
 		//默认分界点是次日5点,如果timerule有设置就用设置的
 		Long splitTime = 86400000+5*3600*1000L;
 		Long yesterdaySplitTime = 86400000+ 5*3600*1000L;
@@ -1397,8 +1398,9 @@ public class PunchServiceImpl implements PunchService {
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
  				"公司没有设置打卡规则");
 		//是否有wifi打卡,如果是判断wifi是否符合
-		
-		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
+
+		List<PunchGeopoint> punchGeopoints = punchProvider.listPunchGeopointsByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
+		List<PunchWifi> wifis = punchProvider.listPunchWifsByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
 		if(null != wifis && null != cmd.getWifiMac()){
 			for(PunchWifi wifi : wifis){
 				if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
@@ -1407,9 +1409,7 @@ public class PunchServiceImpl implements PunchService {
 			
 		}
 		
-		//参数有地址规则看地址范围是否正确,不正确则报错
-		List<PunchGeopoint> punchGeopoints = punchProvider
-				.listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
+		//参数有地址规则看地址范围是否正确,不正确则报错 
 		if(null == punchGeopoints || punchGeopoints.size() == 0){
 			//wifi不符合看是否有地址规则,没有地址规则直接报错
 			if(null == cmd.getWifiMac())
@@ -1692,7 +1692,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public boolean isWorkDay(Date date1,PunchRule punchRule) {
+	public boolean isWorkDay(Date date1,PunchRule punchRule,Long userId) {
 //		if (date1 == null)
 //			return false;
 ////		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
@@ -1736,7 +1736,7 @@ public class PunchServiceImpl implements PunchService {
 //        if(workDays.contains(weekDay))
 //        	return true;
 
-		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(punchRule.getId(),date1);
+		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(punchRule ,date1,userId);
 		if(null != punchTimeRule)
 			return true;
         return false;
@@ -1762,8 +1762,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 	
 	@Override
-	public boolean isWorkTime(Time time, PunchRule punchRule,Date date) {
-		return isWorkTime(time, getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), date)) ;
+	public boolean isWorkTime(Time time, PunchRule punchRule,Date date,Long userId) {
+		return isWorkTime(time, getPunchTimeRuleByRuleIdAndDate(punchRule, date,userId)) ;
 	} 
 	
 	@Override
@@ -1772,10 +1772,10 @@ public class PunchServiceImpl implements PunchService {
 	}
 	
 	@Override
-	public boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule) {
+	public boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule,Long userId) {
 		return isSameDay(fromTime, endTime)
-				&& timeSF.get().format(fromTime).equals(timeSF.get().format(getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), fromTime).getNoonLeaveTime()))
-				&& timeSF.get().format(endTime).equals(timeSF.get().format(getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), endTime).getAfternoonArriveTime()));
+				&& timeSF.get().format(fromTime).equals(timeSF.get().format(getPunchTimeRuleByRuleIdAndDate(punchRule, fromTime,userId).getNoonLeaveTime()))
+				&& timeSF.get().format(endTime).equals(timeSF.get().format(getPunchTimeRuleByRuleIdAndDate(punchRule, endTime,userId).getAfternoonArriveTime()));
 	
 	}
 	
@@ -2303,11 +2303,73 @@ public class PunchServiceImpl implements PunchService {
 		return pdl;
 	}
 	@Override
-	public PunchTimeRule getPunchTimeRuleByRuleIdAndDate(Long ruleId,Date date){
-		PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(ruleId, date);
-		if(null == punchScheduling || punchScheduling.getPunchRuleId() == null )
-			return null ;
-		return this.punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
+	public PunchTimeRule getPunchTimeRuleByRuleIdAndDate(PunchRule pr,Date date,Long userId){
+		//分为排班制和固定班
+		if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
+			//固定班次
+			//看是否为特殊日期
+			PunchSpecialDay specialDay = punchProvider.findSpecialDayByDateAndOrgId(pr.getPunchOrganizationId(),date);
+			if(null != specialDay){
+				if(specialDay.getStatus().equals(NormalFlag.YES.getCode())){
+					return null;
+				}else {
+					return punchProvider.getPunchTimeRuleById(specialDay.getTimeRuleId());
+				}
+			}
+			//如果为节假日则返回null  如果是节假调休日,用调休日期代替
+			java.sql.Date punchDate = new java.sql.Date(date.getTime());
+			if(pr.getChinaHolidayFlag().equals(NormalFlag.YES.getCode())){
+				PunchHoliday holiday = punchProvider.findHolidayByDate(punchDate);
+				if(null != holiday){
+					if(holiday.getStatus().equals(NormalFlag.YES.getCode())){
+						return null;
+					}else {
+						punchDate = holiday.getExchangeFromDate();
+					}
+				}
+					
+			}
+			//看是循环timerule找当天的timeRule
+			List<PunchTimeRule> timeRules = punchProvider.listPunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
+			if(null != timeRules)
+				for(PunchTimeRule timeRule :  timeRules){
+					Integer openWeek = Integer.parseInt(timeRule.getOpenWeekday(), 2);
+					Integer weekDayInt = getWeekDayInt(punchDate);
+					if(weekDayInt.equals(openWeek&weekDayInt)){
+						return timeRule;
+					}
+				}
+			return null;	
+		}else{
+			//查询当天那个人的班次
+			PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(pr.getPunchOrganizationId(),userId,date);
+			if(null == punchScheduling || punchScheduling.getPunchRuleId() == null )
+				return null ;
+			return this.punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
+		}
+	}
+	private Integer getWeekDayInt(java.sql.Date punchDate) {
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(punchDate);
+		int CalendarWeekDay = calendar.get(Calendar.DAY_OF_WEEK);
+		switch(CalendarWeekDay){
+		case Calendar.SUNDAY:
+			return PunchConstants.SUNDAY_INT;
+		case Calendar.MONDAY:
+			return PunchConstants.MONDAY_INT;
+		case Calendar.TUESDAY:
+			return PunchConstants.TUESDAY_INT;
+		case Calendar.WEDNESDAY:
+			return PunchConstants.WEDNESDAY_INT;
+		case Calendar.THURSDAY:
+			return PunchConstants.THURSDAY_INT;
+		case Calendar.FRIDAY:
+			return PunchConstants.FRIDAY_INT;
+		case Calendar.SATURDAY:
+			return PunchConstants.SATURDAY_INT;
+		}
+		return 0;
 	}
 	private void addPunchStatistics(OrganizationMemberDTO member ,Long orgId,Calendar startCalendar,Calendar endCalendar){
 		
@@ -4056,16 +4118,36 @@ public class PunchServiceImpl implements PunchService {
 				return getPunchRule(ownerId, parent,loopMax);
 		}
 	}
-	/**找到用户的打卡总规则*/
+	/**找到用户的打卡规则*/
 	@Override
 	public PunchRule getPunchRule(String ownerType, Long ownerId,Long userId){
-		PunchRuleOwnerMap map = getPunchRuleMap(  ownerType,   ownerId,  userId);
-		if(null == map || map.getPunchRuleId() == null)
+		Organization punchOrg = findPunchGroupByUser(userId, ownerId);
+		if (null == punchOrg)
 			return null;
-		return this.punchProvider.getPunchRuleById(map.getPunchRuleId());
+		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(punchOrg.getId());
+		return pr;
 		
 	}
 
+	/**
+	 * 找到user 的考勤组
+	 * */
+	public Organization findPunchGroupByUser(Long userId,Long organizationId){
+		UniongroupMemberDetail detail = findUserMemberDetail(userId, organizationId);
+		if(null == detail)
+			return null;
+		Organization organization = organizationProvider.findOrganizationById(detail.getGroupId());
+		return organization; 
+	}
+	
+	public UniongroupMemberDetail findUserMemberDetail(Long userId,Long organizationId){
+		List<OrganizationMember> orgMembers = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, organizationId);
+		if(null == orgMembers || orgMembers.size() == 0 )
+			return null;
+		//TODO : 通过detail id 拿薪酬组
+		UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(orgMembers.get(0).getNamespaceId(),orgMembers.get(0).getDetailId());
+		return detail;
+	}
 	/**找到用户的打卡总规则*/ 
 	public PunchRuleOwnerMap getPunchRuleMap(String ownerType, Long ownerId,Long userId){
 		//如果有个人规则就返回个人规则
@@ -6255,6 +6337,7 @@ public class PunchServiceImpl implements PunchService {
                 ptr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
                 ptr.setOwnerId(punchOrgId);  
         		ptr.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
+        		ptr.setPunchRuleId(pr.getId());
         		ptrs.add(ptr);
         		if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
         			//固定班次 默认第二天4点
@@ -6594,6 +6677,9 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public GetPunchTypeResponse getPunchType(GetPunchTypeCommand cmd) {
 		// TODO Auto-generated method stub
+		// 获取打卡规则->timerule
+		
+		// 排班制/固定班次 
 		return null;
 	}
 }

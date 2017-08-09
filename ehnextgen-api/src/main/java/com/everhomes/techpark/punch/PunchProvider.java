@@ -320,6 +320,11 @@ public interface PunchProvider {
 	public List<PunchWifi> listPunchWifsByOwner(String ownerType, Long ownerId);
 
 	public List<PunchSpecialDay> listPunchSpecailDaysByOrgId(Long punchOrganizationId);
+
+	public PunchSpecialDay findSpecialDayByDateAndOrgId(Long punchOrganizationId,
+			java.util.Date date);
+
+	public PunchHoliday findHolidayByDate(java.sql.Date punchDate);
  
  
  

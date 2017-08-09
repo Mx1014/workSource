@@ -161,13 +161,11 @@ public interface PunchService {
 
 	PunchRule getPunchRule(String ownerType, Long ownerId, Long userId);
 
-	boolean isWorkDay(Date date1, PunchRule punchRule);
 
 //	PunchTimeRule getPunchTimeRule(PunchRule punchRule);
 
 //	boolean isWorkTime(Time time, PunchRule punchRule);
-
-	boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule);
+ 
 
 	boolean isSameDay(Date date1, Date date2);
 
@@ -209,10 +207,7 @@ public interface PunchService {
 	public void updatePunchSchedulings(UpdatePunchSchedulingMonthCommand cmd);
 
 	public ListPunchWiFisResponse listPunchWiFis(ListPunchRulesCommonCommand cmd);
-
-	PunchTimeRule getPunchTimeRuleByRuleIdAndDate(Long ruleId, Date date);
-
-	boolean isWorkTime(Time time, PunchRule punchRule, Date date);
+ 
 
 	Long convertTimeToGMTMillisecond(Time time);
 
@@ -237,6 +232,14 @@ public interface PunchService {
 
 	public GetPunchTypeResponse getPunchType(GetPunchTypeCommand cmd);
 
-	public PunchGroupDTO getPunchGroup(GetPunchGroupCommand cmd);
+	public PunchGroupDTO getPunchGroup(GetPunchGroupCommand cmd); 
+
+	PunchTimeRule getPunchTimeRuleByRuleIdAndDate(PunchRule pr, Date date, Long userId);
+
+	boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule, Long userId);
+
+	boolean isWorkTime(Time time, PunchRule punchRule, Date date, Long userId);
+
+	boolean isWorkDay(Date date1, PunchRule punchRule, Long userId);
 
 }

@@ -26,7 +26,15 @@ public class PunchConstants {
 	/** PUNCH_TIME_RULE_NAME = "timeRuleName"  */
 	public static final String PUNCH_TIME_RULE_NAME = "timeRuleName";
 
-	 public static final String locale = "zh_CN";
+	public static final String locale = "zh_CN";
 	 /**'请假申请的时间','${beginTime}至${endTime}'*/
 	public static final int PUNCH_FLOW_REQUEST_TIME = 1; 
+
+	public static final int SUNDAY_INT =    0b1000000;
+	public static final int MONDAY_INT =    0b0100000;
+	public static final int TUESDAY_INT =   0b0010000;
+	public static final int WEDNESDAY_INT = 0b0001000;
+	public static final int THURSDAY_INT =  0b0000100;
+	public static final int FRIDAY_INT =    0b0000010;
+	public static final int SATURDAY_INT =  0b0000001;
 }
