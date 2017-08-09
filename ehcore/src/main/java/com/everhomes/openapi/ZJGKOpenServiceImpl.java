@@ -393,12 +393,12 @@ public class ZJGKOpenServiceImpl {
         // 如果他们有，我们没有，插入
         // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
         if (theirCommunityList != null) {
-            for (ZJCommunity customerApartment : theirCommunityList) {
-                if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+            for (ZJCommunity zjCommunity : theirCommunityList) {
+                if ((zjCommunity.getDealed() != null && zjCommunity.getDealed().booleanValue() == true)) {
                     continue;
                 }
                 // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+                Community community = communityProvider.findCommunityByName()ByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
                 if (address == null) {
                     insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
                 }else {
