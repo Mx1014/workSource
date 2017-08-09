@@ -1,5 +1,5 @@
 -- 张江高科同步数据备份表
-DROP TABLE IF EXISTS `eh_zj_syncdata_backup`;
+-- DROP TABLE IF EXISTS `eh_zj_syncdata_backup`;
 CREATE TABLE `eh_zj_syncdata_backup` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -14,6 +14,16 @@ CREATE TABLE `eh_zj_syncdata_backup` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- DROP TABLE IF EXISTS `eh_thirdpart_configurations`;
+CREATE TABLE `eh_thirdpart_configurations` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `name` VARCHAR(64) NOT NULL,
+  `value` VARCHAR(512) NOT NULL,
+  `description` VARCHAR(256),
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- In some module, there are one or more tables which have lots of fields, it need to be grouped to be more readable in the view,
 -- this table will store these groups. The groups may be hierarchical, mainly for subgroups.

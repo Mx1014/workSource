@@ -452,6 +452,18 @@ public class RegionProviderImpl implements RegionProvider {
 	}
 
 	@Override
+	public Region findRegionByName(Integer namespaceId, String name) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		//fetchOne()没查到记录会返回null
+		try {
+			return context.select().from(Tables.EH_REGIONS).where(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId))
+					.and(Tables.EH_REGIONS.NAME.eq(name)).fetchOne().map(t->ConvertHelper.convert(t, Region.class));
+		} catch (NullPointerException e) {
+			return null;
+		}
+	}
+
+	@Override
 	public List<Region> listRegionByParentId(Integer namespaceId,
 			Long parentId, RegionScope scope, RegionAdminStatus status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
