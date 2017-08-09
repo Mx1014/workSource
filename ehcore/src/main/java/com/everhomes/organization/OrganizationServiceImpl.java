@@ -763,7 +763,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         resp.setNextPageAnchor(rlt.getPageAnchor());
 		return resp;
 	}
-	
+
 	@Override
 	public ListEnterprisesCommandResponse listEnterprises(
 			ListEnterprisesCommand cmd) {
@@ -890,10 +890,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("dto : {}", organizationDetailDTO);
 			throw e;
 		}
-		
+
 		return exportDetailDTO;
 	}
-	
+
 	private String toAdminString(OrganizationContactDTO organizationContactDTO) {
 		return organizationContactDTO.getContactName()+"("+organizationContactDTO.getContactToken()+")";
 	}
@@ -1189,7 +1189,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void updateEnterprise(UpdateEnterpriseCommand cmd) {
         updateEnterprise(cmd, true);
     }
-	
+
 	public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());
@@ -5132,7 +5132,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private List<OrganizationMember> listOrganizationMemberByOrganizationPathAndContactToken(String path, String contactToken) {
         return organizationProvider.listOrganizationMemberByPath(path, null, contactToken);
     }
-	
+
 	@Override
 	public List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
@@ -6293,11 +6293,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
 		for(int i = 1; i < list.size(); i++) {
 			RowResult r = (RowResult)list.get(i);
-			if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) || 
-					org.apache.commons.lang.StringUtils.isNotBlank(r.getC()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getD()) || 
-					org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) || 
-					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) || 
-					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) || 
+			if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) ||
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getC()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getD()) ||
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) ||
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) ||
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
 			ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
 			if(null != r.getA())
@@ -6393,7 +6393,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		// 业务太复杂，导入企业时如果本身系统里面已存在，要覆盖掉，如果是本次导入了同一企业多行，要合并门牌及管理员
 		Map<Long, List<Long>> orgAddressIds = new HashMap<>();
 		Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
-		
+
         for (ImportEnterpriseDataDTO data : list) {
             CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
             ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
@@ -9437,7 +9437,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setOperatorUid(UserContext.current().getUser().getId());
                 orgLog.setContactDescription(organizationMember.getContactDescription());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
-				
+
 				//自动加入公司
 				this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), enterpriseId, organizationMember.getTargetId());
             }
@@ -9656,12 +9656,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         List<OrganizationMember> organizationMembers = null;
         if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE || (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode()))) {
-                organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
+            organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
+            response.setTotalCount(this.organizationProvider.countOrganizationPersonnels(orgCommoand, cmd.getIsSignedup(), visibleFlag));
         } else {
             List<String> groupTypes = new ArrayList<>();
             groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
             groupTypes.add(OrganizationGroupType.GROUP.getCode());
             organizationMembers = this.organizationProvider.listOrganizationMemberByPath(cmd.getKeywords(), org.getPath(), groupTypes, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
+            response.setTotalCount(this.organizationProvider.countOrganizationMemberByPath(cmd.getKeywords(), org.getPath(), groupTypes, cmd.getIsSignedup(), visibleFlag));
         }
 
         //转拼音
