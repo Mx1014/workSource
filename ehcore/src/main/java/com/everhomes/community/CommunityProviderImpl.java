@@ -1400,4 +1400,21 @@ public class CommunityProviderImpl implements CommunityProvider {
          return result;
     
 	}
+
+    @Override
+    public List<Community> listCommunityByNamespaceType(Integer namespaceId, String namespaceType) {
+        List<Community> result = new ArrayList<Community>();
+
+//        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result,
+//                (DSLContext context, Object reducingContext) -> {
+//                    context.select().from(Tables.EH_COMMUNITIES)
+//                            .where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+//                            .and(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TYPE.eq(namespaceType)).fetch().map(r ->{
+//                        return result.add(ConvertHelper.convert(r,Community.class));
+//                    });
+//                    return true;
+//                });
+
+        return result;
+    }
 }

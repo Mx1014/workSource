@@ -46,10 +46,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -192,24 +189,24 @@ public class ZJGKOpenServiceImpl {
         Map<String, String> params = generateParams(pageOffset);
         String buildings = postToShenzhou(params, SYNC_ENTERPRISES, null);
 
-        ShenzhouJsonEntity<List<EnterpriseDTO>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<EnterpriseDTO>>>(){});
-
-        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<EnterpriseDTO> dtos = entity.getData();
-            if(dtos != null && dtos.size() > 0) {
-                syncData(entity, DataType.ENTERPRISE.getCode());
-
-                //数据有下一页则继续请求
-                if(entity.getNextPageOffset() != null) {
-                    syncEnterprises(entity.getNextPageOffset().toString());
-                }
-            }
-
-            //如果到最后一页了，则开始更新到我们数据库中
-            if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.ENTERPRISE.getCode());
-            }
-        }
+//        ShenzhouJsonEntity<List<EnterpriseDTO>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<EnterpriseDTO>>>(){});
+//
+//        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
+//            List<EnterpriseDTO> dtos = entity.getData();
+//            if(dtos != null && dtos.size() > 0) {
+//                syncData(entity, DataType.ENTERPRISE.getCode());
+//
+//                //数据有下一页则继续请求
+//                if(entity.getNextPageOffset() != null) {
+//                    syncEnterprises(entity.getNextPageOffset().toString());
+//                }
+//            }
+//
+//            //如果到最后一页了，则开始更新到我们数据库中
+//            if(entity.getNextPageOffset() == null) {
+//                syncDataToDb(DataType.ENTERPRISE.getCode());
+//            }
+//        }
     }
 
     private void syncIndividuals(String pageOffset) {
@@ -336,18 +333,18 @@ public class ZJGKOpenServiceImpl {
             case COMMUNITY:
                 syncAllCommunities(namespaceId, backupList);
                 break;
-            case BUILDING:
-			    syncAllBuildings(namespaceId, backupList);
-                break;
-            case APARTMENT:
-                syncAllApartments(namespaceId, backupList);
-                break;
-            case ENTERPRISE:
-                syncAllEnterprises(namespaceId, backupList);
-                break;
-            case INDIVIDUAL:
-                syncAllIndividuals(namespaceId, backupList);
-                break;
+//            case BUILDING:
+//			    syncAllBuildings(namespaceId, backupList);
+//                break;
+//            case APARTMENT:
+//                syncAllApartments(namespaceId, backupList);
+//                break;
+//            case ENTERPRISE:
+//                syncAllEnterprises(namespaceId, backupList);
+//                break;
+//            case INDIVIDUAL:
+//                syncAllIndividuals(namespaceId, backupList);
+//                break;
 
             default:
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -373,101 +370,102 @@ public class ZJGKOpenServiceImpl {
         List<Community> myCommunityList = communityProvider.listCommunityByNamespaceType(namespaceId, NamespaceAddressType.SHENZHOU.getCode());
         List<ZJCommunity> theirCommunityList = mergeBackupList(backupList, ZJCommunity.class);
         dbProvider.execute(s->{
-            syncAllCommunities(namespaceId, myCommunityList, theirCommunityList);
+//            syncAllCommunities(namespaceId, myCommunityList, theirCommunityList);
             return true;
         });
     }
 
-    private void syncAllCommunities(Integer namespaceId, List<Community> myCommunityList, List<ZJCommunity> theirCommunityList) {
-        Long defaultForumId = ;
-        Long feedbackForumId = ;
-        // 如果两边都有，更新；如果我们有，他们没有，删除；
-        for (Community myCommunity : myCommunityList) {
-            ZJCommunity zjCommunity = findFromTheirCommunityList(myCommunity, theirCommunityList);
-            if (zjCommunity != null) {
-                updateCommunity(myCommunity, zjCommunity);
-            }else {
-                deleteCommunity(myCommunity);
-            }
-        }
-        // 如果他们有，我们没有，插入
-        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-        if (theirCommunityList != null) {
-            for (ZJCommunity zjCommunity : theirCommunityList) {
-                if ((zjCommunity.getDealed() != null && zjCommunity.getDealed().booleanValue() == true)) {
-                    continue;
-                }
-                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                Community community = communityProvider.findCommunityByName()ByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
-                if (address == null) {
-                    insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
-                }else {
-                    updateAddress(address, customerApartment);
-                }
-            }
-        }
-
-
-    }
+//    private void syncAllCommunities(Integer namespaceId, List<Community> myCommunityList, List<ZJCommunity> theirCommunityList) {
+//        Long defaultForumId = ;
+//        Long feedbackForumId = ;
+//        // 如果两边都有，更新；如果我们有，他们没有，删除；
+//        for (Community myCommunity : myCommunityList) {
+//            ZJCommunity zjCommunity = findFromTheirCommunityList(myCommunity, theirCommunityList);
+//            if (zjCommunity != null) {
+//                updateCommunity(myCommunity, zjCommunity);
+//            }else {
+//                deleteCommunity(myCommunity);
+//            }
+//        }
+//        // 如果他们有，我们没有，插入
+//        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+//        if (theirCommunityList != null) {
+//            for (ZJCommunity zjCommunity : theirCommunityList) {
+//                if ((zjCommunity.getDealed() != null && zjCommunity.getDealed().booleanValue() == true)) {
+//                    continue;
+//                }
+//                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+//                List<Community> community = communityProvider.listCommunityByNamespaceIdAndName(NAMESPACE_ID, zjCommunity.getCommunityName());
+//                if (community == null) {
+//                    insertCommunity(NAMESPACE_ID, zjCommunity);
+//                }else {
+//                    updateCommunity(community, zjCommunity);
+//                }
+//            }
+//        }
+//
+//
+//    }
 
     private ZJCommunity findFromTheirCommunityList(Community myCommunity, List<ZJCommunity> theirCommunityList) {
         if (theirCommunityList != null) {
             for (ZJCommunity zjCommunity : theirCommunityList) {
-                if (myCommunity.getCommunityIdentifier().equals(zjCommunity.getCommunityIdentifier())) {
-                    zjCommunity.setDealed(true);
-                    return zjCommunity;
-                }
+//                if (myCommunity.getCommunityIdentifier().equals(zjCommunity.getCommunityIdentifier())) {
+//                    zjCommunity.setDealed(true);
+//                    return zjCommunity;
+//                }
             }
         }
         return null;
     }
 
-    private void syncAllApartments(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
-        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
-        List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(namespaceId, appNamespaceMapping.getCommunityId(), NamespaceAddressType.SHENZHOU.getCode());
-        List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
-        formatCustomerBuildingName(theirApartmentList);
-        List<CustomerBuilding> theirBuildingList = fetchBuildingsFromApartments(theirApartmentList);
-        List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
-        dbProvider.execute(s->{
-            syncAllApartments(namespaceId, myApartmentList, theirApartmentList);
-            return true;
-        });
-    }
+//    private void syncAllApartments(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
+//        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+//        List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(namespaceId, appNamespaceMapping.getCommunityId(), NamespaceAddressType.SHENZHOU.getCode());
+//        List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+//        formatCustomerBuildingName(theirApartmentList);
+//        List<CustomerBuilding> theirBuildingList = fetchBuildingsFromApartments(theirApartmentList);
+//        List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
+//        dbProvider.execute(s->{
+//            syncAllApartments(namespaceId, myApartmentList, theirApartmentList);
+//            return true;
+//        });
+//    }
+//
+//    private void syncAllApartments(AppNamespaceMapping appNamespaceMapping, List<Address> myApartmentList, List<CustomerApartment> theirApartmentList) {
+//        // 如果两边都有，更新；如果我们有，他们没有，删除；
+//        for (Address myApartment : myApartmentList) {
+//            CustomerApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
+//            if (customerApartment != null) {
+//                updateAddress(myApartment, customerApartment);
+//            }else {
+//                deleteAddress(myApartment);
+//            }
+//        }
+//        // 如果他们有，我们没有，插入
+//        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+//        if (theirApartmentList != null) {
+//            for (CustomerApartment customerApartment : theirApartmentList) {
+//                if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+//                    continue;
+//                }
+//                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+//                Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+//                if (address == null) {
+//                    insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+//                }else {
+//                    updateAddress(address, customerApartment);
+//                }
+//            }
+//        }
+//
+//        // 同步完地址后更新community表中的门牌总数
+//        Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
+//        Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
+//        if (community.getAptCount().intValue() != count.intValue()) {
+//            community.setAptCount(count);
+//            communityProvider.updateCommunity(community);
+//        }
+//    }
 
-    private void syncAllApartments(AppNamespaceMapping appNamespaceMapping, List<Address> myApartmentList, List<CustomerApartment> theirApartmentList) {
-        // 如果两边都有，更新；如果我们有，他们没有，删除；
-        for (Address myApartment : myApartmentList) {
-            CustomerApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
-            if (customerApartment != null) {
-                updateAddress(myApartment, customerApartment);
-            }else {
-                deleteAddress(myApartment);
-            }
-        }
-        // 如果他们有，我们没有，插入
-        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-        if (theirApartmentList != null) {
-            for (CustomerApartment customerApartment : theirApartmentList) {
-                if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
-                    continue;
-                }
-                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
-                if (address == null) {
-                    insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
-                }else {
-                    updateAddress(address, customerApartment);
-                }
-            }
-        }
-
-        // 同步完地址后更新community表中的门牌总数
-        Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
-        Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
-        if (community.getAptCount().intValue() != count.intValue()) {
-            community.setAptCount(count);
-            communityProvider.updateCommunity(community);
-        }
-    }
 }
