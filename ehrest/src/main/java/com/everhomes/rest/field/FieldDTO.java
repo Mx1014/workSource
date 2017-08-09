@@ -1,5 +1,6 @@
 package com.everhomes.rest.field;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -48,6 +49,7 @@ public class FieldDTO {
 
     private Integer defaultOrder;
 
+    @ItemType(FieldItemDTO.class)
     private List<FieldItemDTO> items;
 
     public List<FieldItemDTO> getItems() {
