@@ -2,13 +2,33 @@ package com.everhomes.yellowPage;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.FlowCaseDetailActionData;
+import com.everhomes.rest.common.Router;
+import com.everhomes.rest.common.ThirdPartActionData;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.*;
 
+import com.everhomes.rest.user.FieldContentType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayDestination;
+import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
+import com.everhomes.user.*;
+import com.everhomes.util.RouterBuilder;
+import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +51,6 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
 @Component
@@ -49,7 +65,15 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
     
     @Autowired
     private UserProvider userProvider;
-    
+
+	@Autowired
+	private MessagingService messagingService;
+
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	@Override
 	public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
@@ -58,7 +82,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
         moduleInfo.setModuleId(MODULE_ID);
         return moduleInfo;
 	}
-    
+
+
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
 		// 服务联盟的审批拼接工作流 content字符串
@@ -104,10 +129,11 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		contentBuffer.append(" : ");
 		contentBuffer.append(ga.getApprovalName());
 		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
+		Long yellowPageId = 0l;
 		if(null != sourceVal){
 			if(contentBuffer.length()>1)
 				contentBuffer.append("\n");
-			Long yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+			yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 			ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
 			ServiceAllianceCategories  parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
 
@@ -139,11 +165,129 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setCreatorUid(UserContext.current().getUser().getId());
 		request.setTemplateType("flowCase");
 		serviceAllianceRequestInfoSearcher.feedDoc(request);
+
+		//推送消息
+		//给服务公司留的手机号推消息
+		if (yellowPageId!=0) {
+			ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
+
+			MessageDTO messageDto = new MessageDTO();
+			messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+			String body = "";
+			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
+			body += "收到一条"+serviceOrg.getName()+"的申请";
+			messageDto.setBody(body);
+			FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
+			actionData.setFlowCaseId(flowCase.getId());
+			actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
+			actionData.setModuleId(flowCase.getModuleId());
+			String url = RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
+			RouterMetaObject metaObject = new RouterMetaObject();
+            metaObject.setUrl(url);
+			Map<String, String> meta = new HashMap<>();
+			meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+			meta.put(MessageMetaConstant.MESSAGE_SUBJECT, category.getName());
+      	    meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+
+       	    messageDto.setMeta(meta);
+			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+			if (member!=null)
+				messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+					member.getTargetId().toString(),messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+
+
+		}
+	}
+
+	private void sendMessageToUser(Long userId, String content) {
+		MessageDTO messageDto = new MessageDTO();
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
 
 
+
+	private List<FlowCaseEntity> processCustomRequest(FlowCase flowCase){
+		List<FlowCaseEntity> entities = new ArrayList<>();
+		FlowCaseEntity e ;
+		CustomRequestHandler handler = getCustomRequestHandler(flowCase.getReferType());
+		GetRequestInfoResponse response = handler.getCustomRequestInfo(flowCase.getReferId());
+		List<RequestFieldDTO> dtos = response.getDtos();
+		for (RequestFieldDTO dto:dtos){
+			switch (FieldContentType.fromCode(dto.getFieldContentType())){
+				case TEXT:
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+					e.setKey(dto.getFieldName());
+					e.setValue(dto.getFieldValue());
+					entities.add(e);
+					break;
+				case IMAGE:
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+					e.setKey(dto.getFieldName());
+					e.setValue(dto.getFieldValue());
+					entities.add(e);
+					break;
+				case FILE:
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.FILE.getCode());
+					e.setKey(dto.getFieldName());
+					e.setValue(dto.getFieldValue());
+					entities.add(e);
+					break;
+				default:
+					break;
+			}
+		}
+		return entities;
+	}
+
+	private CustomRequestHandler getCustomRequestHandler(String templateType) {
+		CustomRequestHandler handler = null;
+
+		if(!StringUtils.isEmpty(templateType)) {
+			String handlerPrefix = CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX;
+//            if(templateType.length() > 7 && CustomRequestConstants.RESERVE_REQUEST_CUSTOM.equals(templateType.substring(0, 7))) {
+//            	templateType = CustomRequestConstants.RESERVE_REQUEST_CUSTOM;
+//            }
+			if(templateType.startsWith(CustomRequestConstants.RESERVE_REQUEST_CUSTOM)) {
+				templateType = CustomRequestConstants.RESERVE_REQUEST_CUSTOM;
+			} else if(templateType.startsWith(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM)) {
+				templateType = CustomRequestConstants.APARTMENT_REQUEST_CUSTOM;
+			} else if(templateType.startsWith(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM)) {
+				templateType = CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM;
+			} else if(templateType.startsWith(CustomRequestConstants.SETTLE_REQUEST_CUSTOM)) {
+				templateType = CustomRequestConstants.SETTLE_REQUEST_CUSTOM;
+			} else if(templateType.startsWith(CustomRequestConstants.INVEST_REQUEST_CUSTOM)) {
+				templateType = CustomRequestConstants.INVEST_REQUEST_CUSTOM;
+			} else if(templateType.startsWith(CustomRequestConstants.GOLF_REQUEST_CUSTOM)) {
+				templateType = CustomRequestConstants.GOLF_REQUEST_CUSTOM;
+			} else if(templateType.startsWith(CustomRequestConstants.GYM_REQUEST_CUSTOM)) {
+				templateType = CustomRequestConstants.GYM_REQUEST_CUSTOM;
+			} else if(templateType.startsWith(CustomRequestConstants.SERVER_REQUEST_CUSTOM)) {
+				templateType = CustomRequestConstants.SERVER_REQUEST_CUSTOM;
+			}
+			handler = PlatformContext.getComponent(handlerPrefix + templateType);
+		}
+
+		return handler;
+	}
+
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
+		if (flowCase.getReferType()!=null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getReferType()))
+			return this.processCustomRequest(flowCase);
+
+
 		List<FlowCaseEntity> entities = new ArrayList<>(); 
 		//前面写服务联盟特有的默认字段-姓名-电话-企业-申请类型-申请来源-服务机构
 		//姓名

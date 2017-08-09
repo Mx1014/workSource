@@ -691,7 +691,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void createServiceAllianceRequests(ServiceAllianceRequests request) {
+	public Long createServiceAllianceRequests(ServiceAllianceRequests request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceRequests.class));
 		request.setId(id);
@@ -699,7 +699,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhServiceAllianceRequestsDao dao = new EhServiceAllianceRequestsDao(context.configuration());
         dao.insert(request);
-		
+		return id;
 	}
 
 
@@ -748,7 +748,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void createSettleRequests(SettleRequests request) {
+	public Long createSettleRequests(SettleRequests request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSettleRequests.class));
 		request.setId(id);
@@ -756,6 +756,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhSettleRequestsDao dao = new EhSettleRequestsDao(context.configuration());
         dao.insert(request);
+        return id;
 		
 	}
 
@@ -806,7 +807,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void createReservationRequests(ReservationRequests request) {
+	public Long createReservationRequests(ReservationRequests request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceReservationRequests.class));
 		request.setId(id);
@@ -814,6 +815,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhServiceAllianceReservationRequestsDao dao = new EhServiceAllianceReservationRequestsDao(context.configuration());
         dao.insert(request);
+        return id;
 	}
 
 
@@ -862,7 +864,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void createApartmentRequests(ServiceAllianceApartmentRequests request) {
+	public Long createApartmentRequests(ServiceAllianceApartmentRequests request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceApartmentRequests.class));
 		request.setId(id);
@@ -870,6 +872,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhServiceAllianceApartmentRequestsDao dao = new EhServiceAllianceApartmentRequestsDao(context.configuration());
         dao.insert(request);
+        return id;
 	}
 
 
@@ -937,7 +940,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public void createInvestRequests(ServiceAllianceInvestRequests request) {
+	public Long createInvestRequests(ServiceAllianceInvestRequests request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceInvestRequests.class));
 		request.setId(id);
@@ -945,6 +948,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhServiceAllianceInvestRequestsDao dao = new EhServiceAllianceInvestRequestsDao(context.configuration());
 		dao.insert(request);
+		return id;
 	}
 
 	@Override
@@ -955,7 +959,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public void createGolfRequest(ServiceAllianceGolfRequest request) {
+	public Long createGolfRequest(ServiceAllianceGolfRequest request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.
 				getSequenceDomainFromTablePojo(EhServiceAllianceGolfRequests.class));
@@ -964,6 +968,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 		EhServiceAllianceGolfRequestsDao dao = new EhServiceAllianceGolfRequestsDao(context.configuration());
 		dao.insert(request);
+		return id;
 	}
 
 	@Override
@@ -974,7 +979,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public void createGymRequest(ServiceAllianceGymRequest request) {
+	public Long createGymRequest(ServiceAllianceGymRequest request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.
 				getSequenceDomainFromTablePojo(EhServiceAllianceGymRequests.class));
@@ -983,6 +988,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 		EhServiceAllianceGymRequestsDao dao = new EhServiceAllianceGymRequestsDao(context.configuration());
 		dao.insert(request);
+		return id;
 	}
 
 	@Override
@@ -993,7 +999,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public void createServerRequest(ServiceAllianceServerRequest request) {
+	public Long createServerRequest(ServiceAllianceServerRequest request) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.
 				getSequenceDomainFromTablePojo(EhServiceAllianceServerRequests.class));
@@ -1002,6 +1008,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 		EhServiceAllianceServerRequestsDao dao = new EhServiceAllianceServerRequestsDao(context.configuration());
 		dao.insert(request);
+		return id;
 	}
 
 	@Override
@@ -1055,8 +1062,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.SIGNAL.ne(SignalEnum.DELETE.getCode()))).
 				or(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.SIGNAL.eq(SignalEnum.APPROVAL.getCode())
 		);
+		query.addConditions(condition);
 
-		query.addConditions(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.NAMESPACE_ID.eq(namespaceId));
 
 		query.fetch().map((r) -> {
 			modules.add(ConvertHelper.convert(r, JumpModuleDTO.class));
