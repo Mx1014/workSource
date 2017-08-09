@@ -12,7 +12,6 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>buildingId：楼栋ID</li>
- * <li>rentPosition：招租位置</li>
  * <li>rentType：招租类型：1：出租{@link com.everhomes.rest.techpark.expansion.LeasePromotionType} </li>
  * <li>posterUri：封面uri，标题图 </li>
  * <li>attachments：banner图，列表 {@link com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO} </li>
@@ -47,7 +46,6 @@ public class CreateLeasePromotionCommand {
 	@NotNull
 	private Long buildingId;
 	private String buildingName;
-	private String rentPosition;
 	private String rentType;
 	private String posterUri;
 	private String rentAreas;
@@ -197,12 +195,6 @@ public class CreateLeasePromotionCommand {
 	}
 	public void setBuildingId(Long buildingId) {
 		this.buildingId = buildingId;
-	}
-	public String getRentPosition() {
-		return rentPosition;
-	}
-	public void setRentPosition(String rentPosition) {
-		this.rentPosition = rentPosition;
 	}
 	public String getRentType() {
 		return rentType;

@@ -14,7 +14,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id：要修改的招租信息id</li>
  * <li>buildingId：楼栋ID</li>
- * <li>rentPosition：招租位置</li>
  * <li>posterUri：封面uri，标题图 </li>
  * <li>attachments：banner图，列表 {@link com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO} </li>
  * <li>rentAreas：招租面积</li>
@@ -42,7 +41,6 @@ public class UpdateLeasePromotionCommand {
 	@NotNull
 	private Long     buildingId;
 	private String buildingName;
-	private String   rentPosition;
 	private String   posterUri;
 	private String   rentAreas;
 	private String   contacts;
@@ -186,12 +184,6 @@ public class UpdateLeasePromotionCommand {
 	}
 	public void setBuildingId(Long buildingId) {
 		this.buildingId = buildingId;
-	}
-	public String getRentPosition() {
-		return rentPosition;
-	}
-	public void setRentPosition(String rentPosition) {
-		this.rentPosition = rentPosition;
 	}
 	public String getPosterUri() {
 		return posterUri;

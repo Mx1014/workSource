@@ -591,7 +591,6 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				}else {
 					leasePromotion.setBuildingId(0L);
 				}
-				leasePromotion.setRentPosition(buildingName);
 				leasePromotion.setEnterTime(leasePromotion.getCreateTime());
 				leasePromotion.setNamespaceType(namespaceType);
 				leasePromotion.setNamespaceToken(namespaceToken);

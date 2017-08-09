@@ -135,6 +135,18 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
     }
 
     @Override
+    public LeaseBuilding findLeaseBuildingByBuildingId(Long buildingId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseBuildings.class));
+
+        SelectQuery<EhLeaseBuildingsRecord> query = context.selectQuery(Tables.EH_LEASE_BUILDINGS);
+
+        query.addConditions(Tables.EH_LEASE_BUILDINGS.BUILDING_ID.eq(buildingId));
+
+        return ConvertHelper.convert(query.fetchOne(), LeaseBuilding.class);
+    }
+
+    @Override
     public void createLeasePromotionCommunity(LeasePromotionCommunity leasePromotionCommunity) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhLeasePromotionCommunities.class));
         leasePromotionCommunity.setId(id);

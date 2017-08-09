@@ -77,6 +77,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private UserProvider userProvider;
     @Autowired
     private GeneralFormService generalFormService;
+    @Autowired
+    private EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider;
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
@@ -215,28 +217,33 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
                 buildingName = sb.toString();
             }else {
-                Building building = communityProvider.findBuildingById(applyEntry.getBuildingId());
-                if (null != building) {
-                    buildingName = building.getName();
+                LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getBuildingId());
+                if (null != leaseBuilding) {
+                    buildingName = leaseBuilding.getName();
                 }
             }
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
 			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
-			Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
-			if(null != building){
-                buildingName = building.getName();
+            LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getBuildingId());
+			if(null != leaseBuilding){
+                buildingName = leaseBuilding.getName();
             }
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())||
 				ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())){
 
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
 
-            buildingName = leasePromotion.getRentPosition();
-            com.everhomes.building.Building building = buildingProvider.findBuildingById(applyEntry.getBuildingId());
-            if (null != building) {
-                buildingName = building.getName();
+            if (leasePromotion.getBuildingId() == 0L) {
+
+                buildingName = leasePromotion.getBuildingName();
+            }else {
+                LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(leasePromotion.getBuildingId());
+                if (null != leaseBuilding) {
+                    buildingName = leaseBuilding.getName();
+                }
             }
+
             Address address = addressProvider.findAddressById(applyEntry.getAddressId());
 
             if (null != address) {
@@ -247,9 +254,9 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 			YellowPage yellowPage = yellowPageProvider.getYellowPageById(applyEntry.getSourceId());
 			if(null != yellowPage){
                 if (null != yellowPage.getBuildingId()) {
-                    Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
-                    if(null != building){
-                        buildingName = building.getName();
+                    LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(yellowPage.getBuildingId());
+                    if(null != leaseBuilding){
+                        buildingName = leaseBuilding.getName();
                     }
                 }
 			}

@@ -340,6 +340,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}
 
 			Set<Long> buildingIds = new HashSet<>();
+			String buildingName = null;
             Long projectId = cmd.getCommunityId();
             EnterpriseOpRequestBuilding opRequestBuilding = new EnterpriseOpRequestBuilding();
             opRequestBuilding.setEnterpriseOpRequestsId(request.getId()); 
@@ -358,8 +359,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			for(BuildingApartmentDTO buildingApartmentDTO: buildings){
     				com.everhomes.building.Building building = buildingProvider.findBuildingByName(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), buildingApartmentDTO.getBuildingName());
     				if(building !=null){
-						buildingIds.add(building.getId());
-    					opRequestBuilding.setBuildingId(building.getId());
+						LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(building.getId());
+						buildingIds.add(leaseBuilding.getId());
+    					opRequestBuilding.setBuildingId(leaseBuilding.getId());
     					resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(), 
     							EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
     					enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
@@ -375,10 +377,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					if (null != address) {
 						Building building =communityProvider.findBuildingByCommunityIdAndName(cmd.getCommunityId(), address.getBuildingName());
 						if (null != building) {
-							opRequestBuilding.setBuildingId(building.getId());
+							LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(building.getId());
+							opRequestBuilding.setBuildingId(leaseBuilding.getId());
 							enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
 
-							request.setBuildingId(building.getId());
+							request.setBuildingId(leaseBuilding.getId());
 							request.setAddressId(address.getId());
 						}
 					}
@@ -386,7 +389,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
     			//2. 创客空间带的地址
     			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getSourceId());
-    			opRequestBuilding.setBuildingId(yellowPage.getBuildingId());
+
+				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(yellowPage.getBuildingId());
+
+				opRequestBuilding.setBuildingId(leaseBuilding.getId());
     			resourceCategory = communityProvider.findResourceCategoryAssignment(yellowPage.getBuildingId(), 
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
@@ -394,20 +400,31 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}else if (cmd.getSourceType().equals(ApplyEntrySourceType.BUILDING.getCode())){
     			//3. 园区介绍直接就是楼栋的地址
     			opRequestBuilding.setBuildingId(cmd.getSourceId());
-    			resourceCategory = communityProvider.findResourceCategoryAssignment(cmd.getSourceId(), 
-						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+
+				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(cmd.getSourceId());
+
+				if (leaseBuilding.getBuildingId() != 0L) {
+					resourceCategory = communityProvider.findResourceCategoryAssignment(leaseBuilding.getBuildingId(),
+							EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+				}
+
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
 
-			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(cmd.getSourceType())||
-					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(cmd.getSourceType())){
+			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(cmd.getSourceType())){
     			//4. 虚位以待的楼栋地址
     			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
 
 				issuerType = leasePromotion.getIssuerType();
 
     			opRequestBuilding.setBuildingId(leasePromotion.getBuildingId());
-    			resourceCategory = communityProvider.findResourceCategoryAssignment(leasePromotion.getBuildingId(), 
-						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+
+    			if (leasePromotion.getBuildingId() != 0L) {
+					LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(leasePromotion.getBuildingId());
+					resourceCategory = communityProvider.findResourceCategoryAssignment(leaseBuilding.getBuildingId(),
+							EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+				}else {
+					buildingName = leasePromotion.getBuildingName();
+				}
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
 
 			}
@@ -422,7 +439,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			FlowCase flowCase1 = null;
     		if (LeaseIssuerType.ORGANIZATION.getCode().equals(issuerType)) {
-				flowCase1 = this.createFlowCase(request, projectId, projectType, buildingIds);
+				flowCase1 = this.createFlowCase(request, projectId, projectType, buildingIds, buildingName);
                 request.setFlowcaseId(flowCase1.getId());
             }
 			request.setIssuerType(issuerType);
@@ -430,52 +447,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			return flowCase1;
         });
-
-        // 1.如果创建flowCase成功, 则不在这里发送短信, 移到工作流中配置
-        // 2.如果创建flowCase不成功, 说明没有配置使用工作流, 则保持原来的发短信功能不变   add by xq.tian  2016/12/22
-
-        // 根据apply type来区分
-        String phoneNumber = null;
-        String location = null;
-        ApplyEntryApplyType applyType = ApplyEntryApplyType.fromType(cmd.getApplyType());
-        if(applyType != null && cmd.getSourceId() != null) {
-			//modify by wuhan 2016-8-17 园区入驻2.2全部变成了给管理员发短信(其实是没有for_rent的类型了)
-			  Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
-			  if(building != null) {
-			  	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
-
-			      if(null != member) {
-			          phoneNumber = member.getContactToken();
-			      }
-			      location = building.getName();
-			  } else {
-			      if(LOGGER.isWarnEnabled()) {
-			          LOGGER.warn("Building not found, builingId={}, cmd={}", cmd.getSourceId(), cmd);
-			      }
-			  }
-
-	  		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
-
-            switch(applyType) {
-                case APPLY:
-                    sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
-                            location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
-                    break;
-                case RENEW:
-                    sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
-                            location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"续租");
-                    break;
-                case EXPANSION:
-                    sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
-                            location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
-                    break;
-                default:
-                    if(LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Apply entry source type not supported, applyType={}, cmd={}", applyType, cmd);
-                    }
-                    break;
-            }
-        }
         
         if (flowCase != null) {
         	//TODO: 组装resp
@@ -507,7 +478,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return 0;
 	}
 
-    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType, Set<Long> buildingIds) {
+    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType, Set<Long> buildingIds, String buildingName) {
 
 		String tempOwnerId = String.valueOf(request.getCommunityId()) + convertSourceType(request.getSourceType());
 
@@ -529,7 +500,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         flowCaseCmd.setApplyUserId(request.getApplyUserId());
         flowCaseCmd.setReferId(request.getId());
         // flowCase摘要内容
-        flowCaseCmd.setContent(this.getBriefContent(request, buildingIds));
+        flowCaseCmd.setContent(this.getBriefContent(request, buildingIds, buildingName));
         flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
         flowCaseCmd.setProjectId(projectId);
         
@@ -547,24 +518,27 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     }
 
-    private String getBriefContent(EnterpriseOpRequest request, Set<Long> buildingIds) {
+    private String getBriefContent(EnterpriseOpRequest request, Set<Long> buildingIds, String buildingName) {
         String locale = UserContext.current().getUser().getLocale();
         Map<String, Object> map = new HashMap<>();
 
-        StringBuilder sb = new StringBuilder();
-        int n = 1;
-        for (Long id: buildingIds) {
+        if (buildingName == null) {
+			StringBuilder sb = new StringBuilder();
+			int n = 1;
+			for (Long id: buildingIds) {
 
-			Building building = communityProvider.findBuildingById(id);
-			if (n == buildingIds.size()) {
-				sb.append(building.getName());
-			}else {
-				sb.append(building.getName()).append(",");
+				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(id);
+				if (n == buildingIds.size()) {
+					sb.append(leaseBuilding.getName());
+				}else {
+					sb.append(leaseBuilding.getName()).append(",");
+				}
+				n++;
 			}
-			n++;
+			buildingName = defaultIfNull(sb.toString(),"").toString();
 		}
 
-        map.put("buildingName", defaultIfNull(sb.toString(),""));
+        map.put("buildingName", buildingName);
 
 		GetLeasePromotionConfigCommand cmd = new GetLeasePromotionConfigCommand();
 		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -681,6 +655,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		res.setNextPageAnchor(locator.getAnchor());
 
+		//检查当前用户是不是有权限发布招租
 		Long userId = UserContext.currentUserId();
 		CheckIsLeaseIssuerDTO flag = new CheckIsLeaseIssuerDTO();
 		flag.setFlag(LeasePromotionFlag.DISABLED.getCode());
@@ -696,6 +671,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			populateRentDTO(dto, c);
 
+			//判断此招租，当前登录的人是否有权限删除，编辑
 			dto.setDeleteFlag(LeasePromotionDeleteFlag.NOTSUPPROT.getCode());
 			if (LeaseIssuerType.NORMAL_USER.getCode().equals(c.getIssuerType())) {
 				if (LeasePromotionFlag.ENABLED.getCode() == flag.getFlag() && c.getCreateUid().equals(userId)) {
@@ -712,24 +688,27 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	private void populateRentDTO(BuildingForRentDTO dto, LeasePromotion leasePromotion) {
 
+		//设置详情url
 		processDetailUrl(dto);
-
+		//有门牌id时，表示此招租和楼栋门牌关联，不是手动输入门牌地址
 		if (null != leasePromotion.getAddressId() && leasePromotion.getAddressId() != 0L) {
 			Address address = addressProvider.findAddressById(leasePromotion.getAddressId());
 			if (null != address) {
 				dto.setApartmentName(address.getApartmentName());
 			}
 		}
-
+		//有楼栋id时，表示此招租和楼栋关联，不是手动输入楼栋地址
 		if (null != dto.getBuildingId() && dto.getBuildingId() != 0L) {
 			LeaseBuilding building = enterpriseApplyBuildingProvider.findLeaseBuildingById(dto.getBuildingId());
 			if(null != building){
 				dto.setBuildingName(building.getName());
 			}
 		}
+		//兼容历史app，rentPosition字段值返回的就是楼栋名称
+		dto.setRentPosition(dto.getBuildingName());
 
 		Long userId = UserContext.currentUserId();
-
+		//设置封面图url 和banner图
 		if (null != leasePromotion.getPosterUri()) {
 			dto.setPosterUrl(contentServerService.parserUri(leasePromotion.getPosterUri(), EntityType.USER.getCode(), userId));
 		}else {
@@ -741,16 +720,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		dto.setAttachments(attachments.stream().map(a -> {
 			BuildingForRentAttachmentDTO ad = ConvertHelper.convert(a, BuildingForRentAttachmentDTO.class);
 			ad.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.USER.getCode(), userId));
-
 			return ad;
 		}).collect(Collectors.toList()));
 		//暂时用枚举，如果拓展单位类型，则须在表中添加字段
 		dto.setUnit(LeasePromotionUnit.MONTH_UNIT.getDescription());
 
-		if (LeaseIssuerType.NORMAL_USER.getCode().equals(leasePromotion.getIssuerType())) {
-			dto.setDeleteFlag(LeasePromotionFlag.ENABLED.getCode());
-		}
-
+		//	启用表单，则查询表单值
 		if (LeasePromotionFlag.ENABLED.getCode() == leasePromotion.getCustomFormFlag()) {
 
 			GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
@@ -783,7 +758,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     }
 
 	@Override
-	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd){
+	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag){
 
 		if (null == cmd.getIssuerType()) {
 			cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
@@ -794,6 +769,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null == cmd.getRentType()) {
 			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
 		}
+		//兼容app业主发布招租，后台楼栋从EhLeaseBuildings查询，app业主发布招租取的楼栋信息是以前的项目管理楼栋信息
+		cmd.setBuildingId(handleBuildingId(cmd.getBuildingId(), adminFlag));
 
 		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 
@@ -831,6 +808,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		populateRentDTO(dto, leasePromotion);
 
+		//普通业主发布的招租，可以删除
+		if (LeaseIssuerType.NORMAL_USER.getCode().equals(leasePromotion.getIssuerType())) {
+			dto.setDeleteFlag(LeasePromotionFlag.ENABLED.getCode());
+		}
+
 		return dto;
 	}
 
@@ -846,12 +828,30 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 	}
 
+	private Long handleBuildingId(Long buildingId, Byte adminFlag) {
+		if (adminFlag == (byte)2) {
+			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(buildingId);
+			if (null == leaseBuilding) {
+				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Status can not be modified.");
+			}
+			return leaseBuilding.getId();
+		}
+		return buildingId;
+	}
+
 	@Override
-	public BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd){
+	public BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd, Byte adminFlag){
+
+		cmd.setBuildingId(handleBuildingId(cmd.getBuildingId(), adminFlag));
 
 		return dbProvider.execute((TransactionStatus status) -> {
 
 			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
+
+			if (cmd.getBuildingId() == null) {
+				cmd.setBuildingId(0L);
+			}
 
 			BeanUtils.copyProperties(cmd, leasePromotion);
 //			leasePromotion.setBuildingId(cmd.getBuildingId());
@@ -908,8 +908,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			populateRentDTO(dto, leasePromotion);
 
 			//当前用户可以更新
-			dto.setDeleteFlag(LeasePromotionDeleteFlag.SUPPROT.getCode());
-
+			//普通业主发布的招租，可以删除
+			if (LeaseIssuerType.NORMAL_USER.getCode().equals(leasePromotion.getIssuerType())) {
+				dto.setDeleteFlag(LeasePromotionDeleteFlag.SUPPROT.getCode());
+			}
 			return dto;
 		});
 	}
