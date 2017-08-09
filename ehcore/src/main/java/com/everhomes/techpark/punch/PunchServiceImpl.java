@@ -5153,9 +5153,14 @@ public class PunchServiceImpl implements PunchService {
 		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType())){
 //			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
 //				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
-					this.punchProvider.deletePunchRuleOwnerMap(obj);
-					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
-					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
+			// modify by wh 20170808 要删除punchrule
+			PunchRule pr = punchProvider.getPunchRuleById(obj.getPunchRuleId());
+			if(null != pr)
+				punchProvider.deletePunchRule(pr);
+			this.punchProvider.deletePunchRuleOwnerMap(obj);
+
+			this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
+			this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
 //				}
 //				else{
 // 
