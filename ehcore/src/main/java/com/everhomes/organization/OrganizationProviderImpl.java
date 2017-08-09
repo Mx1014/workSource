@@ -4028,7 +4028,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		/**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
 		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
 		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+		SelectJoinStep<Record1<Integer>> step = context.select(DSL.countDistinct(t2.field("contact_token"))).from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
 		Condition condition = t1.field("group_path").like(path + "%");
 		if (null != groupTypes && groupTypes.size() > 0)
 			condition = condition.and(t1.field("group_type").in(groupTypes));
@@ -4046,7 +4046,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-		return step.where(condition).groupBy(t2.field("contact_token")).fetchOneInto(Integer.class);
+		return step.where(condition).fetchOneInto(Integer.class);
 	}
 
 	/**
