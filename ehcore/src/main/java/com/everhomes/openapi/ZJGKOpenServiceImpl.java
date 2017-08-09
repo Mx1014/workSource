@@ -350,15 +350,14 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void syncAllApartments(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
-        //楼栋的同步按照从门牌中提取来同步
         //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
-        List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceAddressType.JINDIE.getCode());
+        List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(namespaceId, appNamespaceMapping.getCommunityId(), NamespaceAddressType.SHENZHOU.getCode());
         List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
         formatCustomerBuildingName(theirApartmentList);
         List<CustomerBuilding> theirBuildingList = fetchBuildingsFromApartments(theirApartmentList);
         List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
         dbProvider.execute(s->{
-            syncAllApartments(appNamespaceMapping, myApartmentList, theirApartmentList);
+            syncAllApartments(namespaceId, myApartmentList, theirApartmentList);
             return true;
         });
     }
@@ -390,7 +389,7 @@ public class ZJGKOpenServiceImpl {
             }
         }
 
-        // 同步完地址后更新community表中的门牌总数，add by tt, 20170308
+        // 同步完地址后更新community表中的门牌总数
         Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
         Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
         if (community.getAptCount().intValue() != count.intValue()) {
