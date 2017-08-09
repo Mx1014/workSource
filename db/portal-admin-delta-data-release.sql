@@ -112,8 +112,8 @@ insert into `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(10080,'0','app.conf.super','app配置超级权限');
 insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(10079,'0','task.manage.super','任务管理超级权限');
 insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(10090,'0','black.list.super','黑名单超级权限');
-insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(10081,'0','questionnaire.investigation.super','问卷调查超级权限');
+insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(10081,'0','question.investigation.super','问卷调查超级权限');
 
-set @domain_id = (SELECT MAX(id) FROM `eh_domains`);
+set @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
 insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) values((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'test9.lab.everhomes.com', 0, now());
 
