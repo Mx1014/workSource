@@ -3920,42 +3920,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      **/
     @Override
     public List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-
-        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("group_path").like(path + "%");
-        if (null != groupTypes && groupTypes.size() > 0)
-            condition = condition.and(t1.field("group_type").in(groupTypes));
-        if (!StringUtils.isEmpty(keywords)) {
-            condition = condition.and(t2.field("contact_token").eq(keywords).or(t2.field("contact_name").like(keywords + "%")));
-        }
-
-        if (null != visibleFlag) {
-            condition = condition.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
-        }
-
-        if (null != locator.getAnchor()) {
-            condition = condition.and(t1.field("id").lt(locator.getAnchor()));
-        }
-        condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        List<OrganizationMember> records = step.where(condition).groupBy(t2.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, OrganizationMember.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        locator.setAnchor(null);
-        if (result.size() > pageSize) {
-            result.remove(result.size() - 1);
-            locator.setAnchor(result.get(result.size() - 1).getId());
-        }
-
-        return result;
+        return listOrganizationMemberByPath(keywords, path, groupTypes, null, visibleFlag, locator, pageSize);
 
 //        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 //        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
@@ -3988,6 +3953,51 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //        }
 //        return result;
     }
+
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+		/**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+		Condition condition = t1.field("group_path").like(path + "%");
+		if (null != groupTypes && groupTypes.size() > 0)
+			condition = condition.and(t1.field("group_type").in(groupTypes));
+		if (!StringUtils.isEmpty(keywords)) {
+			condition = condition.and(t2.field("contact_token").eq(keywords).or(t2.field("contact_name").like(keywords + "%")));
+		}
+
+		if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
+			condition = condition.and(t1.field("target_id").ne(0L));
+			condition = condition.and(t1.field("target_type").eq(OrganizationMemberTargetType.USER.getCode()));
+		}
+
+		if (null != visibleFlag) {
+			condition = condition.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
+		}
+
+		if (null != locator.getAnchor()) {
+			condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+		}
+		condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		List<OrganizationMember> records = step.where(condition).groupBy(t2.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
+		if (records != null) {
+			records.stream().map(r -> {
+				result.add(ConvertHelper.convert(r, OrganizationMember.class));
+				return null;
+			}).collect(Collectors.toList());
+		}
+		locator.setAnchor(null);
+		if (result.size() > pageSize) {
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+
+		return result;
+	}
 
 	/**
 	 * 金地取数据使用
