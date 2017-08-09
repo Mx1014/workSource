@@ -3,6 +3,7 @@ package com.everhomes.asset;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.rest.asset.ListSettledBillDTO;
+import com.everhomes.rest.asset.SettledBillDTO;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -41,4 +42,6 @@ public interface AssetProvider {
     AssetBill findAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr, Long tenantId, String tenantType, Long addressId);
 
     List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName);
+
+    List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, Long pageAnchor, Integer pageSize);
 }

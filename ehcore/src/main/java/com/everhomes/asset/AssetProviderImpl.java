@@ -10,9 +10,12 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetBillStatus;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.rest.asset.ListSettledBillDTO;
+import com.everhomes.rest.asset.SettledBillDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhPaymentBills;
+import com.everhomes.server.schema.tables.EhPaymentChargingItems;
 import com.everhomes.server.schema.tables.daos.EhAssetBillTemplateFieldsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
@@ -484,6 +487,7 @@ public class AssetProviderImpl implements AssetProvider {
                 dto.setAddressName(addressName);
             }else{
                 String buildingApartmentName = "";
+                //这个时候 r.getValue(t.TARGET_TYPE)还是空值，可以使用条件语句空值多表关联
                 if (r.getValue(t.TARGET_TYPE).equals("individual")){
                     buildingApartmentName = context.select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME).from(Tables.EH_USERS,Tables.EH_ADDRESSES).where(Tables.EH_USERS.ID.eq(r.getValue(t.TARGET_ID)))
                             .and(Tables.EH_USERS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID)).fetchOne(0,String.class);
@@ -514,5 +518,32 @@ public class AssetProviderImpl implements AssetProvider {
             list.add(dto);
             return null;});
         return list;
+    }
+
+    @Override
+    public List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, Long pageAnchor, Integer pageSize) {
+        List<SettledBillDTO> dtos = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
+                .from(t)
+                .leftOuterJoin(t1)
+                .on(t.BILL_ID.eq(billId))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t1.DEFAULT_ORDER)
+                .fetch()
+                .map(r ->{
+            SettledBillDTO dto =new SettledBillDTO();
+            dto.setTargetName(targetName);
+            dto.setDateStr(r.getValue(t.DATE_STR));
+            dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+            dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+            dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
+            dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
+//            dto.setBillStatus(r.getValue());
+            dtos.add(dto);
+            return null;});
+        return dtos;
     }
 }

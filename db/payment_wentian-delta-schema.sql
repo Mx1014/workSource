@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50717
 File Encoding         : 65001
 
-Date: 2017-08-08 20:42:20
+Date: 2017-08-09 14:49:40
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -67,12 +67,14 @@ CREATE TABLE `eh_payment_bill_groups` (
 DROP TABLE IF EXISTS `eh_payment_bill_groups_rules`;
 CREATE TABLE `eh_payment_bill_groups_rules` (
   `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL,
   `bill_group_id` bigint(20) NOT NULL DEFAULT '0',
   `charging_item_id` bigint(20) NOT NULL DEFAULT '0',
   `charging_standards_id` bigint(20) NOT NULL DEFAULT '0',
+  `charging_item_name` varchar(32) DEFAULT NULL,
   `variables_json_string` varchar(2048) DEFAULT NULL COMMENT 'json strings of variables injected for a particular formula',
-  `targetType` varchar(32) DEFAULT NULL,
-  `targetId` bigint(20) DEFAULT '0',
+  `ownerType` varchar(32) NOT NULL,
+  `ownerId` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='变量注入表';
 
@@ -98,7 +100,8 @@ CREATE TABLE `eh_payment_bill_items` (
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
-  `charging_item_name` varchar(20) DEFAULT NULL,
+  `charging_item_name` varchar(32) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0：未缴费;1:已缴费',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='明细';
 

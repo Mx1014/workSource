@@ -198,6 +198,16 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
 
+    @Override
+    public ListSettledBillItemsResponse listSettledBillItems(ListSettledBillItemsCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        ListSettledBillItemsResponse response = new ListSettledBillItemsResponse();
+        List<SettledBillDTO> settledBillDTOS = handler.listSettledBillItems(cmd.getBillId(),cmd.getTargetName(),cmd.getPageAnchor(),cmd.getPageSize());
+        return null;
+    }
+
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
         String key = String.format("pmbill:kexing:latest-selected-organization: %s:%s", UserContext.getCurrentNamespaceId(), UserContext.current().getUser().getId());

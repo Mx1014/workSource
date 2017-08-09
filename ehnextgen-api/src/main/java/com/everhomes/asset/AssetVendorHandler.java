@@ -20,4 +20,6 @@ public interface AssetVendorHandler {
     AssetBillStatDTO getAssetBillStat(String tenantType, Long tenantId, Long addressId);
 
     List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName);
+
+    List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, Long pageAnchor, Integer pageSize);
 }

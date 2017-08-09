@@ -30,12 +30,12 @@ public class ListSettledBillTest extends CoreServerTestCase {
         ListSettledBillCommand cmd = new ListSettledBillCommand();
         cmd.setOwnerId(240111044331055036l);
         cmd.setOwnerType("community");
-        cmd.setPageAnchor(null);
-        cmd.setPageSize(3);
-        cmd.setDateStrBegin(null);
-        cmd.setDateStrEnd(null);
-        cmd.setBillGroupName("物业");
-        cmd.setTargetName("lisi");
+//        cmd.setPageAnchor(null);
+//        cmd.setPageSize(3);
+//        cmd.setDateStrBegin(null);
+//        cmd.setDateStrEnd(null);
+//        cmd.setBillGroupName("物业");
+//        cmd.setTargetName("lisi");
         cmd.setAddressName("beijing");
         ListSettledBillResponse listSettledBillResponse = assetService.listSettledBill(cmd);
         for(int i = 0; i<1000; i++){
