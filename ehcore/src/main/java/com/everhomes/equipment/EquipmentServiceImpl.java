@@ -925,7 +925,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 				for(EquipmentStandardMapDTO dto : eqStandardMap) {
 					List<EquipmentStandardMap> maps = equipmentProvider.findEquipmentStandardMap(dto.getStandardId(),
-							dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+							equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+					LOGGER.debug("equipment standard maps: {}", maps);
 					if(maps == null || maps.size() == 0) {
 						if(dto.getId() == null) {
 							EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
