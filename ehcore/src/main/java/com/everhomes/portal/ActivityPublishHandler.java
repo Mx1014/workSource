@@ -11,6 +11,17 @@ public class ActivityPublishHandler implements PortalPublishHandler{
 
     @Override
     public String publish(String instanceConfig) {
-        return null;
+
+        return instanceConfig;
+    }
+
+    @Override
+    public String getItemActionData(String instanceConfig) {
+        return instanceConfig;
+    }
+
+    @Override
+    public String getAppInstanceConfig(String actionData) {
+        return actionData;
     }
 }

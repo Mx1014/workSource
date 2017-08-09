@@ -70,6 +70,8 @@ public interface ServiceModuleProvider {
 
     List<ServiceModule> listServiceModule();
 
+    List<ServiceModule> listServiceModule(Byte actionType);
+
     List<ServiceModule> listServiceModule(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
 }

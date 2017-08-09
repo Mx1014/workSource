@@ -1,24 +1,4 @@
 
-update `eh_service_modules` set action_type = '23' where id = 50600;
-update `eh_service_modules` set action_type = '27' where id = 50700;
-update `eh_service_modules` set action_type = '30' where id = 40800;
-update `eh_service_modules` set action_type = '44', instance_config = '{"realm":"quality","entryUrl":"https://core.zuolin.com/nar/quality/index.html?hideNavigationBar=1#/task_list#sign_suffix"}' where id = 20600;
-update `eh_service_modules` set action_type = '45' where id = 40300;
-update `eh_service_modules` set action_type = '46' where id = 50400;
-update `eh_service_modules` set action_type = '47' where id = 41100;
-update `eh_service_modules` set action_type = '48', instance_config = '{"categoryId":2,"timeWidgetStyle":"date"}', multiple_flag = 1 where id = 10900;
-update `eh_service_modules` set action_type = '49', instance_config = '{"resourceTypeId":8,"pageType":0}', multiple_flag = 1  where id = 40400;
-update `eh_service_modules` set action_type = '57' where id = 20900;
-update `eh_service_modules` set action_type = '61', instance_config = '{"categoryId":1,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":2,"style":4,"title": "白领活动"}', multiple_flag = 1 where id = 10600;
-update `eh_service_modules` set action_type = '13', instance_config = '{"url":"https://core.zuolin.com/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' where id = 20800;
-update `eh_service_modules` set action_type = '13', instance_config = '{"url":"http://alpha.lab.everhomes.com/station-booking/index.html?hideNavigationBar=1#/station_booking#sign_suffix"}' where id = 40200;
-update `eh_service_modules` set action_type = '62', instance_config = '{"tag":"创客"}', multiple_flag = 1 where id = 10100;
-
-
-set @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
-
-insert  into `eh_service_modules`(`id`,`name`,`parent_id`,`path`,`type`,`level`,`status`,`default_order`,`create_time`,`instance_config`,`update_time`,`operator_uid`,`creator_uid`,`description`) values (90000,'第三方服务模块',0,'/90000',3,1,2,0,now(),NULL,NULL,0,0,NULL);
-
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('4000000','域空间管理','0',NULL,'','1','2','/4000000','zuolin','0','0','1','namespace','classify');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('4100000','域空间配置','4000000',NULL,'','1','2','/4000000/4100000','zuolin','0','0','2','namespace','classify');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('4110000','业务应用配置','4100000',NULL,'','0','2','/4000000/4100000/4110000','zuolin','0','70100','3','namespace','module');
@@ -59,7 +39,7 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 
 
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40000','园区运营服务','0','/40000','1','1','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0',NULL,NULL,'0');
-insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('20100','物业报修','40000','/40000/20100','1','2','2','0','2016-12-06 11:40:50','{\"url\":\"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修\"}',NULL,'0','0',NULL,'60','0');
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('20100','物业报修','40000','/40000/20100','1','2','2','0','2016-12-06 11:40:50','{\"url\":\"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修\"}',NULL,'0','0',NULL,'60','1');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('35000','用户认证','40000','/40000/35000','1','2','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0',NULL,NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('34000','用户管理','40000','/40000/34000','1','2','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0',NULL,NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40050','位置预订','40000','/40000/40050','1','2','0','0','2017-03-07 11:27:15',NULL,NULL,'0','0',NULL,NULL,'0');
@@ -68,7 +48,7 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40200','工位预订','40000','/40000/40200','1','2','2','0','2016-12-06 11:40:51','{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}',NULL,'0','0',NULL,'13','0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40300','服务热线','40000','/40000/40300','1','2','2','0','2016-12-06 11:40:51','',NULL,'0','0',NULL,'45','0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40400','资源预约','40000','/40000/40400','1','2','2','0','2016-12-06 11:40:51','{\"resourceTypeId\":8,\"pageType\":0}',NULL,'0','0',NULL,'49','1');
-insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40500','服务联盟','40000','/40000/40500','1','2','2','0','2016-12-06 11:40:51','{\"type\":2,\"parentId\":100001}',NULL,'0','0',NULL,'33','0');
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40500','服务联盟','40000','/40000/40500','1','2','2','0','2016-12-06 11:40:51','{\"type\":2,\"parentId\":100001}',NULL,'0','0',NULL,'33','1');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40600','创客空间','40000','/40000/40600','1','2','2','0','2016-12-06 11:40:51','{\"type\":1,\"forumId\":177000,\"categoryId\":1003,\"parentId\":110001,\"tag\":\"创客\"}',NULL,'0','0',NULL,'32','0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40700','快递服务','40000','/40000/40700','1','2','2','0','2017-07-18 03:51:18','{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}','2017-07-18 03:51:18','0','0',NULL,'13','0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('40750','运营统计','40000','/40000/40750','1','2','0','0','2016-12-06 11:40:51',NULL,NULL,'0','0',NULL,NULL,'0');
@@ -82,7 +62,7 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('41600','园区审批','40000','/40000/41600','1','2','2','0','2017-05-11 08:51:49',NULL,NULL,'0','0',NULL,NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('41700','问卷调查','40000','/40000/41700','1','2','2','0','2017-05-11 08:51:49',NULL,NULL,'0','0',NULL,NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('10200','园区介绍','40000','/40000/10200','1','2','2','0','2016-12-06 11:40:50',NULL,NULL,'0','0',NULL,'13','0');
-insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('10800','园区快讯','40000','/40000/10800','1','2','2','0','2016-12-06 11:40:50','{\"categoryId\":2,\"timeWidgetStyle\":\"date\"}',NULL,'0','0',NULL,'48','0');
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('10800','园区快讯','40000','/40000/10800','1','2','2','0','2016-12-06 11:40:50','{\"categoryId\":2,\"timeWidgetStyle\":\"date\"}',NULL,'0','0',NULL,'48','1');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('10850','园区报','40000','/40000/10850','1','2','2','0','2016-12-06 11:40:50','{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}',NULL,'0','0',NULL,'13','0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('20900','车辆放行','40000','/40000/20900','1','2','2','0','2017-01-19 12:12:53','',NULL,'0','0',NULL,'57','0');
 
@@ -106,11 +86,12 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 
 
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('70000','域空间管理','0','/70000','1','1','2','0','2016-12-28 10:47:42',NULL,NULL,'0','0',NULL,NULL,'0');
-insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('70100','业务应用配置','0','/70000/70100','1','2','2','0','2017-04-10 10:54:08',NULL,NULL,'0','0',NULL,NULL,'0');
-insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('70200','App配置','0','/70000/70200','1','2','2','0','2017-04-10 10:54:08',NULL,NULL,'0','0',NULL,NULL,'0');
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('70100','业务应用配置','70000','/70000/70100','1','2','2','0','2017-04-10 10:54:08',NULL,NULL,'0','0',NULL,NULL,'0');
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('70200','App配置','70000','/70000/70200','1','2','2','0','2017-04-10 10:54:08',NULL,NULL,'0','0',NULL,NULL,'0');
 
 
-insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('90000','第三方服务模块','0','/90000','3','1','2','0','2017-07-04 15:55:50',NULL,NULL,'0','0',NULL,NULL,NULL);
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('90000','第三方服务模块','0','/90000','3','1','2','0','2017-07-04 15:55:50',NULL,NULL,'0','0',NULL,NULL,0);
+
 
 update `eh_web_menus` set module_id = 10600 where id in (10600, 10610, 10620, 10700);
 update `eh_web_menus` set module_id = 10800 where id in (10900);
@@ -132,3 +113,7 @@ insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(1
 insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(10079,'0','task.manage.super','任务管理超级权限');
 insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(10090,'0','black.list.super','黑名单超级权限');
 insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(10081,'0','questionnaire.investigation.super','问卷调查超级权限');
+
+set @domain_id = (SELECT MAX(id) FROM `eh_domains`);
+insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) values((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'test9.lab.everhomes.com', 0, now());
+

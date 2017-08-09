@@ -1595,8 +1595,10 @@ public class PortalServiceImpl implements PortalService {
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
 			item.setActionType(moduleApp.getActionType());
 			if(null != handler){
-				String actionData = handler.publish(moduleApp.getInstanceConfig());
-				item.setActionData(actionData);
+				String instanceConfig = handler.publish(moduleApp.getInstanceConfig());
+				moduleApp.setInstanceConfig(instanceConfig);
+				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
+				item.setActionData(handler.getItemActionData(instanceConfig));
 			}else{
 				item.setActionData(moduleApp.getInstanceConfig());
 			}
@@ -1879,19 +1881,8 @@ public class PortalServiceImpl implements PortalService {
 				}else{
 					item.setActionType(PortalItemActionType.MODULEAPP.getCode());
 					ModuleAppActionData actionData = new ModuleAppActionData();
-					List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleAppByActionType(namespaceId, padItem.getActionType());
-					for (ServiceModuleApp moduleApp:moduleApps) {
-						if(moduleApp.getModuleId() == 10600L){
-
-						}else if(moduleApp.getModuleId() == 40500L){
-
-						}else if(moduleApp.getModuleId() == 10900L){
-
-						}else{
-							actionData.setModuleAppId(moduleApp.getId());
-							break;
-						}
-					}
+					ServiceModuleApp moduleApp= syncServiceModuleApp(padItem);
+					actionData.setModuleAppId(moduleApp.getId());
 					item.setActionData(StringHelper.toJsonString(actionData));
 				}
 
@@ -1909,6 +1900,35 @@ public class PortalServiceImpl implements PortalService {
 			portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
 
 		}
+	}
+
+	private ServiceModuleApp syncServiceModuleApp(LaunchPadItem padItem){
+		User user = UserContext.current().getUser();
+		ServiceModuleApp moduleApp = new ServiceModuleApp();
+		moduleApp.setInstanceConfig(padItem.getActionData());
+		moduleApp.setActionType(padItem.getActionType());
+		moduleApp.setName(padItem.getItemName());
+		moduleApp.setNamespaceId(padItem.getNamespaceId());
+		moduleApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
+		moduleApp.setCreatorUid(user.getId());
+		moduleApp.setOperatorUid(user.getId());
+		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(padItem.getActionType());
+		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(padItem.getActionType())
+				|| ActionType.ROUTER  == ActionType.fromCode(padItem.getActionType())){
+
+		}else{
+			ServiceModule serviceModule = serviceModules.get(0);
+			moduleApp.setModuleId(serviceModule.getId());
+			if(MultipleFlag.fromCode(serviceModule.getMultipleFlag()) == MultipleFlag.YES){
+				PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
+//				if(null != handler){
+//					String instanceConfig = handler.getAppInstanceConfig(padItem.getActionData());
+//					moduleApp.setInstanceConfig(instanceConfig);
+//				}
+			}
+		}
+		serviceModuleAppProvider.createServiceModuleApp(moduleApp);
+		return moduleApp;
 	}
 
 	private PortalContentScope syncContentScope(User user, Integer namespaceId, String contentType, Long contentId, Byte scopeType, Long scopeId, String sceneType){
