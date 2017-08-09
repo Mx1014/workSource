@@ -272,7 +272,15 @@ ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_uid` BIGINT COMMENT '为退�
 -- 小区信息：
 ALTER TABLE `eh_communities` ADD COLUMN `shared_area` DOUBLE COMMENT '公摊面积';
 ALTER TABLE `eh_communities` ADD COLUMN `charge_area` DOUBLE COMMENT '收费面积';
-ALTER TABLE `eh_communities` ADD COLUMN `buildArea` DOUBLE COMMENT '建筑面积';
-ALTER TABLE `eh_communities` ADD COLUMN `rentArea` DOUBLE COMMENT '出租面积';
+ALTER TABLE `eh_communities` ADD COLUMN `build_area` DOUBLE COMMENT '建筑面积';
+ALTER TABLE `eh_communities` ADD COLUMN `rent_area` DOUBLE COMMENT '出租面积';
 ALTER TABLE `eh_communities` ADD COLUMN `namespace_community_type` VARCHAR(128);
 ALTER TABLE `eh_communities` ADD COLUMN `namespace_community_token` VARCHAR(128);
+
+-- 楼栋信息：
+ALTER TABLE `eh_buildings` ADD COLUMN `construction_company` VARCHAR(128) COMMENT '施工单位';
+ALTER TABLE `eh_buildings` ADD COLUMN `entry_date` DATETIME COMMENT '入驻时间';
+ALTER TABLE `eh_buildings` ADD COLUMN `shared_area` DOUBLE COMMENT '公摊面积';
+ALTER TABLE `eh_buildings` ADD COLUMN `charge_area` DOUBLE COMMENT '收费面积';
+ALTER TABLE `eh_buildings` ADD COLUMN `build_area` DOUBLE COMMENT '建筑面积';
+ALTER TABLE `eh_buildings` ADD COLUMN `rent_area` DOUBLE COMMENT '出租面积';
