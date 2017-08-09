@@ -820,18 +820,21 @@ public class ExpressServiceImpl implements ExpressService {
 				expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
 			}
 		}else{
-			if(cmd.getSendName() == null || cmd.getSendPhone() == null ||
-					cmd.getSendProvince() == null || cmd.getSendCity() == null || 
-					cmd.getSendCounty() == null || cmd.getSendDetailAddress() == null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild send address params");
+			//同城信筒没有寄件地址
+			if(cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()){
+				if(cmd.getSendName() == null || cmd.getSendPhone() == null ||
+						cmd.getSendProvince() == null || cmd.getSendCity() == null || 
+						cmd.getSendCounty() == null || cmd.getSendDetailAddress() == null){
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild send address params");
+				}
+				expressOrder.setSendName(cmd.getSendName());
+				expressOrder.setSendPhone(cmd.getSendPhone());
+				expressOrder.setSendOrganization(cmd.getSendOrganization());
+				expressOrder.setSendProvince(cmd.getSendProvince());
+				expressOrder.setSendCity(cmd.getSendCity());
+				expressOrder.setSendCounty(cmd.getSendCounty());
+				expressOrder.setSendDetailAddress(cmd.getSendDetailAddress());
 			}
-			expressOrder.setSendName(cmd.getSendName());
-			expressOrder.setSendPhone(cmd.getSendPhone());
-			expressOrder.setSendOrganization(cmd.getSendOrganization());
-			expressOrder.setSendProvince(cmd.getSendProvince());
-			expressOrder.setSendCity(cmd.getSendCity());
-			expressOrder.setSendCounty(cmd.getSendCounty());
-			expressOrder.setSendDetailAddress(cmd.getSendDetailAddress());
 		}
 		if(cmd.getReceiveAddressId() != null){
 			ExpressAddress receiveAddress = expressAddressProvider.findExpressAddressById(cmd.getReceiveAddressId());
