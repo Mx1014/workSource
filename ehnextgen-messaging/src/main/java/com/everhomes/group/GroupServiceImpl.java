@@ -861,10 +861,10 @@ public class GroupServiceImpl implements GroupService {
     private long getOrganizationMemberCount(Long orgId){
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(orgId);
-        command.setPageSize(100000000);
+        command.setPageSize(1);
         ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
-        if(res != null && res.getMembers() != null && res.getMembers().size() > 0){
-            return (long)res.getMembers().size();
+        if(res != null && res.getTotalCount() != null){
+            return res.getTotalCount().longValue();
         }
         return 0;
     }
