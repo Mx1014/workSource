@@ -86,6 +86,10 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
+		//旧表单直接退出
+		if(flowCase.getReferType()!=null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getReferType()))
+			return;
+
 		// 服务联盟的审批拼接工作流 content字符串
 		
 		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
