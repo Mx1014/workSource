@@ -1445,18 +1445,16 @@ public class ForumServiceImpl implements ForumService {
 	         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
 	         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
 
-             //查询全部时各个园区只查正常帖，因为有一个范围是“全部”的clone帖子  add by yanjun 20170807
-             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
-                     .or(Tables.EH_FORUM_POSTS.CLONE_FLAG.isNull()));
+             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
+             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 
 	         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
 	         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
 
-             //查询全部时各个公司只查正常帖，因为有一个范围是“全部”的clone帖子  add by yanjun 20170807
-             regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
-                     .or(Tables.EH_FORUM_POSTS.CLONE_FLAG.isNull()));
+             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
+             regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 
-             //增加获取发送到全部的活动，包括一般活动和clone活动  add by yanjun 20170807
+             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
 	         Condition condition = communityCondition
                      .or(regionCondition)
                      .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()))
@@ -2685,7 +2683,11 @@ public class ForumServiceImpl implements ForumService {
         // 根据查帖指定的可见性创建查询条件
         VisibilityScope scope = VisibilityScope.fromCode(cmd.getVisibilityScope());
         Condition visibilityCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
-        
+
+        //单个 -- 查询单个目标的（正常、clone），或者发送到“全部”的（正常）   add by yanjun 20170809
+        Condition cloneCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+                .and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
+
         Condition condition= this.notEqPostCategoryCondition(cmd.getExcludeCategories(), null);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -2715,15 +2717,20 @@ public class ForumServiceImpl implements ForumService {
             }
             
             if(visibilityCondition != null) {
-                query.addConditions(visibilityCondition);
+                //单个 -- 查询单个目标的（正常、clone），或者发送到“全部”的（正常）   add by yanjun 20170809
+                query.addConditions(visibilityCondition.or(cloneCondition));
             }
             
             if(null != condition){
             	query.addConditions(condition);
             }
-            
+
             return query;
         });
+
+        // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170809
+        populateRealPost(posts);
+
         this.forumProvider.populatePostAttachments(posts);
         
         Long nextPageAnchor = null;
@@ -2863,6 +2870,10 @@ public class ForumServiceImpl implements ForumService {
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         
         Condition condition = this.notEqPostCategoryCondition(cmd.getExcludeCategories(), null);
+
+        //整个论坛 -- 该论坛的正常帖（正常），或者发送到“全部”的（clone、正常） add by yanjun 20170809
+        Condition cloneConditin = Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
+                .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
         
         CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
         locator.setAnchor(cmd.getPageAnchor());
@@ -2888,8 +2899,17 @@ public class ForumServiceImpl implements ForumService {
             if(null != condition){
             	query.addConditions(condition);
             }
+
+            //整个论坛 -- 该论坛的正常帖（正常），或者发送到“全部”的（clone、正常） add by yanjun 20170809
+            if(cloneConditin != null){
+                query.addConditions(cloneConditin);
+            }
             return query;
         });
+
+        // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170808
+        populateRealPost(posts);
+
         this.forumProvider.populatePostAttachments(posts);
         
         Long nextPageAnchor = null;
@@ -5438,9 +5458,8 @@ public class ForumServiceImpl implements ForumService {
                     query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
                 }
 
-                //此处根据论坛查帖子，需要的是正常的帖子和发送到“全部”的帖子   add by yanjun 20170807
-                Condition cloneCondition = Tables.EH_FORUM_POSTS.CLONE_FLAG.isNull()
-                        .or(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()))
+                //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）   add by yanjun 20170807
+                Condition cloneCondition = Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
                         .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
 
                 query.addConditions(cloneCondition);
