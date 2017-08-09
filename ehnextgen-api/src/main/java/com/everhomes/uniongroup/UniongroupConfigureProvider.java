@@ -38,7 +38,7 @@ public interface UniongroupConfigureProvider {
 
     UniongroupMemberDetail findUniongroupMemberDetailById(Long id);
 
-    UniongroupMemberDetail findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId);
+    UniongroupMemberDetail findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId, String groupType);
 
     List<UniongroupMemberDetail> listUniongroupMemberDetail(Integer namespaceId, Long groupId, Long ownerId);
 
