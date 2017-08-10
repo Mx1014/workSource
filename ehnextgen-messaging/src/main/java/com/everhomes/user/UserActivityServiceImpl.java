@@ -55,6 +55,9 @@ import com.everhomes.statistics.terminal.AppVersion;
 import com.everhomes.statistics.terminal.StatTerminalProvider;
 import com.everhomes.util.*;
 import com.everhomes.version.VersionService;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
+import com.everhomes.yellowPage.ServiceAlliances;
+import com.everhomes.yellowPage.YellowPageProvider;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
@@ -157,6 +160,8 @@ public class UserActivityServiceImpl implements UserActivityService {
     @Autowired
     private FlowService flowService;
 
+    @Autowired
+    private YellowPageProvider yellowPageProvider;
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
         User user = UserContext.current().getUser();
@@ -1358,15 +1363,22 @@ public class UserActivityServiceImpl implements UserActivityService {
         cmd21.setProjectType(EhCommunities.class.getName());
         String content= "";
         User user = UserContext.current().getUser();
+
+        ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(cmd.getServiceAllianceId(), null, null);
+        if(serviceOrg != null) {
+            content += CustomRequestConstants.APPROVAL_TYPE + ":" + serviceOrg.getName() + "\n";
+            ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
+            cmd21.setTitle(category.getName());
+        }
         if (user.getNickName()!=null)
             content += CustomRequestConstants.USER_NAME+":"+user.getNickName()+"\n";
-        UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-        if(identifier != null)
-            content += CustomRequestConstants.USER_PHONE+":"+identifier.getIdentifierToken()+"\n";
+
+
         cmd21.setContent(content);
         cmd21.setCurrentOrganizationId(cmd.getCreatorOrganizationId());
         RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(cmd.getTemplateType());
-        cmd21.setTitle(template.getName());
+
+
 
         //创建一个空的flow
         GeneralModuleInfo gm = new GeneralModuleInfo();
