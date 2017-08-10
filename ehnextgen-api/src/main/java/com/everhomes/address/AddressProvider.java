@@ -44,6 +44,7 @@ public interface AddressProvider {
     List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName);
 	Address findAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName);
 	List<Address> listAddressByNamespaceType(Integer namespaceId, Long communityId, String namespaceType);
+	List<Address> listAddressByNamespaceType(Integer namespaceId, String namespaceType);
 	Map<Byte, Integer> countApartmentByLivingStatus(Long communityId);
 	Integer countApartment(Long communityId);
 	void updateOrganizationOwnerAddress(Long id);

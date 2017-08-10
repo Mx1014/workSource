@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.records.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -56,10 +57,6 @@ import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhResourceCategories;
 import com.everhomes.server.schema.tables.pojos.EhResourceCategoryAssignments;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
-import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhResourceCategoryAssignmentsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -1416,5 +1413,35 @@ public class CommunityProviderImpl implements CommunityProvider {
                 });
 
         return result;
+    }
+
+    @Override
+    public Map<String, Long> listCommunityIdByNamespaceType(String namespaceType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        final Map<String, Long> communities = new HashMap<>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TYPE.eq(namespaceType));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.fetch().map(r ->{
+            communities.put(r.getNamespaceCommunityToken(), r.getId());
+            return null;
+        });
+        return communities;
+    }
+
+    @Override
+    public CommunityGeoPoint findCommunityGeoPointByCommunityId(long communityId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunityGeopoints.class));
+        List<CommunityGeoPoint> communities = new ArrayList<>();
+        SelectQuery<EhCommunityGeopointsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_GEOPOINTS);
+        query.addConditions(Tables.EH_COMMUNITY_GEOPOINTS.COMMUNITY_ID.eq(communityId));
+        query.fetch().map(r ->{
+            communities.add(ConvertHelper.convert(r, CommunityGeoPoint.class));
+            return null;
+        });
+        if(communities == null || communities.size() == 0) {
+            return null;
+        }
+        return communities.get(0);
     }
 }

@@ -375,7 +375,16 @@ public class AddressProviderImpl implements AddressProvider {
 	        .map(r->ConvertHelper.convert(r, Address.class));
 	}
 
-	@Override
+    @Override
+    public List<Address> listAddressByNamespaceType(Integer namespaceId, String namespaceType) {
+        return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(namespaceType))
+                .fetch()
+                .map(r->ConvertHelper.convert(r, Address.class));
+    }
+
+    @Override
 	public Map<Byte, Integer> countApartmentByLivingStatus(Long communityId) {
 		Map<Byte, Integer> map = new HashMap<>();
 		dbProvider.getDslContext(AccessSpec.readOnly())

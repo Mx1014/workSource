@@ -27,13 +27,13 @@ import com.everhomes.rest.address.NamespaceBuildingType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.NamespaceCommunityType;
-import com.everhomes.rest.openapi.shenzhou.DataType;
-import com.everhomes.rest.openapi.shenzhou.ShenzhouJsonEntity;
-import com.everhomes.rest.openapi.shenzhou.ZJBuilding;
-import com.everhomes.rest.openapi.shenzhou.ZJCommunity;
+import com.everhomes.rest.openapi.shenzhou.*;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
+import com.everhomes.rest.techpark.expansion.LeasePromotionType;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
+import com.everhomes.techpark.expansion.LeasePromotion;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
@@ -348,10 +348,10 @@ public class ZJGKOpenServiceImpl {
                 break;
             case BUILDING:
 			    syncAllBuildings(namespaceId, backupList);
-//                break;
-//            case APARTMENT:
-//                syncAllApartments(namespaceId, backupList);
-//                break;
+                break;
+            case APARTMENT:
+                syncAllApartments(namespaceId, backupList);
+                break;
 //            case ENTERPRISE:
 //                syncAllEnterprises(namespaceId, backupList);
 //                break;
@@ -421,7 +421,8 @@ public class ZJGKOpenServiceImpl {
     private ZJCommunity findFromTheirCommunityList(Community myCommunity, List<ZJCommunity> theirCommunityList) {
         if (theirCommunityList != null) {
             for (ZJCommunity zjCommunity : theirCommunityList) {
-                if (myCommunity.getNamespaceCommunityToken().equals(zjCommunity.getCommunityIdentifier())) {
+                if (NamespaceCommunityType.SHENZHOU.getCode().equals(myCommunity.getNamespaceCommunityType())
+                        && myCommunity.getNamespaceCommunityToken().equals(zjCommunity.getCommunityIdentifier())) {
                     zjCommunity.setDealed(true);
                     return zjCommunity;
                 }
@@ -506,20 +507,41 @@ public class ZJGKOpenServiceImpl {
         communityProvider.updateCommunity(community);
         communitySearcher.feedDoc(community);
 
-        CommunityGeoPoint geoPoint = new CommunityGeoPoint();
-        geoPoint.setCommunityId(community.getId());
-        geoPoint.setLatitude(zjcommunity.getLatitude());
-        geoPoint.setLongitude(zjcommunity.getLongitude());
-        String geohash= GeoHashUtils.encode(zjcommunity.getLatitude(), zjcommunity.getLongitude());
-        geoPoint.setGeohash(geohash);
-        communityProvider.updateCommunityGeoPoint(geoPoint);
+        CommunityGeoPoint geoPoint = communityProvider.findCommunityGeoPointByCommunityId(community.getId());
+        if(geoPoint != null) {
+            geoPoint.setLatitude(zjcommunity.getLatitude());
+            geoPoint.setLongitude(zjcommunity.getLongitude());
+            String geohash= GeoHashUtils.encode(zjcommunity.getLatitude(), zjcommunity.getLongitude());
+            geoPoint.setGeohash(geohash);
+            communityProvider.updateCommunityGeoPoint(geoPoint);
+        } else {
+            geoPoint = new CommunityGeoPoint();
+            geoPoint.setCommunityId(community.getId());
+            geoPoint.setLatitude(zjcommunity.getLatitude());
+            geoPoint.setLongitude(zjcommunity.getLongitude());
+            String geohash= GeoHashUtils.encode(zjcommunity.getLatitude(), zjcommunity.getLongitude());
+            geoPoint.setGeohash(geohash);
+            communityProvider.createCommunityGeoPoint(geoPoint);
+        }
+
     }
 
     private void syncAllBuildings(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
         dbProvider.execute(s->{
             //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
             List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(namespaceId, NamespaceBuildingType.SHENZHOU.getCode());
-            List<ZJBuilding> theirBuildingList = mergeBackupList(backupList, ZJBuilding.class);
+            List<ZJBuilding> mergeBuildingList = mergeBackupList(backupList, ZJBuilding.class);
+            List<ZJBuilding> theirBuildingList = new ArrayList<ZJBuilding>();
+            if(mergeBuildingList != null && mergeBuildingList.size() > 0) {
+                Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(NamespaceBuildingType.SHENZHOU.getCode());
+                mergeBuildingList.forEach(building -> {
+                    Long communityId = communities.get(building.getCommunityIdentifier());
+                    if(communityId != null) {
+                        building.setCommunityId(communityId);
+                    }
+                    theirBuildingList.add(building);
+                });
+            }
             syncAllBuildings(namespaceId, myBuildingList, theirBuildingList);
             return true;
         });
@@ -584,7 +606,6 @@ public class ZJGKOpenServiceImpl {
         building.setNamespaceBuildingType(NamespaceBuildingType.SHENZHOU.getCode());
         building.setNamespaceBuildingToken(customerBuilding.getBuildingIdentifier());
         buildingProvider.createBuilding(building);
-
     }
 
     private void deleteBuilding(Building building) {
@@ -623,7 +644,8 @@ public class ZJGKOpenServiceImpl {
     private ZJBuilding findFromTheirBuildingList(Building myBuilding, List<ZJBuilding> theirBuildingList) {
         if (theirBuildingList != null) {
             for (ZJBuilding customerBuilding : theirBuildingList) {
-                if (myBuilding.getName().equals(customerBuilding.getBuildingName())) {
+                if (NamespaceBuildingType.SHENZHOU.getCode().equals(myBuilding.getNamespaceBuildingType())
+                && myBuilding.getNamespaceBuildingToken().equals(customerBuilding.getBuildingIdentifier())) {
                     customerBuilding.setDealed(true);
                     return customerBuilding;
                 }
@@ -632,53 +654,310 @@ public class ZJGKOpenServiceImpl {
         return null;
     }
 
-//    private void syncAllApartments(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
-//        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
-//        List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(namespaceId, appNamespaceMapping.getCommunityId(), NamespaceAddressType.SHENZHOU.getCode());
-//        List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
-//        formatCustomerBuildingName(theirApartmentList);
-//        List<CustomerBuilding> theirBuildingList = fetchBuildingsFromApartments(theirApartmentList);
-//        List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
-//        dbProvider.execute(s->{
-//            syncAllApartments(namespaceId, myApartmentList, theirApartmentList);
-//            return true;
-//        });
-//    }
-//
-//    private void syncAllApartments(AppNamespaceMapping appNamespaceMapping, List<Address> myApartmentList, List<CustomerApartment> theirApartmentList) {
-//        // 如果两边都有，更新；如果我们有，他们没有，删除；
-//        for (Address myApartment : myApartmentList) {
-//            CustomerApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
-//            if (customerApartment != null) {
-//                updateAddress(myApartment, customerApartment);
-//            }else {
-//                deleteAddress(myApartment);
-//            }
-//        }
-//        // 如果他们有，我们没有，插入
-//        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-//        if (theirApartmentList != null) {
-//            for (CustomerApartment customerApartment : theirApartmentList) {
-//                if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
-//                    continue;
-//                }
-//                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-//                Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
-//                if (address == null) {
-//                    insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
-//                }else {
-//                    updateAddress(address, customerApartment);
-//                }
-//            }
-//        }
-//
-//        // 同步完地址后更新community表中的门牌总数
-//        Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
-//        Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
-//        if (community.getAptCount().intValue() != count.intValue()) {
-//            community.setAptCount(count);
-//            communityProvider.updateCommunity(community);
-//        }
-//    }
+    private void syncAllApartments(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
+        //楼栋的同步按照从门牌中提取来同步
+        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+        List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(namespaceId, NamespaceAddressType.SHENZHOU.getCode());
+        List<ZJApartment> mergeApartmentList = mergeBackupList(backupList, ZJApartment.class);
+        List<ZJApartment> theirApartmentList = new ArrayList<ZJApartment>();
+        if(mergeApartmentList != null && mergeApartmentList.size() > 0) {
+            Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(NamespaceBuildingType.SHENZHOU.getCode());
+            mergeApartmentList.forEach(apartment -> {
+                Long communityId = communities.get(apartment.getCommunityIdentifier());
+                if(communityId != null) {
+                    apartment.setCommunityId(communityId);
+                }
+                theirApartmentList.add(apartment);
+            });
+        }
+        dbProvider.execute(s->{
+            syncAllApartments(namespaceId, myApartmentList, theirApartmentList);
+            return true;
+        });
+    }
+
+    private void syncAllApartments(Integer namespaceId, List<Address> myApartmentList, List<ZJApartment> theirApartmentList) {
+        // 如果两边都有，更新；如果我们有，他们没有，删除；
+        for (Address myApartment : myApartmentList) {
+            ZJApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
+            if (customerApartment != null) {
+                updateAddress(myApartment, customerApartment);
+            }else {
+                deleteAddress(myApartment);
+            }
+        }
+        // 如果他们有，我们没有，插入
+        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+        if (theirApartmentList != null) {
+            for (CustomerApartment customerApartment : theirApartmentList) {
+                if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+                    continue;
+                }
+                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+                Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+                if (address == null) {
+                    insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+                }else {
+                    updateAddress(address, customerApartment);
+                }
+            }
+        }
+
+        // 同步完地址后更新community表中的门牌总数，add by tt, 20170308
+        Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
+        Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
+        if (community.getAptCount().intValue() != count.intValue()) {
+            community.setAptCount(count);
+            communityProvider.updateCommunity(community);
+        }
+    }
+
+    private void insertAddress(Integer namespaceId, Long communityId, CustomerApartment customerApartment) {
+        if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+            return;
+        }
+        Community community = communityProvider.findCommunityById(communityId);
+        if (community == null) {
+            community = new Community();
+            community.setId(communityId);
+        }
+        Address address = new Address();
+        address.setUuid(UUID.randomUUID().toString());
+        address.setCommunityId(community.getId());
+        address.setCityId(community.getCityId());
+        address.setCityName(community.getCityName());
+        address.setAreaId(community.getAreaId());
+        address.setAreaName(community.getAreaName());
+        address.setZipcode(community.getZipcode());
+        address.setAddress(getAddress(customerApartment.getBuildingName(), customerApartment.getApartmentName()));
+        address.setAddressAlias(address.getAddress());
+        address.setBuildingName(customerApartment.getBuildingName());
+        address.setBuildingAliasName(customerApartment.getBuildingName());
+        address.setApartmentName(customerApartment.getApartmentName());
+        address.setApartmentFloor(customerApartment.getApartmentFloor());
+        address.setStatus(CommonStatus.ACTIVE.getCode());
+        address.setCreatorUid(1L);
+        address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        address.setOperatorUid(1L);
+        address.setOperateTime(address.getCreateTime());
+        address.setAreaSize(customerApartment.getAreaSize()==null?customerApartment.getRentArea():customerApartment.getAreaSize());
+        address.setNamespaceId(namespaceId);
+        address.setRentArea(customerApartment.getRentArea());
+        address.setBuildArea(customerApartment.getBuildArea());
+        address.setInnerArea(customerApartment.getInnerArea());
+        address.setLayout(customerApartment.getLayout());
+        address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
+        address.setNamespaceAddressType(NamespaceAddressType.JINDIE.getCode());
+
+        //添加电商用到的楼栋和门牌
+        String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
+        address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
+        address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+
+        addressProvider.createAddress(address);
+        insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
+    }
+
+    private String getRulePrefix(String apartmentName) {
+        if (apartmentName != null) {
+            for (String str : ruleList) {
+                if (apartmentName.startsWith(str)) {
+                    return str;
+                }
+            }
+        }
+        return null;
+    }
+
+    // 查找“-”第几次出现的位置
+    private int indexOf(String source, Integer count, Integer offset) {
+        try {
+            if (count != null) {
+                if (count.intValue() <= 0) {
+                    return -1;
+                }else if (count.intValue() == 1) {
+                    if (offset == null || offset.intValue() == 0) {
+                        return source.indexOf("-");
+                    }
+                    return source.indexOf("-", offset);
+                }else {
+                    count--;
+                    return indexOf(source, count, source.indexOf("-")+1);
+                }
+            }
+            return -1;
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private int getActualPos(String apartmentName, String rule) {
+        try {
+            Integer offset = 0; //在横线基础上的偏移量
+            Integer lineCount = null; //第几个横线
+            if (rule.contains("+")) {
+                String[] arr = rule.split("\\+");
+                lineCount = Integer.parseInt(arr[0]);
+                offset = Integer.parseInt(arr[1]);
+            }else {
+                lineCount = Integer.parseInt(rule);
+            }
+            return indexOf(apartmentName, lineCount, 0) + offset.intValue();
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    // 0存储楼栋名称，1存储门牌名称
+    private String[] getBusinessBuildingApartmentName(String apartmentName) {
+        String[] result = new String[2];
+        try {
+            String rule = ruleMap.get(getRulePrefix(apartmentName));
+            if (rule != null) {
+                String[] ruleArray = rule.split("-");
+                if (ruleArray.length >= 3) {
+                    int buildingStart = getActualPos(apartmentName, ruleArray[0]) + 1;
+                    int buildingEnd = getActualPos(apartmentName, ruleArray[1]);
+                    if (apartmentName.charAt(buildingEnd) >= '0' && apartmentName.charAt(buildingEnd) <= '9') {
+                        throw new Exception();
+                    }
+                    if (apartmentName.charAt(buildingEnd) != '-') {
+                        buildingEnd++;
+                    }
+                    result[0] = apartmentName.substring(buildingStart, buildingEnd);
+                    int apartmentStart = getActualPos(apartmentName, ruleArray[2]) + 1;
+                    if (ruleArray.length == 4) {
+                        int apartmentEnd = getActualPos(apartmentName, ruleArray[3]);
+                        result[1] = apartmentName.substring(apartmentStart, apartmentEnd);
+                    }else {
+                        result[1] = apartmentName.substring(apartmentStart);
+                    }
+                }else {
+                    result = getDefaultBusinessBuildingApartmentName(apartmentName);
+                }
+            }else {
+                result = getDefaultBusinessBuildingApartmentName(apartmentName);
+            }
+        } catch (Exception e) {
+            result = getDefaultBusinessBuildingApartmentName(apartmentName);
+        }
+
+        return result;
+    }
+
+    private String[] getDefaultBusinessBuildingApartmentName(String apartmentName) {
+        String[] result = new String[2];
+        if (apartmentName != null) {
+            if (apartmentName.contains("-")) {
+                int lastIndex = apartmentName.lastIndexOf("-");
+                result[0] = apartmentName.substring(0, lastIndex);
+                result[1] = apartmentName.substring(lastIndex + 1);
+            }else {
+                result[0] = result[1] = apartmentName;
+            }
+        }
+        return result;
+    }
+
+    // 插入或更新招租管理
+    private void insertOrUpdateLeasePromotion(Byte theirLivingStatus, Integer namespaceId, Long communityId, Double rentArea, String buildingName, String apartmentName){
+        CustomerLivingStatus livingStatus = CustomerLivingStatus.fromCode(theirLivingStatus);
+        if (livingStatus == null) {
+            return;
+        }
+
+        String namespaceType = "jindie";
+        String namespaceToken = generateLeasePromotionToken(buildingName, apartmentName);
+        if (livingStatus == CustomerLivingStatus.WAITING_FOR_RENTING) {
+            // 待租状态时，在招租管理里面插入一条数据，状态为已下线（因为需要科技园区编辑图文信息之后再发布到APP端），招租标题就是楼栋门牌，发布时间和入驻时间=插入数据时间，面积=传过来的面积，负责人和电话都为空
+            // 如果有数据则不变
+            LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionByToken(namespaceId, communityId, namespaceType, namespaceToken);
+            if (leasePromotion == null) {
+                leasePromotion = new LeasePromotion();
+                leasePromotion.setNamespaceId(namespaceId);
+                leasePromotion.setCommunityId(communityId);
+                leasePromotion.setRentType(LeasePromotionType.ORDINARY.getCode());
+                leasePromotion.setSubject(apartmentName);
+                leasePromotion.setRentAreas(String.valueOf(rentArea));
+                leasePromotion.setCreateUid(1L);
+                leasePromotion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                leasePromotion.setUpdateTime(leasePromotion.getCreateTime());
+                leasePromotion.setStatus(LeasePromotionStatus.OFFLINE.getCode());
+                Building building = buildingProvider.findBuildingByName(namespaceId, communityId, buildingName);
+                if (building != null) {
+                    leasePromotion.setBuildingId(building.getId());
+                }else {
+                    leasePromotion.setBuildingId(0L);
+                }
+                leasePromotion.setRentPosition(buildingName);
+                leasePromotion.setEnterTime(leasePromotion.getCreateTime());
+                leasePromotion.setNamespaceType(namespaceType);
+                leasePromotion.setNamespaceToken(namespaceToken);
+                enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
+            }
+        }else if (livingStatus == CustomerLivingStatus.NEW_RENTING || livingStatus == CustomerLivingStatus.CONTINUE_RENTING) {
+            // 新租和已租时，将招租管理对应的门牌的招租状态改为“已出租”
+            LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionByToken(namespaceId, communityId, namespaceType, namespaceToken);
+            if (leasePromotion != null && LeasePromotionStatus.fromType(leasePromotion.getStatus()) != LeasePromotionStatus.RENTAL) {
+                leasePromotion.setStatus(LeasePromotionStatus.RENTAL.getCode());
+                enterpriseApplyEntryProvider.updateLeasePromotion(leasePromotion);
+            }
+        }
+    }
+
+    private String generateLeasePromotionToken(String buildingName, String apartmentName) {
+        return buildingName+"-"+apartmentName;
+    };
+
+    private String getAddress(String buildingName, String apartmentName){
+        if (apartmentName.contains(buildingName)) {
+            return apartmentName;
+        }
+        return buildingName+"-"+apartmentName;
+    }
+
+    private void deleteAddress(Address address) {
+        if (CommonStatus.fromCode(address.getStatus()) != CommonStatus.INACTIVE) {
+            address.setOperatorUid(1L);
+            address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            address.setStatus(CommonStatus.INACTIVE.getCode());
+            addressProvider.updateAddress(address);
+        }
+    }
+
+    private void updateAddress(Address address, CustomerApartment customerApartment) {
+        address.setApartmentFloor(customerApartment.getApartmentFloor());
+        address.setAreaSize(customerApartment.getAreaSize()==null?customerApartment.getRentArea():customerApartment.getAreaSize());
+        address.setRentArea(customerApartment.getRentArea());
+        address.setBuildArea(customerApartment.getBuildArea());
+        address.setInnerArea(customerApartment.getInnerArea());
+        address.setLayout(customerApartment.getLayout());
+        address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
+        address.setOperatorUid(1L);
+        address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        address.setStatus(CommonStatus.ACTIVE.getCode());
+
+        //添加电商用到的楼栋和门牌
+        String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
+        address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
+        address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+
+        addressProvider.updateAddress(address);
+        insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
+    }
+
+    private ZJApartment findFromTheirApartmentList(Address myApartment,
+                                                         List<ZJApartment> theirApartmentList) {
+        if (theirApartmentList != null) {
+            for (ZJApartment customerApartment : theirApartmentList) {
+                if (NamespaceAddressType.SHENZHOU.getCode().equals(myApartment.getNamespaceAddressType())
+                && myApartment.getNamespaceAddressToken().equals(customerApartment.getApartmentIdentifier())) {
+                    customerApartment.setDealed(true);
+                    return customerApartment;
+                }
+            }
+        }
+        return null;
+    }
 
 }
