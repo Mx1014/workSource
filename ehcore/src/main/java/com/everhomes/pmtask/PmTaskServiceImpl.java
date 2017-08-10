@@ -2343,6 +2343,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 			task.setRemarkSource(TaskRemarkSource.fromCode(app.getName()).getCode());
 			task.setRemark(cmd.getRemark());
+			task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 			pmTaskProvider.updateTask(task);
 			return null;
 		});
