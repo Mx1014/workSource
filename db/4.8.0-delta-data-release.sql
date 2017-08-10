@@ -103,3 +103,7 @@ ORDER BY
 -- 资源预约 add by sw 20170808
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
 	VALUES ('rental', '14000', 'zh_CN', '请补充线下模式负责人信息！');
+
+-- by dengs, 更新认证描述信息 20170818
+update eh_locale_strings SET text = '很遗憾，您的认证未成功|1、请检测信息填写是否正确，如填写有误，请重新提交|2、如填写无误，请到携带相关证件管理处核对信息|您已退租，如有疑问请联系客服|恭喜您，成为我们的一员，您承租的地址信息如下|未定义的返回码|园区[|]不存在|园区[|]名称存在多个|地址|请求认证失败！|系统认证异常, 请联系管理员' WHERE scope = 'third.party.authorization' AND `code`='personal_back_code_detail';
+update eh_locale_strings SET text = '提交信息匹配不成功|1、请检测信息填写是否正确，如填写有误，请重新提交|2、如填写无误，请到携带相关证件管理处核对信息|您已退租，如有疑问请联系客服|认证成功！您承租地址信息如下|未定义的返回码|园区[|]不存在|园区[|]名称存在多个|地址|请求认证失败！|系统认证异常，请联系管理员' WHERE scope = 'third.party.authorization' AND `code`='organization_back_code_detail';
