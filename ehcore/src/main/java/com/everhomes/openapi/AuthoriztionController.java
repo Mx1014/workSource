@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.approval.CommonStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.DisclaimAddressCommand;
-import com.everhomes.rest.user.UnrentFeedbackCommand;
+import com.everhomes.rest.user.CancelAuthFeedbackCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
@@ -54,13 +55,13 @@ public class AuthoriztionController extends ControllerBase {
     private AddressService addressService;
 
 	/**
-	 * <b>URL: /openapi/unrentFeedback</b>
+	 * <b>URL: /openapi/user/cancelAuthFeedback</b>
      * <p>退租调用接口</p>
 	 */
 	@RequestMapping("cancelAuthFeedback")
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
-	public RestResponse unrentFeedback(@Valid UnrentFeedbackCommand cmd,HttpServletRequest request, HttpServletResponse response) {
+	public RestResponse cancelAuthFeedback(@Valid CancelAuthFeedbackCommand cmd, HttpServletRequest request, HttpServletResponse response) {
 		checkCmd(cmd);
 		
 		AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
@@ -94,6 +95,9 @@ public class AuthoriztionController extends ControllerBase {
 				}
 			}
 		}
+		//退租了，然后就把这个认证记录的状态置为inactive
+		record.setStatus(CommonStatus.INACTIVE.getCode());
+		authorizationThirdPartyRecordProvider.updateAuthorizationThirdPartyRecord(record);
 		RestResponse r = new RestResponse();
 		r.setErrorScope("asset");
 		r.setErrorDetails("OK");
@@ -101,7 +105,7 @@ public class AuthoriztionController extends ControllerBase {
 		return r;
 	}
 
-	private void checkCmd(UnrentFeedbackCommand cmd) {
+	private void checkCmd(CancelAuthFeedbackCommand cmd) {
 		if(cmd.getAppKey() == null
 				|| cmd.getNonce() == null
 				|| cmd.getPhone() == null
@@ -116,7 +120,7 @@ public class AuthoriztionController extends ControllerBase {
 		validateSign(cmd);
 	}
 	
-	private void validateSign(UnrentFeedbackCommand cmd) {
+	private void validateSign(CancelAuthFeedbackCommand cmd) {
 		App app = appProvider.findAppByKey(cmd.getAppKey());
 		if(app == null){
 			LOGGER.error("app not found.key=" + cmd.getAppKey());

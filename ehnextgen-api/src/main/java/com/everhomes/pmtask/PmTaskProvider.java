@@ -74,4 +74,6 @@ public interface PmTaskProvider {
 	void updateTaskHistoryAddress(PmTaskHistoryAddress pmTaskHistoryAddress);
 
 	PmTaskHistoryAddress findTaskHistoryAddressById(Long id);
+
+	List<PmTask> listTasksById(List<Long> ids);
 }

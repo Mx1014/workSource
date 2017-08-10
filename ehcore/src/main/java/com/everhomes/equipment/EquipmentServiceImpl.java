@@ -924,25 +924,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(eqStandardMap != null && eqStandardMap.size() > 0) {
 
 				for(EquipmentStandardMapDTO dto : eqStandardMap) {
-					if(dto.getId() == null) {
-						EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
-						map.setTargetId(equipment.getId());
-						map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-						map.setReviewerUid(0L);
-						map.setReviewTime(null);
-						map.setReviewResult(ReviewResult.NONE.getCode());
-						map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
-						map.setCreatorUid(user.getId());
-						
-						equipmentProvider.createEquipmentStandardMap(map);
-						equipmentStandardMapSearcher.feedDoc(map);
-						
-						updateStandardIds.add(map.getStandardId());
-					} else {
-						EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMap(dto.getId(), dto.getStandardId(),
-								 dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
-						if(map == null) {
-							map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+					List<EquipmentStandardMap> maps = equipmentProvider.findEquipmentStandardMap(dto.getStandardId(),
+							equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+					LOGGER.debug("equipment standard maps: {}", maps);
+					if(maps == null || maps.size() == 0) {
+						if(dto.getId() == null) {
+							EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
 							map.setTargetId(equipment.getId());
 							map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
 							map.setReviewerUid(0L);
@@ -953,11 +940,45 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 							equipmentProvider.createEquipmentStandardMap(map);
 							equipmentStandardMapSearcher.feedDoc(map);
-						}
 
-						updateStandardIds.add(map.getStandardId());
+							updateStandardIds.add(map.getStandardId());
+
+						} else {
+							EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMap(dto.getId(), dto.getStandardId(),
+									dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+							if(map == null) {
+								map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+								map.setTargetId(equipment.getId());
+								map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+								map.setReviewerUid(0L);
+								map.setReviewTime(null);
+								map.setReviewResult(ReviewResult.NONE.getCode());
+								map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+								map.setCreatorUid(user.getId());
+
+								equipmentProvider.createEquipmentStandardMap(map);
+								equipmentStandardMapSearcher.feedDoc(map);
+							}
+
+							updateStandardIds.add(map.getStandardId());
+						}
 					}
+					else if(maps.size() > 1) {
+						//删除设备多次重复绑定的标准,仅保留最早绑的那个
+						maps.remove(0);
+						LOGGER.debug("equipment standard maps after remove: {}", maps);
+						maps.forEach(map -> {
+							map.setStatus(Status.INACTIVE.getCode());
+							map.setDeleterUid(user.getId());
+							map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							equipmentProvider.updateEquipmentStandardMap(map);
+							equipmentStandardMapSearcher.feedDoc(map);
+						});
+					}
+
 				}
+
+
 				
 			}
 
@@ -3792,6 +3813,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			command.setNamespaceId(dto.getNamespaceId());
 			command.setOsType(OSType.Android.getCode());
 			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("app logo url : {}", appUrlDTO.getLogoUrl());
+			}
 			if(appUrlDTO.getLogoUrl() != null) {
 				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
 			}

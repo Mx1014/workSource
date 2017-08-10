@@ -107,657 +107,657 @@ VALUES (1960627, 240111044331050362, '昌发展龙域中心二单元', '龙域�
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262769, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-501','龙域中心一单元','501','2','0',UTC_TIMESTAMP(), @namespace_id, 494.99);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37065, 1035719, 240111044331050362, 239825274387262769, '龙域中心一单元-501', '0');
+VALUES (38066, 1035719, 240111044331050362, 239825274387262769, '龙域中心一单元-501', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262770, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-502','龙域中心一单元','502','2','0',UTC_TIMESTAMP(), @namespace_id, 550.02);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37066, 1035719, 240111044331050362, 239825274387262770, '龙域中心一单元-502', '0');
+VALUES (38067, 1035719, 240111044331050362, 239825274387262770, '龙域中心一单元-502', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262771, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-503','龙域中心一单元','503','2','0',UTC_TIMESTAMP(), @namespace_id, 367.25);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37067, 1035719, 240111044331050362, 239825274387262771, '龙域中心一单元-503', '0');
+VALUES (38068, 1035719, 240111044331050362, 239825274387262771, '龙域中心一单元-503', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262772, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-504','龙域中心一单元','504','2','0',UTC_TIMESTAMP(), @namespace_id, 231.13);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37068, 1035719, 240111044331050362, 239825274387262772, '龙域中心一单元-504', '0');
+VALUES (38069, 1035719, 240111044331050362, 239825274387262772, '龙域中心一单元-504', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262773, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-505','龙域中心一单元','505','2','0',UTC_TIMESTAMP(), @namespace_id, 334.02);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37069, 1035719, 240111044331050362, 239825274387262773, '龙域中心一单元-505', '0');
+VALUES (38070, 1035719, 240111044331050362, 239825274387262773, '龙域中心一单元-505', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262774, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-506','龙域中心一单元','506','2','0',UTC_TIMESTAMP(), @namespace_id, 243.47);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37070, 1035719, 240111044331050362, 239825274387262774, '龙域中心一单元-506', '0');
+VALUES (38071, 1035719, 240111044331050362, 239825274387262774, '龙域中心一单元-506', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262775, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-507','龙域中心一单元','507','2','0',UTC_TIMESTAMP(), @namespace_id, 250.69);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37071, 1035719, 240111044331050362, 239825274387262775, '龙域中心一单元-507', '0');
+VALUES (38072, 1035719, 240111044331050362, 239825274387262775, '龙域中心一单元-507', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262776, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-508','龙域中心一单元','508','2','0',UTC_TIMESTAMP(), @namespace_id, 250.35);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37072, 1035719, 240111044331050362, 239825274387262776, '龙域中心一单元-508', '0');
+VALUES (38073, 1035719, 240111044331050362, 239825274387262776, '龙域中心一单元-508', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262777, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-509','龙域中心一单元','509','2','0',UTC_TIMESTAMP(), @namespace_id, 81.18);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37073, 1035719, 240111044331050362, 239825274387262777, '龙域中心一单元-509', '0');
+VALUES (38074, 1035719, 240111044331050362, 239825274387262777, '龙域中心一单元-509', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262778, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-510','龙域中心一单元','510','2','0',UTC_TIMESTAMP(), @namespace_id, 82.87);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37074, 1035719, 240111044331050362, 239825274387262778, '龙域中心一单元-510', '0');
+VALUES (38075, 1035719, 240111044331050362, 239825274387262778, '龙域中心一单元-510', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262779, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-511','龙域中心一单元','511','2','0',UTC_TIMESTAMP(), @namespace_id, 82.27);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37075, 1035719, 240111044331050362, 239825274387262779, '龙域中心一单元-511', '0');
+VALUES (38076, 1035719, 240111044331050362, 239825274387262779, '龙域中心一单元-511', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262780, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-601','龙域中心一单元','601','2','0',UTC_TIMESTAMP(), @namespace_id, 490.92);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37076, 1035719, 240111044331050362, 239825274387262780, '龙域中心一单元-601', '0');
+VALUES (38077, 1035719, 240111044331050362, 239825274387262780, '龙域中心一单元-601', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262781, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-602','龙域中心一单元','602','2','0',UTC_TIMESTAMP(), @namespace_id, 558.34);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37077, 1035719, 240111044331050362, 239825274387262781, '龙域中心一单元-602', '0');
+VALUES (38078, 1035719, 240111044331050362, 239825274387262781, '龙域中心一单元-602', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262782, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-603','龙域中心一单元','603','2','0',UTC_TIMESTAMP(), @namespace_id, 364.32);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37078, 1035719, 240111044331050362, 239825274387262782, '龙域中心一单元-603', '0');
+VALUES (38079, 1035719, 240111044331050362, 239825274387262782, '龙域中心一单元-603', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262783, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-604','龙域中心一单元','604','2','0',UTC_TIMESTAMP(), @namespace_id, 232.27);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37079, 1035719, 240111044331050362, 239825274387262783, '龙域中心一单元-604', '0');
+VALUES (38080, 1035719, 240111044331050362, 239825274387262783, '龙域中心一单元-604', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262784, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-605','龙域中心一单元','605','2','0',UTC_TIMESTAMP(), @namespace_id, 336.7);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37080, 1035719, 240111044331050362, 239825274387262784, '龙域中心一单元-605', '0');
+VALUES (38081, 1035719, 240111044331050362, 239825274387262784, '龙域中心一单元-605', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262785, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-606','龙域中心一单元','606','2','0',UTC_TIMESTAMP(), @namespace_id, 416.59);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37081, 1035719, 240111044331050362, 239825274387262785, '龙域中心一单元-606', '0');
+VALUES (38082, 1035719, 240111044331050362, 239825274387262785, '龙域中心一单元-606', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262786, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-607','龙域中心一单元','607','2','0',UTC_TIMESTAMP(), @namespace_id, 248.32);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37082, 1035719, 240111044331050362, 239825274387262786, '龙域中心一单元-607', '0');
+VALUES (38083, 1035719, 240111044331050362, 239825274387262786, '龙域中心一单元-607', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262787, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-608','龙域中心一单元','608','2','0',UTC_TIMESTAMP(), @namespace_id, 250.63);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37083, 1035719, 240111044331050362, 239825274387262787, '龙域中心一单元-608', '0');
+VALUES (38084, 1035719, 240111044331050362, 239825274387262787, '龙域中心一单元-608', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262788, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-609','龙域中心一单元','609','2','0',UTC_TIMESTAMP(), @namespace_id, 247.64);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37084, 1035719, 240111044331050362, 239825274387262788, '龙域中心一单元-609', '0');
+VALUES (38085, 1035719, 240111044331050362, 239825274387262788, '龙域中心一单元-609', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262789, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-610','龙域中心一单元','610','2','0',UTC_TIMESTAMP(), @namespace_id, 80.46);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37085, 1035719, 240111044331050362, 239825274387262789, '龙域中心一单元-610', '0');
+VALUES (38086, 1035719, 240111044331050362, 239825274387262789, '龙域中心一单元-610', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262790, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-611','龙域中心一单元','611','2','0',UTC_TIMESTAMP(), @namespace_id, 84.22);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37086, 1035719, 240111044331050362, 239825274387262790, '龙域中心一单元-611', '0');
+VALUES (38087, 1035719, 240111044331050362, 239825274387262790, '龙域中心一单元-611', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262791, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-612','龙域中心一单元','612','2','0',UTC_TIMESTAMP(), @namespace_id, 82.04);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37087, 1035719, 240111044331050362, 239825274387262791, '龙域中心一单元-612', '0');
+VALUES (38088, 1035719, 240111044331050362, 239825274387262791, '龙域中心一单元-612', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262792, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-701','龙域中心一单元','701','2','0',UTC_TIMESTAMP(), @namespace_id, 321.5);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37088, 1035719, 240111044331050362, 239825274387262792, '龙域中心一单元-701', '0');
+VALUES (38089, 1035719, 240111044331050362, 239825274387262792, '龙域中心一单元-701', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262793, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-702','龙域中心一单元','702','2','0',UTC_TIMESTAMP(), @namespace_id, 341.13);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37089, 1035719, 240111044331050362, 239825274387262793, '龙域中心一单元-702', '0');
+VALUES (38090, 1035719, 240111044331050362, 239825274387262793, '龙域中心一单元-702', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262794, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-703','龙域中心一单元','703','2','0',UTC_TIMESTAMP(), @namespace_id, 247.13);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37090, 1035719, 240111044331050362, 239825274387262794, '龙域中心一单元-703', '0');
+VALUES (38091, 1035719, 240111044331050362, 239825274387262794, '龙域中心一单元-703', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262795, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-704','龙域中心一单元','704','2','0',UTC_TIMESTAMP(), @namespace_id, 120.75);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37091, 1035719, 240111044331050362, 239825274387262795, '龙域中心一单元-704', '0');
+VALUES (38092, 1035719, 240111044331050362, 239825274387262795, '龙域中心一单元-704', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262796, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-705','龙域中心一单元','705','2','0',UTC_TIMESTAMP(), @namespace_id, 328.3);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37092, 1035719, 240111044331050362, 239825274387262796, '龙域中心一单元-705', '0');
+VALUES (38093, 1035719, 240111044331050362, 239825274387262796, '龙域中心一单元-705', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262797, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-706','龙域中心一单元','706','2','0',UTC_TIMESTAMP(), @namespace_id, 418.09);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37093, 1035719, 240111044331050362, 239825274387262797, '龙域中心一单元-706', '0');
+VALUES (38094, 1035719, 240111044331050362, 239825274387262797, '龙域中心一单元-706', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262798, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-707','龙域中心一单元','707','2','0',UTC_TIMESTAMP(), @namespace_id, 46.07);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37094, 1035719, 240111044331050362, 239825274387262798, '龙域中心一单元-707', '0');
+VALUES (38095, 1035719, 240111044331050362, 239825274387262798, '龙域中心一单元-707', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262799, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-708','龙域中心一单元','708','2','0',UTC_TIMESTAMP(), @namespace_id, 250.19);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37095, 1035719, 240111044331050362, 239825274387262799, '龙域中心一单元-708', '0');
+VALUES (38096, 1035719, 240111044331050362, 239825274387262799, '龙域中心一单元-708', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262800, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-709','龙域中心一单元','709','2','0',UTC_TIMESTAMP(), @namespace_id, 256.54);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37096, 1035719, 240111044331050362, 239825274387262800, '龙域中心一单元-709', '0');
+VALUES (38097, 1035719, 240111044331050362, 239825274387262800, '龙域中心一单元-709', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262801, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-710','龙域中心一单元','710','2','0',UTC_TIMESTAMP(), @namespace_id, 187.44);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37097, 1035719, 240111044331050362, 239825274387262801, '龙域中心一单元-710', '0');
+VALUES (38098, 1035719, 240111044331050362, 239825274387262801, '龙域中心一单元-710', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262802, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-711','龙域中心一单元','711','2','0',UTC_TIMESTAMP(), @namespace_id, 164.03);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37098, 1035719, 240111044331050362, 239825274387262802, '龙域中心一单元-711', '0');
+VALUES (38099, 1035719, 240111044331050362, 239825274387262802, '龙域中心一单元-711', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262803, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-712','龙域中心一单元','712','2','0',UTC_TIMESTAMP(), @namespace_id, 82.04);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37099, 1035719, 240111044331050362, 239825274387262803, '龙域中心一单元-712', '0');
+VALUES (38100, 1035719, 240111044331050362, 239825274387262803, '龙域中心一单元-712', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262804, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-801','龙域中心一单元','801','2','0',UTC_TIMESTAMP(), @namespace_id, 321.89);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37100, 1035719, 240111044331050362, 239825274387262804, '龙域中心一单元-801', '0');
+VALUES (38101, 1035719, 240111044331050362, 239825274387262804, '龙域中心一单元-801', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262805, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-802','龙域中心一单元','802','2','0',UTC_TIMESTAMP(), @namespace_id, 341.52);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37101, 1035719, 240111044331050362, 239825274387262805, '龙域中心一单元-802', '0');
+VALUES (38102, 1035719, 240111044331050362, 239825274387262805, '龙域中心一单元-802', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262806, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-803','龙域中心一单元','803','2','0',UTC_TIMESTAMP(), @namespace_id, 247.67);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37102, 1035719, 240111044331050362, 239825274387262806, '龙域中心一单元-803', '0');
+VALUES (38103, 1035719, 240111044331050362, 239825274387262806, '龙域中心一单元-803', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262807, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-804','龙域中心一单元','804','2','0',UTC_TIMESTAMP(), @namespace_id, 121.06);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37103, 1035719, 240111044331050362, 239825274387262807, '龙域中心一单元-804', '0');
+VALUES (38104, 1035719, 240111044331050362, 239825274387262807, '龙域中心一单元-804', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262808, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-805','龙域中心一单元','805','2','0',UTC_TIMESTAMP(), @namespace_id, 328.3);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37104, 1035719, 240111044331050362, 239825274387262808, '龙域中心一单元-805', '0');
+VALUES (38105, 1035719, 240111044331050362, 239825274387262808, '龙域中心一单元-805', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262809, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-806','龙域中心一单元','806','2','0',UTC_TIMESTAMP(), @namespace_id, 417.71);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37105, 1035719, 240111044331050362, 239825274387262809, '龙域中心一单元-806', '0');
+VALUES (38106, 1035719, 240111044331050362, 239825274387262809, '龙域中心一单元-806', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262810, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-807','龙域中心一单元','807','2','0',UTC_TIMESTAMP(), @namespace_id, 45.89);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37106, 1035719, 240111044331050362, 239825274387262810, '龙域中心一单元-807', '0');
+VALUES (38107, 1035719, 240111044331050362, 239825274387262810, '龙域中心一单元-807', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262811, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-808','龙域中心一单元','808','2','0',UTC_TIMESTAMP(), @namespace_id, 247.68);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37107, 1035719, 240111044331050362, 239825274387262811, '龙域中心一单元-808', '0');
+VALUES (38108, 1035719, 240111044331050362, 239825274387262811, '龙域中心一单元-808', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262812, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-809','龙域中心一单元','809','2','0',UTC_TIMESTAMP(), @namespace_id, 256.17);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37108, 1035719, 240111044331050362, 239825274387262812, '龙域中心一单元-809', '0');
+VALUES (38109, 1035719, 240111044331050362, 239825274387262812, '龙域中心一单元-809', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262813, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-810','龙域中心一单元','810','2','0',UTC_TIMESTAMP(), @namespace_id, 189.59);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37109, 1035719, 240111044331050362, 239825274387262813, '龙域中心一单元-810', '0');
+VALUES (38110, 1035719, 240111044331050362, 239825274387262813, '龙域中心一单元-810', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262814, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-811','龙域中心一单元','811','2','0',UTC_TIMESTAMP(), @namespace_id, 164.03);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37110, 1035719, 240111044331050362, 239825274387262814, '龙域中心一单元-811', '0');
+VALUES (38111, 1035719, 240111044331050362, 239825274387262814, '龙域中心一单元-811', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262815, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-812','龙域中心一单元','812','2','0',UTC_TIMESTAMP(), @namespace_id, 81.94);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37111, 1035719, 240111044331050362, 239825274387262815, '龙域中心一单元-812', '0');
+VALUES (38112, 1035719, 240111044331050362, 239825274387262815, '龙域中心一单元-812', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262816, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-901','龙域中心一单元','901','2','0',UTC_TIMESTAMP(), @namespace_id, 321.89);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37112, 1035719, 240111044331050362, 239825274387262816, '龙域中心一单元-901', '0');
+VALUES (38113, 1035719, 240111044331050362, 239825274387262816, '龙域中心一单元-901', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262817, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-902','龙域中心一单元','902','2','0',UTC_TIMESTAMP(), @namespace_id, 341.59);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37113, 1035719, 240111044331050362, 239825274387262817, '龙域中心一单元-902', '0');
+VALUES (38114, 1035719, 240111044331050362, 239825274387262817, '龙域中心一单元-902', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262818, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-903','龙域中心一单元','903','2','0',UTC_TIMESTAMP(), @namespace_id, 247.67);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37114, 1035719, 240111044331050362, 239825274387262818, '龙域中心一单元-903', '0');
+VALUES (38115, 1035719, 240111044331050362, 239825274387262818, '龙域中心一单元-903', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262819, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-904','龙域中心一单元','904','2','0',UTC_TIMESTAMP(), @namespace_id, 708.14);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37115, 1035719, 240111044331050362, 239825274387262819, '龙域中心一单元-904', '0');
+VALUES (38116, 1035719, 240111044331050362, 239825274387262819, '龙域中心一单元-904', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262820, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-905','龙域中心一单元','905','2','0',UTC_TIMESTAMP(), @namespace_id, 263.58);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37116, 1035719, 240111044331050362, 239825274387262820, '龙域中心一单元-905', '0');
+VALUES (38117, 1035719, 240111044331050362, 239825274387262820, '龙域中心一单元-905', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262821, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-906','龙域中心一单元','906','2','0',UTC_TIMESTAMP(), @namespace_id, 297.87);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37117, 1035719, 240111044331050362, 239825274387262821, '龙域中心一单元-906', '0');
+VALUES (38118, 1035719, 240111044331050362, 239825274387262821, '龙域中心一单元-906', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262822, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-907','龙域中心一单元','907','2','0',UTC_TIMESTAMP(), @namespace_id, 45.89);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37118, 1035719, 240111044331050362, 239825274387262822, '龙域中心一单元-907', '0');
+VALUES (38119, 1035719, 240111044331050362, 239825274387262822, '龙域中心一单元-907', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262823, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-908','龙域中心一单元','908','2','0',UTC_TIMESTAMP(), @namespace_id, 299.27);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37119, 1035719, 240111044331050362, 239825274387262823, '龙域中心一单元-908', '0');
+VALUES (38120, 1035719, 240111044331050362, 239825274387262823, '龙域中心一单元-908', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262824, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-909','龙域中心一单元','909','2','0',UTC_TIMESTAMP(), @namespace_id, 340.06);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37120, 1035719, 240111044331050362, 239825274387262824, '龙域中心一单元-909', '0');
+VALUES (38121, 1035719, 240111044331050362, 239825274387262824, '龙域中心一单元-909', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262825, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-910','龙域中心一单元','910','2','0',UTC_TIMESTAMP(), @namespace_id, 231.39);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37121, 1035719, 240111044331050362, 239825274387262825, '龙域中心一单元-910', '0');
+VALUES (38122, 1035719, 240111044331050362, 239825274387262825, '龙域中心一单元-910', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262826, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-911','龙域中心一单元','911','2','0',UTC_TIMESTAMP(), @namespace_id, 162.6);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37122, 1035719, 240111044331050362, 239825274387262826, '龙域中心一单元-911', '0');
+VALUES (38123, 1035719, 240111044331050362, 239825274387262826, '龙域中心一单元-911', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262827, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-912','龙域中心一单元','912','2','0',UTC_TIMESTAMP(), @namespace_id, 81.34);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37123, 1035719, 240111044331050362, 239825274387262827, '龙域中心一单元-912', '0');
+VALUES (38124, 1035719, 240111044331050362, 239825274387262827, '龙域中心一单元-912', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262828, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1001','龙域中心一单元','1001','2','0',UTC_TIMESTAMP(), @namespace_id, 321.79);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37124, 1035719, 240111044331050362, 239825274387262828, '龙域中心一单元-1001', '0');
+VALUES (38125, 1035719, 240111044331050362, 239825274387262828, '龙域中心一单元-1001', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262829, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1002','龙域中心一单元','1002','2','0',UTC_TIMESTAMP(), @namespace_id, 339.66);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37125, 1035719, 240111044331050362, 239825274387262829, '龙域中心一单元-1002', '0');
+VALUES (38126, 1035719, 240111044331050362, 239825274387262829, '龙域中心一单元-1002', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262830, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1003','龙域中心一单元','1003','2','0',UTC_TIMESTAMP(), @namespace_id, 247.5);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37126, 1035719, 240111044331050362, 239825274387262830, '龙域中心一单元-1003', '0');
+VALUES (38127, 1035719, 240111044331050362, 239825274387262830, '龙域中心一单元-1003', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262831, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1004','龙域中心一单元','1004','2','0',UTC_TIMESTAMP(), @namespace_id, 701.36);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37127, 1035719, 240111044331050362, 239825274387262831, '龙域中心一单元-1004', '0');
+VALUES (38128, 1035719, 240111044331050362, 239825274387262831, '龙域中心一单元-1004', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262832, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1005','龙域中心一单元','1005','2','0',UTC_TIMESTAMP(), @namespace_id, 269.22);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37128, 1035719, 240111044331050362, 239825274387262832, '龙域中心一单元-1005', '0');
+VALUES (38129, 1035719, 240111044331050362, 239825274387262832, '龙域中心一单元-1005', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262833, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1006','龙域中心一单元','1006','2','0',UTC_TIMESTAMP(), @namespace_id, 298.58);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37129, 1035719, 240111044331050362, 239825274387262833, '龙域中心一单元-1006', '0');
+VALUES (38130, 1035719, 240111044331050362, 239825274387262833, '龙域中心一单元-1006', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262834, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1007','龙域中心一单元','1007','2','0',UTC_TIMESTAMP(), @namespace_id, 45.89);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37130, 1035719, 240111044331050362, 239825274387262834, '龙域中心一单元-1007', '0');
+VALUES (38131, 1035719, 240111044331050362, 239825274387262834, '龙域中心一单元-1007', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262835, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1008','龙域中心一单元','1008','2','0',UTC_TIMESTAMP(), @namespace_id, 298.76);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37131, 1035719, 240111044331050362, 239825274387262835, '龙域中心一单元-1008', '0');
+VALUES (38132, 1035719, 240111044331050362, 239825274387262835, '龙域中心一单元-1008', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262836, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1009','龙域中心一单元','1009','2','0',UTC_TIMESTAMP(), @namespace_id, 341.84);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37132, 1035719, 240111044331050362, 239825274387262836, '龙域中心一单元-1009', '0');
+VALUES (38133, 1035719, 240111044331050362, 239825274387262836, '龙域中心一单元-1009', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262837, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1010','龙域中心一单元','1010','2','0',UTC_TIMESTAMP(), @namespace_id, 227.84);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37133, 1035719, 240111044331050362, 239825274387262837, '龙域中心一单元-1010', '0');
+VALUES (38134, 1035719, 240111044331050362, 239825274387262837, '龙域中心一单元-1010', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262838, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1011','龙域中心一单元','1011','2','0',UTC_TIMESTAMP(), @namespace_id, 162.6);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37134, 1035719, 240111044331050362, 239825274387262838, '龙域中心一单元-1011', '0');
+VALUES (38135, 1035719, 240111044331050362, 239825274387262838, '龙域中心一单元-1011', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262839, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1012','龙域中心一单元','1012','2','0',UTC_TIMESTAMP(), @namespace_id, 81.34);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37135, 1035719, 240111044331050362, 239825274387262839, '龙域中心一单元-1012', '0');
+VALUES (38136, 1035719, 240111044331050362, 239825274387262839, '龙域中心一单元-1012', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262840, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1101','龙域中心一单元','1101','2','0',UTC_TIMESTAMP(), @namespace_id, 321.97);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37136, 1035719, 240111044331050362, 239825274387262840, '龙域中心一单元-1101', '0');
+VALUES (38137, 1035719, 240111044331050362, 239825274387262840, '龙域中心一单元-1101', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262841, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1102','龙域中心一单元','1102','2','0',UTC_TIMESTAMP(), @namespace_id, 341.52);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37137, 1035719, 240111044331050362, 239825274387262841, '龙域中心一单元-1102', '0');
+VALUES (38138, 1035719, 240111044331050362, 239825274387262841, '龙域中心一单元-1102', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262842, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1103','龙域中心一单元','1103','2','0',UTC_TIMESTAMP(), @namespace_id, 246.65);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37138, 1035719, 240111044331050362, 239825274387262842, '龙域中心一单元-1103', '0');
+VALUES (38139, 1035719, 240111044331050362, 239825274387262842, '龙域中心一单元-1103', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262843, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1104','龙域中心一单元','1104','2','0',UTC_TIMESTAMP(), @namespace_id, 705.64);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37139, 1035719, 240111044331050362, 239825274387262843, '龙域中心一单元-1104', '0');
+VALUES (38140, 1035719, 240111044331050362, 239825274387262843, '龙域中心一单元-1104', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262844, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1105','龙域中心一单元','1105','2','0',UTC_TIMESTAMP(), @namespace_id, 263.14);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37140, 1035719, 240111044331050362, 239825274387262844, '龙域中心一单元-1105', '0');
+VALUES (38141, 1035719, 240111044331050362, 239825274387262844, '龙域中心一单元-1105', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262845, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1106','龙域中心一单元','1106','2','0',UTC_TIMESTAMP(), @namespace_id, 297.96);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37141, 1035719, 240111044331050362, 239825274387262845, '龙域中心一单元-1106', '0');
+VALUES (38142, 1035719, 240111044331050362, 239825274387262845, '龙域中心一单元-1106', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262846, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1107','龙域中心一单元','1107','2','0',UTC_TIMESTAMP(), @namespace_id, 46.28);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37142, 1035719, 240111044331050362, 239825274387262846, '龙域中心一单元-1107', '0');
+VALUES (38143, 1035719, 240111044331050362, 239825274387262846, '龙域中心一单元-1107', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262847, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1108','龙域中心一单元','1108','2','0',UTC_TIMESTAMP(), @namespace_id, 300.17);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37143, 1035719, 240111044331050362, 239825274387262847, '龙域中心一单元-1108', '0');
+VALUES (38144, 1035719, 240111044331050362, 239825274387262847, '龙域中心一单元-1108', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262848, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1109','龙域中心一单元','1109','2','0',UTC_TIMESTAMP(), @namespace_id, 240.47);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37144, 1035719, 240111044331050362, 239825274387262848, '龙域中心一单元-1109', '0');
+VALUES (38145, 1035719, 240111044331050362, 239825274387262848, '龙域中心一单元-1109', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262849, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1110','龙域中心一单元','1110','2','0',UTC_TIMESTAMP(), @namespace_id, 230.07);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37145, 1035719, 240111044331050362, 239825274387262849, '龙域中心一单元-1110', '0');
+VALUES (38146, 1035719, 240111044331050362, 239825274387262849, '龙域中心一单元-1110', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262850, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1111','龙域中心一单元','1111','2','0',UTC_TIMESTAMP(), @namespace_id, 163.83);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37146, 1035719, 240111044331050362, 239825274387262850, '龙域中心一单元-1111', '0');
+VALUES (38147, 1035719, 240111044331050362, 239825274387262850, '龙域中心一单元-1111', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262851, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心一单元-1112','龙域中心一单元','1112','2','0',UTC_TIMESTAMP(), @namespace_id, 81.94);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37147, 1035719, 240111044331050362, 239825274387262851, '龙域中心一单元-1112', '0');
+VALUES (38148, 1035719, 240111044331050362, 239825274387262851, '龙域中心一单元-1112', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262852, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-401','龙域中心二单元','401','2','0',UTC_TIMESTAMP(), @namespace_id, 140.89);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37148, 1035719, 240111044331050362, 239825274387262852, '龙域中心二单元-401', '0');
+VALUES (38149, 1035719, 240111044331050362, 239825274387262852, '龙域中心二单元-401', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262853, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-402','龙域中心二单元','402','2','0',UTC_TIMESTAMP(), @namespace_id, 145.17);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37149, 1035719, 240111044331050362, 239825274387262853, '龙域中心二单元-402', '0');
+VALUES (38150, 1035719, 240111044331050362, 239825274387262853, '龙域中心二单元-402', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262854, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-403','龙域中心二单元','403','2','0',UTC_TIMESTAMP(), @namespace_id, 168.45);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37150, 1035719, 240111044331050362, 239825274387262854, '龙域中心二单元-403', '0');
+VALUES (38151, 1035719, 240111044331050362, 239825274387262854, '龙域中心二单元-403', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262855, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-404','龙域中心二单元','404','2','0',UTC_TIMESTAMP(), @namespace_id, 168.55);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37151, 1035719, 240111044331050362, 239825274387262855, '龙域中心二单元-404', '0');
+VALUES (38152, 1035719, 240111044331050362, 239825274387262855, '龙域中心二单元-404', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262856, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-405','龙域中心二单元','405','2','0',UTC_TIMESTAMP(), @namespace_id, 158.94);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37152, 1035719, 240111044331050362, 239825274387262856, '龙域中心二单元-405', '0');
+VALUES (38153, 1035719, 240111044331050362, 239825274387262856, '龙域中心二单元-405', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262857, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-406','龙域中心二单元','406','2','0',UTC_TIMESTAMP(), @namespace_id, 140.89);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37153, 1035719, 240111044331050362, 239825274387262857, '龙域中心二单元-406', '0');
+VALUES (38154, 1035719, 240111044331050362, 239825274387262857, '龙域中心二单元-406', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262858, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-501','龙域中心二单元','501','2','0',UTC_TIMESTAMP(), @namespace_id, 244.27);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37154, 1035719, 240111044331050362, 239825274387262858, '龙域中心二单元-501', '0');
+VALUES (38155, 1035719, 240111044331050362, 239825274387262858, '龙域中心二单元-501', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262859, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-502','龙域中心二单元','502','2','0',UTC_TIMESTAMP(), @namespace_id, 171.97);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37155, 1035719, 240111044331050362, 239825274387262859, '龙域中心二单元-502', '0');
+VALUES (38156, 1035719, 240111044331050362, 239825274387262859, '龙域中心二单元-502', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262860, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-503','龙域中心二单元','503','2','0',UTC_TIMESTAMP(), @namespace_id, 227.44);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37156, 1035719, 240111044331050362, 239825274387262860, '龙域中心二单元-503', '0');
+VALUES (38157, 1035719, 240111044331050362, 239825274387262860, '龙域中心二单元-503', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262861, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-504','龙域中心二单元','504','2','0',UTC_TIMESTAMP(), @namespace_id, 252.11);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37157, 1035719, 240111044331050362, 239825274387262861, '龙域中心二单元-504', '0');
+VALUES (38158, 1035719, 240111044331050362, 239825274387262861, '龙域中心二单元-504', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262862, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-505','龙域中心二单元','505','2','0',UTC_TIMESTAMP(), @namespace_id, 229.98);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37158, 1035719, 240111044331050362, 239825274387262862, '龙域中心二单元-505', '0');
+VALUES (38159, 1035719, 240111044331050362, 239825274387262862, '龙域中心二单元-505', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262863, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-506','龙域中心二单元','506','2','0',UTC_TIMESTAMP(), @namespace_id, 273.89);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37159, 1035719, 240111044331050362, 239825274387262863, '龙域中心二单元-506', '0');
+VALUES (38160, 1035719, 240111044331050362, 239825274387262863, '龙域中心二单元-506', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262864, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-601','龙域中心二单元','601','2','0',UTC_TIMESTAMP(), @namespace_id, 247.63);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37160, 1035719, 240111044331050362, 239825274387262864, '龙域中心二单元-601', '0');
+VALUES (38161, 1035719, 240111044331050362, 239825274387262864, '龙域中心二单元-601', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262865, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-602','龙域中心二单元','602','2','0',UTC_TIMESTAMP(), @namespace_id, 173.07);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37161, 1035719, 240111044331050362, 239825274387262865, '龙域中心二单元-602', '0');
+VALUES (38162, 1035719, 240111044331050362, 239825274387262865, '龙域中心二单元-602', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262866, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-603','龙域中心二单元','603','2','0',UTC_TIMESTAMP(), @namespace_id, 224.98);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37162, 1035719, 240111044331050362, 239825274387262866, '龙域中心二单元-603', '0');
+VALUES (38163, 1035719, 240111044331050362, 239825274387262866, '龙域中心二单元-603', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262867, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-604','龙域中心二单元','604','2','0',UTC_TIMESTAMP(), @namespace_id, 250.02);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37163, 1035719, 240111044331050362, 239825274387262867, '龙域中心二单元-604', '0');
+VALUES (38164, 1035719, 240111044331050362, 239825274387262867, '龙域中心二单元-604', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262868, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-605','龙域中心二单元','605','2','0',UTC_TIMESTAMP(), @namespace_id, 229.62);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37164, 1035719, 240111044331050362, 239825274387262868, '龙域中心二单元-605', '0');
+VALUES (38165, 1035719, 240111044331050362, 239825274387262868, '龙域中心二单元-605', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262869, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-606','龙域中心二单元','606','2','0',UTC_TIMESTAMP(), @namespace_id, 274.42);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37165, 1035719, 240111044331050362, 239825274387262869, '龙域中心二单元-606', '0');
+VALUES (38166, 1035719, 240111044331050362, 239825274387262869, '龙域中心二单元-606', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262870, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-701','龙域中心二单元','701','2','0',UTC_TIMESTAMP(), @namespace_id, 139.44);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37166, 1035719, 240111044331050362, 239825274387262870, '龙域中心二单元-701', '0');
+VALUES (38167, 1035719, 240111044331050362, 239825274387262870, '龙域中心二单元-701', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262871, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-702','龙域中心二单元','702','2','0',UTC_TIMESTAMP(), @namespace_id, 145.06);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37167, 1035719, 240111044331050362, 239825274387262871, '龙域中心二单元-702', '0');
+VALUES (38168, 1035719, 240111044331050362, 239825274387262871, '龙域中心二单元-702', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262872, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-703','龙域中心二单元','703','2','0',UTC_TIMESTAMP(), @namespace_id, 168.46);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37168, 1035719, 240111044331050362, 239825274387262872, '龙域中心二单元-703', '0');
+VALUES (38169, 1035719, 240111044331050362, 239825274387262872, '龙域中心二单元-703', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262873, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-704','龙域中心二单元','704','2','0',UTC_TIMESTAMP(), @namespace_id, 168.55);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37169, 1035719, 240111044331050362, 239825274387262873, '龙域中心二单元-704', '0');
+VALUES (38170, 1035719, 240111044331050362, 239825274387262873, '龙域中心二单元-704', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262874, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-705','龙域中心二单元','705','2','0',UTC_TIMESTAMP(), @namespace_id, 158.81);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37170, 1035719, 240111044331050362, 239825274387262874, '龙域中心二单元-705', '0');
+VALUES (38171, 1035719, 240111044331050362, 239825274387262874, '龙域中心二单元-705', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262875, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-706','龙域中心二单元','706','2','0',UTC_TIMESTAMP(), @namespace_id, 139.44);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37171, 1035719, 240111044331050362, 239825274387262875, '龙域中心二单元-706', '0');
+VALUES (38172, 1035719, 240111044331050362, 239825274387262875, '龙域中心二单元-706', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262876, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-801','龙域中心二单元','801','2','0',UTC_TIMESTAMP(), @namespace_id, 140.34);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37172, 1035719, 240111044331050362, 239825274387262876, '龙域中心二单元-801', '0');
+VALUES (38173, 1035719, 240111044331050362, 239825274387262876, '龙域中心二单元-801', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262877, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-802','龙域中心二单元','802','2','0',UTC_TIMESTAMP(), @namespace_id, 145.39);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37173, 1035719, 240111044331050362, 239825274387262877, '龙域中心二单元-802', '0');
+VALUES (38174, 1035719, 240111044331050362, 239825274387262877, '龙域中心二单元-802', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262878, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-803','龙域中心二单元','803','2','0',UTC_TIMESTAMP(), @namespace_id, 169.47);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37174, 1035719, 240111044331050362, 239825274387262878, '龙域中心二单元-803', '0');
+VALUES (38175, 1035719, 240111044331050362, 239825274387262878, '龙域中心二单元-803', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262879, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-804','龙域中心二单元','804','2','0',UTC_TIMESTAMP(), @namespace_id, 169.56);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37175, 1035719, 240111044331050362, 239825274387262879, '龙域中心二单元-804', '0');
+VALUES (38176, 1035719, 240111044331050362, 239825274387262879, '龙域中心二单元-804', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262880, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-805','龙域中心二单元','805','2','0',UTC_TIMESTAMP(), @namespace_id, 159.52);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37176, 1035719, 240111044331050362, 239825274387262880, '龙域中心二单元-805', '0');
+VALUES (38177, 1035719, 240111044331050362, 239825274387262880, '龙域中心二单元-805', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262881, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-806','龙域中心二单元','806','2','0',UTC_TIMESTAMP(), @namespace_id, 140.34);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37177, 1035719, 240111044331050362, 239825274387262881, '龙域中心二单元-806', '0');
+VALUES (38178, 1035719, 240111044331050362, 239825274387262881, '龙域中心二单元-806', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262882, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-901','龙域中心二单元','901','2','0',UTC_TIMESTAMP(), @namespace_id, 212.94);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37178, 1035719, 240111044331050362, 239825274387262882, '龙域中心二单元-901', '0');
+VALUES (38179, 1035719, 240111044331050362, 239825274387262882, '龙域中心二单元-901', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262883, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-902','龙域中心二单元','902','2','0',UTC_TIMESTAMP(), @namespace_id, 215.08);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37179, 1035719, 240111044331050362, 239825274387262883, '龙域中心二单元-902', '0');
+VALUES (38180, 1035719, 240111044331050362, 239825274387262883, '龙域中心二单元-902', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262884, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-903','龙域中心二单元','903','2','0',UTC_TIMESTAMP(), @namespace_id, 313.38);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37180, 1035719, 240111044331050362, 239825274387262884, '龙域中心二单元-903', '0');
+VALUES (38181, 1035719, 240111044331050362, 239825274387262884, '龙域中心二单元-903', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262885, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-904','龙域中心二单元','904','2','0',UTC_TIMESTAMP(), @namespace_id, 275.83);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37181, 1035719, 240111044331050362, 239825274387262885, '龙域中心二单元-904', '0');
+VALUES (38182, 1035719, 240111044331050362, 239825274387262885, '龙域中心二单元-904', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262886, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-905','龙域中心二单元','905','2','0',UTC_TIMESTAMP(), @namespace_id, 189.43);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37182, 1035719, 240111044331050362, 239825274387262886, '龙域中心二单元-905', '0');
+VALUES (38183, 1035719, 240111044331050362, 239825274387262886, '龙域中心二单元-905', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262887, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-906','龙域中心二单元','906','2','0',UTC_TIMESTAMP(), @namespace_id, 191.27);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37183, 1035719, 240111044331050362, 239825274387262887, '龙域中心二单元-906', '0');
+VALUES (38184, 1035719, 240111044331050362, 239825274387262887, '龙域中心二单元-906', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262888, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1001','龙域中心二单元','1001','2','0',UTC_TIMESTAMP(), @namespace_id, 209);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37184, 1035719, 240111044331050362, 239825274387262888, '龙域中心二单元-1001', '0');
+VALUES (38185, 1035719, 240111044331050362, 239825274387262888, '龙域中心二单元-1001', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262889, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1002','龙域中心二单元','1002','2','0',UTC_TIMESTAMP(), @namespace_id, 214);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37185, 1035719, 240111044331050362, 239825274387262889, '龙域中心二单元-1002', '0');
+VALUES (38186, 1035719, 240111044331050362, 239825274387262889, '龙域中心二单元-1002', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262890, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1003','龙域中心二单元','1003','2','0',UTC_TIMESTAMP(), @namespace_id, 311.45);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37186, 1035719, 240111044331050362, 239825274387262890, '龙域中心二单元-1003', '0');
+VALUES (38187, 1035719, 240111044331050362, 239825274387262890, '龙域中心二单元-1003', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262891, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1004','龙域中心二单元','1004','2','0',UTC_TIMESTAMP(), @namespace_id, 281.31);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37187, 1035719, 240111044331050362, 239825274387262891, '龙域中心二单元-1004', '0');
+VALUES (38188, 1035719, 240111044331050362, 239825274387262891, '龙域中心二单元-1004', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262892, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1005','龙域中心二单元','1005','2','0',UTC_TIMESTAMP(), @namespace_id, 188.35);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37188, 1035719, 240111044331050362, 239825274387262892, '龙域中心二单元-1005', '0');
+VALUES (38189, 1035719, 240111044331050362, 239825274387262892, '龙域中心二单元-1005', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262893, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1006','龙域中心二单元','1006','2','0',UTC_TIMESTAMP(), @namespace_id, 192.08);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37189, 1035719, 240111044331050362, 239825274387262893, '龙域中心二单元-1006', '0');
+VALUES (38190, 1035719, 240111044331050362, 239825274387262893, '龙域中心二单元-1006', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262894, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1101','龙域中心二单元','1101','2','0',UTC_TIMESTAMP(), @namespace_id, 212.94);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37190, 1035719, 240111044331050362, 239825274387262894, '龙域中心二单元-1101', '0');
+VALUES (38191, 1035719, 240111044331050362, 239825274387262894, '龙域中心二单元-1101', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262895, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1102','龙域中心二单元','1102','2','0',UTC_TIMESTAMP(), @namespace_id, 215.08);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37191, 1035719, 240111044331050362, 239825274387262895, '龙域中心二单元-1102', '0');
+VALUES (38192, 1035719, 240111044331050362, 239825274387262895, '龙域中心二单元-1102', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262896, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1103','龙域中心二单元','1103','2','0',UTC_TIMESTAMP(), @namespace_id, 313.38);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37192, 1035719, 240111044331050362, 239825274387262896, '龙域中心二单元-1103', '0');
+VALUES (38193, 1035719, 240111044331050362, 239825274387262896, '龙域中心二单元-1103', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262897, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1104','龙域中心二单元','1104','2','0',UTC_TIMESTAMP(), @namespace_id, 275.83);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37193, 1035719, 240111044331050362, 239825274387262897, '龙域中心二单元-1104', '0');
+VALUES (38194, 1035719, 240111044331050362, 239825274387262897, '龙域中心二单元-1104', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262898, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1105','龙域中心二单元','1105','2','0',UTC_TIMESTAMP(), @namespace_id, 189.43);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37194, 1035719, 240111044331050362, 239825274387262898, '龙域中心二单元-1105', '0');
+VALUES (38195, 1035719, 240111044331050362, 239825274387262898, '龙域中心二单元-1105', 0);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 VALUES(239825274387262899, UUID(), 240111044331050362, 14841, '北京市', 14842, '昌平区' ,'龙域中心二单元-1106','龙域中心二单元','1106','2','0',UTC_TIMESTAMP(), @namespace_id, 191.27);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-VALUES (37195, 1035719, 240111044331050362, 239825274387262899, '龙域中心二单元-1106', '0');
+VALUES (38196, 1035719, 240111044331050362, 239825274387262899, '龙域中心二单元-1106', 0);
 
 
 -- OK
@@ -976,7 +976,7 @@ VALUES ((@lease_config_id := @lease_config_id + 1), @namespace_id, 1, 1, 1, 1, 1
 -- NEW --- 08/04 17:59
 SELECT MAX(id) FROM `eh_organization_details` INTO @organization_details_id;
 INSERT INTO `eh_organization_details` (`id`, `organization_id`, `description`, `contact`, `address`, `create_time`, `longitude`, `latitude`, `geohash`, `display_name`)
-  VALUES ((@organization_details_id := @organization_details_id + 1), 1035719, NULL, '13611204200', '北京市昌平区回龙观龙域中街一号院', NOW(), NULL, NULL, NULL, '均豪物业');
+VALUES ((@organization_details_id := @organization_details_id + 1), 1035719, NULL, '13611204200', '北京市昌平区回龙观龙域中街一号院', NOW(), NULL, NULL, NULL, '均豪物业');
 
 SELECT MAX(id) FROM `eh_enterprise_community_map` INTO @enterprise_community_map_id;
 INSERT INTO `eh_enterprise_community_map` (`id`, `community_id`, `member_type`, `member_id`, `member_status`, `creator_uid`, `create_time`, `update_time`)
