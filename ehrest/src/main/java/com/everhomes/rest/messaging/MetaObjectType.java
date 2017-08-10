@@ -13,6 +13,7 @@ package com.everhomes.rest.messaging;
  * <li>ENTERPRISE_AGREE_TO_JOIN: 同意加入了公司</li>
  * <li>BIZ_NEW_ORDER: 有新的电商订单</li>
  * <li>MESSAGE_ROUTER: 路由跳转</li>
+ * <li>FAMILY_AGREE_TO_JOIN: 同意加入了家庭</li>
  * </ul>
  */
 public enum MetaObjectType {
@@ -26,7 +27,8 @@ public enum MetaObjectType {
     ACLINK_AUTH_CHANGED("aclink.authChanged"),
     BIZ_NEW_ORDER("biz.new.order"),
     MESSAGE_ROUTER("message.router"),
-    ENTERPRISE_LEAVE_THE_JOB("enterprise.leaveTheJob")
+    ENTERPRISE_LEAVE_THE_JOB("enterprise.leaveTheJob"),
+    FAMILY_AGREE_TO_JOIN("family.agreeToJoin"),
     ;
     
     private String code;

@@ -410,7 +410,7 @@ public class FamilyServiceImpl implements FamilyService {
         }
     }
 
-    private void sendFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message) {
+    private void sendFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message, Map<String, String> meta) {
         if(message == null || message.isEmpty()) {
             return;
         }
@@ -426,6 +426,10 @@ public class FamilyServiceImpl implements FamilyService {
             messageDto.setBodyType(MessageBodyType.TEXT.getCode());
             messageDto.setBody(message);
             messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+
+            if(meta != null){
+                messageDto.setMeta(meta);
+            }
 
             includeList.stream().distinct().forEach(targetId -> {
                 messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
@@ -1114,7 +1118,10 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+
+            Map<String, String> meta = new HashMap<>();
+            meta.put("metaObjectType", MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_OTHER;
@@ -2014,7 +2021,14 @@ public class FamilyServiceImpl implements FamilyService {
         List<Long> includeList = new ArrayList<Long>();
         includeList.add(userId);
         // sendFamilyNotification(groupId, includeList, null, message, null, null);
-        sendFamilyNotificationUseSystemUser(includeList, null, message);
+        sendFamilyNotificationUseSystemUser(includeList, null, message, null);
+    }
+
+    private void sendFamilyNotificationToIncludeUser(Long groupId, Long userId, String message, Map<String, String> meta) {
+        List<Long> includeList = new ArrayList<Long>();
+        includeList.add(userId);
+        // sendFamilyNotification(groupId, includeList, null, message, null, null);
+        sendFamilyNotificationUseSystemUser(includeList, null, message, meta);
     }
     
     private List<Long> getFamilyIncludeList(Long groupId, Long operatorId, Long targetId) {
