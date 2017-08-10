@@ -2345,6 +2345,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			task.setRemark(cmd.getRemark());
 			task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 			pmTaskProvider.updateTask(task);
+			pmTaskSearch.feedDoc(task);
 			return null;
 		});
 	}
