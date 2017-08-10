@@ -4,25 +4,17 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
-
-
-
-
-
-
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,6 +40,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.doc.DocUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -2335,6 +2328,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_APP_KEY,
 					"app key is not exist.");
 		}
+//		verifySignature();
 		Long taskId = Long.valueOf(cmd.getTaskNum());
 		PmTask task = pmTaskProvider.findTaskById(taskId);
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
@@ -2352,6 +2346,50 @@ public class PmTaskServiceImpl implements PmTaskService {
 			pmTaskProvider.updateTask(task);
 			return null;
 		});
+	}
+
+	public static String computeSignature(Map<String, String> params, String secretKey) {
+		assert (params != null);
+		assert (secretKey != null);
+
+		try {
+			Mac mac = Mac.getInstance("HmacSHA1");
+			byte[] rawKey = Base64.getDecoder().decode(secretKey);
+
+			SecretKeySpec keySpec = new SecretKeySpec(rawKey, "HmacSHA1");
+			mac.init(keySpec);
+
+			List<String> keyList = new ArrayList<String>();
+			CollectionUtils.addAll(keyList, params.keySet().iterator());
+			Collections.sort(keyList);
+
+			for (String key : keyList) {
+				mac.update(key.getBytes("UTF-8"));
+				String val = params.get(key);
+				if (val != null && !val.isEmpty())
+					mac.update(val.getBytes("UTF-8"));
+			}
+
+			byte[] encryptedBytes = mac.doFinal();
+			String signature = Base64.getEncoder().encodeToString(encryptedBytes);
+
+			return signature;
+		} catch (InvalidKeyException e) {
+			throw new InvalidParameterException("Invalid secretKey for signing");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException("NoSuchAlgorithmException for HmacSHA1", e);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException("UnsupportedEncodingException for UTF-8", e);
+		}
+	}
+
+	public static boolean verifySignature(Map<String, String> params, String secretKey, String signatureToVerify) {
+		String signature = computeSignature(params, secretKey);
+
+		if (signature.equals(signatureToVerify))
+			return true;
+
+		return false;
 	}
 
 	@Override

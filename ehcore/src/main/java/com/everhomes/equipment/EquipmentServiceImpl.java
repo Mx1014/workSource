@@ -966,6 +966,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					else if(maps.size() > 1) {
 						//删除设备多次重复绑定的标准,仅保留最早绑的那个
 						maps.remove(0);
+						LOGGER.debug("equipment standard maps after remove: {}", maps);
 						maps.forEach(map -> {
 							map.setStatus(Status.INACTIVE.getCode());
 							map.setDeleterUid(user.getId());

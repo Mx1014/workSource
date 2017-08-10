@@ -2,6 +2,8 @@ package com.everhomes.pmtask;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 @Component(ZJGKHandoverTaskHandler.HANDOVER_VENDOR_PREFIX + HandoverTaskHandler.ZJGK)
 public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZJGKHandoverTaskHandler.class);
+
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
@@ -60,6 +63,9 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
 
     @Autowired
     private FlowEventLogProvider flowEventLogProvider;
+
+    @Autowired
+    private AppProvider appProvider;
 
 
     @Override
@@ -132,6 +138,16 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
         } else {
             params.put("manager", "");
         }
+
+        String appKey = configProvider.getValue("zjgk.appKey", "d923d02c-453d-4cd8-a948-a34ca312058e");
+        params.put("appKey", appKey);
+        params.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        Integer randomNum = (int) (Math.random()*1000);
+        params.put("nonce",randomNum+"");
+        App app = appProvider.findAppByKey(appKey);
+        String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
+
+        params.put("signature",signature);
         return params;
     }
 
