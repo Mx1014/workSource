@@ -119,5 +119,5 @@ interface PortalService {
 
 	PortalItemDTO getAllOrMoreItem(GetItemAllOrMoreCommand cmd);
 
-	void syncLaunchPadData();
+	void syncLaunchPadData(SyncLaunchPadDataCommand cmd);
 }

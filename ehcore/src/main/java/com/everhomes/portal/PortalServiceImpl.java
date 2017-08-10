@@ -1662,9 +1662,18 @@ public class PortalServiceImpl implements PortalService {
 
 
 	@Override
-	public void syncLaunchPadData(){
+	public void syncLaunchPadData(SyncLaunchPadDataCommand cmd){
+
+		if(StringUtils.isEmpty(cmd.getLocation())){
+			cmd.setLocation("/home");
+		}
+
+		if(StringUtils.isEmpty(cmd.getName())){
+			cmd.setName("ServiceMarketLayout");
+		}
+
 		dbProvider.execute((status) -> {
-			syncLayout(null, "/home", "ServiceMarketLayout");
+			syncLayout(cmd.getNamespaceId(), cmd.getLocation(), cmd.getName());
 			return null;
 		});
 	}

@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
@@ -480,8 +479,8 @@ public class PortalController extends ControllerBase {
 	 */
 	@RequestMapping("syncLaunchPadData")
 	@RestReturn(String.class)
-	public RestResponse syncLaunchPadData(){
-		portalService.syncLaunchPadData();
+	public RestResponse syncLaunchPadData(SyncLaunchPadDataCommand cmd){
+		portalService.syncLaunchPadData(cmd);
 		return new RestResponse();
 	}
 }
