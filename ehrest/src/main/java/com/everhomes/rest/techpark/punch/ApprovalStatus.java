@@ -5,7 +5,7 @@ package com.everhomes.rest.techpark.punch;
  * 
  *<li>NONENTRY(16): 未入职</li>
  *<li>RESIGNED(15): 已离职</li>
- *<li>FORGOT(14): 忘打卡</li>
+ *<li>FORGOT(14): 缺卡</li>
  *<li>HALFOUTWORK(13):  半天公出</li>
  *<li>HALFEXCHANGE(12):  半天调休</li>
  *<li>HALFABSENCE(11):  半天病假</li>

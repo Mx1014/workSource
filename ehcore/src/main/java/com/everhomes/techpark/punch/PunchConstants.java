@@ -37,4 +37,6 @@ public class PunchConstants {
 	public static final int THURSDAY_INT =  0b0000100;
 	public static final int FRIDAY_INT =    0b0000010;
 	public static final int SATURDAY_INT =  0b0000001;
+	
+	public static final String STATUS_SEPARATOR="/";
 }
