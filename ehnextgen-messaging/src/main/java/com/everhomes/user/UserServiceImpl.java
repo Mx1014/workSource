@@ -1539,6 +1539,10 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserLogin> listUserLogins(long uid) {
+	    if(uid == 0) {
+	        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "uid=0 not found");
+	    }
+	    
 		List<UserLogin> logins = new ArrayList<>();
 		String userKey = NameMapper.getCacheKey("user", uid, null);
 
