@@ -15,6 +15,7 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -273,6 +274,31 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     @Override
     public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
         return assetProvider.listNoticeInfoByBillId(billIds);
+    }
+
+    @Override
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId) {
+        ShowBillForClientDTO response = new ShowBillForClientDTO();
+        if(targetType.equals("eh_user")) {
+            targetId = UserContext.current().getUser().getId();
+        }
+        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId);
+        HashSet<String> dateStrFilter = new HashSet<>();
+        BigDecimal amountOwed = new BigDecimal("0");
+        for(int i = 0; i < billDetailDTOList.size(); i++) {
+            BillDetailDTO dto = billDetailDTOList.get(i);
+            dateStrFilter.add(dto.getDateStr());
+            amountOwed.add(dto.getAmountOwed());
+        }
+        response.setAmountOwed(amountOwed);
+        response.setBillPeriodMonths(dateStrFilter.size());
+        response.setBillDetailDTOList(billDetailDTOList);
+        return response;
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
+        return null;
     }
 
     private List<SimpleAssetBillDTO> convertAssetBillToSimpleDTO(List<AssetBill> bills) {

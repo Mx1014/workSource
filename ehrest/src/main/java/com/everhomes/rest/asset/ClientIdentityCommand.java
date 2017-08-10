@@ -8,8 +8,8 @@ import com.everhomes.util.StringHelper;
  *<ul>
  * <li>ownerType:所属者类型</li>
  * <li>ownerId:所属者id</li>
- * <li>targetType:客户类型</li>
- * <li>targetId:客户id</li>
+ * <li>targetType:客户类型,sceneType为default，family时，类型为eh_user即个人，当sceneType为pm_admin屏蔽，当sceneType为其他，则类型为eh_organization即企业</li>
+ * <li>targetId:客户id，客户类型为企业时，targetId为企业id</li>
  * <li>billGroupId:账单组id</li>
  *</ul>
  */

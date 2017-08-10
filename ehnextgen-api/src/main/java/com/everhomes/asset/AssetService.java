@@ -36,4 +36,8 @@ public interface AssetService {
     ListSettledBillItemsResponse listSettledBillItems(ListSettledBillItemsCommand cmd);
 
     void selectNotice(SelectedNoticeCommand cmd);
+
+    ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
+
+    ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
 }

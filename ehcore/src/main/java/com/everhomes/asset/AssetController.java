@@ -780,7 +780,8 @@ public class AssetController extends ControllerBase {
     @RequestMapping("showBillForClient")
     @RestReturn(value = ShowBillForClientDTO.class)
     public RestResponse showBillForClient(ClientIdentityCommand cmd) {
-        RestResponse response = new RestResponse();
+        ShowBillForClientDTO dto = assetService.showBillForClient(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -793,8 +794,9 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("showBillDetailForClient")
     @RestReturn(value = ShowBillDetailForClientResponse.class, collection = true)
-    public RestResponse showBillDetailForClient(BillIdCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse getBillDetailForClient(BillIdCommand cmd) {
+        ShowBillDetailForClientResponse res = assetService.getBillDetailForClient(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

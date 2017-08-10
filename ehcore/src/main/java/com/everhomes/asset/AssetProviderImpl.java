@@ -7,10 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.EquipmentInspectionEquipments;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.asset.AssetBillStatus;
-import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
-import com.everhomes.rest.asset.ListSettledBillDTO;
-import com.everhomes.rest.asset.SettledBillDTO;
+import com.everhomes.rest.asset.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -568,5 +565,49 @@ public class AssetProviderImpl implements AssetProvider {
                     list.add(info);
                     return null;});
         return list;
+    }
+
+    @Override
+    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId) {
+        List<BillDetailDTO> dtos = new ArrayList<>();
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        dslContext.select(t.ID,t.DATE_STR,t.AMOUNT_RECEIVABLE,t.AMOUNT_OWED,t.STATUS)
+                .from(t)
+                .where(t.OWNER_TYPE.eq(ownerType))
+                .and(t.OWNER_ID.eq(ownerId))
+                .and(t.TARGET_TYPE.eq(targetType))
+                .and(t.TARGET_ID.eq(targetId))
+                .and(t.BILL_GROUP_ID.eq(billGroupId))
+                .fetch()
+                .map(r -> {
+                    BillDetailDTO dto = new BillDetailDTO();
+                    dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
+                    dto.setAmountReceviable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setBillId(r.getValue(t.ID));
+                    dto.setDateStr(r.getValue(t.DATE_STR));
+                    dto.setStatus(r.getValue(t.STATUS));
+                    dtos.add(dto);
+                    return null;});
+        return dtos;
+    }
+
+    @Override
+    public List<ShowBillDetailForClientDTO> getBillDetailForClient(Long billId) {
+        List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        dslContext.select(t.AMOUNT_RECEIVABLE,t.CHARGING_ITEM_NAME)
+                .from(t)
+                .where(t.BILL_ID.eq(billId))
+                .fetch()
+                .map(r -> {
+                    ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                    dtos.add(dto);
+                    return null;
+                });
+        return dtos;
     }
 }

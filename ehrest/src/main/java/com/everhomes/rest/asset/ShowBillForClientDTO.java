@@ -11,7 +11,7 @@ import java.util.List;
 /**
  *<ul>
  * <li>billPeriodMonths:待缴月数</li>
- * <li>amountOwed:欠收金额</li>
+ * <li>amountOwed:待缴金额</li>
  * <li>billDetailDTOList:账单列表，参考{@link BillDetailDTO}</li>
  *</ul>
  */

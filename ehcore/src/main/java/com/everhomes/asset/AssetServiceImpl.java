@@ -295,6 +295,22 @@ public class AssetServiceImpl implements AssetService {
         smsProvider.sendSms(UserContext.getCurrentNamespaceId(), phoneNums, SmsTemplateCode.SCOPE_YZX, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
     }
 
+    @Override
+    public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId());
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+        return handler.getBillDetailForClient(cmd.getBillId());
+    }
+
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
         String key = String.format("pmbill:kexing:latest-selected-organization: %s:%s", UserContext.getCurrentNamespaceId(), UserContext.current().getUser().getId());

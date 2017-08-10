@@ -4,10 +4,9 @@ package com.everhomes.assetPayment;
 
 import com.everhomes.asset.AssetService;
 import com.everhomes.junit.CoreServerTestCase;
-import com.everhomes.rest.asset.ListSettledBillCommand;
-import com.everhomes.rest.asset.ListSettledBillItemsCommand;
-import com.everhomes.rest.asset.ListSettledBillItemsResponse;
-import com.everhomes.rest.asset.ListSettledBillResponse;
+import com.everhomes.rest.asset.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -57,10 +56,21 @@ public class ListSettledBillTest extends CoreServerTestCase {
 //        cmd.setBillGroupName("物业");
 //        cmd.setTargetName("lisi");
         cmd.setBillId(1l);
+
+        ClientIdentityCommand c = new ClientIdentityCommand();
+        c.setOwnerType("community");
+        c.setOwnerId(240111044331055036l);
+        c.setTargetType("eh_user");
+        c.setTargetId(43324234234l);
+        c.setBillGroupId(1l);
+        User u = new User();
+        u.setId(240278l);
+        UserContext.current().setUser(u);
         ListSettledBillItemsResponse response = assetService.listSettledBillItems(cmd);
+        ShowBillForClientDTO showBillForClientDTO = assetService.showBillForClient(c);
         for(int i = 0; i<1000; i++){
             System.out.println(i);
         }
-        System.out.println(response);
+        System.out.println(showBillForClientDTO);
     }
 }

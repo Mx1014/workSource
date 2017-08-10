@@ -24,4 +24,8 @@ public interface AssetVendorHandler {
     List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize);
 
     List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
+
+    ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId);
+
+    ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 }

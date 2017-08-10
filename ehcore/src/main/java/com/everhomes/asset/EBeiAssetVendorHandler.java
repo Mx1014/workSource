@@ -132,6 +132,16 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return null;
     }
 
+    @Override
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String ownerType1, Long targetId, Long billGroupId) {
+        return null;
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
+        return null;
+    }
+
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
         try {
