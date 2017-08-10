@@ -1248,7 +1248,7 @@ UPDATE eh_launch_pad_items SET apply_policy = 3 WHERE namespace_id = 999971;
 
 
 -- 加app url
-SET @app_url_id = (SELECT MAX(id) FROM `eh_service_module_scopes`); 
+SET @app_url_id = (SELECT MAX(id) FROM `eh_app_urls`); 
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@app_url_id := @app_url_id + 1), '999971', '张江高科', '2', '', '', '移动平台聚合服务，助力园区效能提升');
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@app_url_id := @app_url_id + 1), '999971', '张江高科', '1', '', '', '移动平台聚合服务，助力园区效能提升');
 
