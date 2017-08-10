@@ -501,7 +501,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
 
 		portalItem.setGroupName(portalItemGroup.getName());
-		portalItem.setItemLocation(getItemLocation(portalLayout.getName()));
+		portalItem.setItemLocation(portalLayout.getLocation());
 		this.dbProvider.execute((status) -> {
 			portalItemProvider.createPortalItem(portalItem);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){
@@ -1442,7 +1442,7 @@ public class PortalServiceImpl implements PortalService {
 		item.setScopeCode(ScopeType.ALL.getCode());
 		item.setScopeId(0L);
 		if(null != layout){
-			item.setItemLocation(getItemLocation(layout.getName()));
+			item.setItemLocation(layout.getLocation());
 		}
 		if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
 			item.setActionType(ActionType.OFFICIAL_URL.getCode());
@@ -1553,7 +1553,7 @@ public class PortalServiceImpl implements PortalService {
 		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(data.getLayoutId());
 		if(null != layout){
 			NavigationActionData navigationActionData = new NavigationActionData();
-			navigationActionData.setItemLocation(getItemLocation(layout.getName()));
+			navigationActionData.setItemLocation(layout.getLocation());
 			navigationActionData.setLayoutName(layout.getName());
 			navigationActionData.setTitle(layout.getLabel());
 			item.setActionData(StringHelper.toJsonString(navigationActionData));
@@ -1656,10 +1656,6 @@ public class PortalServiceImpl implements PortalService {
 		return categoryMap;
 	}
 
-	private String getItemLocation(String layoutName){
-		return "/" + layoutName;
-	}
-
 
 	@Override
 	public void syncLaunchPadData(SyncLaunchPadDataCommand cmd){
@@ -1695,6 +1691,7 @@ public class PortalServiceImpl implements PortalService {
 				layout = ConvertHelper.convert(padLayout, PortalLayout.class);
 				LaunchPadLayoutJson layoutJson = (LaunchPadLayoutJson)StringHelper.fromJsonString(padLayout.getLayoutJson(), LaunchPadLayoutJson.class);
 				layout.setLabel(layoutJson.getDisplayName());
+				layout.setLocation(location);
 				layout.setOperatorUid(user.getId());
 				layout.setCreatorUid(user.getId());
 				portalLayoutProvider.createPortalLayout(layout);
