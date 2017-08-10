@@ -107,7 +107,7 @@ VALUES((@acl_id := @acl_id + 1),'EhOrganizations', 1035719, 1, 10, 'EhUsers', 31
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 VALUES (316713, UUID(), '19132843828', '高力奇', '', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-VALUES (289473, 316713 ,  '0',  ' ',  null,  3, UTC_TIMESTAMP(), @namespace_id);
+VALUES (289473, 316713 ,  '0', '13601388991',  null,  3, UTC_TIMESTAMP(), @namespace_id);
 
 SELECT MAX(id) FROM `eh_organization_members` INTO @organization_members_id;
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
