@@ -1157,7 +1157,7 @@ public class PortalServiceImpl implements PortalService {
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
-		if(null != cmd.getAnchor()){
+		if(null == cmd.getAnchor()){
 			cmd.setAnchor(0L);
 		}
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
