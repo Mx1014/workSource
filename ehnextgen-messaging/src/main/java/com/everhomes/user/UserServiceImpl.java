@@ -1350,6 +1350,7 @@ public class UserServiceImpl implements UserService {
 		foundLogin.setAppVersion(appVersion);
 		String hkeyLogin = String.valueOf(ref.getNextLoginId());
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		LOGGER.debug("createLogin|hId = "+hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
 
 		if(isNew && deviceIdentifier != null && (!deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name()))) {
@@ -1393,6 +1394,7 @@ public class UserServiceImpl implements UserService {
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 
 			LOGGER.debug("Unregister login connection for login: {}", login.toString());
+			LOGGER.debug("unregisterLoginConnection|hId = "+hkeyLogin);
 			accessor.putMapValueObject(hkeyLogin, login);
 		} 
 	}
@@ -1515,6 +1517,7 @@ public class UserServiceImpl implements UserService {
 		if(login != null) {
 			login.setLoginBorderId(null);
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+			LOGGER.debug("unregisterLoginConnection|hId = "+hkeyLogin);
 			accessor.putMapValueObject(hkeyLogin, login);
 
 			if(userLogin.getLoginBorderId() != null) {
@@ -1530,6 +1533,7 @@ public class UserServiceImpl implements UserService {
 		String userKey = NameMapper.getCacheKey("user", login.getUserId(), null);
 		String hkeyLogin = String.valueOf(login.getLoginId());
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		LOGGER.debug("saveLogin|hId = "+hkeyLogin);
 		accessor.putMapValueObject(hkeyLogin, login);
 	}
 
