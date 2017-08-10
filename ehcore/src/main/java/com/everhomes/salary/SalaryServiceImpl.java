@@ -395,8 +395,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         //  存储所有薪酬组 id
         List<Long> salaryGroupIds = organizations.stream().map(r -> {
-            Long salaryGroupId = r.getId();
-            return salaryGroupId;
+            return r.getId();
         }).collect(Collectors.toList());
 
         //  获取公司总人数
@@ -766,7 +765,6 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void addToOrganizationSalaryGroup(AddToOrganizationSalaryGroupCommand cmd) {
 
-        System.out.println(DateHelper.currentGMTTime());
         //  通过组织架构的接口来实现人员的添加
         SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
         command.setGroupId(cmd.getSalaryGroupId());
@@ -799,11 +797,9 @@ public class SalaryServiceImpl implements SalaryService {
 
         // 3.将人员添加至组织架构的薪酬组
         this.uniongroupService.saveUniongroupConfigures(command);
-        System.out.println(DateHelper.currentGMTTime());
 
         //计算之前六个月的period
         recaculateGroupPeriod(cmd.getSalaryGroupId(), true);
-        System.out.println(DateHelper.currentGMTTime());
     }
 
     /******* 根据产品需求，做出的修改需要及时同步，此处是重新计算整组数据 *******/
