@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.approval.CommonStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +95,9 @@ public class AuthoriztionController extends ControllerBase {
 				}
 			}
 		}
+		//退租了，然后就把这个认证记录的状态置为inactive
+		record.setStatus(CommonStatus.INACTIVE.getCode());
+		authorizationThirdPartyRecordProvider.updateAuthorizationThirdPartyRecord(record);
 		RestResponse r = new RestResponse();
 		r.setErrorScope("asset");
 		r.setErrorDetails("OK");
