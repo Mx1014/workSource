@@ -1124,7 +1124,7 @@ public class FamilyServiceImpl implements FamilyService {
 
             //给客户端发一条通知
             Map<String, String> meta = new HashMap<>();
-            meta.put("metaObjectType", MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
             sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
             
             // send notification to family other members
