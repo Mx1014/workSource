@@ -1119,6 +1119,10 @@ public class FamilyServiceImpl implements FamilyService {
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
+            //给用户发一条
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, null);
+
+            //给客户端发一条通知
             Map<String, String> meta = new HashMap<>();
             meta.put("metaObjectType", MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
             sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
