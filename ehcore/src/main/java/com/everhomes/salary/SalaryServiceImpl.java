@@ -668,7 +668,7 @@ public class SalaryServiceImpl implements SalaryService {
                         for (int i = 0; i < originVals.size(); i++) {
                             //  若是数值类则直接赋值，若是公式则依然返回公式
                             if (r.getName().equals(originVals.get(i).getGroupEntityName())
-                                    && r.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
+                                    && !r.getNumberType().equals(SalaryEntityNumberType.FORMULA.getCode())) {
                                 dto.setSalaryValue(originVals.get(i).getSalaryValue());
                                 dto.setId(originVals.get(i).getId());
                                 break;
