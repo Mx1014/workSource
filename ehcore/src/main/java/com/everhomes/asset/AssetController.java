@@ -698,6 +698,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("selectedNotice")
     @RestReturn(value = String.class)
     public RestResponse selectedNotice(SelectedNoticeCommand cmd) {
+        assetService.selectNotice(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

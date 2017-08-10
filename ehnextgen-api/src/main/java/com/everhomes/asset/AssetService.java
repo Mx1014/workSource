@@ -34,4 +34,6 @@ public interface AssetService {
     ListSettledBillResponse listSettledBill(ListSettledBillCommand cmd);
 
     ListSettledBillItemsResponse listSettledBillItems(ListSettledBillItemsCommand cmd);
+
+    void selectNotice(SelectedNoticeCommand cmd);
 }

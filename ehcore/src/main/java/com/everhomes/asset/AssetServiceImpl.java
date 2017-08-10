@@ -21,6 +21,7 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
@@ -31,6 +32,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.admin.SmsTemplate;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -40,17 +42,21 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -137,6 +143,12 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private OrganizationService organizationService;
 
+    @Autowired
+    private SmsProvider smsProvider;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -184,16 +196,16 @@ public class AssetServiceImpl implements AssetService {
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             cmd.setPageAnchor(1l);
         }
-        if(cmd.getPageSize() == null){
+        if(cmd.getPageSize() == null || cmd.getPageSize() < 1 || cmd.getPageSize() > Integer.MAX_VALUE/10){
             cmd.setPageSize(20);
         }
         int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
         List<ListSettledBillDTO> list = handler.listSettledBill(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getAddressName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName());
         response.setListSettledBillDTOs(list);
         if(list.size() != cmd.getPageSize()){
-            response.setNextPageAnchor(null);
-        }else{
             response.setNextPageAnchor(cmd.getPageAnchor());
+        }else{
+            response.setNextPageAnchor(cmd.getPageAnchor()+1);
         }
         return response;
     }
@@ -204,8 +216,83 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListSettledBillItemsResponse response = new ListSettledBillItemsResponse();
-        List<SettledBillDTO> settledBillDTOS = handler.listSettledBillItems(cmd.getBillId(),cmd.getTargetName(),cmd.getPageAnchor(),cmd.getPageSize());
-        return null;
+        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
+            cmd.setPageAnchor(1l);
+        }
+        if(cmd.getPageSize() == null){
+            cmd.setPageSize(20);
+        }
+        int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
+        List<SettledBillDTO> settledBillDTOS = handler.listSettledBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
+        response.setSettledBillDTOS(settledBillDTOS);
+        if(settledBillDTOS.size() <= cmd.getPageSize()) {
+            response.setNextPageAnchor(cmd.getPageAnchor());
+        }else{
+            response.setNextPageAnchor(cmd.getPageAnchor()+1);
+        }
+        return response;
+    }
+
+    @Override
+    public void selectNotice(SelectedNoticeCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        //张江高科的厂商的接口，还未写
+        List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIds());
+
+        if(noticeInfos.size()<1) return;
+        String[] phoneNums = new String[noticeInfos.size()];
+        List<Tuple<String, Object>> variables = new ArrayList<>();
+
+        //"{targetName}先生/女士，您好，您的账单已出，应付{amount1}元，待缴{amount2}元，下载"{appName} APP"可及时查看账单并支持在线付款,还可体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。"
+        for(int i = 0; i<noticeInfos.size(); i++) {
+            NoticeInfo noticeInfo = noticeInfos.get(i);
+            smsProvider.addToTupleList(variables,"targetName",noticeInfo.getTargetName());
+            smsProvider.addToTupleList(variables,"amount1",noticeInfo.getAmountRecevable());
+            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
+            smsProvider.addToTupleList(variables,"appName",noticeInfo.getAppName());
+            phoneNums[i] = noticeInfo.getPhoneNum();
+            //客户在系统内，还需要推送，查看 推送接口
+            if(noticeInfo.getTargetId()!=0l){
+                List<Long> uids = new ArrayList<>();
+                if (noticeInfo.getTargetType()=="eh_user") {
+                    uids.add(noticeInfo.getTargetId());
+                } else if(noticeInfo.getTargetType()=="eh_organization") {
+                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
+                    tempCmd.setOwnerId(cmd.getOwnerId());
+                    tempCmd.setOwnerType(cmd.getOwnerType());
+                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
+                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
+                    for(int j =0 ; i < organizationContactDTOS.size(); i++){
+                        uids.add(organizationContactDTOS.get(0).getId());
+                    }
+                }
+                //对所有的符合推送资格的用户推送账单已出信息
+                for(int k = 0; k < uids.size() ; k++) {
+                    MessageDTO messageDto = new MessageDTO();
+                    messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                    messageDto.setSenderUid(User.SYSTEM_UID);
+                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
+                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                    String content = "";
+                    //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999971)
+                    //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
+                    Map<String,Object> map = new HashMap<>();
+                    User targetUser = userProvider.findUserById(uids.get(k));
+                    map.put("targetName",targetUser.getNickName());
+                    String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
+                    messageDto.setBody(content);
+                    messageDto.setMetaAppId(AppConstants.APPID_USER);
+                    if(!content.trim().equals("")){
+                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                                uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                    }
+                }
+            }
+        }
+        String templateLocale = UserContext.current().getUser().getLocale();
+        smsProvider.sendSms(UserContext.getCurrentNamespaceId(), phoneNums, SmsTemplateCode.SCOPE_YZX, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
     }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {

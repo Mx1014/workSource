@@ -123,7 +123,12 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, Long pageAnchor, Integer pageSize) {
+    public List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
+        return null;
+    }
+
+    @Override
+    public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
         return null;
     }
 

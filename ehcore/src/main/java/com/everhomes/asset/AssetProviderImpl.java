@@ -480,7 +480,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         query.addOrderBy(t.DATE_STR.asc());
         query.addGroupBy(t.TARGETNAME);
-        query.addLimit(pageOffSet,pageSize);
+        query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
             ListSettledBillDTO dto = new ListSettledBillDTO();
             if(addressName!=null){
@@ -521,17 +521,19 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, Long pageAnchor, Integer pageSize) {
+    public List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
         List<SettledBillDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
-        context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
+        context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS)
                 .from(t)
                 .leftOuterJoin(t1)
-                .on(t.BILL_ID.eq(billId))
+                .on(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .where(t.BILL_ID.eq(billId))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .orderBy(t1.DEFAULT_ORDER)
+                .limit(pageOffSet,pageSize+1)
                 .fetch()
                 .map(r ->{
             SettledBillDTO dto =new SettledBillDTO();
@@ -541,9 +543,30 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
             dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
             dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
-//            dto.setBillStatus(r.getValue());
+            dto.setBillStatus(r.getValue(t.STATUS));
             dtos.add(dto);
             return null;});
         return dtos;
+    }
+
+    @Override
+    public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<NoticeInfo> list = new ArrayList<>();
+                dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_APP_URLS.NAME,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGETNAME)
+                .from(Tables.EH_PAYMENT_BILLS,Tables.EH_APP_URLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .fetch().map(r -> {
+                    NoticeInfo info = new NoticeInfo();
+                    info.setPhoneNum(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
+                    info.setAmountRecevable(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE));
+                    info.setAmountOwed(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED));
+                    info.setAppName(r.getValue(Tables.EH_APP_URLS.NAME));
+                    info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));
+                    info.setTargetType(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_TYPE));
+                    info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGETNAME));
+                    list.add(info);
+                    return null;});
+        return list;
     }
 }

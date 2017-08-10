@@ -43,5 +43,7 @@ public interface AssetProvider {
 
     List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName);
 
-    List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, Long pageAnchor, Integer pageSize);
+    List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize);
+
+    List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
 }
