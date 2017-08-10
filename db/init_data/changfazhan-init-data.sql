@@ -44,7 +44,7 @@ VALUES (14842, 14841, '昌平区', 'CHANGPINGQU', 'CPQ', '/北京/北京市/昌�
 
 -- OK
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `description`, `apt_count`, `creator_uid`, `status`, `create_time`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-VALUES(240111044331050362, UUID(), 14841, '北京市',  14842, '昌平区', '昌平科技园', '龙域中心', '北京市昌平区回龙观龙域中街一号院', '', 0, 1,'2',UTC_TIMESTAMP(), 0, 190696, 190697, UTC_TIMESTAMP(), @namespace_id);
+VALUES(240111044331050362, UUID(), 14841, '北京市',  14842, '昌平区', '昌平科技园', '龙域中心', '北京市昌平区回龙观龙域中街一号院', '', 0, 1,'2',UTC_TIMESTAMP(), 1, 190696, 190697, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
 VALUES(240111044331072757, 240111044331050362, '', 116.323584, 40.07254, 'wx4eznbpryyu');
 INSERT INTO `eh_organization_communities`(organization_id, community_id)
