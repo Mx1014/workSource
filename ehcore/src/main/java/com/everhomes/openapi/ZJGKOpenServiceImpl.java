@@ -20,19 +20,18 @@ import com.everhomes.pmtask.ebei.EbeiJsonEntity;
 import com.everhomes.pmtask.ebei.EbeiResult;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.NamespaceAddressType;
-import com.everhomes.rest.address.NamespaceBuildingType;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.openapi.shenzhou.*;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionType;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
+import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeasePromotion;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -109,6 +108,9 @@ public class ZJGKOpenServiceImpl {
 
     @Autowired
     private CommunitySearcher communitySearcher;
+
+    @Autowired
+    private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
 
 
     @Scheduled(cron="0 0 1 * * ?")
@@ -533,7 +535,7 @@ public class ZJGKOpenServiceImpl {
             List<ZJBuilding> mergeBuildingList = mergeBackupList(backupList, ZJBuilding.class);
             List<ZJBuilding> theirBuildingList = new ArrayList<ZJBuilding>();
             if(mergeBuildingList != null && mergeBuildingList.size() > 0) {
-                Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(NamespaceBuildingType.SHENZHOU.getCode());
+                Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(namespaceId, NamespaceBuildingType.SHENZHOU.getCode());
                 mergeBuildingList.forEach(building -> {
                     Long communityId = communities.get(building.getCommunityIdentifier());
                     if(communityId != null) {
@@ -751,133 +753,27 @@ public class ZJGKOpenServiceImpl {
         address.setNamespaceId(namespaceId);
         address.setRentArea(customerApartment.getRentArea());
         address.setBuildArea(customerApartment.getBuildArea());
-//        address.set
-//        address.setLayout(customerApartment.getLayout());
-//        address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
+        address.setChargeArea(customerApartment.getChargeArea());
+        address.setSharedArea(customerApartment.getSharedArea());
+        address.setLayout(customerApartment.getLayout());
+        address.setLivingStatus(customerApartment.getLivingStatus());
         address.setNamespaceAddressType(NamespaceAddressType.SHENZHOU.getCode());
         address.setNamespaceAddressToken(customerApartment.getApartmentIdentifier());
 
         //添加电商用到的楼栋和门牌
-        String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
-        address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
-        address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+        address.setBusinessBuildingName(customerApartment.getBuildingName());
+        address.setBusinessApartmentName(customerApartment.getApartmentName());
 
         addressProvider.createAddress(address);
         insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
     }
 
-    private String getRulePrefix(String apartmentName) {
-        if (apartmentName != null) {
-            for (String str : ruleList) {
-                if (apartmentName.startsWith(str)) {
-                    return str;
-                }
-            }
-        }
-        return null;
-    }
-
-    // 查找“-”第几次出现的位置
-    private int indexOf(String source, Integer count, Integer offset) {
-        try {
-            if (count != null) {
-                if (count.intValue() <= 0) {
-                    return -1;
-                }else if (count.intValue() == 1) {
-                    if (offset == null || offset.intValue() == 0) {
-                        return source.indexOf("-");
-                    }
-                    return source.indexOf("-", offset);
-                }else {
-                    count--;
-                    return indexOf(source, count, source.indexOf("-")+1);
-                }
-            }
-            return -1;
-        } catch (Exception e) {
-            return -1;
-        }
-    }
-
-    private int getActualPos(String apartmentName, String rule) {
-        try {
-            Integer offset = 0; //在横线基础上的偏移量
-            Integer lineCount = null; //第几个横线
-            if (rule.contains("+")) {
-                String[] arr = rule.split("\\+");
-                lineCount = Integer.parseInt(arr[0]);
-                offset = Integer.parseInt(arr[1]);
-            }else {
-                lineCount = Integer.parseInt(rule);
-            }
-            return indexOf(apartmentName, lineCount, 0) + offset.intValue();
-        } catch (Exception e) {
-            return -1;
-        }
-    }
-
-    // 0存储楼栋名称，1存储门牌名称
-    private String[] getBusinessBuildingApartmentName(String apartmentName) {
-        String[] result = new String[2];
-        try {
-            String rule = ruleMap.get(getRulePrefix(apartmentName));
-            if (rule != null) {
-                String[] ruleArray = rule.split("-");
-                if (ruleArray.length >= 3) {
-                    int buildingStart = getActualPos(apartmentName, ruleArray[0]) + 1;
-                    int buildingEnd = getActualPos(apartmentName, ruleArray[1]);
-                    if (apartmentName.charAt(buildingEnd) >= '0' && apartmentName.charAt(buildingEnd) <= '9') {
-                        throw new Exception();
-                    }
-                    if (apartmentName.charAt(buildingEnd) != '-') {
-                        buildingEnd++;
-                    }
-                    result[0] = apartmentName.substring(buildingStart, buildingEnd);
-                    int apartmentStart = getActualPos(apartmentName, ruleArray[2]) + 1;
-                    if (ruleArray.length == 4) {
-                        int apartmentEnd = getActualPos(apartmentName, ruleArray[3]);
-                        result[1] = apartmentName.substring(apartmentStart, apartmentEnd);
-                    }else {
-                        result[1] = apartmentName.substring(apartmentStart);
-                    }
-                }else {
-                    result = getDefaultBusinessBuildingApartmentName(apartmentName);
-                }
-            }else {
-                result = getDefaultBusinessBuildingApartmentName(apartmentName);
-            }
-        } catch (Exception e) {
-            result = getDefaultBusinessBuildingApartmentName(apartmentName);
-        }
-
-        return result;
-    }
-
-    private String[] getDefaultBusinessBuildingApartmentName(String apartmentName) {
-        String[] result = new String[2];
-        if (apartmentName != null) {
-            if (apartmentName.contains("-")) {
-                int lastIndex = apartmentName.lastIndexOf("-");
-                result[0] = apartmentName.substring(0, lastIndex);
-                result[1] = apartmentName.substring(lastIndex + 1);
-            }else {
-                result[0] = result[1] = apartmentName;
-            }
-        }
-        return result;
-    }
-
     // 插入或更新招租管理
     private void insertOrUpdateLeasePromotion(Byte theirLivingStatus, Integer namespaceId, Long communityId, Double rentArea, String buildingName, String apartmentName){
-        CustomerLivingStatus livingStatus = CustomerLivingStatus.fromCode(theirLivingStatus);
-        if (livingStatus == null) {
-            return;
-        }
-
-        String namespaceType = "jindie";
+        String namespaceType = "shenzhou";
         String namespaceToken = generateLeasePromotionToken(buildingName, apartmentName);
-        if (livingStatus == CustomerLivingStatus.WAITING_FOR_RENTING) {
-            // 待租状态时，在招租管理里面插入一条数据，状态为已下线（因为需要科技园区编辑图文信息之后再发布到APP端），招租标题就是楼栋门牌，发布时间和入驻时间=插入数据时间，面积=传过来的面积，负责人和电话都为空
+        if (AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(theirLivingStatus))) {
+            // 待租状态时，在招租管理里面插入一条数据，状态为已下线（因为需要园区编辑图文信息之后再发布到APP端），招租标题就是楼栋门牌，发布时间和入驻时间=插入数据时间，面积=传过来的面积，负责人和电话都为空
             // 如果有数据则不变
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionByToken(namespaceId, communityId, namespaceType, namespaceToken);
             if (leasePromotion == null) {
@@ -903,7 +799,7 @@ public class ZJGKOpenServiceImpl {
                 leasePromotion.setNamespaceToken(namespaceToken);
                 enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
             }
-        }else if (livingStatus == CustomerLivingStatus.NEW_RENTING || livingStatus == CustomerLivingStatus.CONTINUE_RENTING) {
+        }else if (AddressMappingStatus.RENT.equals(AddressMappingStatus.fromCode(theirLivingStatus))) {
             // 新租和已租时，将招租管理对应的门牌的招租状态改为“已出租”
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionByToken(namespaceId, communityId, namespaceType, namespaceToken);
             if (leasePromotion != null && LeasePromotionStatus.fromType(leasePromotion.getStatus()) != LeasePromotionStatus.RENTAL) {
@@ -934,21 +830,40 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void updateAddress(Address address, ZJApartment customerApartment) {
-        address.setApartmentFloor(customerApartment.getApartmentFloor());
+        Community community = communityProvider.findCommunityById(customerApartment.getCommunityId());
+        if (community == null) {
+            community = new Community();
+            community.setId(customerApartment.getCommunityId());
+        }
+        address.setCommunityId(community.getId());
+        address.setCityId(community.getCityId());
+        address.setCityName(community.getCityName());
+        address.setAreaId(community.getAreaId());
+        address.setAreaName(community.getAreaName());
+        address.setZipcode(community.getZipcode());
+        address.setAddress(getAddress(customerApartment.getBuildingName(), customerApartment.getApartmentName()));
+        address.setAddressAlias(address.getAddress());
+        address.setBuildingName(customerApartment.getBuildingName());
+        address.setBuildingAliasName(customerApartment.getBuildingName());
+        address.setApartmentName(customerApartment.getApartmentName());
+        if(customerApartment.getApartmentFloor() != null) {
+            address.setApartmentFloor(String.valueOf(customerApartment.getApartmentFloor()));
+        }
+
         address.setAreaSize(customerApartment.getAreaSize()==null?customerApartment.getRentArea():customerApartment.getAreaSize());
         address.setRentArea(customerApartment.getRentArea());
         address.setBuildArea(customerApartment.getBuildArea());
-        address.setInnerArea(customerApartment.getInnerArea());
+        address.setChargeArea(customerApartment.getChargeArea());
+        address.setSharedArea(customerApartment.getSharedArea());
         address.setLayout(customerApartment.getLayout());
-        address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
+        address.setLivingStatus(customerApartment.getLivingStatus());
         address.setOperatorUid(1L);
         address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         address.setStatus(CommonStatus.ACTIVE.getCode());
 
         //添加电商用到的楼栋和门牌
-        String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
-        address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
-        address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+        address.setBusinessBuildingName(customerApartment.getBuildingName());
+        address.setBusinessApartmentName(customerApartment.getApartmentName());
 
         addressProvider.updateAddress(address);
         insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
