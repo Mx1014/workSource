@@ -1196,8 +1196,8 @@ public class SalaryServiceImpl implements SalaryService {
 	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
-/*            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());*/
-            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(cmd.getSalaryGroupId());
+            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
+            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(salaryGroup.getOrganizationGroupId());
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
             ByteArrayOutputStream out = null;
             XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(results,organization.getName());
