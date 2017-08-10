@@ -1913,7 +1913,7 @@ public class PortalServiceImpl implements PortalService {
 		ServiceModuleApp moduleApp = new ServiceModuleApp();
 		moduleApp.setInstanceConfig(padItem.getActionData());
 		moduleApp.setActionType(padItem.getActionType());
-		moduleApp.setName(padItem.getItemName());
+		moduleApp.setName(padItem.getItemLabel());
 		moduleApp.setNamespaceId(padItem.getNamespaceId());
 		moduleApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
 		moduleApp.setCreatorUid(user.getId());
