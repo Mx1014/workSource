@@ -519,7 +519,10 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			}
 			if(item.getFieldName().equals("certificateType")){
 //				params.put(item.getFieldName(), "1");
-				params.put(item.getFieldName(), CertificateType.fromType(params.get("certificateType")).getCode());
+				CertificateType certificateType = CertificateType.fromType(params.get("certificateType"));
+				if(certificateType != null) {
+					params.put(item.getFieldName(), certificateType.getCode());
+				}
 			}
 		}
 		params.put("appKey", appKey);
