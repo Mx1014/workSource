@@ -672,6 +672,13 @@ public class ZJGKOpenServiceImpl {
         }
         dbProvider.execute(s->{
             syncAllApartments(namespaceId, myApartmentList, theirApartmentList);
+            // 同步完地址后更新community表中的门牌总数
+            Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
+            Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
+            if (community.getAptCount().intValue() != count.intValue()) {
+                community.setAptCount(count);
+                communityProvider.updateCommunity(community);
+            }
             return true;
         });
     }
@@ -703,13 +710,6 @@ public class ZJGKOpenServiceImpl {
             }
         }
 
-        // 同步完地址后更新community表中的门牌总数，add by tt, 20170308
-        Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
-        Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
-        if (community.getAptCount().intValue() != count.intValue()) {
-            community.setAptCount(count);
-            communityProvider.updateCommunity(community);
-        }
     }
 
     private void insertAddress(Integer namespaceId, ZJApartment customerApartment) {
