@@ -1287,7 +1287,7 @@ public class GroupServiceImpl implements GroupService {
     
     private void addGroupMemberLog(GroupMember member, Group group) {
         GroupMemberLog memberLog = ConvertHelper.convert(member, GroupMemberLog.class);
-        memberLog.setNamespaceId(UserContext.getCurrentNamespaceId());
+        memberLog.setNamespaceId(group.getNamespaceId());
         memberLog.setMemberStatus(member.getMemberStatus());
         memberLog.setOperatorUid(UserContext.currentUserId());
         memberLog.setApproveTime(DateUtils.currentTimestamp());
