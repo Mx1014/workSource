@@ -474,11 +474,16 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 								if(conditionOR==null){
 									conditionOR = condition;
 								}else{
-									conditionOR.or(condition);
+									conditionOR = conditionOR.or(condition);
 								}
 							 }
-							 if(conditionOR!=null)
+							 if(conditionOR!=null){
+								 Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()).and(
+										 Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType())
+								 );
+								 conditionOR = conditionOR.or(condition);
 								 query.addConditions(conditionOR);
+							 }
 						}else{
 							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
 									.getOwnerId()));
