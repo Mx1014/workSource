@@ -1416,11 +1416,12 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
     @Override
-    public Map<String, Long> listCommunityIdByNamespaceType(String namespaceType) {
+    public Map<String, Long> listCommunityIdByNamespaceType(Integer namespaceId, String namespaceType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
         final Map<String, Long> communities = new HashMap<>();
         SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
         query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TYPE.eq(namespaceType));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.fetch().map(r ->{
             communities.put(r.getNamespaceCommunityToken(), r.getId());

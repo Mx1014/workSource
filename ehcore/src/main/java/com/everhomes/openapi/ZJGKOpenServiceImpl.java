@@ -661,7 +661,7 @@ public class ZJGKOpenServiceImpl {
         List<ZJApartment> mergeApartmentList = mergeBackupList(backupList, ZJApartment.class);
         List<ZJApartment> theirApartmentList = new ArrayList<ZJApartment>();
         if(mergeApartmentList != null && mergeApartmentList.size() > 0) {
-            Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(NamespaceBuildingType.SHENZHOU.getCode());
+            Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(namespaceId, NamespaceBuildingType.SHENZHOU.getCode());
             mergeApartmentList.forEach(apartment -> {
                 Long communityId = communities.get(apartment.getCommunityIdentifier());
                 if(communityId != null) {
@@ -673,11 +673,15 @@ public class ZJGKOpenServiceImpl {
         dbProvider.execute(s->{
             syncAllApartments(namespaceId, myApartmentList, theirApartmentList);
             // 同步完地址后更新community表中的门牌总数
-            Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
-            Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
-            if (community.getAptCount().intValue() != count.intValue()) {
-                community.setAptCount(count);
-                communityProvider.updateCommunity(community);
+            List<Community> communities = communityProvider.listCommunityByNamespaceType(namespaceId, NamespaceBuildingType.SHENZHOU.getCode());
+            if(communities != null && communities.size() > 0) {
+                communities.forEach(community -> {
+                    Integer count = addressProvider.countApartment(community.getId());
+                    if (community.getAptCount().intValue() != count.intValue()) {
+                        community.setAptCount(count);
+                        communityProvider.updateCommunity(community);
+                    }
+                });
             }
             return true;
         });

@@ -111,6 +111,6 @@ public interface CommunityProvider {
     Map<Long, Community> listCommunitiesByIds(List<Long> ids);
     List<Community> listCommunityByNamespaceIdAndName(Integer namespaceId, String communityName);
     List<Community> listCommunityByNamespaceType(Integer namespaceId, String namespaceType);
-    Map<String, Long> listCommunityIdByNamespaceType(String namespaceType);
+    Map<String, Long> listCommunityIdByNamespaceType(Integer namespaceId, String namespaceType);
     CommunityGeoPoint findCommunityGeoPointByCommunityId(long communityId);
 }
