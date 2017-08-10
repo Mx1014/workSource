@@ -103,7 +103,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
 				.where(Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode()))
 				.and(cond)
-				.orderBy(Tables.EH_PORTAL_ITEMS.ID.asc())
+				.orderBy(Tables.EH_PORTAL_ITEMS.DEFAULT_ORDER.asc(),Tables.EH_PORTAL_ITEMS.ID.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
 	}
 

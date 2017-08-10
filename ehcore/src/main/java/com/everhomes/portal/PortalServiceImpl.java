@@ -467,26 +467,6 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItemDTO> dtos = portalItems.stream().map(r ->{
 			return processPortalItemDTO(r);
 		}).collect(Collectors.toList());
-
-		if(dtos.size() > 0){
-			//按order 排序
-			Collections.sort(dtos, new Comparator<PortalItemDTO>() {
-				@Override
-				public int compare(PortalItemDTO o1, PortalItemDTO o2) {
-					Integer order1 = 0;
-					if(null != o1.getDefaultOrder()){
-						order1 = o1.getDefaultOrder();
-					}
-
-					Integer order2 = 0;
-					if(null != o2.getDefaultOrder()){
-						order2 = o2.getDefaultOrder();
-					}
-					return order1 - order2;
-				}
-			});
-		}
-
 		response.setPortalItems(dtos);
 
 		return response;
