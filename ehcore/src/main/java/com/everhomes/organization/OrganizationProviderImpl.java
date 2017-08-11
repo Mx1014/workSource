@@ -27,8 +27,35 @@ import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhImportFileTasks;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositionMaps;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositions;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberContracts;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberDetails;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberEducations;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberInsurances;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberProfileLogs;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberWorkExperiences;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -4980,4 +5007,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return list;
 	}
+
+	@Override
+	public List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId) {
+        List<ListAddressIdsByOrganizationIdDTO> dtos = new ArrayList<>();
+	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAddresses t = Tables.EH_ADDRESSES.as("t");
+        context.select(t.ID,t.ADDRESS,t.AREA_SIZE)
+            .from(t,Tables.EH_ORGANIZATION_ADDRESSES)
+            .where(t.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID))
+            .and(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+            .fetch()
+            .map(r -> {
+                ListAddressIdsByOrganizationIdDTO dto = new ListAddressIdsByOrganizationIdDTO();
+                dto.setAddressId(r.getValue(t.ID));
+                dto.setAddressName(r.getValue(t.ADDRESS));
+                dto.setAreaSize(r.getValue(t.AREA_SIZE));
+                dtos.add(dto);
+                return null;});
+        return dtos;
+    }
 }

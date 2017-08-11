@@ -12582,6 +12582,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         return res;
     }
 
+    @Override
+    public List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId) {
+        return this.organizationProvider.listAddressIdsByOrganizationId(organizationId);
+    }
+
     /**获取一个组织的总公司ID**/
     private Long getTopEnterpriserIdOfOrganization(Long organizationId){
         Organization org = checkOrganization(organizationId);

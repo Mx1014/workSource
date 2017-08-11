@@ -1761,4 +1761,18 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /org/listAddressIdsByOrganizationId</b>
+     * <p>通过企业id查询地址id集合</p>
+     */
+    @RequestMapping("listAddressIdsByOrganizationId")
+    @RestReturn(value=ListAddressIdsByOrganizationIdDTO.class,collection = true)
+    public RestResponse listAddressIdsByOrganizationId(ListAddressIdsByOrganizationIdCommand cmd) {
+        List<ListAddressIdsByOrganizationIdDTO> addressDTO = this.organizationService.listAddressIdsByOrganizationId(cmd.getOrganizationId());
+        RestResponse response = new RestResponse(addressDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

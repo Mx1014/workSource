@@ -17,9 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Wentian Wang on 2017/8/10.
@@ -33,6 +31,10 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
 
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId) {
+        Map<String,String> map = new HashMap<>();
+        if(targetType == "eh_user") {
+            //个人用户，查询门牌,置入map中
+        }
         return super.showBillForClient(ownerId,ownerType,targetType,targetId,billGroupId);
     }
 

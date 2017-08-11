@@ -527,4 +527,6 @@ public interface OrganizationService {
 	void leaveTheJob(LeaveTheJobCommand cmd);
 
 	ListOrganizationMemberCommandResponse syncOrganizationMemberStatus();
+
+    List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId);
 }

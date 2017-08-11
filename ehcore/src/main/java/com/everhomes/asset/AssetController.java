@@ -774,7 +774,7 @@ public class AssetController extends ControllerBase {
 
     // this is for 显示一个用户的物业账单          2
     /**
-     * <p></p>
+     * <p>显示一个用户的物业账单</p>
      * <b>URL: /asset/showBillForClient</b>
      */
     @RequestMapping("showBillForClient")
@@ -786,6 +786,13 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
+    //this is for 查看缴费详情
+    /**
+     * <p>查看缴费详情</p>
+     * <b>URL: /asset/getPaymentLog</b>
+     */
+//    public RestResponse getPaymentLog(getPaymentLog)
 
     // this is for 用户的账单详情          2
     /**
