@@ -798,7 +798,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
 		}
 		//兼容app业主发布招租，后台楼栋从EhLeaseBuildings查询，app业主发布招租取的楼栋信息是以前的项目管理楼栋信息
-		cmd.setBuildingId(handleBuildingId(cmd.getBuildingId(), adminFlag));
+		cmd.setBuildingId(processBuildingId(cmd.getBuildingId(), adminFlag));
 
 		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 
@@ -856,14 +856,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 	}
 
-	private Long handleBuildingId(Long buildingId, Byte adminFlag) {
+	private Long processBuildingId(Long buildingId, Byte adminFlag) {
 		if (adminFlag == (byte)2) {
 			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(buildingId);
-			if (null == leaseBuilding) {
-				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"Status can not be modified.");
+			if (null != leaseBuilding) {
+				return leaseBuilding.getId();
 			}
-			return leaseBuilding.getId();
 		}
 		return buildingId;
 	}
@@ -871,7 +869,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd, Byte adminFlag){
 
-		cmd.setBuildingId(handleBuildingId(cmd.getBuildingId(), adminFlag));
+		cmd.setBuildingId(processBuildingId(cmd.getBuildingId(), adminFlag));
 
 		return dbProvider.execute((TransactionStatus status) -> {
 
@@ -1004,21 +1002,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public boolean updateApplyEntryStatus(UpdateApplyEntryStatusCommand cmd){
 
-		if (null == cmd.getId()) {
-			LOGGER.error("Invalid param id, cmd={}", cmd);
-			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Status can not be modified.");
-		}
-
 		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getApplyEntryById(cmd.getId());
-		
-		if(ApplyEntryStatus.RESIDED_IN.getCode() == cmd.getStatus()){
-			if(ApplyEntryStatus.PROCESSING.getCode() != request.getStatus()){
-				LOGGER.error("Status can not be modified. cause:data status ="+ request.getStatus());
-				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"Status can not be modified.");
-			}
-		}
 		
 		return enterpriseApplyEntryProvider.updateApplyEntryStatus(cmd.getId(), cmd.getStatus());
 		
