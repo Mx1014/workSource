@@ -10,6 +10,8 @@ ALTER TABLE eh_buildings DROP COLUMN fire_control_description;
 ALTER TABLE eh_buildings DROP COLUMN general_form_id;
 ALTER TABLE eh_buildings DROP COLUMN custom_form_flag;
 
+ALTER TABLE eh_enterprise_op_requests DROP COLUMN building_id;
+
 ALTER TABLE `eh_lease_promotion_attachments` ADD COLUMN `owner_type` VARCHAR(128) NOT NULL AFTER `id`;
 ALTER TABLE `eh_lease_promotion_attachments` CHANGE COLUMN `lease_id` `owner_id` BIGINT NOT NULL AFTER `id`;
 
