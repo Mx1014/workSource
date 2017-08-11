@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import javax.persistence.Convert;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.manager.StatusTransformer;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -4978,7 +4979,25 @@ public class PunchServiceImpl implements PunchService {
 	}
 	public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r ){
 		PunchDayDetailDTO dto =  ConvertHelper.convert(r,PunchDayDetailDTO.class);
-			dto.setStatuString(statusToString(r.getStatus()));
+			if(r.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)){
+				String[] statulist = StringUtils.split(r.getStatusList(), PunchConstants.STATUS_SEPARATOR);
+				for(int i = 0 ;i<statulist.length;i++ ){
+					if(i ==0){
+						dto.setStatuString(statusToString( Byte.valueOf(statulist[i])));
+					}else{
+						dto.setStatuString(dto.getStatuString() + PunchConstants.STATUS_SEPARATOR + statusToString( Byte.valueOf(statulist[i])));
+					}
+				}
+			}
+			else{
+				dto.setStatuString(statusToString(r.getStatus()));
+			}
+			
+			
+			Organization punchGroup = organizationProvider.findOrganizationById(r.getPunchOrganizationId()); 
+			dto.setPunchOrgName(punchGroup.getName());
+			
+			
 			if(null!= r.getArriveTime())
 				dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
 
