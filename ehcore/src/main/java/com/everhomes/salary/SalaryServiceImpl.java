@@ -190,7 +190,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         AddSalaryGroupResponse response = new AddSalaryGroupResponse();
         Long salaryOrgId = null;
-        if (!cmd.getSalaryGroupEntity().isEmpty()) {
+        if (cmd.getSalaryGroupEntity() != null) {
             Long groupId;
 
             if (StringUtils.isEmpty(cmd.getSalaryGroupId())) {
@@ -659,8 +659,8 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setGroupEntityName(r.getName());
                 dto.setSalaryValue(r.getDefaultValue());
 
-                //  为对应字段赋值
-                if (r.getType().equals(SalaryEntityType.TEXT.getCode())) {
+                //  为对应字段赋值，但是信息模板2的字段不用读取
+                if (r.getType().equals(SalaryEntityType.TEXT.getCode()) && r.getTemplateName().equals("信息模板1")) {
                     dto.setSalaryValue(processSalaryValue(r.getOriginEntityId(), cmd.getDetailId()));
                     dto.setId(r.getId());
                 } else {
