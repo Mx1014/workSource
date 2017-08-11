@@ -44,15 +44,15 @@ public class AuthoriztionController extends ControllerBase {
 
 	@Autowired
 	private AppNamespaceMappingProvider appNamespaceMappingProvider;
-	
+
 	@Autowired
 	private AuthorizationThirdPartyRecordProvider authorizationThirdPartyRecordProvider;
 
 	@Autowired
 	private AppProvider appProvider;
-	
-    @Autowired
-    private AddressService addressService;
+
+	@Autowired
+	private AddressService addressService;
 
 	/**
 	 * <b>URL: /openapi/user/cancelAuthFeedback</b>
@@ -63,15 +63,15 @@ public class AuthoriztionController extends ControllerBase {
 	@RequireAuthentication(false)
 	public RestResponse cancelAuthFeedback(@Valid CancelAuthFeedbackCommand cmd, HttpServletRequest req, HttpServletResponse resp) {
 		checkCmd(cmd);
-		
+
 		AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
-		
+
 		if(mapping == null || mapping.getNamespaceId() == null){
 			LOGGER.error("appkey not mapping to namespace, mapping = {}, appKey = {}", mapping, cmd.getAppKey());
 			throw RuntimeErrorException.errorWith("asset", 201,
 					"提交信息不匹配!"+cmd.getSignature());
 		}
-		
+
 		AuthorizationThirdPartyRecord record = authorizationThirdPartyRecordProvider.findAuthorizationThirdPartyRecordByPhone(cmd.getPhone(),cmd.getType(),mapping.getNamespaceId());
 		RestResponse response = new RestResponse();
 		response.setErrorScope("asset");
