@@ -168,7 +168,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setId(flowCase.getId());
 		request.setCreatorUid(UserContext.current().getUser().getId());
 		request.setTemplateType("flowCase");
-		serviceAllianceRequestInfoSearcher.feedDoc(request);
+	//	serviceAllianceRequestInfoSearcher.feedDoc(request);
 
 		//推送消息
 		//给服务公司留的手机号推消息
@@ -198,12 +198,12 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
       	    meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 
        	    messageDto.setMeta(meta);
-			//OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 
-			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), serviceOrg.getContactMemid().toString()));
+			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), member.getTargetId().toString()));
 			messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-					serviceOrg.getContactMemid().toString(),messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                    member.getTargetId().toString(),messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 
 
 
