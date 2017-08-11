@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 
  */
-public class UnrentFeedbackCommand {
+public class CancelAuthFeedbackCommand {
 	@NotNull
 	private String appKey;
 	@NotNull
