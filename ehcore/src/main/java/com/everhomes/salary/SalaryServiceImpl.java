@@ -2117,7 +2117,7 @@ public class SalaryServiceImpl implements SalaryService {
             if(null == dto.getPaidMoney())
                 row.createCell(++i).setCellValue("");
             else
-                row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
+                row.createCell(++i).setCellValue(String.valueOf(dto.getPaidMoney()));
 
         }
     }
