@@ -174,7 +174,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		//给服务公司留的手机号推消息
 		if (yellowPageId!=0) {
 			ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
-
+			if (serviceOrg.getContactMemid()==null || serviceOrg.getContactMemid()==0)
+				return;
 			MessageDTO messageDto = new MessageDTO();
 			messageDto.setAppId(AppConstants.APPID_MESSAGING);
 			messageDto.setSenderUid(User.SYSTEM_UID);
