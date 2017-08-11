@@ -1806,7 +1806,7 @@ public class SalaryServiceImpl implements SalaryService {
             calculateMemberPeriodVals(member, salaryGroup, salaryGroupEntities,returnFlag);
             detailIds.add(member.getDetailId());
         }
-        List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(salaryGroup.getId(),detailIds);
+        List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployZeeByPeriodGroupIdNotInDetailIDS(salaryGroup.getId(),detailIds);
         if (null == salaryEmployees) {
             return;
         }
@@ -2118,7 +2118,7 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(dto.getDepartments());
             row.createCell(++i).setCellValue(dto.getSalaryPeriod());
             row.createCell(++i).setCellValue(dto.getSalaryGroupName());
-            if(null != dto.getPaidMoney())
+            if(null == dto.getPaidMoney())
                 row.createCell(++i).setCellValue("");
             else
                 row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
