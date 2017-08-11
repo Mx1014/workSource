@@ -5,6 +5,7 @@ ALTER TABLE `eh_punch_rules` ADD COLUMN `china_holiday_flag` TINYINT COMMENT '�
 ALTER TABLE `eh_punch_holidays` ADD COLUMN `exchange_from_date` DATE DEFAULT NULL COMMENT '特殊上班日:上原本哪天的班次';
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN status_list VARCHAR(20) COMMENT '多次打卡的状态用/分隔 example: 1 ; 1/13 ; 13/3/4 ';
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN punch_count INT COMMENT '打卡次数';
+ALTER TABLE `eh_punch_day_logs` ADD COLUMN `punch_organization_id` BIGINT;
 
 ALTER TABLE `eh_punch_logs` ADD COLUMN `punch_type` TINYINT DEFAULT '0' COMMENT '0- 上班打卡 ; 1- 下班打卡'; 
 ALTER TABLE `eh_punch_logs` ADD COLUMN `punch_interval_no` INT DEFAULT '1' COMMENT '第几次排班的打卡'; 

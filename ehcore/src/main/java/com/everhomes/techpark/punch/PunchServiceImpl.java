@@ -1202,27 +1202,35 @@ public class PunchServiceImpl implements PunchService {
 						} 
 						//计算下班 
 						calculateLeaveStatus(leaveCalendar,endTime,pdl);
+						pdl.setArriveTime(arriveCalendar.getTimeInMillis());
 					}
 					pdl.setStatusList(pdl.getPunchStatus()+"");
 				}else if (punchIntervalNo == intervals.size() ){
-					if(null == pdl.getPunchStatus()){
-						//计算上班 
-						calculateArriveStatus(arriveCalendar, startTime, pdl);
-						//计算下班 
-						calculateLeaveStatus(leaveCalendar,endTime,pdl); 
-					}
-					pdl.setStatusList(pdl.getStatusList() + PunchConstants.STATUS_SEPARATOR + pdl.getPunchStatus());
-				}else{ 
+					//最后一次打卡
 					if(null == pdl.getPunchStatus()){
 						//计算上班 
 						calculateArriveStatus(arriveCalendar, startTime, pdl);
 						//下班时间+下班延迟时间
 						endTime.setTimeInMillis(endTime.getTimeInMillis() + lateTimeLong);
 						//计算下班 
+						calculateLeaveStatus(leaveCalendar,endTime,pdl); 
+						pdl.setLeaveTime(leaveCalendar.getTimeInMillis());
+					}
+					pdl.setStatusList(pdl.getStatusList() + PunchConstants.STATUS_SEPARATOR + pdl.getPunchStatus());
+
+					pdl.setArriveTime(arriveCalendar.getTimeInMillis());
+				}else{ 
+					//中间打卡
+					if(null == pdl.getPunchStatus()){
+						//计算上班 
+						calculateArriveStatus(arriveCalendar, startTime, pdl);
+						
+						//计算下班 
 						calculateLeaveStatus(leaveCalendar,endTime,pdl);
 						
 					}
 					pdl.setStatusList(pdl.getStatusList() + PunchConstants.STATUS_SEPARATOR + pdl.getPunchStatus());
+					
 				}
 			} 
 		}
@@ -4902,65 +4910,69 @@ public class PunchServiceImpl implements PunchService {
 		
 		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
 		Long ownerId =getTopEnterpriseId(cmd.getOwnerId());
-		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
+		//分页查询 由于用到多条件排序,所以使用pageOffset方式分页 
+		Integer pageOffset = 0; 
+		if (cmd.getPageAnchor() != null)
+			pageOffset = cmd.getPageAnchor().intValue();
+		int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
+		List<Long> userIds = new ArrayList<>();
+//		Long organizationId = null;
+		if(cmd.getUserId() != null){
+			userIds.add(cmd.getUserId());
+		}
+		else if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
 			//找到所有子部门 下面的用户
-			Organization org = this.checkOrganization(cmd.getOwnerId());
-
-			List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+			Organization org = this.checkOrganization(cmd.getOwnerId()); 
+			userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
 			if (null == userIds)
-				return response;
-			//分页查询 由于用到多条件排序,所以使用pageOffset方式分页
-			Integer pageOffset = 0; 
-			if (cmd.getPageAnchor() != null)
-				pageOffset = cmd.getPageAnchor().intValue();
-			int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
-			String startDay=null;
-			if(null!=cmd.getStartDay())
-				startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
-			String endDay=null;
-			if(null!=cmd.getEndDay())
-				endDay =  dateSF.get().format(new Date(cmd.getEndDay()));
-			Long organizationId = org.getDirectlyEnterpriseId();
-			if(organizationId.equals(0L))
-				organizationId = org.getId();
-			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-					ownerId,startDay,endDay , 
-					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
-					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
-					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize+1 );
+				return response; 
+//			organizationId = org.getDirectlyEnterpriseId();
+//			if(organizationId.equals(0L))
+//				organizationId = org.getId();
+		}
+		String startDay=null;
+		if(null!=cmd.getStartDay())
+			startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
+		String endDay=null;
+		if(null!=cmd.getEndDay())
+			endDay =  dateSF.get().format(new Date(cmd.getEndDay()));
+		
+		List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
+				ownerId,startDay,endDay , 
+				cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
+				convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
+				convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize+1 );
+		
+		if (null == results)
+			return response;
+		if(results.size() == pageSize+1){
+			results.remove(pageSize);
+			Long nextPageAnchor = Long.valueOf(pageOffset+pageSize);
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		response.setPunchDayDetails(new ArrayList<PunchDayDetailDTO>());
+		for(PunchDayLog r : results){
+			PunchDayDetailDTO dto =convertToPunchDayDetailDTO(r);
+			if(null!= r.getArriveTime())
+				dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
+
+			if(null!= r.getLeaveTime())
+				dto.setLeaveTime( convertTimeToGMTMillisecond(r.getLeaveTime()));
+
+			if(null!= r.getWorkTime())
+				dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
+
+			if(null!= r.getNoonLeaveTime())
+				dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
+
+			if(null!= r.getAfternoonArriveTime())
+				dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
+			if(null!= r.getPunchDate())
+				dto.setPunchDate(r.getPunchDate().getTime());	
 			
-			if (null == results)
-				return response;
-			if(results.size() == pageSize+1){
-				results.remove(pageSize);
-				Long nextPageAnchor = Long.valueOf(pageOffset+pageSize);
-				response.setNextPageAnchor(nextPageAnchor);
-			}
 			
-			response.setPunchDayDetails(new ArrayList<PunchDayDetailDTO>());
-			for(PunchDayLog r : results){
-				PunchDayDetailDTO dto =convertToPunchDayDetailDTO(r);
-				if(null!= r.getArriveTime())
-					dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
-
-				if(null!= r.getLeaveTime())
-					dto.setLeaveTime( convertTimeToGMTMillisecond(r.getLeaveTime()));
-
-				if(null!= r.getWorkTime())
-					dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
-
-				if(null!= r.getNoonLeaveTime())
-					dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
-
-				if(null!= r.getAfternoonArriveTime())
-					dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
-				if(null!= r.getPunchDate())
-					dto.setPunchDate(r.getPunchDate().getTime());	
-				
-				
-				response.getPunchDayDetails().add(dto);
-			}
-			
+			response.getPunchDayDetails().add(dto);
 		}
 		return response;
 	}
