@@ -10,6 +10,8 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
@@ -26,6 +28,7 @@ import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
 import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.techpark.expansion.ApplyEntryErrorCodes;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -37,6 +40,8 @@ import com.everhomes.util.Tuple;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
 
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +84,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private GeneralFormService generalFormService;
     @Autowired
     private EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider;
-
+    @Autowired
+    private EnterpriseOpRequestBuildingProvider enterpriseOpRequestBuildingProvider;
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
 
@@ -217,15 +223,16 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
                 buildingName = sb.toString();
             }else {
-                LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getBuildingId());
-                if (null != leaseBuilding) {
-                    buildingName = leaseBuilding.getName();
-                }
+//                LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getBuildingId());
+//                if (null != leaseBuilding) {
+//                    buildingName = leaseBuilding.getName();
+//                }
+                buildingName = getBuildingName(applyEntry.getId());
             }
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
 			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
-            LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getBuildingId());
+            LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getSourceId());
 			if(null != leaseBuilding){
                 buildingName = leaseBuilding.getName();
             }
@@ -263,6 +270,34 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 		}
 
         return buildingName;
+    }
+
+    private String getBuildingName(Long applyEntryId) {
+        EnterpriseOpRequestBuilding enterpriseOpRequestBuilding = getEnterpriseOpRequestBuildingByRequestId(applyEntryId);
+        if (null != enterpriseOpRequestBuilding) {
+            LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(enterpriseOpRequestBuilding.getBuildingId());
+            if(null != leaseBuilding){
+                return leaseBuilding.getName();
+            }
+        }
+        return "";
+    }
+
+    private EnterpriseOpRequestBuilding getEnterpriseOpRequestBuildingByRequestId(Long requestId) {
+        List<EnterpriseOpRequestBuilding> opRequestBuildings = this.enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(
+                new ListingQueryBuilderCallback() {
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                        SelectQuery<? extends Record> query) {
+                        query.addConditions(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.ENTERPRISE_OP_REQUESTS_ID.eq(requestId));
+                        return query;
+                    }
+                });
+        if (opRequestBuildings.isEmpty()) {
+            return null;
+        }else {
+            return opRequestBuildings.get(0);
+        }
     }
 
     @Override
