@@ -47,5 +47,5 @@ public interface AssetProvider {
 
     List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId);
 
-    List<ShowBillDetailForClientDTO> getBillDetailForClient(Long billId);
+    ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 }

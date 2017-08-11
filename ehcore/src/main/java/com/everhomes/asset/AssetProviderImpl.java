@@ -593,11 +593,15 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ShowBillDetailForClientDTO> getBillDetailForClient(Long billId) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
+        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+        final String[] dateStr = {""};
+        BigDecimal amountOwed = new BigDecimal("0");
+        BigDecimal amountReceivable = new BigDecimal("0");
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        dslContext.select(t.AMOUNT_RECEIVABLE,t.CHARGING_ITEM_NAME)
+        dslContext.select(t.AMOUNT_RECEIVABLE,t.CHARGING_ITEM_NAME,t.DATE_STR)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -606,8 +610,15 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dtos.add(dto);
+                    dateStr[0] = r.getValue(t.DATE_STR);
+                    amountOwed.add(r.getValue(t.AMOUNT_OWED));
+                    amountReceivable.add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
                 });
-        return dtos;
+        response.setAmountReceivable(amountReceivable);
+        response.setAmountOwed(amountOwed);
+        response.setDatestr(dateStr[0]);
+        response.setShowBillDetailForClientDTOList(dtos);
+        return response;
     }
 }

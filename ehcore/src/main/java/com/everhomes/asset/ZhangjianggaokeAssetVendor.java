@@ -38,14 +38,6 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
-        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
-        List<ShowBillDetailForClientDTO> list = assetProvider.getBillDetailForClient(billId);
-//        response.setAmountOwed();
-//        response.setAmountReceivable();
-//        response.se
-//                //账期和待缴金额的回显放到controller？
         return null;
-
-
     }
 }

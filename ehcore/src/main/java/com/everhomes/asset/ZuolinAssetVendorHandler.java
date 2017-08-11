@@ -298,7 +298,10 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
-        return null;
+        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+        response =  assetProvider.getBillDetailForClient(billId);
+        return response;
+
     }
 
     private List<SimpleAssetBillDTO> convertAssetBillToSimpleDTO(List<AssetBill> bills) {
