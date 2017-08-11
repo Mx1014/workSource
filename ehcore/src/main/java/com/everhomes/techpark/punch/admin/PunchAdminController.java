@@ -1,5 +1,7 @@
 package com.everhomes.techpark.punch.admin;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -27,6 +29,7 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
+import com.google.zxing.Result;
 @RestDoc(value = "Punch controller", site = "ehccore")
 @RestController
 @RequestMapping("/punch")
@@ -386,7 +389,7 @@ public class PunchAdminController extends ControllerBase {
 	/**
 	 * <b>URL: /punch/exportPunchScheduling</b>
 	 * <p>
-	 * 导出公司某个月的班次
+	 * 导出排班表
 	 * </p>
 	 */
 	@RequestMapping("exportPunchScheduling")
@@ -400,13 +403,13 @@ public class PunchAdminController extends ControllerBase {
 
     /**
      * <b>URL: /punch/importPunchScheduling</b>
-     * <p>导入某个月的班次</p>
+     * <p>导入排班表</p>
      */
     @RequestMapping("importPunchScheduling")
-    @RestReturn(value = String.class)
+    @RestReturn(value = PunchSchedulingEmployeeDTO.class,collection = true)
     public RestResponse importPunchScheduling(@Valid ListPunchRulesCommonCommand cmd , @RequestParam(value = "attachment") MultipartFile[] files) {
-    	punchService.importPunchScheduling(cmd , files);
-        RestResponse response = new RestResponse();
+    	List<PunchSchedulingEmployeeDTO> result = punchService.importPunchScheduling(cmd , files);
+        RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

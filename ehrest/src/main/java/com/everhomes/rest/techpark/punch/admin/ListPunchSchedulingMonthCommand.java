@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.punch.admin;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -13,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>targetId：对应设置目标的id比如机构比如人的id</li>
  * <li>punchOriganizationId：打卡考勤组id</li>
  * <li>queryTime: 查询时间 数字时间戳</li>
+ * <li>employees：每一个人的排班{@link PunchSchedulingEmployeeDTO}</li> 
  * </ul>
  */
 public class ListPunchSchedulingMonthCommand {
@@ -25,7 +28,7 @@ public class ListPunchSchedulingMonthCommand {
 	private Long targetId; 
 	private Long punchOriganizationId;
 	private Long queryTime; 
-
+	private List<PunchSchedulingEmployeeDTO> employees;
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
@@ -77,6 +80,14 @@ public class ListPunchSchedulingMonthCommand {
 
 	public void setPunchOriganizationId(Long punchOriganizationId) {
 		this.punchOriganizationId = punchOriganizationId;
+	}
+
+	public List<PunchSchedulingEmployeeDTO> getEmployees() {
+		return employees;
+	}
+
+	public void setEmployees(List<PunchSchedulingEmployeeDTO> employees) {
+		this.employees = employees;
 	}
 
 }
