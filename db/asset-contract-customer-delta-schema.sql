@@ -214,6 +214,8 @@ CREATE TABLE `eh_enterprise_customers` (
   
   `remark` TEXT COMMENT '备注',
   
+  `namespace_customer_type` VARCHAR(128),
+  `namespace_customer_token` VARCHAR(128),
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waiting for approval, 2: active',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
