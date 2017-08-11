@@ -87,7 +87,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
 		//旧表单直接退出
-		if(flowCase.getReferType()!=null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getReferType()))
+		if(flowCase.getOwnerType()!=null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType()))
 			return;
 
 		// 服务联盟的审批拼接工作流 content字符串
@@ -176,6 +176,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
 
 			MessageDTO messageDto = new MessageDTO();
+			messageDto.setAppId(AppConstants.APPID_MESSAGING);
+			messageDto.setSenderUid(User.SYSTEM_UID);
+
 			messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 			String body = "";
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
@@ -194,10 +197,13 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
       	    meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 
        	    messageDto.setMeta(meta);
-			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
-			if (member!=null)
-				messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-					member.getTargetId().toString(),messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+			//OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+
+			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), serviceOrg.getContactMemid().toString()));
+			messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+					serviceOrg.getContactMemid().toString(),messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+
 
 
 		}
@@ -288,7 +294,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-		if (flowCase.getReferType()!=null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getReferType()))
+		if (flowCase.getOwnerType()!=null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType()))
 			return this.processCustomRequest(flowCase);
 
 
