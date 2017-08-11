@@ -4597,3 +4597,20 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60000,'', 'EhNamespaces', 999987,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60100,'', 'EhNamespaces', 999987,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60200,'', 'EhNamespaces', 999987,2);
+
+
+-- fix 13772 add by xiongying20170810
+set @app_url_id = IFNULL((select max(id) from eh_app_urls),0);
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@app_url_id := @app_url_id + 1), '999987', '深圳湾', '2', '', '', '移动平台聚合服务，助力园区效能提升');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@app_url_id := @app_url_id + 1), '999987', '深圳湾', '1', '', '', '移动平台聚合服务，助力园区效能提升');
+
+set @config_id = IFNULL((select max(id) from eh_lease_configs),0);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`, `display_name_str`, `display_order_str`) VALUES ((@config_id := @config_id + 1), '999987', '1', '1', '1', '1', '1', '1', '园区介绍, 虚位以待', '1,2');
+
+set @resource_id = IFNULL((select max(id) from eh_rentalv2_resource_types),0);
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`, `unauth_visible`) VALUES ((@resource_id := @resource_id + 1), '会议室预约', '0', NULL, '2', '999987', '0', '0');
+
+update eh_launch_pad_items set item_label = '会议室预约' where item_label = '行业动态' and namespace_id = 999987;
+update eh_launch_pad_items set action_type = 49 where item_label = '会议室预约' and namespace_id = 999987;
+update eh_launch_pad_items set action_data = CONCAT('{"resourceTypeId":',@resource_id,',"pageType": 0}') where item_label = '会议室预约' and namespace_id = 999987;
+

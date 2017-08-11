@@ -44,15 +44,15 @@ public class AuthoriztionController extends ControllerBase {
 
 	@Autowired
 	private AppNamespaceMappingProvider appNamespaceMappingProvider;
-	
+
 	@Autowired
 	private AuthorizationThirdPartyRecordProvider authorizationThirdPartyRecordProvider;
 
 	@Autowired
 	private AppProvider appProvider;
-	
-    @Autowired
-    private AddressService addressService;
+
+	@Autowired
+	private AddressService addressService;
 
 	/**
 	 * <b>URL: /openapi/user/cancelAuthFeedback</b>
@@ -61,48 +61,59 @@ public class AuthoriztionController extends ControllerBase {
 	@RequestMapping("cancelAuthFeedback")
 	@RestReturn(String.class)
 	@RequireAuthentication(false)
-	public RestResponse cancelAuthFeedback(@Valid CancelAuthFeedbackCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+	public RestResponse cancelAuthFeedback(@Valid CancelAuthFeedbackCommand cmd, HttpServletRequest req, HttpServletResponse resp) {
 		checkCmd(cmd);
-		
+
 		AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
-		
+
 		if(mapping == null || mapping.getNamespaceId() == null){
 			LOGGER.error("appkey not mapping to namespace, mapping = {}, appKey = {}", mapping, cmd.getAppKey());
 			throw RuntimeErrorException.errorWith("asset", 201,
 					"提交信息不匹配!"+cmd.getSignature());
 		}
-		
-		AuthorizationThirdPartyRecord record = authorizationThirdPartyRecordProvider.findAuthorizationThirdPartyRecordByPhone(cmd.getPhone(),cmd.getType(),mapping.getNamespaceId());
-		
-		UserContext.current().setUser(new User());
-		UserContext.current().getUser().setId(record.getCreatorUid());
-		UserContext.current().setNamespaceId(mapping.getNamespaceId());
-		if(record != null && record.getResultJson() != null){
-			ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
-			List<ZjgkResponse> list = entity.getResponse();
-			if(list!=null){
-				try{
-					for (ZjgkResponse r : list) {
-						//依次退租
-						DisclaimAddressCommand disCmd = new DisclaimAddressCommand();
-						disCmd.setAddressId(r.getAddressId());
-						addressService.disclaimAddress(disCmd);
+
+		AuthorizationThirdPartyRecord record = null;
+		if(cmd.getType().intValue() == 1) {
+			record = authorizationThirdPartyRecordProvider.findAuthorizationThirdPartyRecordByPhone(cmd.getPhone(), cmd.getType(), mapping.getNamespaceId());
+		}else{
+			record = authorizationThirdPartyRecordProvider.findAuthorizationThirdPartyRecordByOrgPhone(cmd.getPhone(), cmd.getType(), mapping.getNamespaceId());
+		}
+		RestResponse response = new RestResponse();
+		response.setErrorScope("asset");
+
+		if(record!=null) {
+			UserContext.current().setUser(new User());
+			UserContext.current().getUser().setId(record.getCreatorUid());
+			UserContext.current().setNamespaceId(mapping.getNamespaceId());
+			if (record != null && record.getResultJson() != null) {
+				ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(), new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>() {
+				});
+				List<ZjgkResponse> list = entity.getResponse();
+				if (list != null) {
+					try {
+						for (ZjgkResponse r : list) {
+							//依次退租
+							DisclaimAddressCommand disCmd = new DisclaimAddressCommand();
+							disCmd.setAddressId(r.getAddressId());
+							addressService.disclaimAddress(disCmd);
+						}
+					} catch (RuntimeErrorException e) {
+						LOGGER.error("disclaim address error, e = {}", e);
+						throw RuntimeErrorException.errorWith("asset", 201,
+								"退出失败," + e.getMessage());
 					}
-				}catch(RuntimeErrorException e){
-					LOGGER.error("disclaim address error, e = {}", e);
-					throw RuntimeErrorException.errorWith("asset", 201,
-							"退出失败,"+e.getMessage());
 				}
 			}
+			//退租了，然后就把这个认证记录的状态置为inactive
+			record.setStatus(CommonStatus.INACTIVE.getCode());
+			authorizationThirdPartyRecordProvider.updateAuthorizationThirdPartyRecord(record);
+			response.setErrorDetails("OK");
+			response.setErrorDescription("退租成功");
+		}else{
+			response.setErrorDetails("OK");
+			response.setErrorDescription("没有租赁记录");
 		}
-		//退租了，然后就把这个认证记录的状态置为inactive
-		record.setStatus(CommonStatus.INACTIVE.getCode());
-		authorizationThirdPartyRecordProvider.updateAuthorizationThirdPartyRecord(record);
-		RestResponse r = new RestResponse();
-		r.setErrorScope("asset");
-		r.setErrorDetails("OK");
-		r.setErrorDescription("OK");
-		return r;
+		return response;
 	}
 
 	private void checkCmd(CancelAuthFeedbackCommand cmd) {

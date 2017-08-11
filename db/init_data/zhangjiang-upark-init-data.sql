@@ -1256,4 +1256,6 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
 -- 招租管理配置 add by sw 20170808
 UPDATE eh_lease_configs SET rent_amount_flag = 0, renew_flag = 0, issuer_manage_flag =0, issuing_lease_flag =0, area_search_flag = 1, park_indroduce_flag = 1, display_name_str= '办公招租,商户招租',display_order_str='1,2' WHERE namespace_id = 999971;
 
-
+-- 服务联盟配审批 add by xiongying20170810
+SET @jump_id = (SELECT MAX(id) FROM `eh_service_alliance_jump_module`);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ((@jump_id := @jump_id + 1), '999971', '审批', 'zl://approval/create?approvalId={}&sourceId={}', '0');

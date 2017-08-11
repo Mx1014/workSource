@@ -93,8 +93,9 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 
 	}
 
-    @Autowired
-    private CommunityProvider communityProvider;
+
+	@Autowired
+	private CommunityProvider communityProvider;
 
 	@Autowired
 	public FlowService flowService;
@@ -102,14 +103,14 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	@Autowired
 	public FamilyService familyService;
 
-    @Autowired
-    private AddressService addressService;
+	@Autowired
+	private AddressService addressService;
 
-    @Autowired
-    private DbProvider dbProvider;
+	@Autowired
+	private DbProvider dbProvider;
 
-    @Autowired
-    private AuthorizationThirdPartyRecordProvider authorizationProvider;
+	@Autowired
+	private AuthorizationThirdPartyRecordProvider authorizationProvider;
 
 	@Autowired
 	private LocaleStringService localeStringService;
@@ -225,10 +226,10 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	private PostGeneralFormDTO processGeneralFormDTO(PostGeneralFormCommand cmd, ZjgkJsonEntity<List<ZjgkResponse>> entity,String type, FlowCase flowCase) {
 		PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
 
-        List<PostApprovalFormItem> items = new ArrayList<>();
-        PostApprovalFormItem item = new PostApprovalFormItem();
-        item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+		List<PostApprovalFormItem> items = new ArrayList<>();
+		PostApprovalFormItem item = new PostApprovalFormItem();
+		item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+		item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
 //        if(PERSONAL_AUTHORIZATION.equals(type)){
 //        	String documentflow = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE,
 //    				AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.PERSONAL_BACK_CODE_DETAIL_S);
@@ -240,12 +241,12 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 //    		String[] documentflows = documentflow.split("\\|");
 //        	item.setFieldValue(generalContent(entity,documentflows));
 //		}
-        ApplyEntryResponse resp = new ApplyEntryResponse();
-        resp.setUrl(processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
-        item.setFieldValue(StringHelper.toJsonString(resp));
-        items.add(item);
-        dto.getValues().addAll(items);
-        return dto;
+		ApplyEntryResponse resp = new ApplyEntryResponse();
+		resp.setUrl(processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+		item.setFieldValue(StringHelper.toJsonString(resp));
+		items.add(item);
+		dto.getValues().addAll(items);
+		return dto;
 	}
 
 	//表单提交，对接工作流之后的url，返回给客户端跳转
@@ -336,22 +337,25 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		BatchApproveMemberCommand batchCmd = new BatchApproveMemberCommand();
 		//过滤出在第三方认证的信息，直接认证成功。
 		List<ApproveMemberCommand> members = familyList.stream()
-		.filter(r ->{
-			return isInleaveRecord(record, r.getAddressId());
-		})
-		.map(r -> {
-			ApproveMemberCommand cmd = new ApproveMemberCommand();
-			cmd.setAddressId(r.getAddressId());
-			cmd.setId(r.getId());
-			cmd.setMemberUid(UserContext.current().getUser().getId());
-			return cmd;
-		}).collect(Collectors.toList());
+				.filter(r ->{
+					return isInleaveRecord(record, r.getAddressId());
+				})
+				.map(r -> {
+					ApproveMemberCommand cmd = new ApproveMemberCommand();
+					cmd.setAddressId(r.getAddressId());
+					cmd.setId(r.getId());
+					cmd.setMemberUid(UserContext.current().getUser().getId());
+					return cmd;
+				}).collect(Collectors.toList());
 		batchCmd.setMembers(members);
 		return batchCmd;
 	}
 
 	//在记录
 	private boolean isInleaveRecord(AuthorizationThirdPartyRecord record, long addressId){
+		if(record == null || record.getResultJson() == null){
+			return false;
+		}
 		ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 		if(entity != null &&  entity.getResponse() != null)
 			for (ZjgkResponse zjgkResponse: entity.getResponse()) {
@@ -380,7 +384,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	}
 
 	private AuthorizationThirdPartyRecord generateUserAuthorizationRecord(PostGeneralFormCommand cmd, Map<String, String> params,
-			String authorizationType,ZjgkJsonEntity<List<ZjgkResponse>> entity) {
+																		  String authorizationType,ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		AuthorizationThirdPartyRecord record = new AuthorizationThirdPartyRecord();
 		record.setNamespaceId(UserContext.getCurrentNamespaceId());
 		record.setOwnerType(cmd.getOwnerType());
@@ -505,17 +509,17 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		for (PostApprovalFormItem item : values) {
 			GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(item.getFieldType());
 			switch (fieldType) {
-			case SINGLE_LINE_TEXT:
-			case MULTI_LINE_TEXT:
-			case INTEGER_TEXT:
-			case NUMBER_TEXT:
-			case DROP_BOX:
-			case DATE:
-				PostApprovalFormTextValue value = JSONObject.parseObject(item.getFieldValue(),PostApprovalFormTextValue.class);
-				params.put(item.getFieldName(), value.getText());
-				break;
-			default:
-				break;
+				case SINGLE_LINE_TEXT:
+				case MULTI_LINE_TEXT:
+				case INTEGER_TEXT:
+				case NUMBER_TEXT:
+				case DROP_BOX:
+				case DATE:
+					PostApprovalFormTextValue value = JSONObject.parseObject(item.getFieldValue(),PostApprovalFormTextValue.class);
+					params.put(item.getFieldName(), value.getText());
+					break;
+				default:
+					break;
 			}
 			if(item.getFieldName().equals("certificateType")){
 //				params.put(item.getFieldName(), "1");
