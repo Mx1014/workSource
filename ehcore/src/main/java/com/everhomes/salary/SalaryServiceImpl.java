@@ -2116,10 +2116,10 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(dto.getDepartments());
             row.createCell(++i).setCellValue(dto.getSalaryPeriod());
             row.createCell(++i).setCellValue(dto.getSalaryGroupName());
-            if(null != dto.getPaidMoney())
+            if(null == dto.getPaidMoney())
                 row.createCell(++i).setCellValue("");
             else
-                row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
+                row.createCell(++i).setCellValue(String.valueOf(dto.getPaidMoney()));
 
         }
     }
