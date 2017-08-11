@@ -353,6 +353,9 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 
 	//在记录
 	private boolean isInleaveRecord(AuthorizationThirdPartyRecord record, long addressId){
+		if(record == null || record.getResultJson() == null){
+			return false;
+		}
 		ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(),new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 		if(entity != null &&  entity.getResponse() != null)
 			for (ZjgkResponse zjgkResponse: entity.getResponse()) {

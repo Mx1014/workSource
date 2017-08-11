@@ -72,7 +72,12 @@ public class AuthoriztionController extends ControllerBase {
 					"提交信息不匹配!"+cmd.getSignature());
 		}
 
-		AuthorizationThirdPartyRecord record = authorizationThirdPartyRecordProvider.findAuthorizationThirdPartyRecordByPhone(cmd.getPhone(),cmd.getType(),mapping.getNamespaceId());
+		AuthorizationThirdPartyRecord record = null;
+		if(cmd.getType().intValue() == 1) {
+			record = authorizationThirdPartyRecordProvider.findAuthorizationThirdPartyRecordByPhone(cmd.getPhone(), cmd.getType(), mapping.getNamespaceId());
+		}else{
+			record = authorizationThirdPartyRecordProvider.findAuthorizationThirdPartyRecordByOrgPhone(cmd.getPhone(), cmd.getType(), mapping.getNamespaceId());
+		}
 		RestResponse response = new RestResponse();
 		response.setErrorScope("asset");
 
