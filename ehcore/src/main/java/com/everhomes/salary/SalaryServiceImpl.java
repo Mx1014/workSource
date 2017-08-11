@@ -1802,7 +1802,7 @@ public class SalaryServiceImpl implements SalaryService {
             calculateMemberPeriodVals(member, salaryGroup, salaryGroupEntities,returnFlag);
             detailIds.add(member.getDetailId());
         }
-        List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployZeeByPeriodGroupIdNotInDetailIDS(salaryGroup.getId(),detailIds);
+        List<SalaryEmployee> salaryEmployees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupIdNotInDetailIDS(salaryGroup.getId(),detailIds);
         if (null == salaryEmployees) {
             return;
         }
