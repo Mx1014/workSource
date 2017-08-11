@@ -654,21 +654,23 @@ public class SalaryServiceImpl implements SalaryService {
                     dto.setEditableFlag(r.getEditableFlag());
                 if (!StringUtils.isEmpty(r.getNumberType()))
                     dto.setNumberType(r.getNumberType());
-                dto.setGroupEntityId(r.getId());
+                 dto.setGroupEntityId(r.getId());
                 dto.setOriginEntityId(r.getOriginEntityId());
                 dto.setGroupEntityName(r.getName());
                 dto.setSalaryValue(r.getDefaultValue());
 
-                //  为对应字段赋值，但是信息模板2的字段不用读取
+                //  信息模板1 的字段需要自动获取
                 if (r.getType().equals(SalaryEntityType.TEXT.getCode()) && r.getTemplateName().equals("信息模板1")) {
                     dto.setSalaryValue(processSalaryValue(r.getOriginEntityId(), cmd.getDetailId()));
                     dto.setId(r.getId());
                 } else {
                     if (originVals != null) {
                         for (int i = 0; i < originVals.size(); i++) {
-                            //  若是数值类则直接赋值，若是公式则依然返回公式
+                            //  1.信息模板2类, numberType 为 null 依然需要赋值
+                            //  2.数值类, numberType 为 value 需要赋值
+                            //  3.数值类, numberType 为 formula 则不需要赋值
                             if (r.getName().equals(originVals.get(i).getGroupEntityName())
-                                    && !r.getNumberType().equals(SalaryEntityNumberType.FORMULA.getCode())) {
+                                    && !SalaryEntityNumberType.FORMULA.getCode().equals(r.getNumberType())) {
                                 dto.setSalaryValue(originVals.get(i).getSalaryValue());
                                 dto.setId(originVals.get(i).getId());
                                 break;
