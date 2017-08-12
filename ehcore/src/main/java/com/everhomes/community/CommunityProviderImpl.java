@@ -1431,6 +1431,24 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
     @Override
+    public Community findCommunityByNamespaceToken(String namespaceType, String namespaceToken) {
+        List<Community> result = new ArrayList<Community>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TYPE.eq(namespaceType));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TOKEN.eq(namespaceToken));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.fetch().map(r ->{
+            result.add(ConvertHelper.convert(r, Community.class));
+            return null;
+        });
+        if(result.size() == 0) {
+            return null;
+        }
+        return result.get(0);
+    }
+
+    @Override
     public CommunityGeoPoint findCommunityGeoPointByCommunityId(long communityId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunityGeopoints.class));
         List<CommunityGeoPoint> communities = new ArrayList<>();

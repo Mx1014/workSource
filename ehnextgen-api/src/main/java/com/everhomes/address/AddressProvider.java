@@ -50,4 +50,5 @@ public interface AddressProvider {
 	void updateOrganizationOwnerAddress(Long id);
 	void updateOrganizationAddress(Long id);
 	void updateOrganizationAddressMapping(Long id);
+    Address findAddressByNamespaceTypeAndName(String namespaceType, String namespaceToken);
 }

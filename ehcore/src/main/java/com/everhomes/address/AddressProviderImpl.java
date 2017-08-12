@@ -437,5 +437,21 @@ public class AddressProviderImpl implements AddressProvider {
 			.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
 			.execute();
 	}
-    
+
+    @Override
+    public Address findAddressByNamespaceTypeAndName(String namespaceType, String namespaceToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAddresses.class));
+        List<Address> addresses = new ArrayList<>();
+        SelectQuery<EhAddressesRecord> query = context.selectQuery(Tables.EH_ADDRESSES);
+        query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(namespaceType));
+        query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN.eq(namespaceToken));
+        query.fetch().map(r ->{
+            addresses.add(ConvertHelper.convert(r, Address.class));
+            return null;
+        });
+        if(addresses == null || addresses.size() == 0) {
+            return null;
+        }
+        return addresses.get(0);
+    }
 }

@@ -113,4 +113,5 @@ public interface CommunityProvider {
     List<Community> listCommunityByNamespaceType(Integer namespaceId, String namespaceType);
     Map<String, Long> listCommunityIdByNamespaceType(Integer namespaceId, String namespaceType);
     CommunityGeoPoint findCommunityGeoPointByCommunityId(long communityId);
+    Community findCommunityByNamespaceToken(String namespaceType, String namespaceToken);
 }

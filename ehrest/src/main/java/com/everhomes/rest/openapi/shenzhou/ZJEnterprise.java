@@ -1,11 +1,14 @@
 package com.everhomes.rest.openapi.shenzhou;
 
+import java.util.List;
+
 /**
  * Created by ying.xiong on 2017/8/11.
  */
 public class ZJEnterprise {
     private String communityIdentifier;
-    private String apartmentIdentifier;
+    private Long communityId;
+    private List<String> apartmentIdentifierList;
     private String enterpriseIdentifier;
     private String name;
     private String customerNumber;
@@ -29,6 +32,14 @@ public class ZJEnterprise {
     private String source;
     private Boolean dealed;
 
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
     public Boolean getDealed() {
         return dealed;
     }
@@ -37,12 +48,12 @@ public class ZJEnterprise {
         this.dealed = dealed;
     }
 
-    public String getApartmentIdentifier() {
-        return apartmentIdentifier;
+    public List<String> getApartmentIdentifierList() {
+        return apartmentIdentifierList;
     }
 
-    public void setApartmentIdentifier(String apartmentIdentifier) {
-        this.apartmentIdentifier = apartmentIdentifier;
+    public void setApartmentIdentifierList(List<String> apartmentIdentifierList) {
+        this.apartmentIdentifierList = apartmentIdentifierList;
     }
 
     public String getCommunityIdentifier() {

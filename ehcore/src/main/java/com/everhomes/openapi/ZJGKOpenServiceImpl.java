@@ -19,9 +19,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.*;
+import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.pmtask.ebei.EbeiJsonEntity;
 import com.everhomes.pmtask.ebei.EbeiResult;
 import com.everhomes.region.Region;
@@ -34,12 +33,12 @@ import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.openapi.shenzhou.*;
-import com.everhomes.rest.organization.NamespaceOrganizationType;
-import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionType;
 import com.everhomes.search.CommunitySearcher;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeasePromotion;
@@ -59,9 +58,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.TransactionStatus;
 
 import java.io.IOException;
-import java.sql.Timestamp;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -83,11 +87,14 @@ public class ZJGKOpenServiceImpl {
     private static final String SUCCESS_CODE = "200";
     private static final Integer NAMESPACE_ID = 999971;
 
-    private static final String SYNC_COMMUNITIES = "/openapi/syncCommunities";
-    private static final String SYNC_BUILDINGS = "/openapi/syncBuildings";
-    private static final String SYNC_APARTMENTS = "/openapi/syncApartments";
-    private static final String SYNC_ENTERPRISES = "/openapi/syncEnterprises";
-    private static final String SYNC_INDIVIDUALS = "/openapi/syncIndividualCustomer";
+    private static final String SYNC_COMMUNITIES = "/openapi/asset/syncCommunities";
+    private static final String SYNC_BUILDINGS = "/openapi/asset/syncBuildings";
+    private static final String SYNC_APARTMENTS = "/openapi/asset/syncApartments";
+    private static final String SYNC_ENTERPRISES = "/openapi/asset/syncEnterprises";
+    private static final String SYNC_INDIVIDUALS = "/openapi/asset/syncIndividualCustomer";
+    private static final String SYNC_APARTMENTS_LIVING_STATUS = "/openapi/asset/syncApartmentLivingStatus";
+
+    DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -128,7 +135,16 @@ public class ZJGKOpenServiceImpl {
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
 
-  @Scheduled(cron="0 0 1 * * ?")
+    @Autowired
+    private OrganizationSearcher organizationSearcher;
+
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
+    private ThirdpartConfigurationProvider thirdpartConfigurationProvider;
+
+
     public void syncData() {
 //        Map<String, String> params = generateParams();
 //        String communities = postToShenzhou(params, SYNC_COMMUNITIES, null);
@@ -136,22 +152,22 @@ public class ZJGKOpenServiceImpl {
 //        String apartments = postToShenzhou(params, SYNC_APARTMENTS, null);
 //        String enterprises = postToShenzhou(params, SYNC_ENTERPRISES, null);
 //        String individuals = postToShenzhou(params, SYNC_INDIVIDUALS, null);
-        syncCommunities("0");
-        syncBuildings("0");
-        syncApartments("0");
-        syncEnterprises("0");
+//        syncCommunities("0");
+//        syncBuildings("0");
+//        syncApartments("0");
+//        syncEnterprises("0");
     }
 
-    private void syncCommunities(String pageOffset) {
+    public void syncCommunities(String pageOffset) {
         Map<String, String> params = generateParams(pageOffset);
         String communities = postToShenzhou(params, SYNC_COMMUNITIES, null);
 
-        ShenzhouJsonEntity<List<CommunityDTO>> entity = JSONObject.parseObject(communities, new TypeReference<ShenzhouJsonEntity<List<CommunityDTO>>>(){});
+        ShenzhouJsonEntity<List<ZJCommunity>> entity = JSONObject.parseObject(communities, new TypeReference<ShenzhouJsonEntity<List<ZJCommunity>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<CommunityDTO> dtos = entity.getData();
+            List<ZJCommunity> dtos = entity.getData();
             if(dtos != null && dtos.size() > 0) {
-                syncData(entity, DataType.COMMUNITY.getCode());
+                syncData(entity, DataType.COMMUNITY.getCode(), null);
 
                 //数据有下一页则继续请求
                 if(entity.getNextPageOffset() != null) {
@@ -161,21 +177,21 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.COMMUNITY.getCode());
+                syncDataToDb(DataType.COMMUNITY.getCode(), SyncFlag.ALL.getCode());
             }
         }
     }
 
-    private void syncBuildings(String pageOffset) {
+    public void syncBuildings(String pageOffset) {
         Map<String, String> params = generateParams(pageOffset);
         String buildings = postToShenzhou(params, SYNC_BUILDINGS, null);
 
-        ShenzhouJsonEntity<List<BuildingDTO>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<BuildingDTO>>>(){});
+        ShenzhouJsonEntity<List<ZJBuilding>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<ZJBuilding>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<BuildingDTO> dtos = entity.getData();
+            List<ZJBuilding> dtos = entity.getData();
             if(dtos != null && dtos.size() > 0) {
-                syncData(entity, DataType.BUILDING.getCode());
+                syncData(entity, DataType.BUILDING.getCode(), null);
 
                 //数据有下一页则继续请求
                 if(entity.getNextPageOffset() != null) {
@@ -185,21 +201,21 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.BUILDING.getCode());
+                syncDataToDb(DataType.BUILDING.getCode(), SyncFlag.ALL.getCode());
             }
         }
     }
 
-    private void syncApartments(String pageOffset) {
+    public void syncApartments(String pageOffset) {
         Map<String, String> params = generateParams(pageOffset);
-        String buildings = postToShenzhou(params, SYNC_APARTMENTS, null);
+        String apartments = postToShenzhou(params, SYNC_APARTMENTS, null);
 
-        ShenzhouJsonEntity<List<ApartmentDTO>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<ApartmentDTO>>>(){});
+        ShenzhouJsonEntity<List<ZJApartment>> entity = JSONObject.parseObject(apartments, new TypeReference<ShenzhouJsonEntity<List<ZJApartment>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<ApartmentDTO> dtos = entity.getData();
+            List<ZJApartment> dtos = entity.getData();
             if(dtos != null && dtos.size() > 0) {
-                syncData(entity, DataType.APARTMENT.getCode());
+                syncData(entity, DataType.APARTMENT.getCode(), null);
 
                 //数据有下一页则继续请求
                 if(entity.getNextPageOffset() != null) {
@@ -209,31 +225,71 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.APARTMENT.getCode());
+                syncDataToDb(DataType.APARTMENT.getCode(), SyncFlag.ALL.getCode());
             }
         }
     }
 
-    private void syncEnterprises(String pageOffset) {
+    //每天凌晨一点更新
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void syncApartmentsLivingStatus(String pageOffset) {
         Map<String, String> params = generateParams(pageOffset);
-        String buildings = postToShenzhou(params, SYNC_ENTERPRISES, null);
+        String apartments = postToShenzhou(params, SYNC_APARTMENTS_LIVING_STATUS, null);
 
-        ShenzhouJsonEntity<List<EnterpriseCustomerDTO>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<EnterpriseCustomerDTO>>>(){});
+        ShenzhouJsonEntity<List<ApartmentStatusDTO>> entity = JSONObject.parseObject(apartments, new TypeReference<ShenzhouJsonEntity<List<ApartmentStatusDTO>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<EnterpriseCustomerDTO> dtos = entity.getData();
+            List<ApartmentStatusDTO> dtos = entity.getData();
             if(dtos != null && dtos.size() > 0) {
-                syncData(entity, DataType.ENTERPRISE.getCode());
+                syncData(entity, DataType.APARTMENT_LIVING_STATUS.getCode(), null);
 
                 //数据有下一页则继续请求
                 if(entity.getNextPageOffset() != null) {
-                    syncEnterprises(entity.getNextPageOffset().toString());
+                    syncApartmentsLivingStatus(entity.getNextPageOffset().toString());
                 }
             }
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                syncDataToDb(DataType.ENTERPRISE.getCode());
+                syncDataToDb(DataType.APARTMENT_LIVING_STATUS.getCode(), SyncFlag.ALL.getCode());
+            }
+        }
+    }
+
+    public void syncEnterprises(String pageOffset, String communityIdentifier) {
+        Map<String, String> params= new HashMap<String,String>();
+        params.put("appKey", appKey);
+        params.put("timestamp", ""+System.currentTimeMillis());
+        params.put("nonce", ""+(long)(Math.random()*100000));
+        if(communityIdentifier != null) {
+            params.put("communityIdentifier", communityIdentifier);
+        }
+        params.put("pageOffset", pageOffset);
+        params.put("pageSize", PAGE_SIZE);
+        String signature = SignatureHelper.computeSignature(params, secretKey);
+        params.put("signature", signature);
+        String enterprises = postToShenzhou(params, SYNC_ENTERPRISES, null);
+
+        ShenzhouJsonEntity<List<ZJEnterprise>> entity = JSONObject.parseObject(enterprises, new TypeReference<ShenzhouJsonEntity<List<ZJEnterprise>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
+            List<ZJEnterprise> dtos = entity.getData();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(entity, DataType.ENTERPRISE.getCode(), communityIdentifier);
+
+                //数据有下一页则继续请求
+                if(entity.getNextPageOffset() != null) {
+                    syncEnterprises(entity.getNextPageOffset().toString(), communityIdentifier);
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(entity.getNextPageOffset() == null) {
+                if(communityIdentifier == null) {
+                    syncDataToDb(DataType.ENTERPRISE.getCode(), SyncFlag.ALL.getCode());
+                } else {
+                    syncDataToDb(DataType.ENTERPRISE.getCode(), SyncFlag.PART.getCode());
+                }
             }
         }
     }
@@ -244,15 +300,15 @@ public class ZJGKOpenServiceImpl {
         params.put("appKey", appKey);
         params.put("timestamp", ""+System.currentTimeMillis());
         params.put("nonce", ""+(long)(Math.random()*100000));
-        String signature = SignatureHelper.computeSignature(params, secretKey);
-        params.put("signature", signature);
         params.put("pageOffset", pageOffset);
         params.put("pageSize", PAGE_SIZE);
+        String signature = SignatureHelper.computeSignature(params, secretKey);
+        params.put("signature", signature);
 
         return params;
     }
 
-    private void syncData(ShenzhouJsonEntity entity, Byte dataType) {
+    private void syncData(ShenzhouJsonEntity entity, Byte dataType, String communityIdentifier) {
         ZjSyncdataBackup backup = new ZjSyncdataBackup();
         backup.setNamespaceId(NAMESPACE_ID);
         backup.setDataType(dataType);
@@ -263,11 +319,18 @@ public class ZJGKOpenServiceImpl {
         backup.setCreatorUid(1L);
         backup.setUpdateTime(backup.getCreateTime());
 
+        if(communityIdentifier == null) {
+            backup.setAllFlag(SyncFlag.ALL.getCode());
+        } else {
+            backup.setAllFlag(SyncFlag.PART.getCode());
+            backup.setUpdateCommunity(communityIdentifier);
+        }
+
         zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
 
     }
 
-    private void syncDataToDb(Byte dataType) {
+    private void syncDataToDb(Byte dataType, Byte allFlag) {
         queueThreadPool.execute(()->{
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("dataType {} enter into thread=================", dataType);
@@ -278,7 +341,7 @@ public class ZJGKOpenServiceImpl {
                 return ;
             }
             try {
-                updateAllDate(dataType, NAMESPACE_ID , backupList);
+                updateAllDate(dataType, allFlag, NAMESPACE_ID , backupList);
             } finally {
                 zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
             }
@@ -332,7 +395,7 @@ public class ZJGKOpenServiceImpl {
     }
 
     //基本思路：来自神州数码的数据：在我们数据中不在同步数据里的，删除；两边都在的，更新；不在我们数据库中，在同步数据里的，插入；
-    private void updateAllDate(Byte dataType, Integer namespaceId,
+    private void updateAllDate(Byte dataType, Byte allFlag, Integer namespaceId,
                                List<ZjSyncdataBackup> backupList) {
         DataType zjDataType = DataType.fromCode(dataType);
         switch (zjDataType) {
@@ -346,8 +409,10 @@ public class ZJGKOpenServiceImpl {
                 syncAllApartments(namespaceId, backupList);
                 break;
             case ENTERPRISE:
-//                syncAllEnterprises(namespaceId, backupList);
+                syncAllEnterprises(namespaceId, backupList, allFlag);
                 break;
+            case APARTMENT_LIVING_STATUS:
+                syncApartmentLivingStatus(namespaceId, backupList);
 
             default:
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -380,8 +445,20 @@ public class ZJGKOpenServiceImpl {
 
     private void syncAllCommunities(Integer namespaceId, List<Community> myCommunityList, List<ZJCommunity> theirCommunityList) {
         Long defaultForumId = 1L;
-        Long feedbackForumId = 1L;
-        Long organizationId = 1L;
+        ThirdpartConfiguration defaultForum = thirdpartConfigurationProvider.findByName("default.forum.id", namespaceId);
+        if(defaultForum != null) {
+            defaultForumId = Long.valueOf(defaultForum.getValue());
+        }
+        Long feedbackForumId = 2L;
+        ThirdpartConfiguration feedbackForum = thirdpartConfigurationProvider.findByName("feedback.forum.id", namespaceId);
+        if(feedbackForum != null) {
+            feedbackForumId = Long.valueOf(feedbackForum.getValue());
+        }
+        Long organizationId = 0L;
+        ThirdpartConfiguration organization = thirdpartConfigurationProvider.findByName("organization", namespaceId);
+        if(organization != null) {
+            organizationId = Long.valueOf(organization.getValue());
+        }
         // 如果两边都有，更新；如果我们有，他们没有，删除；
         for (Community myCommunity : myCommunityList) {
             ZJCommunity zjCommunity = findFromTheirCommunityList(myCommunity, theirCommunityList);
@@ -481,7 +558,23 @@ public class ZJGKOpenServiceImpl {
             community.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             community.setStatus(CommonStatus.INACTIVE.getCode());
             communityProvider.updateCommunity(community);
+            communitySearcher.feedDoc(community);
         }
+
+        List<OrganizationCommunity> communityOrgs = organizationProvider.listOrganizationByCommunityId(community.getId());
+        if(communityOrgs != null && communityOrgs.size() > 0) {
+            for(OrganizationCommunity orgCommunity : communityOrgs) {
+                organizationProvider.deleteOrganizationCommunity(orgCommunity);
+            }
+        }
+
+        List<NamespaceResource> namespaceResources = namespaceResourceProvider.listResourceByNamespace(NAMESPACE_ID, NamespaceResourceType.COMMUNITY, community.getId());
+        if(namespaceResources != null && namespaceResources.size() > 0) {
+            for(NamespaceResource resource : namespaceResources) {
+                namespaceResourceProvider.deleteNamespaceResource(resource);
+            }
+        }
+
     }
 
     private void updateCommunity(Community community, ZJCommunity zjcommunity) {
@@ -657,6 +750,34 @@ public class ZJGKOpenServiceImpl {
         }
         return null;
     }
+    private void syncApartmentLivingStatus(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
+        //只更新我们系统中有的门牌的状态，如果在我们系统中找不到则不管
+        List<ApartmentStatusDTO> theirApartmentList = mergeBackupList(backupList, ApartmentStatusDTO.class);
+        if(theirApartmentList != null && theirApartmentList.size() > 0) {
+            ThirdpartConfiguration organization = thirdpartConfigurationProvider.findByName("organization", namespaceId);
+            if(organization == null) {
+                organization = new ThirdpartConfiguration();
+                organization.setValue("0");
+            }
+            Long organizationId = Long.valueOf(organization.getValue());
+            theirApartmentList.forEach(apartment -> {
+                Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.SHENZHOU.getCode(), apartment.getApartmentIdentifier());
+                if(address != null) {
+                    //更新地址表
+                    address.setLivingStatus(apartment.getLivingStatus());
+                    addressProvider.updateAddress(address);
+                    //更新物业公司-地址映射表
+                    CommunityAddressMapping organizationAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+                    if (organizationAddressMapping != null) {
+                        updateOrganizationAddressMapping(organizationAddressMapping, address);
+                    }
+                    //新增或更新招租信息
+                    insertOrUpdateLeasePromotion(address.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
+                }
+            });
+
+        }
+    }
 
     private void syncAllApartments(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
         //楼栋的同步按照从门牌中提取来同步
@@ -665,7 +786,7 @@ public class ZJGKOpenServiceImpl {
         List<ZJApartment> mergeApartmentList = mergeBackupList(backupList, ZJApartment.class);
         List<ZJApartment> theirApartmentList = new ArrayList<ZJApartment>();
         if(mergeApartmentList != null && mergeApartmentList.size() > 0) {
-            Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(namespaceId, NamespaceBuildingType.SHENZHOU.getCode());
+            Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(namespaceId, NamespaceCommunityType.SHENZHOU.getCode());
             mergeApartmentList.forEach(apartment -> {
                 Long communityId = communities.get(apartment.getCommunityIdentifier());
                 if(communityId != null) {
@@ -692,13 +813,18 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void syncAllApartments(Integer namespaceId, List<Address> myApartmentList, List<ZJApartment> theirApartmentList) {
+        Long organizationId = 0L;
+        ThirdpartConfiguration organization = thirdpartConfigurationProvider.findByName("organization", namespaceId);
+        if(organization != null) {
+            organizationId = Long.valueOf(organization.getValue());
+        }
         // 如果两边都有，更新；如果我们有，他们没有，删除；
         for (Address myApartment : myApartmentList) {
             ZJApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
             if (customerApartment != null) {
-                updateAddress(myApartment, customerApartment);
+                updateAddress(myApartment, organizationId, customerApartment);
             }else {
-                deleteAddress(myApartment);
+                deleteAddress(organizationId, myApartment);
             }
         }
         // 如果他们有，我们没有，插入
@@ -711,16 +837,16 @@ public class ZJGKOpenServiceImpl {
                 // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
                 Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, customerApartment.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
                 if (address == null) {
-                    insertAddress(namespaceId, customerApartment);
+                    insertAddress(namespaceId, organizationId, customerApartment);
                 }else {
-                    updateAddress(address, customerApartment);
+                    updateAddress(address, organizationId, customerApartment);
                 }
             }
         }
 
     }
 
-    private void insertAddress(Integer namespaceId, ZJApartment customerApartment) {
+    private void insertAddress(Integer namespaceId, Long organizationId, ZJApartment customerApartment) {
         if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
             return;
         }
@@ -767,7 +893,10 @@ public class ZJGKOpenServiceImpl {
         address.setBusinessApartmentName(customerApartment.getApartmentName());
 
         addressProvider.createAddress(address);
+
+        insertOrganizationAddressMapping(organizationId, address);
         insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
+
     }
 
     // 插入或更新招租管理
@@ -822,16 +951,21 @@ public class ZJGKOpenServiceImpl {
         return buildingName+"-"+apartmentName;
     }
 
-    private void deleteAddress(Address address) {
+    private void deleteAddress(Long organizationId, Address address) {
         if (CommonStatus.fromCode(address.getStatus()) != CommonStatus.INACTIVE) {
             address.setOperatorUid(1L);
             address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             address.setStatus(CommonStatus.INACTIVE.getCode());
             addressProvider.updateAddress(address);
         }
+
+        CommunityAddressMapping organizationAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+        if (organizationAddressMapping != null) {
+            organizationProvider.deleteOrganizationAddressMapping(organizationAddressMapping);
+        }
     }
 
-    private void updateAddress(Address address, ZJApartment customerApartment) {
+    private void updateAddress(Address address, Long organizationId, ZJApartment customerApartment) {
         Community community = communityProvider.findCommunityById(customerApartment.getCommunityId());
         if (community == null) {
             community = new Community();
@@ -869,6 +1003,29 @@ public class ZJGKOpenServiceImpl {
 
         addressProvider.updateAddress(address);
         insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
+        CommunityAddressMapping organizationAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+        if (organizationAddressMapping == null) {
+            insertOrganizationAddressMapping(organizationId, address);
+        }else {
+            updateOrganizationAddressMapping(organizationAddressMapping, address);
+        }
+    }
+
+    private void updateOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping, Address address) {
+        organizationAddressMapping.setOrganizationAddress(address.getAddress());
+        organizationAddressMapping.setLivingStatus(address.getLivingStatus());
+        organizationProvider.updateOrganizationAddressMapping(organizationAddressMapping);
+    }
+
+    private void insertOrganizationAddressMapping(Long organizationId, Address address) {
+        CommunityAddressMapping organizationAddressMapping = new CommunityAddressMapping();
+        organizationAddressMapping.setOrganizationId(organizationId);
+        organizationAddressMapping.setCommunityId(address.getCommunityId());
+        organizationAddressMapping.setAddressId(address.getId());
+        organizationAddressMapping.setOrganizationAddress(address.getAddress());
+        organizationAddressMapping.setLivingStatus(address.getLivingStatus());
+        organizationAddressMapping.setNamespaceType(NamespaceAddressType.SHENZHOU.getCode());
+        organizationProvider.createOrganizationAddressMapping(organizationAddressMapping);
     }
 
     private ZJApartment findFromTheirApartmentList(Address myApartment, List<ZJApartment> theirApartmentList) {
@@ -884,162 +1041,343 @@ public class ZJGKOpenServiceImpl {
         return null;
     }
 
-//    private void syncAllEnterprises(Integer namespaceId, List<ZjSyncdataBackup> backupList) {
-//        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
-//        List<EnterpriseCustomer> myOrganizationList = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceType(namespaceId, NamespaceCustomerType.SHENZHOU.getCode());
-//        List<ZJEnterprise> theirEnterpriseList = mergeBackupList(backupList, ZJEnterprise.class);
-//        dbProvider.execute(s->{
-//            syncAllEnterprises(namespaceId, myOrganizationList, theirEnterpriseList);
-//            return true;
-//        });
-//    }
-//
-//    private void syncAllEnterprises(Integer namespaceId, List<EnterpriseCustomer> myOrganizationList, List<ZJEnterprise> theirEnterpriseList) {
-//        // 如果两边都有，更新；如果我们有，他们没有，删除；
-//        for (EnterpriseCustomer myOrganization : myOrganizationList) {
-//            ZJEnterprise zjEnterprise = findFromTheirEnterpriseList(myOrganization, theirEnterpriseList);
-//            if (zjCommunity != null) {
-//                updateCommunity(myCommunity, zjCommunity);
-//            }else {
-//                deleteCommunity(myCommunity);
-//            }
-//        }
-//        // 如果他们有，我们没有，插入
-//        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-//        if (theirCommunityList != null) {
-//            for (ZJCommunity zjCommunity : theirCommunityList) {
-//                if ((zjCommunity.getDealed() != null && zjCommunity.getDealed().booleanValue() == true)) {
-//                    continue;
-//                }
-//                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-//                List<Community> community = communityProvider.listCommunityByNamespaceIdAndName(NAMESPACE_ID, zjCommunity.getCommunityName());
-//                if (community == null) {
-//                    insertCommunity(NAMESPACE_ID, zjCommunity, defaultForumId, feedbackForumId, organizationId);
-//                }else {
-//                    updateCommunity(community.get(0), zjCommunity);
-//                }
-//            }
-//        }
-//    }
-//
-//    private ZJEnterprise findFromTheirEnterpriseList(EnterpriseCustomer myOrganization, List<ZJEnterprise> theirEnterpriseList) {
-//        if (theirEnterpriseList != null) {
-//            for (ZJEnterprise zjEnterprise : theirEnterpriseList) {
-//                if (NamespaceCustomerType.SHENZHOU.getCode().equals(myCommunity.getNamespaceCommunityType())
-//                        && myCommunity.getNamespaceCommunityToken().equals(zjCommunity.getCommunityIdentifier())) {
-//                    zjCommunity.setDealed(true);
-//                    return zjCommunity;
-//                }
-//            }
-//        }
-//        return null;
-//    }
-//
-//    private void insertCommunity(Integer namespaceId, ZJCommunity zjcommunity, Long defaultForumId, Long feedbackForumId, Long organizationId) {
-//        if (StringUtils.isBlank(zjcommunity.getCommunityIdentifier())) {
-//            return;
-//        }
-//        Community community = new Community();
-//        community.setName(zjcommunity.getCommunityName());
-//        community.setCommunityType(zjcommunity.getCommunityType());
-//        community.setNamespaceId(namespaceId);
-//        community.setAddress(zjcommunity.getAddress());
-//        community.setZipcode(zjcommunity.getZipcode());
-//        community.setDescription(zjcommunity.getDescription());
-//        community.setAptCount(zjcommunity.getAptCount());
-//        community.setNamespaceCommunityToken(zjcommunity.getCommunityIdentifier());
-//        community.setNamespaceCommunityType(NamespaceCommunityType.SHENZHOU.getCode());
-//        community.setAreaSize(zjcommunity.getAreaSize());
-//        community.setChargeArea(zjcommunity.getChargeArea());
-//        community.setSharedArea(zjcommunity.getSharedArea());
-//        community.setRentArea(zjcommunity.getRentArea());
-//        community.setBuildArea(zjcommunity.getBuildArea());
-//
-//        Region city = regionProvider.findRegionByName(namespaceId, zjcommunity.getCityName());
-//        community.setCityId(city.getId());
-//        community.setCityName(city.getName());
-//        Region area = regionProvider.findRegionByName(namespaceId, zjcommunity.getAreaName());
-//        community.setAreaId(area.getId());
-//        community.setAreaName(area.getName());
-//
-//        community.setDefaultForumId(defaultForumId);
-//        community.setFeedbackForumId(feedbackForumId);
-//        community.setStatus(CommonStatus.ACTIVE.getCode());
-//        communityProvider.createCommunity(1L, community);
-//        communitySearcher.feedDoc(community);
-//
-//        CommunityGeoPoint geoPoint = new CommunityGeoPoint();
-//        geoPoint.setCommunityId(community.getId());
-//        geoPoint.setLatitude(zjcommunity.getLatitude());
-//        geoPoint.setLongitude(zjcommunity.getLongitude());
-//        String geohash= GeoHashUtils.encode(zjcommunity.getLatitude(), zjcommunity.getLongitude());
-//        geoPoint.setGeohash(geohash);
-//        communityProvider.createCommunityGeoPoint(geoPoint);
-//
-//        OrganizationCommunity departmentCommunity = new OrganizationCommunity();
-//        departmentCommunity.setCommunityId(community.getId());
-//        departmentCommunity.setOrganizationId(organizationId);
-//        organizationProvider.createOrganizationCommunity(departmentCommunity);
-//
-//        NamespaceResource resource = new NamespaceResource();
-//        resource.setNamespaceId(namespaceId);
-//        resource.setResourceType(NamespaceResourceType.COMMUNITY.getCode());
-//        resource.setResourceId(community.getId());
-//        namespaceResourceProvider.createNamespaceResource(resource);
-//    }
-//
-//    private void deleteCommunity(Community community) {
-//        if (CommonStatus.fromCode(community.getStatus()) != CommonStatus.INACTIVE) {
-//            community.setOperatorUid(1L);
-//            community.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//            community.setStatus(CommonStatus.INACTIVE.getCode());
-//            communityProvider.updateCommunity(community);
-//        }
-//    }
-//
-//    private void updateCommunity(Community community, ZJCommunity zjcommunity) {
-//        community.setOperatorUid(1L);
-//        community.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//        community.setName(zjcommunity.getCommunityName());
-//        community.setCommunityType(zjcommunity.getCommunityType());
-//        community.setAddress(zjcommunity.getAddress());
-//        community.setZipcode(zjcommunity.getZipcode());
-//        community.setDescription(zjcommunity.getDescription());
-//        community.setAptCount(zjcommunity.getAptCount());
-//        community.setNamespaceCommunityToken(zjcommunity.getCommunityIdentifier());
-//        community.setAreaSize(zjcommunity.getAreaSize());
-//        community.setChargeArea(zjcommunity.getChargeArea());
-//        community.setSharedArea(zjcommunity.getSharedArea());
-//        community.setRentArea(zjcommunity.getRentArea());
-//        community.setBuildArea(zjcommunity.getBuildArea());
-//
-//        Region city = regionProvider.findRegionByName(NAMESPACE_ID, zjcommunity.getCityName());
-//        community.setCityId(city.getId());
-//        community.setCityName(city.getName());
-//        Region area = regionProvider.findRegionByName(NAMESPACE_ID, zjcommunity.getAreaName());
-//        community.setAreaId(area.getId());
-//        community.setAreaName(area.getName());
-//
-//        community.setStatus(CommonStatus.ACTIVE.getCode());
-//        communityProvider.updateCommunity(community);
-//        communitySearcher.feedDoc(community);
-//
-//        CommunityGeoPoint geoPoint = communityProvider.findCommunityGeoPointByCommunityId(community.getId());
-//        if(geoPoint != null) {
-//            geoPoint.setLatitude(zjcommunity.getLatitude());
-//            geoPoint.setLongitude(zjcommunity.getLongitude());
-//            String geohash= GeoHashUtils.encode(zjcommunity.getLatitude(), zjcommunity.getLongitude());
-//            geoPoint.setGeohash(geohash);
-//            communityProvider.updateCommunityGeoPoint(geoPoint);
-//        } else {
-//            geoPoint = new CommunityGeoPoint();
-//            geoPoint.setCommunityId(community.getId());
-//            geoPoint.setLatitude(zjcommunity.getLatitude());
-//            geoPoint.setLongitude(zjcommunity.getLongitude());
-//            String geohash= GeoHashUtils.encode(zjcommunity.getLatitude(), zjcommunity.getLongitude());
-//            geoPoint.setGeohash(geohash);
-//            communityProvider.createCommunityGeoPoint(geoPoint);
-//        }
-//
-//    }
+    private void syncAllEnterprises(Integer namespaceId, List<ZjSyncdataBackup> backupList, Byte allFlag) {
+        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+        //allFlag为part时，仅更新单个特定的项目数据即可
+        Long specialCommunityId = null;
+        if(SyncFlag.PART.equals(SyncFlag.fromCode(allFlag))) {
+            String communityIdentifier = backupList.get(0).getUpdateCommunity();
+            Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifier);
+            if(community != null) {
+                specialCommunityId = community.getId();
+            }
+        }
+
+        List<EnterpriseCustomer> myEnterpriseCustomerList = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceType(namespaceId, NamespaceCustomerType.SHENZHOU.getCode(), specialCommunityId);
+
+        List<ZJEnterprise> mergeEnterpriseList = mergeBackupList(backupList, ZJEnterprise.class);
+        List<ZJEnterprise> theirEnterpriseList = new ArrayList<ZJEnterprise>();
+        if(mergeEnterpriseList != null && mergeEnterpriseList.size() > 0) {
+            if(SyncFlag.PART.equals(SyncFlag.fromCode(allFlag))) {
+                String communityIdentifier = backupList.get(0).getUpdateCommunity();
+                Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifier);
+                if(community != null) {
+                    mergeEnterpriseList.forEach(enterprise -> {
+                        enterprise.setCommunityId(community.getId());
+                        theirEnterpriseList.add(enterprise);
+                    });
+                }
+
+            } else {
+                Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(namespaceId, NamespaceCommunityType.SHENZHOU.getCode());
+                mergeEnterpriseList.forEach(enterprise -> {
+                    Long communityId = communities.get(enterprise.getCommunityIdentifier());
+                    if(communityId != null) {
+                        enterprise.setCommunityId(communityId);
+                    }
+                    theirEnterpriseList.add(enterprise);
+                });
+            }
+
+        }
+
+        dbProvider.execute(s->{
+            syncAllEnterprises(namespaceId, myEnterpriseCustomerList, theirEnterpriseList);
+            return true;
+        });
+    }
+
+    private void syncAllEnterprises(Integer namespaceId, List<EnterpriseCustomer> myEnterpriseCustomerList, List<ZJEnterprise> theirEnterpriseList) {
+        // 如果两边都有，更新；如果我们有，他们没有，删除；
+        for (EnterpriseCustomer myEnterpriseCustomer : myEnterpriseCustomerList) {
+            ZJEnterprise zjEnterprise = findFromTheirEnterpriseList(myEnterpriseCustomer, theirEnterpriseList);
+            if (zjEnterprise != null) {
+                updateEnterpriseCustomer(myEnterpriseCustomer, zjEnterprise);
+            }else {
+                deleteEnterpriseCustomer(myEnterpriseCustomer);
+            }
+        }
+        // 如果他们有，我们没有，插入
+        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+        if (theirEnterpriseList != null) {
+            for (ZJEnterprise zjEnterprise : theirEnterpriseList) {
+                if ((zjEnterprise.getDealed() != null && zjEnterprise.getDealed().booleanValue() == true)) {
+                    continue;
+                }
+                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+                List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, zjEnterprise.getName());
+                if (customers == null) {
+                    insertEnterpriseCustomer(NAMESPACE_ID, zjEnterprise);
+                }else {
+                    updateEnterpriseCustomer(customers.get(0), zjEnterprise);
+                }
+            }
+        }
+    }
+
+    private ZJEnterprise findFromTheirEnterpriseList(EnterpriseCustomer myOrganization, List<ZJEnterprise> theirEnterpriseList) {
+        if (theirEnterpriseList != null) {
+            for (ZJEnterprise zjEnterprise : theirEnterpriseList) {
+                if (NamespaceCustomerType.SHENZHOU.getCode().equals(myOrganization.getNamespaceCustomerType())
+                        && myOrganization.getNamespaceCustomerToken().equals(zjEnterprise.getEnterpriseIdentifier())) {
+                    zjEnterprise.setDealed(true);
+                    return zjEnterprise;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void insertEnterpriseCustomer(Integer namespaceId, ZJEnterprise zjEnterprise) {
+        this.dbProvider.execute((TransactionStatus status) -> {
+            EnterpriseCustomer customer = new EnterpriseCustomer();
+            customer.setNamespaceId(namespaceId);
+            customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
+            customer.setNamespaceCustomerToken(zjEnterprise.getEnterpriseIdentifier());
+            customer.setName(zjEnterprise.getName());
+            customer.setNickName(zjEnterprise.getName());
+            customer.setCustomerNumber(zjEnterprise.getCustomerNumber());
+            customer.setCategoryItemName(zjEnterprise.getCustomerCategory());
+            customer.setLevelItemName(zjEnterprise.getCustomerLevel());
+            customer.setContactName(zjEnterprise.getContactName());
+            customer.setContactGenderItemName(zjEnterprise.getContactGender());
+            customer.setContactMobile(zjEnterprise.getContactMobile());
+            customer.setContactAddress(zjEnterprise.getContactAddress());
+            customer.setContactEmail(zjEnterprise.getContactEmail());
+            customer.setContactPhone(zjEnterprise.getContactPhone());
+            customer.setContactOffficePhone(zjEnterprise.getContactOffficePhone());
+            customer.setContactFamilyPhone(zjEnterprise.getContactFamilyPhone());
+            customer.setContactFax(zjEnterprise.getContactFax());
+            customer.setCorpEmail(zjEnterprise.getCorpEmail());
+            customer.setCorpWebsite(zjEnterprise.getCorpWebsite());
+            customer.setCorpNatureItemName(zjEnterprise.getCorpNature());
+            customer.setCorpIndustryItemName(zjEnterprise.getCorpIndustry());
+            customer.setCorpDescription(zjEnterprise.getDescription());
+            if(zjEnterprise.getCorpEntryDate() != null) {
+                customer.setCorpEntryDate(dateStrToTimestamp(zjEnterprise.getCorpEntryDate()));
+            }
+            customer.setSourceItemName(zjEnterprise.getSource());
+            customer.setStatus(CommonStatus.ACTIVE.getCode());
+            customer.setCreatorUid(1L);
+            customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            customer.setOperatorUid(1L);
+            customer.setUpdateTime(customer.getCreateTime());
+
+            //给企业客户创建一个对应的企业账号
+            Organization organization = insertOrganization(customer);
+            customer.setOrganizationId(organization.getId());
+            enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+
+            insertOrUpdateOrganizationDetail(organization, customer);
+            insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
+            insertOrUpdateOrganizationAddresses(zjEnterprise.getCommunityId(), zjEnterprise.getApartmentIdentifierList(), customer);
+
+            return null;
+        });
+
+    }
+
+    private void insertOrUpdateOrganizationAddresses(Long communityId, List<String> apartmentIdentifier, EnterpriseCustomer customer){
+        List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
+        List<String> apartments = apartmentIdentifier;
+        for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
+            Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+            if (address != null && address.getNamespaceAddressType() != null && address.getNamespaceAddressToken() != null) {
+                if (address.getNamespaceAddressType().equals(NamespaceAddressType.SHENZHOU.getCode())) {
+                    for(String identifier : apartmentIdentifier) {
+                        if(address.getNamespaceAddressToken().equals(identifier)) {
+                            apartments.remove(identifier);
+                        }
+                    }
+                }
+            } else {
+                deleteOrganizationAddress(organizationAddress);
+            }
+        }
+        if(apartments != null && apartments.size() > 0) {
+            apartments.forEach(apartment -> {
+                insertOrganizationAddress(apartment, customer);
+            });
+        }
+
+    }
+
+    private void insertOrganizationAddress(String apartmentIdentifier, EnterpriseCustomer customer) {
+        if (StringUtils.isBlank(apartmentIdentifier)) {
+            return;
+        }
+        Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.SHENZHOU.getCode(), apartmentIdentifier);
+        if (address == null) {
+            return;
+        }
+        Building building = buildingProvider.findBuildingByName(customer.getNamespaceId(), address.getCommunityId(), address.getBuildingName());
+
+        OrganizationAddress organizationAddress = new OrganizationAddress();
+        organizationAddress.setOrganizationId(customer.getId());
+        organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+        organizationAddress.setCreatorUid(1L);
+        organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationAddress.setOperatorUid(1L);
+        organizationAddress.setUpdateTime(organizationAddress.getCreateTime());
+        organizationAddress.setAddressId(address.getId());
+        if (building == null) {
+            organizationAddress.setBuildingId(0L);
+        }else {
+            organizationAddress.setBuildingId(building.getId());
+        }
+        organizationAddress.setBuildingName(building.getName());
+        organizationProvider.createOrganizationAddress(organizationAddress);
+    }
+
+    private void deleteOrganizationAddress(OrganizationAddress organizationAddress) {
+        if (OrganizationAddressStatus.fromCode(organizationAddress.getStatus()) != OrganizationAddressStatus.INACTIVE) {
+            organizationAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
+            organizationAddress.setOperatorUid(1L);
+            organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationProvider.updateOrganizationAddress(organizationAddress);
+        }
+    }
+
+    private Organization insertOrganization(EnterpriseCustomer customer) {
+        Organization organization = new Organization();
+        organization.setParentId(0L);
+        organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+        organization.setName(customer.getName());
+        organization.setAddressId(0L);
+        organization.setPath("");
+        organization.setLevel(1);
+        organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+        organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+        organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organization.setUpdateTime(organization.getCreateTime());
+        organization.setDirectlyEnterpriseId(0L);
+        organization.setNamespaceId(customer.getNamespaceId());
+        organization.setShowFlag((byte)1);
+        organization.setNamespaceOrganizationType(NamespaceOrganizationType.SHENZHOU.getCode());
+        organization.setNamespaceOrganizationToken(customer.getNamespaceCustomerToken());
+        organizationProvider.createOrganization(organization);
+        return organization;
+    }
+
+    private void insertOrUpdateOrganizationDetail(Organization organization, EnterpriseCustomer customer) {
+        OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+        if (organizationDetail == null) {
+            organizationDetail = new OrganizationDetail();
+            organizationDetail.setOrganizationId(organization.getId());
+            organizationDetail.setDescription(organization.getDescription());
+            organizationDetail.setContact(customer.getContactPhone());
+            organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationDetail.setDisplayName(organization.getName());
+            organizationDetail.setContactor(customer.getContactName());
+            organizationProvider.createOrganizationDetail(organizationDetail);
+        }else {
+            organizationDetail.setOrganizationId(organization.getId());
+            organizationDetail.setDescription(organization.getDescription());
+            organizationDetail.setContact(customer.getContactPhone());
+            organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationDetail.setDisplayName(organization.getName());
+            organizationDetail.setContactor(customer.getContactName());
+            organizationProvider.updateOrganizationDetail(organizationDetail);
+        }
+        organizationSearcher.feedDoc(organization);
+    }
+
+    private void insertOrUpdateOrganizationCommunityRequest(Long communityId, Organization organization) {
+        OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.findOrganizationCommunityRequestByOrganizationId(communityId, organization.getId());
+        if (organizationCommunityRequest == null) {
+            organizationCommunityRequest = new OrganizationCommunityRequest();
+            organizationCommunityRequest.setCommunityId(communityId);
+            organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+            organizationCommunityRequest.setMemberId(organization.getId());
+            organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+            organizationCommunityRequest.setCreatorUid(1L);
+            organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationCommunityRequest.setOperatorUid(1L);
+            organizationCommunityRequest.setApproveTime(organizationCommunityRequest.getCreateTime());
+            organizationCommunityRequest.setUpdateTime(organizationCommunityRequest.getCreateTime());
+            organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+        }else {
+            organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+            organizationCommunityRequest.setOperatorUid(1L);
+            organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organizationProvider.updateOrganizationCommunityRequest(organizationCommunityRequest);
+        }
+    }
+
+    private Date dateStrToTimestamp(String str) {
+        LocalDate localDate = LocalDate.parse(str,dateSF);
+        Date date = Date.valueOf(localDate);
+        return date;
+    }
+
+    private void deleteEnterpriseCustomer(EnterpriseCustomer customer) {
+        if (CommonStatus.fromCode(customer.getStatus()) != CommonStatus.INACTIVE) {
+            customer.setOperatorUid(1L);
+            customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            customer.setStatus(CommonStatus.INACTIVE.getCode());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        }
+
+        DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
+        deleteOrganizationIdCommand.setId(customer.getOrganizationId());
+        organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
+        List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
+        if(myOrganizationAddressList != null && myOrganizationAddressList.size() > 0) {
+            myOrganizationAddressList.forEach(organizationAddress -> {
+                deleteOrganizationAddress(organizationAddress);
+            });
+        }
+
+    }
+
+    private void updateEnterpriseCustomer(EnterpriseCustomer customer, ZJEnterprise zjEnterprise) {
+        customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
+        customer.setNamespaceCustomerToken(zjEnterprise.getEnterpriseIdentifier());
+        customer.setName(zjEnterprise.getName());
+        customer.setNickName(zjEnterprise.getName());
+        customer.setCustomerNumber(zjEnterprise.getCustomerNumber());
+        customer.setCategoryItemName(zjEnterprise.getCustomerCategory());
+        customer.setLevelItemName(zjEnterprise.getCustomerLevel());
+        customer.setContactName(zjEnterprise.getContactName());
+        customer.setContactGenderItemName(zjEnterprise.getContactGender());
+        customer.setContactMobile(zjEnterprise.getContactMobile());
+        customer.setContactAddress(zjEnterprise.getContactAddress());
+        customer.setContactEmail(zjEnterprise.getContactEmail());
+        customer.setContactPhone(zjEnterprise.getContactPhone());
+        customer.setContactOffficePhone(zjEnterprise.getContactOffficePhone());
+        customer.setContactFamilyPhone(zjEnterprise.getContactFamilyPhone());
+        customer.setContactFax(zjEnterprise.getContactFax());
+        customer.setCorpEmail(zjEnterprise.getCorpEmail());
+        customer.setCorpWebsite(zjEnterprise.getCorpWebsite());
+        customer.setCorpNatureItemName(zjEnterprise.getCorpNature());
+        customer.setCorpIndustryItemName(zjEnterprise.getCorpIndustry());
+        customer.setCorpDescription(zjEnterprise.getDescription());
+        if(zjEnterprise.getCorpEntryDate() != null) {
+            customer.setCorpEntryDate(dateStrToTimestamp(zjEnterprise.getCorpEntryDate()));
+        }
+        customer.setSourceItemName(zjEnterprise.getSource());
+        customer.setStatus(CommonStatus.ACTIVE.getCode());
+        customer.setOperatorUid(1L);
+        customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+
+        //查找对应的企业账号
+        Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+        if(organization == null) {
+            organization = insertOrganization(customer);
+            customer.setOrganizationId(organization.getId());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        } else if(CommonStatus.fromCode(organization.getStatus()) != CommonStatus.ACTIVE || !organization.getName().equals(customer.getName())){
+            organization.setName(customer.getName());
+            organization.setStatus(CommonStatus.ACTIVE.getCode());
+            organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organization.setOperatorUid(1L);
+            organizationProvider.updateOrganization(organization);
+        }
+
+        insertOrUpdateOrganizationDetail(organization, customer);
+        insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
+        insertOrUpdateOrganizationAddresses(zjEnterprise.getCommunityId(), zjEnterprise.getApartmentIdentifierList(), customer);
+    }
 }

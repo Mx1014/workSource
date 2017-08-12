@@ -1,15 +1,14 @@
 package com.everhomes.rest.openapi.shenzhou;
 
 /**
- * Created by ying.xiong on 2017/8/8.
+ * Created by ying.xiong on 2017/8/12.
  */
-public enum DataType {
-    COMMUNITY((byte)1),BUILDING((byte)2),APARTMENT((byte)3),ENTERPRISE((byte)4),INDIVIDUAL((byte)5),
-    APARTMENT_LIVING_STATUS((byte)6);
+public enum SyncFlag {
+    ALL((byte)1),PART((byte)0);
 
     private Byte code;
 
-    private DataType(Byte code) {
+    private SyncFlag(Byte code) {
         this.code = code;
     }
 
@@ -17,9 +16,9 @@ public enum DataType {
         return this.code;
     }
 
-    public static DataType fromCode(Byte code) {
+    public static SyncFlag fromCode(Byte code) {
         if (code != null) {
-            for (DataType type : DataType.values()) {
+            for (SyncFlag type : SyncFlag.values()) {
                 if (type.getCode().byteValue() == code.byteValue()) {
                     return type;
                 }
