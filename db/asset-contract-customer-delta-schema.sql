@@ -3,8 +3,11 @@
 CREATE TABLE `eh_zj_syncdata_backup` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `data_type` TINYINT NOT NULL COMMENT '1: community, 2: building, 3: apartment',
+  `data_type` TINYINT NOT NULL COMMENT '1: community, 2: building, 3: apartment, 4: enterprise',
+  `all_flag` tinyint(4) NOT NULL COMMENT '1: all data, 0: special community',
+  `update_community` VARCHAR(64) COMMENT 'if all flag is 0, the special community identifier',
   `next_page_offset` INTEGER COMMENT 'next page offset',
+  `name` VARCHAR(64) NOT NULL,
   `data` LONGTEXT COMMENT 'data list',
   `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
   `create_time` DATETIME,
