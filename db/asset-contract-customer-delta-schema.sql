@@ -158,6 +158,7 @@ CREATE TABLE `eh_enterprise_customers` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `organization_id` BIGINT NOT NULL COMMENT 'id of eh_organizations',
+  `community_id` BIGINT NOT NULL COMMENT 'id of eh_communities',
   `customer_number` VARCHAR(128) COMMENT 'default is id if not defined',
   `name` VARCHAR(128),
   `nick_name` VARCHAR(128),
@@ -304,9 +305,9 @@ ALTER TABLE `eh_buildings` ADD COLUMN `rent_area` DOUBLE COMMENT '出租面积';
 -- 门牌信息：
 ALTER TABLE `eh_addresses` ADD COLUMN `shared_area` DOUBLE COMMENT '公摊面积';
 ALTER TABLE `eh_addresses` ADD COLUMN `charge_area` DOUBLE COMMENT '收费面积';
-ALTER TABLE `eh_addresses` ADD COLUMN  `category_item_id` BIGINT COMMENT '资产类型：住宅、写字楼、酒店式公寓、厂房、库房、车位、其他..., refer to the id of eh_var_field_items',
-ALTER TABLE `eh_addresses` ADD COLUMN  `category_item_name` VARCHAR(128) COMMENT '资产类型：住宅、写字楼、酒店式公寓、厂房、库房、车位、其他..., refer to the display_name of eh_var_field_items',
-ALTER TABLE `eh_addresses` ADD COLUMN  `source_item_id` BIGINT COMMENT '资产来源：自管、业主放盘、大业主交管、其他..., refer to the id of eh_var_field_items',
-ALTER TABLE `eh_addresses` ADD COLUMN  `source_item_name` VARCHAR(128) COMMENT '资产来源：自管、业主放盘、大业主交管、其他..., refer to the display_name of eh_var_field_items',
+ALTER TABLE `eh_addresses` ADD COLUMN  `category_item_id` BIGINT COMMENT '资产类型：住宅、写字楼、酒店式公寓、厂房、库房、车位、其他..., refer to the id of eh_var_field_items';
+ALTER TABLE `eh_addresses` ADD COLUMN  `category_item_name` VARCHAR(128) COMMENT '资产类型：住宅、写字楼、酒店式公寓、厂房、库房、车位、其他..., refer to the display_name of eh_var_field_items';
+ALTER TABLE `eh_addresses` ADD COLUMN  `source_item_id` BIGINT COMMENT '资产来源：自管、业主放盘、大业主交管、其他..., refer to the id of eh_var_field_items';
+ALTER TABLE `eh_addresses` ADD COLUMN  `source_item_name` VARCHAR(128) COMMENT '资产来源：自管、业主放盘、大业主交管、其他..., refer to the display_name of eh_var_field_items';
 ALTER TABLE `eh_addresses` ADD COLUMN `decorate_status` TINYINT COMMENT '装修状态';
 ALTER TABLE `eh_addresses` ADD COLUMN `orientation` VARCHAR(32) COMMENT '朝向';
