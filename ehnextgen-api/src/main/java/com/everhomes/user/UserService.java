@@ -224,4 +224,9 @@ public interface UserService {
     ListAuthFormsResponse listAuthForms();
 
 	GetFamilyButtonStatusResponse getFamilyButtonStatus();
+
+    /**
+     *
+     */
+    List<String[]> listBuildingAndApartmentById(Long uid);
 }

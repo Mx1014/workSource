@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.user;
 
+import static com.everhomes.server.schema.Tables.EH_ADDRESSES;
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 
 import java.io.UnsupportedEncodingException;
@@ -29,6 +30,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhCommunities;
+import com.everhomes.server.schema.tables.EhGroupMemberLogs;
+import com.everhomes.server.schema.tables.EhUsers;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -4486,5 +4492,28 @@ public class UserServiceImpl implements UserService {
 			response = new GetFamilyButtonStatusResponse(documents[0],FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),documents[1],documents[2]);
 		}
 		return response;
+	}
+
+	@Override
+	public List<String[]> listBuildingAndApartmentById(Long uid) {
+	    List<String[]> list = new ArrayList<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhGroupMemberLogs t1 = Tables.EH_GROUP_MEMBER_LOGS.as("t1");
+        EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
+        EhCommunities t3 = Tables.EH_COMMUNITIES.as("t3");
+        context.select(t2.BUILDING_NAME,t2.APARTMENT_NAME,t3.NAME)
+				.from(t1,t2,t3)
+				.where(t1.MEMBER_ID.eq(uid))
+                .and(t1.ADDRESS_ID.eq(t2.ID))
+                .and(t2.COMMUNITY_ID.eq(t3.ID))
+                .fetch(r -> {
+                    String[] v = new String[3];
+                    v[0] = r.getValue(t3.NAME);
+                    v[1] = r.getValue(t2.BUILDING_NAME);
+                    v[2] = r.getValue(t2.APARTMENT_NAME);
+                    list.add(v);
+                    return null;
+                });
+		return list;
 	}
 }

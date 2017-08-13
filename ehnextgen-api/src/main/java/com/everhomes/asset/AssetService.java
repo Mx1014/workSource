@@ -40,4 +40,6 @@ public interface AssetService {
     ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
 
     ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
+
+//    void synchronizeZJGKBill();
 }

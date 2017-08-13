@@ -47,6 +47,8 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -70,6 +72,7 @@ import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -148,6 +151,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -310,6 +316,15 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
         return handler.getBillDetailForClient(cmd.getBillId());
     }
+//    @Scheduled(cron = "0 0 23 * * ?")
+//    @Override
+//    public void synchronizeZJGKBill() {
+//        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE){
+//            coordinationProvider.getNamedLock(CoordinationLocks.BILL_SYNC.getCode()).tryEnter(() ->{
+//                //调取张江高科的接口获取菜单，可是为什么要同步呢？
+//            });
+//        }
+//    }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
