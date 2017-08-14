@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.messaging.admin.MessagingAdminController;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -19,6 +21,7 @@ import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 
+import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
@@ -176,15 +179,11 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
 			if (serviceOrg.getContactMemid()==null || serviceOrg.getContactMemid()==0)
 				return;
-			MessageDTO messageDto = new MessageDTO();
-			messageDto.setAppId(AppConstants.APPID_MESSAGING);
-			messageDto.setSenderUid(User.SYSTEM_UID);
 
-			messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 			String body = "";
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
 			body += "收到一条"+serviceOrg.getName()+"的申请";
-			messageDto.setBody(body);
+
 			FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
 			actionData.setFlowCaseId(flowCase.getId());
 			actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
@@ -197,31 +196,46 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			meta.put(MessageMetaConstant.MESSAGE_SUBJECT, category.getName());
       	    meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 
-       	    messageDto.setMeta(meta);
 			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 
-			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), member.getTargetId().toString()));
-			messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+			MessageDTO messageDto = createMessageDto(body,meta,member.getTargetId().toString());
 			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                     member.getTargetId().toString(),messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+
+			//发消息给服务联盟机构管理员
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(serviceOrg.getOwnerType(), serviceOrg.getOwnerId(), ContactType.MOBILE.getCode(),
+					serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
+			if(targets != null && targets.size() > 0) {
+				for(ServiceAllianceNotifyTargets target : targets) {
+					if(target.getStatus().byteValue() == 1) {
+						UserIdentifier contact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), target.getContactToken());
+						if(contact != null) {
+							MessageDTO message = createMessageDto(body,meta,contact.getOwnerUid().toString());
+							messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+									contact.getOwnerUid().toString(), message, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+						}
+					}
+
+				}
+			}
 
 
 
 		}
 	}
 
-	private void sendMessageToUser(Long userId, String content) {
+	private MessageDTO createMessageDto(String body,Map<String, String> meta,String uid){
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_MESSAGING);
-		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
-		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setSenderUid(User.SYSTEM_UID);
 		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-		messageDto.setBody(content);
+		messageDto.setBody(body);
+		messageDto.setMeta(meta);
 		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid));
+		return messageDto;
 	}
 
 
