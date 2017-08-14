@@ -2801,24 +2801,14 @@ public class GroupServiceImpl implements GroupService {
     }
 
     private String getScanDownloadUrl(Group group){
-//        String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
-//        String scanDownloadUrl = configProvider.getValue(group.getNamespaceId(), "group.scanDownload.url", "/mobile/static/downloadLink/src/downLink.html");
-//        if (homeUrl.length() == 0 || scanDownloadUrl.length() == 0) {
-//            LOGGER.error("Invalid home url or scanDownloadUrl, homeUrl=" + homeUrl + ", scanDownloadUrl=" + scanDownloadUrl);
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-//                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or scanDownloadUrl");
-//        }
-//        return homeUrl + scanDownloadUrl;
-
-        GetAppInfoCommand cmd = new GetAppInfoCommand();
-        cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        cmd.setOsType(OSType.Android.getCode());
-        AppUrlDTO dto = appUrlService.getAppInfo(cmd);
-
-        if(dto != null){
-            return dto.getDownloadUrl();
+        String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
+        String scanDownloadUrl = configProvider.getValue(group.getNamespaceId(), "group.scanDownload.url", "");
+        if (homeUrl.length() == 0 || scanDownloadUrl.length() == 0) {
+            LOGGER.error("Invalid home url or scanDownloadUrl, homeUrl=" + homeUrl + ", scanDownloadUrl=" + scanDownloadUrl);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or scanDownloadUrl");
         }
-        return null;
+        return homeUrl + scanDownloadUrl;
     }
 
 	private void memberInfoToGroupDTO(Long uid, GroupDTO groupDto, Group group) {
