@@ -4316,6 +4316,9 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public void deleteGroupByCreator(long groupId) {
         User user = UserContext.current().getUser();
+        //先把别名查出来，因为删除之后查不了  add by yanjun
+        String alias = getGroupAlias(groupId);
+
         Group group = checkGroupParameter(groupId, user.getId(), "deleteGroup");
         if(!user.getId().equals(group.getCreatorUid()) && !isAdmin(user.getId(), groupId)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
@@ -4354,16 +4357,12 @@ public class GroupServiceImpl implements GroupService {
         //TODO 如果圈很大怎么办？
         List<Long> members = new ArrayList<Long>();
         List<Long> admins = getGroupAdminIncludeList(group.getId(), user.getId(), null);
-        String nickName = "";
-        
+
         List<GroupMember> groupMember = groupProvider.findGroupMemberByGroupId(groupId);
         for(int i = 0; i < groupMember.size(); i++ ){
             GroupMember gm =  groupMember.get(i);
             gm.setMemberStatus(GroupMemberStatus.INACTIVE.getCode());
             members.add(gm.getMemberId());
-            if(i < 5){
-                nickName = nickName + gm.getMemberNickName() + "、";
-            }
 
 //            if(gm.getMemberId().equals(user.getId())) {
 //                if(gm.getMemberNickName() != null && !gm.getMemberNickName().isEmpty()) {
@@ -4375,14 +4374,8 @@ public class GroupServiceImpl implements GroupService {
 //                }
 //            }
             groupProvider.updateGroupMember(gm);
-            }
-
-        if(groupMember.size() > 0 && groupMember.size() <= 5) {
-            nickName = nickName.substring(0, nickName.length() - 1);
-        }else if(groupMember.size() > 5){
-            nickName = nickName.substring(0, nickName.length() - 1) + "...";
         }
-        
+
   
         //Send message to all other admins
         String locale = user.getLocale();
@@ -4391,7 +4384,7 @@ public class GroupServiceImpl implements GroupService {
 //        //Send message to creator
 //        sendNotificationToCreator(user.getId(), nickName, group, locale);
         
-        sendNotifactionToMembers(members, nickName, group, locale);
+        sendNotifactionToMembers(members, alias, group, locale);
     }
 
     /**
