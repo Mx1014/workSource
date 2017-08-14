@@ -127,5 +127,14 @@ public class FieldProviderImpl implements FieldProvider {
         return items;
     }
 
-
+    @Override
+    public ScopeFieldItem findScopeFieldItemByFieldItemId(Long itemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        ScopeFieldItem item = context.select().from(Tables.EH_VAR_FIELD_ITEM_SCOPES)
+                .where(Tables.EH_VAR_FIELD_ITEM_SCOPES.ITEM_ID.eq(itemId))
+                .fetchAny().map((record)-> {
+            return ConvertHelper.convert(record, ScopeFieldItem.class);
+        });
+        return item;
+    }
 }
