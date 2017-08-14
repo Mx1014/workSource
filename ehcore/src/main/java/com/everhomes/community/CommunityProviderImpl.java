@@ -670,7 +670,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 	
 	@Override
-	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId) {
+	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword) {
 		assert(locator.getEntityId() != 0);
 		namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
@@ -680,8 +680,14 @@ public class CommunityProviderImpl implements CommunityProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_BUILDINGS.DEFAULT_ORDER.lt(locator.getAnchor()));
         }
-        
-        query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+
+        if (null != communityId) {
+            query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        }
+        if (!StringUtils.isBlank(keyword)) {
+            query.addConditions(Tables.EH_BUILDINGS.NAME.like("%" + keyword + "%"));
+        }
+
         query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
@@ -700,7 +706,6 @@ public class CommunityProviderImpl implements CommunityProvider {
         if(buildings.size() > 0) {
             locator.setAnchor(buildings.get(buildings.size() -1).getDefaultOrder());
         }
-        
         
 		return buildings;
 	}

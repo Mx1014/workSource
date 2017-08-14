@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.organization.*;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -185,6 +187,7 @@ public interface OrganizationService {
 	void rejectForEnterpriseContact(RejectContactCommand cmd);
 	OrganizationMember createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
 	ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd);
+	SearchCommunityMapContentsResponse searchEnterprise(SearchCommunityMapContentsCommand cmd);
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);
 	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);

@@ -68,6 +68,8 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -662,6 +664,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         resp.setDtos(dtos);
         return resp;
+    }
+
+    @Override
+    public SearchCommunityMapContentsResponse searchEnterprise(SearchCommunityMapContentsCommand cmd) {
+
+        int namespaceId = UserContext.getCurrentNamespaceId();
+        Long userId = UserContext.currentUserId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+
+        SearchOrganizationCommand searchCmd = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+        searchCmd.setNamespaceId(namespaceId);
+        return null;
     }
 
     private OrganizationDetailDTO toOrganizationDetailDTO(Long id, Boolean flag){
@@ -4433,7 +4447,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Integer namespaceId = null == cmd.getNamespaceId() ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        List<Building> buildings = this.communityProvider.ListBuildingsByCommunityId(locator, AppConstants.PAGINATION_MAX_SIZE + 1, community.getCommunityId(), namespaceId);
+        List<Building> buildings = this.communityProvider.ListBuildingsByCommunityId(locator, AppConstants.PAGINATION_MAX_SIZE + 1, community.getCommunityId(), namespaceId, null);
         List<Building> unassigned = new ArrayList<Building>();
         for (Building building : buildings) {
             if (!pmBuildingIds.contains(building.getId()))
