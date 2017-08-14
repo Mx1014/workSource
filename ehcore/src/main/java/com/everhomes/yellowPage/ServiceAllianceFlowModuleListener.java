@@ -11,9 +11,11 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.admin.MessagingAdminController;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.common.ThirdPartActionData;
@@ -26,6 +28,7 @@ import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayDestination;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.user.*;
@@ -205,8 +208,10 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 			//发消息给服务联盟机构管理员
 			CrossShardListingLocator locator = new CrossShardListingLocator();
-			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(serviceOrg.getOwnerType(), serviceOrg.getOwnerId(), ContactType.MOBILE.getCode(),
-					serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
+
+
+			List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(ServiceAllianceBelongType.COMMUNITY.getCode(),
+					flowCase.getProjectId(), ContactType.MOBILE.getCode(), serviceOrg.getParentId(),locator, Integer.MAX_VALUE);
 			if(targets != null && targets.size() > 0) {
 				for(ServiceAllianceNotifyTargets target : targets) {
 					if(target.getStatus().byteValue() == 1) {
@@ -220,6 +225,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 				}
 			}
+
 
 
 
