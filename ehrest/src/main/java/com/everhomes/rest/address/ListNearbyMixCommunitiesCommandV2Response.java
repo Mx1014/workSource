@@ -6,7 +6,11 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * 获得最近的小区或者园区 on 2017/8/14.
+ * <ul>
+ *   <li>resudentials:小区列表</li>
+ *   <li>commercials:园区列表</li>
+ * </ul>
+ *
  */
 public class ListNearbyMixCommunitiesCommandV2Response {
 
