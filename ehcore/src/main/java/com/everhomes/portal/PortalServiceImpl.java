@@ -809,6 +809,8 @@ public class PortalServiceImpl implements PortalService {
 		checkPortalItemGroup(cmd.getItemGroupId());
 		PortalItemCategory portalItemCategory = ConvertHelper.convert(cmd, PortalItemCategory.class);
 		portalItemCategory.setStatus(PortalItemCategoryStatus.ACTIVE.getCode());
+		portalItemCategory.setLabel(cmd.getName());
+		portalItemCategory.setName(null);
 		portalItemCategory.setOperatorUid(user.getId());
 		portalItemCategory.setCreatorUid(user.getId());
 		portalItemCategory.setNamespaceId(namespaceId);
@@ -906,7 +908,7 @@ public class PortalServiceImpl implements PortalService {
 
 	private List<PortalItem> getItemAllOrMore(Integer namespaceId,Long itemGroupId, AllOrMoreType type){
 		List<PortalItem> items = new ArrayList<>();
-		List<PortalItem> portalItems = portalItemProvider.listPortalItems(null, namespaceId, PortalItemActionType.ALLORMORE.getCode(), itemGroupId);
+		List<PortalItem> portalItems = portalItemProvider.listPortalItems(null, namespaceId, PortalItemActionType.ALLORMORE.getCode(), itemGroupId, PortalItemStatus.INACTIVE.getCode());
 		for (PortalItem portalItem: portalItems) {
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
 			if(null != actionData && AllOrMoreType.fromCode(actionData.getType()) == type){
@@ -1468,40 +1470,36 @@ public class PortalServiceImpl implements PortalService {
 
 	private void publishItem(PortalItemGroup itemGroup){
 		User user = UserContext.current().getUser();
-		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId());
+		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId(), null);
 		Map<Long, Long> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId());
 		for (PortalItem portalItem: portalItems) {
-			if(PortalItemStatus.ACTIVE == PortalItemStatus.fromCode(portalItem.getStatus())){
+			List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
 
-				List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
-
-				if(null != mappings && mappings.size() > 0){
-					for (PortalLaunchPadMapping mapping: mappings) {
-						launchPadProvider.deleteLaunchPadItem(mapping.getLaunchPadContentId());
-						portalLaunchPadMappingProvider.deletePortalLaunchPadMapping(mapping.getId());
-					}
+			if(null != mappings && mappings.size() > 0){
+				for (PortalLaunchPadMapping mapping: mappings) {
+					launchPadProvider.deleteLaunchPadItem(mapping.getLaunchPadContentId());
+					portalLaunchPadMappingProvider.deletePortalLaunchPadMapping(mapping.getId());
 				}
+			}
+
+			if(PortalItemStatus.ACTIVE == PortalItemStatus.fromCode(portalItem.getStatus())){
 				List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
 				for (PortalContentScope scope: contentScopes) {
 					LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
 					if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.RESIDENTIAL.getCode());
-						item.setScopeId(scope.getScopeId());
 						item.setSceneType(SceneType.DEFAULT.getCode());
 					}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.COMMUNITY.getCode());
-						item.setScopeId(scope.getScopeId());
 						item.setSceneType(SceneType.PARK_TOURIST.getCode());
 					}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.PM.getCode());
-						item.setScopeId(scope.getScopeId());
 						item.setSceneType(SceneType.PM_ADMIN.getCode());
 					}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.ORGANIZATION.getCode());
-						item.setScopeId(scope.getScopeId());
 						item.setSceneType(SceneType.PARK_TOURIST.getCode());
 					}
-
+					item.setScopeId(scope.getScopeId());
 					if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
 						setItemLayoutActionData(item, portalItem.getActionData());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){
@@ -1526,7 +1524,7 @@ public class PortalServiceImpl implements PortalService {
 					}
 
 					item.setAppId(AppConstants.APPID_DEFAULT);
-					item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+					item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
 					item.setMinVersion(1L);
 					item.setItemGroup(portalItem.getGroupName());
 					item.setItemLabel(portalItem.getLabel());
@@ -1604,14 +1602,17 @@ public class PortalServiceImpl implements PortalService {
 					ItemServiceCategry itemCategory = ConvertHelper.convert(category, ItemServiceCategry.class);
 					if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
 						itemCategory.setSceneType(SceneType.DEFAULT.getCode());
+						itemCategory.setScopeCode(ScopeType.RESIDENTIAL.getCode());
 					}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
 						itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
+						itemCategory.setScopeCode(ScopeType.COMMUNITY.getCode());
 					}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
 						itemCategory.setSceneType(SceneType.PM_ADMIN.getCode());
+						itemCategory.setScopeCode(ScopeType.PM.getCode());
 					}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
 						itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
+						itemCategory.setScopeCode(ScopeType.ORGANIZATION.getCode());
 					}
-					itemCategory.setScopeType(scope.getScopeType());
 					itemCategory.setScopeId(scope.getScopeId());
 					itemCategory.setStatus(ItemServiceCategryStatus.ACTIVE.getCode());
 					itemCategory.setCreatorUid(user.getId());
@@ -1798,7 +1799,7 @@ public class PortalServiceImpl implements PortalService {
 
 	private void syncItemCategory(Integer namespaceId, Long itemGroupId){
 		User user = UserContext.current().getUser();
-		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategries(namespaceId, null);
+		List<ItemServiceCategry> categories = launchPadProvider.listItemServiceCategries(namespaceId);
 		for (ItemServiceCategry category: categories) {
 			PortalItemCategory portalItemCategory = portalItemCategoryProvider.getPortalItemCategoryByName(namespaceId, itemGroupId, category.getName());
 			if(null == portalItemCategory){

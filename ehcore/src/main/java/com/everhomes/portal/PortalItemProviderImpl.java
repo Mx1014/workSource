@@ -66,22 +66,29 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 
 	@Override
 	public List<PortalItem> listPortalItems(Long itemCategoryId, Long itemGroupId){
-		return listPortalItems(itemCategoryId, null, null, itemGroupId);
+		return listPortalItems(itemCategoryId, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode());
 	}
 
 	@Override
 	public List<PortalItem> listPortalItemByCategoryId(Long itemCategoryId){
-		return listPortalItems(itemCategoryId, null, null, null);
+		return listPortalItems(itemCategoryId, null, null, null, PortalItemStatus.INACTIVE.getCode());
 	}
 
 	@Override
 	public List<PortalItem> listPortalItemByGroupId(Long itemGroupId){
-		return listPortalItems(null, null, null, itemGroupId);
+		return listPortalItems(null, null, null, itemGroupId, PortalItemStatus.INACTIVE.getCode());
 	}
 
 	@Override
-	public List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId) {
-		Condition cond = Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode());
+	public List<PortalItem> listPortalItemByGroupId(Long itemGroupId, Byte neStatus){
+		return listPortalItems(null, null, null, itemGroupId, neStatus);
+	}
+
+	@Override
+	public List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus) {
+		Condition cond = Tables.EH_PORTAL_ITEMS.ID.isNotNull();
+		if(null != neStatus)
+			cond = Tables.EH_PORTAL_ITEMS.STATUS.ne(neStatus);
 		if(null != itemCategoryId){
 			if(0L == itemCategoryId)
 				cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.eq(itemCategoryId).or(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.isNull()));
@@ -101,8 +108,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		}
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
-				.where(Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode()))
-				.and(cond)
+				.where(cond)
 				.orderBy(Tables.EH_PORTAL_ITEMS.DEFAULT_ORDER.asc(),Tables.EH_PORTAL_ITEMS.ID.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
 	}

@@ -4,15 +4,16 @@ package com.everhomes.launchpad;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.launchpad.ItemGroup;
 import com.everhomes.rest.launchpad.ItemServiceCategryStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
+import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -191,6 +192,31 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 		return layouts;
 	}
+
+	@Override
+	public List<LaunchPadItem> listLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation,String itemGroup, Byte applyPolicy, ListingQueryBuilderCallback queryBuilderCallback){
+		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+		SelectQuery<EhLaunchPadItemsRecord> query = context.selectQuery(Tables.EH_LAUNCH_PAD_ITEMS);
+		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup);
+		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq(itemLocation));
+		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
+		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.APPLY_POLICY.eq(applyPolicy));
+		if(null != queryBuilderCallback)
+			queryBuilderCallback.buildCondition(null, query);
+		query.addConditions(condition);
+		query.fetch().map((r) ->{
+			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+			return null;
+		});
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Query launch pad items by tag and scope, sql=" + query.getSQL());
+			LOGGER.debug("Query launch pad items by tag and scope, bindValues=" + query.getBindValues());
+		}
+		return items;
+	}
+
 	@Override
 	public List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId, String sceneType, String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags){
 		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
@@ -501,7 +527,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 	
 	@Override
-	public UserLaunchPadItem getUserLaunchPadItemByOwner(Long userId, String sceneType, String ownerType, Long ownerId, Long itemId) {
+	public UserLaunchPadItem getUserLaunchPadItemByOwner(Long userId, String sceneType, String ownerType, Long ownerId, String itemName) {
 		List<UserLaunchPadItem> items = new ArrayList<UserLaunchPadItem>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUserLaunchPadItems.class));
         SelectJoinStep<Record> step = context.select().from(Tables.EH_USER_LAUNCH_PAD_ITEMS);
@@ -510,7 +536,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_TYPE.eq(ownerType));
         condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_ID.eq(ownerId));
         condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
-        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.ITEM_ID.eq(itemId));
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.ITEM_NAME.eq(itemName));
        
         step.where(condition).fetch().map(r ->{
             items.add(ConvertHelper.convert(r, UserLaunchPadItem.class));
@@ -550,16 +576,30 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserLaunchPadItems.class, null);
 	}
 
-	public List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String sceneType){
+	public List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId){
+		return listItemServiceCategries(namespaceId, null, null, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addGroupBy(Tables.EH_ITEM_SERVICE_CATEGRIES.NAME);
+				return null;
+			}
+		});
+	}
+
+	@Override
+	public List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String itemLocation, String itemGroup, ListingQueryBuilderCallback callback){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		List<ItemServiceCategry> result = new ArrayList<ItemServiceCategry>();
+		List<ItemServiceCategry> result = new ArrayList<>();
 		SelectQuery<EhItemServiceCategriesRecord> query = context.selectQuery(Tables.EH_ITEM_SERVICE_CATEGRIES);
 		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.STATUS.eq(ItemServiceCategryStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.NAMESPACE_ID.eq(namespaceId));
-		if(null != sceneType){
-			query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.SCENE_TYPE.eq(sceneType));
+		if(!StringUtils.isEmpty(itemLocation))
+			query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.ITEM_LOCATION.eq(itemLocation));
+		if(!StringUtils.isEmpty(itemGroup))
+			query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.ITEM_GROUP.eq(itemGroup));
+		if(null != callback){
+			callback.buildCondition(null, query);
 		}
-		query.addOrderBy(Tables.EH_ITEM_SERVICE_CATEGRIES.ORDER);
 		query.fetch().map(r -> {
 			result.add(ConvertHelper.convert(r, ItemServiceCategry.class));
 			return null;

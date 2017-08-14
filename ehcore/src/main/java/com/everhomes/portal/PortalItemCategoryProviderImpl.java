@@ -36,6 +36,9 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 	public void createPortalItemCategory(PortalItemCategory portalItemCategory) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPortalItemCategories.class));
 		portalItemCategory.setId(id);
+		if(StringUtils.isEmpty(portalItemCategory.getName()))
+			portalItemCategory.setName(EhPortalItemCategories.class.getSimpleName() + id);
+
 		portalItemCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		portalItemCategory.setUpdateTime(portalItemCategory.getCreateTime());
 		getReadWriteDao().insert(portalItemCategory);
