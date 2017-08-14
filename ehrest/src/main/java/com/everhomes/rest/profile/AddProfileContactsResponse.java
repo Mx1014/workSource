@@ -2,7 +2,7 @@ package com.everhomes.rest.profile;
 
 import com.everhomes.util.StringHelper;
 
-public class AddProfileContactsPersonnelResponse {
+public class AddProfileContactsResponse {
 
     @Override
     public String toString() {

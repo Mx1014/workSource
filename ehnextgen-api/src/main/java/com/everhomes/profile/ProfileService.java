@@ -1,9 +1,14 @@
 package com.everhomes.profile;
 
-import com.everhomes.rest.profile.AddProfileContactsPersonnelCommand;
-import com.everhomes.rest.profile.AddProfileContactsPersonnelResponse;
+import com.everhomes.rest.profile.*;
 
 public interface ProfileService {
 
-    AddProfileContactsPersonnelResponse addProfileContactsPersonnel(AddProfileContactsPersonnelCommand cmd);
+    AddProfileContactsResponse addProfileContacts(AddProfileContactsCommand cmd);
+
+    void deleteProfileContacts(DeleteProfileContactsCommand cmd);
+
+    void stickProfileContacts(StickProfileContactsCommand cmd);
+
+    listProfileContactsResponse listProfileContacts(listProfileContactsCommand cmd);
 }

@@ -1,14 +1,14 @@
 package com.everhomes.profile;
 
-import com.everhomes.rest.profile.AddProfileContactsPersonnelCommand;
-import com.everhomes.rest.profile.AddProfileContactsPersonnelResponse;
+import com.everhomes.rest.profile.AddProfileContactsCommand;
+import com.everhomes.rest.profile.AddProfileContactsResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProfileServiceImpl implements ProfileService {
 
     @Override
-    public AddProfileContactsPersonnelResponse addProfileContactsPersonnel(AddProfileContactsPersonnelCommand cmd) {
+    public AddProfileContactsResponse addProfileContacts(AddProfileContactsCommand cmd) {
         return null;
     }
 }
