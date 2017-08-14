@@ -59,16 +59,16 @@ public interface PunchService {
 
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd);
 	
-	public void createPunchRule(AddPunchRuleCommand cmd);
-	public void updatePunchRule(UpdatePunchRuleCommand cmd);
-	public void deletePunchRule(DeletePunchRuleCommand cmd);
-	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(GetPunchRuleCommand cmd);
+//	public void createPunchRule(AddPunchRuleCommand cmd);
+//	public void updatePunchRule(UpdatePunchRuleCommand cmd);
+//	public void deletePunchRule(DeletePunchRuleCommand cmd);
+//	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(GetPunchRuleCommand cmd);
  
 	ListYearPunchLogsCommandResponse getlistPunchLogsBetweenTwoCalendar(
 			ListYearPunchLogsCommandResponse pyl, long CompanyId, Calendar start,
 			Calendar end);
 
-	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd);
+//	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd);
 	public ListPunchExceptionRequestCommandResponse listExceptionRequests(ListPunchExceptionRequestCommand cmd);
 //	void approvePropFamilyMember(PunchExceptionRequest cmd);
 //	void rejectPropFamilyMember(PunchExceptionRequest cmd);

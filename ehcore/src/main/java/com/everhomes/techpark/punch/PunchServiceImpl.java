@@ -37,6 +37,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tools.ant.taskdefs.Java;
+import org.elasticsearch.common.cli.CliToolConfig.Cmd;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -1560,28 +1561,28 @@ public class PunchServiceImpl implements PunchService {
 		return angle * Math.PI / 180.0;
 	}
 
-	@Override
-	public void createPunchRule(AddPunchRuleCommand cmd) {
-		Long userId = UserContext.current().getUser().getId();
-		checkCompanyIdIsNull(cmd.getEnterpriseId());
-		PunchTimeRule punchRule = punchProvider.findPunchTimeRuleByCompanyId(cmd
-				.getEnterpriseId()); 
-		if(punchRule == null) {
-			punchRule = ConvertHelper.convert(cmd, PunchTimeRule.class);
- 			punchRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
-			punchRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
-			punchRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
-			convertTime(punchRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
-			punchRule.setCreatorUid(userId);
-			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			punchProvider.createPunchTimeRule(punchRule);
-//			createPunchGeopoints(userId, cmd.getPunchGeoPoints(),cmd.getEnterpriseId());
-		}
-
-	}
-	@Override
-	public void updatePunchRule(UpdatePunchRuleCommand cmd) {
+//	@Override
+//	public void createPunchRule(AddPunchRuleCommand cmd) {
+//		Long userId = UserContext.current().getUser().getId();
+//		checkCompanyIdIsNull(cmd.getEnterpriseId());
+//		PunchTimeRule punchRule = punchProvider.findPunchTimeRuleByCompanyId(cmd
+//				.getEnterpriseId()); 
+//		if(punchRule == null) {
+//			punchRule = ConvertHelper.convert(cmd, PunchTimeRule.class);
+// 			punchRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
+//			punchRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
+//			punchRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
+//			convertTime(punchRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
+//			punchRule.setCreatorUid(userId);
+//			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+//					.getTime()));
+//			punchProvider.createPunchTimeRule(punchRule);
+////			createPunchGeopoints(userId, cmd.getPunchGeoPoints(),cmd.getEnterpriseId());
+//		}
+//
+//	}
+//	@Override
+//	public void updatePunchRule(UpdatePunchRuleCommand cmd) {
 //		Long userId = UserContext.current().getUser().getId();
 //		checkCompanyIdIsNull(cmd.getEnterpriseId());
 //		PunchTimeRule punchRule = punchProvider.findPunchTimeRuleByCompanyId(cmd
@@ -1607,7 +1608,7 @@ public class PunchServiceImpl implements PunchService {
 ////						cmd.getEnterpriseId());
 //			}
 //		}
-	}
+//	}
 //	
 //	private void createPunchGeopoints(Long userId, List<PunchGeoPointDTO> punchGeoPoints,
 //		String ownerType,	Long ownerId) { 
@@ -1669,10 +1670,10 @@ public class PunchServiceImpl implements PunchService {
 	}
 	
     private final Long MILLISECONDGMT=8*3600*1000L;
-	@Override
-	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(
-			GetPunchRuleCommand cmd) {
-		GetPunchRuleCommandResponse response = new GetPunchRuleCommandResponse();
+//	@Override
+//	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(
+//			GetPunchRuleCommand cmd) {
+//		GetPunchRuleCommandResponse response = new GetPunchRuleCommandResponse();
 //		PunchRuleDTO dto = null;
 //		checkCompanyIdIsNull(cmd.getEnterpriseId());
 //		PunchTimeRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
@@ -1692,8 +1693,8 @@ public class PunchServiceImpl implements PunchService {
 //			}
 //		}
 //		response.setPunchRuleDTO(dto);
-		return response;
-	}
+//		return response;
+//	}
 
 //	private String calculateEndTime(String dateFormat, String startEarlyTime,
 //			String workTime) {
@@ -1711,21 +1712,21 @@ public class PunchServiceImpl implements PunchService {
 //		return getGMTtimeString("HH:mm;ss", endTime);
 //	}
 
-	@Override
-	public void deletePunchRule(DeletePunchRuleCommand cmd) {
-		PunchTimeRule punchRule = punchProvider.findPunchTimeRuleByCompanyId(cmd
-				.getEnterpriseId());
-		if (punchRule != null) {
-			punchProvider.deletePunchTimeRule(punchRule);
-			List<PunchGeopoint> geopoints = punchProvider
-					.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
-			if (geopoints != null && geopoints.size() > 0) {
-				for (PunchGeopoint punchGeopoint : geopoints) {
-					punchProvider.deletePunchGeopoint(punchGeopoint);
-				}
-			}
-		}
-	}
+//	@Override
+//	public void deletePunchRule(DeletePunchRuleCommand cmd) {
+//		PunchTimeRule punchRule = punchProvider.findPunchTimeRuleByCompanyId(cmd
+//				.getEnterpriseId());
+//		if (punchRule != null) {
+//			punchProvider.deletePunchTimeRule(punchRule);
+//			List<PunchGeopoint> geopoints = punchProvider
+//					.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
+//			if (geopoints != null && geopoints.size() > 0) {
+//				for (PunchGeopoint punchGeopoint : geopoints) {
+//					punchProvider.deletePunchGeopoint(punchGeopoint);
+//				}
+//			}
+//		}
+//	}
 
 //	// 如果查询时间为空，重置时间范围。默认为上个月。
 //	private void processQueryCommandDay(ListPunchCountCommand cmd) {
@@ -1747,42 +1748,43 @@ public class PunchServiceImpl implements PunchService {
 //	}
 
 	// 计算两个日期间工作日天数，不包含结束时间
-	private Integer countWorkDayCount(Calendar startCalendar, Calendar endCalendar ,PunchStatistic statistic) {
-//		Integer workDayCount = 0;
-//		Calendar calendar = Calendar.getInstance();
-//		calendar.setTime(startCalendar.getTime());
-//		while (true) {
-//			if (isWorkDay(calendar.getTime(),pr)) {
-//				workDayCount++;
-//			}
-//			calendar.add(Calendar.DAY_OF_MONTH, 1);
-//			if (calendar.after(endCalendar)) {
-//				return workDayCount;
-//			}
-//		} 
-		
-		PunchRuleOwnerMap ruleMap = getPunchRuleMap(statistic.getOwnerType(), statistic.getOwnerId(), statistic.getUserId());
-		if(null == ruleMap)
+	private Integer countWorkDayCount(Calendar startCalendar, Calendar endCalendar ,PunchStatistic statistic) { 
+		Calendar anchorCalendar = Calendar.getInstance();
+		anchorCalendar.setTimeInMillis(startCalendar.getTimeInMillis());
+		PunchRule  pr = getPunchRule(statistic.getOwnerType(), statistic.getOwnerId(), statistic.getUserId());
+		if(null == pr)
 			return 0;
-		List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
-			@Override
-			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-					SelectQuery<? extends Record> query) { 
-//				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(new java.sql.Date(startCalendar.getTime().getTime())));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date( endCalendar.getTime().getTime())));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull());
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.eq(ruleMap.getOwnerType()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.eq(ruleMap.getOwnerId())); 
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(ruleMap.getTargetType())); 
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(ruleMap.getTargetId())); 
-				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
-				return null;
+		if(pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())){
+			List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+						SelectQuery<? extends Record> query) { 
+	//				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime()));
+					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(new java.sql.Date(startCalendar.getTime().getTime())));
+					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date( endCalendar.getTime().getTime())));
+					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull()); 
+					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.ne(0L)); 
+					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.ne(statistic.getUserId()));  
+					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(pr.getId()));
+					
+					query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
+					return null;
+				}
+			});
+			if(null == punchSchedulings)
+				return 0;
+			return punchSchedulings.size();
+		}else if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
+			int workday=0;
+			for(;anchorCalendar.before(endCalendar);anchorCalendar.add(Calendar.DAY_OF_MONTH, 1)){
+				PunchTimeRule timerule = getPunchTimeRuleByRuleIdAndDate(pr,anchorCalendar.getTime(), statistic.getUserId());
+				if(null != timerule)
+					workday++;
 			}
-		});
-		if(null == punchSchedulings)
-			return 0;
-		return punchSchedulings.size();
+			return workday;
+		}
+		
+		return 0;
 	}
 
 	@Override
@@ -1881,32 +1883,32 @@ public class PunchServiceImpl implements PunchService {
 //		return null;
 //	}
 
-	@Override
-	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd) {
-		Long userId = UserContext.current().getUser().getId();
-		checkCompanyIdIsNull(cmd.getEnterpriseId());
-		if (cmd.getRequestDescription() == null
-				|| cmd.getRequestDescription().equals(0))
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid description parameter in the command");
-//		PunchRule rule = this.punchProvider.getPunchRuleByCompanyId(cmd.getEnterpriseId());
-		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
-		punchExceptionRequest.setEnterpriseId(cmd.getEnterpriseId());
-		punchExceptionRequest.setRequestType(PunchRquestType.REQUEST.getCode());
-		punchExceptionRequest.setUserId(userId);
-		punchExceptionRequest.setCreatorUid(userId);
-		punchExceptionRequest.setCreateTime(new Timestamp(DateHelper
-				.currentGMTTime().getTime()));
-		punchExceptionRequest.setDescription(cmd.getRequestDescription());
-		punchExceptionRequest.setPunchDate(java.sql.Date.valueOf(cmd
-				.getPunchDate()));
-		punchExceptionRequest.setStatus(ExceptionProcessStatus.WAITFOR
-				.getCode());
-		punchExceptionRequest.setViewFlag(ViewFlags.NOTVIEW.getCode()); 
-		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
-
-	}
+//	@Override
+//	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd) {
+//		Long userId = UserContext.current().getUser().getId();
+//		checkCompanyIdIsNull(cmd.getEnterpriseId());
+//		if (cmd.getRequestDescription() == null
+//				|| cmd.getRequestDescription().equals(0))
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+//					ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid description parameter in the command");
+////		PunchRule rule = this.punchProvider.getPunchRuleByCompanyId(cmd.getEnterpriseId());
+//		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
+//		punchExceptionRequest.setEnterpriseId(cmd.getEnterpriseId());
+//		punchExceptionRequest.setRequestType(PunchRquestType.REQUEST.getCode());
+//		punchExceptionRequest.setUserId(userId);
+//		punchExceptionRequest.setCreatorUid(userId);
+//		punchExceptionRequest.setCreateTime(new Timestamp(DateHelper
+//				.currentGMTTime().getTime()));
+//		punchExceptionRequest.setDescription(cmd.getRequestDescription());
+//		punchExceptionRequest.setPunchDate(java.sql.Date.valueOf(cmd
+//				.getPunchDate()));
+//		punchExceptionRequest.setStatus(ExceptionProcessStatus.WAITFOR
+//				.getCode());
+//		punchExceptionRequest.setViewFlag(ViewFlags.NOTVIEW.getCode()); 
+//		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
+//
+//	}
 
 	@Override
 	public ListPunchExceptionRequestCommandResponse listExceptionRequests(

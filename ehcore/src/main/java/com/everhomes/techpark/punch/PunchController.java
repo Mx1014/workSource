@@ -38,23 +38,23 @@ public class PunchController extends ControllerBase {
 	
 	
 	
-	/**
-	 * <b>URL: /techpark/punch/addPunchExceptionRequest</b>
-	 * <p>
-	 * 增加打卡异常申报
-	 * </p>
-	 */
-	@Deprecated
-	@RequestMapping("addPunchExceptionRequest")
-	@RestReturn(value = String.class)
-	public RestResponse addPunchExceptionRequest(
-			@Valid AddPunchExceptionRequestCommand cmd) {
-		punchService.createPunchExceptionRequest(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /techpark/punch/addPunchExceptionRequest</b>
+//	 * <p>
+//	 * 增加打卡异常申报
+//	 * </p>
+//	 */
+//	@Deprecated
+//	@RequestMapping("addPunchExceptionRequest")
+//	@RestReturn(value = String.class)
+//	public RestResponse addPunchExceptionRequest(
+//			@Valid AddPunchExceptionRequestCommand cmd) {
+//		punchService.createPunchExceptionRequest(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 	/**
 	 * <b>URL: /techpark/punch/punchClock</b>
@@ -240,23 +240,23 @@ public class PunchController extends ControllerBase {
 		return response;
 	}
 	
-	/**
-	 * <b>URL: /techpark/punch/getPunchRule</b>
-	 * <p>
-	 * 查询公司打卡规则
-	 * </p>
-	 */
-
-	@Deprecated
-	@RequestMapping("getPunchRule")
-	@RestReturn(value = GetPunchRuleCommandResponse.class)
-	public RestResponse getPunchRule(@Valid GetPunchRuleCommand cmd) {
-		GetPunchRuleCommandResponse commandResponse = punchService.getPunchRuleByCompanyId(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /techpark/punch/getPunchRule</b>
+//	 * <p>
+//	 * 查询公司打卡规则
+//	 * </p>
+//	 */
+//
+//	@Deprecated
+//	@RequestMapping("getPunchRule")
+//	@RestReturn(value = GetPunchRuleCommandResponse.class)
+//	public RestResponse getPunchRule(@Valid GetPunchRuleCommand cmd) {
+//		GetPunchRuleCommandResponse commandResponse = punchService.getPunchRuleByCompanyId(cmd);
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 	/**
 	 * <b>URL: /techpark/punch/listPunchExceptionRequest</b>
