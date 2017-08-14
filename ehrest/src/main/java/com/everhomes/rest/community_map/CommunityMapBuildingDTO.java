@@ -1,5 +1,10 @@
 package com.everhomes.rest.community_map;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.address.ApartmentDTO;
+
+import java.util.List;
+
 /**
  * @author sw on 2017/8/14.
  */
@@ -14,6 +19,17 @@ public class CommunityMapBuildingDTO {
     private Double longitude;
 
     private Double latitude;
+
+    @ItemType(ApartmentDTO.class)
+    private List<ApartmentDTO> apartments;
+
+    public List<ApartmentDTO> getApartments() {
+        return apartments;
+    }
+
+    public void setApartments(List<ApartmentDTO> apartments) {
+        this.apartments = apartments;
+    }
 
     public Long getId() {
         return id;

@@ -13,8 +13,18 @@ public class CommunityMapOrganizationDTO {
     private Long    id;
     private String  name;
 
+    private String logo;
+
     @ItemType(CommunityMapBuildingDTO.class)
     private List<CommunityMapBuildingDTO> buildings;
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
+    }
 
     public Long getId() {
         return id;
