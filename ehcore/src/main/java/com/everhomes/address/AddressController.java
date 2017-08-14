@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.address.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,30 +19,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.GetApartmentByBuildingApartmentNameCommand;
-import com.everhomes.rest.address.ClaimAddressCommand;
-import com.everhomes.rest.address.ClaimedAddressInfo;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.CommunitySummaryDTO;
-import com.everhomes.rest.address.CreateServiceAddressCommand;
-import com.everhomes.rest.address.DeleteServiceAddressCommand;
-import com.everhomes.rest.address.DisclaimAddressCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListCommunityByKeywordCommand;
-import com.everhomes.rest.address.ListNearbyCommunityCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
-import com.everhomes.rest.address.SearchCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityDTO;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
@@ -325,7 +302,7 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/listNearbyMixCommunities</b>
-     * <p>获取附近小区列表</p>
+     * <p>获取附近混合园区/小区列表</p>
      */
     @RequestMapping("listNearbyMixCommunities")
     @RestReturn(value=ListNearbyMixCommunitiesCommandResponse.class)
@@ -355,6 +332,20 @@ public class AddressController extends ControllerBase {
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
+    }
+
+    /**
+     * <b>URL: /address/listNearbyMixCommunitiesV2</b>
+     * <p>选择附近的社区列表</p>
+     */
+    @RequestMapping("listNearbyMixCommunitiesV2")
+    @RestReturn(value=ListNearbyMixCommunitiesCommandV2Response.class)
+    public RestResponse listNearbyMixCommunitiesV2(@Valid ListNearbyMixCommunitiesCommand cmd) {
+        ListNearbyMixCommunitiesCommandV2Response res = new ListNearbyMixCommunitiesCommandV2Response();
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
 }
