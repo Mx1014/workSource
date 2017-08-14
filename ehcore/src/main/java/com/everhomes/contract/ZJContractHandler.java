@@ -12,6 +12,8 @@ import com.everhomes.rest.openapi.shenzhou.ZJContract;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeFieldItem;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -50,6 +52,10 @@ public class ZJContractHandler implements ContractHandler{
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private FieldProvider fieldProvider;
+
     @Override
     public ListContractsResponse listContracts(ListContractsCommand cmd) {
         String contractStatus  = convertContractStatus(cmd.getStatus());
@@ -57,7 +63,8 @@ public class ZJContractHandler implements ContractHandler{
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         String communityName = community == null ? "" : community.getName();
 
-
+        ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getCategoryItemId());
+        String categoryName = item == null ? "" : item.getItemDisplayName();
         Map<String, String> params = generateParams(communityName, contractStatus, contractAttribute, categoryName, cmd.getKeywords());
         String enterprises = postToShenzhou(params, LIST_CONTRACTS, null);
 
