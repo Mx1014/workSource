@@ -9,6 +9,8 @@ public class SearchCommunityMapContentsCommand {
 
     private String sceneToken;
 
+    private Long buildingId;
+
     private String keyword;
 
     private String contentType;
@@ -16,6 +18,14 @@ public class SearchCommunityMapContentsCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
 
     public String getSceneToken() {
         return sceneToken;

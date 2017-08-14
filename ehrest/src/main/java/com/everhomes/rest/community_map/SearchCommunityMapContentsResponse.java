@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class SearchCommunityMapContentsResponse {
 
-    @ItemType(ContentBriefDTO.class)
+    @ItemType(CommunityMapOrganizationDTO.class)
     private List<CommunityMapOrganizationDTO> organizations;
 
     @ItemType(CommunityMapBuildingDTO.class)

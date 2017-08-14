@@ -21,6 +21,8 @@ public class CommunityMapShopDTO {
 
     private String buildingName;
 
+    private String apartmentName;
+
     public String getBuildingName() {
         return buildingName;
     }
@@ -99,6 +101,14 @@ public class CommunityMapShopDTO {
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     @Override

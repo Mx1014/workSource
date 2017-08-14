@@ -8715,6 +8715,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd) {
+
+        return toOrganizationDetailDTO(cmd.getId(), false);
+    }
+
+    @Override
     public Long getTopOrganizationId(Long organizationId) {
         Organization organization = organizationProvider.findOrganizationById(organizationId);
         if (organization != null) {

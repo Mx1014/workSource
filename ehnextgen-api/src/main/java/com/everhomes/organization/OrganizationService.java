@@ -530,4 +530,6 @@ public interface OrganizationService {
 	void leaveTheJob(LeaveTheJobCommand cmd);
 
 	ListOrganizationMemberCommandResponse syncOrganizationMemberStatus();
+
+	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
 }
