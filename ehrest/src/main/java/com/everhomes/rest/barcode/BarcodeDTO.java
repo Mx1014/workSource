@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>type: byte    (必填)条形码类型  电商为1，coreServer其他模块 参考 {@link com.everhomes.rest.barcode.BarcodeType}</li>
+ * <li>type: byte    (必填)条形码类型  参考 {@link com.everhomes.rest.barcode.BarcodeType}  其中电商为1</li>
  * <li>url: String   (必填) 条形码跳转的完整链接</li>
  * <li>title: String 名称</li>
  * <li>description: String 描述</li>
