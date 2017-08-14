@@ -14,4 +14,5 @@ public interface FieldProvider {
     List<Field> listFields(String moduleName, String groupPath);
     List<FieldItem> listFieldItems(List<Long> fieldIds);
     List<ScopeFieldItem> listScopeFieldItems(List<Long> fieldIds);
+    ScopeFieldItem findScopeFieldItemByFieldItemId(Long itemId);
 }
