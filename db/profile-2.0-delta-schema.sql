@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `eh_proflie_contacts_sticky`;
-CREATE TABLE `eh_proflie_contacts_sticky` (
+DROP TABLE IF EXISTS `eh_profile_contacts_sticky`;
+CREATE TABLE `eh_profile_contacts_sticky` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`organization_id` BIGINT NOT NULL COMMENT '节点id',
