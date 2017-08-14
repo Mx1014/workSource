@@ -687,30 +687,30 @@ public class SalaryServiceImpl implements SalaryService {
 
     //  变更员工薪酬组
     @Override
-    public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
+    public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		//现在先取到现在的薪酬批次
+
+        //现在先取到现在的薪酬批次
         //薪酬批次和cmd中的比较,如果不一样需要刷,一样,不刷
         //删除之前批次的
 
 
         //  1.查询该人员之前的 salaryGroupId 并保存
-        UniongroupMemberDetailsDTO dto = this.uniongroupService.findUniongroupMemberDetailByDetailId(UserContext.getCurrentNamespaceId(),cmd.getDetailId());
-        Long oldSalaryGroupId = dto.getGroupId();
+        UniongroupMemberDetailsDTO dto = this.uniongroupService.findUniongroupMemberDetailByDetailId(UserContext.getCurrentNamespaceId(), cmd.getDetailId());
 
-	    //  2.更新该员工在组织架构的关联及configure
-        this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(),cmd.getDetailId(),cmd.getSalaryGroupId());
+        //  2.更新该员工在组织架构的关联及configure
+        this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(), cmd.getDetailId(), cmd.getSalaryGroupId());
 
         //  3.删除原有的薪酬设定
-        List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(),cmd.getOwnerType(),cmd.getOwnerId());
-        if(!StringUtils.isEmpty(originVals) && originVals.size() > 0) {
+        List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(), cmd.getOwnerType(), cmd.getOwnerId());
+        if (!StringUtils.isEmpty(originVals) && originVals.size() > 0) {
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdDetailId(originVals.get(0).getGroupId(),
                     originVals.get(0).getUserDetailId(), cmd.getOwnerType(), cmd.getOwnerId());
         }
 
         //  4.同步该人员之前的薪酬组数据
-        recaculateGroupPeriod(originVals.get(0).getGroupId(),true);
+        if (dto != null)
+            recaculateGroupPeriod(dto.getGroupId(), true);
 
         //  5.同步该人员修改后的薪酬组数据
         recaculateGroupPeriod(cmd.getSalaryGroupId(), true);

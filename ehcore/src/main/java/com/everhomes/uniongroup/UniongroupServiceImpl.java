@@ -527,11 +527,15 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public UniongroupMemberDetailsDTO findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId){
+    public UniongroupMemberDetailsDTO findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId) {
         //  查找用户
-        UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId,detailId, UniongroupType.SALARYGROUP.getCode());
+        UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, UniongroupType.SALARYGROUP.getCode());
+
         //  转换对象
-        UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(detail);
-        return dto;
+        if (detail != null) {
+            UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(detail);
+            return dto;
+        } else
+            return null;
     }
 }
