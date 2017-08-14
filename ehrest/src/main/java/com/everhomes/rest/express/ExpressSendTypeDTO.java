@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>expressCompanyId : 快递公司id</li>
  * <li>sendType : 寄件类型, 参考 {@link com.everhomes.rest.express.ExpressSendType}</li>
  * <li>sendTypeName : 寄件类型的名称</li>
+ * <li>payType : 支付方式， 参考 {@link com.everhomes.rest.express.ExpressPayType}</li>
  * </ul>
  *
  *  @author:dengs 2017年7月19日
@@ -17,15 +18,19 @@ public class ExpressSendTypeDTO {
 	private Long expressCompanyId;
 	private Byte sendType;
 	private String sendTypeName;
+	private Byte payType;
 	
 	public ExpressSendTypeDTO() {
 	}
-	public ExpressSendTypeDTO(Long expressCompanyId, Byte sendType, String sendTypeName) {
+	
+	public ExpressSendTypeDTO(Long expressCompanyId, Byte sendType, String sendTypeName, Byte payType) {
 		super();
 		this.expressCompanyId = expressCompanyId;
 		this.sendType = sendType;
 		this.sendTypeName = sendTypeName;
+		this.payType = payType;
 	}
+
 	public Long getExpressCompanyId() {
 		return expressCompanyId;
 	}
@@ -45,6 +50,14 @@ public class ExpressSendTypeDTO {
 		this.sendTypeName = sendTypeName;
 	}
 	
+	public Byte getPayType() {
+		return payType;
+	}
+
+	public void setPayType(Byte payType) {
+		this.payType = payType;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
