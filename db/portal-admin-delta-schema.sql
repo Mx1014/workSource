@@ -13,8 +13,10 @@ ALTER TABLE `eh_item_service_categries` ADD `update_time` datetime DEFAULT NULL;
 ALTER TABLE `eh_item_service_categries` ADD `operator_uid` bigint(20) NOT NULL;
 ALTER TABLE `eh_item_service_categries` ADD `creator_uid` bigint(20) NOT NULL;
 ALTER TABLE `eh_item_service_categries` ADD `description` varchar(1024);
-ALTER TABLE `eh_item_service_categries` ADD `scope_type` varchar(64) DEFAULT NULL;
+ALTER TABLE `eh_item_service_categries` ADD `scope_code` tinyint(4) NOT NULL DEFAULT '0';
 ALTER TABLE `eh_item_service_categries` ADD `scope_id` bigint(20) DEFAULT NULL;
+
+ALTER TABLE `eh_user_launch_pad_items` ADD `item_name` varchar(32) DEFAULT NULL;
 
 -- 模块应用表  
 CREATE TABLE `eh_service_module_apps` (
