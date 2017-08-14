@@ -52,7 +52,7 @@ public class CommunityMapController extends ControllerBase {
      * <p>根据id查询楼栋详情</p>
      */
     @RequestMapping("getCommunityMapBuildingDetailById")
-    @RestReturn(value=CommunityMapBuildingDTO.class)
+    @RestReturn(value=CommunityMapBuildingDetailDTO.class)
     public RestResponse getCommunityMapBuildingDetailById(GetCommunityMapBuildingDetailByIdCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
