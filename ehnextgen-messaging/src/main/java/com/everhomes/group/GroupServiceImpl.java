@@ -2801,14 +2801,24 @@ public class GroupServiceImpl implements GroupService {
     }
 
     private String getScanDownloadUrl(Group group){
-        String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
-        String scanDownloadUrl = configProvider.getValue(group.getNamespaceId(), "group.scanDownload.url", "/mobile/static/downloadLink/src/downLink.html");
-        if (homeUrl.length() == 0 || scanDownloadUrl.length() == 0) {
-            LOGGER.error("Invalid home url or scanDownloadUrl, homeUrl=" + homeUrl + ", scanDownloadUrl=" + scanDownloadUrl);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or scanDownloadUrl");
+//        String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
+//        String scanDownloadUrl = configProvider.getValue(group.getNamespaceId(), "group.scanDownload.url", "/mobile/static/downloadLink/src/downLink.html");
+//        if (homeUrl.length() == 0 || scanDownloadUrl.length() == 0) {
+//            LOGGER.error("Invalid home url or scanDownloadUrl, homeUrl=" + homeUrl + ", scanDownloadUrl=" + scanDownloadUrl);
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+//                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or scanDownloadUrl");
+//        }
+//        return homeUrl + scanDownloadUrl;
+
+        GetAppInfoCommand cmd = new GetAppInfoCommand();
+        cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        cmd.setOsType(OSType.Android.getCode());
+        AppUrlDTO dto = appUrlService.getAppInfo(cmd);
+
+        if(dto != null){
+            return dto.getDownloadUrl();
         }
-        return homeUrl + scanDownloadUrl;
+        return null;
     }
 
 	private void memberInfoToGroupDTO(Long uid, GroupDTO groupDto, Group group) {
@@ -3131,10 +3141,13 @@ public class GroupServiceImpl implements GroupService {
             if(excludeList != null && excludeList.size() > 0) {
                 messageDto.getMeta().put(MessageMetaConstant.EXCLUDE, StringHelper.toJsonString(excludeList));
             }
-            if(metaObjectType != null && metaObject != null) {
+            if(metaObjectType != null) {
                 messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, metaObjectType.getCode());
+            }
+            if(metaObject != null) {
                 messageDto.getMeta().put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
             }
+
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
         }
@@ -3812,13 +3825,17 @@ public class GroupServiceImpl implements GroupService {
         int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 56, locale, map, "");
 
-        Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-        String hhmm = dateFormat.format( now );
+//        Date now = new Date();
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+//        String hhmm = dateFormat.format( now );
+//
+//        sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), hhmm);
 
-        sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), hhmm);
         //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
         sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+
+        //给客户端发一条通知消息
+        sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, MetaObjectType.GROUP_MEMBER_DELETE, null);
 
 //        // send notification to who is invited to join the group
 //        String scope = GroupNotificationTemplateCode.SCOPE;

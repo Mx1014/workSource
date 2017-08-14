@@ -14,6 +14,7 @@ package com.everhomes.rest.messaging;
  * <li>BIZ_NEW_ORDER: 有新的电商订单</li>
  * <li>MESSAGE_ROUTER: 路由跳转</li>
  * <li>FAMILY_AGREE_TO_JOIN: 同意加入了家庭</li>
+ * <li>GROUP_MEMBER_DELETE: 用户被踢出</li>
  * </ul>
  */
 public enum MetaObjectType {
@@ -29,7 +30,7 @@ public enum MetaObjectType {
     MESSAGE_ROUTER("message.router"),
     ENTERPRISE_LEAVE_THE_JOB("enterprise.leaveTheJob"),
     FAMILY_AGREE_TO_JOIN("family.agreeToJoin"),
-    ;
+    GROUP_MEMBER_DELETE("group.member.delete");
     
     private String code;
     private MetaObjectType(String code) {
