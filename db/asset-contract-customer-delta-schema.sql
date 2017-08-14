@@ -296,6 +296,7 @@ ALTER TABLE `eh_communities` ADD COLUMN `namespace_community_token` VARCHAR(128)
 
 -- 楼栋信息：
 ALTER TABLE `eh_buildings` ADD COLUMN `construction_company` VARCHAR(128) COMMENT '施工单位';
+ALTER TABLE `eh_buildings` ADD COLUMN `height` DOUBLE COMMENT '楼高 单位米';
 ALTER TABLE `eh_buildings` ADD COLUMN `entry_date` DATETIME COMMENT '入驻时间';
 ALTER TABLE `eh_buildings` ADD COLUMN `shared_area` DOUBLE COMMENT '公摊面积';
 ALTER TABLE `eh_buildings` ADD COLUMN `charge_area` DOUBLE COMMENT '收费面积';

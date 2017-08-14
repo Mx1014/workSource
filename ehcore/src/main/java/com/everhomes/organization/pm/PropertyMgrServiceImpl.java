@@ -79,6 +79,8 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeFieldItem;
 import net.greghaines.jesque.Job;
 import org.apache.poi.ss.usermodel.*;
 import org.jooq.Record;
@@ -227,6 +229,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
+
+	@Autowired
+	private FieldProvider fieldProvider;
     
     private String queueName = "property-mgr-push";
 
@@ -2068,11 +2073,53 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             address.setApartmentName(cmd.getApartmentName());
             address.setAreaSize(cmd.getAreaSize());
             address.setAddress(building.getName() + "-" + cmd.getApartmentName());
+
+			address.setChargeArea(cmd.getChargeArea());
+			address.setSharedArea(cmd.getSharedArea());
+			if(cmd.getCategoryItemId() != null) {
+				address.setCategoryItemId(cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getCategoryItemId());
+				if(item != null) {
+					address.setCategoryItemName(item.getItemDisplayName());
+				}
+			}
+
+			if(cmd.getSourceItemId() != null) {
+				address.setSourceItemId(cmd.getSourceItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getSourceItemId());
+				if(item != null) {
+					address.setSourceItemName(item.getItemDisplayName());
+				}
+			}
+
+			address.setDecorateStatus(cmd.getDecorateStatus());
+			address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
         	addressProvider.createAddress(address);
 		}else if (AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
 			address.setAreaSize(cmd.getAreaSize());
+
+			address.setChargeArea(cmd.getChargeArea());
+			address.setSharedArea(cmd.getSharedArea());
+			if(cmd.getCategoryItemId() != null) {
+				address.setCategoryItemId(cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getCategoryItemId());
+				if(item != null) {
+					address.setCategoryItemName(item.getItemDisplayName());
+				}
+			}
+
+			if(cmd.getSourceItemId() != null) {
+				address.setSourceItemId(cmd.getSourceItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getSourceItemId());
+				if(item != null) {
+					address.setSourceItemName(item.getItemDisplayName());
+				}
+			}
+
+			address.setDecorateStatus(cmd.getDecorateStatus());
+			address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             addressProvider.updateAddress(address);
 		}else {
@@ -2104,6 +2151,26 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	    		address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
 			}else if (cmd.getAreaSize() != null) {
 				address.setAreaSize(cmd.getAreaSize());
+			}else if (cmd.getSharedArea() != null) {
+				address.setSharedArea(cmd.getSharedArea());
+			}else if (cmd.getChargeArea() != null) {
+				address.setChargeArea(cmd.getChargeArea());
+			}else if (cmd.getCategoryItemId() != null) {
+				address.setCategoryItemId(cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getCategoryItemId());
+				if(item != null) {
+					address.setCategoryItemName(item.getItemDisplayName());
+				}
+			}else if (cmd.getSourceItemId() != null) {
+				address.setSourceItemId(cmd.getSourceItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getSourceItemId());
+				if(item != null) {
+					address.setSourceItemName(item.getItemDisplayName());
+				}
+			}else if (cmd.getDecorateStatus() != null) {
+				address.setDecorateStatus(cmd.getDecorateStatus());
+			}else if (cmd.getOrientation() != null) {
+				address.setOrientation(cmd.getOrientation());
 			}
 	    	addressProvider.updateAddress(address);
 		}
