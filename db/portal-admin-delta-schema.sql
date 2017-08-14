@@ -7,6 +7,7 @@ ALTER TABLE `eh_service_modules` ADD `creator_uid` bigint(20) NOT NULL;
 ALTER TABLE `eh_service_modules` ADD `description` varchar(1024);
 ALTER TABLE `eh_service_modules` ADD `multiple_flag` tinyint(4) DEFAULT NULL;
 
+ALTER TABLE `eh_item_service_categries` ADD `label` varchar(64) DEFAULT NULL;
 ALTER TABLE `eh_item_service_categries` ADD `item_location` varchar(2048) DEFAULT NULL;
 ALTER TABLE `eh_item_service_categries` ADD `item_group` varchar(128) NOT NULL DEFAULT '';
 ALTER TABLE `eh_item_service_categries` ADD `update_time` datetime DEFAULT NULL;
@@ -147,7 +148,8 @@ CREATE TABLE `eh_portal_item_categories` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) DEFAULT NULL,
   `item_group_id` bigint(20) NOT NULL,
-  `name` varchar(64) NOT NULL COMMENT 'item categry name',
+  `name` varchar(64) NOT NULL,
+  `label` varchar(64) NOT NULL COMMENT 'item categry label',
   `icon_uri` varchar(1024) DEFAULT NULL COMMENT 'service categry icon uri',
   `default_order` int(11) DEFAULT NULL COMMENT 'order ',
   `align` varchar(64) DEFAULT NULL COMMENT 'left, center',

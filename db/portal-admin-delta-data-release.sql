@@ -137,3 +137,7 @@ insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(1
 set @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
 insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) values((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'test9.lab.everhomes.com', 0, now());
 
+
+update eh_user_launch_pad_items eulpi set item_name = (select item_name from `eh_launch_pad_items` where id = eulpi.item_id);
+update `eh_item_service_categries` set label = name;
+update `eh_item_service_categries` set name = id;
