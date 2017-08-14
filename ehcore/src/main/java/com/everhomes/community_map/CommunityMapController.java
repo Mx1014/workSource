@@ -6,10 +6,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.community_map.ListCommunityMapSearchTypesCommand;
-import com.everhomes.rest.community_map.ListCommunityMapSearchTypesResponse;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
+import com.everhomes.rest.community_map.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +40,20 @@ public class CommunityMapController extends ControllerBase {
     @RequestMapping("searchCommunityMapContents")
     @RestReturn(value=SearchCommunityMapContentsResponse.class)
     public RestResponse searchCommunityMapContents(SearchCommunityMapContentsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /community_map/getCommunityMapBuildingDetailById</b>
+     * <p>根据id查询楼栋详情</p>
+     */
+    @RequestMapping("getCommunityMapBuildingDetailById")
+    @RestReturn(value=CommunityMapBuildingDTO.class)
+    public RestResponse getCommunityMapBuildingDetailById(GetCommunityMapBuildingDetailByIdCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

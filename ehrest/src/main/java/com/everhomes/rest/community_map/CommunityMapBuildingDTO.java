@@ -128,6 +128,14 @@ public class CommunityMapBuildingDTO {
         this.shops = shops;
     }
 
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
