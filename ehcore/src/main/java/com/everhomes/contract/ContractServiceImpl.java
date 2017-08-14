@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.contract.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -86,7 +87,12 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
-		
+
+		if(namespaceId == 999971) {
+			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+			ListContractsResponse response = handler.listContracts(cmd);
+			return response;
+		}
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null?0L:cmd.getPageAnchor();
 		int from = (int) (pageAnchor * pageSize);

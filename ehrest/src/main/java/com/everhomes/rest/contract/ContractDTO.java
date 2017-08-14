@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.contract;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -14,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: id</li>
  * <li>contractNumber: 合同编号</li>
+ * <li>name: 合同名称</li>
+ * <li>contractStartDate: 合同开始日期</li>
  * <li>contractEndDate: 合同到期日期</li>
  * <li>organizationName: 客户名称</li>
  * <li>adminMembers: 管理员列表</li>
@@ -23,17 +26,22 @@ import com.everhomes.util.StringHelper;
  * <li>serviceUserId: 客服人员id</li>
  * <li>serviceUserName: 客服人员名称</li>
  * <li>serviceUserPhone: 客服人员电话</li>
- * <li>buildings: 楼栋门牌信息{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
+ * <li>buildings: 楼栋门牌信息{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
  * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
+ * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
+ * <li>amount: 合同总金额</li>
  * </ul>
  */
 public class ContractDTO {
 	private Long id;
 	
 	private String contractNumber;
+
+	private String name;
 	
+	private Timestamp contractStartDate;
 	private Timestamp contractEndDate;
-	
+
 	private String organizationName;
 	
 	@ItemType(OrganizationContactDTO.class)
@@ -51,10 +59,44 @@ public class ContractDTO {
     
     private String serviceUserPhone;
 
+	private Byte contractType;
 	private Byte status;
-    
+
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> buildings;
+	private BigDecimal amount;
+
+	public Byte getContractType() {
+		return contractType;
+	}
+
+	public void setContractType(Byte contractType) {
+		this.contractType = contractType;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Timestamp getContractStartDate() {
+		return contractStartDate;
+	}
+
+	public void setContractStartDate(Timestamp contractStartDate) {
+		this.contractStartDate = contractStartDate;
+	}
 
 	public Byte getStatus() {
 		return status;
