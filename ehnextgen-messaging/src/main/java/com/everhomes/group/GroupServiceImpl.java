@@ -4354,7 +4354,7 @@ public class GroupServiceImpl implements GroupService {
         //TODO 如果圈很大怎么办？
         List<Long> members = new ArrayList<Long>();
         List<Long> admins = getGroupAdminIncludeList(group.getId(), user.getId(), null);
-        String nickName = user.getNickName();
+        String nickName = "";
         
         List<GroupMember> groupMember = groupProvider.findGroupMemberByGroupId(groupId);
         for(int i = 0; i < groupMember.size(); i++ ){
