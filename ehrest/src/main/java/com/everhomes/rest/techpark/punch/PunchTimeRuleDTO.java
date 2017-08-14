@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>description : 描述</li>  
  * <li>openWeekday : 一周开放日期: 7位二进制，0000000每一位表示星期7123456</li>   
  * <li>punchTimeIntervals：上班时间段列表 {@link com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO} </li> 
+ * <li>hommizationType：人性化设置:0-无 1-弹性 2晚到晚走</li> 
  * <li>flexTime：弹性时间</li> 
  * <li>noonLeaveTime：午休开始时间 (只有一段打卡可以设置)</li>
  * <li>afternoonArriveTime：午休结束时间 (只有一段打卡可以设置)</li> 
@@ -37,7 +38,8 @@ public class PunchTimeRuleDTO {
 	
 	@ItemType(PunchTimeIntervalDTO.class)
 	private List<PunchTimeIntervalDTO> punchTimeIntervals;
-
+	
+	private Byte hommizationType;
     private Long flexTime;
     
 	@NotNull
@@ -189,6 +191,16 @@ public class PunchTimeRuleDTO {
 
 	public void setOpenWeekday(String openWeekday) {
 		this.openWeekday = openWeekday;
+	}
+
+
+	public Byte getHommizationType() {
+		return hommizationType;
+	}
+
+
+	public void setHommizationType(Byte hommizationType) {
+		this.hommizationType = hommizationType;
 	}
  
 }
