@@ -134,8 +134,8 @@ public enum VersionRealmType {
     IOS_GDWY("iOS_GDWY"),
     ANDROID_GUOMAO("Android_Guomao"),
     IOS_GUOMAO("iOS_Guomao"),
-    ANDROID_CHANGFAZHAN("Android_Changfazhan"),
-    IOS_CHANGFAZHAN("iOS_Changfazhan"),
+    ANDROID_CHANGZHIHUI("Android_ChangZhiHui"),
+    IOS_CHANGZHIHUI("iOS_ChangZhiHui"),
 
     ANDROID_VANKE_XSH("Android_Vanke_XSH"),
     IOS_VANKE_XSH("iOS_Vanke_XSH"),
