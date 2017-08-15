@@ -6435,6 +6435,7 @@ public class PunchServiceImpl implements PunchService {
                 ptr.setOwnerId(punchOrgId);  
         		ptr.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
         		ptr.setPunchRuleId(pr.getId());
+        		ptr.setPunchOrganizationId(punchOrgId);
         		ptrs.add(ptr);
         		if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
         			//固定班次 默认第二天4点

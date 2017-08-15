@@ -2584,10 +2584,10 @@ long id = sequenceProvider.getNextSequence(key);
 	}
 
 	@Override
-	public void deletePunchTimeRuleByPunchOrgId(Long id) {
+	public void deletePunchTimeRuleByPunchOrgId(Long punchOrgId) {
 		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 			DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
-			Condition condition = Tables.EH_PUNCH_TIME_RULES.PUNCH_ORGANIZATION_ID.equal(id); 
+			Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(punchOrgId); 
 			step.where(condition);
 			step.execute();
 	}
