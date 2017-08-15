@@ -57,9 +57,13 @@ public interface GroupNotificationTemplateCode {
     static final int GROUP_MEMBER_REJECT_REQUEST_TO_JOIN = 46;  //你加入“${groupName}”的申请被拒绝
 
 
+    static final int GROUP_INVITE_USERS_TO_JOIN = 50;  //你邀请${userNameList}加入了群聊
+    static final int GROUP_OTHER_INVITE_USERS_TO_JOIN = 51;  //${inviterName}邀请${userNameList}加入了群聊
+    static final int GROUP_BE_INVITE_TO_JOIN = 52;  //${inviterName}邀请你加入了群聊
+    static final int GROUP_MEMBER_LEAVE = 53;  //${userName}已退出群聊
+    static final int GROUP_RENAME = 54;  //群聊名称已修改为“${groupName}”
+    static final int GROUP_REMOVE_MEMBERS = 55;  //你将${userNameList}移出了群聊
+    static final int GROUP_BE_REMOVE = 56;  //你被${userName}移出了群聊
+    static final int GROUP_DELETE = 57;  //你加入的群聊“${groupName}”已解散
 
-
-    
-    
-    
 }

@@ -3275,7 +3275,7 @@ public class GroupServiceImpl implements GroupService {
             User user = userProvider.findUserById(member.getMemberId());
 
 
-            String notifyTextForApplicant = localeStringService.getLocalizedString("group", "20003", user.getLocale(), "");
+            String notifyTextForApplicant = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_SCAN_TO_JOIN), user.getLocale(), "");
             //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
 
             sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
@@ -3463,21 +3463,15 @@ public class GroupServiceImpl implements GroupService {
             
             // send notification to who is invited to join the group
             String scope = GroupNotificationTemplateCode.SCOPE;
-            //int code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_INVITATION_REQ_FOR_APPLICANT;
-            //String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            //sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForApplicant);
 
-            // send notification to inviter
-            //code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_INVITATION_REQ_FOR_OPERATOR;
-            //String notifyTextForOperator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            //sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForOperator);
-            
-            // send notification to all members in the group
-            int code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_OTHER;
-            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, 52, locale, map, "");
+            int code = GroupNotificationTemplateCode.GROUP_BE_INVITE_TO_JOIN;
+            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             //sendGroupNotificationToExcludeUsers(group.getId(), inviter.getMemberId(), invitee.getMemberId(), notifyTextForOther);
 
             sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForOther);
+
+            //发一条消息通知客户端
+            sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForOther, MetaObjectType.GROUP_INVITE_TO_JOIN_FREE, null);
             //sendGroupNotification(invitee.getMemberId(), null, null, notifyTextForOther, null, null);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", inviterId=" 
@@ -3499,8 +3493,8 @@ public class GroupServiceImpl implements GroupService {
             String locale = user.getLocale();
 
             String scope = GroupNotificationTemplateCode.SCOPE;
-
-            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, 50, locale, map, "");
+            int code = GroupNotificationTemplateCode.GROUP_INVITE_USERS_TO_JOIN;
+            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
 
             sendGroupNotificationToIncludeUser(group.getId(), inviterId, notifyTextForOther);
@@ -3529,7 +3523,8 @@ public class GroupServiceImpl implements GroupService {
             map.put("userNameList", inviteeNames);
 
             String scope = GroupNotificationTemplateCode.SCOPE;
-            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, 51, locale, map, "");
+            int code = GroupNotificationTemplateCode.GROUP_OTHER_INVITE_USERS_TO_JOIN;
+            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
             //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
             sendGroupNotification(group.getId(), includeList, null, notifyTextForOther, null, null);
@@ -3812,8 +3807,8 @@ public class GroupServiceImpl implements GroupService {
         String locale = user.getLocale();
 
         String scope = GroupNotificationTemplateCode.SCOPE;
-        int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
-        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 56, locale, map, "");
+        int code = GroupNotificationTemplateCode.GROUP_BE_REMOVE;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
 //        Date now = new Date();
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
@@ -3857,8 +3852,8 @@ public class GroupServiceImpl implements GroupService {
         String locale = user.getLocale();
 
         String scope = GroupNotificationTemplateCode.SCOPE;
-        int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
-        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 55, locale, map, "");
+        int code = GroupNotificationTemplateCode.GROUP_REMOVE_MEMBERS;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
         //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
         sendGroupNotificationToIncludeUser(groupId, opeartorId, notifyTextForApplicant);
@@ -4298,7 +4293,7 @@ public class GroupServiceImpl implements GroupService {
 //        map.put("userName", userName);
        
         String scope = GroupNotificationTemplateCode.SCOPE;
-        int code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ALL_WHEN_DELETE;
+        int code = GroupNotificationTemplateCode.GROUP_DELETE;
 //        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
 //        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
 //        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE){
@@ -4307,7 +4302,7 @@ public class GroupServiceImpl implements GroupService {
 //        	//如果解散俱乐部，消息改为你加入的“${groupName}”已解散， add by tt, 20161102
 //        	code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ALL_WHEN_DELETE;
 //		}
-        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 57, locale, map, "");
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         
             //如果圈太大，不发消息
         //make better hear
@@ -4755,7 +4750,7 @@ public class GroupServiceImpl implements GroupService {
        
         String scope = GroupAdminNotificationTemplateCode.SCOPE;
         int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
-        String notifyTextForApplicant = localeStringService.getLocalizedString("group", "20002", locale, "");
+        String notifyTextForApplicant = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_BE_MANAGER), locale, "");
         //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
 
         sendGroupNotificationToIncludeUser(group.getId(), newCreator.getMemberId(), notifyTextForApplicant);
@@ -4772,9 +4767,9 @@ public class GroupServiceImpl implements GroupService {
 		Map<String, Object> map = new HashMap<String, Object>();
         map.put("userName", nickname);
 
-        String scope = GroupAdminNotificationTemplateCode.SCOPE;
-        int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
-        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString("group.notification", 53, locale, map, "");
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        int code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
         //发送会话内提示时间
 //        Date now = new Date();
@@ -4792,7 +4787,8 @@ public class GroupServiceImpl implements GroupService {
         map.put("groupName", group.getName());
 
         String scope = GroupNotificationTemplateCode.SCOPE;
-        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, 54, locale, map, "");
+        int code = GroupNotificationTemplateCode.GROUP_RENAME;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
         //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
         sendGroupNotification(group.getId(), null, null, notifyTextForApplicant, null, null);
