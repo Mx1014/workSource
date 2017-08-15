@@ -45,7 +45,13 @@ public interface AssetProvider {
 
     List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
 
-    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId);
+    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill);
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
+
+    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType);
+
+    ShowCreateBillDTO showCreateBill(Long billGroupId);
+
+    ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr);
 }

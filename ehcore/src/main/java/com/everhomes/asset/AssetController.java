@@ -400,7 +400,8 @@ public class AssetController extends ControllerBase {
     @RequestMapping("listBillGroups")
     @RestReturn(value = ListBillGroupsDTO.class, collection = true)
     public RestResponse listBillGroups(OwnerIdentityCommand cmd) {
-        RestResponse response = new RestResponse();
+        List<ListBillGroupsDTO> list = assetService.listBillGroups(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -623,8 +624,9 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("showCreateBill")
     @RestReturn(value = ShowCreateBillDTO.class)
-    public RestResponse showCreateBill(OwnerIdentityCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse showCreateBill(BillGroupIdCommand cmd) {
+        ShowCreateBillDTO dto = assetService.showCreateBill(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -685,6 +687,7 @@ public class AssetController extends ControllerBase {
     public RestResponse listSettledBillItems(ListSettledBillItemsCommand cmd) {
         ListSettledBillItemsResponse res = assetService.listSettledBillItems(cmd);
         RestResponse response = new RestResponse(res);
+        System.out.println(3434);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -801,8 +804,23 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("showBillDetailForClient")
     @RestReturn(value = ShowBillDetailForClientResponse.class, collection = true)
-    public RestResponse getBillDetailForClient(BillIdCommand cmd) {
+    public RestResponse showBillDetailForClient(BillIdCommand cmd) {
         ShowBillDetailForClientResponse res = assetService.getBillDetailForClient(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    //this is for app选择切换月份查看账单
+    /**
+     * <p>app选择切换月份查看账单</p>
+     * <b>URL: /asset/listBillDetailOnDateChange</b>
+     */
+    @RequestMapping("listBillDetailOnDateChange")
+    @RestReturn(value = ShowBillDetailForClientResponse.class, collection = true)
+    public RestResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
+        ShowBillDetailForClientResponse res = assetService.listBillDetailOnDateChange(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

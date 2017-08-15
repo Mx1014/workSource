@@ -7,12 +7,11 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.EquipmentInspectionEquipments;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.recommend.RecommendationService;
 import com.everhomes.rest.asset.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhPaymentBillItems;
-import com.everhomes.server.schema.tables.EhPaymentBills;
-import com.everhomes.server.schema.tables.EhPaymentChargingItems;
+import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.EhAssetBillTemplateFieldsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
@@ -25,6 +24,7 @@ import com.mysql.jdbc.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -568,18 +568,21 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId) {
+    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill) {
         List<BillDetailDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        dslContext.select(t.ID,t.DATE_STR,t.AMOUNT_RECEIVABLE,t.AMOUNT_OWED,t.STATUS)
-                .from(t)
-                .where(t.OWNER_TYPE.eq(ownerType))
-                .and(t.OWNER_ID.eq(ownerId))
-                .and(t.TARGET_TYPE.eq(targetType))
-                .and(t.TARGET_ID.eq(targetId))
-                .and(t.BILL_GROUP_ID.eq(billGroupId))
-                .fetch()
+        SelectQuery<Record> query = dslContext.selectQuery();
+        query.addFrom(t);
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.TARGET_TYPE.eq(targetType));
+        query.addConditions(t.TARGET_ID.eq(targetId));
+        query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
+        if(isOwedBill==1){
+            query.addConditions(t.STATUS.eq((byte)0));
+        }
+        query.fetch()
                 .map(r -> {
                     BillDetailDTO dto = new BillDetailDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
@@ -596,12 +599,12 @@ public class AssetProviderImpl implements AssetProvider {
     public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         final String[] dateStr = {""};
-        BigDecimal amountOwed = new BigDecimal("0");
-        BigDecimal amountReceivable = new BigDecimal("0");
+        final BigDecimal[] amountOwed = {new BigDecimal("0")};
+        final BigDecimal[] amountReceivable = {new BigDecimal("0")};
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        dslContext.select(t.AMOUNT_RECEIVABLE,t.CHARGING_ITEM_NAME,t.DATE_STR)
+        dslContext.select(t.AMOUNT_RECEIVABLE,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.AMOUNT_RECEIVABLE)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -611,13 +614,100 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dtos.add(dto);
                     dateStr[0] = r.getValue(t.DATE_STR);
-                    amountOwed.add(r.getValue(t.AMOUNT_OWED));
-                    amountReceivable.add(r.getValue(t.AMOUNT_RECEIVABLE));
+                    amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
                 });
-        response.setAmountReceivable(amountReceivable);
-        response.setAmountOwed(amountOwed);
+        response.setAmountReceivable(amountReceivable[0]);
+        response.setAmountOwed(amountOwed[0]);
         response.setDatestr(dateStr[0]);
+        response.setShowBillDetailForClientDTOList(dtos);
+        return response;
+    }
+
+    @Override
+    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType) {
+        List<ListBillGroupsDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        context.select()
+                .from(t)
+                .where(t.OWNER_ID.eq(ownerId))
+                .and(t.OWNER_TYPE.eq(ownerType))
+                .orderBy(t.DEFAULT_ORDER)
+                .fetch()
+                .map(r -> {
+                    ListBillGroupsDTO dto = new ListBillGroupsDTO();
+                    dto.setBillGroupId(r.getValue(t.ID));
+                    dto.setBillGroupName(r.getValue(t.NAME));
+                    dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
+    public ShowCreateBillDTO showCreateBill(Long billGroupId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroupsRules rule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("rule");
+        EhPaymentBillGroups bg = Tables.EH_PAYMENT_BILL_GROUPS.as("bg");
+        EhPaymentChargingItems ci = Tables.EH_PAYMENT_CHARGING_ITEMS.as("ci");
+        ShowCreateBillDTO response = new ShowCreateBillDTO();
+        List<BillItemDTO> list = new ArrayList<>();
+        final String[] billRuleName = {""};
+        context.select(rule.ID,rule.CHARGING_ITEM_NAME,bg.NAME)
+                .from(bg,rule,ci)
+                .where(bg.ID.eq(rule.BILL_GROUP_ID))
+                .and(rule.CHARGING_ITEM_ID.eq(ci.ID))
+                .and(bg.ID.eq(billGroupId))
+                .orderBy(ci.DEFAULT_ORDER)
+                .fetch()
+                .map(r -> {
+                    BillItemDTO dto = new BillItemDTO();
+                    dto.setBillItemId(r.getValue(rule.ID));
+                    dto.setBillItemName(r.getValue(rule.CHARGING_ITEM_NAME));
+                    billRuleName[0] = r.getValue(bg.NAME);
+                    list.add(dto);
+                    return null;});
+        response.setBillGroupId(billGroupId);
+        response.setBillGroupName(billRuleName[0]);
+        response.setBillItemDTOList(list);
+        return response;
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr) {
+        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+        final BigDecimal[] amountOwed = {new BigDecimal("0")};
+        final BigDecimal[] amountReceivable = {new BigDecimal("0")};
+        List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        try {
+            dslContext.select(t.AMOUNT_RECEIVABLE, t.CHARGING_ITEM_NAME, t.DATE_STR, t.AMOUNT_OWED, t.AMOUNT_RECEIVABLE)
+                    .from(t)
+                    .where(t.OWNER_TYPE.eq(ownerType))
+                    .and(t.OWNER_ID.eq(ownerId))
+                    .and(t.TARGET_TYPE.eq(targetType))
+                    .and(t.TARGET_ID.eq(targetId))
+                    .and(t.DATE_STR.eq(dateStr))
+                    .fetch()
+                    .map(r -> {
+                        ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
+                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                        dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                        dtos.add(dto);
+                        amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                        amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
+                        return null;
+                    });
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+        }
+        response.setAmountReceivable(amountReceivable[0]);
+        response.setAmountOwed(amountOwed[0]);
+        response.setDatestr(dateStr);
         response.setShowBillDetailForClientDTOList(dtos);
         return response;
     }

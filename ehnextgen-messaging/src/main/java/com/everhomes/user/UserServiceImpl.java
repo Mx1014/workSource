@@ -4500,17 +4500,20 @@ public class UserServiceImpl implements UserService {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhGroupMemberLogs t1 = Tables.EH_GROUP_MEMBER_LOGS.as("t1");
         EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
-        EhCommunities t3 = Tables.EH_COMMUNITIES.as("t3");
-        context.select(t2.BUILDING_NAME,t2.APARTMENT_NAME,t3.NAME)
-				.from(t1,t2,t3)
+//        EhCommunities t3 = Tables.EH_COMMUNITIES.as("t3");
+//        context.select(t2.BUILDING_NAME,t2.APARTMENT_NAME,t3.NAME)
+        context.select(t2.BUILDING_NAME,t2.APARTMENT_NAME)
+//				.from(t1,t2,t3)
+				.from(t1,t2)
 				.where(t1.MEMBER_ID.eq(uid))
                 .and(t1.ADDRESS_ID.eq(t2.ID))
-                .and(t2.COMMUNITY_ID.eq(t3.ID))
+//                .and(t2.COMMUNITY_ID.eq(t3.ID))
                 .fetch(r -> {
-                    String[] v = new String[3];
-                    v[0] = r.getValue(t3.NAME);
-                    v[1] = r.getValue(t2.BUILDING_NAME);
-                    v[2] = r.getValue(t2.APARTMENT_NAME);
+//                    String[] v = new String[3];
+                    String[] v = new String[2];
+//                    v[0] = r.getValue(t3.NAME);
+                    v[0] = r.getValue(t2.BUILDING_NAME);
+                    v[1] = r.getValue(t2.APARTMENT_NAME);
                     list.add(v);
                     return null;
                 });

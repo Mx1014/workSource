@@ -8,7 +8,13 @@ import java.math.BigDecimal;
 /**
  * Created by Wentian Wang on 2017/8/11.
  */
-
+/**
+ *<ul>
+ * <li>addressId:地址id</li>
+ * <li>addressName:地址名称</li>
+ * <li>areaSize:面积</li>
+ *</ul>
+ */
 public class ListAddressIdsByOrganizationIdDTO {
     private Long addressId;
     private String addressName;

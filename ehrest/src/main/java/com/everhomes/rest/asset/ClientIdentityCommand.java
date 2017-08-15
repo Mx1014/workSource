@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>targetType:客户类型,sceneType为default，family时，类型为eh_user即个人，当sceneType为pm_admin屏蔽，当sceneType为其他，则类型为eh_organization即企业</li>
  * <li>targetId:客户id，客户类型为企业时，targetId为企业id</li>
  * <li>billGroupId:账单组id</li>
+ * <li>isOnlyOwedBill:是否只显示待缴账单1:是;0：不是</li>
  *</ul>
  */
 public class ClientIdentityCommand {
@@ -19,6 +20,7 @@ public class ClientIdentityCommand {
     private String targetType;
     private Long targetId;
     private Long billGroupId;
+    private Byte isOnlyOwedBill;
 
     @Override
     public String toString() {
@@ -27,6 +29,14 @@ public class ClientIdentityCommand {
 
     public String getOwnerType() {
         return ownerType;
+    }
+
+    public Byte getIsOnlyOwedBill() {
+        return isOnlyOwedBill;
+    }
+
+    public void setIsOnlyOwedBill(Byte isOnlyOwedBill) {
+        this.isOnlyOwedBill = isOnlyOwedBill;
     }
 
     public void setOwnerType(String ownerType) {

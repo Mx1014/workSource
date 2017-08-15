@@ -25,6 +25,8 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     @Autowired
     private PmKeXingBillService keXingBillService;
 
+    private static ZuolinAssetVendorHandler zuolinAssetVendorHandler = new ZuolinAssetVendorHandler();
+
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
 
@@ -119,27 +121,32 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName) {
-        return null;
+        return zuolinAssetVendorHandler.listSettledBill( currentNamespaceId,  ownerId,  ownerType,  addressName,  addressId,  billGroupName,  billGroupId,  billStatus,  dateStrBegin,  dateStrEnd,  pageOffSet,  pageSize,  targetName);
     }
 
     @Override
     public List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
-        return null;
+        return zuolinAssetVendorHandler.listSettledBillItems( billId,  targetName,  pageOffSet,  pageSize);
     }
 
     @Override
     public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
-        return null;
+        return zuolinAssetVendorHandler.listNoticeInfoByBillId(billIds);
     }
 
     @Override
-    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String ownerType1, Long targetId, Long billGroupId) {
-        return null;
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String ownerType1, Long targetId, Long billGroupId,Byte isOwedBill) {
+        return zuolinAssetVendorHandler.showBillForClient( ownerId,  ownerType,  ownerType1,  targetId,  billGroupId, isOwedBill);
     }
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
-        return null;
+        return zuolinAssetVendorHandler.getBillDetailForClient(billId);
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr) {
+        return zuolinAssetVendorHandler.listBillDetailOnDateChange( ownerId,  ownerType,  targetType,  targetId,  dateStr);
     }
 
     private Timestamp covertStrToTimestamp(String str) {

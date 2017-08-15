@@ -41,5 +41,11 @@ public interface AssetService {
 
     ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
 
+    List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd);
+
+    ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
+
+    ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
+
 //    void synchronizeZJGKBill();
 }

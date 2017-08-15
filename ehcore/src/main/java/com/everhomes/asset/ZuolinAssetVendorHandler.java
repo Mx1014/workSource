@@ -277,12 +277,12 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId) {
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill) {
         ShowBillForClientDTO response = new ShowBillForClientDTO();
         if(targetType.equals("eh_user")) {
             targetId = UserContext.current().getUser().getId();
         }
-        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId);
+        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill);
         HashSet<String> dateStrFilter = new HashSet<>();
         BigDecimal amountOwed = new BigDecimal("0");
         for(int i = 0; i < billDetailDTOList.size(); i++) {
@@ -302,6 +302,13 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         response =  assetProvider.getBillDetailForClient(billId);
         return response;
 
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr) {
+        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+        response =  assetProvider.getBillDetailByDateStr(ownerId,ownerType,targetId,targetType,dateStr);
+        return response;
     }
 
     private List<SimpleAssetBillDTO> convertAssetBillToSimpleDTO(List<AssetBill> bills) {
