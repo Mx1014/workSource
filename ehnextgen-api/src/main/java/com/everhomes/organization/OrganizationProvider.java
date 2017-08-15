@@ -11,7 +11,6 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
-
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.userOrganization.UserOrganizations;
 import org.jooq.Condition;
@@ -302,6 +301,7 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
 
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
+
 	List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize);
 	List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
@@ -425,6 +425,25 @@ public interface OrganizationProvider {
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 	
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
+	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
+
+	//	根据 group_type 查找薪酬组 added by R 20170630
+	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId);
+	//查询组织下内有效的人数
+	Integer countOrganizationMemberDetailsByOrgId(Integer namespaceId, Long organizationId);
+	OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId);
+
+	//查询所有总公司
+	List<Organization> listHeadEnterprises();
+
+	List<OrganizationMember> listOrganizationMemberByPathHavingDetailId(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
+
+	/**
+	 * 查询非离职状态下所有员工的 detailId
+	 * added by R, 20170719
+	 */
+	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId);
+
 
 	List listOrganizationMembersGroupByToken();
 

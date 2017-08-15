@@ -24,6 +24,8 @@ public class FlowCaseState {
 	private List<FlowEventLog> updateLogs;
 	private List<FlowTimeout> timeouts;
 	private Stack<FlowCaseStateStackType> processStack;
+
+	private boolean continueStep = true;// 是否正常按照流程执行
 	
 	public FlowCaseState() {
 		extra = new ConcurrentHashMap<String, Object>();
@@ -116,7 +118,15 @@ public class FlowCaseState {
 		return updateLogs;
 	}
 
-	public void pushProcessType(FlowCaseStateStackType processType) {
+    public boolean isContinueStep() {
+        return continueStep;
+    }
+
+    public void setContinueStep(boolean continueStep) {
+        this.continueStep = continueStep;
+    }
+
+    public void pushProcessType(FlowCaseStateStackType processType) {
 		processStack.push(processType);
 	}
 	

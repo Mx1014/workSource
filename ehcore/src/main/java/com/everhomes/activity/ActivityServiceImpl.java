@@ -554,6 +554,8 @@ public class ActivityServiceImpl implements ActivityService {
 			 return;
 		 }
 
+		 LOGGER.info("UserContext current getVersion , version = {}", version);
+
 		 if(version == null){
 			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
@@ -1580,7 +1582,7 @@ public class ActivityServiceImpl implements ActivityService {
 			LOGGER.error("Refund failed from vendor, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}", 
 					roster.getOrderNo(), userId, activity.getId(), refundCmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 							"bill  refound error"); 
 		}
 		long endTime = System.currentTimeMillis();

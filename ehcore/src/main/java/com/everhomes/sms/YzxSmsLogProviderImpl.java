@@ -80,7 +80,9 @@ public class YzxSmsLogProviderImpl implements YzxSmsLogProvider {
     }
 
     private void ifNotNull(Object condition, Callback callback) {
-        if (condition != null) {
+        if (condition instanceof String && condition.toString().trim().length() > 0) {
+            callback.condition();
+        } else if (condition != null) {
             callback.condition();
         }
     }

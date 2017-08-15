@@ -505,3 +505,8 @@ insert into eh_service_alliance_jump_module (id, namespace_id, module_name, modu
 
 update eh_launch_pad_items set action_data = replace(action_data, '"displayType": "list"', '"displayType": "grid"') where item_label = '服务联盟' and namespace_id=999981;
 
+-- add by xiongying 20170808
+SET @max_scope_id = (SELECT max(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@max_scope_id := @max_scope_id + 1), 41300, '', 'EhNamespaces', 999981, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@max_scope_id := @max_scope_id + 1), 41310, '', 'EhNamespaces', 999981, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@max_scope_id := @max_scope_id + 1), 41320, '', 'EhNamespaces', 999981, 2);

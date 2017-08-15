@@ -1350,6 +1350,7 @@ public class UserServiceImpl implements UserService {
 		foundLogin.setAppVersion(appVersion);
 		String hkeyLogin = String.valueOf(ref.getNextLoginId());
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		LOGGER.debug("createLogin|hId = "+hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
 
 		if(isNew && deviceIdentifier != null && (!deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name()))) {
@@ -1393,6 +1394,7 @@ public class UserServiceImpl implements UserService {
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 
 			LOGGER.debug("Unregister login connection for login: {}", login.toString());
+			LOGGER.debug("unregisterLoginConnection|hId = "+hkeyLogin);
 			accessor.putMapValueObject(hkeyLogin, login);
 		} 
 	}
@@ -1515,6 +1517,7 @@ public class UserServiceImpl implements UserService {
 		if(login != null) {
 			login.setLoginBorderId(null);
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+			LOGGER.debug("unregisterLoginConnection|hId = "+hkeyLogin);
 			accessor.putMapValueObject(hkeyLogin, login);
 
 			if(userLogin.getLoginBorderId() != null) {
@@ -1530,11 +1533,16 @@ public class UserServiceImpl implements UserService {
 		String userKey = NameMapper.getCacheKey("user", login.getUserId(), null);
 		String hkeyLogin = String.valueOf(login.getLoginId());
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		LOGGER.debug("saveLogin|hId = "+hkeyLogin);
 		accessor.putMapValueObject(hkeyLogin, login);
 	}
 
 	@Override
 	public List<UserLogin> listUserLogins(long uid) {
+	    if(uid == 0) {
+	        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "uid=0 not found");
+	    }
+	    
 		List<UserLogin> logins = new ArrayList<>();
 		String userKey = NameMapper.getCacheKey("user", uid, null);
 
@@ -1543,6 +1551,8 @@ public class UserServiceImpl implements UserService {
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
 		Object maxLoginId = accessor.getMapValueObject(hkeyIndex);
 		if(maxLoginId != null) {
+			LOGGER.debug("maxLoginId: "+maxLoginId);
+			LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
 			for(int i = 1; i <= Integer.parseInt(maxLoginId.toString()); i++) {
 				String hkeyLogin = String.valueOf(i);
 				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
@@ -4407,6 +4417,7 @@ public class UserServiceImpl implements UserService {
 			else {
 				SceneContactV2DTO dto = new SceneContactV2DTO();
 				dto.setUserId(detail.getTargetId());
+				dto.setTargetType(detail.getTargetType());
 				dto.setDetailId(detail.getId());
 				if (!StringUtils.isEmpty(detail.getAvatar()))
 					dto.setContactAvatar(detail.getAvatar());
@@ -4417,7 +4428,7 @@ public class UserServiceImpl implements UserService {
 				dto.setContactToken(detail.getContactToken());
 				if (!StringUtils.isEmpty(detail.getEmail()))
 					dto.setEmail(detail.getEmail());
-				getRelevantContactEnterprise(dto, detail.getOrganizationId());
+				getRelevantContactEnterpriseWithAvatar(dto, detail.getOrganizationId());
 				return dto;
 			}
 		}
@@ -4442,7 +4453,7 @@ public class UserServiceImpl implements UserService {
 		}
 	} 
 
-    private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
+    private void getRelevantContactEnterpriseWithAvatar(SceneContactV2DTO dto, Long organizationId) {
 
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
@@ -4472,6 +4483,14 @@ public class UserServiceImpl implements UserService {
         //  设置岗位
         dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
 
+
+        //  设置头像(由于迁移数据detail表中可能没有头像信息，故由原始的组织架构接口获得)
+        if (OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())) {
+            User user = userProvider.findUserById(dto.getUserId());
+            if (null != user) {
+                dto.setContactAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+            }
+        }
     }
 	
 	@Override
