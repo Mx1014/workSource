@@ -26,7 +26,17 @@ public class SearchOrganizationCommand {
     
     private String organizationType;
     private String buildingName;
-    
+
+    private Byte existAddressFlag;
+
+    public Byte getExistAddressFlag() {
+        return existAddressFlag;
+    }
+
+    public void setExistAddressFlag(Byte existAddressFlag) {
+        this.existAddressFlag = existAddressFlag;
+    }
+
     public String getBuildingName() {
 		return buildingName;
 	}

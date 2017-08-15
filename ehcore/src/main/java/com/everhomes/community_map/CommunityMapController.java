@@ -54,7 +54,7 @@ public class CommunityMapController extends ControllerBase {
     @RequestMapping("getCommunityMapBuildingDetailById")
     @RestReturn(value=CommunityMapBuildingDetailDTO.class)
     public RestResponse getCommunityMapBuildingDetailById(GetCommunityMapBuildingDetailByIdCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(communityMapService.getCommunityMapBuildingDetailById(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
 

@@ -15,10 +15,7 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community_map.*;
 import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
@@ -48,8 +45,6 @@ public class CommunityMapServiceImpl implements CommunityMapService {
     private CommunityProvider communityProvider;
     @Autowired
     private ConfigurationProvider configurationProvider;
-    @Autowired
-    private CommunityMapSearcherImpl communityMapSearcherImpl;
     @Autowired
     private CommunityService communityService;
 
@@ -131,11 +126,16 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
         SearchContentsBySceneCommand cmd2 = ConvertHelper.convert(cmd, SearchContentsBySceneCommand.class);
         SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
-        response.setNextPageAnchor(resp.getNextPageAnchor());
-        response.setShops(resp.getShopDTOs().stream().map(r -> {
-            CommunityMapShopDTO shop = ConvertHelper.convert(cmd, CommunityMapShopDTO.class);
-            return shop;
-        }).collect(Collectors.toList()));
+
+        response.setShops(new ArrayList<>());
+
+        if (null != resp) {
+            response.setNextPageAnchor(resp.getNextPageAnchor());
+            response.getShops().addAll(resp.getShopDTOs().stream().map(r -> {
+                CommunityMapShopDTO shop = ConvertHelper.convert(cmd, CommunityMapShopDTO.class);
+                return shop;
+            }).collect(Collectors.toList()));
+        }
 
         return response;
     }
@@ -191,6 +191,7 @@ public class CommunityMapServiceImpl implements CommunityMapService {
             }
         }
         searchCmd.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+        searchCmd.setExistAddressFlag(ExistAddressFlag.EXIST.getCode());
 
         ListEnterprisesCommandResponse orgResponse = organizationService.searchEnterprise(searchCmd);
 
@@ -238,9 +239,11 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
         temp.keySet().forEach(r -> {
             Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, r);
-            CommunityMapBuildingDTO buildingDTO = ConvertHelper.convert(building, CommunityMapBuildingDTO.class);
-            buildingDTO.setApartments(temp.get(r));
-            buildings.add(buildingDTO);
+            if (null != building) {
+                CommunityMapBuildingDTO buildingDTO = ConvertHelper.convert(building, CommunityMapBuildingDTO.class);
+                buildingDTO.setApartments(temp.get(r));
+                buildings.add(buildingDTO);
+            }
         });
 
         return buildings;
@@ -252,7 +255,16 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         BuildingDTO buildingDTO = communityService.getBuilding(cmd2);
 
         CommunityMapBuildingDetailDTO dto = ConvertHelper.convert(buildingDTO, CommunityMapBuildingDetailDTO.class);
+        SearchCommunityMapContentsCommand cmd3 = new SearchCommunityMapContentsCommand();
+        cmd3.setBuildingId(cmd.getBuildingId());
+        cmd3.setPageSize(5);
+        cmd3.setSceneToken(cmd.getSceneToken());
 
+        SearchCommunityMapContentsResponse orgResponse = this.searchEnterprise(cmd3);
+        SearchCommunityMapContentsResponse shopResponse = this.searchShops(cmd3);
+
+        dto.setOrganizations(orgResponse.getOrganizations());
+        dto.setShops(shopResponse.getShops());
         return dto;
     }
 }

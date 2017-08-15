@@ -7,7 +7,17 @@ import com.everhomes.util.StringHelper;
  */
 public class GetCommunityMapBuildingDetailByIdCommand {
 
+    private String sceneToken;
+
     private Long buildingId;
+
+    public String getSceneToken() {
+        return sceneToken;
+    }
+
+    public void setSceneToken(String sceneToken) {
+        this.sceneToken = sceneToken;
+    }
 
     public Long getBuildingId() {
         return buildingId;
