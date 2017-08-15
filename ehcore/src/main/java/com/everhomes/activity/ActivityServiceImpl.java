@@ -995,9 +995,9 @@ public class ActivityServiceImpl implements ActivityService {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
 			List<ImportSignupErrorDTO> errorDTOS = new ArrayList<>();
-			List<ActivityRoster> rostersTemp = getRostersFromExcel(files[0], errorDTOS);
+			List<ActivityRoster> rosters = getRostersFromExcel(files[0], errorDTOS, activity.getId());
 			
-			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
+//			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 			//检查是否超过报名人数限制, add by tt, 20161012
 	        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount().intValue() + rosters.size() > activity.getMaxQuantity().intValue()) {
 	        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -1023,21 +1023,18 @@ public class ActivityServiceImpl implements ActivityService {
 		
 	}
 
-	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, List<ImportSignupErrorDTO> errorDTOS) {
+	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, List<ImportSignupErrorDTO> errorDTOS, Long activityId) {
 		@SuppressWarnings("rawtypes")
 		ArrayList rows = processorExcel(file);
 		List<ActivityRoster> rosters = new ArrayList<>();
 		for(int i=1, len=rows.size(); i<len; i++) {
 			RowResult row = (RowResult) rows.get(i);
-			if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
-				continue;
-			}
-			if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
-				continue;
-			}
-			
-			//新增条件真实姓名必填  add by yanjun 20170628
-			if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
+
+			//检验Excel的数据   add by yanjun 20170815
+			ImportSignupErrorDTO errorDTO = checkExcelRoster(rosters, row, activityId);
+			if(errorDTO != null){
+				errorDTO.setRowNum(i);
+				errorDTOS.add(errorDTO);
 				continue;
 			}
 			
@@ -1065,35 +1062,75 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		return rosters;
 	}
-	
-	private List<ActivityRoster> filterExistRoster(Long activityId, List<ActivityRoster> rosters){
-		List<ActivityRoster> newRosters = new ArrayList<ActivityRoster>();
-		if(rosters == null){
-			return newRosters;
+
+	private ImportSignupErrorDTO checkExcelRoster(List<ActivityRoster> newRosters, RowResult row, Long activityId){
+
+		ImportSignupErrorDTO errorDTO = new ImportSignupErrorDTO();
+
+		//手机不能为空
+		if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
+			errorDTO.setDescription("The phone number is empty");
+
+			return errorDTO;
 		}
-		
-		//筛选重复数据，1、数据库不能有重复的，2、自己不能有重复的。
-		for(int i= 0; i< rosters.size(); i++){
-			ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, rosters.get(i).getPhone(), ActivityRosterStatus.NORMAL.getCode());
-			if(oldRoster != null){
-				continue;
-			}
-			
-			boolean oldFlag = false;
-			for(int j =0; j<newRosters.size(); j++){
-				if(rosters.get(i).getPhone().equals(newRosters.get(j).getPhone())){
-					oldFlag = true;
-					break;
-				}
-			}
-			
-			if(oldFlag){
-				continue;
-			}
-			newRosters.add(rosters.get(i));
+		//手机格式简单检验
+		if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
+			errorDTO.setDescription("Invalid phone number");
+			return errorDTO;
 		}
-		return newRosters;
+
+		//新增条件真实姓名必填  add by yanjun 20170628
+		if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
+			errorDTO.setDescription("The realName is empty");
+			return errorDTO;
+		}
+
+		//检查是否已经报过名
+		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, row.getA(), ActivityRosterStatus.NORMAL.getCode());
+		if(oldRoster != null){
+			errorDTO.setDescription("The roster already exists, checked with phone");
+			return errorDTO;
+		}
+
+		//检查Excel内是否存在重复
+		for(int i=0; i< newRosters.size(); i++){
+			if(newRosters.get(i).getPhone().equals(row.getA())){
+				errorDTO.setDescription("Repeat roster in this Excel, checked with phone");
+				return errorDTO;
+			}
+		}
+
+    	return null;
 	}
+	
+//	private List<ActivityRoster> filterExistRoster(Long activityId, List<ActivityRoster> rosters){
+//		List<ActivityRoster> newRosters = new ArrayList<ActivityRoster>();
+//		if(rosters == null){
+//			return newRosters;
+//		}
+//
+//		//筛选重复数据，1、数据库不能有重复的，2、自己不能有重复的。
+//		for(int i= 0; i< rosters.size(); i++){
+//			ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, rosters.get(i).getPhone(), ActivityRosterStatus.NORMAL.getCode());
+//			if(oldRoster != null){
+//				continue;
+//			}
+//
+//			boolean oldFlag = false;
+//			for(int j =0; j<newRosters.size(); j++){
+//				if(rosters.get(i).getPhone().equals(newRosters.get(j).getPhone())){
+//					oldFlag = true;
+//					break;
+//				}
+//			}
+//
+//			if(oldFlag){
+//				continue;
+//			}
+//			newRosters.add(rosters.get(i));
+//		}
+//		return newRosters;
+//	}
 	
 	/**
 	 * 防止nullPointException
