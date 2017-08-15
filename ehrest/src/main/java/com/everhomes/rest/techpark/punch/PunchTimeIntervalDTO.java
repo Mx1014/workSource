@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchRuleId： 规则id</li>
  * <li>timeRuleId： 时间规则id</li>
  * <li>arriveTime： 上班时间</li> 
- * <li>workTime： 下班时间</li>
+ * <li>leaveTime： 下班时间</li>
  * </ul>
  */
 public class PunchTimeIntervalDTO {
