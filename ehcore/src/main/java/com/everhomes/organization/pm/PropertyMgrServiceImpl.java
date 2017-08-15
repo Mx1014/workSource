@@ -101,6 +101,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.constraints.Null;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -2074,6 +2075,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             address.setAreaSize(cmd.getAreaSize());
             address.setAddress(building.getName() + "-" + cmd.getApartmentName());
 
+			address.setBuildArea(cmd.getBuildArea());
+			address.setRentArea(cmd.getRentArea());
 			address.setChargeArea(cmd.getChargeArea());
 			address.setSharedArea(cmd.getSharedArea());
 			if(cmd.getCategoryItemId() != null) {
@@ -2100,6 +2103,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}else if (AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
 			address.setAreaSize(cmd.getAreaSize());
 
+			address.setBuildArea(cmd.getBuildArea());
+			address.setRentArea(cmd.getRentArea());
 			address.setChargeArea(cmd.getChargeArea());
 			address.setSharedArea(cmd.getSharedArea());
 			if(cmd.getCategoryItemId() != null) {
@@ -2127,6 +2132,38 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
         
         insertOrganizationAddressMapping(organizationId, community, address, cmd.getStatus());
+
+		//门牌对应的楼栋和园区的sharedArea chargeArea buildArea rentArea都要增加相应的值 by xiongying 20170815
+		if(address.getRentArea() != null) {
+			Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+			building.setRentArea(buildingRentArea + address.getRentArea());
+
+			Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+			community.setRentArea(communityRentArea + address.getRentArea());
+		}
+		if(address.getSharedArea() != null) {
+			Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+			building.setSharedArea(buildingSharedArea + address.getSharedArea());
+
+			Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+			community.setSharedArea(communitySharedArea + address.getSharedArea());
+		}
+		if(address.getBuildArea() != null) {
+			Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+			building.setBuildArea(buildingBuildArea + address.getBuildArea());
+
+			Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+			community.setBuildArea(communityBuildArea + address.getBuildArea());
+		}
+		if(address.getChargeArea() != null) {
+			Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+			building.setChargeArea(buildingChargeArea + address.getChargeArea());
+
+			Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+			community.setChargeArea(communityChargeArea + address.getChargeArea());
+		}
+		communityProvider.updateBuilding(building);
+		communityProvider.updateCommunity(community);
 	}
 
     @Override
@@ -2135,8 +2172,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
 		}
+		Community community = checkCommunity(address.getCommunityId());
+		Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
     	if (cmd.getStatus() != null) {
-    		Community community = checkCommunity(address.getCommunityId());
     		Long organizationId = findOrganizationByCommunity(community);
     		CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
     		communityAddressMapping.setLivingStatus(cmd.getStatus());
@@ -2152,8 +2190,36 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}else if (cmd.getAreaSize() != null) {
 				address.setAreaSize(cmd.getAreaSize());
 			}else if (cmd.getSharedArea() != null) {
+				Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+				Double oldAddressSharedArea = address.getSharedArea() == null ? 0.0 : address.getSharedArea();
+				building.setSharedArea(buildingSharedArea - oldAddressSharedArea + cmd.getSharedArea());
+				Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+				community.setSharedArea(communitySharedArea - oldAddressSharedArea + cmd.getSharedArea());
+
 				address.setSharedArea(cmd.getSharedArea());
+			}else if (cmd.getBuildArea() != null) {
+				Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+				Double oldAddressBuildArea = address.getBuildArea() == null ? 0.0 : address.getBuildArea();
+				building.setBuildArea(buildingBuildArea - oldAddressBuildArea + cmd.getBuildArea());
+				Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+				community.setBuildArea(communityBuildArea - oldAddressBuildArea + cmd.getBuildArea());
+
+				address.setBuildArea(cmd.getBuildArea());
+			}else if (cmd.getRentArea() != null) {
+				Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+				Double oldAddressRentArea = address.getRentArea() == null ? 0.0 : address.getRentArea();
+				building.setRentArea(buildingRentArea - oldAddressRentArea + cmd.getRentArea());
+				Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+				community.setRentArea(communityRentArea - oldAddressRentArea + cmd.getRentArea());
+
+				address.setRentArea(cmd.getRentArea());
 			}else if (cmd.getChargeArea() != null) {
+				Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+				Double oldAddressChargeArea = address.getChargeArea() == null ? 0.0 : address.getChargeArea();
+				building.setChargeArea(buildingChargeArea - oldAddressChargeArea + cmd.getChargeArea());
+				Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+				community.setChargeArea(communityChargeArea - oldAddressChargeArea + cmd.getChargeArea());
+
 				address.setChargeArea(cmd.getChargeArea());
 			}else if (cmd.getCategoryItemId() != null) {
 				address.setCategoryItemId(cmd.getCategoryItemId());
@@ -2173,6 +2239,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				address.setOrientation(cmd.getOrientation());
 			}
 	    	addressProvider.updateAddress(address);
+
+			communityProvider.updateBuilding(building);
+			communityProvider.updateCommunity(community);
 		}
 	}
 
@@ -2236,6 +2305,40 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	addressProvider.updateOrganizationAddressMapping(address.getId());
     	addressProvider.updateOrganizationAddress(address.getId());
     	addressProvider.updateOrganizationOwnerAddress(address.getId());
+
+		//门牌对应的楼栋和园区的sharedArea chargeArea buildArea rentArea都要减去相应的值 by xiongying 20170815
+		Community community = checkCommunity(address.getCommunityId());
+		Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+		if(address.getRentArea() != null) {
+			Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+			building.setRentArea(buildingRentArea - address.getRentArea());
+
+			Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+			community.setRentArea(communityRentArea - address.getRentArea());
+		}
+		if(address.getSharedArea() != null) {
+			Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+			building.setSharedArea(buildingSharedArea - address.getSharedArea());
+
+			Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+			community.setSharedArea(communitySharedArea - address.getSharedArea());
+		}
+		if(address.getBuildArea() != null) {
+			Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+			building.setBuildArea(buildingBuildArea - address.getBuildArea());
+
+			Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+			community.setBuildArea(communityBuildArea - address.getBuildArea());
+		}
+		if(address.getChargeArea() != null) {
+			Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+			building.setChargeArea(buildingChargeArea - address.getChargeArea());
+
+			Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+			community.setChargeArea(communityChargeArea - address.getChargeArea());
+		}
+		communityProvider.updateBuilding(building);
+		communityProvider.updateCommunity(community);
 	}
 
 	private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {

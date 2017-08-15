@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>areaSize: 面积</li>
  * <li>sharedArea: 公摊面积</li>
  * <li>chargeArea: 收费面积</li>
+ * <li>buildArea: 建筑面积</li>
+ * <li>rentArea: 出租面积</li>
  * <li>categoryItemId: 资产类型：住宅、写字楼、酒店式公寓、厂房、库房、车位、其他...</li>
  * <li>sourceItemId: 资产来源：自管、业主放盘、大业主交管、其他...</li>
  * <li>decorateStatus: 装修状态</li>
@@ -25,10 +27,28 @@ public class UpdateApartmentCommand {
 	private Double areaSize;
 	private Double sharedArea;
 	private Double chargeArea;
+	private Double buildArea;
+	private Double rentArea;
 	private Long categoryItemId;
 	private Long sourceItemId;
 	private Byte decorateStatus;
 	private String orientation;
+
+	public Double getBuildArea() {
+		return buildArea;
+	}
+
+	public void setBuildArea(Double buildArea) {
+		this.buildArea = buildArea;
+	}
+
+	public Double getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(Double rentArea) {
+		this.rentArea = rentArea;
+	}
 
 	public Long getCategoryItemId() {
 		return categoryItemId;
