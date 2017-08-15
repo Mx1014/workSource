@@ -6756,6 +6756,8 @@ public class PunchServiceImpl implements PunchService {
 			if(null != intervals)
 				for(PunchTimeInterval interval : intervals){
 					PunchTimeIntervalDTO intervalDTO = ConvertHelper.convert(interval, PunchTimeIntervalDTO.class); 
+					intervalDTO.setArriveTime(interval.getArriveTimeLong());
+					intervalDTO.setLeaveTime(interval.getLeaveTimeLong());
 					dto.getPunchTimeIntervals().add(intervalDTO);
 				}
 		}
