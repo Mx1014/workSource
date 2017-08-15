@@ -19,7 +19,7 @@ import java.util.List;
  * <li>visibleFlag: 隐私设置: 0-显示, 1-隐藏</li>
  * </ul>
  */
-public class AddProfileContactsCommand {
+public class AddProfileContactCommand {
     private String contactName;
 
     private String contactEnName;
@@ -42,7 +42,7 @@ public class AddProfileContactsCommand {
 
     private Byte visibleFlag;
 
-    public AddProfileContactsCommand() {
+    public AddProfileContactCommand() {
     }
 
     @Override

@@ -8,17 +8,17 @@ import java.util.List;
 /**
  * <ul>
  * <li>nextPageAnchor: 下一页起始锚点</li>
- * <li>contacts: 成员信息，参考{@link ProfileContactDTO}</li>
+ * <li>profilePersonnels: 成员信息，参考{@link ProfileEmployeeDTO}</li>
  * </ul>
  */
-public class ListProfileContactsResponse {
+public class ListProfileEmployeesResponse {
 
     private Long nextPageAnchor;
 
-    @ItemType(ProfileContactDTO.class)
-    private List<ProfileContactDTO> contacts;
+    @ItemType(ProfileEmployeeDTO.class)
+    private List<ProfileEmployeeDTO> profilePersonnels;
 
-    public ListProfileContactsResponse() {
+    public ListProfileEmployeesResponse() {
     }
 
     public Long getNextPageAnchor() {
@@ -29,16 +29,17 @@ public class ListProfileContactsResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<ProfileContactDTO> getContacts() {
-        return contacts;
+    public List<ProfileEmployeeDTO> getProfilePersonnels() {
+        return profilePersonnels;
     }
 
-    public void setContacts(List<ProfileContactDTO> contacts) {
-        this.contacts = contacts;
+    public void setProfilePersonnels(List<ProfileEmployeeDTO> profilePersonnels) {
+        this.profilePersonnels = profilePersonnels;
     }
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

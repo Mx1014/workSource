@@ -8,13 +8,13 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface ProfileService {
 
-    AddProfileContactsResponse addProfileContacts(AddProfileContactsCommand cmd);
+    ProfileContactDTO addProfileContact(AddProfileContactCommand cmd);
 
     void transferProfileContacts(TransferProfileContactsCommand cmd);
 
     void deleteProfileContacts(DeleteProfileContactsCommand cmd);
 
-    void stickProfileContacts(StickProfileContactsCommand cmd);
+    void stickProfileContact(StickProfileContactCommand cmd);
 
     ListProfileContactsResponse listProfileContacts(ListProfileContactsCommand cmd);
 
@@ -22,4 +22,10 @@ public interface ProfileService {
             MultipartFile mfile, Long userId, Integer namespaceId, ImportProfileContactsCommand cmd);
 
     void exportProfileContacts(ExportProfileContactsCommand cmd, HttpServletResponse httpResponse);
+
+    void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
+
+    ListProfileEmployeesResponse listProfileEmployees(ListProfileEmployeesCommand cmd);
+
+    ProfileEmployeeDTO addProfileEmployee(AddProfileEmployeeCommand cmd);
 }

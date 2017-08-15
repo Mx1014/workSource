@@ -29,13 +29,13 @@ public class ProfileController extends ControllerBase{
     private ProfileService profileService;
 
     /**
-     * <b>URL: /profile/addProfileContacts</b>
+     * <b>URL: /profile/addProfileContact</b>
      * <p>1.添加、编辑通讯录成员</p>
      */
-    @RequestMapping("addProfileContacts")
-    @RestReturn(value = AddProfileContactsResponse.class)
-    public RestResponse addProfileContacts(AddProfileContactsCommand cmd){
-        AddProfileContactsResponse res = profileService.addProfileContacts(cmd);
+    @RequestMapping("addProfileContact")
+    @RestReturn(value = ProfileContactDTO.class)
+    public RestResponse addProfileContact(AddProfileContactCommand cmd){
+        ProfileContactDTO res = profileService.addProfileContact(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -58,7 +58,7 @@ public class ProfileController extends ControllerBase{
 
     /**
      * <b>URL: /profile/deleteProfileContacts</b>
-     * <p>2.删除通讯录成员</p>
+     * <p>2-2.删除通讯录成员</p>
      */
     @RequestMapping("deleteProfileContacts")
     @RestReturn(value = String.class)
@@ -71,13 +71,13 @@ public class ProfileController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/stickProfileContacts</b>
+     * <b>URL: /profile/stickProfileContact</b>
      * <p>3.通讯录成员置顶</p>
      */
-    @RequestMapping("stickProfileContacts")
+    @RequestMapping("stickProfileContact")
     @RestReturn(value = String.class)
-    public RestResponse stickProfileContacts(StickProfileContactsCommand cmd){
-        profileService.stickProfileContacts(cmd);
+    public RestResponse stickProfileContact(StickProfileContactCommand cmd){
+        profileService.stickProfileContact(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -121,5 +121,47 @@ public class ProfileController extends ControllerBase{
     public RestResponse exportProfileContacts(ExportProfileContactsCommand cmd, HttpServletResponse httpResponse){
         profileService.exportProfileContacts(cmd,httpResponse);
         return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /profile/verifyPersonnelByPassword</b>
+     * <p>5-3.导出通讯录身份校验</p>
+     */
+    @RequestMapping("verifyPersonnelByPassword")
+    @RestReturn(value = String.class)
+    public RestResponse verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd){
+        profileService.verifyPersonnelByPassword(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /profile/listProfileEmployees</b>
+     * <p>7.员工档案人员列表</p>
+     */
+    @RequestMapping("listProfileEmployees")
+    @RestReturn(value = ListProfileEmployeesResponse.class)
+    public RestResponse listProfileEmployees(ListProfileEmployeesCommand cmd){
+        ListProfileEmployeesResponse res = profileService.listProfileEmployees(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /profile/addProfileEmployee</b>
+     * <p>8.添加成员至员工档案</p>
+     */
+    @RequestMapping("addProfileEmployee")
+    @RestReturn(value = ProfileEmployeeDTO.class)
+    public RestResponse addProfileEmployee(AddProfileEmployeeCommand cmd){
+        ProfileEmployeeDTO res = profileService.addProfileEmployee(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }

@@ -4,6 +4,7 @@ import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.profile.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +17,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Autowired ProfileProvider profileProvider;
 
     @Override
-    public AddProfileContactsResponse addProfileContacts(AddProfileContactsCommand cmd) {
+    public ProfileContactDTO addProfileContact(AddProfileContactCommand cmd) {
         return null;
     }
 
@@ -31,7 +32,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void stickProfileContacts(StickProfileContactsCommand cmd) {
+    public void stickProfileContact(StickProfileContactCommand cmd) {
         User user = UserContext.current().getUser();
 
         //  状态码为 0 时删除
@@ -67,4 +68,24 @@ public class ProfileServiceImpl implements ProfileService {
     public void exportProfileContacts(ExportProfileContactsCommand cmd, HttpServletResponse httpResponse) {
 
     }
+
+    @Override
+    public void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd) {
+        //   校验有误时抛出异常
+/*        if(member != null){
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PHONE_ALREADY_EXIST,
+                    "phone number already exists.");
+                    }*/
+    }
+
+    @Override
+    public ListProfileEmployeesResponse listProfileEmployees(ListProfileEmployeesCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ProfileEmployeeDTO addProfileEmployee(AddProfileEmployeeCommand cmd) {
+        return null;
+    }
+
 }

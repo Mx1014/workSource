@@ -8,17 +8,24 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>detailId: 成员 detailId</li>
  * <li>contactName: 姓名</li>
- * <li>jobPositions: 职务 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
- * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>employeeStatus: 成员状态: 0-试用, 1-正式</li>
+ * <li>jobPositions: 职务 {@link OrganizationDTO}</li>
+ * <li>departments: 部门 {@link OrganizationDTO}</li>
  * <li>contactToken: 手机号</li>
  * <li>email: 邮箱</li>
- * <li>stick: 置顶状态: 0-未置顶 1-置顶</li>
+ * <li>employmentTime: 转正日期</li>
+ * <li>contractTime: 合同日期</li>
  * </ul>
  */
-public class ProfileContactsDTO {
+public class ProfileEmployeeDTO {
+
+    private Long detailId;
 
     private String contactName;
+
+    private String employeeStatus;
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> jobPositions;
@@ -30,9 +37,19 @@ public class ProfileContactsDTO {
 
     private String email;
 
-    private String stick;
+    private String employmentTime;
 
-    public ProfileContactsDTO() {
+    private String contractTime;
+
+    public ProfileEmployeeDTO() {
+    }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public String getContactName() {
@@ -41,6 +58,14 @@ public class ProfileContactsDTO {
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
+    }
+
+    public String getEmployeeStatus() {
+        return employeeStatus;
+    }
+
+    public void setEmployeeStatus(String employeeStatus) {
+        this.employeeStatus = employeeStatus;
     }
 
     public List<OrganizationDTO> getJobPositions() {
@@ -75,12 +100,20 @@ public class ProfileContactsDTO {
         this.email = email;
     }
 
-    public String getStick() {
-        return stick;
+    public String getEmploymentTime() {
+        return employmentTime;
     }
 
-    public void setStick(String stick) {
-        this.stick = stick;
+    public void setEmploymentTime(String employmentTime) {
+        this.employmentTime = employmentTime;
+    }
+
+    public String getContractTime() {
+        return contractTime;
+    }
+
+    public void setContractTime(String contractTime) {
+        this.contractTime = contractTime;
     }
 
     @Override
