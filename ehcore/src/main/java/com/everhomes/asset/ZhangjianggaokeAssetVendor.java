@@ -54,9 +54,12 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
 
     @Autowired
     private static final String appKey = "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21";
+//放到数据库，或者分离出http地址前缀+配成zjgk的配置项
+    @Autowired
+    private static final String apartmentBillUrl = "http://139.129.220.146:3578/openapi/getApartmentBills";
 
     @Autowired
-    private static final String companyBillUrl = "http://139.129.220.146:3578/openapi/getApartmentBills";
+    private static final String companyBillUrl = "http://139.129.220.146:3578/openapi/getCompanyBills";
 
     @Autowired
     private OrganizationProvider organizationProvider;
@@ -85,14 +88,14 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
                 String[] address = list.get(i);
                 if (isOwedBill==1){
                     String body = getUrlBody4GetApartmentBill(communityName,address[0],address[1],"0");
-                    HttpResponseEntity<?> postReturn = postGo(body, companyBillUrl, ShowBillForClientZJGKENTITY.class);
+                    HttpResponseEntity<?> postReturn = postGo(body, apartmentBillUrl, ShowBillForClientZJGKENTITY.class);
                     ShowBillForClientZJGKENTITY res = (ShowBillForClientZJGKENTITY)postReturn.getBody();
                     responseList.add(res);
                 }else{
                     String body1 = getUrlBody4GetApartmentBill(communityName,address[0],address[1],"0");
                     String body2 = getUrlBody4GetApartmentBill(communityName,address[0],address[1],"1");
-                    HttpResponseEntity<?> postReturn1 = postGo(body1, companyBillUrl, ShowBillForClientZJGKENTITY.class);
-                    HttpResponseEntity<?> postReturn2 = postGo(body2, companyBillUrl, ShowBillForClientZJGKENTITY.class);
+                    HttpResponseEntity<?> postReturn1 = postGo(body1, apartmentBillUrl, ShowBillForClientZJGKENTITY.class);
+                    HttpResponseEntity<?> postReturn2 = postGo(body2, apartmentBillUrl, ShowBillForClientZJGKENTITY.class);
                     ShowBillForClientZJGKENTITY res1 = (ShowBillForClientZJGKENTITY)postReturn1.getBody();
                     ShowBillForClientZJGKENTITY res2 = (ShowBillForClientZJGKENTITY)postReturn2.getBody();
                     responseList.add(res1);
@@ -105,9 +108,17 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         } else if(targetType == "eh_organization"){
             //拿到enterpriseName
             //调用getCompanyBills
-            organizationProvider.getOrganizationByGoupId()
+            String organizationName = organizationProvider.getOrganizationNameById(targetId);
+            String body = getUrlBody4GetCompanyBills(communityName,organizationName,"");
+            HttpResponseEntity<?> entity = postGo(body, companyBillUrl, "", GetCompanyBillsEntity.class);
+            GetCompanyBillsEntity res = entity.getBody();
+            sortedBills = getSortedBills(res);
         }
         return sortedBills;
+    }
+
+    private ShowBillForClientDTO getSortedBills(GetCompanyBillsEntity res) {
+        return null;
     }
 
     private ShowBillForClientDTO getSortedBills(List<ShowBillForClientZJGKENTITY> responseList) {
@@ -122,11 +133,15 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
             List<BillDTO_zj> billDTO = billDTOs.getBillDTOS();
             for(int j = 0; j < billDTO.size(); j++){
                 BillDTO_zj var1 = billDTO.get(j);
-                mergeList.containsKey(var1.getDateStr())?
-                        mergeList.get(var1.getDateStr()).getStatus().equals(var1.getDetails().get(0).getPayFlag())?
-                                mergeToList(mergeList,var1.getDateStr(),var1,true):mergeToList(mergeList,var1.getDateStr(),var1,false)
-                        :
-                        mergeToList(mergeList,null,var1,true);
+                if(mergeList.containsKey(var1.getDateStr())) {
+                    if(mergeList.get(var1.getDateStr()).getStatus().equals(var1.getDetails().get(0).getPayFlag())) {
+                        mergeToList(mergeList,var1.getDateStr(),var1,true);
+                    }else{
+                        mergeToList(mergeList,var1.getDateStr(),var1,false);
+                    }
+                }else{
+                    mergeToList(mergeList,null,var1,true);
+                }
             }
 
 
@@ -144,6 +159,14 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
 //            }
         }
         return countTotal(mergeList);
+    }
+
+    private ShowBillForClientDTO countTotal(HashMap<String, BillDetailDTO> mergeList) {
+        return null;
+    }
+
+    private void mergeToList(HashMap<String, BillDetailDTO> mergeList, String dateStr, BillDTO_zj var1, boolean b) {
+        return;
     }
 
     @Override
