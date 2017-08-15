@@ -186,60 +186,60 @@ public class PunchController extends ControllerBase {
 	}
 	
 	
-	/**
-	 * <b>URL: /techpark/punch/addPunchRule</b>
-	 * <p>
-	 * 添加公司打卡规则
-	 * </p>
-	 */
-
-	@Deprecated
-	@RequestMapping("addPunchRule")
-	@RestReturn(value = String.class)
-	public RestResponse addPunchRule(@Valid AddPunchRuleCommand cmd) {
-		punchService.createPunchRule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /techpark/punch/addPunchRule</b>
+//	 * <p>
+//	 * 添加公司打卡规则
+//	 * </p>
+//	 */
+//
+//	@Deprecated
+//	@RequestMapping("addPunchRule")
+//	@RestReturn(value = String.class)
+//	public RestResponse addPunchRule(@Valid AddPunchRuleCommand cmd) {
+//		punchService.createPunchRule(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
-	/**
-	 * <b>URL: /techpark/punch/updatePunchRule</b>
-	 * <p>
-	 * 修改公司打卡规则
-	 * </p>
-	 */
-
-	@Deprecated
-	@RequestMapping("updatePunchRule")
-	@RestReturn(value = String.class)
-	public RestResponse updatePunchRule(@Valid UpdatePunchRuleCommand cmd) {
-		punchService.updatePunchRule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /techpark/punch/deletePunchRule</b>
-	 * <p>
-	 * 删除公司打卡规则
-	 * </p>
-	 */
-
-	@Deprecated
-	@RequestMapping("deletePunchRule")
-	@RestReturn(value = String.class)
-	public RestResponse deletePunchRule(@Valid DeletePunchRuleCommand cmd) {
-		punchService.deletePunchRule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
+//	/**
+//	 * <b>URL: /techpark/punch/updatePunchRule</b>
+//	 * <p>
+//	 * 修改公司打卡规则
+//	 * </p>
+//	 */
+//
+//	@Deprecated
+//	@RequestMapping("updatePunchRule")
+//	@RestReturn(value = String.class)
+//	public RestResponse updatePunchRule(@Valid UpdatePunchRuleCommand cmd) {
+//		punchService.updatePunchRule(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
+//	/**
+//	 * <b>URL: /techpark/punch/deletePunchRule</b>
+//	 * <p>
+//	 * 删除公司打卡规则
+//	 * </p>
+//	 */
+//
+//	@Deprecated
+//	@RequestMapping("deletePunchRule")
+//	@RestReturn(value = String.class)
+//	public RestResponse deletePunchRule(@Valid DeletePunchRuleCommand cmd) {
+//		punchService.deletePunchRule(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
 //	/**
 //	 * <b>URL: /techpark/punch/getPunchRule</b>
 //	 * <p>
