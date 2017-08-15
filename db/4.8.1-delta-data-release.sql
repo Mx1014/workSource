@@ -45,3 +45,6 @@ SET @id = (SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@id := @id + 1),'group','20001','zh_CN','群聊');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@id := @id + 1),'group','20002','zh_CN','你已成为新群主');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@id := @id + 1),'group','20003','zh_CN','你通过扫描二维码加入了群聊');
+
+-- 活动分享页app信息栏-volgo更新为“工作中的生活态度”  add by yanjun 20170815
+UPDATE eh_app_urls set description = '工作中的生活态度' where namespace_id = 1;
