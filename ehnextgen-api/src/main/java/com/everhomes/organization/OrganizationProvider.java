@@ -433,4 +433,6 @@ public interface OrganizationProvider {
 	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
 
     List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId);
+
+    void getOrganizationNameById(Long targetId);
 }
