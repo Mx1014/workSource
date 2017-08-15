@@ -771,6 +771,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         addExtraInfo(dtos);
         resp.setDtos(dtos);
         resp.setNextPageAnchor(rlt.getPageAnchor());
+<<<<<<< HEAD
+		return resp;
+	}
+
+	@Override
+	public ListEnterprisesCommandResponse listEnterprises(
+			ListEnterprisesCommand cmd) {
+		// 更改成全部走搜索引擎
+		return listNewEnterprises(cmd);
+=======
 			return resp;
 		}
 
@@ -779,6 +789,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             ListEnterprisesCommand cmd) {
         // 更改成全部走搜索引擎
         return listNewEnterprises(cmd);
+>>>>>>> 4.8.1
 //		ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
 //
 //		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
@@ -901,6 +912,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw e;
 		}
 
+<<<<<<< HEAD
+		return exportDetailDTO;
+	}
+
+	private String toAdminString(OrganizationContactDTO organizationContactDTO) {
+		return organizationContactDTO.getContactName()+"("+organizationContactDTO.getContactToken()+")";
+	}
+=======
         return exportDetailDTO;
 	}
 
@@ -908,6 +927,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizationContactDTO.getContactName() + "(" + organizationContactDTO.getContactToken() + ")";
     }
 	
+>>>>>>> 4.8.1
     private void addExtraInfo(List<OrganizationDetailDTO> organizationDetailList) {
         for (OrganizationDetailDTO organizationDetailDTO : organizationDetailList) {
             addExtraInfo(organizationDetailDTO);
@@ -1204,7 +1224,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         updateEnterprise(cmd, true);
     }
 
+<<<<<<< HEAD
+	public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
+=======
     public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
+>>>>>>> 4.8.1
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());
         User user = UserContext.current().getUser();
@@ -5140,12 +5164,21 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizationProvider.listOrganizationMemberByPath(path, null, contactToken);
     }
 
+<<<<<<< HEAD
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+		if(null == userIdentifier)
+			return null;
+		return listOrganizationMemberByOrganizationPathAndContactToken(path, userIdentifier.getIdentifierToken());
+=======
     @Override
     public List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId) {
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
         if (null == userIdentifier)
             return null;
         return listOrganizationMemberByOrganizationPathAndContactToken(path, userIdentifier.getIdentifierToken());
+>>>>>>> 4.8.1
 	}
 
     @Override
@@ -6347,13 +6380,48 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private List<ImportEnterpriseDataDTO> handleImportEnterpriseData(List list) {
         List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
-        for (int i = 1; i < list.size(); i++) {
-            RowResult r = (RowResult) list.get(i);
+<<<<<<< HEAD
+		for(int i = 1; i < list.size(); i++) {
+			RowResult r = (RowResult)list.get(i);
 			if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getC()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getD()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) ||
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
+			ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
+			if(null != r.getA())
+				data.setName(r.getA().trim());
+			if(null != r.getB())
+				data.setDisplayName(r.getB().trim());
+			if(null != r.getC())
+				data.setAdminName(r.getC().trim());
+			if(null != r.getD())
+				data.setAdminToken(r.getD().trim());
+			if(null != r.getE())
+				data.setEmail(r.getE().trim());
+			if(null != r.getF())
+				data.setBuildingName(r.getF().trim());
+			if(null != r.getG())
+				data.setAddress(r.getG().trim());
+			if(null != r.getH())
+				data.setContact(r.getH().trim());
+			if(null != r.getI())
+				data.setNumber(r.getI().trim());
+			if(null != r.getJ())
+				data.setCheckinDate(r.getJ().trim());
+			if(null != r.getK())
+				data.setDescription(r.getK().trim());
+			datas.add(data);
+			}
+=======
+        for (int i = 1; i < list.size(); i++) {
+            RowResult r = (RowResult) list.get(i);
+			if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) || 
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getC()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getD()) || 
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) || 
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) || 
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) || 
                     org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
                 ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
                 if (null != r.getA())
@@ -6380,6 +6448,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setDescription(r.getK().trim());
                 datas.add(data);
             }
+>>>>>>> 4.8.1
         }
         return datas;
     }
@@ -6446,9 +6515,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 
+<<<<<<< HEAD
+		// 业务太复杂，导入企业时如果本身系统里面已存在，要覆盖掉，如果是本次导入了同一企业多行，要合并门牌及管理员
+		Map<Long, List<Long>> orgAddressIds = new HashMap<>();
+		Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
+=======
         // 业务太复杂，导入企业时如果本身系统里面已存在，要覆盖掉，如果是本次导入了同一企业多行，要合并门牌及管理员
         Map<Long, List<Long>> orgAddressIds = new HashMap<>();
         Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
+>>>>>>> 4.8.1
 
         for (ImportEnterpriseDataDTO data : list) {
             CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();

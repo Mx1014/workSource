@@ -28,6 +28,7 @@ import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
@@ -50,7 +51,7 @@ import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.ui.group.ListNearbyGroupBySceneCommand;
@@ -83,6 +84,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -169,6 +171,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
+
+    @Autowired
+    private LocaleStringService localeStringService;
     
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
@@ -336,7 +341,7 @@ public class GroupServiceImpl implements GroupService {
             Forum forum = createGroupForum(group);
             group.setOwningForumId(forum.getId());
             this.groupProvider.updateGroup(group);
-            
+
             GroupMember member = new GroupMember();
             member.setGroupId(group.getId());
             member.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -512,6 +517,8 @@ public class GroupServiceImpl implements GroupService {
         
         Long groupId = cmd.getGroupId();
         Group group = checkGroupParameter(groupId, operatorUid, "updateGroup");
+
+        String oldName = group.getName();
         
         //群管理员修改群信息时显示 Insufficient privilege 所以注释掉 modified by xiongying 20160614
         //checkGroupPrivilege(operatorUid, groupId, PrivilegeConstants.Write);
@@ -552,15 +559,24 @@ public class GroupServiceImpl implements GroupService {
             return null;
         });
         groupSearcher.feedDoc(group);
+
+        if(cmd.getName() != null && !cmd.getName().equals(oldName)){
+            sendNotificationForUpdateName(group, operator.getLocale());
+        }
         
         return this.toGroupDTO(operatorUid, group);
     }
     
     @Override
     public GroupDTO getGroup(GetGroupCommand cmd) {
-        User user = UserContext.current().getUser();
-        Long userId = user != null ? user.getId() : 0;
-        
+
+        //优先使用前端传来的userId。消息2.1的扫码入群是没有登录的，但是要判断该用户是否已经加入群  add by yanjun 20170725
+        Long userId = cmd.getUserId();
+        if(userId == null){
+            User user = UserContext.current().getUser();
+            userId = user != null ? user.getId() : 0;
+        }
+
         Long groupId = cmd.getGroupId();
         // 改成通过UUID获取，不需要进行权限校验
         //checkGroupPrivilege(userId, groupId, PrivilegeConstants.Visible);
@@ -572,16 +588,46 @@ public class GroupServiceImpl implements GroupService {
         	throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_NOT_FOUND, 
                 "Unable to find the group");
         } else {
+            GroupDTO  dto = this.toGroupDTO(userId, group);
+
         	if(GroupDiscriminator.ENTERPRISE == GroupDiscriminator.fromCode(group.getDiscriminator())){
         		Organization organization = organizationProvider.findOrganizationByGroupId(groupId);
         		if(null == organization){
         			LOGGER.error("Group organization not found, operatorUid = {}, groupId = {}", userId, groupId);
     	            throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_MEMBER_NOT_FOUND, "Unable to find the group organization");
         		}
-        		group.setName(organization.getName());
+                dto.setName(organization.getName());
+                dto.setMemberOf((byte)1);
+
+                OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
+                if (member != null && member.getStatus() != null)
+                    dto.setMemberStatus(member.getStatus());
+                else
+                    dto.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
+
+                // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
+                if(dto.getMemberCount() == 0){
+                    long count = getOrganizationMemberCount(organization.getId());
+                    dto.setMemberCount(count);
+                }
+
+                dto.setOrgId(organization.getId());
             }
-        	
-            return this.toGroupDTO(userId, group);
+
+
+            //群聊名称为空时填充群聊别名  edit by yanjun 20170724
+            if(StringUtils.isEmpty(dto.getName())){
+                String alias = getGroupAlias(dto.getId());
+                dto.setAlias(alias);
+                String defaultName = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_DEFAULT_NAME), UserContext.current().getUser().getLocale(), "");
+                dto.setName(defaultName);
+                dto.setIsNameEmptyBefore(GroupNameEmptyFlag.EMPTY.getCode());
+            }
+
+
+
+            return dto;
+
         }
     }
     
@@ -672,7 +718,175 @@ public class GroupServiceImpl implements GroupService {
         
         return groupDtoList;
     }
-    
+
+    @Override
+    public List<GroupDTO> listUserGroups() {
+        long startTime = System.currentTimeMillis();
+
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        List<GroupDTO> groupDtoList = new ArrayList<GroupDTO>();
+        Group tmpGroup = null;
+
+        //添加公司group  add by yanjun 20170721
+        List<OrganizationDTO> listOrg = organizationService.listUserRelateOrganizations(namespaceId, userId, OrganizationGroupType.ENTERPRISE);
+        if(listOrg != null){
+            for(OrganizationDTO org : listOrg){
+                if(org.getGroupId() != null){
+
+                    tmpGroup = groupProvider.findGroupById(org.getGroupId());
+                    //加上域空间限制，否则跨域的也会查出来, add by tt, 20161101
+                    if (tmpGroup != null && tmpGroup.getNamespaceId().intValue() != namespaceId.intValue()) {
+                        continue;
+                    }
+                    if(tmpGroup != null && !tmpGroup.getStatus().equals(GroupAdminStatus.INACTIVE.getCode())) {
+                        GroupDTO dto = toGroupDTO(userId, tmpGroup);
+                        dto.setMemberOf((byte)1);
+                        dto.setMemberStatus(org.getMemberStatus());
+
+                        //默认使用org那边的名称
+                        if(org.getName() != null){
+                            dto.setName(org.getName());
+                        }
+
+                        // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
+                        if(dto.getMemberCount() == 0){
+                            long count = getOrganizationMemberCount(org.getId());
+                            dto.setMemberCount(count);
+                        }
+
+                        dto.setOrgId(org.getId());
+                        groupDtoList.add(dto);
+                    } else {
+                        LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + org.getGroupId());
+                    }
+                }
+
+            }
+        }
+
+        //添加家庭群
+        List<UserGroup> userGroupList = new ArrayList<UserGroup>();
+        List<UserGroup> userGroupListFamily = userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
+        userGroupList.addAll(userGroupListFamily);
+        //添加普通群
+        List<UserGroup> userGroupListGroup = userProvider.listUserGroups(userId, GroupDiscriminator.GROUP.getCode());
+        userGroupList.addAll(userGroupListGroup);
+
+        int size = (userGroupList == null) ? 0 : userGroupList.size();
+
+        if(size > 0) {
+            for(UserGroup userGroup : userGroupList) {
+                // 应客户端要求，过滤掉成员状态为非active的group，因为在客户端那边拿到该group后，group active成员没有本人
+                GroupMemberStatus status = GroupMemberStatus.fromCode(userGroup.getMemberStatus());
+                if(status != GroupMemberStatus.ACTIVE) {
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("The group is filtered for not in active member status, userId=" + userId
+                                + ", groupId=" + userGroup.getGroupId() + ", memberStatus=" + status);
+                    }
+                    continue;
+                }
+                tmpGroup = groupProvider.findGroupById(userGroup.getGroupId());
+                //加上域空间限制，否则跨域的也会查出来, add by tt, 20161101
+                if (tmpGroup != null && tmpGroup.getNamespaceId().intValue() != namespaceId.intValue()) {
+                    continue;
+                }
+
+                //若是group类型，只要的私有组，即群聊。  add by yanjun 20170724
+                if(tmpGroup.getDiscriminator() != null
+                        && GroupDiscriminator.fromCode(tmpGroup.getDiscriminator()) == GroupDiscriminator.GROUP
+                        && tmpGroup.getPrivateFlag() != null
+                        && tmpGroup.getPrivateFlag() != GroupPrivacy.PRIVATE.getCode()){
+
+                    continue;
+                }
+                if(tmpGroup != null && !tmpGroup.getStatus().equals(GroupAdminStatus.INACTIVE.getCode())) {
+                    GroupDTO dto = toGroupDTO(userId, tmpGroup);
+
+                    //群聊名称为空时填充群聊别名  edit by yanjun 20170724
+                    if(StringUtils.isEmpty(dto.getName())){
+                        String alias = getGroupAlias(dto.getId());
+                        dto.setAlias(alias);
+                        String defaultName = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_DEFAULT_NAME), UserContext.current().getUser().getLocale(), "");
+                        dto.setName(defaultName);
+                        dto.setIsNameEmptyBefore(GroupNameEmptyFlag.EMPTY.getCode());
+                    }
+                    groupDtoList.add(dto);
+                } else {
+                    LOGGER.error("The group is not found, userId=" + userId + ", groupId=" + userGroup.getGroupId());
+                }
+
+            }
+        }
+
+
+
+//
+//        //排序：第一企业，第二家庭，第三群聊  add by yanjun 20170724
+//        if(groupDtoList != null && groupDtoList.size() >0){
+//            groupDtoList.sort(new Comparator<GroupDTO>() {
+//                @Override
+//                public int compare(GroupDTO o1, GroupDTO o2) {
+//                    if(o2.getDiscriminator() == null ){
+//                        return -1;
+//                    }
+//                    if(o1.getDiscriminator() == null ){
+//                        return 1;
+//                    }
+//
+//                    if(GroupDiscriminator.fromCode(o2.getDiscriminator()) == GroupDiscriminator.ENTERPRISE && GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.ENTERPRISE){
+//                        return 1;
+//                    }else if(o2.getDiscriminator() == GroupDiscriminator.FAMILY.getCode()
+//                            && (GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.ENTERPRISE && GroupDiscriminator.fromCode(o1.getDiscriminator()) != GroupDiscriminator.FAMILY)){
+//                        return 1;
+//                    }else{
+//                        return -1;
+//                    }
+//                }
+//            });
+//        }
+
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("List user groups, userId=" + userId + ", size=" + size
+                    + ", elapse=" + (endTime - startTime));
+        }
+
+        return groupDtoList;
+    }
+
+
+    private long getOrganizationMemberCount(Long orgId){
+        ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+        command.setOrganizationId(orgId);
+        command.setPageSize(1);
+        command.setIsSignedup((byte)1);
+        ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
+        if(res != null && res.getTotalCount() != null){
+            return res.getTotalCount().longValue();
+        }
+        return 0;
+    }
+
+    @Override
+    public String getGroupAlias(Long groupId){
+        ListMemberInStatusCommand cmd = new ListMemberInStatusCommand();
+        cmd.setGroupId(groupId);
+        cmd.setStatus(GroupMemberStatus.ACTIVE.getCode());
+        cmd.setPageSize(5);
+        ListMemberCommandResponse commandResponse = this.listMembersInStatus(cmd);
+        if(commandResponse.getMembers() != null && commandResponse.getMembers().size() > 0){
+            String  alias = "";
+            for(int i = 0; i< commandResponse.getMembers().size(); i++){
+                alias += commandResponse.getMembers().get(i).getMemberNickName();
+                alias += "、";
+            }
+           return alias.substring(0, alias.length()-1);
+        }
+        return "";
+    }
     
     
     @Override
@@ -1045,6 +1259,24 @@ public class GroupServiceImpl implements GroupService {
         int userCount = 0;
         if(inviteeIds != null) {
             userCount = inviteeIds.size();
+
+            //用于发信息
+            String inviteeNames = "";
+            ListMemberInStatusCommand listMemberInStatusCommand = new ListMemberInStatusCommand();
+            listMemberInStatusCommand.setGroupId(group.getId());
+            listMemberInStatusCommand.setPageSize(1000000);
+            ListMemberCommandResponse response = this.listMembersInStatus(listMemberInStatusCommand);
+            List<Long> includeList = new ArrayList<Long>();
+            if(response != null && response.getMembers() != null && response.getMembers().size() != 0){
+                for(int i = 0; i<response.getMembers().size(); i++){
+                    if(response.getMembers().get(i).getMemberId() != operatorUid.longValue()){
+                        includeList.add(response.getMembers().get(i).getMemberId());
+                    }
+
+                }
+            }
+
+
             for(Long inviteeId : inviteeIds) {
                 if(inviteeId == null) {
                     LOGGER.error("The invited user id is null, operatorId=" + operator.getId() 
@@ -1059,7 +1291,15 @@ public class GroupServiceImpl implements GroupService {
                 }
                 result = inviteToJoinGroup(operator, group, inviteeId, cmd.getInvitationText(), true);
                 resultList.add(result);
+
+                inviteeNames = inviteeNames + invitee.getNickName() + "、";
             }
+
+            if(inviteeNames.length() > 0){
+                sendGroupNotificationForInviteToJoinGroupToinviter(group, operator.getId(), inviteeNames.substring(0, inviteeNames.length() - 1));
+                sendGroupNotificationForInviteToJoinGroupToOthers(group, operator.getId(), inviteeNames.substring(0, inviteeNames.length() - 1), includeList);
+            }
+
         }
         
         if(LOGGER.isInfoEnabled()) {
@@ -1414,6 +1654,7 @@ public class GroupServiceImpl implements GroupService {
                     code, "Creator can't leave the group");
             } else {
                 deleteActiveGroupMember(userId, member, "leave group");
+                sendNotificationForLeaveToCreator(group.getCreatorUid(), member, user.getLocale());
             }
             
             // 俱乐部退出不发消息，add by tt, 20161115
@@ -1468,7 +1709,7 @@ public class GroupServiceImpl implements GroupService {
                 sendGroupNotificationForRevokeGroupMember(group, revoker, member);
             }
             
-            sendGroupNotificationForMemberLeaveGroup(group, member);
+//            sendGroupNotificationForMemberLeaveGroup(group, member);
             break;
         default:
             LOGGER.error("Target user is not an active group member, operatorUid=" + userId + ", groupId=" + groupId 
@@ -1480,7 +1721,27 @@ public class GroupServiceImpl implements GroupService {
             break;
         }
     }
-    
+
+
+    @Override
+    public void revokeGroupMemberList(RevokeGroupMemberListCommand cmd) {
+        RevokeGroupMemberCommand cmdOne = new RevokeGroupMemberCommand();
+        cmdOne.setGroupId(cmd.getGroupId());
+        cmdOne.setRevokeText(cmd.getRevokeText());
+
+        String revokeNames = "";
+        if(cmd.getUserIds() != null && cmd.getUserIds().size() > 0){
+            for(int i = 0; i< cmd.getUserIds().size(); i++){
+                cmdOne.setUserId(cmd.getUserIds().get(i));
+                this.revokeGroupMember(cmdOne);
+
+                User user = userProvider.findUserById(cmdOne.getUserId());
+                revokeNames = revokeNames + user.getNickName() + "、";
+            }
+            sendGroupNotificationForRevokeGroupMemberToOpeartor(cmd.getGroupId(), UserContext.current().getUser().getId(), revokeNames.substring(0, revokeNames.length() - 1));
+        }
+    }
+
     @Override
     public List<GroupMemberDTO> listGroupWaitingAcceptances() {
         long startTime = System.currentTimeMillis();
@@ -2495,6 +2756,9 @@ public class GroupServiceImpl implements GroupService {
 		}
         
         groupDto.setShareUrl(getShareUrl(group));
+
+        groupDto.setScanJoinUrl(getScanJoinUrl(group));
+        groupDto.setScanDownloadUrl(getScanDownloadUrl(group));
         //groupDto.setBehaviorTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"),
         //    group.getBehaviorTime().getTime()));
         //groupDto.setCreatorUid(group.getCreatorUid());
@@ -2523,6 +2787,29 @@ public class GroupServiceImpl implements GroupService {
 			return homeUrl + shareUrl + "?namespaceId=" + group.getNamespaceId()+"&groupId="+group.getId()+"&realm=";
 		}
 	}
+
+	private String getScanJoinUrl(Group group){
+        String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
+        String scanJoinUrl = configProvider.getValue(group.getNamespaceId(), "group.scanJoin.url", "/mobile/static/message/src/addGroup.html");
+        if (homeUrl.length() == 0 || scanJoinUrl.length() == 0) {
+            LOGGER.error("Invalid home url or scanJoinUrl, homeUrl=" + homeUrl + ", scanJoinUrl=" + scanJoinUrl);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or scanJoinUrl");
+        }
+        return homeUrl + scanJoinUrl;
+
+    }
+
+    private String getScanDownloadUrl(Group group){
+        String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
+        String scanDownloadUrl = configProvider.getValue(group.getNamespaceId(), "group.scanDownload.url", "");
+        if (homeUrl.length() == 0 || scanDownloadUrl.length() == 0) {
+            LOGGER.error("Invalid home url or scanDownloadUrl, homeUrl=" + homeUrl + ", scanDownloadUrl=" + scanDownloadUrl);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or scanDownloadUrl");
+        }
+        return homeUrl + scanDownloadUrl;
+    }
 
 	private void memberInfoToGroupDTO(Long uid, GroupDTO groupDto, Group group) {
         //
@@ -2573,6 +2860,16 @@ public class GroupServiceImpl implements GroupService {
             groupDto.setMemberForumPrivileges(memberForumPrivileges);
         } else {
             groupDto.setMemberOf((byte)0);
+            groupDto.setMemberNickName("");
+
+            Organization organization = organizationProvider.findOrganizationByGroupId(group.getId());
+            if(organization != null){
+                OrganizationMember orgmember = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, organization.getId());
+                if(orgmember != null && orgmember.getContactName() != null){
+                    groupDto.setMemberNickName(orgmember.getContactName());
+                }
+            }
+
         }
     }
     
@@ -2834,10 +3131,13 @@ public class GroupServiceImpl implements GroupService {
             if(excludeList != null && excludeList.size() > 0) {
                 messageDto.getMeta().put(MessageMetaConstant.EXCLUDE, StringHelper.toJsonString(excludeList));
             }
-            if(metaObjectType != null && metaObject != null) {
+            if(metaObjectType != null) {
                 messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, metaObjectType.getCode());
+            }
+            if(metaObject != null) {
                 messageDto.getMeta().put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
             }
+
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
         }
@@ -2971,46 +3271,57 @@ public class GroupServiceImpl implements GroupService {
     private void sendGroupNotificationPrivateForReqToJoinGroupFreely(Group group, GroupMember member) {
      // send notification to the applicant
         try {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("groupName", group.getName());
+
             User user = userProvider.findUserById(member.getMemberId());
-            String userName = "";
-            if(member.getMemberNickName() != null && !member.getMemberNickName().trim().isEmpty()) {
-                userName = member.getMemberNickName();
-            } else {
-                userName = user.getNickName();
-                if (null != userName) {
-                    userName = "";
-                    }
-                }
-            map.put("userName", userName);
-            String locale = user.getLocale();
-            
-            // send notification to who is requesting to join the group
-            String scope = GroupNotificationTemplateCode.SCOPE;
-            int code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_APPLICANT;
-            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+
+            String notifyTextForApplicant = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_SCAN_TO_JOIN), user.getLocale(), "");
+            //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+
             sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
-            
-            // send notification to all members in the group
-            code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_OTHER;
-            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            
-            //Modify by Janson
-            List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
-            //sendGroupNotificationToExcludeUsers(group.getId(), member.getMemberId(), null, notifyTextForOther);
-            if(includeList.size() > 0) {
 
-                QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
-                metaObject.setRequestInfo(notifyTextForOther);
 
-                QuestionMetaActionData actionData = new QuestionMetaActionData();
-                actionData.setMetaObject(metaObject);
 
-                String routerUri = RouterBuilder.build(Router.GROUP_MEMBER_APPLY, actionData);
-
-                sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForOther, routerUri);
-            }
+//            Map<String, Object> map = new HashMap<String, Object>();
+//            map.put("groupName", group.getName());
+//            User user = userProvider.findUserById(member.getMemberId());
+//            String userName = "";
+//            if(member.getMemberNickName() != null && !member.getMemberNickName().trim().isEmpty()) {
+//                userName = member.getMemberNickName();
+//            } else {
+//                userName = user.getNickName();
+//                if (null != userName) {
+//                    userName = "";
+//                    }
+//                }
+//            map.put("userName", userName);
+//            String locale = user.getLocale();
+//
+//            // send notification to who is requesting to join the group
+//            String scope = GroupNotificationTemplateCode.SCOPE;
+//            int code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_APPLICANT;
+//            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//            sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+//
+//            // send notification to all members in the group
+//            code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_OTHER;
+//            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//
+//            //Modify by Janson
+//            List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
+//            //sendGroupNotificationToExcludeUsers(group.getId(), member.getMemberId(), null, notifyTextForOther);
+//            if(includeList.size() > 0) {
+//
+//                QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
+//                metaObject.setRequestInfo(notifyTextForOther);
+//
+//                QuestionMetaActionData actionData = new QuestionMetaActionData();
+//                actionData.setMetaObject(metaObject);
+//
+//                String routerUri = RouterBuilder.build(Router.GROUP_MEMBER_APPLY, actionData);
+//
+//                sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForOther, routerUri);
+//            }
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -3145,30 +3456,81 @@ public class GroupServiceImpl implements GroupService {
             // send notification to the applicant
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("groupName", group.getName());
-            map.put("operatorName", inviter.getMemberNickName());
+            map.put("inviterName", inviter.getMemberNickName());
             map.put("userName", invitee.getMemberNickName());
             User user = userProvider.findUserById(invitee.getMemberId());
             String locale = user.getLocale();
             
             // send notification to who is invited to join the group
             String scope = GroupNotificationTemplateCode.SCOPE;
-            //int code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_INVITATION_REQ_FOR_APPLICANT;
-            //String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            //sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForApplicant);
 
-            // send notification to inviter
-            //code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_INVITATION_REQ_FOR_OPERATOR;
-            //String notifyTextForOperator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            //sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForOperator);
-            
-            // send notification to all members in the group
-            int code = GroupNotificationTemplateCode.GROUP_FREE_JOIN_REQ_FOR_OTHER;
+            int code = GroupNotificationTemplateCode.GROUP_BE_INVITE_TO_JOIN;
             String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             //sendGroupNotificationToExcludeUsers(group.getId(), inviter.getMemberId(), invitee.getMemberId(), notifyTextForOther);
-            sendGroupNotification(group.getId(), null, null, notifyTextForOther, null, null);
+
+            sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForOther);
+
+            //发一条消息通知客户端
+            sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForOther, MetaObjectType.GROUP_INVITE_TO_JOIN_FREE, null);
+            //sendGroupNotification(invitee.getMemberId(), null, null, notifyTextForOther, null, null);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", inviterId=" 
                 + inviter.getMemberId() + ", inviteeId=" + invitee.getMemberId(), e);
+        }
+    }
+
+    private void sendGroupNotificationForInviteToJoinGroupToinviter(Group group, Long inviterId, String inviteeNames) {
+        if(inviterId == null || inviteeNames == null) {
+            LOGGER.error("The inviter or inviteeNames should not be null, inviter=" + inviterId + ", inviteeNames=" + inviteeNames);
+            return;
+        }
+
+        try {
+            // send notification to the applicant
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("userNameList", inviteeNames);
+            User user = userProvider.findUserById(inviterId);
+            String locale = user.getLocale();
+
+            String scope = GroupNotificationTemplateCode.SCOPE;
+            int code = GroupNotificationTemplateCode.GROUP_INVITE_USERS_TO_JOIN;
+            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+
+            sendGroupNotificationToIncludeUser(group.getId(), inviterId, notifyTextForOther);
+        } catch(Exception e) {
+            LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", inviterId="
+                    + inviterId + ", inviteeId=" + inviterId, e);
+        }
+    }
+
+    private void sendGroupNotificationForInviteToJoinGroupToOthers(Group group, Long inviterId, String inviteeNames, List<Long> includeList) {
+        if(inviterId == null || inviteeNames == null) {
+            LOGGER.error("The inviter or inviteeNames should not be null, inviter=" + inviterId + ", inviteeNames=" + inviteeNames);
+            return;
+        }
+        if(includeList.size() == 0){
+            return;
+        }
+
+        try {
+
+            User user = userProvider.findUserById(inviterId);
+            String locale = user.getLocale();
+            // send notification to the applicant
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("inviterName", user.getNickName());
+            map.put("userNameList", inviteeNames);
+
+            String scope = GroupNotificationTemplateCode.SCOPE;
+            int code = GroupNotificationTemplateCode.GROUP_OTHER_INVITE_USERS_TO_JOIN;
+            String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+            //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+            sendGroupNotification(group.getId(), includeList, null, notifyTextForOther, null, null);
+        } catch(Exception e) {
+            LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", inviterId="
+                    + inviterId + ", inviteeId=" + inviterId, e);
         }
     }
     
@@ -3431,36 +3793,71 @@ public class GroupServiceImpl implements GroupService {
             sendGroupNotificationPublicForMemberLeaveGroup(group, member);
         }
     }
-    
+
     private void sendGroupNotificationForRevokeGroupMember(Group group, GroupMember opeartor, GroupMember member) {
         if(opeartor == null || member == null) {
             LOGGER.error("The opeartor or member should not be null, opeartor=" + opeartor + ", requestor=" + member);
             return;
         }
-        
+
         // send notification to the applicant
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("groupName", group.getName());
-        map.put("operatorName", opeartor.getMemberNickName());
-        map.put("userName", member.getMemberNickName());
+        map.put("userName", opeartor.getMemberNickName());
         User user = userProvider.findUserById(member.getMemberId());
         String locale = user.getLocale();
-        
-        // send notification to who is invited to join the group
+
         String scope = GroupNotificationTemplateCode.SCOPE;
-        int code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_APPLICANT;
+        int code = GroupNotificationTemplateCode.GROUP_BE_REMOVE;
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+//        Date now = new Date();
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+//        String hhmm = dateFormat.format( now );
+//
+//        sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), hhmm);
+
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
         sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
 
-        // send notification to inviter
-        code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_OPERATOR;
-        String notifyTextForOperator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        sendGroupNotificationToIncludeUser(group.getId(), opeartor.getMemberId(), notifyTextForOperator);
-        
-        // send notification to all members in the group
-        code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_OTHER;
-        String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        sendGroupNotificationToExcludeUsers(group.getId(), opeartor.getMemberId(), member.getMemberId(), notifyTextForOther);
+        //给客户端发一条通知消息
+        sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, MetaObjectType.GROUP_MEMBER_DELETE, null);
+
+//        // send notification to who is invited to join the group
+//        String scope = GroupNotificationTemplateCode.SCOPE;
+//        int code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_APPLICANT;
+//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//        sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+//
+//        // send notification to inviter
+//        code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_OPERATOR;
+//        String notifyTextForOperator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//        sendGroupNotificationToIncludeUser(group.getId(), opeartor.getMemberId(), notifyTextForOperator);
+//
+//        // send notification to all members in the group
+//        code = GroupNotificationTemplateCode.GROUP_MEMBER_INVOKE_FOR_OTHER;
+//        String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//        sendGroupNotificationToExcludeUsers(group.getId(), opeartor.getMemberId(), member.getMemberId(), notifyTextForOther);
+    }
+
+    private void sendGroupNotificationForRevokeGroupMemberToOpeartor(Long groupId, Long opeartorId, String revokeNames) {
+        if(groupId == null || opeartorId == null) {
+            LOGGER.error("The groupId or opeartorId should not be null, groupId=" + groupId + ", opeartorId=" + opeartorId);
+            return;
+        }
+
+        // send notification to the applicant
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("userNameList", revokeNames);
+        User user = userProvider.findUserById(opeartorId);
+        String locale = user.getLocale();
+
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        int code = GroupNotificationTemplateCode.GROUP_REMOVE_MEMBERS;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+        sendGroupNotificationToIncludeUser(groupId, opeartorId, notifyTextForApplicant);
+
     }
     
     private void sendGroupNotificationForReqToBeGroupAdminWaitingApproval(Group group, GroupMember member) {
@@ -3826,13 +4223,29 @@ public class GroupServiceImpl implements GroupService {
         messageDto.setSenderUid(User.SYSTEM_UID);
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
         // messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_GROUP);
         if(null != meta && meta.size() > 0) {
             messageDto.getMeta().putAll(meta);
             }
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+
+    private void sendSystemMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        // messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+        }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
     
@@ -3869,20 +4282,26 @@ public class GroupServiceImpl implements GroupService {
         sendMessageToUser(creator, notifyTextForApplicant, null);
     }
     
-    private void sendNotifactionToMembers(List<Long> members, String userName, Group group, String locale) {
+    private void sendNotifactionToMembers(List<Long> members, String nickName, Group group, String locale) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("groupName", group.getName());
-        map.put("userName", userName);
+        if(group.getName() == null ){
+            map.put("groupName", nickName);
+        }else {
+            map.put("groupName", group.getName());
+        }
+
+//        map.put("userName", userName);
        
         String scope = GroupNotificationTemplateCode.SCOPE;
-        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
-        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
-        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE){
-        	code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_ADMIN;
-        }else if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
-        	//如果解散俱乐部，消息改为你加入的“${groupName}”已解散， add by tt, 20161102
-        	code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ALL_WHEN_DELETE;
-		}
+        int code = GroupNotificationTemplateCode.GROUP_DELETE;
+//        int code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETE_MEMBER;
+//        //如果是解散群聊，提示普通人${userName}已删除群聊“${groupName}”，update by tt, 20160811
+//        if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE){
+//        	code = GroupNotificationTemplateCode.GROUP_MEMBER_DELETED_ADMIN;
+//        }else if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+//        	//如果解散俱乐部，消息改为你加入的“${groupName}”已解散， add by tt, 20161102
+//        	code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ALL_WHEN_DELETE;
+//		}
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         
             //如果圈太大，不发消息
@@ -3892,13 +4311,16 @@ public class GroupServiceImpl implements GroupService {
             }
         
         for(Long userId: members) {
-            sendMessageToUser(userId, notifyTextForApplicant, null);
+            sendSystemMessageToUser(userId, notifyTextForApplicant, null);
         }
     }
     
     @Override
     public void deleteGroupByCreator(long groupId) {
         User user = UserContext.current().getUser();
+        //先把别名查出来，因为删除之后查不了  add by yanjun
+        String alias = getGroupAlias(groupId);
+
         Group group = checkGroupParameter(groupId, user.getId(), "deleteGroup");
         if(!user.getId().equals(group.getCreatorUid()) && !isAdmin(user.getId(), groupId)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
@@ -3937,33 +4359,34 @@ public class GroupServiceImpl implements GroupService {
         //TODO 如果圈很大怎么办？
         List<Long> members = new ArrayList<Long>();
         List<Long> admins = getGroupAdminIncludeList(group.getId(), user.getId(), null);
-        String nickName = user.getNickName();
-        
+
         List<GroupMember> groupMember = groupProvider.findGroupMemberByGroupId(groupId);
-        for(GroupMember gm : groupMember){
+        for(int i = 0; i < groupMember.size(); i++ ){
+            GroupMember gm =  groupMember.get(i);
             gm.setMemberStatus(GroupMemberStatus.INACTIVE.getCode());
-            
-            if(gm.getMemberId().equals(user.getId())) {
-                if(gm.getMemberNickName() != null && !gm.getMemberNickName().isEmpty()) {
-                    nickName = gm.getMemberNickName();
-                    }
-            } else {
-                if(RoleConstants.ResourceCreator != gm.getMemberRole().longValue() && RoleConstants.ResourceAdmin != gm.getMemberRole().longValue()) {
-                    members.add(gm.getMemberId());     
-                    }
-                }
+            members.add(gm.getMemberId());
+
+//            if(gm.getMemberId().equals(user.getId())) {
+//                if(gm.getMemberNickName() != null && !gm.getMemberNickName().isEmpty()) {
+//                    nickName = gm.getMemberNickName();
+//                    }
+//            } else {
+//                if(RoleConstants.ResourceCreator != gm.getMemberRole().longValue() && RoleConstants.ResourceAdmin != gm.getMemberRole().longValue()) {
+//                    members.add(gm.getMemberId());
+//                }
+//            }
             groupProvider.updateGroupMember(gm);
-            }
-        
+        }
+
   
         //Send message to all other admins
         String locale = user.getLocale();
-        sendNotificationToAdmin(admins, nickName, group, locale);
+//        sendNotificationToAdmin(admins, nickName, group, locale);
+//
+//        //Send message to creator
+//        sendNotificationToCreator(user.getId(), nickName, group, locale);
         
-        //Send message to creator
-        sendNotificationToCreator(user.getId(), nickName, group, locale);
-        
-        sendNotifactionToMembers(members, nickName, group, locale);
+        sendNotifactionToMembers(members, alias, group, locale);
     }
 
     /**
@@ -4283,7 +4706,7 @@ public class GroupServiceImpl implements GroupService {
 					//发消息
 					if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE) {
 						//退出群聊时发送消息
-						sendNotificationToOldCreator(gm, user);
+						//sendNotificationToOldCreator(gm, user);
 						sendNotificationToNewCreator(newCreator, user.getLocale());
 					}else {
 						//退出俱乐部时发送消息，add by tt, 20161102
@@ -4322,14 +4745,54 @@ public class GroupServiceImpl implements GroupService {
 			nickname = user.getNickName();
 		}
 		
-		Map<String, Object> map = new HashMap<String, Object>();
-        map.put("groupName", group.getName());
+//		Map<String, Object> map = new HashMap<String, Object>();
+//        map.put("groupName", group.getName());
        
         String scope = GroupAdminNotificationTemplateCode.SCOPE;
         int code = GroupAdminNotificationTemplateCode.GROUP_ADMINROLE_APPROVE_FOR_APPLICANT;
-        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+        String notifyTextForApplicant = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_BE_MANAGER), locale, "");
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+
+        sendGroupNotificationToIncludeUser(group.getId(), newCreator.getMemberId(), notifyTextForApplicant);
 	}
+
+    private void sendNotificationForLeaveToCreator(Long creatorId, GroupMember leaveMember, String locale) {
+        Group group = groupProvider.findGroupById(leaveMember.getGroupId());
+        String nickname = leaveMember.getMemberNickName();
+        if (StringUtils.isEmpty(nickname)) {
+            User user = userProvider.findUserById(leaveMember.getMemberId());
+            nickname = user.getNickName();
+        }
+
+		Map<String, Object> map = new HashMap<String, Object>();
+        map.put("userName", nickname);
+
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        int code = GroupNotificationTemplateCode.GROUP_MEMBER_LEAVE;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+        //发送会话内提示时间
+//        Date now = new Date();
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+//        String hhmm = dateFormat.format( now );
+//        sendGroupNotificationToIncludeUser(group.getId(), creatorId, hhmm);
+
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+        sendGroupNotificationToIncludeUser(group.getId(), creatorId, notifyTextForApplicant);
+    }
+
+    private void sendNotificationForUpdateName(Group group, String locale) {
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("groupName", group.getName());
+
+        String scope = GroupNotificationTemplateCode.SCOPE;
+        int code = GroupNotificationTemplateCode.GROUP_RENAME;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+        //sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
+        sendGroupNotification(group.getId(), null, null, notifyTextForApplicant, null, null);
+    }
 
 	private boolean checkIfOnlyOneGroupMember(Long userId, Long groupId) {
 		ListingLocator locator = new ListingLocator(groupId);

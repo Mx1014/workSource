@@ -11,8 +11,11 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
+<<<<<<< HEAD
 
 import com.everhomes.rest.user.InvitationRoster;
+=======
+>>>>>>> 4.8.1
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.userOrganization.UserOrganizations;
 import org.jooq.Condition;
@@ -305,7 +308,12 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
 
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
+<<<<<<< HEAD
+	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
+	Integer countOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, Byte contactSignedupStatus, VisibleFlag visibleFlag);
+=======
 
+>>>>>>> 4.8.1
 	List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize);
 	List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);

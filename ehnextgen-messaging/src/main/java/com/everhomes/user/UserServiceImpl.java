@@ -29,6 +29,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.group.GroupLocalStringCode;
+import com.everhomes.rest.group.GroupNameEmptyFlag;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -91,6 +93,7 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -151,48 +154,15 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.*;
-import com.everhomes.util.*;
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.FamilyButtonStatusType;
@@ -273,7 +243,6 @@ import com.everhomes.rest.user.admin.SendUserTestMailCommand;
 import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
 import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
 import com.everhomes.rest.user.admin.UsersWithAddrResponse;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsBlackList;
 import com.everhomes.sms.SmsBlackListCreateType;
 import com.everhomes.sms.SmsBlackListProvider;
@@ -282,7 +251,6 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RandomGenerator;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -445,6 +413,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
+
+	@Autowired
+	private GroupService groupService;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -3994,6 +3965,16 @@ public class UserServiceImpl implements UserService {
                         name = organization.getName();
                     }
                     dto.setName(name);
+
+					//群聊名称为空时填充群聊别名  edit by yanjun 20170724
+					if(name == null || "".equals(name)){
+						String alias = groupService.getGroupAlias(group.getId());
+						dto.setAlias(alias);
+						String defaultName = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_DEFAULT_NAME), UserContext.current().getUser().getLocale(), "");
+						dto.setName(defaultName);
+						dto.setIsNameEmptyBefore(GroupNameEmptyFlag.EMPTY.getCode());
+					}
+
                     dto.setMessageType(UserMessageType.MESSAGE.getCode());
                     String avatar = parseUri(group.getAvatar(), com.everhomes.rest.common.EntityType.GROUP.getCode(), group.getId());
                     dto.setAvatar(avatar);
@@ -4439,7 +4420,7 @@ public class UserServiceImpl implements UserService {
         List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(user.getId(), organizationId);
 //		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), organizationId);
 
-		if (members == null)
+		if (members == null || members.size() == 0)
 			return null;
 		else {
 		    OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(members.get(0).getDetailId());
@@ -4492,8 +4473,23 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-	
-	@Override
+
+    @Override
+    public SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
+        // 1.通过 userId 与 organizationId 去找到 detailId
+        // 2.根据 detailId 调用之前的获取信息接口
+        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+        GetRelevantContactInfoCommand command = new GetRelevantContactInfoCommand();
+        command.setDetailId(members.get(0).getDetailId());
+        command.setOrganizationId(cmd.getOrganizationId());
+        SceneContactV2DTO dto = this.getRelevantContactInfo(command);
+        if (dto != null)
+            return dto;
+        else
+            return null;
+    }
+
+    @Override
 	public GetFamilyButtonStatusResponse getFamilyButtonStatus(){
 		int namespaceId = UserContext.getCurrentNamespaceId();
 		AuthorizationThirdPartyButton buttonstatus = authorizationThirdPartyButtonProvider.getButtonStatusByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));

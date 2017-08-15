@@ -6,8 +6,10 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.family.FamilyMemberDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.ui.user.*;
+import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +34,7 @@ import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
- 
-import com.everhomes.rest.user.ListUserOpPromotionsRespose;
- 
+
 import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
@@ -51,7 +51,6 @@ import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
-import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.WebTokenGenerator;
 
 /**
@@ -142,8 +141,8 @@ public class UserUiController extends ControllerBase {
 			}
 			 
 		}
-		
-		ListNeighborUsersCommandResponse resp = null;
+
+		List<FamilyMemberDTO> resp = null;
 		// 仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
  	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 // 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
@@ -152,26 +151,31 @@ public class UserUiController extends ControllerBase {
 // 	    	command.setId(sceneToken.getEntityId());
 // 	    	resp= familyService.listNeighborUsers(command);
 		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
- 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
- 	    	command.setIsPinyin(1);
- 	    	command.setType(ParamType.FAMILY.getCode());
- 	    	command.setId(sceneToken.getEntityId());
- 	    	resp = familyService.listNeighborUsers(command);
+
+// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+// 	    	command.setIsPinyin(1);
+// 	    	command.setType(ParamType.FAMILY.getCode());
+// 	    	command.setId(sceneToken.getEntityId());
+//			resp = familyService.listNeighborUsers(command);
+			
+			// 群聊里只看同一个家庭的人  edit by yanjun 20170803
+			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
 		}
  	    
- 	    if(null != resp && null != resp.getNeighborUserList() &&  0 != resp.getNeighborUserList().size()){
- 	    	dtos = resp.getNeighborUserList().stream().map(r->{
+ 	    if(null != resp &&  0 != resp.size()){
+ 	    	dtos = resp.stream().map(r->{
 				SceneContactDTO dto = new SceneContactDTO();
-				dto.setContactId(r.getUserId());
-				dto.setContactName(r.getUserName());
-				dto.setStatusLine(r.getUserStatusLine());
+				dto.setContactId(r.getMemberUid());
+				dto.setContactName(r.getMemberName());
+				dto.setStatusLine(r.getStatusLine());
 				dto.setOccupation(r.getOccupation());
-				dto.setContactAvatar(r.getUserAvatarUrl());
-				dto.setUserId(r.getUserId());
-				dto.setInitial(r.getInitial());
-				dto.setFullInitial(r.getFullInitial());
-				dto.setFullPinyin(r.getFullPinyin());
-				dto.setNeighborhoodRelation(r.getNeighborhoodRelation());
+				dto.setContactAvatar(r.getMemberAvatarUrl());
+				dto.setUserId(r.getMemberUid());
+
+				String pinyin = PinYinHelper.getPinYin(r.getMemberName());
+				dto.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+				dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+				dto.setInitial(PinYinHelper.getCapitalInitial(dto.getFullPinyin()));
 				return dto;
 			}).collect(Collectors.toList());
  	    }
@@ -307,17 +311,20 @@ public class UserUiController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
- 
-/*
-    @RequestMapping("getCurrentContactRealInfo")
+
+	/**
+	 * <b>URL: /ui/user/getContactInfoByUserId</b>
+	 * <p>根据用户 id 获取用户详细信息</p>
+	 */
+    @RequestMapping("getContactInfoByUserId")
     @RestReturn(value=SceneContactV2DTO.class)
-    public RestResponse getCurrentContactRealInfo(GetCurrentContactRealInfoCommand cmd) {
-        SceneContactV2DTO result = userService.getCurrentContactRealInfo(cmd);
+    public RestResponse getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
+        SceneContactV2DTO result = userService.getContactInfoByUserId(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }*/
+    }
 
     /**
      * <b>URL: /ui/user/getRelevantContactInfo</b>
