@@ -26,6 +26,9 @@ import com.everhomes.parking.ketuo.KetuoTempFee;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.util.RuntimeErrorException;
 
+/**
+ * 储能 停车场对接
+ */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO")
 public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoParkingVendorHandler.class);

@@ -1,33 +1,5 @@
 package com.everhomes.openapi;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowService;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.reserver.CreateReserverOrderCommand;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -35,68 +7,53 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.ApartmentFloorDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListApartmentFloorCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
-import com.everhomes.rest.business.GetReceivedCouponCountCommand;
-import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
-import com.everhomes.rest.business.ListUserByIdentifierCommand;
-import com.everhomes.rest.business.ListUserByKeywordCommand;
-import com.everhomes.rest.business.ReSyncBusinessCommand;
-import com.everhomes.rest.business.SyncBusinessCommand;
-import com.everhomes.rest.business.SyncDeleteBusinessCommand;
-import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
-import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
-import com.everhomes.rest.business.UserFavoriteCommand;
-import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
+import com.everhomes.rest.business.*;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.openapi.BizMessageType;
-import com.everhomes.rest.openapi.BusinessMessageCommand;
-import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
-import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
-import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
-import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
-import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
-import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
-import com.everhomes.rest.openapi.UserCouponsCommand;
-import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.openapi.ValidateUserPassCommand;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.openapi.*;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
+import com.everhomes.rest.reserver.CreateReserverOrderCommand;
 import com.everhomes.rest.ui.user.UserProfileDTO;
-import com.everhomes.rest.user.FindTokenByUserIdCommand;
-import com.everhomes.rest.user.GetUserByUuidResponse;
-import com.everhomes.rest.user.GetUserDefaultAddressCommand;
-import com.everhomes.rest.user.GetUserDetailByUuidResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.GetUserInfoByUuid;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.ListUserCommand;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserDtoForBiz;
-import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.*;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestDoc(value="Business open Constroller", site="core")
 @RestController
@@ -293,6 +250,27 @@ public class BusinessOpenController extends ControllerBase {
 			cmd.getMeta().put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
 		}
 		sendMessageToUser(cmd.getUserId(), cmd.getContent(), cmd.getMeta());
+
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("sendMessageToUserV2")
+	@RestReturn(value=String.class)
+	public RestResponse sendMessageToUserV2(BusinessMessageV2Command cmd) {
+        Map<String, String> meta = null;
+        if (cmd.getMeta() != null) {
+            meta = (Map<String, String>) StringHelper.fromJsonString(cmd.getMeta(), HashMap.class);
+        }
+        if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
+            if (meta == null) {
+                meta = new HashMap<>();
+            }
+            meta.put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
+		}
+		sendMessageToUser(cmd.getUserId(), cmd.getContent(), meta);
 
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

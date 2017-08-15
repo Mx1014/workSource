@@ -3708,9 +3708,9 @@ public class ForumServiceImpl implements ForumService {
                         if(activity != null && activity.getWechatSignup() != null){
                             wechatSignup = activity.getWechatSignup();
                         }
-                        post.setShareUrl(homeUrl.replace("http://", "https://") + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
+                        post.setShareUrl(homeUrl + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                 	} else {
-                		post.setShareUrl(homeUrl.replace("http://", "https://") + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}
                 }
             } catch(Exception e) {

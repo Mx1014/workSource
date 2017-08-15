@@ -225,7 +225,6 @@ CREATE TABLE `eh_stat_event_statistics` (
   `event_portal_stat_id` BIGINT NOT NULL COMMENT 'ref eh_stat_event_portal_statistics id',
   `time_interval` VARCHAR(32) NOT NULL COMMENT 'HOURLY, DAILY, WEEKLY, MONTHLY',
   `stat_date` DATE NOT NULL COMMENT 'stat date',
-#   `stat_hour` INTEGER COMMENT 'stat hour',
   `total_count` BIGINT NOT NULL DEFAULT 0 COMMENT 'event total count',
   `unique_users` BIGINT NOT NULL DEFAULT 0 COMMENT 'unique users',
   `completed_sessions` BIGINT NOT NULL DEFAULT 0 COMMENT 'completed sessions',
@@ -253,106 +252,106 @@ CREATE TABLE `eh_stat_event_task_logs` (
 -- 少凡的表================================================
 
 -- 门户item group
-# DROP TABLE IF EXISTS `eh_portal_item_groups`;
-# CREATE TABLE `eh_portal_item_groups` (
-#   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-#   `namespace_id` int(11) NOT NULL DEFAULT '0',
-#   `layout_id` bigint(20) NOT NULL,
-#   `label` varchar(64) DEFAULT NULL,
-#   `name` varchar(64) DEFAULT NULL  COMMENT 'item_group_${id}，对应eh_launch_pad_layouts里面的layout_json里面item_group的 groups[x].instanceConfig.itemGroup 和 eh_launch_pad_items里的item_group',
-#   `separator_flag` tinyint(4) DEFAULT 0,
-#   `separator_height` decimal(10,2) DEFAULT NULL,
-#   `widget` varchar(64) DEFAULT NULL,
-#   `content_type` varchar(64) DEFAULT NULL,
-#   `style` varchar(64) DEFAULT NULL,
-#   `instance_config` text COMMENT '参数配置',
-#   `default_order` int(11) NOT NULL DEFAULT '0',
-#   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
-#   `create_time` datetime DEFAULT NULL,
-#   `update_time` datetime DEFAULT NULL,
-#   `operator_uid` bigint(20) NOT NULL,
-#   `creator_uid` bigint(20) NOT NULL,
-#   `description` varchar(1024),
-#   PRIMARY KEY (`id`)
-# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-#
-# -- 门户item
-# DROP TABLE IF EXISTS `eh_portal_items`;
-# CREATE TABLE `eh_portal_items` (
-#   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-#   `namespace_id` int(11) NOT NULL DEFAULT '0',
-#   `item_group_id` bigint(20) NOT NULL,
-#   `label` varchar(64) DEFAULT NULL,
-#   `item_location` varchar(2048) DEFAULT NULL COMMENT '/eh_portal_item_groups  name 对应eh_launch_pad_items里的item_location',
-#   `group_name` varchar(64) DEFAULT NULL  COMMENT 'eh_portal_item_groups  name 对应eh_launch_pad_layouts里面的layout_json里面item_group的 groups[x].instanceConfig.itemGroup 和 eh_launch_pad_items里的item_group',
-#   `name` varchar(64) DEFAULT NULL  COMMENT 'item_${id}',
-#   `icon_uri` varchar(1024) DEFAULT NULL,
-#   `item_width` int(11) NOT NULL DEFAULT '1',
-#   `item_height` int(11) NOT NULL DEFAULT '1',
-#   `bgcolor` int(11) NOT NULL DEFAULT '0',
-#   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
-#   `action_type` varchar(64) DEFAULT NULL,
-#   `action_data` text,
-#   `default_order` int(11) NOT NULL DEFAULT '0',
-#   `display_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'default display on the pad, 0: hide, 1:display',
-#   `selected_icon_uri` varchar(1024) DEFAULT NULL,
-#   `more_order` int(11) NOT NULL DEFAULT '0',
-#   `target_type` varchar(32) DEFAULT NULL,
-#   `target_id` varchar(64) DEFAULT NULL COMMENT 'the entity id linked back to the orginal resource',
-#   `item_category_id` bigint(20),
-#   `description` varchar(1024),
-#   `create_time` datetime DEFAULT NULL,
-#   `update_time` datetime DEFAULT NULL,
-#   `operator_uid` bigint(20) NOT NULL,
-#   `creator_uid` bigint(20) NOT NULL,
-#   PRIMARY KEY (`id`)
-# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-#
-# -- 门户导航栏
-# DROP TABLE IF EXISTS `eh_portal_navigation_bars`;
-# CREATE TABLE `eh_portal_navigation_bars` (
-#   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-#   `namespace_id` int(11) NOT NULL DEFAULT '0',
-#   `label` varchar(64) DEFAULT NULL,
-#   `target_type` varchar(64) NOT NULL,
-#   `target_id` bigint(20) NOT NULL,
-#   `icon_uri` varchar(1024) DEFAULT NULL,
-#   `selected_icon_uri` varchar(1024) DEFAULT NULL,
-#   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
-#   `create_time` datetime DEFAULT NULL,
-#   `update_time` datetime DEFAULT NULL,
-#   `operator_uid` bigint(20) NOT NULL,
-#   `creator_uid` bigint(20) NOT NULL,
-#   `description` varchar(1024),
-#   PRIMARY KEY (`id`)
-# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-#
-# -- 门户 layout
-# DROP TABLE IF EXISTS `eh_portal_layouts`;
-# CREATE TABLE `eh_portal_layouts` (
-#   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-#   `namespace_id` int(11) NOT NULL DEFAULT '0',
-#   `label` varchar(64) DEFAULT NULL,
-#   `name` varchar(64) DEFAULT NULL COMMENT 'layout_${id}，eh_launch_pad_layouts里面的name',
-#   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
-#   `create_time` datetime DEFAULT NULL,
-#   `update_time` datetime DEFAULT NULL,
-#   `operator_uid` bigint(20) NOT NULL,
-#   `creator_uid` bigint(20) NOT NULL,
-#   `description` varchar(1024),
-#   PRIMARY KEY (`id`)
-# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-#
-# -- 门户管理和服务广场id映射关系表git
-# DROP TABLE IF EXISTS `eh_portal_launch_pad_mappings`;
-# CREATE TABLE `eh_portal_launch_pad_mappings` (
-#   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-#   `content_type` varchar(64) DEFAULT NULL,
-#   `portal_content_id` bigint(20) NOT NULL,
-#   `launch_pad_content_id` bigint(20) NOT NULL,
-#   `create_time` datetime DEFAULT NULL,
-#   `creator_uid` bigint(20) NOT NULL,
-#   PRIMARY KEY (`id`)
-# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `eh_portal_item_groups`;
+CREATE TABLE `eh_portal_item_groups` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `layout_id` bigint(20) NOT NULL,
+  `label` varchar(64) DEFAULT NULL,
+  `name` varchar(64) DEFAULT NULL  COMMENT 'item_group_${id}，对应eh_launch_pad_layouts里面的layout_json里面item_group的 groups[x].instanceConfig.itemGroup 和 eh_launch_pad_items里的item_group',
+  `separator_flag` tinyint(4) DEFAULT 0,
+  `separator_height` decimal(10,2) DEFAULT NULL,
+  `widget` varchar(64) DEFAULT NULL,
+  `content_type` varchar(64) DEFAULT NULL,
+  `style` varchar(64) DEFAULT NULL,
+  `instance_config` text COMMENT '参数配置',
+  `default_order` int(11) NOT NULL DEFAULT '0',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) NOT NULL,
+  `creator_uid` bigint(20) NOT NULL,
+  `description` varchar(1024),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 门户item
+DROP TABLE IF EXISTS `eh_portal_items`;
+CREATE TABLE `eh_portal_items` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `item_group_id` bigint(20) NOT NULL,
+  `label` varchar(64) DEFAULT NULL,
+  `item_location` varchar(2048) DEFAULT NULL COMMENT '/eh_portal_item_groups  name 对应eh_launch_pad_items里的item_location',
+  `group_name` varchar(64) DEFAULT NULL  COMMENT 'eh_portal_item_groups  name 对应eh_launch_pad_layouts里面的layout_json里面item_group的 groups[x].instanceConfig.itemGroup 和 eh_launch_pad_items里的item_group',
+  `name` varchar(64) DEFAULT NULL  COMMENT 'item_${id}',
+  `icon_uri` varchar(1024) DEFAULT NULL,
+  `item_width` int(11) NOT NULL DEFAULT '1',
+  `item_height` int(11) NOT NULL DEFAULT '1',
+  `bgcolor` int(11) NOT NULL DEFAULT '0',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
+  `action_type` varchar(64) DEFAULT NULL,
+  `action_data` text,
+  `default_order` int(11) NOT NULL DEFAULT '0',
+  `display_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'default display on the pad, 0: hide, 1:display',
+  `selected_icon_uri` varchar(1024) DEFAULT NULL,
+  `more_order` int(11) NOT NULL DEFAULT '0',
+  `target_type` varchar(32) DEFAULT NULL,
+  `target_id` varchar(64) DEFAULT NULL COMMENT 'the entity id linked back to the orginal resource',
+  `item_category_id` bigint(20),
+  `description` varchar(1024),
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) NOT NULL,
+  `creator_uid` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 门户导航栏
+DROP TABLE IF EXISTS `eh_portal_navigation_bars`;
+CREATE TABLE `eh_portal_navigation_bars` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `label` varchar(64) DEFAULT NULL,
+  `target_type` varchar(64) NOT NULL,
+  `target_id` bigint(20) NOT NULL,
+  `icon_uri` varchar(1024) DEFAULT NULL,
+  `selected_icon_uri` varchar(1024) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) NOT NULL,
+  `creator_uid` bigint(20) NOT NULL,
+  `description` varchar(1024),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 门户 layout
+DROP TABLE IF EXISTS `eh_portal_layouts`;
+CREATE TABLE `eh_portal_layouts` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `label` varchar(64) DEFAULT NULL,
+  `name` varchar(64) DEFAULT NULL COMMENT 'layout_${id}，eh_launch_pad_layouts里面的name',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) NOT NULL,
+  `creator_uid` bigint(20) NOT NULL,
+  `description` varchar(1024),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 门户管理和服务广场id映射关系表git
+DROP TABLE IF EXISTS `eh_portal_launch_pad_mappings`;
+CREATE TABLE `eh_portal_launch_pad_mappings` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `content_type` varchar(64) DEFAULT NULL,
+  `portal_content_id` bigint(20) NOT NULL,
+  `launch_pad_content_id` bigint(20) NOT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `creator_uid` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ================================================

@@ -29,6 +29,7 @@ public class UpdateItemAdminCommand {
 	private java.lang.String     imgUri;
 	private java.lang.Integer    defaultOrder;
 	private java.lang.Byte       itemType;
+	private String description;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -81,5 +82,13 @@ public class UpdateItemAdminCommand {
 	}
 	public void setItemType(java.lang.Byte itemType) {
 		this.itemType = itemType;
-	} 
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 }

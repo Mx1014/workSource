@@ -28,9 +28,9 @@ public class GetServiceAllianceEnterpriseListCommand {
 	private String keywords;
 
 	private Long parentId;
-	
+
 	private Long nextPageAnchor;
-    
+
 	private Integer pageSize;
 
 	private Long categoryId;

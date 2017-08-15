@@ -1908,3 +1908,5 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 		
 -- 康利item url修改 add by sfyan 20170714
 update `eh_launch_pad_items` set `action_data` = '{"url":"http://alpha.vrbrowserextern.bqlnv.com.cn/vreditor/view/64997823126520945"}' where `item_label` = '园区3D图' and namespace_id = 999978;
+
+INSERT INTO `eh_namespaces` (`id`, `name`) VALUES (999978, '康利K生活');

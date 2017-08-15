@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -361,7 +362,16 @@ public class StatTerminalServiceImpl implements StatTerminalService{
 
     private void generateTerminalAppVersionCumulative(String date){
         List<AppVersion> versions = statTerminalProvider.listAppVersions(null);
-        Condition cond = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).eq(date);
+        // Condition cond = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).eq(date);
+
+        long aDayMill = 24 * 60 * 60 * 1000 - 1;
+        Date date1 = DateUtil.strToDate(date, "yyyy-MM-dd");
+
+        long time = date1.getTime();
+        Timestamp minTime = new Timestamp(time);
+        Timestamp maxTime = new Timestamp(time + aDayMill);
+
+        Condition cond = Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime);
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(null);
         List<String> notVersionNames = new ArrayList<>();
@@ -374,7 +384,10 @@ public class StatTerminalServiceImpl implements StatTerminalService{
             }
             c = c.and(vCond);
             while(true){
-                List<UserActivity> userActivetys = userActivityProvider.listUserActivetys(c,100, locator);
+                Condition tempC = c;
+                List<UserActivity> userActivetys = processTime(() -> {
+                    return userActivityProvider.listUserActivetys(tempC,100, locator);
+                }, date, "generateTerminalAppVersionCumulative", "listUserActivetys");
                 for (UserActivity userActivety: userActivetys) {
                     if(StringUtils.isEmpty(userActivety.getImeiNumber())){
                         continue;
@@ -409,7 +422,17 @@ public class StatTerminalServiceImpl implements StatTerminalService{
     private void generateTerminalAppVersionActive(String date){
         String tDate = date.replaceAll("-","");
         List<AppVersion> versions = statTerminalProvider.listAppVersions(null);
-        Condition cond = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).eq(date);
+        // Condition cond = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).eq(date);
+
+        long aDayMill = 24 * 60 * 60 * 1000 - 1;
+        Date date1 = DateUtil.strToDate(date, "yyyy-MM-dd");
+
+        long time = date1.getTime();
+        Timestamp minTime = new Timestamp(time);
+        Timestamp maxTime = new Timestamp(time + aDayMill);
+
+        Condition cond = Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime);
+
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(null);
         List<String> notVersionNames = new ArrayList<>();
@@ -422,7 +445,11 @@ public class StatTerminalServiceImpl implements StatTerminalService{
             }
             c = c.and(vCond);
             while(true){
-                List<UserActivity> userActivetys = userActivityProvider.listUserActivetys(c,100, locator);
+                Condition tempC = c;
+                List<UserActivity> userActivetys = processTime(() -> {
+                    return userActivityProvider.listUserActivetys(tempC,100, locator);
+                }, date, "generateTerminalAppVersionActive", "listUserActivetys");
+
                 for (UserActivity userActivety: userActivetys) {
                     if(StringUtils.isEmpty(userActivety.getImeiNumber())){
                         continue;
@@ -477,7 +504,11 @@ public class StatTerminalServiceImpl implements StatTerminalService{
             }
             TerminalDayStatistics yesterdayStatistics = statTerminalProvider.getTerminalDayStatisticsByDay(yDate, namespaceId);
 
-            TerminalDayStatistics toDayStatistics = statTerminalProvider.statisticalUserActivity(date, null, namespaceId);
+            Integer tempNs = namespaceId;
+            TerminalDayStatistics toDayStatistics = processTime(() -> {
+                return statTerminalProvider.statisticalUserActivity(date, null, tempNs);
+            }, date, "generateTerminalDayStatistics", "statisticalUserActivity");
+
             toDayStatistics.setDate(tDate.toString());
             toDayStatistics.setNamespaceId(namespaceId);
             if(null == yesterdayStatistics){
@@ -516,8 +547,13 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                 toDayStatistics.setActiveRate(new BigDecimal(toDayStatistics.getActiveUserNumber().doubleValue() / toDayStatistics.getCumulativeUserNumber().doubleValue()*100));
             }
 
-            toDayStatistics.setSevenActiveUserNumber(statTerminalProvider.getTerminalActiveUserNumberByDate(sevenDate, date, namespaceId));
-            toDayStatistics.setThirtyActiveUserNumber(statTerminalProvider.getTerminalActiveUserNumberByDate(thirtyDate, date, namespaceId));
+            toDayStatistics.setSevenActiveUserNumber(processTime(() -> {
+                return statTerminalProvider.getTerminalActiveUserNumberByDate(sevenDate, date, tempNs);
+            }, date, "generateTerminalDayStatistics", "setSevenActiveUserNumber"));
+
+            toDayStatistics.setThirtyActiveUserNumber(processTime(() -> {
+                return statTerminalProvider.getTerminalActiveUserNumberByDate(thirtyDate, date, tempNs);
+            }, date, "generateTerminalDayStatistics", "setThirtyActiveUserNumber"));
 
             statTerminalProvider.createTerminalDayStatistics(toDayStatistics);
         }
@@ -540,7 +576,13 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                 if(hour < 10){
                     hourStr = "0" + hour;
                 }
-                TerminalDayStatistics toDayStatistics = statTerminalProvider.statisticalUserActivity(date, hourStr, namespaceId);
+
+                String tempHour = hourStr;
+                Integer tempNs = namespaceId;
+                TerminalDayStatistics toDayStatistics = processTime(() -> {
+                    return statTerminalProvider.statisticalUserActivity(date, tempHour, tempNs);
+                }, date, "generateTerminalHourStatistics", "statisticalUserActivity");
+
                 TerminalHourStatistics toDayHourStatistics = ConvertHelper.convert(toDayStatistics, TerminalHourStatistics.class);
                 toDayHourStatistics.setDate(tDate.toString());
                 toDayHourStatistics.setHour(hourStr);
@@ -556,6 +598,18 @@ public class StatTerminalServiceImpl implements StatTerminalService{
         }
     }
 
+    interface Processer<T> {
+        T process();
+    }
+
+    private <T> T processTime(Processer<T> processer, String date, String... tags) {
+        long start = System.currentTimeMillis();
+        T t = processer.process();
+        long end = System.currentTimeMillis();
+        LOGGER.debug("date = {}, duration = {}s, tag = {}", date, (end - start)/1000, org.apache.commons.lang.StringUtils.join(tags, " "));
+        return t;
+    }
+
     private void generateTerminalAppVersionStatistics(String date) {
         String tDate = date.replaceAll("-","");
         List<AppVersion> versions = statTerminalProvider.listAppVersions(null);
@@ -569,8 +623,11 @@ public class StatTerminalServiceImpl implements StatTerminalService{
             Long activeUserNumber = statTerminalProvider.getTerminalAppVersionActiveUserNumberByDay(tDate, null, version.getNamespaceId());
             // 版本活跃用户数量
             Long versionActiveUserNumber = statTerminalProvider.getTerminalAppVersionActiveUserNumberByDay(tDate, version.getName(), version.getNamespaceId());
-            //
-            Long versionStartUmber = statTerminalProvider.getTerminalStartNumberByDay(date, version.getName(), version.getNamespaceId());
+
+            Long versionStartUmber = processTime(() -> {
+                return statTerminalProvider.getTerminalStartNumberByDay(date, version.getName(), version.getNamespaceId());
+            }, date, "generateTerminalAppVersionStatistics", "getTerminalStartNumberByDay");
+
             // 版本新增用户
             Long versionNewUserNumber = statTerminalProvider.getTerminalAppVersionNewUserNumberByDay(tDate, version.getName(), version.getNamespaceId());
 
