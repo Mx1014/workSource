@@ -80,9 +80,6 @@ public class ZJGKOpenServiceImpl {
 
     private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1);
 
-    private String appKey = "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21";
-    private String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
-
     private static final String PAGE_SIZE = "20";
     private static final String SUCCESS_CODE = "200";
     private static final Integer NAMESPACE_ID = 999971;
@@ -257,6 +254,9 @@ public class ZJGKOpenServiceImpl {
     }
 
     public void syncEnterprises(String pageOffset, String communityIdentifier) {
+        String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
+        String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
+
         Map<String, String> params= new HashMap<String,String>();
         params.put("appKey", appKey);
         params.put("timestamp", ""+System.currentTimeMillis());
@@ -296,6 +296,8 @@ public class ZJGKOpenServiceImpl {
 
 
     private Map<String, String> generateParams(String pageOffset) {
+        String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
+        String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
         Map<String, String> params= new HashMap<String,String>();
         params.put("appKey", appKey);
         params.put("timestamp", ""+System.currentTimeMillis());
