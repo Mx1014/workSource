@@ -19,6 +19,9 @@ ALTER TABLE `eh_item_service_categries` ADD `scope_id` bigint(20) DEFAULT NULL;
 
 ALTER TABLE `eh_user_launch_pad_items` ADD `item_name` varchar(32) DEFAULT NULL;
 
+ALTER TABLE `eh_launch_pad_items` ADD `categry_name` varchar(64) DEFAULT NULL;
+
+
 -- 模块应用表  
 CREATE TABLE `eh_service_module_apps` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
