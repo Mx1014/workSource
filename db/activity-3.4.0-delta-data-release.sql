@@ -11,7 +11,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@id := @id + 1), 'activity', '22', 'zh_CN', '真实姓名为空');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
-	((@id := @id + 1), 'activity', '23', 'zh_CN', '该用户已报名');
+	((@id := @id + 1), 'activity', '23', 'zh_CN', '报名信息已经存在，可在报名详情页修改该用户信息');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@id := @id + 1), 'activity', '24', 'zh_CN', '该用户在Excel表重复');
 
+UPDATE eh_locale_strings SET text = '呃，报名信息已经存在，可在报名详情页修改该用户信息' WHERE scope = 'activity' AND code = 10031;
