@@ -269,8 +269,7 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 			expressOrder.setStatus(ExpressOrderStatus.FINISHED.getCode());
 			expressOrder.setBillNo(mailNum);
 			expressOrderProvider.updateExpressOrder(expressOrder);
-		}
-		if(status.toUpperCase().contains("F")){
+		}else if(status.toUpperCase().contains("F")){
 			expressOrder.setStatus(ExpressOrderStatus.CANCELLED.getCode());
 			expressOrder.setStatusDesc(status+params.get("desc"));
 			expressOrderProvider.updateExpressOrder(expressOrder);
