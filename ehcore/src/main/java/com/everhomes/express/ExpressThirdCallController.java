@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.app.App;
@@ -28,6 +29,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.user.User;
@@ -124,7 +126,21 @@ public class ExpressThirdCallController {// extends ControllerBase
 	 * <p>请求国贸授权。</p>
 	 */
 	@RequestMapping("/express/callback")
-	public void expressCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	@ResponseBody
+	public Map<String,String> expressCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Map<String, String> resp = new HashMap<String, String>();
+		resp.put("success","T");
+		try{
+			doCallback(request, response);
+		}catch (RuntimeErrorException e) {
+			resp.put("success","F");
+			resp.put("errorMsg",e.getMessage());
+			resp.put("errorCode",e.getErrorScope()+" "+e.getErrorCode());
+		}
+		return resp;
+	}
+	
+	private void doCallback(HttpServletRequest request, HttpServletResponse response) {
 		long startTime = System.currentTimeMillis();
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.info("Process express callback request(req calculate), startTime={}", startTime);
@@ -149,7 +165,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 		ExpressHandler handler = getExpressHandler(company.getId());
 		handler.orderStatusCallback(order, company, params);
 	}
-	
+
 	private ExpressHandler getExpressHandler(Long expressCompanyId) {
 		ExpressCompany expressCompany = findTopExpressCompany(expressCompanyId);
 		return PlatformContext.getComponent(ExpressHandler.EXPRESS_HANDLER_PREFIX+expressCompany.getId());
