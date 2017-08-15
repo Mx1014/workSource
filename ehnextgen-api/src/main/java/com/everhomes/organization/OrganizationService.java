@@ -187,7 +187,6 @@ public interface OrganizationService {
 	void rejectForEnterpriseContact(RejectContactCommand cmd);
 	OrganizationMember createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
 	ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd);
-	SearchCommunityMapContentsResponse searchEnterprise(SearchCommunityMapContentsCommand cmd);
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);
 	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);

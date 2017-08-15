@@ -666,18 +666,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         return resp;
     }
 
-    @Override
-    public SearchCommunityMapContentsResponse searchEnterprise(SearchCommunityMapContentsCommand cmd) {
-
-        int namespaceId = UserContext.getCurrentNamespaceId();
-        Long userId = UserContext.currentUserId();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-
-        SearchOrganizationCommand searchCmd = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
-        searchCmd.setNamespaceId(namespaceId);
-        return null;
-    }
-
     private OrganizationDetailDTO toOrganizationDetailDTO(Long id, Boolean flag){
         Long userId = UserContext.current().getUser().getId();
 

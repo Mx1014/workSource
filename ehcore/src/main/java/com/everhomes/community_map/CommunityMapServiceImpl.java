@@ -4,14 +4,21 @@ package com.everhomes.community_map;
 import com.everhomes.business.BusinessService;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community_map.*;
 import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
@@ -43,6 +50,8 @@ public class CommunityMapServiceImpl implements CommunityMapService {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private CommunityMapSearcherImpl communityMapSearcherImpl;
+    @Autowired
+    private CommunityService communityService;
 
     @Override
     public ListCommunityMapSearchTypesResponse listCommunityMapSearchTypesByScene(ListCommunityMapSearchTypesCommand cmd) {
@@ -83,41 +92,24 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         switch(contentType) {
 
             case ORGANIZATION:
-//                response = organizationService.searchEnterprise(cmd);
+                response = this.searchEnterprise(cmd);
                 break;
 
             case BUILDING:
-//                int pageSize2 = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-//                CrossShardListingLocator locator = new CrossShardListingLocator();
-//                locator.setAnchor(cmd.getPageAnchor());
-//                List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize2 + 1,null,
-//                        namespaceId, cmd.getKeyword());
+                response = this.searchBuildings(cmd);
 
-//                response
                 break;
             case SHOP:
-//                SearchContentsBySceneCommand cmd2 = ConvertHelper.convert(cmd, SearchContentsBySceneCommand.class);
-//                SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
+                response = this.searchShops(cmd);
+
                 break;
             case ALL:
-//                int pageSize = (int)configurationProvider.getIntValue("search.content.size", 3);
-//                cmd.setPageSize(pageSize);
-//
-//                List<OrganizationDTO> organizationDTOs = new ArrayList<OrganizationDTO>();
-//                List<BuildingDTO> buildingDTOs = new ArrayList<BuildingDTO>();
-//                List<ShopDTO> shopDTOs = new ArrayList<ShopDTO>();
-//                response.setBuildingDTOs(buildingDTOs);
-//                response.setShopDTOs(shopDTOs);
-//                response.setOrganizationDTOs(organizationDTOs);
-//
-//                response.getOrganizationDTOs().addAll(organizationService.searchEnterprise(cmd).getOrganizationDTOs());
-//
-//                SearchContentsBySceneCommand cmd3 = ConvertHelper.convert(cmd, SearchContentsBySceneCommand.class);
-//                SearchContentsBySceneReponse tempResp = businessService.searchShops(cmd3);
-//                if(tempResp != null
-//                        && tempResp.getShopDTOs() != null) {
-//                    response.getShopDTOs().addAll(tempResp.getShopDTOs());
-//                }
+                int pageSize = configurationProvider.getIntValue("search.content.size", 3);
+                cmd.setPageSize(pageSize);
+
+                response.setOrganizations(this.searchEnterprise(cmd).getOrganizations());
+                response.setBuildings(this.searchBuildings(cmd).getBuildings());
+                response.setShops(this.searchShops(cmd).getShops());
 
                 break;
 
@@ -134,4 +126,133 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         return response;
     }
 
+    private SearchCommunityMapContentsResponse searchShops(SearchCommunityMapContentsCommand cmd) {
+        SearchCommunityMapContentsResponse response = new SearchCommunityMapContentsResponse();
+
+        SearchContentsBySceneCommand cmd2 = ConvertHelper.convert(cmd, SearchContentsBySceneCommand.class);
+        SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
+        response.setNextPageAnchor(resp.getNextPageAnchor());
+        response.setShops(resp.getShopDTOs().stream().map(r -> {
+            CommunityMapShopDTO shop = ConvertHelper.convert(cmd, CommunityMapShopDTO.class);
+            return shop;
+        }).collect(Collectors.toList()));
+
+        return response;
+    }
+
+    private SearchCommunityMapContentsResponse searchBuildings(SearchCommunityMapContentsCommand cmd) {
+        SearchCommunityMapContentsResponse response = new SearchCommunityMapContentsResponse();
+
+        User user = UserContext.current().getUser();
+
+        Long userId = user.getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        int pageSize2 = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        Long communityId = userService.getCommunityIdBySceneToken(sceneToken);
+
+        List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize2 + 1, communityId,
+                namespaceId, cmd.getKeyword());
+
+        Long nextPageAnchor = null;
+        if(buildings.size() > pageSize2) {
+            buildings.remove(buildings.size() - 1);
+            nextPageAnchor = buildings.get(buildings.size() - 1).getId();
+        }
+
+        List<CommunityMapBuildingDTO> dtos = buildings.stream().map(r -> {
+            CommunityMapBuildingDTO dto = ConvertHelper.convert(r, CommunityMapBuildingDTO.class);
+            return  dto;
+        }).collect(Collectors.toList());
+        response.setBuildings(dtos);
+        response.setNextPageAnchor(nextPageAnchor);
+
+        return response;
+    }
+
+    private SearchCommunityMapContentsResponse searchEnterprise(SearchCommunityMapContentsCommand cmd) {
+
+        int namespaceId = UserContext.getCurrentNamespaceId();
+        Long userId = UserContext.currentUserId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+
+        Long communityId = userService.getCommunityIdBySceneToken(sceneToken);
+
+        SearchOrganizationCommand searchCmd = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+        searchCmd.setNamespaceId(namespaceId);
+        searchCmd.setCommunityId(communityId);
+        if (null != cmd.getBuildingId()) {
+            Building building = communityProvider.findBuildingById(cmd.getBuildingId());
+            if (null != building) {
+                searchCmd.setBuildingName(building.getName());
+            }
+        }
+        searchCmd.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+
+        ListEnterprisesCommandResponse orgResponse = organizationService.searchEnterprise(searchCmd);
+
+        List<CommunityMapOrganizationDTO> organizations = orgResponse.getDtos().stream().map(r -> {
+
+            CommunityMapOrganizationDTO org = new CommunityMapOrganizationDTO();
+            org.setId(r.getId());
+            org.setName(r.getName());
+            org.setLogo(r.getAvatarUrl());
+
+            List<AddressDTO> addresses = r.getAddresses();
+
+            org.setBuildings(processAddresses(addresses, communityId));
+            return org;
+        }).collect(Collectors.toList());
+
+        SearchCommunityMapContentsResponse response = new SearchCommunityMapContentsResponse();
+        response.setNextPageAnchor(orgResponse.getNextPageAnchor());
+        response.setOrganizations(organizations);
+
+        return response;
+    }
+
+    //处理同一个园区的楼栋门牌
+    private List<CommunityMapBuildingDTO> processAddresses(List<AddressDTO> addresses, Long communityId) {
+        List<CommunityMapBuildingDTO> buildings = new ArrayList<>();
+        Map<String, List<ApartmentDTO>> temp = new HashMap<>();
+        for (AddressDTO ad: addresses) {
+            if (temp.containsKey(ad.getBuildingName())) {
+                ApartmentDTO apartmentDTO = new ApartmentDTO();
+                apartmentDTO.setApartmentName(ad.getApartmentName());
+                apartmentDTO.setAddressId(ad.getId());
+                List<ApartmentDTO> apartmentDTOS = temp.get(ad.getBuildingName());
+                apartmentDTOS.add(apartmentDTO);
+            }else {
+
+                ApartmentDTO apartmentDTO = new ApartmentDTO();
+                apartmentDTO.setApartmentName(ad.getApartmentName());
+                apartmentDTO.setAddressId(ad.getId());
+                List<ApartmentDTO> apartmentDTOS = new ArrayList<ApartmentDTO>();
+                apartmentDTOS.add(apartmentDTO);
+                temp.put(ad.getBuildingName(), apartmentDTOS);
+            }
+        }
+
+        temp.keySet().forEach(r -> {
+            Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, r);
+            CommunityMapBuildingDTO buildingDTO = ConvertHelper.convert(building, CommunityMapBuildingDTO.class);
+            buildingDTO.setApartments(temp.get(r));
+            buildings.add(buildingDTO);
+        });
+
+        return buildings;
+    }
+
+    @Override
+    public CommunityMapBuildingDetailDTO getCommunityMapBuildingDetailById(GetCommunityMapBuildingDetailByIdCommand cmd) {
+        GetBuildingCommand cmd2 = ConvertHelper.convert(cmd, GetBuildingCommand.class);
+        BuildingDTO buildingDTO = communityService.getBuilding(cmd2);
+
+        CommunityMapBuildingDetailDTO dto = ConvertHelper.convert(buildingDTO, CommunityMapBuildingDetailDTO.class);
+
+        return dto;
+    }
 }

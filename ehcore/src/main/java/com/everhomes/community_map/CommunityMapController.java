@@ -40,7 +40,7 @@ public class CommunityMapController extends ControllerBase {
     @RequestMapping("searchCommunityMapContents")
     @RestReturn(value=SearchCommunityMapContentsResponse.class)
     public RestResponse searchCommunityMapContents(SearchCommunityMapContentsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(communityMapService.searchContentsByScene(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
 
