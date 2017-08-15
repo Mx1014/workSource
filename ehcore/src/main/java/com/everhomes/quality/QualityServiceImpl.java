@@ -3131,15 +3131,16 @@ public class QualityServiceImpl implements QualityService {
 		taskIds = sortedMap.keySet();
        
 		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIds);
+		//去掉cache之后 改为一把取record 如果还是有问题那么不是cache的错 可能是record没有塞进去
+		Map<Long, QualityInspectionTaskRecords> recordsMap = qualityProvider.listLastRecordByTaskIds(taskIds);
 
-		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+		List<QualityInspectionTaskRecords> records = new ArrayList<>();
         for(QualityInspectionTasks task : tasks) {
-        	QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
-        	if(record != null) {
-        		task.setRecord(record);
-            	records.add(task.getRecord());
-        	}
-        	
+			QualityInspectionTaskRecords record = recordsMap.get(task.getId());
+			if(record != null) {
+				task.setRecord(recordsMap.get(task.getId()));
+				records.add(recordsMap.get(task.getId()));
+			}
         }
 
 		this.qualityProvider.populateRecordAttachments(records);
@@ -3805,13 +3806,36 @@ public class QualityServiceImpl implements QualityService {
 
 		LOGGER.info("deduct sample id:{}, start time : {}, results: {}",scoreStat.getSampleId(), scoreStat.getUpdateTime(), results);
 		if(results != null) {
+			List<Long> categoryIds = new ArrayList<>();
 			results.forEach(result -> {
+				String path = result.getSpecificationPath();
+				String[] paths = path.split("/");
+				categoryIds.add(Long.valueOf(paths[1]));
+			});
+			LOGGER.info("categoryIds: {}", categoryIds);
+			//一把取出涉及到的类型
+			Map<Long, QualityInspectionSpecifications> categories = qualityProvider.listSpecificationByIds(categoryIds);
+			results.forEach(result -> {
+				Double weight = 1.0;
+				for(Long categoryId : categoryIds) {
+					if(result.getSpecificationPath().contains(categoryId.toString())) {
+						LOGGER.info("contains categoryid: {}", categoryId);
+						if(categories.get(categoryId) != null) {
+							LOGGER.info("get category by id: {}", categoryId);
+							weight = categories.get(categoryId).getWeight();
+						}
+					}
+				}
+
+				//扣分等于实际扣分乘以占比
+				LOGGER.info("result: {}, weight: {}", result, weight);
 				Double statScore = communitySpecificationStats.get(result.getTargetId());
 				if(statScore != null) {
-					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
-					statScore = statScore + result.getTotalScore();
+					scoreStat.setDeductScore(scoreStat.getDeductScore() + (result.getTotalScore() * weight));
+					statScore = statScore + (result.getTotalScore() * weight);
 					communitySpecificationStats.put(result.getTargetId(), statScore);
 				}
+
 			});
 		}
 		//按map的value排序 第一个和最后一个是扣分最少和最多的项目

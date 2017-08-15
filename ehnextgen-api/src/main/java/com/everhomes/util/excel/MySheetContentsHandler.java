@@ -10,10 +10,10 @@ import java.util.ArrayList;
  * 需要针对不同的excel模板写具体的处理类
  */
 public class MySheetContentsHandler implements XSSFSheetXMLHandler.SheetContentsHandler {
-	
+
 	private ArrayList resultList=new ArrayList();
 	private RowResult rowResult=null;
-	
+
 	/**
 	 * 第1行不处理
 	 */
@@ -26,12 +26,12 @@ public class MySheetContentsHandler implements XSSFSheetXMLHandler.SheetContents
 		}
 	}
 
-	
+
 
 	@Override
 	public void headerFooter(String s, boolean flag, String s1) {
 	}
-	
+
 	public ArrayList getResultList()
 	{
 		return resultList;
@@ -155,9 +155,9 @@ public class MySheetContentsHandler implements XSSFSheetXMLHandler.SheetContents
 
 	@Override
 	public void endRow(int arg0) {
-	
-		
+
+
 	}
-	
+
 
 }

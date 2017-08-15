@@ -373,7 +373,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 			if(rosterOrderSettingDTO != null){
 				cmd.setWechatSignup(rosterOrderSettingDTO.getWechatSignup());
 			}else{
-				cmd.setWechatSignup(WechatSignupFlag.NO.getCode());
+				cmd.setWechatSignup(WechatSignupFlag.YES.getCode());
 			}
 
 		}

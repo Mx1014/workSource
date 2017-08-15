@@ -24,4 +24,6 @@ public interface AuthorizationThirdPartyRecordProvider {
 	AuthorizationThirdPartyRecord findAuthorizationThirdPartyRecordByPhone(String phone, Byte type,
 			Integer namespaceId);
 
+	AuthorizationThirdPartyRecord findAuthorizationThirdPartyRecordByOrgPhone(String phone, Byte type,
+																		   Integer namespaceId);
 }

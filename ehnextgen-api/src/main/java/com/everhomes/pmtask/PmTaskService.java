@@ -86,4 +86,8 @@ public interface PmTaskService {
 	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);
 
 	PmTaskHistoryAddressDTO createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd);
+
+	void notifyTaskResult(NotifyTaskResultCommand cmd);
+
+	void exportTasksCard(ExportTasksCardCommand cmd, HttpServletResponse response);
 }

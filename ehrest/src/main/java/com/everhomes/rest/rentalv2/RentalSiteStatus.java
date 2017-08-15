@@ -3,8 +3,8 @@ package com.everhomes.rest.rentalv2;
 /**
  * <ul>
  * <li>NORMAL(0): 启用</li> 
- * <li>DISABLE(-1):停用</li> 
- * <li>DISPLOY(-2):前端不展示</li> 
+ * <li>DISABLE(-1):停用(不可用)</li>
+ * <li>DISPLOY(-2):停用（app不显示）</li>
  * </ul>
  */
 public enum RentalSiteStatus {

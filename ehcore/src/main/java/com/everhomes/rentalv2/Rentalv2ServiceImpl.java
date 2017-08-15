@@ -693,7 +693,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule defaultRule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getResourceTypeId());
 		if(null==defaultRule){
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "didnt have default rule!");
 		}
 		if(null==cmd.getSiteCounts()) 
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -787,7 +787,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null==defaultRule){
 			throw RuntimeErrorException
 					.errorWith(RentalServiceErrorCode.SCOPE,
-							RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
+							RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "didnt have default rule!");
 		}
 		this.dbProvider.execute((TransactionStatus status) -> {
 
@@ -1364,6 +1364,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		} 
 		siteItemDTO.setItemName(item.getName());
 		siteItemDTO.setItemPrice(item.getPrice());
+		siteItemDTO.setDescription(item.getDescription());
 		siteItemDTO.setImgUrl(this.contentServerService.parserUri(siteItemDTO.getImgUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 		return siteItemDTO;
 	}
@@ -1450,7 +1451,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			RentalOrder rentalBill = ConvertHelper.convert(rs, RentalOrder.class);
 			//设置当前场景公司id
-			rentalBill.setOrganizationId(orgId);
+			rentalBill.setRequestorOrganizationId(orgId);
 			if(null== rs.getCancelTime())
 				rentalBill.setCancelTime(new Timestamp(0));
 			else
@@ -3147,7 +3148,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							else{
 								LOGGER.error("bill id=["+order.getId()+"] refound error param is "+refundCmd.toString());
 								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-										RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+										RentalServiceErrorCode.ERROR_REFUND_ERROR,
 												"bill  refound error"); 
 							}	
 //						}
@@ -5162,7 +5163,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			} 
 			if (null == defaultRule)
 				throw RuntimeErrorException
-				.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
+				.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "didnt have default rule!");
 			resource.setExclusiveFlag(defaultRule.getExclusiveFlag());
 			if(defaultRule.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
 				defaultRule.setUnit(1.0);
@@ -5343,9 +5344,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalResource rentalsite = this.rentalv2Provider.getRentalSiteById(cmd.getId()); 
 
 			RentalResourceType type = this.rentalv2Provider.getRentalResourceTypeById(rentalsite.getResourceTypeId());
-			if(PayMode.OFFLINE_PAY.getCode().equals(type.getPayMode())&&(null==cmd.getOfflineCashierAddress()||null==cmd.getOfflinePayeeUid())){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-						ErrorCodes.ERROR_INVALID_PARAMETER,
+
+			if (PayMode.OFFLINE_PAY.getCode().equals(type.getPayMode()) &&
+					(null == cmd.getOfflineCashierAddress() ||
+							null== cmd.getOfflinePayeeUid())) {
+				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+						RentalServiceErrorCode.ERROR_OFFLINE_PAY_UPDATE_RESOURCE_STATUS,
 						"Neither offline cashier address nor payee uid can  be null");
 			}
 			
@@ -5409,6 +5413,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		siteItem.setItemType(cmd.getItemType());
 		siteItem.setName(cmd.getItemName());
 		siteItem.setPrice(cmd.getItemPrice());
+		siteItem.setDescription(cmd.getDescription());
 		rentalv2Provider.updateRentalSiteItem(siteItem);
 	}
 
@@ -5777,7 +5782,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : refund order id  can not find refund order ");
 		if(refundOrder.getOnlinePayStyleNo().equals(VendorType.WEI_XIN.getStyleNo()))
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 
-					RentalServiceErrorCode.ERROR_REFOUND_ERROR, "refund order is wechat  ");
+					RentalServiceErrorCode.ERROR_REFUND_ERROR, "refund order is wechat  ");
 		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
 		String refoundApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "");
 		String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
@@ -5802,11 +5807,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			LOGGER.error("refund order no =["+refundOrder.getRefundOrderNo()+"] refound error param is "+refundCmd.toString());
 			if (null != refundResponse.getErrorDetails())
 				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-						RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+						RentalServiceErrorCode.ERROR_REFUND_ERROR,
 						refundResponse.getErrorDetails()); 
 			else
 				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-						RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+						RentalServiceErrorCode.ERROR_REFUND_ERROR,
 						"refund order error"); 
 		}	
 		 
@@ -6005,7 +6010,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null==defaultRule){
 			throw RuntimeErrorException
 			.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "didnt have default rule!");
 		} 
 		this.dbProvider.execute((TransactionStatus status) -> {
 

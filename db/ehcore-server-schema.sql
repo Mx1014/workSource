@@ -1635,7 +1635,46 @@ CREATE TABLE `eh_communities`(
   KEY `i_eh_community_stag2` (`string_tag2`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_community_approve`;
+CREATE TABLE `eh_community_approve` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `organization_id` BIGINT NOT NULL,
+  `owner_id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT,
+  `module_type` VARCHAR(64),
+  `project_id` BIGINT DEFAULT '0',
+  `project_type` VARCHAR(64),
+  `approve_name` VARCHAR(64),
+  `status` TINYINT NOT NULL DEFAULT '1',
+  `form_origin_id` BIGINT,
+  `form_version` BIGINT,
+  `update_time` DATETIME,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_community_approve_requests`;
+CREATE TABLE `eh_community_approve_requests` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `organization_id` BIGINT NOT NULL DEFAULT '0',
+  `owner_id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT,
+  `module_type` VARCHAR(64),
+  `flow_case_id` BIGINT DEFAULT '0',
+  `form_origin_id` BIGINT,
+  `form_version` BIGINT,
+  `approve_id` BIGINT DEFAULT '0',
+  `approve_name` VARCHAR(64),
+  `requestor_name` VARCHAR(64),
+  `requestor_phone` VARCHAR(64),
+  `requestor_company` VARCHAR(64),
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 --
 -- member of eh_communities partition
 --
@@ -4324,10 +4363,10 @@ CREATE TABLE `eh_group_member_logs` (
   `create_time` datetime(3),
   `uuid` VARCHAR(128) NOT NULL DEFAULT '',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `community_id` BIGINT NOT NULL,
-  `address_id` BIGINT NOT NULL,
-  `group_id` BIGINT NOT NULL,
-  `member_type` VARCHAR(32) NOT NULL COMMENT 'member object type; for example; type could be User; Group; etc',
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `address_id` BIGINT NOT NULL DEFAULT 0,
+  `group_id` BIGINT NOT NULL DEFAULT 0,
+  `member_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'member object type; for example; type could be User; Group; etc',
   `member_id` BIGINT,
   `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',
   `member_avatar` VARCHAR(128) COMMENT 'avatar image identifier in storage sub-system',
@@ -4341,7 +4380,7 @@ CREATE TABLE `eh_group_member_logs` (
   `operation_type` TINYINT COMMENT '1: request to join; 2: invite to join',
   `inviter_uid` BIGINT COMMENT 'record inviter user id',
   `invite_time` DATETIME COMMENT 'the time the member is invited',
-  `update_time` DATETIME NOT NULL,
+  `update_time` DATETIME,
   `integral_tag1` BIGINT,
   `integral_tag2` BIGINT,
   `integral_tag3` BIGINT,
@@ -6866,6 +6905,8 @@ CREATE TABLE `eh_pm_tasks` (
   `string_tag1` VARCHAR(128),
   `building_name` VARCHAR(128),
   `organization_uid` BIGINT,
+  `remark_source` VARCHAR(32),
+  `remark` VARCHAR(1024),
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -8380,6 +8421,7 @@ CREATE TABLE `eh_rentalv2_items` (
   `default_order` INTEGER COMMENT '排序字段',
   `img_uri` VARCHAR(1024) COMMENT '图片uri',
   `item_type` TINYINT COMMENT '1购买型 2租用型',
+  `description` VARCHAR(1024),
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -8498,6 +8540,7 @@ CREATE TABLE `eh_rentalv2_orders` (
   `offline_cashier_address` VARCHAR(200),
   `offline_payee_uid` BIGINT,
   `flow_case_id` BIGINT COMMENT 'id of the flow_case',
+  `requestor_organization_id` BIGINT COMMENT 'id of the requestor organization',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
