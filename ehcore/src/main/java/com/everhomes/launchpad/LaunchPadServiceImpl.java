@@ -192,6 +192,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			categryItemDTO.setCategryIconUrl(parserUri(categry.getIconUri(),EntityType.USER.getCode(),userId));
 			categryItemDTO.setCategryAlign(categry.getAlign());
 			cmd.setCategryId(categry.getId());
+			cmd.setCategryName(categry.getName());
 			List<LaunchPadItemDTO> result = getItemsByCommunity(cmd, request, null);
 			categryItemDTO.setLaunchPadItems(result);
 			categryItemDTOs.add(categryItemDTO);
