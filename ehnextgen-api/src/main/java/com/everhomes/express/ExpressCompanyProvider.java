@@ -17,6 +17,6 @@ public interface ExpressCompanyProvider {
 
 	List<ExpressCompany> listExpressCompanyByOwner(ExpressOwner owner);
 
-	ExpressCompany findExpressCompanyByAppKeyAndAuth(String appKey, String authorization);
+	ExpressCompany findExpressCompanyByAppKey(String appKey);
 
 }

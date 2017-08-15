@@ -127,7 +127,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 	 */
 	@RequestMapping("/express/callback")
 	@ResponseBody
-	public Map<String,String> expressCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public Map<String,Object> expressCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		Map<String, String> resp = new HashMap<String, String>();
 		resp.put("success","T");
 		try{
@@ -137,7 +137,9 @@ public class ExpressThirdCallController {// extends ControllerBase
 			resp.put("errorMsg",e.getMessage());
 			resp.put("errorCode",e.getErrorScope()+" "+e.getErrorCode());
 		}
-		return resp;
+		Map<String,Object> objectMap = new HashMap<String, Object>();
+		objectMap.put("response", resp);
+		return objectMap;
 	}
 	
 	private void doCallback(HttpServletRequest request, HttpServletResponse response) {
@@ -146,17 +148,16 @@ public class ExpressThirdCallController {// extends ControllerBase
 			LOGGER.info("Process express callback request(req calculate), startTime={}", startTime);
 		}
 		Map<String, String> params = getRequestParams(request);
-		String authorization = params.get("authorization");
+//		String authorization = params.get("authorization");
 		String appKey = params.get("app_key");
 		String txLogisticID = params.get("txLogisticID");
-		if(authorization == null || appKey == null || authorization.length()==0
-				|| appKey.length() == 0 || txLogisticID == null || txLogisticID.length()==0){
+		if(appKey == null || appKey.length() == 0 || txLogisticID == null || txLogisticID.length()==0){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"authorization = "+authorization+", app_key = "+appKey+", txLogisticID = "+txLogisticID);
+					"app_key = "+appKey+", txLogisticID = "+txLogisticID);
 		}
-		ExpressCompany company = expressCompanyProvider.findExpressCompanyByAppKeyAndAuth(appKey,authorization);
+		ExpressCompany company = expressCompanyProvider.findExpressCompanyByAppKey(appKey);
 		if(company == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown authorization = "+authorization+", app_key = "+appKey);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown app_key = "+appKey);
 		}
 		ExpressOrder order = expressOrderProvider.findExpressOrderByOrderNo(txLogisticID);
 		if(order == null){
