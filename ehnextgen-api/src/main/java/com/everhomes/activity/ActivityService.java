@@ -155,7 +155,7 @@ public interface ActivityService {
 
 	SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd);
 
-	void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
+	List<ImportSignupErrorDTO> importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
 
 	ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd);
 

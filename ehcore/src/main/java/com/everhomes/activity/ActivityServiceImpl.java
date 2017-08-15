@@ -990,14 +990,16 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
+	public List<ImportSignupErrorDTO> importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
+		List<ImportSignupErrorDTO> errorDTOS = new ArrayList<>();
+
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ImportSignupErrorDTO> errorDTOS = new ArrayList<>();
 			List<ActivityRoster> rosters = getRostersFromExcel(files[0], errorDTOS, activity.getId());
 			
 //			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
+
 			//检查是否超过报名人数限制, add by tt, 20161012
 	        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount().intValue() + rosters.size() > activity.getMaxQuantity().intValue()) {
 	        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -1020,7 +1022,8 @@ public class ActivityServiceImpl implements ActivityService {
 			});
 			return null;
 		});
-		
+
+		return errorDTOS;
 	}
 
 	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, List<ImportSignupErrorDTO> errorDTOS, Long activityId) {
@@ -1066,36 +1069,48 @@ public class ActivityServiceImpl implements ActivityService {
 	private ImportSignupErrorDTO checkExcelRoster(List<ActivityRoster> newRosters, RowResult row, Long activityId){
 
 		ImportSignupErrorDTO errorDTO = new ImportSignupErrorDTO();
+		String  locale = UserContext.current().getUser().getLocale();
+		String scope = ActivityLocalStringCode.SCOPE;
 
+		String errorString = "";
 		//手机不能为空
 		if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
-			errorDTO.setDescription("The phone number is empty");
-
+			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_PHONE_EMPTY);
+			errorString = localeStringService.getLocalizedString(scope, code, locale, "The phone number is empty");
+			errorDTO.setDescription(errorString);
 			return errorDTO;
 		}
 		//手机格式简单检验
 		if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
-			errorDTO.setDescription("Invalid phone number");
+			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_INVALID_PHONE);
+			errorString = localeStringService.getLocalizedString(scope, code, locale, "Invalid phone number");
+			errorDTO.setDescription(errorString);
 			return errorDTO;
 		}
 
 		//新增条件真实姓名必填  add by yanjun 20170628
 		if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
-			errorDTO.setDescription("The realName is empty");
+			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REALNAME_EMPTY);
+			errorString = localeStringService.getLocalizedString(scope, code, locale, "The realName is empty");
+			errorDTO.setDescription(errorString);
 			return errorDTO;
 		}
 
 		//检查是否已经报过名
 		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, row.getA(), ActivityRosterStatus.NORMAL.getCode());
 		if(oldRoster != null){
-			errorDTO.setDescription("The roster already exists, checked with phone");
+			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_ROSTER_ALREADY_EXISTS);
+			errorString = localeStringService.getLocalizedString(scope, code, locale, "The roster already exists, checked with phone");
+			errorDTO.setDescription(errorString);
 			return errorDTO;
 		}
 
 		//检查Excel内是否存在重复
 		for(int i=0; i< newRosters.size(); i++){
 			if(newRosters.get(i).getPhone().equals(row.getA())){
-				errorDTO.setDescription("Repeat roster in this Excel, checked with phone");
+				String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REPEAT_ROSTER_IN_EXCEL);
+				errorString = localeStringService.getLocalizedString(scope, code, locale, "Repeat roster in this Excel, checked with phone");
+				errorDTO.setDescription(errorString);
 				return errorDTO;
 			}
 		}

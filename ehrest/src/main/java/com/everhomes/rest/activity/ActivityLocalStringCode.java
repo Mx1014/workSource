@@ -21,6 +21,12 @@ public interface ActivityLocalStringCode {
 	 static final int ACTIVITY_TO_CONFIRM = 13;
 	 static final int ACTIVITY_HAVE_CONFIRM = 14;
 	 static final int ACTIVITY_TO_PAY = 15;
+
+	static final int ACTIVITY_PHONE_EMPTY = 20;
+	static final int ACTIVITY_INVALID_PHONE = 21;
+	static final int ACTIVITY_REALNAME_EMPTY=22;
+	static final int ACTIVITY_ROSTER_ALREADY_EXISTS = 23;
+	static final int ACTIVITY_REPEAT_ROSTER_IN_EXCEL = 24;
 	 
 	 
 }
