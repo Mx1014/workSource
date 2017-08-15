@@ -1,5 +1,7 @@
 package com.everhomes.rest.profile;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>organizationId: 公司或部门id</li>
@@ -29,5 +31,10 @@ public class listProfileContactsCommand {
 
     public void setKeywords(String keywords) {
         this.keywords = keywords;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -1,21 +1,22 @@
 package com.everhomes.rest.profile;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
 /**
  * <ul>
- * <li>detailIds: (List)成员 detailIds 列表</li>
+ * <li>detailIds: 成员 detailId 列表</li>
+ * <li>departmentId: 部门 id</li>
  * </ul>
  */
-public class DeleteProfileContactsCommand {
+public class TransferProfileContactsCommand {
 
-    @ItemType(Long.class)
     private List<Long> detailIds;
 
-    public DeleteProfileContactsCommand() {
+    private Long departmentId;
+
+    public TransferProfileContactsCommand() {
     }
 
     public List<Long> getDetailIds() {
@@ -24,6 +25,14 @@ public class DeleteProfileContactsCommand {
 
     public void setDetailIds(List<Long> detailIds) {
         this.detailIds = detailIds;
+    }
+
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
     @Override

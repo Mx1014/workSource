@@ -11,4 +11,6 @@ public interface ProfileProvider {
     ProfileContactsSticky findProfileContactsStickyById(Long id);
 
     List<Long> listProfileContactsStickyIds(Integer namespaceId, Long organizationId);
+
+    ProfileContactsSticky findProfileContactsStickyByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
 }

@@ -10,10 +10,12 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhProfileContactsStickyDao;
 import com.everhomes.server.schema.tables.pojos.EhProfileContactsSticky;
+import com.everhomes.server.schema.tables.records.EhProfileContactsStickyRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -69,5 +71,18 @@ public class ProfileProviderImpl implements ProfileProvider {
                 .where(Tables.EH_PROFILE_CONTACTS_STICKY.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_PROFILE_CONTACTS_STICKY.ORGANIZATION_ID.eq(organizationId))
                 .fetchInto(Long.class);
+    }
+
+    @Override
+    public ProfileContactsSticky findProfileContactsStickyByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhProfileContactsStickyRecord> query = context.selectQuery(Tables.EH_PROFILE_CONTACTS_STICKY);
+        query.addConditions(Tables.EH_PROFILE_CONTACTS_STICKY.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_PROFILE_CONTACTS_STICKY.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_PROFILE_CONTACTS_STICKY.DETAIL_ID.eq(detailId));
+        if(query.fetch() != null){
+            return ConvertHelper.convert(query.fetchOne(),ProfileContactsSticky.class);
+        }else
+            return null;
     }
 }

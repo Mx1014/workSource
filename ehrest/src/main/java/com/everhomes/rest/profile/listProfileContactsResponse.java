@@ -1,6 +1,7 @@
 package com.everhomes.rest.profile;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -34,5 +35,10 @@ public class listProfileContactsResponse {
 
     public void setContacts(List<ProfileContactsDTO> contacts) {
         this.contacts = contacts;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

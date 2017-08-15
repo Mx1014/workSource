@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.profile.*;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +25,7 @@ public class ProfileController extends ControllerBase{
 
     /**
      * <b>URL: /profile/addProfileContacts</b>
-     * <p>1.添加成员至通讯录</p>
+     * <p>1.添加、编辑通讯录成员</p>
      */
     @RequestMapping("addProfileContacts")
     @RestReturn(value = String.class)
@@ -37,8 +38,18 @@ public class ProfileController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/changeProfileContacts</b>
+     * <b>URL: /profile/transferProfileContacts</b>
+     * <p>2-1.调整通讯录成员</p>
      */
+    @RequestMapping("transferProfileContacts")
+    @RestReturn(value = String.class)
+    public RestResponse transferProfileContacts(TransferProfileContactsCommand cmd){
+        this.profileService.transferProfileContacts(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /profile/deleteProfileContacts</b>

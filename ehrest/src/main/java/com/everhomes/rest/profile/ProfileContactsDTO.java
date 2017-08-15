@@ -2,6 +2,7 @@ package com.everhomes.rest.profile;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -80,5 +81,10 @@ public class ProfileContactsDTO {
 
     public void setStick(String stick) {
         this.stick = stick;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
