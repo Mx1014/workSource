@@ -1,5 +1,5 @@
 
-package cn.cpst.rit.service;
+package com.everhomes.express.guomao.rit.service;
 
 import javax.xml.bind.annotation.XmlRegistry;
 

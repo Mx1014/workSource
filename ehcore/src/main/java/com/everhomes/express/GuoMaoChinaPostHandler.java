@@ -26,6 +26,10 @@ import com.alibaba.fastjson.TypeReference;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.express.guomao.GuoMaoChinaPostResponse;
 import com.everhomes.express.guomao.GuoMaoChinaPostResponseEntity;
+import com.everhomes.express.guomao.rit.model.ArrayOfMail;
+import com.everhomes.express.guomao.rit.model.Mail;
+import com.everhomes.express.guomao.rit.service.MailTtServiceGn;
+import com.everhomes.express.guomao.rit.service.MailTtServiceGnPortType;
 import com.everhomes.parking.Utils;
 import com.everhomes.rest.express.ExpressLogisticsStatus;
 import com.everhomes.rest.express.ExpressOrderStatus;
@@ -36,10 +40,6 @@ import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 
-import cn.cpst.rit.model.ArrayOfMail;
-import cn.cpst.rit.model.Mail;
-import cn.cpst.rit.service.MailTtServiceGn;
-import cn.cpst.rit.service.MailTtServiceGnPortType;
 //后面的2为表eh_express_companies中父id为0的行的id 国贸 中国邮政
 @Component(ExpressHandler.EXPRESS_HANDLER_PREFIX+"3")
 public class GuoMaoChinaPostHandler implements ExpressHandler{

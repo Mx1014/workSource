@@ -1,4 +1,4 @@
-package cn.cpst.rit.service;
+package com.everhomes.express.guomao.rit.service;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -15,14 +15,14 @@ import javax.xml.ws.ResponseWrapper;
  * 
  */
 @WebService(targetNamespace = "http://service.rit.cpst.cn", name = "MailTtService_GnPortType")
-@XmlSeeAlso({cn.cpst.rit.model.ObjectFactory.class, ObjectFactory.class})
+@XmlSeeAlso({com.everhomes.express.guomao.rit.service.ObjectFactory.class, ObjectFactory.class})
 public interface MailTtServiceGnPortType {
 
     @WebMethod
     @RequestWrapper(localName = "getMails", targetNamespace = "http://service.rit.cpst.cn", className = "cn.cpst.rit.service.GetMails")
     @ResponseWrapper(localName = "getMailsResponse", targetNamespace = "http://service.rit.cpst.cn", className = "cn.cpst.rit.service.GetMailsResponse")
     @WebResult(name = "out", targetNamespace = "http://service.rit.cpst.cn")
-    public cn.cpst.rit.model.ArrayOfMail getMails(
+    public com.everhomes.express.guomao.rit.model.ArrayOfMail getMails(
         @WebParam(name = "in0", targetNamespace = "http://service.rit.cpst.cn")
         java.lang.String in0,
         @WebParam(name = "in1", targetNamespace = "http://service.rit.cpst.cn")

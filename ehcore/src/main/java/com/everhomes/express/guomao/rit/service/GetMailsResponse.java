@@ -1,12 +1,13 @@
 
-package cn.cpst.rit.service;
+package com.everhomes.express.guomao.rit.service;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import cn.cpst.rit.model.ArrayOfMail;
+
+import com.everhomes.express.guomao.rit.model.ArrayOfMail;
 
 
 /**

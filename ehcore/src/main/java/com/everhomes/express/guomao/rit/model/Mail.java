@@ -1,5 +1,5 @@
 
-package cn.cpst.rit.model;
+package com.everhomes.express.guomao.rit.model;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;

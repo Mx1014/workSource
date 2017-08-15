@@ -1,5 +1,5 @@
 
-package cn.cpst.rit.model;
+package com.everhomes.express.guomao.rit.model;
 
 import java.util.ArrayList;
 import java.util.List;

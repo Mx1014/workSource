@@ -1,4 +1,4 @@
-package cn.cpst.rit.service;
+package com.everhomes.express.guomao.rit.service;
 
 import java.net.MalformedURLException;
 import java.net.URL;
