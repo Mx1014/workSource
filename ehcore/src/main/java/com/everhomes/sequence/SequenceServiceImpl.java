@@ -1494,6 +1494,57 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhYzxSmsLogs.class, Tables.EH_YZX_SMS_LOGS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_YZX_SMS_LOGS.ID.max()).from(Tables.EH_YZX_SMS_LOGS).fetchOne().value1();
         });
+        syncTableSequence(null, EhStatEventDeviceLogs.class, Tables.EH_STAT_EVENT_DEVICE_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_DEVICE_LOGS.ID.max()).from(Tables.EH_STAT_EVENT_DEVICE_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventUploadStrategies.class, Tables.EH_STAT_EVENT_UPLOAD_STRATEGIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_UPLOAD_STRATEGIES.ID.max()).from(Tables.EH_STAT_EVENT_UPLOAD_STRATEGIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEvents.class, Tables.EH_STAT_EVENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENTS.ID.max()).from(Tables.EH_STAT_EVENTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventParams.class, Tables.EH_STAT_EVENT_PARAMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_PARAMS.ID.max()).from(Tables.EH_STAT_EVENT_PARAMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventContentLogs.class, Tables.EH_STAT_EVENT_CONTENT_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_CONTENT_LOGS.ID.max()).from(Tables.EH_STAT_EVENT_CONTENT_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventLogs.class, Tables.EH_STAT_EVENT_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_LOGS.ID.max()).from(Tables.EH_STAT_EVENT_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventParamLogs.class, Tables.EH_STAT_EVENT_PARAM_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_PARAM_LOGS.ID.max()).from(Tables.EH_STAT_EVENT_PARAM_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventAppAttachmentLogs.class, Tables.EH_STAT_EVENT_APP_ATTACHMENT_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_APP_ATTACHMENT_LOGS.ID.max()).from(Tables.EH_STAT_EVENT_APP_ATTACHMENT_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventPortalConfigs.class, Tables.EH_STAT_EVENT_PORTAL_CONFIGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_PORTAL_CONFIGS.ID.max()).from(Tables.EH_STAT_EVENT_PORTAL_CONFIGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventPortalStatistics.class, Tables.EH_STAT_EVENT_PORTAL_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID.max()).from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventStatistics.class, Tables.EH_STAT_EVENT_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_STATISTICS.ID.max()).from(Tables.EH_STAT_EVENT_STATISTICS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhStatEventTaskLogs.class, Tables.EH_STAT_EVENT_TASK_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_STAT_EVENT_TASK_LOGS.ID.max()).from(Tables.EH_STAT_EVENT_TASK_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPortalItemGroups.class, Tables.EH_PORTAL_ITEM_GROUPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PORTAL_ITEM_GROUPS.ID.max()).from(Tables.EH_PORTAL_ITEM_GROUPS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPortalItems.class, Tables.EH_PORTAL_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PORTAL_ITEMS.ID.max()).from(Tables.EH_PORTAL_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPortalNavigationBars.class, Tables.EH_PORTAL_NAVIGATION_BARS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PORTAL_NAVIGATION_BARS.ID.max()).from(Tables.EH_PORTAL_NAVIGATION_BARS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPortalLayouts.class, Tables.EH_PORTAL_LAYOUTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PORTAL_LAYOUTS.ID.max()).from(Tables.EH_PORTAL_LAYOUTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPortalLaunchPadMappings.class, Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS.ID.max()).from(Tables.EH_PORTAL_LAUNCH_PAD_MAPPINGS).fetchOne().value1();
+        });
 
     }
 

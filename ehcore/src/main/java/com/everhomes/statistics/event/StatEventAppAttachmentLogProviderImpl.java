@@ -1,10 +1,6 @@
 // @formatter:off
 package com.everhomes.statistics.event;
 
-import org.jooq.DSLContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -13,8 +9,12 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhStatEventAppAttachmentLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhStatEventAppAttachmentLogs;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class StatEventAppAttachmentLogProviderImpl implements StatEventAppAttachmentLogProvider {
@@ -30,7 +30,7 @@ public class StatEventAppAttachmentLogProviderImpl implements StatEventAppAttach
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhStatEventAppAttachmentLogs.class));
 		statEventAppAttachmentLog.setId(id);
 		statEventAppAttachmentLog.setCreateTime(DateUtils.currentTimestamp());
-		// statEventAppAttachmentLog.setCreatorUid(UserContext.currentUserId());
+		statEventAppAttachmentLog.setCreatorUid(UserContext.currentUserId());
 		rwDao().insert(statEventAppAttachmentLog);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhStatEventAppAttachmentLogs.class, id);
 	}

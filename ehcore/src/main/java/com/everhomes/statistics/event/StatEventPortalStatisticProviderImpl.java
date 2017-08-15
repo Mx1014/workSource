@@ -13,6 +13,10 @@ import com.everhomes.server.schema.tables.pojos.EhStatEventPortalStatistics;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectHavingStep;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -52,13 +56,44 @@ public class StatEventPortalStatisticProviderImpl implements StatEventPortalStat
 	}
 
     @Override
-    public List<StatEventPortalStatistic> listEventPortalStat(Integer namespaceId, Long parentId, Byte statType, Date startDate, Date endDate) {
-        return context().select().from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+    public List<StatEventPortalStatistic> listEventPortalStatByZeroParentId(Integer namespaceId, Byte statType, Date startDate, Date endDate) {
+        SelectHavingStep<Record1<Long>> lastRecordIdCondition = context().select(DSL.max(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID))
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
                 .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.PARENT_ID.eq(parentId))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.PARENT_ID.eq(0L))
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_TYPE.eq(statType))
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.between(startDate, endDate))
-                .groupBy(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID)
+                .groupBy(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_TYPE, Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID);
+
+        return context().selectFrom(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID.in(lastRecordIdCondition))
+                .fetchInto(StatEventPortalStatistic.class);
+    }
+
+    @Override
+    public List<StatEventPortalStatistic> listEventPortalStatByParentId(Integer namespaceId, Long parentId, Byte statType, Date startDate, Date endDate) {
+
+        SelectConditionStep<Record1<Long>> ownerIdCondition = context()
+                .select(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID)
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID.eq(parentId));
+
+        SelectConditionStep<Record1<Long>> idCondition = context()
+                .select(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID)
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID.in(ownerIdCondition));
+
+        SelectHavingStep<Record1<Long>> lastRecordIdCondition = context()
+                .select(DSL.max(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID))
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.PARENT_ID.in(idCondition))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_TYPE.eq(statType))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.between(startDate, endDate))
+                .groupBy(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_TYPE, Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID);
+
+        return context().selectFrom(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID.in(lastRecordIdCondition))
                 .fetchInto(StatEventPortalStatistic.class);
     }
 
@@ -95,6 +130,14 @@ public class StatEventPortalStatisticProviderImpl implements StatEventPortalStat
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.eq(statDate))
                 .fetchAnyInto(StatEventPortalStatistic.class);
+    }
+
+    @Override
+    public void deleteEventPortalStatByDate(Date date) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.eq(date))
+                .execute();
     }
 
     private EhStatEventPortalStatisticsDao rwDao() {

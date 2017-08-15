@@ -19,7 +19,7 @@ import java.util.List;
  * Created by xq.tian on 2017/8/14.
  */
 @Component
-public class StepPortalStatistic extends AbstractStatEventStep {
+public class EventStatPortalStatStep extends AbstractStatEventStep {
 
     @Autowired
     private DbProvider dbProvider;
@@ -35,6 +35,7 @@ public class StepPortalStatistic extends AbstractStatEventStep {
     private PortalLayoutProvider portalLayoutProvider;
 
     @Autowired
+    @Qualifier("PortalNavigationBarProvider-Config")
     private PortalNavigationBarProvider portalNavigationBarProvider;
 
     @Autowired
@@ -42,7 +43,7 @@ public class StepPortalStatistic extends AbstractStatEventStep {
     private PortalItemGroupProvider portalItemGroupProvider;
 
     @Override
-    public void doExecute(StatEventExecution execution) {
+    public void doExecute(StatEventStepExecution execution) {
         LocalDate statDate = execution.getParam("statDate");
 
         Date date = Date.valueOf(statDate);
@@ -67,7 +68,7 @@ public class StepPortalStatistic extends AbstractStatEventStep {
             stat.setOwnerType(EhPortalNavigationBars.class.getSimpleName());
             stat.setOwnerId(navigationBar.getId());
             stat.setDisplayName(navigationBar.getLabel());
-            // stat.setName(navigationBar.getLabel());
+            stat.setName(navigationBar.getLabel());
             stat.setStatType(StatEventPortalStatType.BOTTOM_NAVIGATION.getCode());
             stat.setDescription(navigationBar.getDescription());
             stat.setTimeInterval(StatEventStatTimeInterval.DAILY.getCode());
@@ -81,7 +82,7 @@ public class StepPortalStatistic extends AbstractStatEventStep {
         final byte statusReleased = 4;// 发布状态
 
         // 拿到已发布的顶部工具栏
-        List<StatEventPortalConfig> portalConfigs = statEventPortalConfigProvider.listPortalTopNavigationBarByStatus(
+        List<StatEventPortalConfig> portalConfigs = statEventPortalConfigProvider.listStatEventPortalConfigs(
                 StatEventPortalConfigType.TOP_NAVIGATION.getCode(), statusReleased);
         for (StatEventPortalConfig portalConfig : portalConfigs) {
             StatEventPortalStatistic stat = new StatEventPortalStatistic();
@@ -90,7 +91,7 @@ public class StepPortalStatistic extends AbstractStatEventStep {
             stat.setOwnerType(EhStatEventPortalConfigs.class.getSimpleName());
             stat.setOwnerId(portalConfig.getId());
             stat.setDisplayName(portalConfig.getDisplayName());
-            // stat.setName(portalConfig.getConfigName());
+            stat.setName(portalConfig.getConfigName());
             stat.setStatType(StatEventPortalStatType.TOP_NAVIGATION.getCode());
             stat.setDescription(portalConfig.getDescription());
             stat.setTimeInterval(StatEventStatTimeInterval.DAILY.getCode());

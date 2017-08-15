@@ -29,8 +29,8 @@ public class PortalItemProviderImpl1 implements PortalItemProvider {
             portalItem.setNamespaceId(namespaceId);
             portalItem.setActionType(String.valueOf(launchPadItem.getActionType()));
             portalItem.setActionData(launchPadItem.getActionData());
-            portalItemList.add(portalItem);
             portalItem.setGroupName(launchPadItem.getItemGroup());
+            portalItemList.add(portalItem);
         }
         return portalItemList;
     }
@@ -47,6 +47,18 @@ public class PortalItemProviderImpl1 implements PortalItemProvider {
 
     @Override
     public PortalItem findPortalItemById(Long id) {
-        throw new RuntimeException("findPortalItemById not supported");
+        LaunchPadItem launchPadItem = launchPadProvider.findLaunchPadItemById(id);
+        if (launchPadItem != null) {
+            PortalItem portalItem = new PortalItem();
+            portalItem.setLabel(launchPadItem.getItemLabel());
+            portalItem.setName(launchPadItem.getItemName());
+            portalItem.setId(launchPadItem.getId());
+            portalItem.setNamespaceId(launchPadItem.getNamespaceId());
+            portalItem.setActionType(String.valueOf(launchPadItem.getActionType()));
+            portalItem.setActionData(launchPadItem.getActionData());
+            portalItem.setGroupName(launchPadItem.getItemGroup());
+            return portalItem;
+        }
+        return null;
     }
 }

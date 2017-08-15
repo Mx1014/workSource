@@ -2,6 +2,7 @@
 package com.everhomes.statistics.event;
 
 import java.sql.Date;
+import java.util.List;
 
 public interface StatEventTaskLogProvider {
 
@@ -11,5 +12,7 @@ public interface StatEventTaskLogProvider {
 
 	StatEventTaskLog findById(Long id);
 
-    StatEventTaskLog findByTaskDate(Date taskDate);
+    List<StatEventTaskLog> findByTaskDate(Date taskDate);
+
+    void deleteEventTaskLogByDate(Date date);
 }

@@ -52,7 +52,7 @@ public class StatEventPortalConfigProviderImpl implements StatEventPortalConfigP
 	}
 
     @Override
-    public List<StatEventPortalConfig> listPortalTopNavigationBarByStatus(byte configType, byte status) {
+    public List<StatEventPortalConfig> listStatEventPortalConfigs(byte configType, byte status) {
         return context().selectFrom(Tables.EH_STAT_EVENT_PORTAL_CONFIGS)
                 .where(Tables.EH_STAT_EVENT_PORTAL_CONFIGS.CONFIG_TYPE.eq(configType))
                 .and(Tables.EH_STAT_EVENT_PORTAL_CONFIGS.STATUS.eq(status))

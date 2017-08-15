@@ -4,6 +4,7 @@ package com.everhomes.rest.statistics.event;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -25,8 +26,8 @@ public class StatEventLogDTO {
     private Long deviceTime;
     private String eventName;
     private Integer acc;
-    private Integer val;
-    private Integer version;
+    private BigDecimal val;
+    private String version;
     @ItemType(String.class)
     private Map<String, String> param;
 
@@ -70,28 +71,28 @@ public class StatEventLogDTO {
         this.acc = acc;
     }
 
-    public Integer getVal() {
-        return val;
-    }
-
-    public void setVal(Integer val) {
-        this.val = val;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
     public Map<String, String> getParam() {
         return param;
     }
 
     public void setParam(Map<String, String> param) {
         this.param = param;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public BigDecimal getVal() {
+        return val;
+    }
+
+    public void setVal(BigDecimal val) {
+        this.val = val;
     }
 
     @Override

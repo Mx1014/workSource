@@ -5,6 +5,9 @@ package com.everhomes.statistics.event;
  */
 public interface StatEventStep {
 
-    void execute(StatEventExecution execution);
+    void execute(StatEventTaskExecution execution);
 
+    String getStepName();
+
+    StatEventStepExecution getStepException(StatEventTaskExecution taskExecution);
 }

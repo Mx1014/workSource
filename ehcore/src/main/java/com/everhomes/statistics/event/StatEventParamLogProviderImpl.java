@@ -60,7 +60,7 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
     }
 
     @Override
-    public List<StatEventParamLog> listEventParamLog(Integer namespaceId, String eventName, Integer eventVersion, Timestamp minTime, Timestamp maxTime) {
+    public List<StatEventParamLog> listEventParamLog(Integer namespaceId, String eventName, String eventVersion, Timestamp minTime, Timestamp maxTime) {
         return context().select()
                 .from(Tables.EH_STAT_EVENT_PARAM_LOGS)
                 .where(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID.eq(namespaceId))
@@ -71,7 +71,7 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
     }
 
     @Override
-    public Map<String, Integer> countParamTotalCount(Integer namespaceId, String eventName, Integer eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
+    public Map<String, Integer> countParamTotalCount(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
         return context().select(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE, DSL.count())
                 .from(Tables.EH_STAT_EVENT_PARAM_LOGS)
                 .where(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID.eq(namespaceId))
@@ -84,7 +84,7 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
     }
 
     @Override
-    public Map<String, Integer> countDistinctSession(Integer namespaceId, String eventName, Integer eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
+    public Map<String, Integer> countDistinctSession(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
         return context().select(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE, DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.SESSION_ID))
                 .from(Tables.EH_STAT_EVENT_PARAM_LOGS)
                 .where(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID.eq(namespaceId))
@@ -97,7 +97,7 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
     }
 
     @Override
-    public Map<String, Integer> countDistinctUid(Integer namespaceId, String eventName, Integer eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
+    public Map<String, Integer> countDistinctUid(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
         return context().select(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE, DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.UID))
                 .from(Tables.EH_STAT_EVENT_PARAM_LOGS)
                 .where(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID.eq(namespaceId))

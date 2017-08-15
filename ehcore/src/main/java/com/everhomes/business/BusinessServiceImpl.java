@@ -59,7 +59,6 @@ import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import com.google.gson.annotations.SerializedName;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.DistanceUtils;
@@ -2168,35 +2167,6 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
 
-    /*// 商品对象
-    private static class Commodity {
-        private String id;// 商品id
-        private String commoNo;// 商品编号
-        private String commoName;// 商品名称
-        private String defaultPic;// 商品图片
-        private BigDecimal price;// 商品价格
-        private String shopNo;// 店铺编号
-        private String uri;// 商品详情链接
-
-        @Override
-        public String toString() {
-            return StringHelper.toJsonString(this);
-        }
-    }*/
-
-    // 电商服务器响应对象
-    private static class Resp {
-        private String version;
-        private Integer errorCode;
-        @SerializedName("response")
-        private List<ModulePromotionEntityDTO> response = new ArrayList<>();
-
-        @Override
-        public String toString() {
-            return StringHelper.toJsonString(this);
-        }
-    }
-
     private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
         String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "zl-ec/rest/openapi/commodity/listRecommend");
 
@@ -2215,9 +2185,9 @@ public class BusinessServiceImpl implements BusinessService {
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
         try {
             String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 10, "UTF-8");
-            Resp resp = (Resp) StringHelper.fromJsonString(jsonStr, Resp.class);
+            CommodityRespDTO resp = (CommodityRespDTO) StringHelper.fromJsonString(jsonStr, CommodityRespDTO.class);
             if (resp != null) {
-                reponse.setEntities(resp.response);
+                reponse.setEntities(resp.getResponse());
             }
             return reponse;
         } catch (Exception e) {

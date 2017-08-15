@@ -21,7 +21,7 @@ import java.util.Map;
  * Created by xq.tian on 2017/8/14.
  */
 @Component
-public class StepLoadContentLogToTable extends AbstractStatEventStep {
+public class EventStatProcessContentLogStep extends AbstractStatEventStep {
 
     @Autowired
     private DbProvider dbProvider;
@@ -45,7 +45,7 @@ public class StepLoadContentLogToTable extends AbstractStatEventStep {
     private StatEventParamLogProvider statEventParamLogProvider;
 
     @Override
-    public void doExecute(StatEventExecution execution) {
+    public void doExecute(StatEventStepExecution execution) {
         LocalDate statDate = execution.getParam("statDate");
 
         Timestamp minTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MIN));
@@ -54,6 +54,14 @@ public class StepLoadContentLogToTable extends AbstractStatEventStep {
         List<StatEventLogContent> logContents = statEventContentLogProvider.listEventLogContent(StatEventCommonStatus.ACTIVE.getCode(), minTime, maxTime);
 
         Map<String, StatEventDeviceLog> statDeviceLogMap = new HashMap<>();
+
+        // 有可能第一次什么也没有，客户端会传个0的sessionId
+        // StatEventDeviceLog zeroDevice = new StatEventDeviceLog();
+        // zeroDevice.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+        // zeroDevice.setUid(0L);
+        // zeroDevice.setId(0L);
+        // statDeviceLogMap.put("0", zeroDevice);
+
         Map<String, StatEvent> statEventMap = new HashMap<>();
         Map<String, StatEventParam> statEventParamMap = new HashMap<>();
         Map<String, List<Long>> sessionIdToDeviceGenIdMap = new HashMap<>();
@@ -67,6 +75,10 @@ public class StepLoadContentLogToTable extends AbstractStatEventStep {
                     StatEventDeviceLog deviceLog = statDeviceLogMap.get(logDTO.getSessionId());
                     if (deviceLog == null) {
                         deviceLog = statEventDeviceLogProvider.findStatEventDeviceLogById(Long.valueOf(logDTO.getSessionId()));
+                        // 找不到这个deviceLog就跳过
+                        if (deviceLog == null) {
+                            continue;
+                        }
                         statDeviceLogMap.put(String.valueOf(deviceLog.getId()), deviceLog);
                     }
                     StatEvent statEvent = statEventMap.get(logDTO.getEventName());
@@ -105,11 +117,14 @@ public class StepLoadContentLogToTable extends AbstractStatEventStep {
                     statEventLogProvider.createStatEventLog(log);
 
                     Map<String, String> param = logDTO.getParam();
-                    param.forEach((k, v) -> {
-                        StatEventParam statEventParam = statEventParamMap.get(log.getEventName() + k);
+                    if (param == null) {
+                        continue;
+                    }
+                    for (Map.Entry<String, String> entry : param.entrySet()) {
+                        StatEventParam statEventParam = statEventParamMap.get(log.getEventName() + entry.getKey());
                         if (statEventParam == null) {
-                            statEventParam = statEventParamProvider.findStatEventParam(log.getEventName(), k);
-                            statEventParamMap.put(log.getEventName() + k, statEventParam);
+                            statEventParam = statEventParamProvider.findStatEventParam(log.getEventName(), entry.getKey());
+                            statEventParamMap.put(log.getEventName() + entry.getKey(), statEventParam);
                         }
                         if (statEventParam != null) {
                             StatEventParamLog paramLog = new StatEventParamLog();
@@ -120,17 +135,17 @@ public class StepLoadContentLogToTable extends AbstractStatEventStep {
                             paramLog.setEventName(log.getEventName());
                             paramLog.setUid(log.getUid());
                             paramLog.setEventLogId(log.getId());
-                            paramLog.setParamKey(k);
+                            paramLog.setParamKey(entry.getKey());
                             paramLog.setEventVersion(log.getEventVersion());
                             paramLog.setUploadTime(logContent.getCreateTime());
                             if (statEventParam.getParamType() == StatEventParamType.NUMBER.getCode()) {
-                                paramLog.setNumberValue(Integer.valueOf(v));
+                                paramLog.setNumberValue(Integer.valueOf(entry.getValue()));
                             } else {
-                                paramLog.setStringValue(v);
+                                paramLog.setStringValue(entry.getValue());
                             }
                             statEventParamLogProvider.createStatEventParamLog(paramLog);
                         }
-                    });
+                    }
                 }
                 return true;
             });

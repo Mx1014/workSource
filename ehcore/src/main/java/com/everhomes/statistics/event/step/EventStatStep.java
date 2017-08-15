@@ -4,6 +4,7 @@ package com.everhomes.statistics.event.step;
 import com.everhomes.db.DbProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.statistics.event.StatEventStatTimeInterval;
 import com.everhomes.statistics.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by xq.tian on 2017/8/14.
  */
 @Component
-public class StepEventStatistic extends AbstractStatEventStep implements InitializingBean {
+public class EventStatStep extends AbstractStatEventStep implements InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StepEventStatistic.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventStatStep.class);
 
     @Autowired
     private List<StatEventHandler> handlers;
@@ -45,7 +46,7 @@ public class StepEventStatistic extends AbstractStatEventStep implements Initial
     private NamespaceProvider namespaceProvider;
 
     @Override
-    public void doExecute(StatEventExecution execution) {
+    public void doExecute(StatEventStepExecution execution) {
         LocalDate statDate = execution.getParam("statDate");
 
         List<Namespace> namespaces = namespaceProvider.listNamespaces();
@@ -53,6 +54,7 @@ public class StepEventStatistic extends AbstractStatEventStep implements Initial
         List<StatEvent> statEvents = statEventProvider.listStatEvent();
 
         Map<String, Object> stepMeta = new HashMap<>();
+        boolean success = true;
         for (StatEvent statEvent : statEvents) {
             StatEventHandler handler = handlerMap.get(statEvent.getEventName());
             if (handler == null) {
@@ -66,15 +68,14 @@ public class StepEventStatistic extends AbstractStatEventStep implements Initial
                         LOGGER.warn("task [{}] handler step [{}] already finished", execution.getTaskDate(), handler.getClass().getSimpleName());
                         continue;
                     }
-                    List<StatEventStatistic> statList = handler.process(namespace, statEvent, statDate);
 
-                    dbProvider.execute(status -> {
-                        statEventStatisticProvider.insertEventStatList(statList);
-                        return true;
-                    });
+                    // 处理并在事物中保存
+                    save(process(statDate, statEvent, handler, namespace, execution.getInterval()));
+
                     // success
                     taskMeta = 1;
                 } catch (Throwable t) {
+                    success = false;
                     try (ByteArrayOutputStream out = new ByteArrayOutputStream();
                          PrintStream stream = new PrintStream(out))
                     {
@@ -83,28 +84,44 @@ public class StepEventStatistic extends AbstractStatEventStep implements Initial
                         taskMeta = out.toString("UTF-8");
                     } catch (Exception ignored) { }
                 } finally {
-                    stepMeta.put(getHandlerStepName(handler, namespace.getId()), taskMeta);
+                    stepMeta.put(String.format("%s:%s", handler.getEventName(), namespace.getId()), taskMeta);
                 }
             }
         }
         // 自己特殊的stepMeta
-        execution.getTaskMeta().put(thisStepName(), stepMeta);
+        execution.getTaskMeta().put(getStepName(), stepMeta);
+        if (success) {
+            execution.setStatus(StatEventStepExecution.Status.FINISH);
+        } else {
+            execution.setStatus(StatEventStepExecution.Status.ERROR);
+        }
+    }
+
+    private void save(List<StatEventStatistic> statList) {
+        dbProvider.execute(status -> {
+            statEventStatisticProvider.insertEventStatList(statList);
+            return true;
+        });
+    }
+
+    private List<StatEventStatistic> process(LocalDate statDate, StatEvent statEvent, StatEventHandler handler, Namespace namespace, StatEventStatTimeInterval interval) {
+        return handler.process(namespace, statEvent, statDate, interval);
     }
 
     private String getHandlerStepName(StatEventHandler handler, Integer namespaceId) {
         return String.format("%s:%s", handler.getClass().getName(), namespaceId);
     }
 
-    private boolean thisHandlerStepFinished(StatEventHandler handler, Namespace namespace, StatEventExecution execution) {
-        Map<String, Object> map = (Map<String, Object>) execution.getTaskMeta().get(thisStepName());
+    private boolean thisHandlerStepFinished(StatEventHandler handler, Namespace namespace, StatEventStepExecution execution) {
+        Map<String, Object> map = (Map<String, Object>) execution.getTaskMeta().get(getStepName());
         return map != null
                 && map.get(getHandlerStepName(handler, namespace.getId())) != null
                 && map.get(getHandlerStepName(handler, namespace.getId())).getClass().isInstance(Integer.class)
                 && map.get(getHandlerStepName(handler, namespace.getId())).equals(1);
     }
 
-    protected void after(StatEventExecution execution) {
-        // do nothing
+    protected void after(StatEventStepExecution execution) {
+        execution.setEndTime(System.currentTimeMillis());
     }
 
     @Override

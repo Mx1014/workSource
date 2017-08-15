@@ -9,7 +9,9 @@ import java.time.LocalDate;
  */
 public interface StatEventJobService {
 
-    void executeTask(LocalDate statDate);
+    void executeTask(StatEventTaskExecution taskExecution);
+
+    StatEventTaskExecution getTaskExecution(LocalDate statDate, boolean manuallyExecute);
 
     void executeTask(StatExecuteEventTaskCommand cmd);
 }

@@ -25,7 +25,7 @@ public interface StatEventParamLogProvider {
      * @param minTime
      * @param maxTime    @return
      */
-    Map<String, Integer> countParamTotalCount(Integer namespaceId, String eventName, Integer eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
+    Map<String, Integer> countParamTotalCount(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
 
     /**
      * 根据eventName查询出来参数日志
@@ -35,7 +35,7 @@ public interface StatEventParamLogProvider {
      *@param minTime
      * @param maxTime   @return
      */
-    List<StatEventParamLog> listEventParamLog(Integer namespaceId, String eventName, Integer eventVersion, Timestamp minTime, Timestamp maxTime);
+    List<StatEventParamLog> listEventParamLog(Integer namespaceId, String eventName, String eventVersion, Timestamp minTime, Timestamp maxTime);
 
     /**
      * 统计参数的独立session数
@@ -47,7 +47,7 @@ public interface StatEventParamLogProvider {
      * @param maxTime
      * @return
      */
-    Map<String,Integer> countDistinctSession(Integer namespaceId, String eventName, Integer eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
+    Map<String,Integer> countDistinctSession(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
 
     /**
      * 统计参数的独立uid数
@@ -59,7 +59,7 @@ public interface StatEventParamLogProvider {
      * @param maxTime
      * @return
      */
-    Map<String,Integer> countDistinctUid(Integer namespaceId, String eventName, Integer eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
+    Map<String,Integer> countDistinctUid(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
 
     // List<StatEventParamLog> listStatEventParamLog();
 

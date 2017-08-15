@@ -59,7 +59,7 @@ public class StatEventParamProviderImpl implements StatEventParamProvider {
     }
 
     @Override
-    public List<StatEventParam> listParam(String eventName, Integer eventVersion) {
+    public List<StatEventParam> listParam(String eventName, String eventVersion) {
         return context().selectFrom(Tables.EH_STAT_EVENT_PARAMS)
                 .where(Tables.EH_STAT_EVENT_PARAMS.EVENT_NAME.eq(eventName))
                 .and(Tables.EH_STAT_EVENT_PARAMS.EVENT_VERSION.eq(eventVersion))

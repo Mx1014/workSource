@@ -1023,4 +1023,11 @@ VALUES ((@organization_details_id := @organization_details_id + 1), 1035719, NUL
 # VALUES ((@enterprise_community_map_id := @enterprise_community_map_id + 1), 240111044331050362, 'enterprise', 1035719, 3, NULL, NOW(), NOW());
 -- NEW END--- 08/04 17:59
 
+SELECT MAX(id) FROM `eh_app_urls` INTO @app_urls_id;
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
+  VALUES ((@app_urls_id := @app_urls_id + 1), 999969, '昌智慧', 1, '', 'cs://1/image/aW1hZ2UvTVRveFltSmlNV0ptT1dKaU1UQTFOekZrWldOa09XWmpOVEppT0RKaFpUVTJOQQ', '移动平台聚合服务，助力园区效能提升');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
+  VALUES ((@app_urls_id := @app_urls_id + 1), 999969, '昌智慧', 2, '', 'cs://1/image/aW1hZ2UvTVRveFltSmlNV0ptT1dKaU1UQTFOekZrWldOa09XWmpOVEppT0RKaFpUVTJOQQ', '移动平台聚合服务，助力园区效能提升');
+
+
 SET FOREIGN_KEY_CHECKS = 1;

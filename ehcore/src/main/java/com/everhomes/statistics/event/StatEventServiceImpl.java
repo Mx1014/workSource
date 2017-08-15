@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -133,8 +131,14 @@ public class StatEventServiceImpl implements StatEventService {
         Date startDate = new Date(cmd.getStartDate());
         Date endDate = new Date(cmd.getEndDate());
 
-        List<StatEventPortalStatistic> statistics = statEventPortalStatisticProvider.listEventPortalStat(
-                namespaceId, cmd.getParentId(), cmd.getStatType(), startDate, endDate);
+        List<StatEventPortalStatistic> statistics;
+        if (cmd.getParentId() == 0) {
+            statistics = statEventPortalStatisticProvider.listEventPortalStatByZeroParentId(
+                    namespaceId, cmd.getStatType(), startDate, endDate);
+        } else {
+            statistics = statEventPortalStatisticProvider.listEventPortalStatByParentId(
+                    namespaceId, cmd.getParentId(), cmd.getStatType(), startDate, endDate);
+        }
 
         boolean isPortalItemGroupType = StatEventPortalStatType.fromCode(cmd.getStatType()) == StatEventPortalStatType.PORTAL_ITEM_GROUP;
         List<StatEventPortalStatDTO> list = new ArrayList<>();
@@ -147,17 +151,34 @@ public class StatEventServiceImpl implements StatEventService {
             dto.setOwnerType(statistic.getOwnerType());
             dto.setOwnerId(statistic.getOwnerId());
             if (isPortalItemGroupType) {
-                String[] split = statistic.getIdentifier().split(":");
-                if (split.length >= 2) {
-                    dto.setWidget(split[1]);
-                    dto.setItemGroup(split[2]);
-                }
+                processWidget(statistic, dto);
             }
             list.add(dto);
         }
         ListStatEventPortalStatResponse response = new ListStatEventPortalStatResponse();
+        list.sort(Comparator.comparingLong(StatEventPortalStatDTO::getId));
         response.setStatList(list);
         return response;
+    }
+
+    private void processWidget(StatEventPortalStatistic statistic, StatEventPortalStatDTO dto) {
+        String[] split = statistic.getIdentifier().split(":");
+        if (split.length >= 2) {
+            dto.setWidget(split[1]);
+            if (split[1].equals("OPPush")) {
+                switch (split[2]) {
+                    case "OPPushBiz":
+                        dto.setContentType("EhBizs");
+                        break;
+                    case "OPPushActivity":
+                        dto.setContentType("EhActivities");
+                        break;
+                    case "Gallery":
+                        dto.setContentType("EhServiceAlliances");
+                        break;
+                }
+            }
+        }
     }
 
     @Override
@@ -173,7 +194,13 @@ public class StatEventServiceImpl implements StatEventService {
 
         StatEventStatDTO dto = new StatEventStatDTO();
 
-        List<StatEventStatistic> statList = statEventStatisticProvider.countAndListEventStat(namespaceId, cmd.getParentId(), cmd.getIdentifier(), startDate, endDate);
+        List<StatEventStatistic> statList;
+        if (cmd.getParentId() == 0) {
+            statList = statEventStatisticProvider.countAndListEventStatByZeroParentId(namespaceId, cmd.getIdentifier(), startDate, endDate);
+        } else {
+            statList = statEventStatisticProvider.countAndListEventStatByParentId(namespaceId, cmd.getParentId(), cmd.getIdentifier(), startDate, endDate);
+        }
+
         List<Map<String, Object>> items = new ArrayList<>();
         for (StatEventStatistic stat : statList) {
             Map<String, Object> param = (Map<String, Object>) StringHelper.fromJsonString(stat.getParam(), Map.class);

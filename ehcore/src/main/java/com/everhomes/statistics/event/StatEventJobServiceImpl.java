@@ -2,11 +2,12 @@
 package com.everhomes.statistics.event;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.statistics.event.StatEventStatTimeInterval;
 import com.everhomes.rest.statistics.event.StatExecuteEventTaskCommand;
 import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.statistics.event.step.StepEventStatistic;
-import com.everhomes.statistics.event.step.StepLoadContentLogToTable;
-import com.everhomes.statistics.event.step.StepPortalStatistic;
+import com.everhomes.statistics.event.step.EventStatPortalStatStep;
+import com.everhomes.statistics.event.step.EventStatProcessContentLogStep;
+import com.everhomes.statistics.event.step.EventStatStep;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,12 @@ public class StatEventJobServiceImpl implements StatEventJobService, Application
     @Autowired
     private StatEventTaskLogProvider statEventTaskLogProvider;
 
+    @Autowired
+    private StatEventPortalStatisticProvider statEventPortalStatisticProvider;
+
+    @Autowired
+    private StatEventStatisticProvider statEventStatisticProvider;
+
     private final List<StatEventStep> steps = new LinkedList<>();
 
     @Override
@@ -50,9 +57,9 @@ public class StatEventJobServiceImpl implements StatEventJobService, Application
     }
 
     private void stepInit() {
-        StepLoadContentLogToTable step1 = PlatformContext.getComponent(StepLoadContentLogToTable.class);
-        StepPortalStatistic step2 = PlatformContext.getComponent(StepPortalStatistic.class);
-        StepEventStatistic step3 = PlatformContext.getComponent(StepEventStatistic.class);
+        EventStatProcessContentLogStep step1 = PlatformContext.getComponent(EventStatProcessContentLogStep.class);
+        EventStatPortalStatStep step2 = PlatformContext.getComponent(EventStatPortalStatStep.class);
+        EventStatStep step3 = PlatformContext.getComponent(EventStatStep.class);
 
         steps.add(step1);
         steps.add(step2);
@@ -67,71 +74,90 @@ public class StatEventJobServiceImpl implements StatEventJobService, Application
     }
 
     @Override
-    public void executeTask(LocalDate statDate) {
-        if (statDate == null) {
-            statDate = LocalDate.now();
-        }
-
-        StatEventExecution execution = execution(statDate);
-        //////////////////////////////////////////////
-        // if (execution.getStatus() == StatEventExecution.Status.FINISH) {
-        //     LOGGER.warn("stat event task {} already finished", statDate);
-        //     return;
-        // }
-        //////////////////////////////////////////////
-        long start = System.currentTimeMillis();
+    public void executeTask(StatEventTaskExecution taskExecution) {
         try {
+            prepareExecute(taskExecution);
             for (StatEventStep step : steps) {
-                try {
-                    prepareExecute(execution, step);
-                    step.execute(execution);
-                } catch (Throwable t) {
-                    LOGGER.error("stat event step error", t);
-                    execution.setStatus(StatEventExecution.Status.ERROR);
-                    execution.setT(t);
-                    throw t;
-                }
+                step.execute(taskExecution);
             }
-            execution.setStatus(StatEventExecution.Status.FINISH);
+            taskExecution.setStatus(StatEventTaskExecution.Status.FINISH);
+        } catch (Throwable t) {
+            LOGGER.error("stat event step error", t);
+            taskExecution.setStatus(StatEventTaskExecution.Status.ERROR);
+            taskExecution.setT(t);
         } finally {
-            StatEventTaskLog taskLog = execution.getTaskLog();
-            if (execution.getTaskLog() == null) {
+            doFinally(taskExecution);
+        }
+    }
+
+    private void doFinally(StatEventTaskExecution taskExecution) {
+        Map<String, StatEventStepExecution> stepExecutionMap = taskExecution.getStepExecutionMap();
+        stepExecutionMap.forEach((k, v) -> {
+            StatEventTaskLog taskLog = v.getTaskLog();
+            if (taskLog == null) {
                 taskLog = new StatEventTaskLog();
             }
-            taskLog.setTaskDate(Date.valueOf(statDate));
-            taskLog.setStatus(execution.getStatus().name());
-            taskLog.setTaskMeta(StringHelper.toJsonString(execution.getTaskMeta()));
 
-            if (execution.getT() != null) {
+            if (v.getT() != null) {
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream();
-                     PrintStream stream = new PrintStream(out))
-                {
-                    execution.getT().printStackTrace(stream);
+                     PrintStream stream = new PrintStream(out)) {
+                    v.getT().printStackTrace(stream);
                     String stacktrace = out.toString("UTF-8");
                     taskLog.setExceptionStacktrace(stacktrace);
                 } catch (Exception ignored) { }
+            } else {
+                taskLog.setExceptionStacktrace(null);
             }
-            long end = System.currentTimeMillis();
-            long duration = (end - start) / 1000;
-            taskLog.setDurationSeconds((int) duration);
+
+            taskLog.setStatus(v.getStatus().name());
+            taskLog.setTaskDate(Date.valueOf(v.getTaskDate()));
+            taskLog.setTaskMeta(StringHelper.toJsonString(v.getTaskMeta()));
+            taskLog.setDurationSeconds(v.getDurationSeconds());
+            taskLog.setStepName(k);
+
             statEventTaskLogProvider.createOrUpdateStatEventTaskLog(taskLog);
+        });
+    }
+
+    private void prepareExecute(StatEventTaskExecution execution) {
+        execution.setStatus(StatEventTaskExecution.Status.PROCESSING);
+        // 手动触发执行的话就把之前计算的数据都删掉
+        if (execution.isManuallyExecute()) {
+            execution.getStepExecutionMap().clear();
+            Date date = Date.valueOf(execution.getTaskDate());
+            statEventPortalStatisticProvider.deleteEventPortalStatByDate(date);
+            statEventStatisticProvider.deleteEventStatByDate(date);
+            statEventTaskLogProvider.deleteEventTaskLogByDate(date);
         }
     }
 
-    private void prepareExecute(StatEventExecution execution, StatEventStep step) {
-        execution.setStatus(StatEventExecution.Status.PROCESSING);
-    }
+    @Override
+    public StatEventTaskExecution getTaskExecution(LocalDate statDate, boolean manuallyExecute) {
+        Date date = Date.valueOf(statDate);
+        StatEventTaskExecution taskExecution = new StatEventTaskExecution();
+        taskExecution.getParameters().put("statDate", statDate);
+        taskExecution.setTaskDate(statDate);
+        taskExecution.setStatus(StatEventTaskExecution.Status.PROCESSING);
+        taskExecution.setInterval(StatEventStatTimeInterval.DAILY);
+        taskExecution.setManuallyExecute(manuallyExecute);
 
-    private StatEventExecution execution(LocalDate statDate) {
-        StatEventExecution execution = new StatEventExecution();
-        execution.getParameters().put("statDate", statDate);
-        StatEventTaskLog taskLog = statEventTaskLogProvider.findByTaskDate(Date.valueOf(statDate));
-        if (taskLog != null) {
-            execution.setTaskMeta((Map<String, Object>) StringHelper.fromJsonString(taskLog.getTaskMeta(), HashMap.class));
-            execution.setStatus(StatEventExecution.Status.valueOf(taskLog.getStatus()));
-            execution.setTaskLog(taskLog);
+        Map<String, StatEventStepExecution> stepExecutionMap = new HashMap<>();
+        List<StatEventTaskLog> taskLogs = statEventTaskLogProvider.findByTaskDate(date);
+
+        for (StatEventTaskLog taskLog : taskLogs) {
+            StatEventStepExecution stepExecution = new StatEventStepExecution();
+            stepExecution.setTaskLog(taskLog);
+            stepExecution.setParameters(taskExecution.getParameters());
+            stepExecution.setStatus(StatEventStepExecution.Status.valueOf(taskLog.getStatus()));
+            stepExecution.setTaskDate(statDate);
+            stepExecution.setTaskMeta((Map<String, Object>) StringHelper.fromJsonString(taskLog.getTaskMeta(), HashMap.class));
+            stepExecution.setStepName(taskLog.getStepName());
+            stepExecution.setInterval(taskExecution.getInterval());
+            stepExecutionMap.put(stepExecution.getStepName(), stepExecution);
         }
-        return execution;
+
+        taskExecution.setStepExecutionMap(stepExecutionMap);
+        return taskExecution;
     }
 
     public void executeTask(StatExecuteEventTaskCommand cmd) {
@@ -145,7 +171,8 @@ public class StatEventJobServiceImpl implements StatEventJobService, Application
         }
 
         do {
-            executeTask(startDate);
+            StatEventTaskExecution taskExecution = getTaskExecution(startDate, true);
+            executeTask(taskExecution);
             startDate = startDate.plusDays(1);
         } while (startDate.isBefore(endDate));
     }

@@ -11,12 +11,10 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhStatEventStatisticsDao;
 import com.everhomes.server.schema.tables.pojos.EhStatEventLogs;
 import com.everhomes.server.schema.tables.pojos.EhStatEventStatistics;
+import com.everhomes.server.schema.tables.records.EhStatEventStatisticsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
-import org.jooq.DSLContext;
-import org.jooq.Field;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -81,15 +79,73 @@ public class StatEventStatisticProviderImpl implements StatEventStatisticProvide
     }
 
     @Override
-    public List<StatEventStatistic> countAndListEventStat(Integer namespaceId, Long parentId, String identifier, Date startDate, Date endDate) {
+    public List<StatEventStatistic> countAndListEventStatByParentId(Integer namespaceId, Long parentId, String identifier, Date startDate, Date endDate) {
         DSLContext context = context();
+
+        // 为了在分组的时候拿到最新的一条数据
+        Table<EhStatEventStatisticsRecord> orderByIdDescTable = context
+                .selectFrom(Tables.EH_STAT_EVENT_STATISTICS)
+                .orderBy(Tables.EH_STAT_EVENT_STATISTICS.ID.desc()).asTable();
+
+        SelectConditionStep<Record1<Long>> ownerIdCondition = context()
+                .select(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID)
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID.eq(parentId));
+
+        SelectConditionStep<Record1<Long>> idCondition = context()
+                .select(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID)
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.OWNER_ID.in(ownerIdCondition));
 
         // 根据identifier拿到所有门户统计，不用去重
         SelectConditionStep<Record1<Long>> portalStatIdList = context.
                 select(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID)
                 .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
                 .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.PARENT_ID.eq(parentId))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.PARENT_ID.in(idCondition))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.IDENTIFIER.eq(identifier))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.between(startDate, endDate));
+
+        // 再去拿到所有事件统计
+        List<Field<?>> fields = new ArrayList<>();
+        fields.add(DSL.sum(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.TOTAL_COUNT)).as("totalCountTimes"));
+        fields.addAll(Arrays.asList(orderByIdDescTable.fields()));
+
+        return context.select(fields)
+                .from(orderByIdDescTable)
+                .where(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.EVENT_PORTAL_STAT_ID).in(portalStatIdList))
+                .groupBy(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.OWNER_TYPE), orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.OWNER_ID))
+                .fetch().map(r -> {
+                    StatEventStatistic stat = r.into(StatEventStatistic.class);
+                    BigDecimal totalCountTimes = r.getValue(DSL.fieldByName(BigDecimal.class, "totalCountTimes"));
+                    stat.setTotalCount(totalCountTimes.longValue());
+                    return stat;
+                });
+    }
+
+    @Override
+    public void deleteEventStatByDate(Date date) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_STAT_EVENT_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_STATISTICS.STAT_DATE.eq(date))
+                .execute();
+    }
+
+    /*@Override
+    public List<StatEventStatistic> countAndListEventStatByZeroParentId(Integer namespaceId, String identifier, Date startDate, Date endDate) {
+        DSLContext context = context();
+
+        // 为了在分组的时候拿到最新的一条数据
+        // Table<EhStatEventStatisticsRecord> orderByIdDescTable = context
+        //         .selectFrom(Tables.EH_STAT_EVENT_STATISTICS)
+        //         .orderBy(Tables.EH_STAT_EVENT_STATISTICS.ID.desc()).asTable();
+
+        // 根据identifier拿到所有门户统计，不用去重
+        SelectConditionStep<Record1<Long>> portalStatIdList = context.
+                select(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID)
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.PARENT_ID.eq(0L))
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.IDENTIFIER.eq(identifier))
                 .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.between(startDate, endDate));
 
@@ -98,18 +154,54 @@ public class StatEventStatisticProviderImpl implements StatEventStatisticProvide
         fields.add(DSL.sum(Tables.EH_STAT_EVENT_STATISTICS.TOTAL_COUNT).as("totalCountTimes"));
         fields.addAll(Arrays.asList(Tables.EH_STAT_EVENT_STATISTICS.fields()));
 
-        List<StatEventStatistic> statList = context
-                .select(fields)
+        SelectHavingStep<Record1<Long>> lastRecordIdCondition = context
+                .select(DSL.max(Tables.EH_STAT_EVENT_STATISTICS.ID))
                 .from(Tables.EH_STAT_EVENT_STATISTICS)
                 .where(Tables.EH_STAT_EVENT_STATISTICS.EVENT_PORTAL_STAT_ID.in(portalStatIdList))
-                .groupBy(Tables.EH_STAT_EVENT_STATISTICS.OWNER_TYPE, Tables.EH_STAT_EVENT_STATISTICS.OWNER_ID)
+                .groupBy(Tables.EH_STAT_EVENT_STATISTICS.OWNER_TYPE, Tables.EH_STAT_EVENT_STATISTICS.OWNER_ID);
+
+        return context.select(fields).from(Tables.EH_STAT_EVENT_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_STATISTICS.ID.in(lastRecordIdCondition))
                 .fetch().map(r -> {
                     StatEventStatistic stat = r.into(StatEventStatistic.class);
                     BigDecimal totalCountTimes = r.getValue(DSL.fieldByName(BigDecimal.class, "totalCountTimes"));
                     stat.setTotalCount(totalCountTimes.longValue());
                     return stat;
                 });
-        return statList;
+    }*/
+    @Override
+    public List<StatEventStatistic> countAndListEventStatByZeroParentId(Integer namespaceId, String identifier, Date startDate, Date endDate) {
+        DSLContext context = context();
+
+        // 为了在分组的时候拿到最新的一条数据
+        Table<EhStatEventStatisticsRecord> orderByIdDescTable = context
+                .selectFrom(Tables.EH_STAT_EVENT_STATISTICS)
+                .orderBy(Tables.EH_STAT_EVENT_STATISTICS.ID.desc()).asTable();
+
+        // 根据identifier拿到所有门户统计，不用去重
+        SelectConditionStep<Record1<Long>> portalStatIdList = context.
+                select(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.ID)
+                .from(Tables.EH_STAT_EVENT_PORTAL_STATISTICS)
+                .where(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.PARENT_ID.eq(0L))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.IDENTIFIER.eq(identifier))
+                .and(Tables.EH_STAT_EVENT_PORTAL_STATISTICS.STAT_DATE.between(startDate, endDate));
+
+        // 再去拿到所有事件统计
+        List<Field<?>> fields = new ArrayList<>();
+        fields.add(DSL.sum(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.TOTAL_COUNT)).as("totalCountTimes"));
+        fields.addAll(Arrays.asList(orderByIdDescTable.fields()));
+
+        return context.select(fields)
+                .from(orderByIdDescTable)
+                .where(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.EVENT_PORTAL_STAT_ID).in(portalStatIdList))
+                .groupBy(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.OWNER_TYPE), orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.OWNER_ID))
+                .fetch().map(r -> {
+                    StatEventStatistic stat = r.into(StatEventStatistic.class);
+                    BigDecimal totalCountTimes = r.getValue(DSL.fieldByName(BigDecimal.class, "totalCountTimes"));
+                    stat.setTotalCount(totalCountTimes.longValue());
+                    return stat;
+                });
     }
 
     private EhStatEventStatisticsDao rwDao() {

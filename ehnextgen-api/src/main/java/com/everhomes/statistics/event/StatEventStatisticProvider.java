@@ -19,7 +19,11 @@ public interface StatEventStatisticProvider {
 
     void insertEventStatList(List<StatEventStatistic> statList);
 
-    List<StatEventStatistic> countAndListEventStat(Integer namespaceId, Long parentId, String identifier, Date startDate, Date endDate);
+    List<StatEventStatistic> countAndListEventStatByZeroParentId(Integer namespaceId, String identifier, Date startDate, Date endDate);
+
+    List<StatEventStatistic> countAndListEventStatByParentId(Integer namespaceId, Long parentId, String identifier, Date startDate, Date endDate);
+
+    void deleteEventStatByDate(Date date);
 
     // List<StatEventStatistic> listStatEventStatistic();
 

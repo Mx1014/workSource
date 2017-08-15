@@ -1,23 +1,23 @@
 // @formatter:off
 package com.everhomes.statistics.event;
 
-import com.everhomes.server.schema.Tables;
-import org.jooq.DSLContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhStatEventTaskLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhStatEventTaskLogs;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
+import java.util.List;
 
 @Repository
 public class StatEventTaskLogProviderImpl implements StatEventTaskLogProvider {
@@ -37,8 +37,8 @@ public class StatEventTaskLogProviderImpl implements StatEventTaskLogProvider {
             rwDao().insert(statEventTaskLog);
             DaoHelper.publishDaoAction(DaoAction.CREATE, EhStatEventTaskLogs.class, id);
         } else {
-            rwDao().update(statEventTaskLog);
             statEventTaskLog.setUpdateTime(DateUtils.currentTimestamp());
+            rwDao().update(statEventTaskLog);
             DaoHelper.publishDaoAction(DaoAction.MODIFY, EhStatEventTaskLogs.class, statEventTaskLog.getId());
         }
 	}
@@ -57,10 +57,18 @@ public class StatEventTaskLogProviderImpl implements StatEventTaskLogProvider {
 	}
 
     @Override
-    public StatEventTaskLog findByTaskDate(Date taskDate) {
+    public List<StatEventTaskLog> findByTaskDate(Date taskDate) {
         return context().selectFrom(Tables.EH_STAT_EVENT_TASK_LOGS)
                 .where(Tables.EH_STAT_EVENT_TASK_LOGS.TASK_DATE.eq(taskDate))
-                .fetchAnyInto(StatEventTaskLog.class);
+                .fetchInto(StatEventTaskLog.class);
+    }
+
+    @Override
+    public void deleteEventTaskLogByDate(Date date) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_STAT_EVENT_TASK_LOGS)
+                .where(Tables.EH_STAT_EVENT_TASK_LOGS.TASK_DATE.eq(date))
+                .execute();
     }
 
     private EhStatEventTaskLogsDao rwDao() {

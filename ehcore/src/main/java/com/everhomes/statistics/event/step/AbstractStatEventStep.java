@@ -1,8 +1,9 @@
 // @formatter:off
 package com.everhomes.statistics.event.step;
 
-import com.everhomes.statistics.event.StatEventExecution;
 import com.everhomes.statistics.event.StatEventStep;
+import com.everhomes.statistics.event.StatEventStepExecution;
+import com.everhomes.statistics.event.StatEventTaskExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,34 +15,57 @@ abstract public class AbstractStatEventStep implements StatEventStep {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStatEventStep.class);
 
     @Override
-    public void execute(StatEventExecution execution) {
+    public void execute(StatEventTaskExecution execution) {
         if (thisStepFinished(execution)) {
-            LOGGER.warn("task [{}] step [{}] already finished", execution.getTaskDate(), thisStepName());
+            LOGGER.warn("task [{}] step [{}] already finished", execution.getTaskDate(), getStepName());
             return;
         }
 
-        before(execution);
-        doExecute(execution);
-        after(execution);
+        try {
+            before(execution);
+            doExecute(getStepException(execution));
+            after(getStepException(execution));
+        } catch (Throwable t) {
+            error(getStepException(execution), t);
+            throw t;
+        }
     }
 
-    protected void before(StatEventExecution execution) {
-        //
+    private void error(StatEventStepExecution stepExecution, Throwable t) {
+        stepExecution.setT(t);
+        stepExecution.setStatus(StatEventStepExecution.Status.ERROR);
+        stepExecution.setEndTime(System.currentTimeMillis());
     }
 
-    protected void after(StatEventExecution execution) {
-        execution.getTaskMeta().put(thisStepName(), 1);
+    protected void before(StatEventTaskExecution execution) {
+        StatEventStepExecution stepExecution = execution.getStepExecutionMap().computeIfAbsent(getStepName(), r -> new StatEventStepExecution());
+        stepExecution.setInterval(execution.getInterval());
+        stepExecution.setStatus(StatEventStepExecution.Status.PROCESSING);
+        stepExecution.setParameters(execution.getParameters());
+        stepExecution.setStepName(getStepName());
+        stepExecution.setTaskDate(execution.getTaskDate());
+        stepExecution.setStartTime(System.currentTimeMillis());
     }
 
-    private boolean thisStepFinished(StatEventExecution execution) {
-        return execution.getTaskMeta().get(thisStepName()) != null
-                && execution.getTaskMeta().get(thisStepName()).getClass().isInstance(Integer.class)
-                && execution.getTaskMeta().get(thisStepName()).equals(1);
+    protected void after(StatEventStepExecution stepExecution) {
+        stepExecution.setStatus(StatEventStepExecution.Status.FINISH);
+        stepExecution.setEndTime(System.currentTimeMillis());
     }
 
-    protected String thisStepName() {
+    private boolean thisStepFinished(StatEventTaskExecution execution) {
+        StatEventStepExecution stepExecution = getStepException(execution);
+        return stepExecution != null && stepExecution.getStatus() == StatEventStepExecution.Status.FINISH;
+    }
+
+    @Override
+    public String getStepName() {
         return getClass().getName();
     }
 
-    public abstract void doExecute(StatEventExecution execution);
+    @Override
+    public StatEventStepExecution getStepException(StatEventTaskExecution taskExecution) {
+        return taskExecution.getStepExecutionMap().get(getStepName());
+    }
+
+    public abstract void doExecute(StatEventStepExecution execution);
 }

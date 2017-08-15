@@ -11,7 +11,7 @@ public interface StatEventPortalConfigProvider {
 
 	StatEventPortalConfig findStatEventPortalConfigById(Long id);
 
-    List<StatEventPortalConfig> listPortalTopNavigationBarByStatus(byte configType, byte status);
+    List<StatEventPortalConfig> listStatEventPortalConfigs(byte configType, byte status);
 
     StatEventPortalConfig findPortalConfig(Integer namespaceId, byte configType, String identifier);
 

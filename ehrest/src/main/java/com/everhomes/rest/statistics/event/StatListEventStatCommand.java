@@ -23,9 +23,7 @@ public class StatListEventStatCommand {
     private Long parentId;
     @NotNull
     private String identifier;//
-    @NotNull
     private String ownerType;
-    @NotNull
     private Long ownerId;
     @NotNull
     private Long startDate;

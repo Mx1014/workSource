@@ -15,7 +15,9 @@ public interface StatEventPortalStatisticProvider {
     /**
      * 门户统计结果列表
      */
-    List<StatEventPortalStatistic> listEventPortalStat(Integer namespaceId, Long parentId, Byte statType, Date startDate, Date endDate);
+    List<StatEventPortalStatistic> listEventPortalStatByZeroParentId(Integer namespaceId, Byte statType, Date startDate, Date endDate);
+
+    List<StatEventPortalStatistic> listEventPortalStatByParentId(Integer namespaceId, Long parentId, Byte statType, Date startDate, Date endDate);
 
     /**
      * 根据时间查询identifier为所需的id列表
@@ -25,4 +27,6 @@ public interface StatEventPortalStatisticProvider {
     StatEventPortalStatistic findStatEventPortalStatistic(Integer namespaceId, byte statType, String configName, Date statDate);
 
     StatEventPortalStatistic findStatEventPortalStatistic(Integer namespaceId, byte statType, String ownerType, Long ownerId, Date statDate);
+
+    void deleteEventPortalStatByDate(Date date);
 }

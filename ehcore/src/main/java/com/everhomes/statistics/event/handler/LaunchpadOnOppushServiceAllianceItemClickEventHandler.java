@@ -1,13 +1,13 @@
 // @formatter:off
 package com.everhomes.statistics.event.handler;
 
-import com.everhomes.activity.Activity;
-import com.everhomes.activity.ActivityProivider;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.launchpad.Widget;
 import com.everhomes.statistics.event.StatEventParam;
 import com.everhomes.statistics.event.StatEventStatistic;
 import com.everhomes.util.StringHelper;
+import com.everhomes.yellowPage.ServiceAlliances;
+import com.everhomes.yellowPage.YellowPageProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,23 +16,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 活动运营点击
+ * 服务联盟运营点击
  * Created by xq.tian on 2017/8/7.
  */
 @Component
-public class LaunchpadOnOppushActivityItemClickEventHandler extends AbstractStatEventPortalItemGroupHandler {
+public class LaunchpadOnOppushServiceAllianceItemClickEventHandler extends AbstractStatEventPortalItemGroupHandler {
 
     @Autowired
-    private ActivityProivider activityProivider;
+    private YellowPageProvider yellowPageProvider;
 
     @Override
     public String getEventName() {
-        return LAUNCHPAD_ON_OPPUSH_ACTIVITY_ITEM_CLICK;
+        return LAUNCHPAD_ON_OPPUSH_SERVICE_ALLIANCE_ITEM_CLICK;
     }
 
     @Override
     protected String getItemGroup(String key, Long layoutId) {
-        return "OPPushActivity";
+        return "Gallery";
     }
 
     @Override
@@ -44,17 +44,18 @@ public class LaunchpadOnOppushActivityItemClickEventHandler extends AbstractStat
     protected StatEventStatistic getEventStat(String identifierParamsValue) {
         StatEventStatistic eventStat = new StatEventStatistic();
 
-        Long topicId = Long.valueOf(identifierParamsValue);
-        Activity activity = activityProivider.findSnapshotByPostId(topicId);
-        if (activity == null) {
+        Long serviceAllianceId = Long.valueOf(identifierParamsValue);
+
+        ServiceAlliances serviceAlliances = yellowPageProvider.findServiceAllianceById(serviceAllianceId, null, null);
+        if (serviceAlliances == null) {
             return null;
         }
-        eventStat.setOwnerType(EntityType.ACTIVITY.getCode());
-        eventStat.setOwnerId(activity.getId());
+        eventStat.setOwnerType(EntityType.SERVICE_ALLIANCES.getCode());
+        eventStat.setOwnerId(serviceAllianceId);
 
         Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("activityId", activity.getId());
-        paramMap.put("activitySubject", activity.getSubject());
+        paramMap.put("serviceAllianceId", serviceAllianceId);
+        paramMap.put("serviceAllianceName", serviceAlliances.getName());
 
         eventStat.setParam(StringHelper.toJsonString(paramMap));
         return eventStat;
@@ -63,7 +64,7 @@ public class LaunchpadOnOppushActivityItemClickEventHandler extends AbstractStat
     @Override
     protected StatEventParam getIdentifierParam(List<StatEventParam> params) {
         for (StatEventParam param : params) {
-            if (param.getParamKey().equals("topicId")) {
+            if (param.getParamKey().equals("id")) {
                 return param;
             }
         }

@@ -109,5 +109,6 @@ public interface ConfigConstants {
     
     public static final String BIZ_SEARCH_SHOPS_API = "biz.search.shops.api";
     public static final String QUALITY_STAT_CORN = "quality.stat.corn";
+    public static final String BIZ_COMMONDITY_DETAIL_API = "biz.queryCommodityDetail.api";
 
 }

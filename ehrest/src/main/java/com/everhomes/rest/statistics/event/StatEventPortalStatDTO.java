@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerType: ownerType</li>
  *     <li>ownerId: ownerId</li>
  *     <li>widget: widget {@link com.everhomes.rest.launchpad.Widget}</li>
- *     <li>itemGroup: itemGroup</li>
+ *     <li>contentType: 只有类型是OPPush时才有这个值</li>
  * </ul>
  */
 public class StatEventPortalStatDTO {
@@ -24,7 +24,7 @@ public class StatEventPortalStatDTO {
     private String ownerType;
     private Long ownerId;
     private String widget;
-    private String itemGroup;
+    private String contentType;
 
     public Long getId() {
         return id;
@@ -82,12 +82,12 @@ public class StatEventPortalStatDTO {
         this.widget = widget;
     }
 
-    public String getItemGroup() {
-        return itemGroup;
+    public String getContentType() {
+        return contentType;
     }
 
-    public void setItemGroup(String itemGroup) {
-        this.itemGroup = itemGroup;
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     @Override

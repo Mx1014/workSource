@@ -1,22 +1,14 @@
 // @formatter:off
 package com.everhomes.statistics.event.handler;
 
-import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.statistics.event.StatEventPortalConfigType;
 import com.everhomes.rest.statistics.event.StatEventPortalStatType;
-import com.everhomes.rest.statistics.event.StatEventStatTimeInterval;
-import com.everhomes.server.schema.tables.EhStatEventPortalConfigs;
-import com.everhomes.statistics.event.*;
+import com.everhomes.statistics.event.StatEventParam;
+import com.everhomes.statistics.event.StatEventPortalStatistic;
+import com.everhomes.statistics.event.StatEventStatistic;
 import com.everhomes.util.StringHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,20 +17,8 @@ import java.util.Map;
  * 顶部工具栏
  * Created by xq.tian on 2017/8/7.
  */
-@Component(AbstractStatEventHandler.EVENT_HANDLER_PREFIX + AbstractStatEventHandler.PORTAL_ON_NAVIGATION_CLICK)
-public class PortalOnNavigationClickEventHandler extends AbstractStatEventHandler {
-
-    @Autowired
-    private StatEventPortalStatisticProvider statEventPortalStatisticProvider;
-
-    @Autowired
-    private StatEventPortalConfigProvider statEventPortalConfigProvider;
-
-    @Autowired
-    private StatEventParamProvider statEventParamProvider;
-
-    @Autowired
-    private StatEventParamLogProvider statEventParamLogProvider;
+@Component
+public class PortalOnNavigationClickEventHandler extends AbstractStatEventPortalConfigHandler {
 
     @Override
     public String getEventName() {
@@ -46,6 +26,35 @@ public class PortalOnNavigationClickEventHandler extends AbstractStatEventHandle
     }
 
     @Override
+    protected StatEventPortalStatType getStatType() {
+        return StatEventPortalStatType.TOP_NAVIGATION;
+    }
+
+    @Override
+    protected StatEventPortalConfigType getConfigType() {
+        return StatEventPortalConfigType.TOP_NAVIGATION;
+    }
+
+    @Override
+    protected StatEventStatistic getEventStat(String identifierParamsValue, StatEventPortalStatistic portalStat) {
+        StatEventStatistic eventStat = new StatEventStatistic();
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("topNavigationName", portalStat.getDisplayName());
+
+        eventStat.setParam(StringHelper.toJsonString(paramMap));
+        return eventStat;
+    }
+
+    protected StatEventParam getIdentifierParam(List<StatEventParam> params) {
+        for (StatEventParam p : params) {
+            if (p.getParamKey().equals("identifier")) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /*@Override
     public List<StatEventStatistic> process(Namespace namespace, StatEvent statEvent, LocalDate statDate) {
         Timestamp minTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MIN));
         Timestamp maxTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MAX));
@@ -79,10 +88,16 @@ public class PortalOnNavigationClickEventHandler extends AbstractStatEventHandle
             // 拿到底部导航栏的配置config
             StatEventPortalConfig portalConfig = statEventPortalConfigProvider.findPortalConfig(
                     namespace.getId(), StatEventPortalConfigType.TOP_NAVIGATION.getCode(), entry.getKey());
+            if (portalConfig == null) {
+                continue;
+            }
 
             // 根据配置名称拿到底部导航栏的今天的统计数据
             StatEventPortalStatistic portalStat = statEventPortalStatisticProvider.findStatEventPortalStatistic(
                     namespace.getId(), StatEventPortalStatType.TOP_NAVIGATION.getCode(), portalConfig.getConfigName(), date);
+            if (portalStat == null) {
+                continue;
+            }
 
             StatEventStatistic eventStat = new StatEventStatistic();
 
@@ -116,5 +131,5 @@ public class PortalOnNavigationClickEventHandler extends AbstractStatEventHandle
             statList.add(eventStat);
         }
         return statList;
-    }
+    }*/
 }
