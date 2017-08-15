@@ -136,10 +136,10 @@ public class ActivityController extends ControllerBase {
      * <b>URL: /activity/importSignupInfo</b>
      */
     @RequestMapping("importSignupInfo")
-    @RestReturn(value=ImportSignupErrorDTO.class)
+    @RestReturn(value=ImportSignupInfoResponse.class)
     public RestResponse importSignupInfo(@Valid ImportSignupInfoCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
-        List<ImportSignupErrorDTO> errorDTOS = activityService.importSignupInfo(cmd, files);
-    	RestResponse response = new RestResponse(errorDTOS);
+        ImportSignupInfoResponse importSignupInfoResponse = activityService.importSignupInfo(cmd, files);
+    	RestResponse response = new RestResponse(importSignupInfoResponse);
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	return response;

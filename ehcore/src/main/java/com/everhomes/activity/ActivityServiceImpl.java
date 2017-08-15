@@ -990,7 +990,7 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public List<ImportSignupErrorDTO> importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
+	public ImportSignupInfoResponse importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
 		List<ImportSignupErrorDTO> errorDTOS = new ArrayList<>();
 
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
@@ -1022,8 +1022,9 @@ public class ActivityServiceImpl implements ActivityService {
 			});
 			return null;
 		});
-
-		return errorDTOS;
+		ImportSignupInfoResponse response = new ImportSignupInfoResponse();
+		response.setDtos(errorDTOS);
+		return response;
 	}
 
 	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, List<ImportSignupErrorDTO> errorDTOS, Long activityId) {
