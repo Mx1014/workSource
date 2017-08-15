@@ -28,7 +28,8 @@ public enum FlowOwnerType {
 	EhOrganizations("EhOrganizations"), 
     WAREHOUSE_REQUEST("WAREHOUSEREQUEST"),
     LEASE_PROMOTION("LEASE_PROMOTION"),
-    TALENT_REQUEST("TALENT_REQUEST")
+    TALENT_REQUEST("TALENT_REQUEST"),
+    CUSTOM_REQUEST("CUSTOM_REQUEST")
     ;
 
 	private String code;
