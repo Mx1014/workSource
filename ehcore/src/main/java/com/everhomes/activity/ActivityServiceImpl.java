@@ -994,7 +994,8 @@ public class ActivityServiceImpl implements ActivityService {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ActivityRoster> rostersTemp = getRostersFromExcel(files[0]);
+			List<ImportSignupErrorDTO> errorDTOS = new ArrayList<>();
+			List<ActivityRoster> rostersTemp = getRostersFromExcel(files[0], errorDTOS);
 			
 			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 			//检查是否超过报名人数限制, add by tt, 20161012
@@ -1022,7 +1023,7 @@ public class ActivityServiceImpl implements ActivityService {
 		
 	}
 
-	private List<ActivityRoster> getRostersFromExcel(MultipartFile file) {
+	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, List<ImportSignupErrorDTO> errorDTOS) {
 		@SuppressWarnings("rawtypes")
 		ArrayList rows = processorExcel(file);
 		List<ActivityRoster> rosters = new ArrayList<>();
@@ -1032,15 +1033,12 @@ public class ActivityServiceImpl implements ActivityService {
 				continue;
 			}
 			if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
-				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-	                    ActivityServiceErrorCode.ERROR_PHONE, "invalid phone " + row.getA());
+				continue;
 			}
 			
 			//新增条件真实姓名必填  add by yanjun 20170628
 			if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
 				continue;
-//				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-//	                    ActivityServiceErrorCode.ERROR_INVALID_REALNAME, "invalid realname " + row.getB());
 			}
 			
 			User user = getUserFromPhone(row.getA().trim());
