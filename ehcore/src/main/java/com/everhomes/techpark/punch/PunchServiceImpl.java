@@ -81,6 +81,7 @@ import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.poll.ProcessStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -4794,7 +4795,7 @@ public class PunchServiceImpl implements PunchService {
 						pdl.setAfternoonPunchStatus(dayLog.getAfternoonStatus());
 						pdl.setMorningPunchStatus(dayLog.getMorningStatus());
 						//TODO: 对于请假
-						pdl.setStatuString(statusToString(dayLog.getStatus()));
+						pdl.setStatuString( processStatus(dayLog.getStatusList()));
 						userMonthLogsDTO.getPunchLogsDayList().add(pdl);
 						if (dayLog.getExceptionStatus() != null && ExceptionStatus.EXCEPTION.equals(ExceptionStatus.fromCode(dayLog.getExceptionStatus()))){
 							exceptionStatus = ExceptionStatus.EXCEPTION;
@@ -4980,76 +4981,83 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return response;
 	}
+	String processStatus(String statuList ){
+		String result = "";
+		if(statuList.contains(PunchConstants.STATUS_SEPARATOR)){
+			String[] statulist = StringUtils.split(statuList, PunchConstants.STATUS_SEPARATOR);
+			for(int i = 0 ;i<statulist.length;i++ ){
+				if(i ==0){
+					result = statusToString( Byte.valueOf(statulist[i]));
+				}else{
+					result = result + PunchConstants.STATUS_SEPARATOR + statusToString( Byte.valueOf(statulist[i]));
+				}
+			}
+		}
+		else{
+			result = statusToString(Byte.valueOf(statuList));
+		}
+		return result;
+	}
 	public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r ){
 		PunchDayDetailDTO dto =  ConvertHelper.convert(r,PunchDayDetailDTO.class);
-			if(r.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)){
-				String[] statulist = StringUtils.split(r.getStatusList(), PunchConstants.STATUS_SEPARATOR);
-				for(int i = 0 ;i<statulist.length;i++ ){
-					if(i ==0){
-						dto.setStatuString(statusToString( Byte.valueOf(statulist[i])));
-					}else{
-						dto.setStatuString(dto.getStatuString() + PunchConstants.STATUS_SEPARATOR + statusToString( Byte.valueOf(statulist[i])));
-					}
-				}
-			}
-			else{
-				dto.setStatuString(statusToString(r.getStatus()));
-			}
+		
+			 
+		dto.setStatuString(processStatus(r.getStatusList())); 
 			
 			
-			Organization punchGroup = organizationProvider.findOrganizationById(r.getPunchOrganizationId()); 
-			dto.setPunchOrgName(punchGroup.getName());
-			
-			
-			if(null!= r.getArriveTime())
-				dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
+		Organization punchGroup = organizationProvider.findOrganizationById(r.getPunchOrganizationId()); 
+		dto.setPunchOrgName(punchGroup.getName());
+		
+		
+		if(null!= r.getArriveTime())
+			dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
 
-			if(null!= r.getLeaveTime())
-				dto.setLeaveTime( convertTimeToGMTMillisecond(r.getLeaveTime()));
+		if(null!= r.getLeaveTime())
+			dto.setLeaveTime( convertTimeToGMTMillisecond(r.getLeaveTime()));
 
-			if(null!= r.getWorkTime())
-				dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
+		if(null!= r.getWorkTime())
+			dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
 
-			if(null!= r.getNoonLeaveTime())
-				dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
+		if(null!= r.getNoonLeaveTime())
+			dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
 
-			if(null!= r.getAfternoonArriveTime())
-				dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
-			if(null!= r.getPunchDate())
-				dto.setPunchDate(r.getPunchDate().getTime());
-			dto.setPunchTimesPerDay(r.getPunchTimesPerDay());
-			// modify by wh 2017年6月22日 现在都是挂总公司下,用户未必都能通过这种方式查到
+		if(null!= r.getAfternoonArriveTime())
+			dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
+		if(null!= r.getPunchDate())
+			dto.setPunchDate(r.getPunchDate().getTime());
+		dto.setPunchTimesPerDay(r.getPunchTimesPerDay());
+		// modify by wh 2017年6月22日 现在都是挂总公司下,用户未必都能通过这种方式查到
 //			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
-			
-			List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/"+r.getEnterpriseId(),dto.getUserId() );
-			if (null != organizationMembers && organizationMembers.size() >0) {
-				dto.setUserName(organizationMembers.get(0).getContactName());
-				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), organizationMembers.get(0).getOrganizationId());
-				if(null != dept){
-					dto.setDeptName(dept.getName());
-				}
+		
+		List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/"+r.getEnterpriseId(),dto.getUserId() );
+		if (null != organizationMembers && organizationMembers.size() >0) {
+			dto.setUserName(organizationMembers.get(0).getContactName());
+			OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), organizationMembers.get(0).getOrganizationId());
+			if(null != dept){
+				dto.setDeptName(dept.getName());
+			}
 
-				   
+			   
 //				dto.setUserPhoneNumber(member.getContactToken());
-				// dto.setUserDepartment(enterpriseContact.get);
-				PunchExceptionApproval approval = punchProvider
-						.getExceptionApproval(dto.getUserId(),
-								 r.getEnterpriseId() ,
-								new java.sql.Date(dto.getPunchDate()));
-				if (approval != null) {
-					dto.setApprovalStatus(approval
-							.getApprovalStatus());
-					dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
-					dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
+			// dto.setUserDepartment(enterpriseContact.get);
+			PunchExceptionApproval approval = punchProvider
+					.getExceptionApproval(dto.getUserId(),
+							 r.getEnterpriseId() ,
+							new java.sql.Date(dto.getPunchDate()));
+			if (approval != null) {
+				dto.setApprovalStatus(approval
+						.getApprovalStatus());
+				dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
+				dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
 //					OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(approval.getOperatorUid(), cmd.getEnterpriseId());
 //					if(null != operator )
 //						dto.setOperatorName(operator.getContactName());
-				} else {
-					//do nothing
+			} else {
+				//do nothing
 //					dto.setApprovalStatus((byte) 0);
-				}
 			}
-			return dto;
+		}
+		return dto;
 	}
 
 	/**
@@ -6128,7 +6136,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	
 	@Override
-	public List<PunchSchedulingEmployeeDTO>  importPunchScheduling(ListPunchRulesCommonCommand cmd ,MultipartFile[] files) {
+	public List<PunchSchedulingEmployeeDTO>  importPunchScheduling(  MultipartFile[] files) {
 		// TODO Auto-generated method stub
 		 
 		ArrayList resultList = new ArrayList();
@@ -6584,7 +6592,7 @@ public class PunchServiceImpl implements PunchService {
 		dto.setId(pr.getPunchOrganizationId());
 		Integer totalCount = uniongroupService.countUnionGroupMemberDetailsByOrgId(r.getNamespaceId(),r.getId());
 		dto.setEmployeeCount(totalCount);
-		//TODO: 关联 人员和机构
+		// 关联 人员和机构
 		GetUniongroupConfiguresCommand cmd1 = new GetUniongroupConfiguresCommand();
 		cmd1.setGroupId(r.getId());
 		List<UniongroupConfiguresDTO> resp = uniongroupService.getConfiguresListByGroupId(cmd1);

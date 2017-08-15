@@ -199,7 +199,7 @@ public interface PunchService {
 	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
 			HttpServletResponse response);
 
-	public List<PunchSchedulingEmployeeDTO> importPunchScheduling(ListPunchRulesCommonCommand cmd, MultipartFile[] files);
+	public List<PunchSchedulingEmployeeDTO> importPunchScheduling(  MultipartFile[] files);
 
 	public void updatePunchRuleMap(PunchRuleMapDTO cmd);
 

@@ -407,8 +407,8 @@ public class PunchAdminController extends ControllerBase {
      */
     @RequestMapping("importPunchScheduling")
     @RestReturn(value = PunchSchedulingEmployeeDTO.class,collection = true)
-    public RestResponse importPunchScheduling(@Valid ListPunchRulesCommonCommand cmd , @RequestParam(value = "attachment") MultipartFile[] files) {
-    	List<PunchSchedulingEmployeeDTO> result = punchService.importPunchScheduling(cmd , files);
+    public RestResponse importPunchScheduling(@Valid   @RequestParam(value = "attachment") MultipartFile[] files) {
+    	List<PunchSchedulingEmployeeDTO> result = punchService.importPunchScheduling( files);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
