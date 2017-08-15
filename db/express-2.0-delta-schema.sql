@@ -76,3 +76,6 @@ ALTER TABLE `eh_express_orders`	ADD COLUMN `invoice_head` VARCHAR(512) COMMENT '
 -- 这里华润需要处理老数据，赋值为 send_type_name =  标准快递
 ALTER TABLE `eh_express_orders`	ADD COLUMN `send_type_name` VARCHAR(128) COMMENT '业务类型名称(/（华润）标准快递/（国贸）EMS标准快递/（国贸）邮政快递包裹/（国贸）同城信筒快件)' AFTER `send_type`;
 ALTER TABLE `eh_express_orders`	ADD COLUMN `quantity_and_weight` VARCHAR(128) COMMENT '数量和重量' AFTER `send_type_name`;
+
+--
+ALTER TABLE `eh_express_orders` ADD COLUMN `status_desc` TEXT COMMENT '状态描述信息，国贸ems使用' AFTER `status`;

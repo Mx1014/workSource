@@ -2,9 +2,6 @@
 package com.everhomes.express.guomao;
 
 public class GuoMaoEMSResponseEntity<T> {
-	private String requestno;
-	private String count;
-	private T mailnums;
 	private String success;
 	private String errorMsg;
 	private String errorCode;
@@ -19,24 +16,6 @@ public class GuoMaoEMSResponseEntity<T> {
 	}
 	public void setErrorCode(String errorCode) {
 		this.errorCode = errorCode;
-	}
-	public String getRequestno() {
-		return requestno;
-	}
-	public void setRequestno(String requestno) {
-		this.requestno = requestno;
-	}
-	public String getCount() {
-		return count;
-	}
-	public void setCount(String count) {
-		this.count = count;
-	}
-	public T getMailnums() {
-		return mailnums;
-	}
-	public void setMailnums(T mailnums) {
-		this.mailnums = mailnums;
 	}
 	public String getSuccess() {
 		return success;

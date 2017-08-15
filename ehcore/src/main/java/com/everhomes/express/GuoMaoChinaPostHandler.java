@@ -357,4 +357,9 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		 }
 	}
 
+	@Override
+	public void orderStatusCallback(ExpressOrder expressOrder, ExpressCompany expressCompany, Map<String,String> params) {
+		
+	}
+
 }

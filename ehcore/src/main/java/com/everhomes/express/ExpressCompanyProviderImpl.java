@@ -109,4 +109,19 @@ public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public ExpressCompany findExpressCompanyByAppKeyAndAuth(String appKey, String authorization) {
+		 List<ExpressCompany> list = getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANIES)
+				.where(Tables.EH_EXPRESS_COMPANIES.APP_KEY.eq(appKey))
+				.and(Tables.EH_EXPRESS_COMPANIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_EXPRESS_COMPANIES.AUTHORIZATION.eq(authorization))
+				.and(Tables.EH_EXPRESS_COMPANIES.PARENT_ID.eq(0L))
+				.orderBy(Tables.EH_EXPRESS_COMPANIES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));
+		 if(list!=null && list.size()>0){
+			 return list.get(0);
+		 }
+		 return null;
+	}
 }

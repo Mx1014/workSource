@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.namespace.Namespace;
@@ -43,9 +43,8 @@ import com.everhomes.util.RuntimeErrorException;
  */
 @RestDoc(value = "Express Auth Controller", site = "core")
 @RestController
-@RequestMapping("/expressauth")
-public class ExpressAuthController {// extends ControllerBase
-	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressAuthController.class);
+public class ExpressThirdCallController {// extends ControllerBase
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressThirdCallController.class);
     
     private final static String NS = "ns";
     private final static String COMMUNITY = "community";
@@ -66,7 +65,10 @@ public class ExpressAuthController {// extends ControllerBase
     private UserService userService;
     
     @Autowired
-    private ConfigurationProvider configurationProvider;
+    private ExpressCompanyProvider expressCompanyProvider;
+    
+    @Autowired
+    private ExpressOrderProvider expressOrderProvider;
     
 	@Autowired
 	private AppNamespaceMappingProvider appNamespaceMappingProvider;
@@ -82,7 +84,7 @@ public class ExpressAuthController {// extends ControllerBase
 	 * <b>URL: /expressauth/authReq</b>
 	 * <p>请求国贸授权。</p>
 	 */
-	@RequestMapping("authReq")
+	@RequestMapping("/expressauth/authReq")
 	public void authReq(HttpServletRequest request, HttpServletResponse response) throws Exception {
 	    long startTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
@@ -116,6 +118,51 @@ public class ExpressAuthController {// extends ControllerBase
         }
         return ;
 	}
+	
+	/**
+	 * <b>URL: /express/callback</b>
+	 * <p>请求国贸授权。</p>
+	 */
+	@RequestMapping("/express/callback")
+	public void expressCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		long startTime = System.currentTimeMillis();
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.info("Process express callback request(req calculate), startTime={}", startTime);
+		}
+		Map<String, String> params = getRequestParams(request);
+		String authorization = params.get("authorization");
+		String appKey = params.get("app_key");
+		String txLogisticID = params.get("txLogisticID");
+		if(authorization == null || appKey == null || authorization.length()==0
+				|| appKey.length() == 0 || txLogisticID == null || txLogisticID.length()==0){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"authorization = "+authorization+", app_key = "+appKey+", txLogisticID = "+txLogisticID);
+		}
+		ExpressCompany company = expressCompanyProvider.findExpressCompanyByAppKeyAndAuth(appKey,authorization);
+		if(company == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown authorization = "+authorization+", app_key = "+appKey);
+		}
+		ExpressOrder order = expressOrderProvider.findExpressOrderByOrderNo(txLogisticID);
+		if(order == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown txLogisticID = "+txLogisticID);
+		}
+		ExpressHandler handler = getExpressHandler(company.getId());
+		handler.orderStatusCallback(order, company, params);
+	}
+	
+	private ExpressHandler getExpressHandler(Long expressCompanyId) {
+		ExpressCompany expressCompany = findTopExpressCompany(expressCompanyId);
+		return PlatformContext.getComponent(ExpressHandler.EXPRESS_HANDLER_PREFIX+expressCompany.getId());
+	}
+	
+	private ExpressCompany findTopExpressCompany(Long expressCompanyId) {
+		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(expressCompanyId);
+		if (expressCompany.getParentId().longValue() != 0L) {
+			return findTopExpressCompany(expressCompany.getParentId());
+		}
+		return expressCompany;
+	}
+
 	/**
 	 * 参数校验
 	 */

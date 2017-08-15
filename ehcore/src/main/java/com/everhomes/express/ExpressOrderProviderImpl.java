@@ -126,4 +126,16 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public ExpressOrder findExpressOrderByOrderNo(String orderNo) {
+		List<ExpressOrder> list = getReadOnlyContext().select().from(Tables.EH_EXPRESS_ORDERS)
+		.where(Tables.EH_EXPRESS_ORDERS.ORDER_NO.eq(orderNo))
+		.fetch()
+		.map(r->ConvertHelper.convert(r, ExpressOrder.class));
+		if(list != null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
+	}
 }

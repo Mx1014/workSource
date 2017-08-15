@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.util.Map;
+
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 
 public interface ExpressHandler {
@@ -22,5 +24,10 @@ public interface ExpressHandler {
 	void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany);
 	
 	void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany);
+	
+	/**
+	 * 国贸项目EMS快递状态回调
+	 */
+	void orderStatusCallback(ExpressOrder expressOrder, ExpressCompany expressCompany, Map<String,String> params);
 	
 }

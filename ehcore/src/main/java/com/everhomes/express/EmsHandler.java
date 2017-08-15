@@ -12,6 +12,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -350,23 +351,19 @@ public class EmsHandler implements ExpressHandler {
 
 	@Override
 	public void createOrder(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-		// TODO Auto-generated method stub
 		
 	}
-	
-	
-	
-	
+
+	@Override
+	public void orderStatusCallback(ExpressOrder expressOrder, ExpressCompany expressCompany, Map<String,String> params) {
+	}
 }
