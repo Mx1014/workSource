@@ -339,7 +339,15 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
                 .fetchOneInto(Integer.class);
     }
-
+    @Override
+    public Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.select(DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))
+                .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .fetchOneInto(Integer.class);
+    }
     @Override
     public List<Object[]> listUniongroupMemberDetailsCount(Integer namespaceId, List<Long> groupIds, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

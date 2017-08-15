@@ -6591,7 +6591,7 @@ public class PunchServiceImpl implements PunchService {
 		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
 		dto.setGroupName(r.getName());
 		dto.setId(pr.getPunchOrganizationId());
-		Integer totalCount = uniongroupService.countUnionGroupMemberDetailsByOrgId(r.getNamespaceId(),r.getId());
+		Integer totalCount = uniongroupConfigureProvider.countUnionGroupMemberDetailsByGroupId(r.getNamespaceId(),r.getId());
 		dto.setEmployeeCount(totalCount);
 		// 关联 人员和机构
 		GetUniongroupConfiguresCommand cmd1 = new GetUniongroupConfiguresCommand();

@@ -61,4 +61,6 @@ public interface UniongroupConfigureProvider {
     List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId);
 
     List listDetailNotInUniongroup(Integer namespaceId, Long organizationId);
+
+	Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId);
 }
