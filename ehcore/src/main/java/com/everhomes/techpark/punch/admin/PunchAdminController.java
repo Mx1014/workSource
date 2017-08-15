@@ -421,8 +421,8 @@ public class PunchAdminController extends ControllerBase {
      */
     @RequestMapping("testimportPunchScheduling")
     @RestReturn(value = String.class)
-    public RestResponse testimportPunchScheduling(@Valid ListPunchRulesCommonCommand cmd , @RequestParam(value = "_attachment_file") MultipartFile[] files) {
-    	punchService.importPunchScheduling(cmd , files);
+    public RestResponse testimportPunchScheduling( @RequestParam(value = "_attachment_file") MultipartFile[] files) {
+    	punchService.importPunchScheduling( files);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
