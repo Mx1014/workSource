@@ -136,6 +136,7 @@ import com.everhomes.rest.techpark.punch.PunchCountDTO;
 import com.everhomes.rest.techpark.punch.PunchExceptionDTO;
 import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
 import com.everhomes.rest.techpark.punch.PunchGeoPointDTO;
+import com.everhomes.rest.techpark.punch.PunchHommizationType;
 import com.everhomes.rest.techpark.punch.PunchLogDTO;
 import com.everhomes.rest.techpark.punch.PunchLogsDay;
 import com.everhomes.rest.techpark.punch.PunchLogsMonthList;
@@ -6430,9 +6431,14 @@ public class PunchServiceImpl implements PunchService {
         			ptr.setDaySplitTimeLong(28*3600*1000L);
         		}else{
         			//排班制 是下班时间+弹性时间+结束打卡时间
-        			ptr.setDaySplitTimeLong(timeRule.getPunchTimeIntervals().get(timeRule.getPunchTimeIntervals().size()-1).getLeaveTime()
-        					+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime())
-        					+timeRule.getEndPunchTime());
+        			if(timeRule.getHommizationType().equals(PunchHommizationType.LATEARRIVE_LATELEAVE.getCode()))
+	        			ptr.setDaySplitTimeLong(timeRule.getPunchTimeIntervals().get(timeRule.getPunchTimeIntervals().size()-1).getLeaveTime()
+	        					+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime())
+	        					+timeRule.getEndPunchTime());
+        			else {
+        				ptr.setDaySplitTimeLong(timeRule.getPunchTimeIntervals().get(timeRule.getPunchTimeIntervals().size()-1).getLeaveTime()
+	        					+timeRule.getEndPunchTime());
+        			}
         		}
         		if(timeRule.getPunchTimeIntervals().size()==1){
         			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
