@@ -190,7 +190,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         AddSalaryGroupResponse response = new AddSalaryGroupResponse();
         Long salaryOrgId = null;
-        if (!cmd.getSalaryGroupEntity().isEmpty()) {
+        if (cmd.getSalaryGroupEntity() != null) {
             Long groupId;
 
             if (StringUtils.isEmpty(cmd.getSalaryGroupId())) {
@@ -397,8 +397,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         //  存储所有薪酬组 id
         List<Long> salaryGroupIds = organizations.stream().map(r -> {
-            Long salaryGroupId = r.getId();
-            return salaryGroupId;
+            return r.getId();
         }).collect(Collectors.toList());
 
         //  获取公司总人数
@@ -655,21 +654,23 @@ public class SalaryServiceImpl implements SalaryService {
                     dto.setEditableFlag(r.getEditableFlag());
                 if (!StringUtils.isEmpty(r.getNumberType()))
                     dto.setNumberType(r.getNumberType());
-                dto.setGroupEntityId(r.getId());
+                 dto.setGroupEntityId(r.getId());
                 dto.setOriginEntityId(r.getOriginEntityId());
                 dto.setGroupEntityName(r.getName());
                 dto.setSalaryValue(r.getDefaultValue());
 
-                //  为对应字段赋值
-                if (r.getType().equals(SalaryEntityType.TEXT.getCode())) {
+                //  信息模板1 的字段需要自动获取
+                if (r.getType().equals(SalaryEntityType.TEXT.getCode()) && r.getTemplateName().equals("信息模板1")) {
                     dto.setSalaryValue(processSalaryValue(r.getOriginEntityId(), cmd.getDetailId()));
                     dto.setId(r.getId());
                 } else {
                     if (originVals != null) {
                         for (int i = 0; i < originVals.size(); i++) {
-                            //  若是数值类则直接赋值，若是公式则依然返回公式
+                            //  1.信息模板2类, numberType 为 null 依然需要赋值
+                            //  2.数值类, numberType 为 value 需要赋值
+                            //  3.数值类, numberType 为 formula 则不需要赋值
                             if (r.getName().equals(originVals.get(i).getGroupEntityName())
-                                    && r.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
+                                    && !SalaryEntityNumberType.FORMULA.getCode().equals(r.getNumberType())) {
                                 dto.setSalaryValue(originVals.get(i).getSalaryValue());
                                 dto.setId(originVals.get(i).getId());
                                 break;
@@ -686,30 +687,30 @@ public class SalaryServiceImpl implements SalaryService {
 
     //  变更员工薪酬组
     @Override
-    public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd){
+    public void updateSalaryEmployeesGroup(UpdateSalaryEmployeesGroupCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		//现在先取到现在的薪酬批次
+
+        //现在先取到现在的薪酬批次
         //薪酬批次和cmd中的比较,如果不一样需要刷,一样,不刷
         //删除之前批次的
 
 
         //  1.查询该人员之前的 salaryGroupId 并保存
-        UniongroupMemberDetailsDTO dto = this.uniongroupService.findUniongroupMemberDetailByDetailId(UserContext.getCurrentNamespaceId(),cmd.getDetailId());
-        Long oldSalaryGroupId = dto.getGroupId();
+        UniongroupMemberDetailsDTO dto = this.uniongroupService.findUniongroupMemberDetailByDetailId(UserContext.getCurrentNamespaceId(), cmd.getDetailId());
 
-	    //  2.更新该员工在组织架构的关联及configure
-        this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(),cmd.getDetailId(),cmd.getSalaryGroupId());
+        //  2.更新该员工在组织架构的关联及configure
+        this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(), cmd.getDetailId(), cmd.getSalaryGroupId());
 
         //  3.删除原有的薪酬设定
-        List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(),cmd.getOwnerType(),cmd.getOwnerId());
-        if(!StringUtils.isEmpty(originVals) && originVals.size() > 0) {
+        List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByDetailId(cmd.getDetailId(), cmd.getOwnerType(), cmd.getOwnerId());
+        if (!StringUtils.isEmpty(originVals) && originVals.size() > 0) {
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupIdDetailId(originVals.get(0).getGroupId(),
                     originVals.get(0).getUserDetailId(), cmd.getOwnerType(), cmd.getOwnerId());
         }
 
         //  4.同步该人员之前的薪酬组数据
-        recaculateGroupPeriod(originVals.get(0).getGroupId(),true);
+        if (dto != null)
+            recaculateGroupPeriod(dto.getGroupId(), true);
 
         //  5.同步该人员修改后的薪酬组数据
         recaculateGroupPeriod(cmd.getSalaryGroupId(), true);
@@ -768,7 +769,6 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public void addToOrganizationSalaryGroup(AddToOrganizationSalaryGroupCommand cmd) {
 
-        System.out.println(DateHelper.currentGMTTime());
         //  通过组织架构的接口来实现人员的添加
         SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
         command.setGroupId(cmd.getSalaryGroupId());
@@ -801,11 +801,9 @@ public class SalaryServiceImpl implements SalaryService {
 
         // 3.将人员添加至组织架构的薪酬组
         this.uniongroupService.saveUniongroupConfigures(command);
-        System.out.println(DateHelper.currentGMTTime());
 
         //计算之前六个月的period
         recaculateGroupPeriod(cmd.getSalaryGroupId(), true);
-        System.out.println(DateHelper.currentGMTTime());
     }
 
     /******* 根据产品需求，做出的修改需要及时同步，此处是重新计算整组数据 *******/
@@ -1200,8 +1198,8 @@ public class SalaryServiceImpl implements SalaryService {
 	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
-/*            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());*/
-            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(cmd.getSalaryGroupId());
+            SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
+            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(salaryGroup.getOrganizationGroupId());
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
             ByteArrayOutputStream out = null;
             XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(results,organization.getName());
@@ -2118,10 +2116,10 @@ public class SalaryServiceImpl implements SalaryService {
             row.createCell(++i).setCellValue(dto.getDepartments());
             row.createCell(++i).setCellValue(dto.getSalaryPeriod());
             row.createCell(++i).setCellValue(dto.getSalaryGroupName());
-            if(null != dto.getPaidMoney())
+            if(null == dto.getPaidMoney())
                 row.createCell(++i).setCellValue("");
             else
-                row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
+                row.createCell(++i).setCellValue(String.valueOf(dto.getPaidMoney()));
 
         }
     }
