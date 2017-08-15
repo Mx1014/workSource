@@ -936,3 +936,8 @@ VALUES ((@max_id := @max_id + 1), 999990, 0, 0, 0, '/home', 'OPPushBiz', 'BIZ_CO
 SELECT max(id) FROM `eh_configurations` INTO @max_id;
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 VALUES ((@max_id := @max_id + 1), 'business.url', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999989&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3fshopcfgId%3d20%23%2fmicroshop%2fhome%3F_k%3Dzlbiz#sign_suffix', 'bussiness url', 999990, '');
+
+--13852 加运营统计-应用统计 add by xiongying
+SET @scope_id = (SELECT MAX FROM `eh_web_menu_scopes`); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id:=@scope_id+1, 41300, '', 'EhNamespaces', 999990, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@scope_id:=@scope_id+1, 41310, '', 'EhNamespaces', 999990, 2);

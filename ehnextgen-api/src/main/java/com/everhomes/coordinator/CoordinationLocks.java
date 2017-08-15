@@ -84,8 +84,7 @@ public enum CoordinationLocks {
 
     USER_APPEAL_LOG("user.appeal.log"),
 
-    BILL_SYNC("bill.sync")
-    ;
+	SALARY_GROUP_LOCK("salary.group");
 
     private String code;
     private CoordinationLocks(String code) {

@@ -348,7 +348,10 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		}
 		
 		log.setFlowButtonId(btn.getFlowButton().getId());
-		log.setFlowNodeId(next.getFlowNode().getId());
+		if(next != null) {
+			log.setFlowNodeId(next.getFlowNode().getId());
+		}
+
 		log.setParentId(0L);
 		log.setFlowUserName(firedUser.getNickName());
 //		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {

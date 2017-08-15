@@ -142,4 +142,20 @@ public class AuthorizationThirdPartyRecordProviderImpl implements AuthorizationT
 		}
 		return null;
 	}
+
+	@Override
+	public AuthorizationThirdPartyRecord findAuthorizationThirdPartyRecordByOrgPhone(String phone, Byte type,
+																				  Integer namespaceId) {
+		List<AuthorizationThirdPartyRecord> list = getReadOnlyContext().select()
+				.from(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS)
+				.where(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.ORGANIZATION_PHONE.eq(phone))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.TYPE.eq(type+""))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_AUTHORIZATION_THIRD_PARTY_RECORDS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.fetch().map(r -> ConvertHelper.convert(r, AuthorizationThirdPartyRecord.class));
+		if(list!=null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
+	}
 }

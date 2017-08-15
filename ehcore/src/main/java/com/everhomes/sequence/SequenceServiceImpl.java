@@ -1494,6 +1494,7 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhYzxSmsLogs.class, Tables.EH_YZX_SMS_LOGS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_YZX_SMS_LOGS.ID.max()).from(Tables.EH_YZX_SMS_LOGS).fetchOne().value1();
         });
+
     }
 
     @SuppressWarnings("rawtypes")

@@ -3622,6 +3622,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	
 	@Override
 	public void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId) {
+        //检测userId是否合法
+        if(userId == null || userId == 0){
+            return;
+        }
+
 		String info = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_JOIN_COMPANY_AUTO_AUTH, "");
 		if(info == null || info.isEmpty()) {
 			if(LOGGER.isInfoEnabled()) {
