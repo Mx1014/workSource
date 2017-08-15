@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.rest.general_approval.*;
@@ -450,22 +451,17 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
 
 		//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
-		ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
-		List<OrganizationCommunity> communityList = null;
-		if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
-			 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-		}
+
 		List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
 				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
 
 					@Override
 					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 							SelectQuery<? extends Record> query) {
-						ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
 						List<OrganizationCommunity> communityList = null;
 						
 						//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
-						if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+						if(EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType())){
 							 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
 							 Condition conditionOR = null;
 							 for (OrganizationCommunity organizationCommunity : communityList) {
@@ -474,11 +470,16 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 								if(conditionOR==null){
 									conditionOR = condition;
 								}else{
-									conditionOR.or(condition);
+									conditionOR = conditionOR.or(condition);
 								}
 							 }
-							 if(conditionOR!=null)
+							 if(conditionOR!=null){
+								 Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()).and(
+										 Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType())
+								 );
+								 conditionOR = conditionOR.or(condition);
 								 query.addConditions(conditionOR);
+							 }
 						}else{
 							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
 									.getOwnerId()));

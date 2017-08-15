@@ -1589,3 +1589,13 @@ update `eh_launch_pad_items` set action_data = replace(action_data, '"payMode":2
 
 -- 更新科兴layout，去除精选热销模块   edit by yanjun 20170725
 UPDATE eh_launch_pad_layouts SET version_code = '2017072501', layout_json = '{"versionCode":"2017072501","versionName":"3.12.2","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Gallery1"},"style":"Gallery","defaultOrder":4,"separatorFlag":1,"separatorHeight":21,"columnCount":2},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Gallery"},"style":"Gallery","defaultOrder":5,"separatorFlag":1,"separatorHeight":21,"columnCount":3}]}' WHERE namespace_id = 999983 AND NAME = 'ServiceMarketLayout';
+
+-- 将“投诉建议”icon名称修改为“投诉与需求” 13742 add by xiongying20170810
+update eh_launch_pad_items set item_label = '投诉与需求' where namespace_id = 999983 and item_label = '投诉建议';
+
+
+
+
+
+
+

@@ -38,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  *<li>refundAmount:退款金额</li>
  *<li>refundTime:退款时间</li>
  *<li>status:订单状态 0: cancel, 1: reject, 2:normal 参考 {@link com.everhomes.rest.activity.ActivityRosterStatus }</li>
+ *<li>signupStatusText:报名状态text</li>
  * </ul>
  */
 public class SignupInfoDTO {
@@ -76,6 +77,7 @@ public class SignupInfoDTO {
     private BigDecimal refundAmount;
     private Timestamp refundTime;
 	private Byte status;
+	private String signupStatusText;
 	
 	public Byte getCreateFlag() {
 		return createFlag;
@@ -290,6 +292,15 @@ public class SignupInfoDTO {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
+
+	public String getSignupStatusText() {
+		return signupStatusText;
+	}
+
+	public void setSignupStatusText(String signupStatusText) {
+		this.signupStatusText = signupStatusText;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

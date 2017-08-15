@@ -132,6 +132,7 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 			flowCase.setRejectCount(flowCase.getRejectCount() + 1);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
 			break;
+		case END_STEP:
 		case ABSORT_STEP:
 			tracker = new FlowEventLog();
 			if(ctx.getOperator() != null) {

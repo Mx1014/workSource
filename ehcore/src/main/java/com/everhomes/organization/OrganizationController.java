@@ -1748,4 +1748,17 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /org/leaveTheJob</b>
+     * <p>人事档案离职</p>
+     */
+    @RequestMapping("syncOrganizationMemberStatus")
+    @RestReturn(value = String.class)
+    public RestResponse syncOrganizationMemberStatus() {
+        ListOrganizationMemberCommandResponse members = this.organizationService.syncOrganizationMemberStatus();
+        RestResponse response = new RestResponse(members);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

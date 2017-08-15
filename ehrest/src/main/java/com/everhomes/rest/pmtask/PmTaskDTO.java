@@ -37,6 +37,8 @@ import com.everhomes.util.StringHelper;
  * <li>revisitTime: 回访时间</li>
  * <li>operatorStar: 操作人员评价分数</li>
  * <li>flowCaseId: 工作流flowCaseId</li>
+ * <li>remarkSource: 处理意见来源</li>
+ * <li>remark: 处理意见</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -74,6 +76,10 @@ public class PmTaskDTO {
 	private Long flowCaseId;
 	
 	private String buildingName;
+
+	private String remarkSource;
+
+	private String remark;
 	
 	@ItemType(PmTaskAttachmentDTO.class)
 	private List<PmTaskAttachmentDTO> attachments;
@@ -265,7 +271,23 @@ public class PmTaskDTO {
 	public void setOperatorStar(Byte operatorStar) {
 		this.operatorStar = operatorStar;
 	}
-	
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public String getRemarkSource() {
+		return remarkSource;
+	}
+
+	public void setRemarkSource(String remarkSource) {
+		this.remarkSource = remarkSource;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

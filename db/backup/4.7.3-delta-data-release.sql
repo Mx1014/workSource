@@ -24,15 +24,15 @@ INSERT INTO `eh_authorization_third_party_buttons` (`id`, `namespace_id`, `owner
 
 -- 文本
 set @eh_locale_strings_id = (select MAX(id) FROM eh_locale_strings);
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'work_flow_title', 'zh_CN', '姓名 : |证件号码 : |个人认证申请|组织机构代码 : |企业联系人 : |企业认证申请');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'personal_back_code_detail', 'zh_CN', '很遗憾，您的认证未成功|1、请检测信息填写是否正确，如填写有误，请重新提交|2、如填写无误，请到携带相关证件管理处核对信息|您已退租，如有疑问请联系客服|恭喜您，成为我们的一员，您承租的地址信息如下|未定义的返回码|园区[|]不存在|园区[|]名称存在多个|地址|请求认证失败！|系统认证异常，已退出家庭');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'organization_back_code_detail', 'zh_CN', '提交信息匹配不成功|1、请检测信息填写是否正确，如填写有误，请重新提交|2、如填写无误，请到携带相关证件管理处核对信息|您已退租，如有疑问请联系客服|认证成功！您承租地址信息如下|未定义的返回码|园区[|]不存在|园区[|]名称存在多个|地址|请求认证失败！|系统认证异常，已退出公司');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'work_flow_content', 'zh_CN', '组织机构代码|企业联系人|企业联系电话|认证反馈结果|手机号|姓名|证件类型|证件号码|认证反馈结果|身份证|未知证件类型');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'third.party.authorization', 'family_detail', 'zh_CN', '家庭信息|您还未加入任何家庭，快去加入吧!|添加住址');
 
 --
@@ -62,7 +62,7 @@ UPDATE `eh_user_activities` AS u SET u.`imei_number` = u.`uid`;
 update eh_service_modules set level = 3 where id = 20811;
 update eh_service_modules set path = '/20000/20800/20811' where id = 20811;
 
-SET @template_id = (SELECT MAX(id) FROM `eh_locale_templates`); 
+SET @template_id = (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@template_id := @template_id + 1), 'equipment.notification', '6', 'zh_CN', '通知过期任务', '“${taskName}”过期未执行，请到后台查看详情', '0');
 
 
@@ -74,17 +74,17 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `appl
 SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(60210,'责任部门配置',60200,'/60000/60200/60210','1','3','2','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40023, '0', 'module.conf.relation.list', '责任部门配置列表查询', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'60210','0',40023,'责任部门配置列表查询','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40024, '0', 'module.conf.relation.create', '创建修改责任部门配置', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'60210','0',40024,'创建修改责任部门配置','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (40026, '0', 'module.conf.relation.delete', '删除责任部门配置', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
     VALUES((@module_privilege_id := @module_privilege_id + 1),'60210','0',40026,'删除责任部门配置','0',NOW());
-    
+
 -- fix 13160 数据交错问题 add by xiongying 20170727
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 VALUES ('20220', '任务列表', '20200', NULL, 'react:/repair-management/task-list/1', '0', '2', '/20000/20230/20220', 'park', '220', '20100', '3', NULL, 'module');
 
 update `eh_web_menu_scopes` set menu_id = 20220 where menu_id = 20210 and owner_id = 999983;
@@ -93,3 +93,10 @@ update `eh_web_menu_scopes` set menu_id = 20220 where menu_id = 20210 and owner_
 SET @max_id = IFNULL((select max(id) from `eh_sms_black_lists`), 1);
 INSERT INTO `eh_sms_black_lists` (`id`, `namespace_id`, `contact_token`, `reason`, `status`, `create_type`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
 VALUES ((@max_id := @max_id + 1), 0, '13111116818', 'manual', 1, 1, 0, NOW(), NULL, NULL);
+
+-- added by janson, add zuolin_v2
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999993, 'aclink.qr_driver_zuolin_inner', 'zuolin_v2', 'use version2 of zuolin driver');
+
+-- added by janson
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999993, 'aclink.qr_image_timeout', '600', '10 minute for image timeout');
+

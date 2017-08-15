@@ -2678,3 +2678,36 @@ SET @namespace_resource_id = (select max(id) from eh_namespace_resources) + 1;
 SET @community_id = (select id from eh_communities where name = '南海科技园' and namespace_id = 999984); 
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(@namespace_resource_id, 999984, 'COMMUNITY', @community_id, UTC_TIMESTAMP());
+
+-- #13421 add by xq.tian 2017/08/03
+SELECT max(id) FROM `eh_launch_pad_items` INTO @max_id;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@max_id := @max_id + 1), 999984, 0, 0, 0, '/home', 'Bizs', 'PARKING_RECHARGE', '停车缴费', 'cs://1/image/aW1hZ2UvTVRwaU9UWmtZVEprT1dKa1pEUXpaRGs0TVdFd05tRTNaakppT0RFeVlqWmtZZw', 1, 1, 30, '', 29, 0, 1, 1, '1', 0, NULL, NULL, NULL, 1, 'park_tourist', 0, 5, NULL, 500, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@max_id := @max_id + 1), 999984, 0, 0, 0, '/home', 'Bizs', 'PARKING_RECHARGE', '停车缴费', 'cs://1/image/aW1hZ2UvTVRwaU9UWmtZVEprT1dKa1pEUXpaRGs0TVdFd05tRTNaakppT0RFeVlqWmtZZw', 1, 1, 30, '', 29, 0, 1, 1, '1', 0, NULL, NULL, NULL, 1, 'pm_admin', 0, 5, NULL, 500, NULL);
+
+-- #13496 add by xq.tian 2017/08/03
+select max(id) from `eh_web_menu_scopes` into @max_id;
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@max_id := @max_id + 1), 56161, '', 'EhNamespaces', 999984, 2);
+
+SELECT max(id) FROM `eh_web_menu_scopes` INTO @menu_sc_id;
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 40800, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 40810, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 40840, '', 'EhNamespaces', 999984, 2);
+SELECT max(id) FROM `eh_web_menu_scopes` INTO @menu_sc_id;
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 50660, '', 'EhNamespaces', 999984, 2);
+SELECT max(id) FROM `eh_web_menu_scopes` INTO @menu_sc_id;
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 41300, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 41310, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy)
+VALUES ((@menu_sc_id := @menu_sc_id + 1), 41320, '', 'EhNamespaces', 999984, 2);
+update eh_web_menus set status=2 where id in(41300, 41310, 41320);
+
+-- 停车缴费 add by sw 20170808
+UPDATE eh_parking_lots set vendor_name = 'JIN_YI' where id = 10007;

@@ -39,7 +39,7 @@ public class OrganizationMemberBasicDTO {
     @NotNull
     private Long id;
 
-    private Long membersId;
+//    private Long membersId;
 
     private Integer namespaceId;
 
@@ -99,13 +99,13 @@ public class OrganizationMemberBasicDTO {
         this.id = id;
     }
 
-    public Long getMembersId() {
+/*    public Long getMembersId() {
         return membersId;
     }
 
     public void setMembersId(Long membersId) {
         this.membersId = membersId;
-    }
+    }*/
 
     public Integer getNamespaceId() {
         return namespaceId;
