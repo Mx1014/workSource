@@ -222,6 +222,12 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 	}
 	
 
+	private String deleteSignal(String s){
+		s = s.replaceAll("<p>","");
+		s = s.replaceAll("</p>","\n");
+		return s;
+	}
+
 	private String getNote(SettleRequests request) {
 		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
 		if(fieldList != null && fieldList.size() > 0) {
@@ -250,7 +256,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(content);
+        messageDto.setBody(deleteSignal(content));
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
