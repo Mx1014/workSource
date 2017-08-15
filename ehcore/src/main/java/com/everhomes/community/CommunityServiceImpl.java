@@ -1524,7 +1524,7 @@ public class CommunityServiceImpl implements CommunityService {
             if (null != locator.getAnchor()) {
                 query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
             }
-            query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
+            query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.desc());
             return query;
         });
         memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
