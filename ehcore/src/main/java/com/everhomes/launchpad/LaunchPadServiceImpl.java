@@ -749,7 +749,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 		
         //增加定制item流程 by sfyan 20160607
-		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null);
+		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null, cmd.getCategryName());
 
 		List<LaunchPadItem> customizedItems = new ArrayList<LaunchPadItem>();
 		
@@ -777,7 +777,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //			allItems = overrideOrRevertItems(defaultItems, communityDefaultItems);
 //			allItems = overrideOrRevertItems(defaultItems, communityItems);
 
-			allItems = getLaunchPadItemsByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), ApplyPolicy.DEFAULT.getCode(), sceneType, null, communityId);
+			allItems = getLaunchPadItemsByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), ApplyPolicy.DEFAULT.getCode(), sceneType, null, communityId, cmd.getCategryName());
 		}
 		
 		
@@ -791,9 +791,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			}
 
 			// 根据类别过滤出item by sfyan 20161020
-			if(null != cmd.getCategryId()){
-				allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
-			}
+//			if(null != cmd.getCategryId()){
+//				allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
+//			}
 		}
 
 		// 把对item的处理独立成一个新的方法，供公共调用 by lqs 20160324
@@ -865,7 +865,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
         
         //增加定制item流程 by sfyan 20160607
-      	List<LaunchPadItem> orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ORGANIZATION.getCode(),cmd.getOrganizationId(),null);
+      	List<LaunchPadItem> orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ORGANIZATION.getCode(),cmd.getOrganizationId(),null, cmd.getCategryName());
 
         // 如果只定制scope为公司的，则只有当前公司才能查到，其它公司就查不到，故补充也按园区查询 by lqs 20160729
       	int orgItemSize = orgItems.size();
@@ -873,7 +873,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		List<LaunchPadItem> communityItems = null;
       	if(communityId != null) {
-			communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, SceneType.PARK_TOURIST.getCode(), cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.COMMUNITY.getCode(), communityId, null);
+			communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, SceneType.PARK_TOURIST.getCode(), cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.COMMUNITY.getCode(), communityId, null, cmd.getCategryName());
 			if(0 == orgItemSize)
 				orgItems = communityItems;
 
@@ -910,7 +910,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //			allItems = overrideOrRevertItems(allItems, communityItems);
 //			allItems = overrideOrRevertItems(allItems, orgItems);
 
-			allItems = getLaunchPadItemsByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), ApplyPolicy.DEFAULT.getCode(), sceneType, cmd.getOrganizationId(), communityId);
+			allItems = getLaunchPadItemsByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(),ApplyPolicy.DEFAULT.getCode(), sceneType, cmd.getOrganizationId(), communityId, cmd.getCategryName());
 
             if(allItems!=null&&!allItems.isEmpty()){
             	List<UserLaunchPadItem> userLaunchPadItems = this.launchPadProvider.findUserLaunchPadItemByUserId(userId, sceneType, EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
@@ -921,9 +921,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				}
 
 				// 根据类别过滤出item by sfyan 20161020
-				if(null != cmd.getCategryId()){
-					allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
-				}
+//				if(null != cmd.getCategryId()){
+//					allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
+//				}
             }
             	
       	}
@@ -931,8 +931,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         return processLaunchPadItems(token, userId, communityId, allItems, request, itemDisplayFlag);
     }
 
+	private List<LaunchPadItem> getLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation, String itemGroup, String sceneType, Long organizationId, Long communityId){
+		return getLaunchPadItemsByScopeType(namespaceId, itemLocation, itemGroup, ApplyPolicy.DEFAULT.getCode(), sceneType, organizationId, communityId, null);
+	}
 
-	private List<LaunchPadItem> getLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation,String itemGroup, Byte applyPolicy, String sceneType, Long organizationId, Long communityId){
+	private List<LaunchPadItem> getLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation,String itemGroup, Byte applyPolicy, String sceneType, Long organizationId, Long communityId, String categryName){
 		return launchPadProvider.listLaunchPadItemsByScopeType(namespaceId, itemLocation, itemGroup, applyPolicy, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -978,6 +981,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					cond = cond.or(condOrg);
 				}
 
+				if(!StringUtils.isEmpty(categryName))
+					cond = cond.and(Tables.EH_LAUNCH_PAD_ITEMS.CATEGRY_NAME.eq(categryName));
 				query.addConditions(cond);
 				query.addGroupBy(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME);
 				query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.DEFAULT_ORDER);

@@ -88,7 +88,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 	public List<PortalItem> listPortalItems(Long itemCategoryId, Integer namespaceId, String actionType, Long itemGroupId, Byte neStatus) {
 		Condition cond = Tables.EH_PORTAL_ITEMS.ID.isNotNull();
 		if(null != neStatus)
-			cond = Tables.EH_PORTAL_ITEMS.STATUS.ne(neStatus);
+			cond = cond.and(Tables.EH_PORTAL_ITEMS.STATUS.ne(neStatus));
 		if(null != itemCategoryId){
 			if(0L == itemCategoryId)
 				cond = cond.and(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.eq(itemCategoryId).or(Tables.EH_PORTAL_ITEMS.ITEM_CATEGORY_ID.isNull()));
@@ -145,8 +145,7 @@ public class PortalItemProviderImpl implements PortalItemProvider {
 		}
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEMS)
-				.where(Tables.EH_PORTAL_ITEMS.STATUS.ne(PortalItemStatus.INACTIVE.getCode()))
-				.and(cond)
+				.where(cond)
 				.orderBy(Tables.EH_PORTAL_ITEMS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItem.class));
 	}

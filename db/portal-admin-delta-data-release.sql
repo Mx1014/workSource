@@ -146,3 +146,4 @@ update `eh_item_service_categries` set `item_group` = 'Bizs';
 update `eh_item_service_categries` set `scope_code` = 5, `scope_id` = 0 where `scene_type` = 'pm_admin'; 
 update `eh_item_service_categries` set `scope_code` = 1, `scope_id` = 0 where `scene_type` = 'park_tourist'; 
 update `eh_item_service_categries` set `scope_code` = 6, `scope_id` = 0 where `scene_type` = 'default'; 
+update `eh_launch_pad_items` elpi set categry_name = (select name from eh_item_service_categries where id = elpi.service_categry_id);

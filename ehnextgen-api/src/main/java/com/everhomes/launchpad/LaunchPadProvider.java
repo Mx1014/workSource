@@ -19,6 +19,7 @@ public interface LaunchPadProvider {
     void createLaunchPadLayout(LaunchPadLayout launchPadLayout);
     List<LaunchPadLayout> findLaunchPadItemsByVersionCode(Integer namespaceId, String sceneType, String name,long versionCode, ScopeType scopeType, Long scopeId);
     List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId, String sceneType, String itemLocation,String itemGroup, Byte scopeCode, long scopeId, List<String> tag);
+    List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId, String sceneType, String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags, String categryName);
     void updateLaunchPadLayout(LaunchPadLayout launchPadLayout);
     LaunchPadLayout findLaunchPadLayoutById(long id);
     List<LaunchPadItem> getLaunchPadItemsByKeyword(String keyword, int offset, int pageSize);

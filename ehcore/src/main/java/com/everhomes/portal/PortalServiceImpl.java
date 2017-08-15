@@ -1474,7 +1474,7 @@ public class PortalServiceImpl implements PortalService {
 	private void publishItem(PortalItemGroup itemGroup){
 		User user = UserContext.current().getUser();
 		List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(itemGroup.getId(), null);
-		Map<Long, Long> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId());
+		Map<Long, String> categoryIdMap = getItemCategoryMap(itemGroup.getNamespaceId());
 		for (PortalItem portalItem: portalItems) {
 			List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
 
@@ -1534,7 +1534,7 @@ public class PortalServiceImpl implements PortalService {
 					item.setItemName(portalItem.getName());
 					item.setDeleteFlag(DeleteFlagType.YES.getCode());
 					item.setScaleType(ScaleType.TAILOR.getCode());
-					item.setServiceCategryId(categoryIdMap.get(portalItem.getItemCategoryId()));
+					item.setCategryName(categoryIdMap.get(portalItem.getItemCategoryId()));
 					launchPadProvider.createLaunchPadItem(item);
 
 					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
@@ -1651,11 +1651,11 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private Map<Long, Long> getItemCategoryMap(Integer namespaceId){
-		Map<Long, Long> categoryMap = new HashMap<>();
-		List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM_CATEGORY.getCode(), null, null);
-		for (PortalLaunchPadMapping  mapping: mappings) {
-			categoryMap.put(mapping.getPortalContentId(), mapping.getLaunchPadContentId());
+	private Map<Long, String> getItemCategoryMap(Integer namespaceId){
+		Map<Long, String> categoryMap = new HashMap<>();
+		List<PortalItemCategory> categories = portalItemCategoryProvider.listPortalItemCategory(namespaceId, null);
+		for (PortalItemCategory  category: categories) {
+			categoryMap.put(category.getId(), category.getName());
 		}
 		return categoryMap;
 	}
@@ -1728,6 +1728,12 @@ public class PortalServiceImpl implements PortalService {
 						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId());
 						if(name.equals("ServiceMarketLayout"))
 							syncItemCategory(itemGroup.getNamespaceId(),itemGroup.getId());
+					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BANNERS){
+						BannersInstanceConfig instanceConfig = (BannersInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BannersInstanceConfig.class)), BannersInstanceConfig.class);
+						itemGroup.setName(instanceConfig.getItemGroup());
+						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
+						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
+						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BULLETINS){
 						BulletinsInstanceConfig instanceConfig = (BulletinsInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BulletinsInstanceConfig.class)), BulletinsInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
@@ -1830,6 +1836,9 @@ public class PortalServiceImpl implements PortalService {
 		User user = UserContext.current().getUser();
 		List<LaunchPadItem> padItems = launchPadProvider.listLaunchPadItemsByItemGroup(namespaceId, location, itemGroupName);
 		for (LaunchPadItem padItem: padItems) {
+			if(ScopeType.USER == ScopeType.fromCode(padItem.getScopeCode())){
+				continue;
+			}
 			PortalItem item = portalItemProvider.getPortalItemByGroupNameAndName(namespaceId, location, itemGroupName, padItem.getItemName(), itemGroupId);
 			if(null == item){
 				item = ConvertHelper.convert(padItem, PortalItem.class);
