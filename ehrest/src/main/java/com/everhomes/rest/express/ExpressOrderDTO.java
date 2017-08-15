@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>invoiceFlag: 需要发票，参考{@link com.everhomes.rest.express.ExpressInvoiceFlagType}</li>
  * <li>payType: 付款方式，参考{@link com.everhomes.rest.express.ExpressPayType}</li>
  * <li>status: 订单状态，参考{@link com.everhomes.rest.express.ExpressOrderStatus}</li>
+ * <li>statusDesc: 订单状态描述</li>
  * <li>paySummary: 付费总计</li>
  * <li>sendOrganization: 寄件人公司</li>
  * <li>sendProvince: 寄件省</li>
@@ -58,6 +59,7 @@ public class ExpressOrderDTO {
 	private Byte invoiceFlag;
 	private Byte payType;
 	private Byte status;
+	private String statusDesc;
 	private BigDecimal paySummary;
 	private String sendOrganization;
 	private String sendProvince;
@@ -350,6 +352,14 @@ public class ExpressOrderDTO {
 
 	public void setPaySummary(BigDecimal paySummary) {
 		this.paySummary = paySummary;
+	}
+
+	public String getStatusDesc() {
+		return statusDesc;
+	}
+
+	public void setStatusDesc(String statusDesc) {
+		this.statusDesc = statusDesc;
 	}
 
 	@Override
