@@ -341,7 +341,7 @@ public class AddressController extends ControllerBase {
     @RequestMapping("listNearbyMixCommunitiesV2")
     @RestReturn(value=ListNearbyMixCommunitiesCommandV2Response.class)
     public RestResponse listNearbyMixCommunitiesV2(@Valid ListNearbyMixCommunitiesCommand cmd) {
-        ListNearbyMixCommunitiesCommandV2Response res = new ListNearbyMixCommunitiesCommandV2Response();
+        ListNearbyMixCommunitiesCommandV2Response res = addressService.listNearbyMixCommunitiesV2(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

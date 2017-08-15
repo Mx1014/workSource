@@ -49,7 +49,7 @@ public interface AddressService {
     void importParkAddressData(ImportAddressCommand cmd,MultipartFile[] files);
     
     void importAddressData(MultipartFile[] files);
-    
+
     ListNearbyMixCommunitiesCommandResponse listNearbyMixCommunities(ListNearbyMixCommunitiesCommand cmd);
 
     List<AddressDTO> listAddressByBuildingName(ListApartmentByBuildingNameCommand cmd);
@@ -60,4 +60,6 @@ public interface AddressService {
 	Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloorForBusiness(ListApartmentFloorCommand cmd);
 	Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordForBusiness(ListPropApartmentsByKeywordCommand cmd);
 	Object importParkAddressData(ImportAddressCommand cmd, MultipartFile file);
+
+    ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd);
 }

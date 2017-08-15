@@ -1,60 +1,13 @@
 // @formatter:off
 package com.everhomes.user;
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.authorization.AuthorizationErrorCode;
-import com.everhomes.authorization.AuthorizationThirdPartyButton;
-import com.everhomes.authorization.AuthorizationThirdPartyButtonProvider;
-import com.everhomes.authorization.AuthorizationThirdPartyForm;
-import com.everhomes.authorization.AuthorizationThirdPartyFormProvider;
+import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -109,8 +62,7 @@ import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
-import com.everhomes.organization.*; 
-import com.everhomes.organization.OrganizationMember; 
+import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
@@ -129,13 +81,7 @@ import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagePopupFlag;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.UserMessageType;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -192,101 +138,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.everhomes.rest.ui.user.SceneType.DEFAULT;
+import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
-import com.everhomes.rest.ui.user.ContentBriefDTO;
-import com.everhomes.rest.ui.user.FamilyButtonStatusType;
-import com.everhomes.rest.ui.user.FormSourceDTO;
-import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListAuthFormsResponse;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.ui.user.SearchTypeDTO;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.CreateInvitationCommand;
-import com.everhomes.rest.user.CreateUserImpersonationCommand;
-import com.everhomes.rest.user.DeleteUserImpersonationCommand;
-import com.everhomes.rest.user.DeviceIdentifierType;
-import com.everhomes.rest.user.GetBizSignatureCommand;
-import com.everhomes.rest.user.GetMessageSessionInfoCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.GetUserNotificationSettingCommand;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.InitBizInfoCommand;
-import com.everhomes.rest.user.InitBizInfoDTO;
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.rest.user.ListLoginByPhoneCommand;
-import com.everhomes.rest.user.ListRegisterUsersResponse;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.MessageSessionInfoDTO;
-import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
-import com.everhomes.rest.user.SearchUserByNamespaceCommand;
-import com.everhomes.rest.user.SearchUserImpersonationCommand;
-import com.everhomes.rest.user.SearchUserImpersonationResponse;
-import com.everhomes.rest.user.SearchUsersCommand;
-import com.everhomes.rest.user.SearchUsersResponse;
-import com.everhomes.rest.user.SendMessageTestCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.SynThridUserCommand;
-import com.everhomes.rest.user.UpdateUserNotificationSettingCommand;
-import com.everhomes.rest.user.UserCurrentEntity;
-import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.rest.user.UserDTO;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserImperInfo;
-import com.everhomes.rest.user.UserImpersonationDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserLoginDTO;
-import com.everhomes.rest.user.UserLoginResponse;
-import com.everhomes.rest.user.UserLoginStatus;
-import com.everhomes.rest.user.UserMuteNotificationFlag;
-import com.everhomes.rest.user.UserNotificationSettingDTO;
-import com.everhomes.rest.user.UserNotificationTemplateCode;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
-import com.everhomes.rest.user.ValidatePassCommand;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.admin.InvitatedUsers;
-import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
-import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
-import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
-import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.SendUserTestMailCommand;
-import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
-import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
-import com.everhomes.rest.user.admin.UsersWithAddrResponse;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsBlackList;
-import com.everhomes.sms.SmsBlackListCreateType;
-import com.everhomes.sms.SmsBlackListProvider;
-import com.everhomes.sms.SmsBlackListStatus;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RandomGenerator;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
 
 /**
  * 
@@ -2812,54 +2667,9 @@ public class UserServiceImpl implements UserService {
 
 		// 处于家庭对应的场景
 		// 列出用户有效家庭 mod by xiongying 20160523
-		List<FamilyDTO> familyList = this.familyProvider.getUserFamiliesByUserId(userId);
-		toFamilySceneDTO(namespaceId, userId, sceneList, familyList);
-
+		addFamilySceneToList(userId, namespaceId, sceneList);
 		// 处于某个公司对应的场景
-		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
-		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
-		//toOrganizationSceneDTO(sceneList, enterpriseList);
-		for(OrganizationDTO orgDto : organizationList) {
-			String orgType = orgDto.getOrganizationType();
-			// 在园区通用版和左邻小区版合并后，改为按域空间判断，0域空间不只列物业公司场景 by lqs 20160517
-			//if(isCmntyScene) { // 小区版只列物业公司的场景，园区版则列所有公司的场景  by lqs 20160510
-			//	        if(OrganizationType.isGovAgencyOrganization(orgType)) {
-			//	            SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, SceneType.PM_ADMIN);
-			//	            if(sceneDto != null) {
-			//	                sceneList.add(sceneDto);
-			//	            }
-			//	        } else {
-			//	            if(LOGGER.isDebugEnabled()) {
-			//	                LOGGER.debug("Ignore the organization for it is not govagency type, userId=" + userId 
-			//	                    + ", organizationId=" + orgDto.getId() + ", orgType=" + orgType);
-			//	            }
-			//	        } else {
-			//                SceneType sceneType = SceneType.PARK_PM_ADMIN;
-			//                if(!OrganizationType.isGovAgencyOrganization(orgType)) {
-			//                    if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
-			//                        sceneType = SceneType.PARK_ENTERPRISE;
-			//                    } else {
-			//                        sceneType = SceneType.PARK_ENTERPRISE_NOAUTH;
-			//                    }
-			//                }
-			//                SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
-			//                if(sceneDto != null) {
-			//                    sceneList.add(sceneDto);
-			//                }
-			//	        }
-			SceneType sceneType = SceneType.PM_ADMIN;
-			if(!OrganizationType.isGovAgencyOrganization(orgType)) {
-				if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
-					sceneType = SceneType.ENTERPRISE;
-				} else {
-					sceneType = SceneType.ENTERPRISE_NOAUTH;
-				}
-			} 
-			SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
-			if(sceneDto != null) {
-				sceneList.add(sceneDto);
-			}
-		}
+		addOrganizationSceneToList(userId, namespaceId, sceneList);
 
 		// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
 		if(sceneList.size() == 0) {
@@ -2894,10 +2704,10 @@ public class UserServiceImpl implements UserService {
 					if(community != null) {
 						CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
 
-						SceneType sceneType = SceneType.DEFAULT;
+						SceneType sceneType = DEFAULT;
 						CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
 						if(communityType == CommunityType.COMMERCIAL) {
-							sceneType = SceneType.PARK_TOURIST;
+							sceneType = PARK_TOURIST;
 						}
 
 						communityScene = toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
@@ -3744,9 +3554,9 @@ public class UserServiceImpl implements UserService {
 			Community community = communityProvider.findCommunityById(resource.getResourceId());
 			if(null != community){
 				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
-				SceneType sceneType = SceneType.DEFAULT;
+				SceneType sceneType = DEFAULT;
 				if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL){
-					sceneType = SceneType.PARK_TOURIST;
+					sceneType = PARK_TOURIST;
 				}
 				SceneDTO sceneDTO = this.toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
 				sceneList.add(sceneDTO);
@@ -4505,5 +4315,87 @@ public class UserServiceImpl implements UserService {
 			response = new GetFamilyButtonStatusResponse(documents[0],FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),documents[1],documents[2]);
 		}
 		return response;
+	}
+
+	@Override
+	public List<SceneDTO> listUserRelatedScenesByType(ListUserRelatedScenesByTypeCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = UserContext.current().getUser().getId();
+
+		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+
+		if (DEFAULT == SceneType.fromCode(cmd.getSceneType())) {
+			// 处于家庭对应的场景
+			// 列出用户有效家庭 mod by xiongying 20160523
+			addFamilySceneToList(userId, namespaceId, sceneList);
+		} else if (PARK_TOURIST == SceneType.fromCode(cmd.getSceneType())) {
+			// 处于某个公司对应的场景
+			addOrganizationSceneToList(userId, namespaceId, sceneList);
+		}
+
+		// 如果没有有效场景
+		if (sceneList.size() == 0) {
+			Community community = new Community();
+			switch (SceneType.fromCode(cmd.getSceneType())) {
+				case DEFAULT:
+					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.RESIDENTIAL.getCode());
+					break;
+				case PARK_TOURIST:
+					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.COMMERCIAL.getCode());
+					break;
+			}
+
+			if (community != null) {
+				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+				SceneType sceneType = DEFAULT;
+				CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
+				if (communityType == CommunityType.COMMERCIAL) {
+					sceneType = PARK_TOURIST;
+				}
+				SceneDTO communityScene = toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
+				if (communityScene != null) {
+					sceneList.add(communityScene);
+				}
+			}
+		}
+
+		//modify by lei.lv --2017.8.15
+//		// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
+//		if(sceneList.size() == 0) {
+//			SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+//			if(communityScene != null) {
+//				sceneList.add(communityScene);
+//			}
+//		}
+
+		return sceneList;
+	}
+
+	private List<SceneDTO> addFamilySceneToList(Long userId, Integer namespaceId, List<SceneDTO> sceneList){
+		List<FamilyDTO> familyList = this.familyProvider.getUserFamiliesByUserId(userId);
+		toFamilySceneDTO(namespaceId, userId, sceneList, familyList);
+		return sceneList;
+	}
+
+	private List<SceneDTO> addOrganizationSceneToList(Long userId, Integer namespaceId, List<SceneDTO> sceneList){
+		// 处于某个公司对应的场景
+		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+		for(OrganizationDTO orgDto : organizationList) {
+			String orgType = orgDto.getOrganizationType();
+			SceneType sceneType = SceneType.PM_ADMIN;
+			if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+				if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
+					sceneType = SceneType.ENTERPRISE;
+				} else {
+					sceneType = SceneType.ENTERPRISE_NOAUTH;
+				}
+			}
+			SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
+			if(sceneDto != null) {
+				sceneList.add(sceneDto);
+			}
+		}
+		return sceneList;
 	}
 }

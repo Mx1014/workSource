@@ -18,6 +18,13 @@ public class ListNearbyMixCommunitiesCommandV2Response {
     private List<CommunityDTO> resudentials;
     @ItemType(CommunityDTO.class)
     private List<CommunityDTO> commercials;
+    @ItemType(CommunityDTO.class)
+    private List<CommunityDTO> dtos;
+
+    private Long nextPageAnchor;
+
+    public ListNearbyMixCommunitiesCommandV2Response() {
+    }
 
     @Override
     public String toString() {
@@ -38,5 +45,21 @@ public class ListNearbyMixCommunitiesCommandV2Response {
 
     public void setCommercials(List<CommunityDTO> commercials) {
         this.commercials = commercials;
+    }
+
+    public List<CommunityDTO> getDtos() {
+        return dtos;
+    }
+
+    public void setDtos(List<CommunityDTO> dtos) {
+        this.dtos = dtos;
+    }
+
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 }
