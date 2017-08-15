@@ -6359,29 +6359,31 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO addPunchGroup(AddPunchGroupCommand cmd) {
 		// 
-		//建立考勤组
-		Organization punchOrg = this.organizationService.createUniongroupOrganization(cmd.getOwnerId(),cmd.getGroupName(),UniongroupType.PUNCHGROUP.getCode());
-		//添加关联
-		SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
-        command.setGroupId(punchOrg.getId());
-        command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
-        command.setEnterpriseId(cmd.getOwnerId());
-        command.setTargets(cmd.getTargets()); 
-        this.uniongroupService.saveUniongroupConfigures(command);
-        //打卡地点和wifi
-        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
-
-        PunchRule pr = ConvertHelper.convert(cmd, PunchRule.class);
-        pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-        pr.setOwnerId(cmd.getOwnerId());  
-        pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
-        pr.setName(cmd.getGroupName());
-        pr.setRuleType(cmd.getRuleType());
-        pr.setPunchOrganizationId( punchOrg.getId());  
-        punchProvider.createPunchRule(pr); 
-        //打卡时间
-		savePunchTimeRule(ConvertHelper.convert(cmd, PunchGroupDTO.class),pr);
-		
+		this.dbProvider.execute((status) -> {
+			//建立考勤组
+			Organization punchOrg = this.organizationService.createUniongroupOrganization(cmd.getOwnerId(),cmd.getGroupName(),UniongroupType.PUNCHGROUP.getCode());
+			//添加关联
+			SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
+	        command.setGroupId(punchOrg.getId());
+	        command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
+	        command.setEnterpriseId(cmd.getOwnerId());
+	        command.setTargets(cmd.getTargets()); 
+	        this.uniongroupService.saveUniongroupConfigures(command);
+	        //打卡地点和wifi
+	        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
+	
+	        PunchRule pr = ConvertHelper.convert(cmd, PunchRule.class);
+	        pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+	        pr.setOwnerId(cmd.getOwnerId());  
+	        pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
+	        pr.setName(cmd.getGroupName());
+	        pr.setRuleType(cmd.getRuleType());
+	        pr.setPunchOrganizationId( punchOrg.getId());  
+	        punchProvider.createPunchRule(pr); 
+	        //打卡时间
+			savePunchTimeRule(ConvertHelper.convert(cmd, PunchGroupDTO.class),pr);
+			return null;
+		});
 		return null;
 	} 
 	/**
@@ -6575,6 +6577,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private PunchGroupDTO getPunchGroupDTOByOrg(Organization r) {
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(r.getId());
+		if(null == pr )
+			return null;
 		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
 		dto.setId(pr.getPunchOrganizationId());
 		Integer totalCount = uniongroupService.countUnionGroupMemberDetailsByOrgId(r.getNamespaceId(),r.getId());
