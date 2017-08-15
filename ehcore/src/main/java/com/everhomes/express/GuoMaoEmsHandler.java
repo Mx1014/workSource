@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -42,6 +43,9 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 	//EMS标准快递代号，目前只用标准快递
 	private static final String UTF8_CHARACTER_SET = "UTF-8";
 	private static final String PK_POST_CODE = "100000";
+	
+	@Autowired
+	private ExpressOrderProvider expressOrderProvider;
 	
 	@Override
 	public String getBillNo(ExpressOrder expressOrder) {
@@ -251,6 +255,10 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 					"unsupport method = "+params.get("method"));
 		}
 		String status = params.get("status");
+		if(status==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"unsupport status = "+status);
+		}
 		if("1".equals(status)){
 			String mailNum = params.get("mailNum");
 			if(mailNum == null){
@@ -260,6 +268,12 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 			LOGGER.info("update order status = {}, billno = {}", status,mailNum);
 			expressOrder.setStatus(ExpressOrderStatus.FINISHED.getCode());
 			expressOrder.setBillNo(mailNum);
+			expressOrderProvider.updateExpressOrder(expressOrder);
+		}
+		if(status.contains("F")){
+			expressOrder.setStatus(ExpressOrderStatus.CANCELLED.getCode());
+			expressOrder.setStatusDesc(params.get("desc"));
+			expressOrderProvider.updateExpressOrder(expressOrder);
 		}
 		
 	}
