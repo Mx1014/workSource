@@ -6580,6 +6580,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null == pr )
 			return null;
 		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
+		dto.setGroupName(r.getName());
 		dto.setId(pr.getPunchOrganizationId());
 		Integer totalCount = uniongroupService.countUnionGroupMemberDetailsByOrgId(r.getNamespaceId(),r.getId());
 		dto.setEmployeeCount(totalCount);
