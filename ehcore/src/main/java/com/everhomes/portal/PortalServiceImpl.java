@@ -604,10 +604,12 @@ public class PortalServiceImpl implements PortalService {
 			}
 		}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.THIRDURL){
 			UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(portalItem.getActionData(), UrlActionData.class);
-			dto.setContentName(actionData.getUrl());
+			if(null != actionData)
+				dto.setContentName(actionData.getUrl());
 		}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ZUOLINURL){
 			UrlActionData actionData = (UrlActionData)StringHelper.fromJsonString(portalItem.getActionData(), UrlActionData.class);
-			dto.setContentName(actionData.getUrl());
+			if(null != actionData)
+				dto.setContentName(actionData.getUrl());
 		}
 
 		List<PortalContentScope> portalContentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());

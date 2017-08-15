@@ -141,3 +141,8 @@ insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `dom
 update eh_user_launch_pad_items eulpi set item_name = (select item_name from `eh_launch_pad_items` where id = eulpi.item_id);
 update `eh_item_service_categries` set label = name;
 update `eh_item_service_categries` set name = id;
+update `eh_item_service_categries` set `item_location` = '/home';
+update `eh_item_service_categries` set `item_group` = 'Bizs';
+update `eh_item_service_categries` set `scope_code` = 5, `scope_id` = 0 where `scene_type` = 'pm_admin'; 
+update `eh_item_service_categries` set `scope_code` = 1, `scope_id` = 0 where `scene_type` = 'park_tourist'; 
+update `eh_item_service_categries` set `scope_code` = 6, `scope_id` = 0 where `scene_type` = 'default'; 
