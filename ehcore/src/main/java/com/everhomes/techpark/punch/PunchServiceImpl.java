@@ -6436,6 +6436,7 @@ public class PunchServiceImpl implements PunchService {
         		ptr.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
         		ptr.setPunchRuleId(pr.getId());
         		ptr.setPunchOrganizationId(punchOrgId);
+        		ptr.setFlexTimeLong(timeRule.getFlexTime());
         		ptrs.add(ptr);
         		if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
         			//固定班次 默认第二天4点
@@ -6611,7 +6612,7 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchTimeRule> timeRules = punchProvider.listPunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),r.getId());
 		if(null != timeRules && timeRules.size() > 0)
 			dto.setTimeRules(timeRules.stream().map(r1 -> {
-				PunchTimeRuleDTO dto1 = ConvertPunchTimeRule2DTO(r1) ;
+				PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1) ;
 	            return dto1;
 	        }).collect(Collectors.toList()));
 		
@@ -6728,7 +6729,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 		return null;
 	}
-	private PunchTimeRuleDTO ConvertPunchTimeRule2DTO(PunchTimeRule r) { 
+	private PunchTimeRuleDTO convertPunchTimeRule2DTO(PunchTimeRule r) { 
 		PunchTimeRuleDTO dto = ConvertHelper.convert(r, PunchTimeRuleDTO.class);
 		dto.setFlexTime(r.getFlexTimeLong());
 		dto.setAfternoonArriveTime(r.getAfternoonArriveTimeLong());
