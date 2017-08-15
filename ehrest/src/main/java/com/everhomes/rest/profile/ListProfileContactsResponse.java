@@ -11,14 +11,14 @@ import java.util.List;
  * <li>contacts: 成员信息，参考{@link com.everhomes.rest.profile.ProfileContactsDTO}</li>
  * </ul>
  */
-public class listProfileContactsResponse {
+public class ListProfileContactsResponse {
 
     private Long nextPageAnchor;
 
     @ItemType(ProfileContactsDTO.class)
     private List<ProfileContactsDTO> contacts;
 
-    public listProfileContactsResponse() {
+    public ListProfileContactsResponse() {
     }
 
     public Long getNextPageAnchor() {

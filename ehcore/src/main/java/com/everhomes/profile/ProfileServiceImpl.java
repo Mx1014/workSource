@@ -1,10 +1,14 @@
 package com.everhomes.profile;
 
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.profile.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Component
 public class ProfileServiceImpl implements ProfileService {
@@ -50,7 +54,17 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public listProfileContactsResponse listProfileContacts(listProfileContactsCommand cmd) {
+    public ListProfileContactsResponse listProfileContacts(ListProfileContactsCommand cmd) {
         return null;
+    }
+
+    @Override
+    public ImportFileTaskDTO importProfileContacts(MultipartFile mfile, Long userId, Integer namespaceId, ImportProfileContactsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void exportProfileContacts(ExportProfileContactsCommand cmd, HttpServletResponse httpResponse) {
+
     }
 }

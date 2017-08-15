@@ -1,6 +1,10 @@
 package com.everhomes.profile;
 
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.profile.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
 
 public interface ProfileService {
 
@@ -12,5 +16,10 @@ public interface ProfileService {
 
     void stickProfileContacts(StickProfileContactsCommand cmd);
 
-    listProfileContactsResponse listProfileContacts(listProfileContactsCommand cmd);
+    ListProfileContactsResponse listProfileContacts(ListProfileContactsCommand cmd);
+
+    ImportFileTaskDTO importProfileContacts(
+            MultipartFile mfile, Long userId, Integer namespaceId, ImportProfileContactsCommand cmd);
+
+    void exportProfileContacts(ExportProfileContactsCommand cmd, HttpServletResponse httpResponse);
 }

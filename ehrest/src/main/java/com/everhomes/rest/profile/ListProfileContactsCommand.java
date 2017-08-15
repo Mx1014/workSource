@@ -8,13 +8,13 @@ import com.everhomes.util.StringHelper;
  * <li>keywords: 搜索关键词</li>
  * </ul>
  */
-public class listProfileContactsCommand {
+public class ListProfileContactsCommand {
 
     private Long organizationId;
 
     private String keywords;
 
-    public listProfileContactsCommand() {
+    public ListProfileContactsCommand() {
     }
 
     public Long getOrganizationId() {
