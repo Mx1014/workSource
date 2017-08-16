@@ -132,7 +132,7 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         if (null != resp) {
             response.setNextPageAnchor(resp.getNextPageAnchor());
             response.getShops().addAll(resp.getShopDTOs().stream().map(r -> {
-                CommunityMapShopDTO shop = ConvertHelper.convert(cmd, CommunityMapShopDTO.class);
+                CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
                 return shop;
             }).collect(Collectors.toList()));
         }
@@ -190,7 +190,7 @@ public class CommunityMapServiceImpl implements CommunityMapService {
                 searchCmd.setBuildingName(building.getName());
             }
         }
-        searchCmd.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+//        searchCmd.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
         searchCmd.setExistAddressFlag(ExistAddressFlag.EXIST.getCode());
 
         ListEnterprisesCommandResponse orgResponse = organizationService.searchEnterprise(searchCmd);
