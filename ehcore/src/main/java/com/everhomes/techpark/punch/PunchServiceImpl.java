@@ -5992,16 +5992,16 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
 			HttpServletResponse response) {
-		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
-		targetTimeRules.set(punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(),  null));
-		if(null == targetTimeRules.get())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-					"have no time rule"); 
-		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
-			LOGGER.error("Invalid owner type or  Id parameter in the command");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid owner type or  Id parameter in the command");
-		} 
+//		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
+//		targetTimeRules.set(punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(),  null));
+//		if(null == targetTimeRules.get())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"have no time rule"); 
+//		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+//			LOGGER.error("Invalid owner type or  Id parameter in the command");
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid owner type or  Id parameter in the command");
+//		} 
 		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
 		String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"排班表":scheduleLocaleString.getText())+".xlsx";
