@@ -284,7 +284,8 @@ public class ForumServiceImpl implements ForumService {
         populatePost(creatorUid, post, communityId, false);
 
         //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
-        if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE) {
+        //客户端传来的status可能为空，edit by yanjun
+        if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE || PostStatus.fromCode(post.getStatus()) == null) {
             try {
                 postSearcher.feedDoc(post);
 
