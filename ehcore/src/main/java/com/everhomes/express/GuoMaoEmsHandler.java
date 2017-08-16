@@ -47,6 +47,9 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 	@Autowired
 	private ExpressOrderProvider expressOrderProvider;
 	
+	@Autowired
+	private ExpressService expressService;
+	
 	@Override
 	public String getBillNo(ExpressOrder expressOrder) {
 		return null;
@@ -64,14 +67,15 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 		GetExpressLogisticsDetailResponse response = new GetExpressLogisticsDetailResponse();
 		response.setBillNo(billNo);
 		response.setExpressCompany(expressCompany.getName());
-		response.setExpressLogo(expressCompany.getLogo());
+		response.setExpressLogo(expressService.getUrl(expressCompany.getLogo()));
 		response.setTraces(new ArrayList<ExpressTraceDTO>());
 		if(emsResp.isSuccess()){
 			List<GuoMaoEMSLogisticsItem> list = emsResp.getTraces();
 			if(list != null && list.size() > 0){
 				for (GuoMaoEMSLogisticsItem item : list) {
 					ExpressTraceDTO dto = new ExpressTraceDTO();
-					dto.setAcceptAddress(item.getAcceptAddress()+" "+ item.getRemark());
+					dto.setAcceptAddress(item.getAcceptAddress());
+					dto.setRemark(item.getRemark());
 					dto.setAcceptTime(item.getAcceptTime());
 					response.getTraces().add(dto);
 				}

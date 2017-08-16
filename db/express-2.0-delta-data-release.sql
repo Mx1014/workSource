@@ -10,7 +10,7 @@ set @guo_mao_ems_authorization = '7cacaabcbb996fdcbe4b42096e09724c';
 INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `order_url`, `logistics_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('2', @namespaceId, 'EhNamespaces', @namespaceId, '0', 'EMS', @guo_mao_ems_logo, '国贸项目，EMS快递公司', @guo_mao_ems_order_url,@guo_mao_ems_logistics_url, @guo_mao_ems_app_key, @guo_mao_ems_app_secret, @guo_mao_ems_authorization, '2', '0', NOW(), NOW(), '0');
 INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `description`, `order_url`, `logistics_url`, `app_key`, `app_secret`, `authorization`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES ('10003', @namespaceId, 'community', @community_id, '2', 'EMS', '', '国贸项目，EMS快递公司', NULL,NULL, NULL, NULL, NULL, '2', '0', NOW(), NOW(), '0');
 -- 国贸中国邮政快递公司
-set @guo_mao_chinapost_logo = 'cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw';
+set @guo_mao_chinapost_logo = 'cs://1/image/aW1hZ2UvTVRvME9UUmxOMkV5WkdJeFpUTXhObUl5TUdZMk1XUmpOVFpoTWpabU1qTTNNdw';
 set @guo_mao_chinapost_order_url = 'http://222.222.2.155:8001';
 set @guo_mao_chinapost_logistics_url = 'http://211.156.198.97/zdxtJkServer/zhddws/MailTtService_Gn?wsdl';
 set @guo_mao_chinapost_app_key = '123';

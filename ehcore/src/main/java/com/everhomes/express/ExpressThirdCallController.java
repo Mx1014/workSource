@@ -39,7 +39,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
- *  国贸登录调用
+ *  第三方登录回调使用
  *
  *  @author:dengs 2017年7月28日
  */

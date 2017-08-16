@@ -64,6 +64,9 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	@Autowired
 	private ExpressOrderProvider expressOrderProvider;
 	
+	@Autowired
+	private ExpressService expressService;
+	
 	@Override
 	public String getBillNo(ExpressOrder expressOrder) {
 		// TODO Auto-generated method stub
@@ -90,31 +93,23 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	}
 
 	private GetExpressLogisticsDetailResponse converMailToResponse(List<Mail> maillist,ExpressCompany expressCompany, String billNo) {
-		//TODO
 		GetExpressLogisticsDetailResponse response = new GetExpressLogisticsDetailResponse();
 		response.setBillNo(billNo);
 		response.setExpressCompany(expressCompany.getName());
-		response.setExpressLogo(expressCompany.getLogo());
-//		response.setConsumeTime(consumeTime);
+		response.setExpressLogo(expressService.getUrl(expressCompany.getLogo()));
 		response.setTraces(new ArrayList<ExpressTraceDTO>());
 		for (Mail mail : maillist) {
 			ExpressTraceDTO dto = new ExpressTraceDTO();
-			dto.setAcceptAddress(mail.getRelationOfficeDesc().getValue());
+			if(mail.getOfficeName()!=null && mail.getOfficeName().getValue()!=null && mail.getOfficeName().getValue().trim().length()>0){
+				dto.setAcceptAddress(mail.getOfficeName().getValue());
+			}
+			if(mail.getRelationOfficeDesc()!=null && mail.getRelationOfficeDesc().getValue()!=null && mail.getRelationOfficeDesc().getValue().trim().length()>0){
+				dto.setRemark(mail.getRelationOfficeDesc().getValue());
+			}
 			XMLGregorianCalendar cdar = mail.getActionDateTime();
-			if(cdar != null)
+			if(cdar != null){
 				dto.setAcceptTime(cdar.toString().replace("T", " ").replace("+08:00", ""));
-//			System.out.print(mail.getActionInfoOut().getValue()+" | ");
-//			System.out.print(mail.getActionDateTime().getYear()+"."+
-//					mail.getActionDateTime().getMonth()+"."+
-//					mail.getActionDateTime().getDay()+" "+
-//					mail.getActionDateTime().getHour()+"-"+
-//					mail.getActionDateTime().getMinute()+"-"+
-//					mail.getActionDateTime().getSecond()+" | ");
-//			System.out.print(mail.getMailCode().getValue()+" | ");
-//			System.out.print(mail.getActionDateTime().getMillisecond()+" | ");
-//			System.out.print(mail.getOfficeName().getValue()+" | ");
-//			System.out.print(mail.getRelationOfficeDesc().getValue()+" | ");
-//			System.out.println("--------------------------------------------------------");
+			}
 			response.getTraces().add(dto);
 		}
 		String statusvalue = maillist.get(maillist.size()-1).getActionInfoOut().getValue();
