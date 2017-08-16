@@ -420,10 +420,10 @@ public class PunchAdminController extends ControllerBase {
      * <p>导入某个月的班次</p>
      */
     @RequestMapping("testimportPunchScheduling")
-    @RestReturn(value = String.class)
+    @RestReturn(value = PunchSchedulingEmployeeDTO.class,collection = true)
     public RestResponse testimportPunchScheduling( @RequestParam(value = "_attachment_file") MultipartFile[] files) {
-    	punchService.importPunchScheduling( files);
-        RestResponse response = new RestResponse();
+    	List<PunchSchedulingEmployeeDTO> result = punchService.importPunchScheduling( files);
+        RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
