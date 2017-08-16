@@ -65,12 +65,10 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Override
-    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
+    public List<ParkingCardDTO> listParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<>();
-		GetParkingCardsResponse response = new GetParkingCardsResponse();
-		response.setCards(resultList);
 
 		JinyiCard card = getCardInfo(plateNumber);
     	
@@ -93,8 +91,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 			
 			if(endTime + cardReserveTime < now){
-				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
-				return response;
+				return resultList;
 			}
 			
 			String plateOwnerName = card.getOwnername();
@@ -115,10 +112,8 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
-		}else{
-			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
 		}
-        return response;
+        return resultList;
     }
 
     private JinyiCard getCardInfo(String plateNumber){

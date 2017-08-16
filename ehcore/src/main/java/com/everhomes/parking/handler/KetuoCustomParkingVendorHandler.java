@@ -1,22 +1,23 @@
 // @formatter:off
 package com.everhomes.parking.handler;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.flow.*;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.ketuo.*;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,32 +25,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.parking.ketuo.KetuoTempFee;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.organization.VendorType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 科兴 正中会 停车对接
  */
-@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO2")
-public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
-	private static final Logger LOGGER = LoggerFactory.getLogger(Ketuo2ParkingVendorHandler.class);
+@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KE_TUO_CUSTOM")
+public class KetuoCustomParkingVendorHandler implements ParkingVendorHandler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoCustomParkingVendorHandler.class);
 
 	private static final String RECHARGE = "/api/pay/CardRecharge";
 	private static final String GET_CARD = "/api/pay/GetCarCardInfo";

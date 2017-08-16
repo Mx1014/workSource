@@ -9,7 +9,7 @@ import com.everhomes.rest.parking.*;
 public interface ParkingVendorHandler {
     String PARKING_VENDOR_PREFIX = "ParkingVendor-";
 
-    GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId, Long parkingLotId, String plateNumber);
+    List<ParkingCardDTO> listParkingCardsByPlate(String ownerType, Long ownerId, Long parkingLotId, String plateNumber);
     
     List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String palteNumber,String cardNo);
 

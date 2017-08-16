@@ -50,12 +50,10 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
     private ConfigurationProvider configProvider;
 
 	@Override
-    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
+    public List<ParkingCardDTO> listParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
 
     	List<ParkingCardDTO> resultList = new ArrayList<>();
-		GetParkingCardsResponse response = new GetParkingCardsResponse();
-		response.setCards(resultList);
 
 		InnoSpringCardInfo card = getCard(plateNumber);
 
@@ -78,8 +76,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 
 			if(expireTime + cardReserveTime < now){
-				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
-				return response;
+				return resultList;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
@@ -96,12 +93,9 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 
 			resultList.add(parkingCardDTO);
-		}else {
-			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
-
 		}
 
-        return response;
+        return resultList;
     }
 
     @Override

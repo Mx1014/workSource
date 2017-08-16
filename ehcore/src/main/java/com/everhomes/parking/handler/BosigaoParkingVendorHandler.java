@@ -46,12 +46,10 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	private LocaleTemplateService localeTemplateService;
 
 	@Override
-    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
+    public List<ParkingCardDTO> listParkingCardsByPlate(String ownerType, Long ownerId,
                                                        Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<>();
-		GetParkingCardsResponse response = new GetParkingCardsResponse();
-		response.setCards(resultList);
 
 		BosigaoCardInfo card = getCardInfo(plateNumber);
     	
@@ -72,8 +70,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 			
 			if(endTime + cardReserveTime < now){
-				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
-				return response;
+				return resultList;
 			}
 			
 			String plateOwnerName = card.getUserName();
@@ -98,10 +95,8 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
-		}else{
-			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
 		}
-        return response;
+        return resultList;
     }
 
     private BosigaoCardInfo getCardInfo(String plateNumber){
