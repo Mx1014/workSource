@@ -6223,10 +6223,11 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 	private List<PunchSchedulingEmployeeDTO> convertToPunchSchedulings(ArrayList list ) {
-		LOGGER.debug("list : "+JSON.toJSONString(list));
 		List<PunchSchedulingEmployeeDTO> result = new ArrayList<PunchSchedulingEmployeeDTO>();
 		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
 			RowResult r = (RowResult)list.get(rowIndex);
+			LOGGER.debug("R + "+JSON.toJSONString(r));
+			LOGGER.debug("r.getA() + "+r.getA());
 			PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
 			dto.setContactName(r.getA());
 			dto.setDaySchedulings(new ArrayList<>());
@@ -6236,7 +6237,6 @@ public class PunchServiceImpl implements PunchService {
 			}
 			result.add(dto);
 		}
-		LOGGER.debug("result +"+result);
 		return result;
 	}
 
