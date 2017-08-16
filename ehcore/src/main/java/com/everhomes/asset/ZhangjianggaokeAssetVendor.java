@@ -67,6 +67,7 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill) {
         Map<String,String> map = new HashMap<>();
+        String payFlag = "";
         Community communityById = new Community();
         if(targetType=="community"){
             communityById = communityProvider.findCommunityById(ownerId);
@@ -109,9 +110,13 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
             //拿到enterpriseName
             //调用getCompanyBills
             String organizationName = organizationProvider.getOrganizationNameById(targetId);
-            String body = getUrlBody4GetCompanyBills(communityName,organizationName,"");
-            HttpResponseEntity<?> entity = postGo(body, companyBillUrl, "", GetCompanyBillsEntity.class);
-            GetCompanyBillsEntity res = entity.getBody();
+            if(isOwedBill.equals("1")){
+                payFlag = "0";
+            }
+            //GetCompanyBillsEntity以及getSortedBills，countTotal，mergeToList剩下的开发
+            String body = getUrlBody4GetCompanyBills(communityName,organizationName,payFlag);
+            HttpResponseEntity<?> entity = postGo(body, companyBillUrl, GetCompanyBillsEntity.class);
+            GetCompanyBillsEntity res = (GetCompanyBillsEntity)entity.getBody();
             sortedBills = getSortedBills(res);
         }
         return sortedBills;
@@ -123,6 +128,7 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONDAY) + 1;
         int day = c.get(Calendar.DAY_OF_MONTH);
+        String nowTime = String.valueOf(year) + String.valueOf(month) + String.valueOf(day);
         params.put("communityName",communityName);
         params.put("organizationName",organizationName);
         params.put("offset","0");
@@ -132,8 +138,15 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         }else if(payFlag.equals("0")){
             params.put("payFlag","0");
         }
-        params.put("sdateFrom",String.valueOf(year)+String.valueOf(month)+String.valueOf(day));
-        params.put("sdateTo",String.valueOf(year)+String.valueOf(month)+String.valueOf(day));
+        int newMonth = month + 6>12? month+6-12:month+6;
+        int before6Month = month - 6 < 0 ? 12 -(month - 5):month - 5;
+        int newYear = month + 6 > 12? year+1 : year;
+        int before6Year = month - 6 < 0 ? year-1 : year;
+        String afterSixMonth = String.valueOf(newYear) + String.valueOf(newMonth) + String.valueOf(day);
+        String beforeSixMonth = String.valueOf(before6Year) + String.valueOf(before6Month) + String.valueOf(day);
+
+        params.put("sdateFrom",beforeSixMonth);
+        params.put("sdateTo",nowTime);
         params.put("appKey",appKey);
         Long l = System.currentTimeMillis();
         params.put("timestamp",String.valueOf(l));
@@ -143,14 +156,13 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         params.put("crypto","Doc.Wentian");
         String signature = computeSignature(params,secretKey);
         String body = RestCallTemplate.queryStringBuilder()
-                .var("community",communityName)
-                .var("buildingName",buildingName)
-                .var("apartmentName",apartmentName)
+                .var("communityName",communityName)
+                .var("buildingName",organizationName)
                 .var("offset","0")
-                .var("pageSize","")
-                .var("payFlag","")
-                .var("sdateFrom","")
-                .var("sdateTo","")
+                .var("pageSize","50")
+                .var("payFlag",payFlag)
+                .var("sdateFrom",nowTime)
+                .var("sdateTo",beforeSixMonth)
                 .var("appKey",appKey)
                 .var("timestamp",String.valueOf(l))
                 .var("nonce",String.valueOf(nonce))
@@ -232,7 +244,7 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         params.put("crypto","Doc.Wentian");
         String signature = computeSignature(params,secretKey);
         String body = RestCallTemplate.queryStringBuilder()
-                .var("community",communityName)
+                .var("communityName",communityName)
                 .var("buildingName",buildingName)
                 .var("apartmentName",apartmentName)
                 .var("offset","0")

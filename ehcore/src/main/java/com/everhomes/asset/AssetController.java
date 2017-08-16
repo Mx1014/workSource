@@ -797,7 +797,7 @@ public class AssetController extends ControllerBase {
      */
 //    public RestResponse getPaymentLog(getPaymentLog)
 
-    // this is for 用户的账单详情          2
+    // this is for 用户的账单详情          4
     /**
      * <p>用户的账单的收费细项</p>
      * <b>URL: /asset/showBillDetailForClient</b>
@@ -812,7 +812,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    //this is for app选择切换月份查看账单
+    //this is for app选择切换月份查看账单      4
     /**
      * <p>app选择切换月份查看账单</p>
      * <b>URL: /asset/listBillDetailOnDateChange</b>
