@@ -59,8 +59,8 @@ package com.everhomes.rest.version;
  * <li>IOS_GUOMAO("iOS_Guomao"): 国贸</li>
  * <li>ANDROID_CHANGFAZHAN("Android_Changfazhan"): 昌发展</li>
  * <li>IOS_CHANGFAZHAN("iOS_Changfazhan"): 昌发展</li>
- * <li>Android_MyBay("Android_MyBay"): 深圳湾</li>
- * <li>IOS_MyBay("iOS_MyBay"): 深圳湾</li>
+ * <li>ANDROID_MYBAY("Android_MyBay"): 深圳湾</li>
+ * <li>IOS_MYBAY("iOS_MyBay"): 深圳湾</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -143,8 +143,8 @@ public enum VersionRealmType {
     IOS_VANKE_XSH("iOS_Vanke_XSH"),
     ANDROID_OA("Android_OA"),
     IOS_OA("iOS_OA"),
-    Android_MyBay("Android_MyBay"),
-    IOS_MyBay("iOS_MyBay");
+    ANDROID_MYBAY("Android_MyBay"),
+    IOS_MYBAY("iOS_MyBay");
 
     private String code;
     private VersionRealmType(String code) {
