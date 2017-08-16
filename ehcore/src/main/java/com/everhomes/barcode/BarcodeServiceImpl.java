@@ -4,6 +4,7 @@ package com.everhomes.barcode;
 import com.everhomes.BarCodeService.BarcodeModuleListener;
 import com.everhomes.BarCodeService.BarcodeService;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.oauth2client.HttpResponseEntity;
 import com.everhomes.oauth2client.handler.RestCallTemplate;
 import com.everhomes.rest.barcode.BarcodeDTO;
@@ -18,7 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class BarcodeServiceImpl implements BarcodeService {
@@ -57,19 +61,28 @@ public class BarcodeServiceImpl implements BarcodeService {
     }
 
     private BarcodeDTO checkForBiz(CheckBarcodeCommand cmd){
-        String host = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.host", "https://pay.zuolin.com");
-        String checkBarcodeApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.checkBarcode", "");
+        String host = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"stat.biz.server.url", "");
+        String checkBarcodeApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"biz.zuolin.checkBarcode", "");
 
-
-        HttpResponseEntity<BarcodeDTO> responseEntity = RestCallTemplate.url(host + checkBarcodeApi)
-                .var("barcode", cmd.getBarcode())
-                .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .respType(BarcodeDTO.class)
-                .post();
-
-        if(responseEntity.getBody() != null){
-            return responseEntity.getBody();
+        Map<String, String> para = new HashMap<>();
+        para.put("barcode", cmd.getBarcode());
+        String result = null;
+        try {
+            result = HttpUtils.get(host + checkBarcodeApi, para);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+//        HttpResponseEntity<BarcodeDTO> responseEntity = RestCallTemplate.url(host + checkBarcodeApi)
+//                .var("barcode", cmd.getBarcode())
+//                .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+//                .respType(BarcodeDTO.class)
+//                .post();
+//
+//
+//        if(responseEntity.getBody() != null){
+//            return responseEntity.getBody();
+//        }
+        LOGGER.info("result = {}", result);
         return null;
     }
 }
