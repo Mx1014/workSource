@@ -6488,8 +6488,38 @@ public class PunchServiceImpl implements PunchService {
         		psd.setPunchRuleId(pr.getId());
         		psd.setPunchOrganizationId(punchOrgId);  
         		psd.setRuleDate(new java.sql.Date(specialDayDTO.getRuleDate())); 
+				if(null != specialDayDTO.getTimeRule()){
+					PunchTimeRuleDTO timeRule = specialDayDTO.getTimeRule();
+					PunchTimeRule ptr2 =ConvertHelper.convert(timeRule, PunchTimeRule.class); 
+	        		ptr2.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2)); 
+	        		ptr2.setFlexTimeLong(timeRule.getFlexTime()); 
+	        		if(timeRule.getPunchTimeIntervals().size()==1){
+	        			ptr2.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+	        			ptr2.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
+	        			ptr2.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+	        			punchProvider.createPunchTimeRule(ptr2);
+	        		}else if(timeRule.getPunchTimeIntervals().size()==2){
+	        			ptr2.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+	        			ptr2.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
+	        			ptr2.setNoonLeaveTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime());
+	        			ptr2.setAfternoonArriveTimeLong(timeRule.getPunchTimeIntervals().get(1).getArriveTime());
+	        			ptr2.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(1).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+	        			punchProvider.createPunchTimeRule(ptr2);
+	        		}else{
+	        			punchProvider.createPunchTimeRule(ptr2);
+	        			for(PunchTimeIntervalDTO interval:timeRule.getPunchTimeIntervals()){
+	        				PunchTimeInterval ptInterval = ConvertHelper.convert(ptr2, PunchTimeInterval.class);
+	        				ptInterval.setArriveTimeLong(interval.getArriveTime());
+	        				ptInterval.setLeaveTimeLong(interval.getLeaveTime());
+	        				ptInterval.setPunchRuleId(pr.getId());
+	        				ptInterval.setTimeRuleId(ptr2.getId());
+	        				punchProvider.createPunchTimeInterval(ptInterval);
+	        				
+	        			}
+	        		} 
+	        		psd.setTimeRuleId(ptr2.getId());
+				}
 				punchProvider.createPunchSpecialDay(psd);
-        		
         	}
         }
         //排班
@@ -6650,6 +6680,13 @@ public class PunchServiceImpl implements PunchService {
 				dto.setSpecialDays(new ArrayList<>());
 				for(PunchSpecialDay specialDay : specialDays){
 					PunchSpecialDayDTO dto1 =ConvertHelper.convert(specialDay, PunchSpecialDayDTO.class);
+					if(null != specialDay.getTimeRuleId()){
+						PunchTimeRule timeRule = punchProvider.getPunchTimeRuleById(specialDay.getTimeRuleId());
+						if(null != timeRule){
+							PunchTimeRuleDTO timeRuleDTO = convertPunchTimeRule2DTO(timeRule);
+							dto1.setTimeRule(timeRuleDTO);
+						}
+					}
 					dto.getSpecialDays().add(dto1);
 				}
 			}
