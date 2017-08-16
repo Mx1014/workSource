@@ -6225,11 +6225,9 @@ public class PunchServiceImpl implements PunchService {
 	private List<PunchSchedulingEmployeeDTO> convertToPunchSchedulings(ArrayList list ) {
 		List<PunchSchedulingEmployeeDTO> result = new ArrayList<PunchSchedulingEmployeeDTO>();
 		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
-			RowResult r = (RowResult)list.get(rowIndex);
-			LOGGER.debug("R + "+JSON.toJSONString(r));
-			LOGGER.debug("r.getA() + "+r.getA());
+			RowResult r = (RowResult)list.get(rowIndex); 
 			PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
-			dto.setContactName(r.getA());
+			dto.setContactName(r.getCells().get("A"));
 			dto.setDaySchedulings(new ArrayList<>());
 			for(int i = 1 ; i<=31;i++){
 				String val = r.getCells().get(GetExcelLetter(i + 1));
