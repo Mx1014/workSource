@@ -64,23 +64,24 @@ public class BarcodeServiceImpl implements BarcodeService {
         String host = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"stat.biz.server.url", "");
         String checkBarcodeApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"biz.zuolin.checkBarcode", "");
 
-        Map<String, String> para = new HashMap<>();
-        para.put("barcode", cmd.getBarcode());
+        Map<String, Object> para = new HashMap<>();
+        para.put("body", cmd);
         String result = null;
         try {
-            result = HttpUtils.get(host + checkBarcodeApi, para);
+            result = HttpUtils.postJson(host + checkBarcodeApi, StringHelper.toJsonString(para), 2000);
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        HttpResponseEntity<BarcodeDTO> responseEntity = RestCallTemplate.url(host + checkBarcodeApi)
-//                .var("barcode", cmd.getBarcode())
+//        HttpResponseEntity responseEntity = RestCallTemplate.url(host + checkBarcodeApi)
+////                .var("barcode", cmd.getBarcode())
+//                .body(StringHelper.toJsonString(para))
 //                .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-//                .respType(BarcodeDTO.class)
+//                .respType(String.class)
 //                .post();
 //
 //
 //        if(responseEntity.getBody() != null){
-//            return responseEntity.getBody();
+////            return responseEntity.getBody();
 //        }
         LOGGER.info("result = {}", result);
         return null;
