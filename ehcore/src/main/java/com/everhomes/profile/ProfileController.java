@@ -178,4 +178,46 @@ public class ProfileController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /profile/employProfileEmployees</b>
+     * <p>10-1.员工批量转正</p>
+     */
+    @RequestMapping("employProfileEmployees")
+    @RestReturn(value = String.class)
+    public RestResponse employProfileEmployees(EmployProfileEmployeesCommand cmd){
+        profileService.employProfileEmployees(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /profile/transferProfileEmployees</b>
+     * <p>10-2.员工批量调整</p>
+     */
+    @RequestMapping("transferProfileEmployees")
+    @RestReturn(value = String.class)
+    public RestResponse transferProfileEmployees(TransferProfileEmployeesCommand cmd){
+        profileService.transferProfileEmployees(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /profile/dismissProfileEmployees</b>
+     * <p>10-3.员工批量离职</p>
+     */
+    @RequestMapping("dismissProfileEmployees")
+    @RestReturn(value = String.class)
+    public RestResponse dismissProfileEmployees(DismissProfileEmployeesCommand cmd){
+        profileService.dismissProfileEmployees(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

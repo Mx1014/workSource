@@ -30,4 +30,8 @@ public interface ProfileService {
     ProfileEmployeeDTO addProfileEmployee(AddProfileEmployeeCommand cmd);
 
     ListProfileDismissEmployeesResponse listProfileDismissEmployees(ListProfileDismissEmployeesCommand cmd);
+
+    void employProfileEmployees(EmployProfileEmployeesCommand cmd);
+
+    void transferProfileEmployees(TransferProfileEmployeesCommand cmd);
 }

@@ -1,4 +1,12 @@
 package com.everhomes.profile;
 
-public class ProfileDismissEmployees extends EhProfile{
+import com.everhomes.server.schema.tables.pojos.EhProfileDismissEmployees;
+import com.everhomes.util.StringHelper;
+
+public class ProfileDismissEmployees extends EhProfileDismissEmployees{
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
