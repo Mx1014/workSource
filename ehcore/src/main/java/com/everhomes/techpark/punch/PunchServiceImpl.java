@@ -226,6 +226,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -2402,6 +2403,13 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public PunchTimeRule getPunchTimeRuleByRuleIdAndDate(PunchRule pr,Date date,Long userId){
+		Long id = getPunchTimeRuleIdByRuleIdAndDate(pr, date, userId);
+		if(null != id && !id.equals(0L))
+			return punchProvider.getPunchTimeRuleById(id);
+		return null;
+		
+	}
+	public Long getPunchTimeRuleIdByRuleIdAndDate(PunchRule pr,Date date,Long userId){
 		//分为排班制和固定班
 		if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
 			//固定班次
@@ -2411,7 +2419,7 @@ public class PunchServiceImpl implements PunchService {
 				if(specialDay.getStatus().equals(NormalFlag.YES.getCode())){
 					return null;
 				}else {
-					return punchProvider.getPunchTimeRuleById(specialDay.getTimeRuleId());
+					return specialDay.getTimeRuleId();
 				}
 			}
 			//如果为节假日则返回null  如果是节假调休日,用调休日期代替
@@ -2434,7 +2442,7 @@ public class PunchServiceImpl implements PunchService {
 					Integer openWeek = Integer.parseInt(timeRule.getOpenWeekday(), 2);
 					Integer weekDayInt = getWeekDayInt(punchDate);
 					if(weekDayInt.equals(openWeek&weekDayInt)){
-						return timeRule;
+						return timeRule.getId();
 					}
 				}
 			return null;	
@@ -2443,7 +2451,7 @@ public class PunchServiceImpl implements PunchService {
 			PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(pr.getPunchOrganizationId(),userId,date);
 			if(null == punchScheduling || punchScheduling.getPunchRuleId() == null )
 				return null ;
-			return this.punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
+			return punchScheduling.getTimeRuleId();
 		}
 	}
 	private Integer getWeekDayInt(java.sql.Date punchDate) {
@@ -6037,7 +6045,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet, Long queryTime) { 
 		Row row = sheet.createRow(sheet.getLastRowNum());
-		int i =1 ; 
+		int i =0 ; 
+		SimpleDateFormat sf= new SimpleDateFormat("dd日 EEE");
 		Calendar startCalendar = Calendar.getInstance();
 		Calendar endCalendar = Calendar.getInstance();
 		startCalendar.setTime(new Date(queryTime)); 
@@ -6048,16 +6057,17 @@ public class PunchServiceImpl implements PunchService {
 		endCalendar.setTime(startCalendar.getTime());
 		endCalendar.add(Calendar.MONTH, 1);
 		for(;startCalendar.before(endCalendar);startCalendar.add(Calendar.DAY_OF_MONTH, 1)){
-			row.createCell(++i).setCellValue( startCalendar.get(Calendar.DAY_OF_MONTH)+startCalendar.get(Calendar.DAY_OF_WEEK));
-		} 
+			row.createCell(++i).setCellValue(sf.format(startCalendar.getTime()));
+		}
 	}
 	private void setNewPunchSchedulingsBookRow(Sheet sheet, PunchSchedulingEmployeeDTO employee ) { 
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1;  
 		row.createCell(++i).setCellValue(employee.getContactName());
-		for( String paiban : employee.getDaySchedulings()){
-			row.createCell(++i).setCellValue(paiban);
-		} 
+		if(null != employee.getDaySchedulings())
+			for( String paiban : employee.getDaySchedulings()){
+				row.createCell(++i).setCellValue(paiban);
+			} 
 	}
 	/** 
      * 设置某些列的值只能输入预制的数据,显示下拉框. 
@@ -6538,16 +6548,19 @@ public class PunchServiceImpl implements PunchService {
 		int i = 1; 
 		for(String ruleName : r.getDaySchedulings() ){
 			PunchTimeRule ptr =findPtrByName(ptrs,ruleName);
+			calendar.set(Calendar.DAY_OF_MONTH, i);
+			PunchScheduling ps = ConvertHelper.convert(pr, PunchScheduling.class);
+			ps.setPunchRuleId(pr.getId());
+			ps.setRuleDate(new java.sql.Date(calendar.getTimeInMillis()));
 			if(null != ptr){
-				calendar.set(Calendar.DAY_OF_MONTH, i);
-				PunchScheduling ps = ConvertHelper.convert(pr, PunchScheduling.class);
-				ps.setPunchRuleId(pr.getId());
-				ps.setRuleDate(new java.sql.Date(calendar.getTimeInMillis()));
 				ps.setTimeRuleId(ptr.getId());
-				ps.setTargetType(PunchTargetType.USER.getCode());
-				ps.setTargetId(r.getUserId());
-				punchSchedulingProvider.createPunchScheduling(ps);
+			}else{
+				ps.setTimeRuleId(0L);
 			}
+			ps.setTargetType(PunchTargetType.USER.getCode());
+			ps.setTargetId(r.getUserId());
+			punchSchedulingProvider.createPunchScheduling(ps);
+			
 			i++;
 		}
 	}
@@ -6739,12 +6752,17 @@ public class PunchServiceImpl implements PunchService {
 				for(;start.before(end);start.add(Calendar.DAY_OF_MONTH, 1)){
 					PunchScheduling scheduling = findSchedlingByDate(scheMap.get(userId),new java.sql.Date(start.getTimeInMillis()));
 					if(null != scheduling){
-						PunchTimeRule ptr = punchProvider.findPunchTimeRuleById(scheduling.getTimeRuleId());
-						if(null != ptr){
-							employeeDTO.getDaySchedulings().add(ptr.getName()); 
+						if(scheduling.getTimeRuleId()==null || scheduling.getTimeRuleId().equals(0L)){
+							employeeDTO.getDaySchedulings().add("休息");
 						}
 						else{
-							employeeDTO.getDaySchedulings().add(""); 
+							PunchTimeRule ptr = punchProvider.findPunchTimeRuleById(scheduling.getTimeRuleId());
+							if(null != ptr){
+								employeeDTO.getDaySchedulings().add(ptr.getName()); 
+							}
+							else{
+								employeeDTO.getDaySchedulings().add(""); 
+							}
 						}
 					}
 					else{
