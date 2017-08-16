@@ -178,7 +178,7 @@
         eh_authorization_third_party_forms | eh_authorization_third_party_records | eh_authorization_third_party_buttons |
         eh_user_identifier_logs | eh_user_appeal_logs |
         eh_var_field_groups | eh_var_fields | eh_var_field_items | eh_var_field_group_scopes | eh_var_field_scopes | eh_var_field_item_scopes |
-        eh_enterprise_customers |
+        eh_enterprise_customers | eh_contract_attachments | eh_contract_charging_items | eh_contract_charging_item_addresses | eh_contract_params |
         eh_zj_syncdata_backup | eh_thirdpart_configurations |
         </includes>
 
