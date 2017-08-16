@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 665941574;
+	private static final long serialVersionUID = -285443851;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -280,6 +280,31 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_forum_posts.official_flag</code>. whether it is an official activity, 0 not, 1 yes
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Byte> OFFICIAL_FLAG = createField("official_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "whether it is an official activity, 0 not, 1 yes");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.media_display_flag</code>. whether display image
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Byte> MEDIA_DISPLAY_FLAG = createField("media_display_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "whether display image");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.max_quantity</code>. max person quantity
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Integer> MAX_QUANTITY = createField("max_quantity", org.jooq.impl.SQLDataType.INTEGER, this, "max person quantity");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.activity_category_id</code>. activity category id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> ACTIVITY_CATEGORY_ID = createField("activity_category_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "activity category id");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.activity_content_category_id</code>. activity content category id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> ACTIVITY_CONTENT_CATEGORY_ID = createField("activity_content_category_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "activity content category id");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.parent_comment_id</code>. parent comment id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> PARENT_COMMENT_ID = createField("parent_comment_id", org.jooq.impl.SQLDataType.BIGINT, this, "parent comment id");
 
 	/**
 	 * Create a <code>ehcore.eh_forum_posts</code> table reference

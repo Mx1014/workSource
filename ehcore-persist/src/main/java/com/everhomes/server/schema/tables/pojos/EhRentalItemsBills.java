@@ -11,9 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1416073903;
+	private static final long serialVersionUID = 1317059331;
 
 	private java.lang.Long       id;
+	private java.lang.Long       communityId;
+	private java.lang.String     siteType;
 	private java.lang.Long       rentalBillId;
 	private java.lang.Long       rentalSiteItemId;
 	private java.lang.Integer    rentalCount;
@@ -22,15 +24,13 @@ public class EhRentalItemsBills implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
-	private java.lang.Long       resourceTypeId;
-	private java.lang.String     itemName;
-	private java.lang.String     imgUri;
-	private java.lang.Byte       itemType;
 
 	public EhRentalItemsBills() {}
 
 	public EhRentalItemsBills(
 		java.lang.Long       id,
+		java.lang.Long       communityId,
+		java.lang.String     siteType,
 		java.lang.Long       rentalBillId,
 		java.lang.Long       rentalSiteItemId,
 		java.lang.Integer    rentalCount,
@@ -38,13 +38,11 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		java.lang.Long       creatorUid,
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
-		java.sql.Timestamp   operateTime,
-		java.lang.Long       resourceTypeId,
-		java.lang.String     itemName,
-		java.lang.String     imgUri,
-		java.lang.Byte       itemType
+		java.sql.Timestamp   operateTime
 	) {
 		this.id = id;
+		this.communityId = communityId;
+		this.siteType = siteType;
 		this.rentalBillId = rentalBillId;
 		this.rentalSiteItemId = rentalSiteItemId;
 		this.rentalCount = rentalCount;
@@ -53,10 +51,6 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.resourceTypeId = resourceTypeId;
-		this.itemName = itemName;
-		this.imgUri = imgUri;
-		this.itemType = itemType;
 	}
 
 	public java.lang.Long getId() {
@@ -65,6 +59,22 @@ public class EhRentalItemsBills implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
+	}
+
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public java.lang.String getSiteType() {
+		return this.siteType;
+	}
+
+	public void setSiteType(java.lang.String siteType) {
+		this.siteType = siteType;
 	}
 
 	public java.lang.Long getRentalBillId() {
@@ -129,37 +139,5 @@ public class EhRentalItemsBills implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
-	}
-
-	public java.lang.Long getResourceTypeId() {
-		return this.resourceTypeId;
-	}
-
-	public void setResourceTypeId(java.lang.Long resourceTypeId) {
-		this.resourceTypeId = resourceTypeId;
-	}
-
-	public java.lang.String getItemName() {
-		return this.itemName;
-	}
-
-	public void setItemName(java.lang.String itemName) {
-		this.itemName = itemName;
-	}
-
-	public java.lang.String getImgUri() {
-		return this.imgUri;
-	}
-
-	public void setImgUri(java.lang.String imgUri) {
-		this.imgUri = imgUri;
-	}
-
-	public java.lang.Byte getItemType() {
-		return this.itemType;
-	}
-
-	public void setItemType(java.lang.Byte itemType) {
-		this.itemType = itemType;
 	}
 }

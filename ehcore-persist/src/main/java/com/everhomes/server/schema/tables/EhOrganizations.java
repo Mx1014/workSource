@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationsRecord> {
 
-	private static final long serialVersionUID = 1213426877;
+	private static final long serialVersionUID = -875220079;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organizations</code>
@@ -44,7 +44,7 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	/**
 	 * The column <code>ehcore.eh_organizations.name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_organizations.address_id</code>. address for department
@@ -77,9 +77,9 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> DEPARTMENT_TYPE = createField("department_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_organizations.group_type</code>. enterprise, department, group
+	 * The column <code>ehcore.eh_organizations.group_type</code>. ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> GROUP_TYPE = createField("group_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "enterprise, department, group");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> GROUP_TYPE = createField("group_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER");
 
 	/**
 	 * The column <code>ehcore.eh_organizations.create_time</code>.
@@ -100,6 +100,11 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_organizations.namespace_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.group_id</code>. eh_group id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT, this, "eh_group id");
 
 	/**
 	 * The column <code>ehcore.eh_organizations.integral_tag1</code>.
@@ -152,14 +157,39 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_organizations.group_id</code>. eh_group id
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT, this, "eh_group id");
-
-	/**
 	 * The column <code>ehcore.eh_organizations.show_flag</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Byte> SHOW_FLAG = createField("show_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.namespace_organization_token</code>. the token from third party
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> NAMESPACE_ORGANIZATION_TOKEN = createField("namespace_organization_token", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "the token from third party");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.namespace_organization_type</code>. the type of organization
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> NAMESPACE_ORGANIZATION_TYPE = createField("namespace_organization_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "the type of organization");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.size</code>. job level size
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Integer> SIZE = createField("size", org.jooq.impl.SQLDataType.INTEGER, this, "job level size");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.creator_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.operator_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.set_admin_flag</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Byte> SET_ADMIN_FLAG = createField("set_admin_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_organizations</code> table reference
@@ -204,7 +234,7 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOrganizationsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOrganizationsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ORGANIZATIONS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_ORGANIZATIONS_U_EH_ORG_NAME);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOrganizationsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ORGANIZATIONS_PRIMARY);
 	}
 
 	/**

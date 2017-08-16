@@ -179,4 +179,11 @@ public class EhPollsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPolls> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPolls.EH_POLLS.DELETE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPolls> fetchByTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPolls.EH_POLLS.TAG, values);
+	}
 }

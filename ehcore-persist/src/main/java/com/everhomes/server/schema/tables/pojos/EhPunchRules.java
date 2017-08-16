@@ -11,19 +11,16 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1504730066;
+	private static final long serialVersionUID = 2050767584;
 
 	private java.lang.Long     id;
-	private java.lang.Long     enterpriseId;
-	private java.sql.Time      startEarlyTime;
-	private java.sql.Time      startLateTime;
-	private java.sql.Time      workTime;
-	private java.sql.Time      noonLeaveTime;
-	private java.sql.Time      afternoonArriveTime;
-	private java.sql.Time      timeTag1;
-	private java.sql.Time      timeTag2;
-	private java.sql.Time      timeTag3;
-	private java.lang.Byte     punchTimesPerDay;
+	private java.lang.String   ownerType;
+	private java.lang.Long     ownerId;
+	private java.lang.String   name;
+	private java.lang.Long     timeRuleId;
+	private java.lang.Long     locationRuleId;
+	private java.lang.Long     wifiRuleId;
+	private java.lang.Long     workdayRuleId;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
@@ -33,32 +30,26 @@ public class EhPunchRules implements java.io.Serializable {
 
 	public EhPunchRules(
 		java.lang.Long     id,
-		java.lang.Long     enterpriseId,
-		java.sql.Time      startEarlyTime,
-		java.sql.Time      startLateTime,
-		java.sql.Time      workTime,
-		java.sql.Time      noonLeaveTime,
-		java.sql.Time      afternoonArriveTime,
-		java.sql.Time      timeTag1,
-		java.sql.Time      timeTag2,
-		java.sql.Time      timeTag3,
-		java.lang.Byte     punchTimesPerDay,
+		java.lang.String   ownerType,
+		java.lang.Long     ownerId,
+		java.lang.String   name,
+		java.lang.Long     timeRuleId,
+		java.lang.Long     locationRuleId,
+		java.lang.Long     wifiRuleId,
+		java.lang.Long     workdayRuleId,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
-		this.enterpriseId = enterpriseId;
-		this.startEarlyTime = startEarlyTime;
-		this.startLateTime = startLateTime;
-		this.workTime = workTime;
-		this.noonLeaveTime = noonLeaveTime;
-		this.afternoonArriveTime = afternoonArriveTime;
-		this.timeTag1 = timeTag1;
-		this.timeTag2 = timeTag2;
-		this.timeTag3 = timeTag3;
-		this.punchTimesPerDay = punchTimesPerDay;
+		this.ownerType = ownerType;
+		this.ownerId = ownerId;
+		this.name = name;
+		this.timeRuleId = timeRuleId;
+		this.locationRuleId = locationRuleId;
+		this.wifiRuleId = wifiRuleId;
+		this.workdayRuleId = workdayRuleId;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
@@ -73,84 +64,60 @@ public class EhPunchRules implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getEnterpriseId() {
-		return this.enterpriseId;
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
 	}
 
-	public void setEnterpriseId(java.lang.Long enterpriseId) {
-		this.enterpriseId = enterpriseId;
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
 	}
 
-	public java.sql.Time getStartEarlyTime() {
-		return this.startEarlyTime;
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
 	}
 
-	public void setStartEarlyTime(java.sql.Time startEarlyTime) {
-		this.startEarlyTime = startEarlyTime;
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
-	public java.sql.Time getStartLateTime() {
-		return this.startLateTime;
+	public java.lang.String getName() {
+		return this.name;
 	}
 
-	public void setStartLateTime(java.sql.Time startLateTime) {
-		this.startLateTime = startLateTime;
+	public void setName(java.lang.String name) {
+		this.name = name;
 	}
 
-	public java.sql.Time getWorkTime() {
-		return this.workTime;
+	public java.lang.Long getTimeRuleId() {
+		return this.timeRuleId;
 	}
 
-	public void setWorkTime(java.sql.Time workTime) {
-		this.workTime = workTime;
+	public void setTimeRuleId(java.lang.Long timeRuleId) {
+		this.timeRuleId = timeRuleId;
 	}
 
-	public java.sql.Time getNoonLeaveTime() {
-		return this.noonLeaveTime;
+	public java.lang.Long getLocationRuleId() {
+		return this.locationRuleId;
 	}
 
-	public void setNoonLeaveTime(java.sql.Time noonLeaveTime) {
-		this.noonLeaveTime = noonLeaveTime;
+	public void setLocationRuleId(java.lang.Long locationRuleId) {
+		this.locationRuleId = locationRuleId;
 	}
 
-	public java.sql.Time getAfternoonArriveTime() {
-		return this.afternoonArriveTime;
+	public java.lang.Long getWifiRuleId() {
+		return this.wifiRuleId;
 	}
 
-	public void setAfternoonArriveTime(java.sql.Time afternoonArriveTime) {
-		this.afternoonArriveTime = afternoonArriveTime;
+	public void setWifiRuleId(java.lang.Long wifiRuleId) {
+		this.wifiRuleId = wifiRuleId;
 	}
 
-	public java.sql.Time getTimeTag1() {
-		return this.timeTag1;
+	public java.lang.Long getWorkdayRuleId() {
+		return this.workdayRuleId;
 	}
 
-	public void setTimeTag1(java.sql.Time timeTag1) {
-		this.timeTag1 = timeTag1;
-	}
-
-	public java.sql.Time getTimeTag2() {
-		return this.timeTag2;
-	}
-
-	public void setTimeTag2(java.sql.Time timeTag2) {
-		this.timeTag2 = timeTag2;
-	}
-
-	public java.sql.Time getTimeTag3() {
-		return this.timeTag3;
-	}
-
-	public void setTimeTag3(java.sql.Time timeTag3) {
-		this.timeTag3 = timeTag3;
-	}
-
-	public java.lang.Byte getPunchTimesPerDay() {
-		return this.punchTimesPerDay;
-	}
-
-	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
-		this.punchTimesPerDay = punchTimesPerDay;
+	public void setWorkdayRuleId(java.lang.Long workdayRuleId) {
+		this.workdayRuleId = workdayRuleId;
 	}
 
 	public java.lang.Long getCreatorUid() {

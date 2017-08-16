@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord> {
 
-	private static final long serialVersionUID = 753708721;
+	private static final long serialVersionUID = 1693399289;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_tasks</code>
@@ -172,14 +172,34 @@ public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everho
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.String> CATEGORY_PATH = createField("category_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "refernece to the path of eh_categories");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_tasks.create_uid</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> CREATE_UID = createField("create_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
-
-	/**
 	 * The column <code>ehcore.eh_quality_inspection_tasks.manual_flag</code>. 0: auto 1:manual
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> MANUAL_FLAG = createField("manual_flag", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "0: auto 1:manual");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.target_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.target_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.String> TARGET_TYPE = createField("target_type", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.creator_uid</code>. record creator user id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "record creator user id");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.executive_position_id</code>. refernece to the id of eh_organization_job_positions
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> EXECUTIVE_POSITION_ID = createField("executive_position_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "refernece to the id of eh_organization_job_positions");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_quality_inspection_tasks</code> table reference

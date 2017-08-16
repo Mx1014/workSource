@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeRates extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord> {
 
-	private static final long serialVersionUID = -1754646694;
+	private static final long serialVersionUID = 762291579;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_recharge_rates</code>
@@ -75,6 +75,11 @@ public class EhParkingRechargeRates extends org.jooq.impl.TableImpl<com.everhome
 	 * The column <code>ehcore.eh_parking_recharge_rates.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_rates.card_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord, java.lang.String> CARD_TYPE = createField("card_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_parking_recharge_rates</code> table reference

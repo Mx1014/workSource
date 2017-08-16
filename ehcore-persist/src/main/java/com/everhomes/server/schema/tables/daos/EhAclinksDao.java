@@ -90,6 +90,41 @@ public class EhAclinksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG5, values);
+	}
+
+	/**
 	 * Fetch records that have <code>driver IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByDriver(java.lang.String... values) {
@@ -129,40 +164,5 @@ public class EhAclinksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByIntegralTag5(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.INTEGRAL_TAG5, values);
-	}
-
-	/**
-	 * Fetch records that have <code>string_tag1 IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag1(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG1, values);
-	}
-
-	/**
-	 * Fetch records that have <code>string_tag2 IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag2(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG2, values);
-	}
-
-	/**
-	 * Fetch records that have <code>string_tag3 IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag3(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG3, values);
-	}
-
-	/**
-	 * Fetch records that have <code>string_tag4 IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag4(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG4, values);
-	}
-
-	/**
-	 * Fetch records that have <code>string_tag5 IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag5(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG5, values);
 	}
 }

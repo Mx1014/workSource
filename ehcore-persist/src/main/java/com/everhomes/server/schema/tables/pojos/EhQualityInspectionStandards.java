@@ -11,14 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionStandards implements java.io.Serializable {
 
-	private static final long serialVersionUID = 718074396;
+	private static final long serialVersionUID = -1243917406;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
 	private java.lang.Long     ownerId;
 	private java.lang.String   standardNumber;
 	private java.lang.String   name;
-	private java.lang.Long     categoryId;
 	private java.lang.Long     repeatSettingId;
 	private java.lang.String   description;
 	private java.lang.Byte     status;
@@ -28,6 +27,12 @@ public class EhQualityInspectionStandards implements java.io.Serializable {
 	private java.sql.Timestamp updateTime;
 	private java.lang.Long     deleterUid;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.Long     targetId;
+	private java.lang.String   targetType;
+	private java.lang.Byte     reviewResult;
+	private java.lang.Long     reviewerUid;
+	private java.sql.Timestamp reviewTime;
+	private java.lang.Integer  namespaceId;
 
 	public EhQualityInspectionStandards() {}
 
@@ -37,7 +42,6 @@ public class EhQualityInspectionStandards implements java.io.Serializable {
 		java.lang.Long     ownerId,
 		java.lang.String   standardNumber,
 		java.lang.String   name,
-		java.lang.Long     categoryId,
 		java.lang.Long     repeatSettingId,
 		java.lang.String   description,
 		java.lang.Byte     status,
@@ -46,14 +50,19 @@ public class EhQualityInspectionStandards implements java.io.Serializable {
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp updateTime,
 		java.lang.Long     deleterUid,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.Long     targetId,
+		java.lang.String   targetType,
+		java.lang.Byte     reviewResult,
+		java.lang.Long     reviewerUid,
+		java.sql.Timestamp reviewTime,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.standardNumber = standardNumber;
 		this.name = name;
-		this.categoryId = categoryId;
 		this.repeatSettingId = repeatSettingId;
 		this.description = description;
 		this.status = status;
@@ -63,6 +72,12 @@ public class EhQualityInspectionStandards implements java.io.Serializable {
 		this.updateTime = updateTime;
 		this.deleterUid = deleterUid;
 		this.deleteTime = deleteTime;
+		this.targetId = targetId;
+		this.targetType = targetType;
+		this.reviewResult = reviewResult;
+		this.reviewerUid = reviewerUid;
+		this.reviewTime = reviewTime;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -103,14 +118,6 @@ public class EhQualityInspectionStandards implements java.io.Serializable {
 
 	public void setName(java.lang.String name) {
 		this.name = name;
-	}
-
-	public java.lang.Long getCategoryId() {
-		return this.categoryId;
-	}
-
-	public void setCategoryId(java.lang.Long categoryId) {
-		this.categoryId = categoryId;
 	}
 
 	public java.lang.Long getRepeatSettingId() {
@@ -183,5 +190,53 @@ public class EhQualityInspectionStandards implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.Long getTargetId() {
+		return this.targetId;
+	}
+
+	public void setTargetId(java.lang.Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public java.lang.String getTargetType() {
+		return this.targetType;
+	}
+
+	public void setTargetType(java.lang.String targetType) {
+		this.targetType = targetType;
+	}
+
+	public java.lang.Byte getReviewResult() {
+		return this.reviewResult;
+	}
+
+	public void setReviewResult(java.lang.Byte reviewResult) {
+		this.reviewResult = reviewResult;
+	}
+
+	public java.lang.Long getReviewerUid() {
+		return this.reviewerUid;
+	}
+
+	public void setReviewerUid(java.lang.Long reviewerUid) {
+		this.reviewerUid = reviewerUid;
+	}
+
+	public java.sql.Timestamp getReviewTime() {
+		return this.reviewTime;
+	}
+
+	public void setReviewTime(java.sql.Timestamp reviewTime) {
+		this.reviewTime = reviewTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

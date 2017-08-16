@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2129733320;
+	private static final long serialVersionUID = 123518238;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -42,8 +42,12 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     categoryId;
 	private java.lang.String   categoryPath;
-	private java.lang.Long     createUid;
 	private java.lang.Long     manualFlag;
+	private java.lang.Long     targetId;
+	private java.lang.String   targetType;
+	private java.lang.Long     creatorUid;
+	private java.lang.Long     executivePositionId;
+	private java.lang.Integer  namespaceId;
 
 	public EhQualityInspectionTasks() {}
 
@@ -77,8 +81,12 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Long     categoryId,
 		java.lang.String   categoryPath,
-		java.lang.Long     createUid,
-		java.lang.Long     manualFlag
+		java.lang.Long     manualFlag,
+		java.lang.Long     targetId,
+		java.lang.String   targetType,
+		java.lang.Long     creatorUid,
+		java.lang.Long     executivePositionId,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -109,8 +117,12 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		this.createTime = createTime;
 		this.categoryId = categoryId;
 		this.categoryPath = categoryPath;
-		this.createUid = createUid;
 		this.manualFlag = manualFlag;
+		this.targetId = targetId;
+		this.targetType = targetType;
+		this.creatorUid = creatorUid;
+		this.executivePositionId = executivePositionId;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -345,19 +357,51 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		this.categoryPath = categoryPath;
 	}
 
-	public java.lang.Long getCreateUid() {
-		return this.createUid;
-	}
-
-	public void setCreateUid(java.lang.Long createUid) {
-		this.createUid = createUid;
-	}
-
 	public java.lang.Long getManualFlag() {
 		return this.manualFlag;
 	}
 
 	public void setManualFlag(java.lang.Long manualFlag) {
 		this.manualFlag = manualFlag;
+	}
+
+	public java.lang.Long getTargetId() {
+		return this.targetId;
+	}
+
+	public void setTargetId(java.lang.Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public java.lang.String getTargetType() {
+		return this.targetType;
+	}
+
+	public void setTargetType(java.lang.String targetType) {
+		this.targetType = targetType;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public java.lang.Long getExecutivePositionId() {
+		return this.executivePositionId;
+	}
+
+	public void setExecutivePositionId(java.lang.Long executivePositionId) {
+		this.executivePositionId = executivePositionId;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

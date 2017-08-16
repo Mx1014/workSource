@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationOwners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord> {
 
-	private static final long serialVersionUID = 1665488553;
+	private static final long serialVersionUID = -795645291;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_owners</code>
@@ -59,7 +59,7 @@ public class EhOrganizationOwners extends org.jooq.impl.TableImpl<com.everhomes.
 	/**
 	 * The column <code>ehcore.eh_organization_owners.address_id</code>. address id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "address id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT, this, "address id");
 
 	/**
 	 * The column <code>ehcore.eh_organization_owners.address</code>.
@@ -85,6 +85,56 @@ public class EhOrganizationOwners extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_organization_owners.community_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.registered_residence</code>. registered residence
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.String> REGISTERED_RESIDENCE = createField("registered_residence", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "registered residence");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.org_owner_type_id</code>. owner type id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.Long> ORG_OWNER_TYPE_ID = createField("org_owner_type_id", org.jooq.impl.SQLDataType.BIGINT, this, "owner type id");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.gender</code>. male, female
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.Byte> GENDER = createField("gender", org.jooq.impl.SQLDataType.TINYINT, this, "male, female");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.birthday</code>. birthday
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.sql.Date> BIRTHDAY = createField("birthday", org.jooq.impl.SQLDataType.DATE, this, "birthday");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.marital_status</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.String> MARITAL_STATUS = createField("marital_status", org.jooq.impl.SQLDataType.VARCHAR.length(10), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.job</code>. job
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.String> JOB = createField("job", org.jooq.impl.SQLDataType.VARCHAR.length(10), this, "job");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.company</code>. company
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.String> COMPANY = createField("company", org.jooq.impl.SQLDataType.VARCHAR.length(100), this, "company");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.id_card_number</code>. id card number
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.String> ID_CARD_NUMBER = createField("id_card_number", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "id card number");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.avatar</code>. avatar
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.String> AVATAR = createField("avatar", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "avatar");
+
+	/**
+	 * The column <code>ehcore.eh_organization_owners.status</code>. delete: 0, normal: 1
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "delete: 0, normal: 1");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_owners</code> table reference

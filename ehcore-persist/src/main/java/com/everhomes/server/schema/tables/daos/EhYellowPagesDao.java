@@ -235,4 +235,11 @@ public class EhYellowPagesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhYellowPages> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>building_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhYellowPages> fetchByBuildingId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES.BUILDING_ID, values);
+	}
 }

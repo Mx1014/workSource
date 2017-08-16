@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = -93832405;
+	private static final long serialVersionUID = -1726968530;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_users</code>
@@ -44,12 +44,12 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	/**
 	 * The column <code>ehcore.eh_users.nick_name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> NICK_NAME = createField("nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> NICK_NAME = createField("nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_users.avatar</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> AVATAR = createField("avatar", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> AVATAR = createField("avatar", org.jooq.impl.SQLDataType.VARCHAR.length(2048), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_users.status_line</code>. status line to express who you are
@@ -195,6 +195,31 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 * The column <code>ehcore.eh_users.namespace_user_token</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> NAMESPACE_USER_TOKEN = createField("namespace_user_token", org.jooq.impl.SQLDataType.VARCHAR.length(2048).nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.namespace_user_type</code>. the type of user
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> NAMESPACE_USER_TYPE = createField("namespace_user_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "the type of user");
+
+	/**
+	 * The column <code>ehcore.eh_users.executive_tag</code>. 0-不是高管 1-是高管
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Byte> EXECUTIVE_TAG = createField("executive_tag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0-不是高管 1-是高管");
+
+	/**
+	 * The column <code>ehcore.eh_users.position_tag</code>. 职位
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> POSITION_TAG = createField("position_tag", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "职位");
+
+	/**
+	 * The column <code>ehcore.eh_users.identity_number_tag</code>. 身份证号
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> IDENTITY_NUMBER_TAG = createField("identity_number_tag", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "身份证号");
+
+	/**
+	 * The column <code>ehcore.eh_users.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_users</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1330446203;
+	private static final long serialVersionUID = -944287771;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -64,6 +64,11 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.sql.Timestamp startTime;
 	private java.sql.Timestamp endTime;
 	private java.lang.Byte     officialFlag;
+	private java.lang.Byte     mediaDisplayFlag;
+	private java.lang.Integer  maxQuantity;
+	private java.lang.Long     activityCategoryId;
+	private java.lang.Long     activityContentCategoryId;
+	private java.lang.Long     parentCommentId;
 
 	public EhForumPosts() {}
 
@@ -118,7 +123,12 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.String   tag,
 		java.sql.Timestamp startTime,
 		java.sql.Timestamp endTime,
-		java.lang.Byte     officialFlag
+		java.lang.Byte     officialFlag,
+		java.lang.Byte     mediaDisplayFlag,
+		java.lang.Integer  maxQuantity,
+		java.lang.Long     activityCategoryId,
+		java.lang.Long     activityContentCategoryId,
+		java.lang.Long     parentCommentId
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -171,6 +181,11 @@ public class EhForumPosts implements java.io.Serializable {
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.officialFlag = officialFlag;
+		this.mediaDisplayFlag = mediaDisplayFlag;
+		this.maxQuantity = maxQuantity;
+		this.activityCategoryId = activityCategoryId;
+		this.activityContentCategoryId = activityContentCategoryId;
+		this.parentCommentId = parentCommentId;
 	}
 
 	public java.lang.Long getId() {
@@ -579,5 +594,45 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setOfficialFlag(java.lang.Byte officialFlag) {
 		this.officialFlag = officialFlag;
+	}
+
+	public java.lang.Byte getMediaDisplayFlag() {
+		return this.mediaDisplayFlag;
+	}
+
+	public void setMediaDisplayFlag(java.lang.Byte mediaDisplayFlag) {
+		this.mediaDisplayFlag = mediaDisplayFlag;
+	}
+
+	public java.lang.Integer getMaxQuantity() {
+		return this.maxQuantity;
+	}
+
+	public void setMaxQuantity(java.lang.Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
+	}
+
+	public java.lang.Long getActivityCategoryId() {
+		return this.activityCategoryId;
+	}
+
+	public void setActivityCategoryId(java.lang.Long activityCategoryId) {
+		this.activityCategoryId = activityCategoryId;
+	}
+
+	public java.lang.Long getActivityContentCategoryId() {
+		return this.activityContentCategoryId;
+	}
+
+	public void setActivityContentCategoryId(java.lang.Long activityContentCategoryId) {
+		this.activityContentCategoryId = activityContentCategoryId;
+	}
+
+	public java.lang.Long getParentCommentId() {
+		return this.parentCommentId;
+	}
+
+	public void setParentCommentId(java.lang.Long parentCommentId) {
+		this.parentCommentId = parentCommentId;
 	}
 }

@@ -116,4 +116,39 @@ public class EhFeedbacksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByProofResourceUri(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.PROOF_RESOURCE_URI, values);
 	}
+
+	/**
+	 * Fetch records that have <code>status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>verify_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByVerifyType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.VERIFY_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>handle_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByHandleType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.HANDLE_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>handle_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByHandleTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.HANDLE_TIME, values);
+	}
 }

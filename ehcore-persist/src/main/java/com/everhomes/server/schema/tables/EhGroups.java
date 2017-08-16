@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = -1719758271;
+	private static final long serialVersionUID = -879634552;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -200,6 +200,16 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 * The column <code>ehcore.eh_groups.visible_region_id</code>. the id of region where the group belong to
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> VISIBLE_REGION_ID = createField("visible_region_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the id of region where the group belong to");
+
+	/**
+	 * The column <code>ehcore.eh_groups.approval_status</code>. approval status
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> APPROVAL_STATUS = createField("approval_status", org.jooq.impl.SQLDataType.TINYINT, this, "approval status");
+
+	/**
+	 * The column <code>ehcore.eh_groups.operator_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_groups</code> table reference

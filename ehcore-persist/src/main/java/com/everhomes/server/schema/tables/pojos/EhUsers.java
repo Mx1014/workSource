@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -632815433;
+	private static final long serialVersionUID = 847930417;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -47,6 +47,11 @@ public class EhUsers implements java.io.Serializable {
 	private java.lang.String   passwordHash;
 	private java.lang.Integer  namespaceId;
 	private java.lang.String   namespaceUserToken;
+	private java.lang.String   namespaceUserType;
+	private java.lang.Byte     executiveTag;
+	private java.lang.String   positionTag;
+	private java.lang.String   identityNumberTag;
+	private java.sql.Timestamp updateTime;
 
 	public EhUsers() {}
 
@@ -84,7 +89,12 @@ public class EhUsers implements java.io.Serializable {
 		java.lang.String   salt,
 		java.lang.String   passwordHash,
 		java.lang.Integer  namespaceId,
-		java.lang.String   namespaceUserToken
+		java.lang.String   namespaceUserToken,
+		java.lang.String   namespaceUserType,
+		java.lang.Byte     executiveTag,
+		java.lang.String   positionTag,
+		java.lang.String   identityNumberTag,
+		java.sql.Timestamp updateTime
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -120,6 +130,11 @@ public class EhUsers implements java.io.Serializable {
 		this.passwordHash = passwordHash;
 		this.namespaceId = namespaceId;
 		this.namespaceUserToken = namespaceUserToken;
+		this.namespaceUserType = namespaceUserType;
+		this.executiveTag = executiveTag;
+		this.positionTag = positionTag;
+		this.identityNumberTag = identityNumberTag;
+		this.updateTime = updateTime;
 	}
 
 	public java.lang.Long getId() {
@@ -392,5 +407,45 @@ public class EhUsers implements java.io.Serializable {
 
 	public void setNamespaceUserToken(java.lang.String namespaceUserToken) {
 		this.namespaceUserToken = namespaceUserToken;
+	}
+
+	public java.lang.String getNamespaceUserType() {
+		return this.namespaceUserType;
+	}
+
+	public void setNamespaceUserType(java.lang.String namespaceUserType) {
+		this.namespaceUserType = namespaceUserType;
+	}
+
+	public java.lang.Byte getExecutiveTag() {
+		return this.executiveTag;
+	}
+
+	public void setExecutiveTag(java.lang.Byte executiveTag) {
+		this.executiveTag = executiveTag;
+	}
+
+	public java.lang.String getPositionTag() {
+		return this.positionTag;
+	}
+
+	public void setPositionTag(java.lang.String positionTag) {
+		this.positionTag = positionTag;
+	}
+
+	public java.lang.String getIdentityNumberTag() {
+		return this.identityNumberTag;
+	}
+
+	public void setIdentityNumberTag(java.lang.String identityNumberTag) {
+		this.identityNumberTag = identityNumberTag;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
 	}
 }

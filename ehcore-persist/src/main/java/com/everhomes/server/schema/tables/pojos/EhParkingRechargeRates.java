@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeRates implements java.io.Serializable {
 
-	private static final long serialVersionUID = 804734749;
+	private static final long serialVersionUID = 1981715551;
 
 	private java.lang.Long       id;
 	private java.lang.String     ownerType;
@@ -23,6 +23,7 @@ public class EhParkingRechargeRates implements java.io.Serializable {
 	private java.lang.Byte       status;
 	private java.lang.Long       creatorUid;
 	private java.sql.Timestamp   createTime;
+	private java.lang.String     cardType;
 
 	public EhParkingRechargeRates() {}
 
@@ -36,7 +37,8 @@ public class EhParkingRechargeRates implements java.io.Serializable {
 		java.math.BigDecimal price,
 		java.lang.Byte       status,
 		java.lang.Long       creatorUid,
-		java.sql.Timestamp   createTime
+		java.sql.Timestamp   createTime,
+		java.lang.String     cardType
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -48,6 +50,7 @@ public class EhParkingRechargeRates implements java.io.Serializable {
 		this.status = status;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.cardType = cardType;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +131,13 @@ public class EhParkingRechargeRates implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.String getCardType() {
+		return this.cardType;
+	}
+
+	public void setCardType(java.lang.String cardType) {
+		this.cardType = cardType;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -606567097;
+	private static final long serialVersionUID = 980724875;
 
 	private java.lang.Long     id;
 	private java.lang.Long     uid;
@@ -31,6 +31,8 @@ public class EhUserActivities implements java.io.Serializable {
 	private java.lang.Long     collectTimeMs;
 	private java.lang.Long     reportTimeMs;
 	private java.sql.Timestamp createTime;
+	private java.lang.Integer  namespaceId;
+	private java.lang.String   versionRealm;
 
 	public EhUserActivities() {}
 
@@ -52,7 +54,9 @@ public class EhUserActivities implements java.io.Serializable {
 		java.lang.String   userAgent,
 		java.lang.Long     collectTimeMs,
 		java.lang.Long     reportTimeMs,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Integer  namespaceId,
+		java.lang.String   versionRealm
 	) {
 		this.id = id;
 		this.uid = uid;
@@ -72,6 +76,8 @@ public class EhUserActivities implements java.io.Serializable {
 		this.collectTimeMs = collectTimeMs;
 		this.reportTimeMs = reportTimeMs;
 		this.createTime = createTime;
+		this.namespaceId = namespaceId;
+		this.versionRealm = versionRealm;
 	}
 
 	public java.lang.Long getId() {
@@ -216,5 +222,21 @@ public class EhUserActivities implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.String getVersionRealm() {
+		return this.versionRealm;
+	}
+
+	public void setVersionRealm(java.lang.String versionRealm) {
+		this.versionRealm = versionRealm;
 	}
 }

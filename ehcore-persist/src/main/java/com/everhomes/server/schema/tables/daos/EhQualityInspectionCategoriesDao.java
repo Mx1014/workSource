@@ -123,4 +123,11 @@ public class EhQualityInspectionCategoriesDao extends org.jooq.impl.DAOImpl<com.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories> fetchByDescription(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionCategories.EH_QUALITY_INSPECTION_CATEGORIES.DESCRIPTION, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionCategories.EH_QUALITY_INSPECTION_CATEGORIES.NAMESPACE_ID, values);
+	}
 }

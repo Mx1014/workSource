@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchGeopoints extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord> {
 
-	private static final long serialVersionUID = -1909534751;
+	private static final long serialVersionUID = -1116478271;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_geopoints</code>
@@ -80,6 +80,21 @@ public class EhPunchGeopoints extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 * The column <code>ehcore.eh_punch_geopoints.operate_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_punch_geopoints.owner_type</code>. owner resource(user/organization) type
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "owner resource(user/organization) type");
+
+	/**
+	 * The column <code>ehcore.eh_punch_geopoints.owner_id</code>. owner resource(user/organization) id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT, this, "owner resource(user/organization) id");
+
+	/**
+	 * The column <code>ehcore.eh_punch_geopoints.location_rule_id</code>. fk:eh_punch_geopoints id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord, java.lang.Long> LOCATION_RULE_ID = createField("location_rule_id", org.jooq.impl.SQLDataType.BIGINT, this, "fk:eh_punch_geopoints id");
 
 	/**
 	 * Create a <code>ehcore.eh_punch_geopoints</code> table reference

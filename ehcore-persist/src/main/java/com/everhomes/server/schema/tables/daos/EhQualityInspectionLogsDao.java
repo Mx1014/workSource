@@ -95,4 +95,11 @@ public class EhQualityInspectionLogsDao extends org.jooq.impl.DAOImpl<com.everho
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionLogs.EH_QUALITY_INSPECTION_LOGS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionLogs.EH_QUALITY_INSPECTION_LOGS.NAMESPACE_ID, values);
+	}
 }

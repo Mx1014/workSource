@@ -123,4 +123,74 @@ public class EhOrganizationOwnersDao extends org.jooq.impl.DAOImpl<com.everhomes
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByCommunityId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.COMMUNITY_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>registered_residence IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByRegisteredResidence(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.REGISTERED_RESIDENCE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>org_owner_type_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByOrgOwnerTypeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>gender IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByGender(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.GENDER, values);
+	}
+
+	/**
+	 * Fetch records that have <code>birthday IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByBirthday(java.sql.Date... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.BIRTHDAY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>marital_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByMaritalStatus(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.MARITAL_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>job IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByJob(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.JOB, values);
+	}
+
+	/**
+	 * Fetch records that have <code>company IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByCompany(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.COMPANY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>id_card_number IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByIdCardNumber(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.ID_CARD_NUMBER, values);
+	}
+
+	/**
+	 * Fetch records that have <code>avatar IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByAvatar(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.AVATAR, values);
+	}
+
+	/**
+	 * Fetch records that have <code>status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.STATUS, values);
+	}
 }

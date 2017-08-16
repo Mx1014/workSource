@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBuildings implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2092248404;
+	private static final long serialVersionUID = -331169096;
 
 	private java.lang.Long     id;
 	private java.lang.Long     communityId;
@@ -43,6 +43,26 @@ public class EhBuildings implements java.io.Serializable {
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
 	private java.lang.Integer  namespaceId;
+	private java.lang.String   productType;
+	private java.sql.Timestamp completeDate;
+	private java.sql.Timestamp joininDate;
+	private java.lang.String   floorCount;
+	private java.lang.String   namespaceBuildingType;
+	private java.lang.String   namespaceBuildingToken;
+	private java.lang.String   trafficDescription;
+	private java.lang.String   liftDescription;
+	private java.lang.String   pmDescription;
+	private java.lang.String   parkingLotDescription;
+	private java.lang.String   environmentalDescription;
+	private java.lang.String   powerDescription;
+	private java.lang.String   telecommunicationDescription;
+	private java.lang.String   airConditionDescription;
+	private java.lang.String   securityDescription;
+	private java.lang.String   fireControlDescription;
+	private java.lang.Long     generalFormId;
+	private java.lang.Byte     customFormFlag;
+	private java.lang.Long     defaultOrder;
+	private java.lang.String   managerName;
 
 	public EhBuildings() {}
 
@@ -76,7 +96,27 @@ public class EhBuildings implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
-		java.lang.Integer  namespaceId
+		java.lang.Integer  namespaceId,
+		java.lang.String   productType,
+		java.sql.Timestamp completeDate,
+		java.sql.Timestamp joininDate,
+		java.lang.String   floorCount,
+		java.lang.String   namespaceBuildingType,
+		java.lang.String   namespaceBuildingToken,
+		java.lang.String   trafficDescription,
+		java.lang.String   liftDescription,
+		java.lang.String   pmDescription,
+		java.lang.String   parkingLotDescription,
+		java.lang.String   environmentalDescription,
+		java.lang.String   powerDescription,
+		java.lang.String   telecommunicationDescription,
+		java.lang.String   airConditionDescription,
+		java.lang.String   securityDescription,
+		java.lang.String   fireControlDescription,
+		java.lang.Long     generalFormId,
+		java.lang.Byte     customFormFlag,
+		java.lang.Long     defaultOrder,
+		java.lang.String   managerName
 	) {
 		this.id = id;
 		this.communityId = communityId;
@@ -108,6 +148,26 @@ public class EhBuildings implements java.io.Serializable {
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
 		this.namespaceId = namespaceId;
+		this.productType = productType;
+		this.completeDate = completeDate;
+		this.joininDate = joininDate;
+		this.floorCount = floorCount;
+		this.namespaceBuildingType = namespaceBuildingType;
+		this.namespaceBuildingToken = namespaceBuildingToken;
+		this.trafficDescription = trafficDescription;
+		this.liftDescription = liftDescription;
+		this.pmDescription = pmDescription;
+		this.parkingLotDescription = parkingLotDescription;
+		this.environmentalDescription = environmentalDescription;
+		this.powerDescription = powerDescription;
+		this.telecommunicationDescription = telecommunicationDescription;
+		this.airConditionDescription = airConditionDescription;
+		this.securityDescription = securityDescription;
+		this.fireControlDescription = fireControlDescription;
+		this.generalFormId = generalFormId;
+		this.customFormFlag = customFormFlag;
+		this.defaultOrder = defaultOrder;
+		this.managerName = managerName;
 	}
 
 	public java.lang.Long getId() {
@@ -348,5 +408,165 @@ public class EhBuildings implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.String getProductType() {
+		return this.productType;
+	}
+
+	public void setProductType(java.lang.String productType) {
+		this.productType = productType;
+	}
+
+	public java.sql.Timestamp getCompleteDate() {
+		return this.completeDate;
+	}
+
+	public void setCompleteDate(java.sql.Timestamp completeDate) {
+		this.completeDate = completeDate;
+	}
+
+	public java.sql.Timestamp getJoininDate() {
+		return this.joininDate;
+	}
+
+	public void setJoininDate(java.sql.Timestamp joininDate) {
+		this.joininDate = joininDate;
+	}
+
+	public java.lang.String getFloorCount() {
+		return this.floorCount;
+	}
+
+	public void setFloorCount(java.lang.String floorCount) {
+		this.floorCount = floorCount;
+	}
+
+	public java.lang.String getNamespaceBuildingType() {
+		return this.namespaceBuildingType;
+	}
+
+	public void setNamespaceBuildingType(java.lang.String namespaceBuildingType) {
+		this.namespaceBuildingType = namespaceBuildingType;
+	}
+
+	public java.lang.String getNamespaceBuildingToken() {
+		return this.namespaceBuildingToken;
+	}
+
+	public void setNamespaceBuildingToken(java.lang.String namespaceBuildingToken) {
+		this.namespaceBuildingToken = namespaceBuildingToken;
+	}
+
+	public java.lang.String getTrafficDescription() {
+		return this.trafficDescription;
+	}
+
+	public void setTrafficDescription(java.lang.String trafficDescription) {
+		this.trafficDescription = trafficDescription;
+	}
+
+	public java.lang.String getLiftDescription() {
+		return this.liftDescription;
+	}
+
+	public void setLiftDescription(java.lang.String liftDescription) {
+		this.liftDescription = liftDescription;
+	}
+
+	public java.lang.String getPmDescription() {
+		return this.pmDescription;
+	}
+
+	public void setPmDescription(java.lang.String pmDescription) {
+		this.pmDescription = pmDescription;
+	}
+
+	public java.lang.String getParkingLotDescription() {
+		return this.parkingLotDescription;
+	}
+
+	public void setParkingLotDescription(java.lang.String parkingLotDescription) {
+		this.parkingLotDescription = parkingLotDescription;
+	}
+
+	public java.lang.String getEnvironmentalDescription() {
+		return this.environmentalDescription;
+	}
+
+	public void setEnvironmentalDescription(java.lang.String environmentalDescription) {
+		this.environmentalDescription = environmentalDescription;
+	}
+
+	public java.lang.String getPowerDescription() {
+		return this.powerDescription;
+	}
+
+	public void setPowerDescription(java.lang.String powerDescription) {
+		this.powerDescription = powerDescription;
+	}
+
+	public java.lang.String getTelecommunicationDescription() {
+		return this.telecommunicationDescription;
+	}
+
+	public void setTelecommunicationDescription(java.lang.String telecommunicationDescription) {
+		this.telecommunicationDescription = telecommunicationDescription;
+	}
+
+	public java.lang.String getAirConditionDescription() {
+		return this.airConditionDescription;
+	}
+
+	public void setAirConditionDescription(java.lang.String airConditionDescription) {
+		this.airConditionDescription = airConditionDescription;
+	}
+
+	public java.lang.String getSecurityDescription() {
+		return this.securityDescription;
+	}
+
+	public void setSecurityDescription(java.lang.String securityDescription) {
+		this.securityDescription = securityDescription;
+	}
+
+	public java.lang.String getFireControlDescription() {
+		return this.fireControlDescription;
+	}
+
+	public void setFireControlDescription(java.lang.String fireControlDescription) {
+		this.fireControlDescription = fireControlDescription;
+	}
+
+	public java.lang.Long getGeneralFormId() {
+		return this.generalFormId;
+	}
+
+	public void setGeneralFormId(java.lang.Long generalFormId) {
+		this.generalFormId = generalFormId;
+	}
+
+	public java.lang.Byte getCustomFormFlag() {
+		return this.customFormFlag;
+	}
+
+	public void setCustomFormFlag(java.lang.Byte customFormFlag) {
+		this.customFormFlag = customFormFlag;
+	}
+
+	public java.lang.Long getDefaultOrder() {
+		return this.defaultOrder;
+	}
+
+	public void setDefaultOrder(java.lang.Long defaultOrder) {
+		this.defaultOrder = defaultOrder;
+	}
+
+	public java.lang.String getManagerName() {
+		return this.managerName;
+	}
+
+	public void setManagerName(java.lang.String managerName) {
+		this.managerName = managerName;
 	}
 }

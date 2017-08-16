@@ -11,19 +11,19 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkApplyCard implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1756909029;
+	private static final long serialVersionUID = -2010890629;
 
 	private java.lang.Long     id;
 	private java.lang.Long     applierId;
 	private java.lang.String   applierName;
 	private java.lang.String   applierPhone;
-	private java.lang.String   companyName;
 	private java.lang.String   plateNumber;
 	private java.sql.Timestamp applyTime;
 	private java.lang.Byte     applyStatus;
 	private java.lang.Byte     fetchStatus;
 	private java.sql.Timestamp deadline;
 	private java.lang.Long     communityId;
+	private java.lang.String   companyName;
 
 	public EhParkApplyCard() {}
 
@@ -32,25 +32,25 @@ public class EhParkApplyCard implements java.io.Serializable {
 		java.lang.Long     applierId,
 		java.lang.String   applierName,
 		java.lang.String   applierPhone,
-		java.lang.String   companyName,
 		java.lang.String   plateNumber,
 		java.sql.Timestamp applyTime,
 		java.lang.Byte     applyStatus,
 		java.lang.Byte     fetchStatus,
 		java.sql.Timestamp deadline,
-		java.lang.Long     communityId
+		java.lang.Long     communityId,
+		java.lang.String   companyName
 	) {
 		this.id = id;
 		this.applierId = applierId;
 		this.applierName = applierName;
 		this.applierPhone = applierPhone;
-		this.companyName = companyName;
 		this.plateNumber = plateNumber;
 		this.applyTime = applyTime;
 		this.applyStatus = applyStatus;
 		this.fetchStatus = fetchStatus;
 		this.deadline = deadline;
 		this.communityId = communityId;
+		this.companyName = companyName;
 	}
 
 	public java.lang.Long getId() {
@@ -83,14 +83,6 @@ public class EhParkApplyCard implements java.io.Serializable {
 
 	public void setApplierPhone(java.lang.String applierPhone) {
 		this.applierPhone = applierPhone;
-	}
-
-	public java.lang.String getCompanyName() {
-		return this.companyName;
-	}
-
-	public void setCompanyName(java.lang.String companyName) {
-		this.companyName = companyName;
 	}
 
 	public java.lang.String getPlateNumber() {
@@ -139,5 +131,13 @@ public class EhParkApplyCard implements java.io.Serializable {
 
 	public void setCommunityId(java.lang.Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public java.lang.String getCompanyName() {
+		return this.companyName;
+	}
+
+	public void setCompanyName(java.lang.String companyName) {
+		this.companyName = companyName;
 	}
 }

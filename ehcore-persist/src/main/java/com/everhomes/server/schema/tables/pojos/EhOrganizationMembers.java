@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1794501885;
+	private static final long serialVersionUID = -4438861;
 
 	private java.lang.Long     id;
 	private java.lang.Long     organizationId;
@@ -41,6 +41,11 @@ public class EhOrganizationMembers implements java.io.Serializable {
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
 	private java.lang.Integer  namespaceId;
+	private java.lang.Byte     visibleFlag;
+	private java.lang.String   groupType;
+	private java.lang.Long     creatorUid;
+	private java.lang.Long     operatorUid;
+	private java.lang.Long     detailId;
 
 	public EhOrganizationMembers() {}
 
@@ -72,7 +77,12 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
-		java.lang.Integer  namespaceId
+		java.lang.Integer  namespaceId,
+		java.lang.Byte     visibleFlag,
+		java.lang.String   groupType,
+		java.lang.Long     creatorUid,
+		java.lang.Long     operatorUid,
+		java.lang.Long     detailId
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -102,6 +112,11 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
 		this.namespaceId = namespaceId;
+		this.visibleFlag = visibleFlag;
+		this.groupType = groupType;
+		this.creatorUid = creatorUid;
+		this.operatorUid = operatorUid;
+		this.detailId = detailId;
 	}
 
 	public java.lang.Long getId() {
@@ -326,5 +341,45 @@ public class EhOrganizationMembers implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Byte getVisibleFlag() {
+		return this.visibleFlag;
+	}
+
+	public void setVisibleFlag(java.lang.Byte visibleFlag) {
+		this.visibleFlag = visibleFlag;
+	}
+
+	public java.lang.String getGroupType() {
+		return this.groupType;
+	}
+
+	public void setGroupType(java.lang.String groupType) {
+		this.groupType = groupType;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public java.lang.Long getOperatorUid() {
+		return this.operatorUid;
+	}
+
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+
+	public java.lang.Long getDetailId() {
+		return this.detailId;
+	}
+
+	public void setDetailId(java.lang.Long detailId) {
+		this.detailId = detailId;
 	}
 }

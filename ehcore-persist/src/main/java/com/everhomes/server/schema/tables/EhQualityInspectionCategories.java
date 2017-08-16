@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord> {
 
-	private static final long serialVersionUID = 1821439015;
+	private static final long serialVersionUID = -1746829480;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_categories</code>
@@ -85,6 +85,11 @@ public class EhQualityInspectionCategories extends org.jooq.impl.TableImpl<com.e
 	 * The column <code>ehcore.eh_quality_inspection_categories.description</code>. content data
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "content data");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_categories.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_quality_inspection_categories</code> table reference

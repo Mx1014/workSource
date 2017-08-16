@@ -312,4 +312,151 @@ public class EhActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByOfficialFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.OFFICIAL_FLAG, values);
 	}
+
+	/**
+	 * Fetch records that have <code>video_url IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByVideoUrl(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.VIDEO_URL, values);
+	}
+
+	/**
+	 * Fetch records that have <code>is_video_support IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByIsVideoSupport(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.IS_VIDEO_SUPPORT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>max_quantity IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByMaxQuantity(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.MAX_QUANTITY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>content_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByContentType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.CONTENT_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>version IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByVersion(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.VERSION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>category_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByCategoryId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.CATEGORY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>forum_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByForumId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.FORUM_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByCreatorTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.CREATOR_TAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByTargetTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.TARGET_TAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>visible_region_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByVisibleRegionType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.VISIBLE_REGION_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>visible_region_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByVisibleRegionId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.VISIBLE_REGION_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>achievement IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByAchievement(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.ACHIEVEMENT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>achievement_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByAchievementType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.ACHIEVEMENT_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>achievement_richtext_url IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByAchievementRichtextUrl(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.ACHIEVEMENT_RICHTEXT_URL, values);
+	}
+
+	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.UPDATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>content_category_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByContentCategoryId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.CONTENT_CATEGORY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>signup_end_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchBySignupEndTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.SIGNUP_END_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>all_day_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByAllDayFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.ALL_DAY_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>charge_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByChargeFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.CHARGE_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>charge_price IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByChargePrice(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.CHARGE_PRICE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>wechat_signup IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByWechatSignup(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.WECHAT_SIGNUP, values);
+	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationOwners implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2053877924;
+	private static final long serialVersionUID = 335308766;
 
 	private java.lang.Long     id;
 	private java.lang.Long     organizationId;
@@ -25,6 +25,16 @@ public class EhOrganizationOwners implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     communityId;
+	private java.lang.String   registeredResidence;
+	private java.lang.Long     orgOwnerTypeId;
+	private java.lang.Byte     gender;
+	private java.sql.Date      birthday;
+	private java.lang.String   maritalStatus;
+	private java.lang.String   job;
+	private java.lang.String   company;
+	private java.lang.String   idCardNumber;
+	private java.lang.String   avatar;
+	private java.lang.Byte     status;
 
 	public EhOrganizationOwners() {}
 
@@ -40,7 +50,17 @@ public class EhOrganizationOwners implements java.io.Serializable {
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Integer  namespaceId,
-		java.lang.Long     communityId
+		java.lang.Long     communityId,
+		java.lang.String   registeredResidence,
+		java.lang.Long     orgOwnerTypeId,
+		java.lang.Byte     gender,
+		java.sql.Date      birthday,
+		java.lang.String   maritalStatus,
+		java.lang.String   job,
+		java.lang.String   company,
+		java.lang.String   idCardNumber,
+		java.lang.String   avatar,
+		java.lang.Byte     status
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -54,6 +74,16 @@ public class EhOrganizationOwners implements java.io.Serializable {
 		this.createTime = createTime;
 		this.namespaceId = namespaceId;
 		this.communityId = communityId;
+		this.registeredResidence = registeredResidence;
+		this.orgOwnerTypeId = orgOwnerTypeId;
+		this.gender = gender;
+		this.birthday = birthday;
+		this.maritalStatus = maritalStatus;
+		this.job = job;
+		this.company = company;
+		this.idCardNumber = idCardNumber;
+		this.avatar = avatar;
+		this.status = status;
 	}
 
 	public java.lang.Long getId() {
@@ -150,5 +180,85 @@ public class EhOrganizationOwners implements java.io.Serializable {
 
 	public void setCommunityId(java.lang.Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public java.lang.String getRegisteredResidence() {
+		return this.registeredResidence;
+	}
+
+	public void setRegisteredResidence(java.lang.String registeredResidence) {
+		this.registeredResidence = registeredResidence;
+	}
+
+	public java.lang.Long getOrgOwnerTypeId() {
+		return this.orgOwnerTypeId;
+	}
+
+	public void setOrgOwnerTypeId(java.lang.Long orgOwnerTypeId) {
+		this.orgOwnerTypeId = orgOwnerTypeId;
+	}
+
+	public java.lang.Byte getGender() {
+		return this.gender;
+	}
+
+	public void setGender(java.lang.Byte gender) {
+		this.gender = gender;
+	}
+
+	public java.sql.Date getBirthday() {
+		return this.birthday;
+	}
+
+	public void setBirthday(java.sql.Date birthday) {
+		this.birthday = birthday;
+	}
+
+	public java.lang.String getMaritalStatus() {
+		return this.maritalStatus;
+	}
+
+	public void setMaritalStatus(java.lang.String maritalStatus) {
+		this.maritalStatus = maritalStatus;
+	}
+
+	public java.lang.String getJob() {
+		return this.job;
+	}
+
+	public void setJob(java.lang.String job) {
+		this.job = job;
+	}
+
+	public java.lang.String getCompany() {
+		return this.company;
+	}
+
+	public void setCompany(java.lang.String company) {
+		this.company = company;
+	}
+
+	public java.lang.String getIdCardNumber() {
+		return this.idCardNumber;
+	}
+
+	public void setIdCardNumber(java.lang.String idCardNumber) {
+		this.idCardNumber = idCardNumber;
+	}
+
+	public java.lang.String getAvatar() {
+		return this.avatar;
+	}
+
+	public void setAvatar(java.lang.String avatar) {
+		this.avatar = avatar;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
 	}
 }

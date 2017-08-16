@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchWorkday extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord> {
 
-	private static final long serialVersionUID = 1475222532;
+	private static final long serialVersionUID = -849211770;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_workday</code>
@@ -30,11 +30,6 @@ public class EhPunchWorkday extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_punch_workday.id</code>. id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
-
-	/**
-	 * The column <code>ehcore.eh_punch_workday.enterprise_id</code>. compay id
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord, java.lang.Long> ENTERPRISE_ID = createField("enterprise_id", org.jooq.impl.SQLDataType.BIGINT, this, "compay id");
 
 	/**
 	 * The column <code>ehcore.eh_punch_workday.date_status</code>. 0:weekend work date, 1:holiday
@@ -65,6 +60,11 @@ public class EhPunchWorkday extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_punch_workday.operate_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_punch_workday.enterprise_id</code>. compay id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord, java.lang.Long> ENTERPRISE_ID = createField("enterprise_id", org.jooq.impl.SQLDataType.BIGINT, this, "compay id");
 
 	/**
 	 * Create a <code>ehcore.eh_punch_workday</code> table reference

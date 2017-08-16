@@ -165,4 +165,18 @@ public class EhUserActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserActivities> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserActivities.EH_USER_ACTIVITIES.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserActivities> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserActivities.EH_USER_ACTIVITIES.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>version_realm IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserActivities> fetchByVersionRealm(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserActivities.EH_USER_ACTIVITIES.VERSION_REALM, values);
+	}
 }

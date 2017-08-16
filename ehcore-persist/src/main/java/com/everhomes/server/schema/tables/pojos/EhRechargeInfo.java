@@ -11,14 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo implements java.io.Serializable {
 
-	private static final long serialVersionUID = -63040418;
+	private static final long serialVersionUID = -1487081072;
 
 	private java.lang.Long     id;
 	private java.lang.Long     billId;
 	private java.lang.String   plateNumber;
 	private java.lang.Byte     numberType;
 	private java.lang.String   ownerName;
-	private java.lang.String   cardType;
 	private java.lang.Long     rechargeUserid;
 	private java.lang.String   rechargeUsername;
 	private java.lang.String   rechargePhone;
@@ -30,6 +29,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 	private java.lang.Byte     paymentStatus;
 	private java.lang.Byte     rechargeStatus;
 	private java.lang.Long     communityId;
+	private java.lang.String   cardType;
 
 	public EhRechargeInfo() {}
 
@@ -39,7 +39,6 @@ public class EhRechargeInfo implements java.io.Serializable {
 		java.lang.String   plateNumber,
 		java.lang.Byte     numberType,
 		java.lang.String   ownerName,
-		java.lang.String   cardType,
 		java.lang.Long     rechargeUserid,
 		java.lang.String   rechargeUsername,
 		java.lang.String   rechargePhone,
@@ -50,14 +49,14 @@ public class EhRechargeInfo implements java.io.Serializable {
 		java.sql.Timestamp newValidityperiod,
 		java.lang.Byte     paymentStatus,
 		java.lang.Byte     rechargeStatus,
-		java.lang.Long     communityId
+		java.lang.Long     communityId,
+		java.lang.String   cardType
 	) {
 		this.id = id;
 		this.billId = billId;
 		this.plateNumber = plateNumber;
 		this.numberType = numberType;
 		this.ownerName = ownerName;
-		this.cardType = cardType;
 		this.rechargeUserid = rechargeUserid;
 		this.rechargeUsername = rechargeUsername;
 		this.rechargePhone = rechargePhone;
@@ -69,6 +68,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.paymentStatus = paymentStatus;
 		this.rechargeStatus = rechargeStatus;
 		this.communityId = communityId;
+		this.cardType = cardType;
 	}
 
 	public java.lang.Long getId() {
@@ -109,14 +109,6 @@ public class EhRechargeInfo implements java.io.Serializable {
 
 	public void setOwnerName(java.lang.String ownerName) {
 		this.ownerName = ownerName;
-	}
-
-	public java.lang.String getCardType() {
-		return this.cardType;
-	}
-
-	public void setCardType(java.lang.String cardType) {
-		this.cardType = cardType;
 	}
 
 	public java.lang.Long getRechargeUserid() {
@@ -205,5 +197,13 @@ public class EhRechargeInfo implements java.io.Serializable {
 
 	public void setCommunityId(java.lang.Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public java.lang.String getCardType() {
+		return this.cardType;
+	}
+
+	public void setCardType(java.lang.String cardType) {
+		this.cardType = cardType;
 	}
 }

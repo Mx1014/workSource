@@ -146,6 +146,13 @@ public class EhOrganizationsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	}
 
 	/**
+	 * Fetch records that have <code>group_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByGroupId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.GROUP_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>integral_tag1 IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByIntegralTag1(java.lang.Long... values) {
@@ -216,16 +223,51 @@ public class EhOrganizationsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	}
 
 	/**
-	 * Fetch records that have <code>group_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByGroupId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.GROUP_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>show_flag IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByShowFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.SHOW_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_organization_token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByNamespaceOrganizationToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_organization_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByNamespaceOrganizationType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>size IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchBySize(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.SIZE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.CREATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByOperatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.OPERATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>set_admin_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchBySetAdminFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.SET_ADMIN_FLAG, values);
 	}
 }

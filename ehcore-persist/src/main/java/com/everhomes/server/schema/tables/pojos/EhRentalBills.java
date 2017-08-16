@@ -11,10 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -593347481;
+	private static final long serialVersionUID = 987385087;
 
 	private java.lang.Long       id;
-	private java.lang.String     billNumber;
+	private java.lang.Long       ownerId;
+	private java.lang.String     siteType;
 	private java.lang.Long       rentalSiteId;
 	private java.lang.Long       rentalUid;
 	private java.sql.Date        rentalDate;
@@ -37,17 +38,14 @@ public class EhRentalBills implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
-	private java.lang.String     siteName;
-	private java.lang.String     useTime;
-	private java.lang.String     vendorType;
-	private java.lang.Long       resourceTypeId;
-	private java.lang.Long       organizationId;
+	private java.lang.String     ownerType;
 
 	public EhRentalBills() {}
 
 	public EhRentalBills(
 		java.lang.Long       id,
-		java.lang.String     billNumber,
+		java.lang.Long       ownerId,
+		java.lang.String     siteType,
 		java.lang.Long       rentalSiteId,
 		java.lang.Long       rentalUid,
 		java.sql.Date        rentalDate,
@@ -70,14 +68,11 @@ public class EhRentalBills implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.String     siteName,
-		java.lang.String     useTime,
-		java.lang.String     vendorType,
-		java.lang.Long       resourceTypeId,
-		java.lang.Long       organizationId
+		java.lang.String     ownerType
 	) {
 		this.id = id;
-		this.billNumber = billNumber;
+		this.ownerId = ownerId;
+		this.siteType = siteType;
 		this.rentalSiteId = rentalSiteId;
 		this.rentalUid = rentalUid;
 		this.rentalDate = rentalDate;
@@ -100,11 +95,7 @@ public class EhRentalBills implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.siteName = siteName;
-		this.useTime = useTime;
-		this.vendorType = vendorType;
-		this.resourceTypeId = resourceTypeId;
-		this.organizationId = organizationId;
+		this.ownerType = ownerType;
 	}
 
 	public java.lang.Long getId() {
@@ -115,12 +106,20 @@ public class EhRentalBills implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.String getBillNumber() {
-		return this.billNumber;
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
 	}
 
-	public void setBillNumber(java.lang.String billNumber) {
-		this.billNumber = billNumber;
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public java.lang.String getSiteType() {
+		return this.siteType;
+	}
+
+	public void setSiteType(java.lang.String siteType) {
+		this.siteType = siteType;
 	}
 
 	public java.lang.Long getRentalSiteId() {
@@ -299,43 +298,11 @@ public class EhRentalBills implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
-	public java.lang.String getSiteName() {
-		return this.siteName;
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
 	}
 
-	public void setSiteName(java.lang.String siteName) {
-		this.siteName = siteName;
-	}
-
-	public java.lang.String getUseTime() {
-		return this.useTime;
-	}
-
-	public void setUseTime(java.lang.String useTime) {
-		this.useTime = useTime;
-	}
-
-	public java.lang.String getVendorType() {
-		return this.vendorType;
-	}
-
-	public void setVendorType(java.lang.String vendorType) {
-		this.vendorType = vendorType;
-	}
-
-	public java.lang.Long getResourceTypeId() {
-		return this.resourceTypeId;
-	}
-
-	public void setResourceTypeId(java.lang.Long resourceTypeId) {
-		this.resourceTypeId = resourceTypeId;
-	}
-
-	public java.lang.Long getOrganizationId() {
-		return this.organizationId;
-	}
-
-	public void setOrganizationId(java.lang.Long organizationId) {
-		this.organizationId = organizationId;
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
 	}
 }

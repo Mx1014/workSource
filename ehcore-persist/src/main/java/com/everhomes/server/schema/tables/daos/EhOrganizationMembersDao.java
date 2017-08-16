@@ -235,4 +235,39 @@ public class EhOrganizationMembersDao extends org.jooq.impl.DAOImpl<com.everhome
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByNamespaceId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>visible_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByVisibleFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.VISIBLE_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>group_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByGroupType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.GROUP_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.CREATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByOperatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.OPERATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>detail_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByDetailId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.DETAIL_ID, values);
+	}
 }

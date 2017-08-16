@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord> {
 
-	private static final long serialVersionUID = 400084738;
+	private static final long serialVersionUID = -321826550;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recharge_info</code>
@@ -50,11 +50,6 @@ public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_recharge_info.owner_name</code>. plate number owner name
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> OWNER_NAME = createField("owner_name", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "plate number owner name");
-
-	/**
-	 * The column <code>ehcore.eh_recharge_info.card_type</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> CARD_TYPE = createField("card_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recharge_info.recharge_userid</code>.
@@ -110,6 +105,11 @@ public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_recharge_info.community_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recharge_info.card_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> CARD_TYPE = createField("card_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_recharge_info</code> table reference

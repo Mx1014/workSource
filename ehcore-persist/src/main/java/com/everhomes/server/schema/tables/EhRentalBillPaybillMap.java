@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillPaybillMap extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord> {
 
-	private static final long serialVersionUID = -1533939495;
+	private static final long serialVersionUID = 1389366677;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_bill_paybill_map</code>
@@ -30,6 +30,16 @@ public class EhRentalBillPaybillMap extends org.jooq.impl.TableImpl<com.everhome
 	 * The column <code>ehcore.eh_rental_bill_paybill_map.id</code>. id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_bill_paybill_map.owner_id</code>. community id or organization id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "community id or organization id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_bill_paybill_map.site_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bill_paybill_map.rental_bill_id</code>.
@@ -62,9 +72,9 @@ public class EhRentalBillPaybillMap extends org.jooq.impl.TableImpl<com.everhome
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bill_paybill_map.vendor_type</code>. 支付方式,10001-支付宝，10002-微信
+	 * The column <code>ehcore.eh_rental_bill_paybill_map.owner_type</code>. owner type: community, organization
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord, java.lang.String> VENDOR_TYPE = createField("vendor_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "支付方式,10001-支付宝，10002-微信");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type: community, organization");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_bill_paybill_map</code> table reference

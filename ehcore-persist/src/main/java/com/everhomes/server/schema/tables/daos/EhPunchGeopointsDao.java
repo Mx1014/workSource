@@ -116,4 +116,25 @@ public class EhPunchGeopointsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchGeopoints> fetchByOperateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS.OPERATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>owner_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchGeopoints> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS.OWNER_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>owner_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchGeopoints> fetchByOwnerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS.OWNER_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>location_rule_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchGeopoints> fetchByLocationRuleId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS.LOCATION_RULE_ID, values);
+	}
 }

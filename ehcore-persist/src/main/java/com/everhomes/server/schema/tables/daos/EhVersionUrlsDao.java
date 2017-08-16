@@ -74,4 +74,39 @@ public class EhVersionUrlsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionUrls> fetchByInfoUrl(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.INFO_URL, values);
 	}
+
+	/**
+	 * Fetch records that have <code>upgrade_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionUrls> fetchByUpgradeDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.UPGRADE_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionUrls> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>app_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionUrls> fetchByAppName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.APP_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>publish_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionUrls> fetchByPublishTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.PUBLISH_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>icon_url IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionUrls> fetchByIconUrl(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.ICON_URL, values);
+	}
 }

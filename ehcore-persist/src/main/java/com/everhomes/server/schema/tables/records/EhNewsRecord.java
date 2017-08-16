@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNewsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhNewsRecord> {
 
-	private static final long serialVersionUID = -1034359793;
+	private static final long serialVersionUID = 1855751148;
 
 	/**
 	 * Setter for <code>ehcore.eh_news.id</code>.
@@ -349,6 +349,34 @@ public class EhNewsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhome
 		return (java.sql.Timestamp) getValue(23);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_news.category_id</code>. category id
+	 */
+	public void setCategoryId(java.lang.Long value) {
+		setValue(24, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_news.category_id</code>. category id
+	 */
+	public java.lang.Long getCategoryId() {
+		return (java.lang.Long) getValue(24);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_news.visible_type</code>.
+	 */
+	public void setVisibleType(java.lang.String value) {
+		setValue(25, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_news.visible_type</code>.
+	 */
+	public java.lang.String getVisibleType() {
+		return (java.lang.String) getValue(25);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -375,7 +403,7 @@ public class EhNewsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhome
 	/**
 	 * Create a detached, initialised EhNewsRecord
 	 */
-	public EhNewsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.String ownerType, java.lang.Long ownerId, java.lang.String title, java.lang.String author, java.lang.String coverUri, java.lang.String contentType, java.lang.String content, java.lang.String contentAbstract, java.lang.String sourceDesc, java.lang.String sourceUrl, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.Long viewCount, java.sql.Timestamp publishTime, java.lang.Long topIndex, java.lang.Byte topFlag, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long deleterUid, java.sql.Timestamp deleteTime) {
+	public EhNewsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.String ownerType, java.lang.Long ownerId, java.lang.String title, java.lang.String author, java.lang.String coverUri, java.lang.String contentType, java.lang.String content, java.lang.String contentAbstract, java.lang.String sourceDesc, java.lang.String sourceUrl, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.Long viewCount, java.sql.Timestamp publishTime, java.lang.Long topIndex, java.lang.Byte topFlag, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long deleterUid, java.sql.Timestamp deleteTime, java.lang.Long categoryId, java.lang.String visibleType) {
 		super(com.everhomes.server.schema.tables.EhNews.EH_NEWS);
 
 		setValue(0, id);
@@ -402,5 +430,7 @@ public class EhNewsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhome
 		setValue(21, createTime);
 		setValue(22, deleterUid);
 		setValue(23, deleteTime);
+		setValue(24, categoryId);
+		setValue(25, visibleType);
 	}
 }

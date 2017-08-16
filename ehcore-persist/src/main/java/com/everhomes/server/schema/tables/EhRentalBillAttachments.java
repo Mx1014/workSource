@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillAttachments extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord> {
 
-	private static final long serialVersionUID = -921911406;
+	private static final long serialVersionUID = 99160104;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_bill_attachments</code>
@@ -32,14 +32,24 @@ public class EhRentalBillAttachments extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
+	 * The column <code>ehcore.eh_rental_bill_attachments.owner_id</code>. community id or organization id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "community id or organization id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_bill_attachments.site_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_rental_bill_attachments.rental_bill_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> RENTAL_BILL_ID = createField("rental_bill_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bill_attachments.attachment_type</code>. 0:文本 1:车牌 2:显示内容 3：附件链接
+	 * The column <code>ehcore.eh_rental_bill_attachments.attachment_type</code>. 0:String 1:email 2:attachment file
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Byte> ATTACHMENT_TYPE = createField("attachment_type", org.jooq.impl.SQLDataType.TINYINT, this, "0:文本 1:车牌 2:显示内容 3：附件链接");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Byte> ATTACHMENT_TYPE = createField("attachment_type", org.jooq.impl.SQLDataType.TINYINT, this, "0:String 1:email 2:attachment file");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bill_attachments.content</code>.
@@ -72,9 +82,9 @@ public class EhRentalBillAttachments extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bill_attachments.resource_type_id</code>. 广场图标id
+	 * The column <code>ehcore.eh_rental_bill_attachments.owner_type</code>. owner type: community, organization
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> RESOURCE_TYPE_ID = createField("resource_type_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type: community, organization");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_bill_attachments</code> table reference

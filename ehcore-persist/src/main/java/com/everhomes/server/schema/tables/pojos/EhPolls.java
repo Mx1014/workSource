@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPolls implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1934005035;
+	private static final long serialVersionUID = -1558119463;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -32,6 +32,7 @@ public class EhPolls implements java.io.Serializable {
 	private java.lang.Integer  changeVersion;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.String   tag;
 
 	public EhPolls() {}
 
@@ -54,7 +55,8 @@ public class EhPolls implements java.io.Serializable {
 		java.lang.Byte     status,
 		java.lang.Integer  changeVersion,
 		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.String   tag
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -75,6 +77,7 @@ public class EhPolls implements java.io.Serializable {
 		this.changeVersion = changeVersion;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
+		this.tag = tag;
 	}
 
 	public java.lang.Long getId() {
@@ -227,5 +230,13 @@ public class EhPolls implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.String getTag() {
+		return this.tag;
+	}
+
+	public void setTag(java.lang.String tag) {
+		this.tag = tag;
 	}
 }

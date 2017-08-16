@@ -109,25 +109,4 @@ public class EhRentalSiteItemsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteItems> fetchByOperateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS.OPERATE_TIME, values);
 	}
-
-	/**
-	 * Fetch records that have <code>default_order IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteItems> fetchByDefaultOrder(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS.DEFAULT_ORDER, values);
-	}
-
-	/**
-	 * Fetch records that have <code>img_uri IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteItems> fetchByImgUri(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS.IMG_URI, values);
-	}
-
-	/**
-	 * Fetch records that have <code>item_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteItems> fetchByItemType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS.ITEM_TYPE, values);
-	}
 }

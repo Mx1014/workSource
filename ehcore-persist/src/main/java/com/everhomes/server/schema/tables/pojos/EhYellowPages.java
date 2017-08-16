@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhYellowPages implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1358678601;
+	private static final long serialVersionUID = 159686377;
 
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
@@ -41,6 +41,7 @@ public class EhYellowPages implements java.io.Serializable {
 	private java.lang.String   stringTag5;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.Long     buildingId;
 
 	public EhYellowPages() {}
 
@@ -72,7 +73,8 @@ public class EhYellowPages implements java.io.Serializable {
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Long     buildingId
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -102,6 +104,7 @@ public class EhYellowPages implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.buildingId = buildingId;
 	}
 
 	public java.lang.Long getId() {
@@ -326,5 +329,13 @@ public class EhYellowPages implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Long getBuildingId() {
+		return this.buildingId;
+	}
+
+	public void setBuildingId(java.lang.Long buildingId) {
+		this.buildingId = buildingId;
 	}
 }

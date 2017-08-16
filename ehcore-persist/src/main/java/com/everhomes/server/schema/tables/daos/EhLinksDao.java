@@ -137,4 +137,11 @@ public class EhLinksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLinks> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLinks.EH_LINKS.DELETE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>rich_content IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLinks> fetchByRichContent(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLinks.EH_LINKS.RICH_CONTENT, values);
+	}
 }

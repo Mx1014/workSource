@@ -88,4 +88,11 @@ public class EhVersionedContentDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionedContent> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhVersionedContent.EH_VERSIONED_CONTENT.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionedContent> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhVersionedContent.EH_VERSIONED_CONTENT.NAMESPACE_ID, values);
+	}
 }

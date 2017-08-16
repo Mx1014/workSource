@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 997965224;
+	private static final long serialVersionUID = -1714091502;
 
 	/**
 	 * Setter for <code>ehcore.eh_launch_pad_items.id</code>.
@@ -324,15 +324,15 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	/**
 	 * Setter for <code>ehcore.eh_launch_pad_items.target_id</code>. the entity id linked back to the orginal resource
 	 */
-	public void setTargetId(java.lang.Long value) {
+	public void setTargetId(java.lang.String value) {
 		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_launch_pad_items.target_id</code>. the entity id linked back to the orginal resource
 	 */
-	public java.lang.Long getTargetId() {
-		return (java.lang.Long) getValue(22);
+	public java.lang.String getTargetId() {
+		return (java.lang.String) getValue(22);
 	}
 
 	/**
@@ -377,6 +377,62 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 		return (java.lang.Byte) getValue(25);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_launch_pad_items.service_categry_id</code>. service categry id
+	 */
+	public void setServiceCategryId(java.lang.Long value) {
+		setValue(26, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_launch_pad_items.service_categry_id</code>. service categry id
+	 */
+	public java.lang.Long getServiceCategryId() {
+		return (java.lang.Long) getValue(26);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_launch_pad_items.selected_icon_uri</code>.
+	 */
+	public void setSelectedIconUri(java.lang.String value) {
+		setValue(27, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_launch_pad_items.selected_icon_uri</code>.
+	 */
+	public java.lang.String getSelectedIconUri() {
+		return (java.lang.String) getValue(27);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_launch_pad_items.more_order</code>.
+	 */
+	public void setMoreOrder(java.lang.Integer value) {
+		setValue(28, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_launch_pad_items.more_order</code>.
+	 */
+	public java.lang.Integer getMoreOrder() {
+		return (java.lang.Integer) getValue(28);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_launch_pad_items.alias_icon_uri</code>. 原有icon_uri有圆形、方形等，展现风格不一致。应对这样的场景增加alias_icon_uri，存储圆形默认图片。
+	 */
+	public void setAliasIconUri(java.lang.String value) {
+		setValue(29, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_launch_pad_items.alias_icon_uri</code>. 原有icon_uri有圆形、方形等，展现风格不一致。应对这样的场景增加alias_icon_uri，存储圆形默认图片。
+	 */
+	public java.lang.String getAliasIconUri() {
+		return (java.lang.String) getValue(29);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -403,7 +459,7 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	/**
 	 * Create a detached, initialised EhLaunchPadItemsRecord
 	 */
-	public EhLaunchPadItemsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.Long appId, java.lang.Byte scopeCode, java.lang.Long scopeId, java.lang.String itemLocation, java.lang.String itemGroup, java.lang.String itemName, java.lang.String itemLabel, java.lang.String iconUri, java.lang.Integer itemWidth, java.lang.Integer itemHeight, java.lang.Byte actionType, java.lang.String actionData, java.lang.Integer defaultOrder, java.lang.Byte applyPolicy, java.lang.Long minVersion, java.lang.Byte displayFlag, java.lang.String displayLayout, java.lang.Integer bgcolor, java.lang.String tag, java.lang.String targetType, java.lang.Long targetId, java.lang.Byte deleteFlag, java.lang.String sceneType, java.lang.Byte scaleType) {
+	public EhLaunchPadItemsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.Long appId, java.lang.Byte scopeCode, java.lang.Long scopeId, java.lang.String itemLocation, java.lang.String itemGroup, java.lang.String itemName, java.lang.String itemLabel, java.lang.String iconUri, java.lang.Integer itemWidth, java.lang.Integer itemHeight, java.lang.Byte actionType, java.lang.String actionData, java.lang.Integer defaultOrder, java.lang.Byte applyPolicy, java.lang.Long minVersion, java.lang.Byte displayFlag, java.lang.String displayLayout, java.lang.Integer bgcolor, java.lang.String tag, java.lang.String targetType, java.lang.String targetId, java.lang.Byte deleteFlag, java.lang.String sceneType, java.lang.Byte scaleType, java.lang.Long serviceCategryId, java.lang.String selectedIconUri, java.lang.Integer moreOrder, java.lang.String aliasIconUri) {
 		super(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS);
 
 		setValue(0, id);
@@ -432,5 +488,9 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 		setValue(23, deleteFlag);
 		setValue(24, sceneType);
 		setValue(25, scaleType);
+		setValue(26, serviceCategryId);
+		setValue(27, selectedIconUri);
+		setValue(28, moreOrder);
+		setValue(29, aliasIconUri);
 	}
 }

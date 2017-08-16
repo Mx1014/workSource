@@ -11,14 +11,15 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionStandardGroupMap implements java.io.Serializable {
 
-	private static final long serialVersionUID = 145982602;
+	private static final long serialVersionUID = 935187598;
 
 	private java.lang.Long     id;
 	private java.lang.Byte     groupType;
 	private java.lang.Long     standardId;
 	private java.lang.Long     groupId;
-	private java.sql.Timestamp createTime;
 	private java.lang.Long     inspectorUid;
+	private java.sql.Timestamp createTime;
+	private java.lang.Long     positionId;
 
 	public EhQualityInspectionStandardGroupMap() {}
 
@@ -27,15 +28,17 @@ public class EhQualityInspectionStandardGroupMap implements java.io.Serializable
 		java.lang.Byte     groupType,
 		java.lang.Long     standardId,
 		java.lang.Long     groupId,
+		java.lang.Long     inspectorUid,
 		java.sql.Timestamp createTime,
-		java.lang.Long     inspectorUid
+		java.lang.Long     positionId
 	) {
 		this.id = id;
 		this.groupType = groupType;
 		this.standardId = standardId;
 		this.groupId = groupId;
-		this.createTime = createTime;
 		this.inspectorUid = inspectorUid;
+		this.createTime = createTime;
+		this.positionId = positionId;
 	}
 
 	public java.lang.Long getId() {
@@ -70,6 +73,14 @@ public class EhQualityInspectionStandardGroupMap implements java.io.Serializable
 		this.groupId = groupId;
 	}
 
+	public java.lang.Long getInspectorUid() {
+		return this.inspectorUid;
+	}
+
+	public void setInspectorUid(java.lang.Long inspectorUid) {
+		this.inspectorUid = inspectorUid;
+	}
+
 	public java.sql.Timestamp getCreateTime() {
 		return this.createTime;
 	}
@@ -78,11 +89,11 @@ public class EhQualityInspectionStandardGroupMap implements java.io.Serializable
 		this.createTime = createTime;
 	}
 
-	public java.lang.Long getInspectorUid() {
-		return this.inspectorUid;
+	public java.lang.Long getPositionId() {
+		return this.positionId;
 	}
 
-	public void setInspectorUid(java.lang.Long inspectorUid) {
-		this.inspectorUid = inspectorUid;
+	public void setPositionId(java.lang.Long positionId) {
+		this.positionId = positionId;
 	}
 }

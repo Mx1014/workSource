@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserIdentifiers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> {
 
-	private static final long serialVersionUID = -55913656;
+	private static final long serialVersionUID = -289510320;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_identifiers</code>
@@ -70,6 +70,11 @@ public class EhUserIdentifiers extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_user_identifiers.namespace_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_identifiers.region_code</code>. region code 86 852
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord, java.lang.Integer> REGION_CODE = createField("region_code", org.jooq.impl.SQLDataType.INTEGER.defaulted(true), this, "region code 86 852");
 
 	/**
 	 * Create a <code>ehcore.eh_user_identifiers</code> table reference

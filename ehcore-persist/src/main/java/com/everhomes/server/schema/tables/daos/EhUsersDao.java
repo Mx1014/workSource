@@ -291,4 +291,39 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByNamespaceUserToken(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.NAMESPACE_USER_TOKEN, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_user_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByNamespaceUserType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.NAMESPACE_USER_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>executive_tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByExecutiveTag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.EXECUTIVE_TAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>position_tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByPositionTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.POSITION_TAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>identity_number_tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByIdentityNumberTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.IDENTITY_NUMBER_TAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.UPDATE_TIME, values);
+	}
 }

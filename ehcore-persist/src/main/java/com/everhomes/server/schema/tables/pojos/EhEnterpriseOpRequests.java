@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseOpRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = 167263571;
+	private static final long serialVersionUID = 1026476375;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -32,6 +32,11 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 	private java.lang.Long     operatorUid;
 	private java.lang.String   processMessage;
 	private java.sql.Timestamp processTime;
+	private java.lang.Long     contractId;
+	private java.lang.String   issuerType;
+	private java.lang.Long     buildingId;
+	private java.lang.Long     addressId;
+	private java.lang.Long     flowcaseId;
 
 	public EhEnterpriseOpRequests() {}
 
@@ -54,7 +59,12 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.lang.String   processMessage,
-		java.sql.Timestamp processTime
+		java.sql.Timestamp processTime,
+		java.lang.Long     contractId,
+		java.lang.String   issuerType,
+		java.lang.Long     buildingId,
+		java.lang.Long     addressId,
+		java.lang.Long     flowcaseId
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -75,6 +85,11 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 		this.operatorUid = operatorUid;
 		this.processMessage = processMessage;
 		this.processTime = processTime;
+		this.contractId = contractId;
+		this.issuerType = issuerType;
+		this.buildingId = buildingId;
+		this.addressId = addressId;
+		this.flowcaseId = flowcaseId;
 	}
 
 	public java.lang.Long getId() {
@@ -227,5 +242,45 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 
 	public void setProcessTime(java.sql.Timestamp processTime) {
 		this.processTime = processTime;
+	}
+
+	public java.lang.Long getContractId() {
+		return this.contractId;
+	}
+
+	public void setContractId(java.lang.Long contractId) {
+		this.contractId = contractId;
+	}
+
+	public java.lang.String getIssuerType() {
+		return this.issuerType;
+	}
+
+	public void setIssuerType(java.lang.String issuerType) {
+		this.issuerType = issuerType;
+	}
+
+	public java.lang.Long getBuildingId() {
+		return this.buildingId;
+	}
+
+	public void setBuildingId(java.lang.Long buildingId) {
+		this.buildingId = buildingId;
+	}
+
+	public java.lang.Long getAddressId() {
+		return this.addressId;
+	}
+
+	public void setAddressId(java.lang.Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public java.lang.Long getFlowcaseId() {
+		return this.flowcaseId;
+	}
+
+	public void setFlowcaseId(java.lang.Long flowcaseId) {
+		this.flowcaseId = flowcaseId;
 	}
 }

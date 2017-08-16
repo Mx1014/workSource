@@ -48,73 +48,52 @@ public class EhPunchRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>enterprise_id IN (values)</code>
+	 * Fetch records that have <code>owner_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByEnterpriseId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.ENTERPRISE_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.OWNER_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>start_early_time IN (values)</code>
+	 * Fetch records that have <code>owner_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByStartEarlyTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.START_EARLY_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByOwnerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.OWNER_ID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>start_late_time IN (values)</code>
+	 * Fetch records that have <code>name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByStartLateTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.START_LATE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.NAME, values);
 	}
 
 	/**
-	 * Fetch records that have <code>work_time IN (values)</code>
+	 * Fetch records that have <code>time_rule_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByWorkTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.WORK_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByTimeRuleId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.TIME_RULE_ID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>noon_leave_time IN (values)</code>
+	 * Fetch records that have <code>location_rule_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByNoonLeaveTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.NOON_LEAVE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByLocationRuleId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.LOCATION_RULE_ID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>afternoon_arrive_time IN (values)</code>
+	 * Fetch records that have <code>wifi_rule_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByAfternoonArriveTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.AFTERNOON_ARRIVE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByWifiRuleId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.WIFI_RULE_ID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>time_tag1 IN (values)</code>
+	 * Fetch records that have <code>workday_rule_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByTimeTag1(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.TIME_TAG1, values);
-	}
-
-	/**
-	 * Fetch records that have <code>time_tag2 IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByTimeTag2(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.TIME_TAG2, values);
-	}
-
-	/**
-	 * Fetch records that have <code>time_tag3 IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByTimeTag3(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.TIME_TAG3, values);
-	}
-
-	/**
-	 * Fetch records that have <code>punch_times_per_day IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByPunchTimesPerDay(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.PUNCH_TIMES_PER_DAY, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByWorkdayRuleId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.WORKDAY_RULE_ID, values);
 	}
 
 	/**

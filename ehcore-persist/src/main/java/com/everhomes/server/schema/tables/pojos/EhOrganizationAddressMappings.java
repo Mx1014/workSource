@@ -11,24 +11,30 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationAddressMappings implements java.io.Serializable {
 
-	private static final long serialVersionUID = -801337341;
+	private static final long serialVersionUID = -532152153;
 
-	private java.lang.Long   id;
-	private java.lang.Long   organizationId;
-	private java.lang.Long   communityId;
-	private java.lang.Long   addressId;
-	private java.lang.String organizationAddress;
-	private java.lang.Byte   livingStatus;
+	private java.lang.Long     id;
+	private java.lang.Long     organizationId;
+	private java.lang.Long     communityId;
+	private java.lang.Long     addressId;
+	private java.lang.String   organizationAddress;
+	private java.lang.Byte     livingStatus;
+	private java.lang.String   namespaceType;
+	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp updateTime;
 
 	public EhOrganizationAddressMappings() {}
 
 	public EhOrganizationAddressMappings(
-		java.lang.Long   id,
-		java.lang.Long   organizationId,
-		java.lang.Long   communityId,
-		java.lang.Long   addressId,
-		java.lang.String organizationAddress,
-		java.lang.Byte   livingStatus
+		java.lang.Long     id,
+		java.lang.Long     organizationId,
+		java.lang.Long     communityId,
+		java.lang.Long     addressId,
+		java.lang.String   organizationAddress,
+		java.lang.Byte     livingStatus,
+		java.lang.String   namespaceType,
+		java.sql.Timestamp createTime,
+		java.sql.Timestamp updateTime
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -36,6 +42,9 @@ public class EhOrganizationAddressMappings implements java.io.Serializable {
 		this.addressId = addressId;
 		this.organizationAddress = organizationAddress;
 		this.livingStatus = livingStatus;
+		this.namespaceType = namespaceType;
+		this.createTime = createTime;
+		this.updateTime = updateTime;
 	}
 
 	public java.lang.Long getId() {
@@ -84,5 +93,29 @@ public class EhOrganizationAddressMappings implements java.io.Serializable {
 
 	public void setLivingStatus(java.lang.Byte livingStatus) {
 		this.livingStatus = livingStatus;
+	}
+
+	public java.lang.String getNamespaceType() {
+		return this.namespaceType;
+	}
+
+	public void setNamespaceType(java.lang.String namespaceType) {
+		this.namespaceType = namespaceType;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
 	}
 }

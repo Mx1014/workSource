@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionEvaluationFactors implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1724306470;
+	private static final long serialVersionUID = -1995927026;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -21,6 +21,7 @@ public class EhQualityInspectionEvaluationFactors implements java.io.Serializabl
 	private java.lang.Double   weight;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.Integer  namespaceId;
 
 	public EhQualityInspectionEvaluationFactors() {}
 
@@ -32,7 +33,8 @@ public class EhQualityInspectionEvaluationFactors implements java.io.Serializabl
 		java.lang.Long     groupId,
 		java.lang.Double   weight,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -42,6 +44,7 @@ public class EhQualityInspectionEvaluationFactors implements java.io.Serializabl
 		this.weight = weight;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -106,5 +109,13 @@ public class EhQualityInspectionEvaluationFactors implements java.io.Serializabl
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

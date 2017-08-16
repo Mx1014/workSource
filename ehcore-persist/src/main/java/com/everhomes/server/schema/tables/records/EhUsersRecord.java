@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = -237678198;
+	private static final long serialVersionUID = -2009940615;
 
 	/**
 	 * Setter for <code>ehcore.eh_users.id</code>. id of the record
@@ -489,6 +489,76 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 		return (java.lang.String) getValue(33);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_users.namespace_user_type</code>. the type of user
+	 */
+	public void setNamespaceUserType(java.lang.String value) {
+		setValue(34, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_users.namespace_user_type</code>. the type of user
+	 */
+	public java.lang.String getNamespaceUserType() {
+		return (java.lang.String) getValue(34);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_users.executive_tag</code>. 0-不是高管 1-是高管
+	 */
+	public void setExecutiveTag(java.lang.Byte value) {
+		setValue(35, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_users.executive_tag</code>. 0-不是高管 1-是高管
+	 */
+	public java.lang.Byte getExecutiveTag() {
+		return (java.lang.Byte) getValue(35);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_users.position_tag</code>. 职位
+	 */
+	public void setPositionTag(java.lang.String value) {
+		setValue(36, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_users.position_tag</code>. 职位
+	 */
+	public java.lang.String getPositionTag() {
+		return (java.lang.String) getValue(36);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_users.identity_number_tag</code>. 身份证号
+	 */
+	public void setIdentityNumberTag(java.lang.String value) {
+		setValue(37, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_users.identity_number_tag</code>. 身份证号
+	 */
+	public java.lang.String getIdentityNumberTag() {
+		return (java.lang.String) getValue(37);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_users.update_time</code>.
+	 */
+	public void setUpdateTime(java.sql.Timestamp value) {
+		setValue(38, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_users.update_time</code>.
+	 */
+	public java.sql.Timestamp getUpdateTime() {
+		return (java.sql.Timestamp) getValue(38);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -515,7 +585,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	/**
 	 * Create a detached, initialised EhUsersRecord
 	 */
-	public EhUsersRecord(java.lang.Long id, java.lang.String uuid, java.lang.String accountName, java.lang.String nickName, java.lang.String avatar, java.lang.String statusLine, java.lang.Byte status, java.lang.Integer points, java.lang.Byte level, java.lang.Byte gender, java.sql.Date birthday, java.lang.Long addressId, java.lang.String address, java.lang.Long communityId, java.lang.Long homeTown, java.lang.String homeTownPath, java.lang.String occupation, java.lang.String company, java.lang.String school, java.lang.String locale, java.lang.Byte inviteType, java.lang.Long invitorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.sql.Timestamp lastLoginTime, java.lang.String lastLoginIp, java.lang.String regIp, java.lang.Long regCityId, java.lang.Long regChannelId, java.lang.String originalAvatar, java.lang.String salt, java.lang.String passwordHash, java.lang.Integer namespaceId, java.lang.String namespaceUserToken) {
+	public EhUsersRecord(java.lang.Long id, java.lang.String uuid, java.lang.String accountName, java.lang.String nickName, java.lang.String avatar, java.lang.String statusLine, java.lang.Byte status, java.lang.Integer points, java.lang.Byte level, java.lang.Byte gender, java.sql.Date birthday, java.lang.Long addressId, java.lang.String address, java.lang.Long communityId, java.lang.Long homeTown, java.lang.String homeTownPath, java.lang.String occupation, java.lang.String company, java.lang.String school, java.lang.String locale, java.lang.Byte inviteType, java.lang.Long invitorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.sql.Timestamp lastLoginTime, java.lang.String lastLoginIp, java.lang.String regIp, java.lang.Long regCityId, java.lang.Long regChannelId, java.lang.String originalAvatar, java.lang.String salt, java.lang.String passwordHash, java.lang.Integer namespaceId, java.lang.String namespaceUserToken, java.lang.String namespaceUserType, java.lang.Byte executiveTag, java.lang.String positionTag, java.lang.String identityNumberTag, java.sql.Timestamp updateTime) {
 		super(com.everhomes.server.schema.tables.EhUsers.EH_USERS);
 
 		setValue(0, id);
@@ -552,5 +622,10 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 		setValue(31, passwordHash);
 		setValue(32, namespaceId);
 		setValue(33, namespaceUserToken);
+		setValue(34, namespaceUserType);
+		setValue(35, executiveTag);
+		setValue(36, positionTag);
+		setValue(37, identityNumberTag);
+		setValue(38, updateTime);
 	}
 }

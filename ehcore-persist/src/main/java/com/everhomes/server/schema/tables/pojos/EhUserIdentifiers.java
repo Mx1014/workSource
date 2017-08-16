@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserIdentifiers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 160362770;
+	private static final long serialVersionUID = 300293724;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
@@ -22,6 +22,7 @@ public class EhUserIdentifiers implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp notifyTime;
 	private java.lang.Integer  namespaceId;
+	private java.lang.Integer  regionCode;
 
 	public EhUserIdentifiers() {}
 
@@ -34,7 +35,8 @@ public class EhUserIdentifiers implements java.io.Serializable {
 		java.lang.Byte     claimStatus,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp notifyTime,
-		java.lang.Integer  namespaceId
+		java.lang.Integer  namespaceId,
+		java.lang.Integer  regionCode
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
@@ -45,6 +47,7 @@ public class EhUserIdentifiers implements java.io.Serializable {
 		this.createTime = createTime;
 		this.notifyTime = notifyTime;
 		this.namespaceId = namespaceId;
+		this.regionCode = regionCode;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +120,13 @@ public class EhUserIdentifiers implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Integer getRegionCode() {
+		return this.regionCode;
+	}
+
+	public void setRegionCode(java.lang.Integer regionCode) {
+		this.regionCode = regionCode;
 	}
 }

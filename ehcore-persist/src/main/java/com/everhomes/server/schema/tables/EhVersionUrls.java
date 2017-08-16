@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVersionUrls extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> {
 
-	private static final long serialVersionUID = 2123073255;
+	private static final long serialVersionUID = 728961515;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_version_urls</code>
@@ -50,6 +50,31 @@ public class EhVersionUrls extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_version_urls.info_url</code>. example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord, java.lang.String> INFO_URL = createField("info_url", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html");
+
+	/**
+	 * The column <code>ehcore.eh_version_urls.upgrade_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord, java.lang.String> UPGRADE_DESCRIPTION = createField("upgrade_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_version_urls.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_version_urls.app_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord, java.lang.String> APP_NAME = createField("app_name", org.jooq.impl.SQLDataType.VARCHAR.length(50), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_version_urls.publish_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord, java.sql.Timestamp> PUBLISH_TIME = createField("publish_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_version_urls.icon_url</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord, java.lang.String> ICON_URL = createField("icon_url", org.jooq.impl.SQLDataType.VARCHAR.length(50), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_version_urls</code> table reference

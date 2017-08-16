@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationDetails implements java.io.Serializable {
 
-	private static final long serialVersionUID = 520708720;
+	private static final long serialVersionUID = 1665599934;
 
 	private java.lang.Long     id;
 	private java.lang.Long     organizationId;
@@ -38,6 +38,9 @@ public class EhOrganizationDetails implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.lang.Long     serviceUserId;
+	private java.lang.String   namespaceOrganizationType;
+	private java.lang.String   namespaceOrganizationToken;
 
 	public EhOrganizationDetails() {}
 
@@ -66,7 +69,10 @@ public class EhOrganizationDetails implements java.io.Serializable {
 		java.lang.String   stringTag2,
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
-		java.lang.String   stringTag5
+		java.lang.String   stringTag5,
+		java.lang.Long     serviceUserId,
+		java.lang.String   namespaceOrganizationType,
+		java.lang.String   namespaceOrganizationToken
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -93,6 +99,9 @@ public class EhOrganizationDetails implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.serviceUserId = serviceUserId;
+		this.namespaceOrganizationType = namespaceOrganizationType;
+		this.namespaceOrganizationToken = namespaceOrganizationToken;
 	}
 
 	public java.lang.Long getId() {
@@ -293,5 +302,29 @@ public class EhOrganizationDetails implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.Long getServiceUserId() {
+		return this.serviceUserId;
+	}
+
+	public void setServiceUserId(java.lang.Long serviceUserId) {
+		this.serviceUserId = serviceUserId;
+	}
+
+	public java.lang.String getNamespaceOrganizationType() {
+		return this.namespaceOrganizationType;
+	}
+
+	public void setNamespaceOrganizationType(java.lang.String namespaceOrganizationType) {
+		this.namespaceOrganizationType = namespaceOrganizationType;
+	}
+
+	public java.lang.String getNamespaceOrganizationToken() {
+		return this.namespaceOrganizationToken;
+	}
+
+	public void setNamespaceOrganizationToken(java.lang.String namespaceOrganizationToken) {
+		this.namespaceOrganizationToken = namespaceOrganizationToken;
 	}
 }

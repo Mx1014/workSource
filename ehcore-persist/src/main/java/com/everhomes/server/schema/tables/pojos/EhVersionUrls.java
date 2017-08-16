@@ -11,28 +11,43 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVersionUrls implements java.io.Serializable {
 
-	private static final long serialVersionUID = -465569215;
+	private static final long serialVersionUID = -1744408703;
 
-	private java.lang.Long   id;
-	private java.lang.Long   realmId;
-	private java.lang.String targetVersion;
-	private java.lang.String downloadUrl;
-	private java.lang.String infoUrl;
+	private java.lang.Long     id;
+	private java.lang.Long     realmId;
+	private java.lang.String   targetVersion;
+	private java.lang.String   downloadUrl;
+	private java.lang.String   infoUrl;
+	private java.lang.String   upgradeDescription;
+	private java.lang.Integer  namespaceId;
+	private java.lang.String   appName;
+	private java.sql.Timestamp publishTime;
+	private java.lang.String   iconUrl;
 
 	public EhVersionUrls() {}
 
 	public EhVersionUrls(
-		java.lang.Long   id,
-		java.lang.Long   realmId,
-		java.lang.String targetVersion,
-		java.lang.String downloadUrl,
-		java.lang.String infoUrl
+		java.lang.Long     id,
+		java.lang.Long     realmId,
+		java.lang.String   targetVersion,
+		java.lang.String   downloadUrl,
+		java.lang.String   infoUrl,
+		java.lang.String   upgradeDescription,
+		java.lang.Integer  namespaceId,
+		java.lang.String   appName,
+		java.sql.Timestamp publishTime,
+		java.lang.String   iconUrl
 	) {
 		this.id = id;
 		this.realmId = realmId;
 		this.targetVersion = targetVersion;
 		this.downloadUrl = downloadUrl;
 		this.infoUrl = infoUrl;
+		this.upgradeDescription = upgradeDescription;
+		this.namespaceId = namespaceId;
+		this.appName = appName;
+		this.publishTime = publishTime;
+		this.iconUrl = iconUrl;
 	}
 
 	public java.lang.Long getId() {
@@ -73,5 +88,45 @@ public class EhVersionUrls implements java.io.Serializable {
 
 	public void setInfoUrl(java.lang.String infoUrl) {
 		this.infoUrl = infoUrl;
+	}
+
+	public java.lang.String getUpgradeDescription() {
+		return this.upgradeDescription;
+	}
+
+	public void setUpgradeDescription(java.lang.String upgradeDescription) {
+		this.upgradeDescription = upgradeDescription;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.String getAppName() {
+		return this.appName;
+	}
+
+	public void setAppName(java.lang.String appName) {
+		this.appName = appName;
+	}
+
+	public java.sql.Timestamp getPublishTime() {
+		return this.publishTime;
+	}
+
+	public void setPublishTime(java.sql.Timestamp publishTime) {
+		this.publishTime = publishTime;
+	}
+
+	public java.lang.String getIconUrl() {
+		return this.iconUrl;
+	}
+
+	public void setIconUrl(java.lang.String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 }

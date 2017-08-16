@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = -356087319;
+	private static final long serialVersionUID = -158540345;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_addresses</code>
@@ -192,14 +192,59 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_addresses.area_size</code>. the area size of the room according to the address
+	 * The column <code>ehcore.eh_addresses.area_size</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Double> AREA_SIZE = createField("area_size", org.jooq.impl.SQLDataType.DOUBLE, this, "the area size of the room according to the address");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Double> AREA_SIZE = createField("area_size", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.namespace_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.rent_area</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Double> RENT_AREA = createField("rent_area", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.build_area</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Double> BUILD_AREA = createField("build_area", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.inner_area</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Double> INNER_AREA = createField("inner_area", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.layout</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> LAYOUT = createField("layout", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.living_status</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Byte> LIVING_STATUS = createField("living_status", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.namespace_address_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> NAMESPACE_ADDRESS_TYPE = createField("namespace_address_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.namespace_address_token</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> NAMESPACE_ADDRESS_TOKEN = createField("namespace_address_token", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.business_building_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> BUSINESS_BUILDING_NAME = createField("business_building_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.business_apartment_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> BUSINESS_APARTMENT_NAME = createField("business_apartment_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_addresses</code> table reference
@@ -236,7 +281,7 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ADDRESSES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_ADDRESSES_U_EH_UUID);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ADDRESSES_PRIMARY);
 	}
 
 	/**

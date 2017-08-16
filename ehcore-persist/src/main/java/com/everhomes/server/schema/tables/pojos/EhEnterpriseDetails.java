@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseDetails implements java.io.Serializable {
 
-	private static final long serialVersionUID = 968182878;
+	private static final long serialVersionUID = -900329482;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
@@ -22,22 +22,6 @@ public class EhEnterpriseDetails implements java.io.Serializable {
 	private java.lang.Double   latitude;
 	private java.lang.String   geohash;
 	private java.sql.Timestamp createTime;
-	private java.lang.String   displayName;
-	private java.lang.String   contactor;
-	private java.lang.Long     memberCount;
-	private java.sql.Timestamp checkinDate;
-	private java.lang.String   avatar;
-	private java.lang.String   postUri;
-	private java.lang.Long     integralTag1;
-	private java.lang.Long     integralTag2;
-	private java.lang.Long     integralTag3;
-	private java.lang.Long     integralTag4;
-	private java.lang.Long     integralTag5;
-	private java.lang.String   stringTag1;
-	private java.lang.String   stringTag2;
-	private java.lang.String   stringTag3;
-	private java.lang.String   stringTag4;
-	private java.lang.String   stringTag5;
 
 	public EhEnterpriseDetails() {}
 
@@ -50,23 +34,7 @@ public class EhEnterpriseDetails implements java.io.Serializable {
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
 		java.lang.String   geohash,
-		java.sql.Timestamp createTime,
-		java.lang.String   displayName,
-		java.lang.String   contactor,
-		java.lang.Long     memberCount,
-		java.sql.Timestamp checkinDate,
-		java.lang.String   avatar,
-		java.lang.String   postUri,
-		java.lang.Long     integralTag1,
-		java.lang.Long     integralTag2,
-		java.lang.Long     integralTag3,
-		java.lang.Long     integralTag4,
-		java.lang.Long     integralTag5,
-		java.lang.String   stringTag1,
-		java.lang.String   stringTag2,
-		java.lang.String   stringTag3,
-		java.lang.String   stringTag4,
-		java.lang.String   stringTag5
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.enterpriseId = enterpriseId;
@@ -77,22 +45,6 @@ public class EhEnterpriseDetails implements java.io.Serializable {
 		this.latitude = latitude;
 		this.geohash = geohash;
 		this.createTime = createTime;
-		this.displayName = displayName;
-		this.contactor = contactor;
-		this.memberCount = memberCount;
-		this.checkinDate = checkinDate;
-		this.avatar = avatar;
-		this.postUri = postUri;
-		this.integralTag1 = integralTag1;
-		this.integralTag2 = integralTag2;
-		this.integralTag3 = integralTag3;
-		this.integralTag4 = integralTag4;
-		this.integralTag5 = integralTag5;
-		this.stringTag1 = stringTag1;
-		this.stringTag2 = stringTag2;
-		this.stringTag3 = stringTag3;
-		this.stringTag4 = stringTag4;
-		this.stringTag5 = stringTag5;
 	}
 
 	public java.lang.Long getId() {
@@ -165,133 +117,5 @@ public class EhEnterpriseDetails implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
-	}
-
-	public java.lang.String getDisplayName() {
-		return this.displayName;
-	}
-
-	public void setDisplayName(java.lang.String displayName) {
-		this.displayName = displayName;
-	}
-
-	public java.lang.String getContactor() {
-		return this.contactor;
-	}
-
-	public void setContactor(java.lang.String contactor) {
-		this.contactor = contactor;
-	}
-
-	public java.lang.Long getMemberCount() {
-		return this.memberCount;
-	}
-
-	public void setMemberCount(java.lang.Long memberCount) {
-		this.memberCount = memberCount;
-	}
-
-	public java.sql.Timestamp getCheckinDate() {
-		return this.checkinDate;
-	}
-
-	public void setCheckinDate(java.sql.Timestamp checkinDate) {
-		this.checkinDate = checkinDate;
-	}
-
-	public java.lang.String getAvatar() {
-		return this.avatar;
-	}
-
-	public void setAvatar(java.lang.String avatar) {
-		this.avatar = avatar;
-	}
-
-	public java.lang.String getPostUri() {
-		return this.postUri;
-	}
-
-	public void setPostUri(java.lang.String postUri) {
-		this.postUri = postUri;
-	}
-
-	public java.lang.Long getIntegralTag1() {
-		return this.integralTag1;
-	}
-
-	public void setIntegralTag1(java.lang.Long integralTag1) {
-		this.integralTag1 = integralTag1;
-	}
-
-	public java.lang.Long getIntegralTag2() {
-		return this.integralTag2;
-	}
-
-	public void setIntegralTag2(java.lang.Long integralTag2) {
-		this.integralTag2 = integralTag2;
-	}
-
-	public java.lang.Long getIntegralTag3() {
-		return this.integralTag3;
-	}
-
-	public void setIntegralTag3(java.lang.Long integralTag3) {
-		this.integralTag3 = integralTag3;
-	}
-
-	public java.lang.Long getIntegralTag4() {
-		return this.integralTag4;
-	}
-
-	public void setIntegralTag4(java.lang.Long integralTag4) {
-		this.integralTag4 = integralTag4;
-	}
-
-	public java.lang.Long getIntegralTag5() {
-		return this.integralTag5;
-	}
-
-	public void setIntegralTag5(java.lang.Long integralTag5) {
-		this.integralTag5 = integralTag5;
-	}
-
-	public java.lang.String getStringTag1() {
-		return this.stringTag1;
-	}
-
-	public void setStringTag1(java.lang.String stringTag1) {
-		this.stringTag1 = stringTag1;
-	}
-
-	public java.lang.String getStringTag2() {
-		return this.stringTag2;
-	}
-
-	public void setStringTag2(java.lang.String stringTag2) {
-		this.stringTag2 = stringTag2;
-	}
-
-	public java.lang.String getStringTag3() {
-		return this.stringTag3;
-	}
-
-	public void setStringTag3(java.lang.String stringTag3) {
-		this.stringTag3 = stringTag3;
-	}
-
-	public java.lang.String getStringTag4() {
-		return this.stringTag4;
-	}
-
-	public void setStringTag4(java.lang.String stringTag4) {
-		this.stringTag4 = stringTag4;
-	}
-
-	public java.lang.String getStringTag5() {
-		return this.stringTag5;
-	}
-
-	public void setStringTag5(java.lang.String stringTag5) {
-		this.stringTag5 = stringTag5;
 	}
 }

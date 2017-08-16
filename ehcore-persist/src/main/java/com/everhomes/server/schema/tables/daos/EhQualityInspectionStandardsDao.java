@@ -76,13 +76,6 @@ public class EhQualityInspectionStandardsDao extends org.jooq.impl.DAOImpl<com.e
 	}
 
 	/**
-	 * Fetch records that have <code>category_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards> fetchByCategoryId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS.CATEGORY_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>repeat_setting_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards> fetchByRepeatSettingId(java.lang.Long... values) {
@@ -143,5 +136,47 @@ public class EhQualityInspectionStandardsDao extends org.jooq.impl.DAOImpl<com.e
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS.DELETE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards> fetchByTargetId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS.TARGET_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards> fetchByTargetType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS.TARGET_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>review_result IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards> fetchByReviewResult(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS.REVIEW_RESULT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>reviewer_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards> fetchByReviewerUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS.REVIEWER_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>review_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards> fetchByReviewTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS.REVIEW_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS.NAMESPACE_ID, values);
 	}
 }

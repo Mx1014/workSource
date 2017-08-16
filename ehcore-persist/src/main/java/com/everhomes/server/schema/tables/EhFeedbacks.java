@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFeedbacks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhFeedbacksRecord> {
 
-	private static final long serialVersionUID = -1188392296;
+	private static final long serialVersionUID = 1913240216;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_feedbacks</code>
@@ -72,14 +72,39 @@ public class EhFeedbacks extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_feedbacks.content_category</code>. 0: other, 1: product bug, 2: product improvement, 3: version problem, 11: sensitive info, 12: copyright problem, 13: violent pornography, 14: fraud&fake, 15: disturbance, 21: rumor, 22: malicious marketing, 23: induction
+	 * The column <code>ehcore.eh_feedbacks.content_category</code>. 0-其它、1-产品bug、2-产品改进、3-版本问题;11-敏感信息、12-版权问题、13-暴力色情、14-诈骗和虚假信息、15-骚扰；16-谣言、17-恶意营销、18-诱导分享；19-政治
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.Long> CONTENT_CATEGORY = createField("content_category", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "0: other, 1: product bug, 2: product improvement, 3: version problem, 11: sensitive info, 12: copyright problem, 13: violent pornography, 14: fraud&fake, 15: disturbance, 21: rumor, 22: malicious marketing, 23: induction");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.Long> CONTENT_CATEGORY = createField("content_category", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "0-其它、1-产品bug、2-产品改进、3-版本问题;11-敏感信息、12-版权问题、13-暴力色情、14-诈骗和虚假信息、15-骚扰；16-谣言、17-恶意营销、18-诱导分享；19-政治");
 
 	/**
 	 * The column <code>ehcore.eh_feedbacks.proof_resource_uri</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.String> PROOF_RESOURCE_URI = createField("proof_resource_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_feedbacks.status</code>. 0: does not handle, 1: have handled
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0: does not handle, 1: have handled");
+
+	/**
+	 * The column <code>ehcore.eh_feedbacks.verify_type</code>. 0: verify false, 1: verify true
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.Byte> VERIFY_TYPE = createField("verify_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: verify false, 1: verify true");
+
+	/**
+	 * The column <code>ehcore.eh_feedbacks.handle_type</code>. 0: none, 1 delete
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.Byte> HANDLE_TYPE = createField("handle_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: none, 1 delete");
+
+	/**
+	 * The column <code>ehcore.eh_feedbacks.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_feedbacks.handle_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.sql.Timestamp> HANDLE_TIME = createField("handle_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_feedbacks</code> table reference

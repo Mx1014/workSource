@@ -11,44 +11,90 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivityRoster implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2080562953;
+	private static final long serialVersionUID = 1492612099;
 
-	private java.lang.Long     id;
-	private java.lang.String   uuid;
-	private java.lang.Long     activityId;
-	private java.lang.Long     uid;
-	private java.lang.Long     familyId;
-	private java.lang.Integer  adultCount;
-	private java.lang.Integer  childCount;
-	private java.lang.Byte     checkinFlag;
-	private java.lang.Long     checkinUid;
-	private java.lang.Byte     confirmFlag;
-	private java.lang.Long     confirmUid;
-	private java.lang.Long     confirmFamilyId;
-	private java.sql.Timestamp confirmTime;
-	private java.lang.Byte     lotteryFlag;
-	private java.sql.Timestamp lotteryTime;
-	private java.sql.Timestamp createTime;
+	private java.lang.Long       id;
+	private java.lang.String     uuid;
+	private java.lang.Long       activityId;
+	private java.lang.Long       uid;
+	private java.lang.Long       familyId;
+	private java.lang.Integer    adultCount;
+	private java.lang.Integer    childCount;
+	private java.lang.Byte       checkinFlag;
+	private java.lang.Long       checkinUid;
+	private java.lang.Byte       confirmFlag;
+	private java.lang.Long       confirmUid;
+	private java.lang.Long       confirmFamilyId;
+	private java.sql.Timestamp   confirmTime;
+	private java.lang.Byte       lotteryFlag;
+	private java.sql.Timestamp   lotteryTime;
+	private java.sql.Timestamp   createTime;
+	private java.lang.String     phone;
+	private java.lang.String     realName;
+	private java.lang.Byte       gender;
+	private java.lang.String     communityName;
+	private java.lang.String     organizationName;
+	private java.lang.String     position;
+	private java.lang.Byte       leaderFlag;
+	private java.lang.Byte       sourceFlag;
+	private java.lang.String     email;
+	private java.lang.Byte       payFlag;
+	private java.lang.Long       orderNo;
+	private java.sql.Timestamp   orderStartTime;
+	private java.sql.Timestamp   orderExpireTime;
+	private java.lang.String     vendorType;
+	private java.math.BigDecimal payAmount;
+	private java.sql.Timestamp   payTime;
+	private java.lang.Long       refundOrderNo;
+	private java.math.BigDecimal refundAmount;
+	private java.sql.Timestamp   refundTime;
+	private java.lang.Byte       status;
+	private java.lang.Long       organizationId;
+	private java.sql.Timestamp   cancelTime;
+	private java.lang.String     orderType;
 
 	public EhActivityRoster() {}
 
 	public EhActivityRoster(
-		java.lang.Long     id,
-		java.lang.String   uuid,
-		java.lang.Long     activityId,
-		java.lang.Long     uid,
-		java.lang.Long     familyId,
-		java.lang.Integer  adultCount,
-		java.lang.Integer  childCount,
-		java.lang.Byte     checkinFlag,
-		java.lang.Long     checkinUid,
-		java.lang.Byte     confirmFlag,
-		java.lang.Long     confirmUid,
-		java.lang.Long     confirmFamilyId,
-		java.sql.Timestamp confirmTime,
-		java.lang.Byte     lotteryFlag,
-		java.sql.Timestamp lotteryTime,
-		java.sql.Timestamp createTime
+		java.lang.Long       id,
+		java.lang.String     uuid,
+		java.lang.Long       activityId,
+		java.lang.Long       uid,
+		java.lang.Long       familyId,
+		java.lang.Integer    adultCount,
+		java.lang.Integer    childCount,
+		java.lang.Byte       checkinFlag,
+		java.lang.Long       checkinUid,
+		java.lang.Byte       confirmFlag,
+		java.lang.Long       confirmUid,
+		java.lang.Long       confirmFamilyId,
+		java.sql.Timestamp   confirmTime,
+		java.lang.Byte       lotteryFlag,
+		java.sql.Timestamp   lotteryTime,
+		java.sql.Timestamp   createTime,
+		java.lang.String     phone,
+		java.lang.String     realName,
+		java.lang.Byte       gender,
+		java.lang.String     communityName,
+		java.lang.String     organizationName,
+		java.lang.String     position,
+		java.lang.Byte       leaderFlag,
+		java.lang.Byte       sourceFlag,
+		java.lang.String     email,
+		java.lang.Byte       payFlag,
+		java.lang.Long       orderNo,
+		java.sql.Timestamp   orderStartTime,
+		java.sql.Timestamp   orderExpireTime,
+		java.lang.String     vendorType,
+		java.math.BigDecimal payAmount,
+		java.sql.Timestamp   payTime,
+		java.lang.Long       refundOrderNo,
+		java.math.BigDecimal refundAmount,
+		java.sql.Timestamp   refundTime,
+		java.lang.Byte       status,
+		java.lang.Long       organizationId,
+		java.sql.Timestamp   cancelTime,
+		java.lang.String     orderType
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -66,6 +112,29 @@ public class EhActivityRoster implements java.io.Serializable {
 		this.lotteryFlag = lotteryFlag;
 		this.lotteryTime = lotteryTime;
 		this.createTime = createTime;
+		this.phone = phone;
+		this.realName = realName;
+		this.gender = gender;
+		this.communityName = communityName;
+		this.organizationName = organizationName;
+		this.position = position;
+		this.leaderFlag = leaderFlag;
+		this.sourceFlag = sourceFlag;
+		this.email = email;
+		this.payFlag = payFlag;
+		this.orderNo = orderNo;
+		this.orderStartTime = orderStartTime;
+		this.orderExpireTime = orderExpireTime;
+		this.vendorType = vendorType;
+		this.payAmount = payAmount;
+		this.payTime = payTime;
+		this.refundOrderNo = refundOrderNo;
+		this.refundAmount = refundAmount;
+		this.refundTime = refundTime;
+		this.status = status;
+		this.organizationId = organizationId;
+		this.cancelTime = cancelTime;
+		this.orderType = orderType;
 	}
 
 	public java.lang.Long getId() {
@@ -194,5 +263,189 @@ public class EhActivityRoster implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.String getPhone() {
+		return this.phone;
+	}
+
+	public void setPhone(java.lang.String phone) {
+		this.phone = phone;
+	}
+
+	public java.lang.String getRealName() {
+		return this.realName;
+	}
+
+	public void setRealName(java.lang.String realName) {
+		this.realName = realName;
+	}
+
+	public java.lang.Byte getGender() {
+		return this.gender;
+	}
+
+	public void setGender(java.lang.Byte gender) {
+		this.gender = gender;
+	}
+
+	public java.lang.String getCommunityName() {
+		return this.communityName;
+	}
+
+	public void setCommunityName(java.lang.String communityName) {
+		this.communityName = communityName;
+	}
+
+	public java.lang.String getOrganizationName() {
+		return this.organizationName;
+	}
+
+	public void setOrganizationName(java.lang.String organizationName) {
+		this.organizationName = organizationName;
+	}
+
+	public java.lang.String getPosition() {
+		return this.position;
+	}
+
+	public void setPosition(java.lang.String position) {
+		this.position = position;
+	}
+
+	public java.lang.Byte getLeaderFlag() {
+		return this.leaderFlag;
+	}
+
+	public void setLeaderFlag(java.lang.Byte leaderFlag) {
+		this.leaderFlag = leaderFlag;
+	}
+
+	public java.lang.Byte getSourceFlag() {
+		return this.sourceFlag;
+	}
+
+	public void setSourceFlag(java.lang.Byte sourceFlag) {
+		this.sourceFlag = sourceFlag;
+	}
+
+	public java.lang.String getEmail() {
+		return this.email;
+	}
+
+	public void setEmail(java.lang.String email) {
+		this.email = email;
+	}
+
+	public java.lang.Byte getPayFlag() {
+		return this.payFlag;
+	}
+
+	public void setPayFlag(java.lang.Byte payFlag) {
+		this.payFlag = payFlag;
+	}
+
+	public java.lang.Long getOrderNo() {
+		return this.orderNo;
+	}
+
+	public void setOrderNo(java.lang.Long orderNo) {
+		this.orderNo = orderNo;
+	}
+
+	public java.sql.Timestamp getOrderStartTime() {
+		return this.orderStartTime;
+	}
+
+	public void setOrderStartTime(java.sql.Timestamp orderStartTime) {
+		this.orderStartTime = orderStartTime;
+	}
+
+	public java.sql.Timestamp getOrderExpireTime() {
+		return this.orderExpireTime;
+	}
+
+	public void setOrderExpireTime(java.sql.Timestamp orderExpireTime) {
+		this.orderExpireTime = orderExpireTime;
+	}
+
+	public java.lang.String getVendorType() {
+		return this.vendorType;
+	}
+
+	public void setVendorType(java.lang.String vendorType) {
+		this.vendorType = vendorType;
+	}
+
+	public java.math.BigDecimal getPayAmount() {
+		return this.payAmount;
+	}
+
+	public void setPayAmount(java.math.BigDecimal payAmount) {
+		this.payAmount = payAmount;
+	}
+
+	public java.sql.Timestamp getPayTime() {
+		return this.payTime;
+	}
+
+	public void setPayTime(java.sql.Timestamp payTime) {
+		this.payTime = payTime;
+	}
+
+	public java.lang.Long getRefundOrderNo() {
+		return this.refundOrderNo;
+	}
+
+	public void setRefundOrderNo(java.lang.Long refundOrderNo) {
+		this.refundOrderNo = refundOrderNo;
+	}
+
+	public java.math.BigDecimal getRefundAmount() {
+		return this.refundAmount;
+	}
+
+	public void setRefundAmount(java.math.BigDecimal refundAmount) {
+		this.refundAmount = refundAmount;
+	}
+
+	public java.sql.Timestamp getRefundTime() {
+		return this.refundTime;
+	}
+
+	public void setRefundTime(java.sql.Timestamp refundTime) {
+		this.refundTime = refundTime;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
+	}
+
+	public java.lang.Long getOrganizationId() {
+		return this.organizationId;
+	}
+
+	public void setOrganizationId(java.lang.Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public java.sql.Timestamp getCancelTime() {
+		return this.cancelTime;
+	}
+
+	public void setCancelTime(java.sql.Timestamp cancelTime) {
+		this.cancelTime = cancelTime;
+	}
+
+	public java.lang.String getOrderType() {
+		return this.orderType;
+	}
+
+	public void setOrderType(java.lang.String orderType) {
+		this.orderType = orderType;
 	}
 }
