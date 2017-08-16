@@ -2664,20 +2664,71 @@ public class UserServiceImpl implements UserService {
 		Long userId = UserContext.current().getUser().getId();
 
 		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+		List<SceneDTO> residential_sceneList = new ArrayList<SceneDTO>();
+		List<SceneDTO> commercial_sceneList = new ArrayList<SceneDTO>();
+		//默认的community
+		Community residential_community = new Community();
+		Community commercial_community = new Community();
+
 
 		// 处于家庭对应的场景
 		// 列出用户有效家庭 mod by xiongying 20160523
-		addFamilySceneToList(userId, namespaceId, sceneList);
-		// 处于某个公司对应的场景
-		addOrganizationSceneToList(userId, namespaceId, sceneList);
-
-		// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
-		if(sceneList.size() == 0) {
-			SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
-			if(communityScene != null) {
-				sceneList.add(communityScene);
+		addFamilySceneToList(userId, namespaceId, residential_sceneList);
+		// 当用户既没有选择家庭
+		if (residential_sceneList.size() == 0) {
+			residential_community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.RESIDENTIAL.getCode());
+			if(residential_community != null){
+				CommunityDTO residential_communityDTO = ConvertHelper.convert(residential_community, CommunityDTO.class);
+				SceneType residential_sceneType = DEFAULT;
+				SceneDTO residential_communityScene = toCommunitySceneDTO(namespaceId, userId, residential_communityDTO, sceneType);
+				if (residential_communityScene != null) {
+					sceneList.add(residential_communityScene);
+				}
 			}
 		}
+		// 处于某个公司对应的场景
+		addOrganizationSceneToList(userId, namespaceId, commercial_sceneList);
+		// 当用户既没有选择园区时
+		if (commercial_sceneList.size() == 0) {
+			commercial_community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.COMMERCIAL.getCode());
+		}
+
+
+		// 当用户既没有选择家庭、也没有在某个公司内时，默认给一个有效场景
+		if (sceneList.size() == 0) {
+			Community community = new Community();
+			switch (SceneType.fromCode(cmd.getSceneType())) {
+				case DEFAULT:
+					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.RESIDENTIAL.getCode());
+					break;
+				case PARK_TOURIST:
+					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.COMMERCIAL.getCode());
+					break;
+			}
+
+			if (community != null) {
+				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+				SceneType sceneType = DEFAULT;
+				CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
+				if (communityType == CommunityType.COMMERCIAL) {
+					sceneType = PARK_TOURIST;
+				}
+				SceneDTO communityScene = toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
+				if (communityScene != null) {
+					sceneList.add(communityScene);
+				}
+			}
+		}
+
+		// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
+//		if(sceneList.size() == 0) {
+//			SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+//			if(communityScene != null) {
+//				sceneList.add(communityScene);
+//			}
+//		}
+
+
 
 		return sceneList;
 	}
