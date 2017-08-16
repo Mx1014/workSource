@@ -141,24 +141,49 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 LoginToken token = userService.getLoginToken(request);
                 // isValid转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
                 if (!userService.isValid(token)) {
+                    // 由于客户端已经在全部接口上加上签名，按原来的逻辑是先检验签名，若签名校验通过则不再往下执行而直接返回校验通过；
+                    // 但如果用户是在被踢出状态，则会导致客户端仍然能够访问，但此时用户ID为0，会导致一部分接口出问题，
+                    // 故把校验签名与校验踢出的代码换一下位置。 by lqs 20170816
+//                    if (this.isInnerSignLogon(request)) {
+//                        token = this.innerSignLogon(request, response);
+//                        setupUserContext(token);
+//                        MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+//                        return true;
+//                    } else if (this.checkRequestSignature(request)) {
+//                        setupUserContextForApp(UserContext.current().getCallerApp());
+//                        //TODO Added by Janson
+//                        if (null != UserContext.current().getUser()) {
+//                            MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+//                        }
+//                        return true;
+//                    }
+//
+//                    //Kickoff state support
+//                    if (kickoffService.isKickoff(UserContext.current().getNamespaceId(), token)) {
+//                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+//                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
+//                    }
                     if (this.isInnerSignLogon(request)) {
                         token = this.innerSignLogon(request, response);
                         setupUserContext(token);
                         MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         return true;
-                    } else if (this.checkRequestSignature(request)) {
+                    } 
+
+                    //Kickoff state support
+                    // 把踢出校验这一步移到checkRequestSignature前面
+                    if (kickoffService.isKickoff(UserContext.current().getNamespaceId(), token)) {
+                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
+                    }
+                    
+                    if (this.checkRequestSignature(request)) {
                         setupUserContextForApp(UserContext.current().getCallerApp());
                         //TODO Added by Janson
                         if (null != UserContext.current().getUser()) {
                             MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         }
                         return true;
-                    }
-
-                    //Kickoff state support
-                    if (kickoffService.isKickoff(UserContext.current().getNamespaceId(), token)) {
-                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
-                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
                     }
 
                     //Update by Janson, when the request is using apiKey, we generate a 403 response to app.
