@@ -139,7 +139,7 @@ public class ProfileController extends ControllerBase{
 
     /**
      * <b>URL: /profile/listProfileEmployees</b>
-     * <p>7.员工档案人员列表</p>
+     * <p>7.员工列表</p>
      */
     @RequestMapping("listProfileEmployees")
     @RestReturn(value = ListProfileEmployeesResponse.class)
@@ -160,6 +160,20 @@ public class ProfileController extends ControllerBase{
     public RestResponse addProfileEmployee(AddProfileEmployeeCommand cmd){
         ProfileEmployeeDTO res = profileService.addProfileEmployee(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /profile/listProfileDismissEmployees</b>
+     * <p>9.离职员工列表</p>
+     */
+    @RequestMapping("listProfileDismissEmployees")
+    @RestReturn(value = ListProfileEmployeesResponse.class)
+    public RestResponse listProfileDismissEmployees(ListProfileDismissEmployeesCommand cmd){
+        ListProfileDismissEmployeesResponse res = profileService.listProfileDismissEmployees(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

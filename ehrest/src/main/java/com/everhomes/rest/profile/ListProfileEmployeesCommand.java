@@ -2,6 +2,8 @@ package com.everhomes.rest.profile;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Date;
+
 /**
  * <ul>
  * <li>checkInTimeStart: 入职起始日期</li>
@@ -19,92 +21,92 @@ import com.everhomes.util.StringHelper;
  */
 public class ListProfileEmployeesCommand {
 
-    private String checkInTimeStart;
+    private Date checkInTimeStart;
 
-    private String checkInTimeEnd;
+    private Date checkInTimeEnd;
 
-    private String employmentTimeStart;
+    private Date employmentTimeStart;
 
-    private String employmentTimeEnd;
+    private Date employmentTimeEnd;
 
-    private String contractTimeStart;
+    private Date contractTimeStart;
 
-    private String contractTimeEnd;
+    private Date contractTimeEnd;
 
-    private String employeeStatus;
+    private Byte employeeStatus;
 
-    private String organizationId;
+    private Long organizationId;
 
     private String contactName;
 
-    private String departmentId;
+    private Long departmentId;
 
     private String workingPlace;
 
     public ListProfileEmployeesCommand() {
     }
 
-    public String getCheckInTimeStart() {
+    public Date getCheckInTimeStart() {
         return checkInTimeStart;
     }
 
-    public void setCheckInTimeStart(String checkInTimeStart) {
+    public void setCheckInTimeStart(Date checkInTimeStart) {
         this.checkInTimeStart = checkInTimeStart;
     }
 
-    public String getCheckInTimeEnd() {
+    public Date getCheckInTimeEnd() {
         return checkInTimeEnd;
     }
 
-    public void setCheckInTimeEnd(String checkInTimeEnd) {
+    public void setCheckInTimeEnd(Date checkInTimeEnd) {
         this.checkInTimeEnd = checkInTimeEnd;
     }
 
-    public String getEmploymentTimeStart() {
+    public Date getEmploymentTimeStart() {
         return employmentTimeStart;
     }
 
-    public void setEmploymentTimeStart(String employmentTimeStart) {
+    public void setEmploymentTimeStart(Date employmentTimeStart) {
         this.employmentTimeStart = employmentTimeStart;
     }
 
-    public String getEmploymentTimeEnd() {
+    public Date getEmploymentTimeEnd() {
         return employmentTimeEnd;
     }
 
-    public void setEmploymentTimeEnd(String employmentTimeEnd) {
+    public void setEmploymentTimeEnd(Date employmentTimeEnd) {
         this.employmentTimeEnd = employmentTimeEnd;
     }
 
-    public String getContractTimeStart() {
+    public Date getContractTimeStart() {
         return contractTimeStart;
     }
 
-    public void setContractTimeStart(String contractTimeStart) {
+    public void setContractTimeStart(Date contractTimeStart) {
         this.contractTimeStart = contractTimeStart;
     }
 
-    public String getContractTimeEnd() {
+    public Date getContractTimeEnd() {
         return contractTimeEnd;
     }
 
-    public void setContractTimeEnd(String contractTimeEnd) {
+    public void setContractTimeEnd(Date contractTimeEnd) {
         this.contractTimeEnd = contractTimeEnd;
     }
 
-    public String getEmployeeStatus() {
+    public Byte getEmployeeStatus() {
         return employeeStatus;
     }
 
-    public void setEmployeeStatus(String employeeStatus) {
+    public void setEmployeeStatus(Byte employeeStatus) {
         this.employeeStatus = employeeStatus;
     }
 
-    public String getOrganizationId() {
+    public Long getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(String organizationId) {
+    public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
 
@@ -116,11 +118,11 @@ public class ListProfileEmployeesCommand {
         this.contactName = contactName;
     }
 
-    public String getDepartmentId() {
+    public Long getDepartmentId() {
         return departmentId;
     }
 
-    public void setDepartmentId(String departmentId) {
+    public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
     }
 

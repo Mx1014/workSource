@@ -88,4 +88,9 @@ public class ProfileServiceImpl implements ProfileService {
         return null;
     }
 
+    @Override
+    public ListProfileDismissEmployeesResponse listProfileDismissEmployees(ListProfileDismissEmployeesCommand cmd) {
+        return null;
+    }
+
 }

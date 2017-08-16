@@ -28,4 +28,6 @@ public interface ProfileService {
     ListProfileEmployeesResponse listProfileEmployees(ListProfileEmployeesCommand cmd);
 
     ProfileEmployeeDTO addProfileEmployee(AddProfileEmployeeCommand cmd);
+
+    ListProfileDismissEmployeesResponse listProfileDismissEmployees(ListProfileDismissEmployeesCommand cmd);
 }
