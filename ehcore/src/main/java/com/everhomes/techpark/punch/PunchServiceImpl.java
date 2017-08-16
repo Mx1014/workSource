@@ -51,6 +51,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import ch.qos.logback.core.joran.conditional.ElseAction;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.approval.ApprovalCategory;
 import com.everhomes.approval.ApprovalCategoryProvider;
 import com.everhomes.approval.ApprovalDayActualTimeProvider;
@@ -6222,7 +6223,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 	private List<PunchSchedulingEmployeeDTO> convertToPunchSchedulings(ArrayList list ) {
-	 
+		LOGGER.debug("list : "+JSON.toJSONString(list));
 		List<PunchSchedulingEmployeeDTO> result = new ArrayList<PunchSchedulingEmployeeDTO>();
 		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
 			RowResult r = (RowResult)list.get(rowIndex);
@@ -6235,6 +6236,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 			result.add(dto);
 		}
+		LOGGER.debug("result +"+result);
 		return result;
 	}
 
