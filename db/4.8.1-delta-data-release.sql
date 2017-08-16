@@ -49,7 +49,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 活动分享页app信息栏-volgo更新为“工作中的生活态度”  add by yanjun 20170815
 UPDATE eh_app_urls set description = '工作中的生活态度' where namespace_id = 1;
 
--- 更新老数据，以前如果一个地址有人加入后新建group时取的是0域空间。现在要跟新过来，使用实际的域空间  add by yanjun 20170816 
+-- 更新老数据，以前如果一个地址有人加入后新建group时取的是0域空间。现在要跟新过来，使用实际的域空间  add by yanjun 20170816
 update eh_groups set namespace_id = 999994 where id =   179181 and namespace_id =   0 ;
 update eh_groups set namespace_id = 999994 where id =   179184 and namespace_id =   0 ;
 update eh_groups set namespace_id = 999994 where id =   179185 and namespace_id =   0 ;
