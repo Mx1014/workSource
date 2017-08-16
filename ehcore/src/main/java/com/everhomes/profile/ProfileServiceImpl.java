@@ -93,4 +93,39 @@ public class ProfileServiceImpl implements ProfileService {
         return null;
     }
 
+    @Override
+    public void employProfileEmployees(EmployProfileEmployeesCommand cmd) {
+
+    }
+
+    @Override
+    public void transferProfileEmployees(TransferProfileEmployeesCommand cmd) {
+
+    }
+
+    @Override
+    public void dismissProfileEmployees(DismissProfileEmployeesCommand cmd) {
+
+    }
+
+    @Override
+    public void addProfileField(AddProfileFieldCommand cmd) {
+
+    }
+
+    @Override
+    public void addProfileFieldGroup(AddProfileFieldGroupCommand cmd) {
+
+    }
+
+    @Override
+    public void updateProfileFieldOrder(UpdateProfileFieldOrderCommand cmd) {
+
+    }
+
+    @Override
+    public GetProfileFieldResponse getProfileField(GetProfileFieldCommand cmd) {
+        return null;
+    }
+
 }
