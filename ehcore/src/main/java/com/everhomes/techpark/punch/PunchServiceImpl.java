@@ -4639,7 +4639,7 @@ public class PunchServiceImpl implements PunchService {
 
     private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos) {
     	if (null == dtos || dtos.size() == 0)
-			return null;
+			return new XSSFWorkbook();
 		Workbook wb = new XSSFWorkbook();
 		Sheet sheet = wb.createSheet("punchDetails");
 		
@@ -6759,7 +6759,7 @@ public class PunchServiceImpl implements PunchService {
 					PunchTimeIntervalDTO intervalDTO = ConvertHelper.convert(interval, PunchTimeIntervalDTO.class); 
 					intervalDTO.setArriveTime(interval.getArriveTimeLong());
 					intervalDTO.setLeaveTime(interval.getLeaveTimeLong());
-					dto.getPunchTimeIntervals().add(intervalDTO);
+					dto.getPunchTimeIntervals().add(intervalDTO); 
 				}
 		}
 		
