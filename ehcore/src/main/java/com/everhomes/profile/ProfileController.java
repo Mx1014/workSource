@@ -220,4 +220,32 @@ public class ProfileController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /profile/addProfileField</b>
+     * <p>11-1.增加、修改档案字段</p>
+     */
+    @RequestMapping("addProfileField")
+    @RestReturn(value = String.class)
+    public RestResponse addProfileField(AddProfileFieldCommand cmd){
+        profileService.addProfileField(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /profile/addProfileFieldGroup</b>
+     * <p>11-2.添加档案字段分组</p>
+     */
+    @RequestMapping("addProfileFieldGroup")
+    @RestReturn(value = String.class)
+    public RestResponse addProfileFieldGroup(AddProfileFieldGroupCommand cmd){
+        profileService.addProfileFieldGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

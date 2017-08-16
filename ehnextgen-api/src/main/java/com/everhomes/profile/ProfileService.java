@@ -34,4 +34,10 @@ public interface ProfileService {
     void employProfileEmployees(EmployProfileEmployeesCommand cmd);
 
     void transferProfileEmployees(TransferProfileEmployeesCommand cmd);
+
+    void dismissProfileEmployees(DismissProfileEmployeesCommand cmd);
+
+    void addProfileField(AddProfileFieldCommand cmd);
+
+   void addProfileFieldGroup(AddProfileFieldGroupCommand cmd);
 }
