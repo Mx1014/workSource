@@ -286,6 +286,73 @@ ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_reason` VARCHAR(256) COMMENT
 ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_time` DATETIME COMMENT '为退约合同的时候';
 ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_uid` BIGINT COMMENT '为退约合同的时候';
  
+ 
+-- 合同-资产表： 
+ALTER TABLE eh_contract_building_mappings ADD COLUMN `address_id` BIGINT;
+
+-- 合同附件：
+CREATE TABLE `eh_contract_attachments` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `contract_id` bigint(20) NOT NULL DEFAULT '0',
+  `name` varchar(128) DEFAULT NULL,
+  `file_size` int(11) NOT NULL DEFAULT '0',
+  `content_type` varchar(32) DEFAULT NULL COMMENT 'attachment object content type',
+  `content_uri` varchar(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ 
+-- 合同计价条款表： 
+CREATE TABLE `eh_contract_charging_items` (
+  `id` BIGINT NOT NULL 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT '0' COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `contract_id` BIGINT NOT NULL COMMENT 'id of eh_contracts',
+  `charging_item_id` BIGINT COMMENT '收费项',
+  `charging_standard_id` BIGINT COMMENT '收费标准',  
+  `formula` varchar(1024) DEFAULT NULL,
+  `formula_type` tinyint(4) DEFAULT NULL COMMENT '1: fixed fee; 2: normal formula; 3: gradient varied on variable price; 4: gradients varied functions on each variable section',
+  `billing_cycle` tinyint(4) DEFAULT NULL,
+  `late_fee_standard_id` BIGINT COMMENT '滞纳金标准',
+  `charging_amount_value` DECIMAL(10,2) COMMENT '计费金额参数',
+  `charging_start_time` DATETIME,
+  `charging_expired_time` DATETIME,
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 条款作用资产：
+CREATE TABLE `eh_contract_charging_item_addresses` (
+  `id` BIGINT NOT NULL 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT '0' COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `contract_charging_item_id` BIGINT NOT NULL COMMENT 'id of eh_contract_charging_items',
+  `address_id` BIGINT,
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 合同参数表
+CREATE TABLE `eh_contract_params` (
+  `id` BIGINT NOT NULL 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT '0' COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `community_id` BIGINT COMMENT '园区id',
+  `expiring_period` INTEGER NOT NULL DEFAULT '0' COMMENT '合同到期日前多久为即将到期合同',
+  `expiring_unit` TINYINT NOT NULL DEFAULT '0' COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
+  `notify_period` INTEGER NOT NULL DEFAULT '0' COMMENT '提醒时间',
+  `notify_unit` TINYINT NOT NULL DEFAULT '0' COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
+  `expired_period` INTEGER NOT NULL DEFAULT '0' COMMENT '审批通过合同转为过期的时间',
+  `expired_unit` TINYINT NOT NULL DEFAULT '0' COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 小区信息：
 ALTER TABLE `eh_communities` ADD COLUMN `shared_area` DOUBLE COMMENT '公摊面积';
 ALTER TABLE `eh_communities` ADD COLUMN `charge_area` DOUBLE COMMENT '收费面积';
