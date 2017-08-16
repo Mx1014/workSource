@@ -294,7 +294,7 @@ ALTER TABLE eh_contract_building_mappings ADD COLUMN `address_id` BIGINT;
 -- 合同附件：
 CREATE TABLE `eh_contract_attachments` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `contract_id` bigint(20) NOT NULL DEFAULT '0',
+  `contract_id` bigint(20) NOT NULL DEFAULT 0,
   `name` varchar(128) DEFAULT NULL,
   `file_size` int(11) NOT NULL DEFAULT '0',
   `content_type` varchar(32) DEFAULT NULL COMMENT 'attachment object content type',
@@ -306,7 +306,7 @@ CREATE TABLE `eh_contract_attachments` (
  
 -- 合同计价条款表： 
 CREATE TABLE `eh_contract_charging_items` (
-  `id` BIGINT NOT NULL 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `contract_id` BIGINT NOT NULL COMMENT 'id of eh_contracts',
   `charging_item_id` BIGINT COMMENT '收费项',
@@ -330,7 +330,7 @@ CREATE TABLE `eh_contract_charging_items` (
 
 -- 条款作用资产：
 CREATE TABLE `eh_contract_charging_item_addresses` (
-  `id` BIGINT NOT NULL 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `contract_charging_item_id` BIGINT NOT NULL COMMENT 'id of eh_contract_charging_items',
   `address_id` BIGINT,
@@ -342,7 +342,7 @@ CREATE TABLE `eh_contract_charging_item_addresses` (
 
 -- 合同参数表
 CREATE TABLE `eh_contract_params` (
-  `id` BIGINT NOT NULL 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `community_id` BIGINT COMMENT '园区id',
   `expiring_period` INTEGER NOT NULL DEFAULT 0 COMMENT '合同到期日前多久为即将到期合同',
