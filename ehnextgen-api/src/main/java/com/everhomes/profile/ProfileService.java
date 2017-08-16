@@ -39,5 +39,9 @@ public interface ProfileService {
 
     void addProfileField(AddProfileFieldCommand cmd);
 
-   void addProfileFieldGroup(AddProfileFieldGroupCommand cmd);
+    void addProfileFieldGroup(AddProfileFieldGroupCommand cmd);
+
+    void updateProfileFieldOrder(UpdateProfileFieldOrderCommand cmd);
+
+    GetProfileFieldResponse getProfileField(GetProfileFieldCommand cmd);
 }

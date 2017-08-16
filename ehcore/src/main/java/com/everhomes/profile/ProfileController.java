@@ -248,4 +248,34 @@ public class ProfileController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /profile/updateProfileFieldOrder</b>
+     * <p>11-3.批量调整档案字段</p>
+     */
+    @RequestMapping("updateProfileFieldOrder")
+    @RestReturn(value = String.class)
+    public RestResponse updateProfileFieldOrder(UpdateProfileFieldOrderCommand cmd){
+        profileService.updateProfileFieldOrder(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /profile/getProfileField</b>
+     * <p>11-4.获取档案字段</p>
+     */
+    @RequestMapping("getProfileField")
+    @RestReturn(value = String.class)
+    public RestResponse getProfileField(GetProfileFieldCommand cmd){
+        GetProfileFieldResponse res = profileService.getProfileField(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 }
