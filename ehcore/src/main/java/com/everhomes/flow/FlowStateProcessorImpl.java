@@ -118,7 +118,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	    		user = userProvider.findUserById(stepDTO.getOperatorId());
     			UserContext.current().setUser(user);
     			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
-	    	} else if(UserContext.current().getUser() != null) {
+	    	} else if(UserContext.current().getUser() != null && UserContext.current().getUser().getId() != User.ANNONYMOUS_UID) {
 	    		user = UserContext.current().getUser();
 	    	} else {
 	    		user = userProvider.findUserById(User.SYSTEM_UID);
@@ -499,6 +499,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case NO_STEP:
 			break;
 		case APPROVE_STEP:
+			case END_STEP:
 			ctx.getFlowCase().setStatus(FlowCaseStatus.FINISHED.getCode());
 			break;
 		case EVALUATE_STEP:

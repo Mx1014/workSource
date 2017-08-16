@@ -39,7 +39,7 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
             directOrgId = org.getDirectlyEnterpriseId();
         }
 
-        this.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
+        this.setId(member.getUserDetailId() != null ? member.getUserDetailId() : 0L);
         this.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
         this.setOrganizationId(directOrgId);
         this.setContactName(member.getContactName());

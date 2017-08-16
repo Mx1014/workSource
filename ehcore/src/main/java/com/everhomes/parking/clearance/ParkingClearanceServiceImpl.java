@@ -618,11 +618,14 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         ParkingActualClearanceLogDTO dto = new ParkingActualClearanceLogDTO();
-        LocalDateTime entryTime = LocalDateTime.parse(jinyiClearance.getEntrytime(), dtf);
-        LocalDateTime exitTime = LocalDateTime.parse(jinyiClearance.getExittime(), dtf);
-
-        dto.setEntryTime(Timestamp.valueOf(entryTime));
-        dto.setExitTime(Timestamp.valueOf(exitTime));
+        if (null != jinyiClearance.getEntrytime()) {
+            LocalDateTime entryTime = LocalDateTime.parse(jinyiClearance.getEntrytime(), dtf);
+            dto.setEntryTime(Timestamp.valueOf(entryTime));
+        }
+        if (null != jinyiClearance.getExittime()) {
+            LocalDateTime exitTime = LocalDateTime.parse(jinyiClearance.getExittime(), dtf);
+            dto.setExitTime(Timestamp.valueOf(exitTime));
+        }
 
         return dto;
     }
