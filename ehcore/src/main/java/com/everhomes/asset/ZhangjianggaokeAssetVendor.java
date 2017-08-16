@@ -117,6 +117,49 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         return sortedBills;
     }
 
+    private String getUrlBody4GetCompanyBills(String communityName, String organizationName, String payFlag) {
+        HashMap<String,String> params = new HashMap<>();
+        Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONDAY) + 1;
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        params.put("communityName",communityName);
+        params.put("organizationName",organizationName);
+        params.put("offset","0");
+        params.put("pageSize","50");
+        if (payFlag.equals("1")){
+            params.put("payFlag","1");
+        }else if(payFlag.equals("0")){
+            params.put("payFlag","0");
+        }
+        params.put("sdateFrom",String.valueOf(year)+String.valueOf(month)+String.valueOf(day));
+        params.put("sdateTo",String.valueOf(year)+String.valueOf(month)+String.valueOf(day));
+        params.put("appKey",appKey);
+        Long l = System.currentTimeMillis();
+        params.put("timestamp",String.valueOf(l));
+        Random r = new Random();
+        int nonce = r.nextInt(1000);
+        params.put("nonce",String.valueOf(nonce));
+        params.put("crypto","Doc.Wentian");
+        String signature = computeSignature(params,secretKey);
+        String body = RestCallTemplate.queryStringBuilder()
+                .var("community",communityName)
+                .var("buildingName",buildingName)
+                .var("apartmentName",apartmentName)
+                .var("offset","0")
+                .var("pageSize","")
+                .var("payFlag","")
+                .var("sdateFrom","")
+                .var("sdateTo","")
+                .var("appKey",appKey)
+                .var("timestamp",String.valueOf(l))
+                .var("nonce",String.valueOf(nonce))
+                .var("crypto","Doc.Wentian")
+                .var("signature",signature)
+                .build();
+        return body;
+    }
+
     private ShowBillForClientDTO getSortedBills(GetCompanyBillsEntity res) {
         return null;
     }
@@ -143,20 +186,6 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
                     mergeToList(mergeList,null,var1,true);
                 }
             }
-
-
-//            List<BillDTO_zj> billDTOS = responseList.get(i).getResponse().getBillDTOS();
-//            for (int j = 0; j<responseList.get(i).getResponse().getBillDTOS())
-//            ShowBillForClientZJGKENTITY bill = responseList.get(i);
-//            String payFlag = bill.getResponse().getBillDTOS().get(0).getDetails().get(0).getPayFlag();
-//            if (payFlag.equals("0")) {
-//                BillDetailDTO dto = new BillDetailDTO();
-//                dto.setStatus(bill.getResponse().ge);
-//                dto.setDateStr();
-//                dto.setBillId();
-//                dto.setAmountReceviable();
-//                dto.setAmountOwed();
-//            }
         }
         return countTotal(mergeList);
     }
