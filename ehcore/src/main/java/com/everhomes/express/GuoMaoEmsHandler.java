@@ -254,6 +254,16 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"unsupport method = "+params.get("method"));
 		}
+		/* status可能的状态
+		下单成功： AS1、处理中  AS2、已派员揽收 AS3、未到指定时间 AS4、订单完成，成功——为“揽收完成”，失败——为“揽收失败，原因：XXXXX”  
+		下单失败： AF11、日期格式错误 AF12、联系人为空或超长 AF13、联系电话为空或超长 AF14、寄件-省行政区划代码为空或超长 AF15、寄件-市行政区划代码为空或超长 
+			AF16、寄件详细地址为空或超长 AF17、寄件地址代码超长 AF18、订单备注超长 AF19、客户姓名为空或超长 AF20、订单来源为空 AF21、预约时间小于当前时间 AF99、其他错误 AF、内部错误导致下单失败 
+		揽收成功： 1、揽收成功 
+		揽收失败： F1、地址有误/不详且无法联系到用户 F2、电话有误且该址无此人 F3、派段错误 F4、用户不在揽收地点 F5、用户主动取消 F6、用户未下订单 
+			F7、超范围揽收 F8、属禁限寄物品 F9、属超规格物品 F10、恶意下单 F11、用户未备齐货品 F12、因资费原因放弃 F13、因上门揽收不及时放弃
+			F14、客户要求延时（默认） F15、申请改派 F16、已联系客户并确认重复下单 F17、已回班或其他原因无法处理订单 F18、客户要求预约揽收
+			F19、客户自交寄 F20、客户转交其他公司 F21、其他原因 
+		 */		
 		String status = params.get("status");
 		if(status==null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
