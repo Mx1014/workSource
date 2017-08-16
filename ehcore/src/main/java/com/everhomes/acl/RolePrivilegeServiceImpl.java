@@ -403,24 +403,28 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public void createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		User user = UserContext.current().getUser();
 
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		Long roleId = RoleConstants.PM_SUPER_ADMIN;
 
 		CreateOrganizationAccountCommand command = new CreateOrganizationAccountCommand();
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
-		organizationService.createOrganizationAccount(command, roleId);
 
-		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
+		dbProvider.execute((TransactionStatus status) -> {
+			//创建机构账号，包括注册、把用户添加到公司
+			OrganizationMember member = organizationService.createOrganizationAccount(command, RoleConstants.PM_SUPER_ADMIN, namespaceId);
 
+			/**
+			 * 分配权限
+			 */
+			this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			return null;
+		});
 
 		/**
 		 * 分配权限
 		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),userIdentifier.getOwnerUid(),"admin",PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 
 	}
 
@@ -1395,24 +1399,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		Long roleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
 
 		CreateOrganizationAccountCommand command = new CreateOrganizationAccountCommand();
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
 
-		//创建管理员不再返回member
-		organizationService.createOrganizationAccount(command, roleId, namespaceId);
+		dbProvider.execute((TransactionStatus status) -> {
+			//创建机构账号，包括注册、把用户添加到公司
+			OrganizationMember member = organizationService.createOrganizationAccount(command, RoleConstants.ENTERPRISE_SUPER_ADMIN, namespaceId);
 
+			/**
+			 * 分配权限
+			 */
+			this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
+			return null;
+		});
 
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(org.getNamespaceId(), cmd.getContactToken());
-
-
-		/**
-		 * 分配权限
-		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),userIdentifier.getOwnerUid(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
 	}
 
 	@Override

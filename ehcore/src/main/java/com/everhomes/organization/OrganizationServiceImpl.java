@@ -6009,6 +6009,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId, Integer exNamespaceId) {
 
+        User user = UserContext.current().getUser();
         if (null == cmd.getAccountPhone()) {
             LOGGER.error("contactToken can not be empty.");
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "contactToken can not be empty.");
@@ -6018,117 +6019,91 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.error("contactName can not be empty.");
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "contactName can not be empty.");
         }
-        if (exNamespaceId == null) {
-            exNamespaceId = UserContext.getCurrentNamespaceId(null);
-        }
-        Integer namespaceId = exNamespaceId;
+        Integer namespaceId = UserContext.getCurrentNamespaceId(exNamespaceId);
 
         Organization org = checkOrganization(cmd.getOrganizationId());
 
         OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
+        //创建用户
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getAccountPhone());
+        if (null == userIdentifier) {
+            userIdentifier = createUserAndIdentifier(namespaceId, cmd.getAccountName(), cmd.getAccountPhone());
+        }
+        if(null == member){
+            OrganizationMember organizationMember = new OrganizationMember();
+            organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+            organizationMember.setContactType(IdentifierType.MOBILE.getCode());
+            organizationMember.setCreatorUid(user.getId());
+            organizationMember.setNamespaceId(namespaceId);
+            organizationMember.setGroupId(0l);
+            organizationMember.setGroupType(org.getGroupType());
+            organizationMember.setGroupPath(org.getPath());
+            organizationMember.setGender(UserGender.UNDISCLOSURED.getCode());
+            organizationMember.setContactName(cmd.getAccountName());
+            organizationMember.setContactToken(cmd.getAccountPhone());
+            organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+            organizationMember.setTargetId(userIdentifier.getOwnerUid());
+            createOrganiztionMemberWithDetailAndUserOrganization(organizationMember, org.getId());
+        }else if(OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())){
+            //把正在申请加入公司状态的 记录改成正常
+            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+            organizationProvider.updateOrganizationMember(member);
+        }
 
-        return this.dbProvider.execute((TransactionStatus status) -> {
-//            OrganizationMember m = member;
+        //刷新企业通讯录
+        if (null != userIdentifier)
+            processUserForMemberWithoutMessage(userIdentifier);
 
-//            if (null == m) {
-//                CreateOrganizationMemberCommand memberCmd = new CreateOrganizationMemberCommand();
-//                memberCmd.setContactName(cmd.getAccountName());
-//                memberCmd.setContactToken(cmd.getAccountPhone());
-//                memberCmd.setOrganizationId(cmd.getOrganizationId());
-//                memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
-//                m = this.createOrganizationPersonnel(memberCmd);
-//            } else {
-//				List<OrganizationMember> members = listOrganizationMemberByOrganizationPathAndContactToken(org.getPath(), cmd.getAccountPhone());
-//				for (OrganizationMember organizationMember: members) {
-//					organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-//					organizationMember.setContactName(cmd.getAccountName());
-//					organizationProvider.updateOrganizationMember(organizationMember);
-//                }
-//            }
+        if (null != cmd.getAssignmentId())
+            aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
 
+        if (null != roleId) {
+            SetAclRoleAssignmentCommand roleCmd = new SetAclRoleAssignmentCommand();
+            roleCmd.setRoleId(roleId);
+            roleCmd.setTargetId(userIdentifier.getOwnerUid());
+            roleCmd.setOrganizationId(cmd.getOrganizationId());
+            this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
+        }
 
-            //创建用户
-            UserIdentifier userIdentifier = null;
-            userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getAccountPhone());
-
-            if (null == userIdentifier) {
-                User newuser = new User();
-                newuser.setStatus(UserStatus.ACTIVE.getCode());
-                newuser.setNamespaceId(namespaceId);
-                newuser.setNickName(cmd.getAccountName());
-                newuser.setGender(UserGender.UNDISCLOSURED.getCode());
-                String salt = EncryptionUtils.createRandomSalt();
-                newuser.setSalt(salt);
-                try {
-                    newuser.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", salt)));
-                } catch (Exception e) {
-                    LOGGER.error("encode password failed");
-                    throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
-
-                }
-
-                userProvider.createUser(newuser);
-
-                userIdentifier = new UserIdentifier();
-                userIdentifier.setOwnerUid(newuser.getId());
-                userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
-                userIdentifier.setIdentifierToken(cmd.getAccountPhone());
-                userIdentifier.setNamespaceId(namespaceId);
-
-                userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-                userProvider.createIdentifier(userIdentifier);
+        OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
+        if (null == detail) {
+            LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
+        } else {
+            // 如果是金蝶过来的数据，则不更新此两列
+            if (detail.getNamespaceOrganizationType() == null || !detail.getNamespaceOrganizationType().equals(NamespaceOrganizationType.JINDIE.getCode())) {
+                detail.setContactor(cmd.getAccountName());
+                detail.setContact(cmd.getAccountPhone());
+                organizationProvider.updateOrganizationDetail(detail);
             }
+        }
 
-            //循环更新
-//            List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhoneAndNamespaceId(m.getContactToken(), namespaceId);
-//            for(OrganizationMember _m :members){
-//                if (_m.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())) {
-//                    _m.setContactName(cmd.getAccountName());
-//                    _m.setTargetType(OrganizationMemberTargetType.USER.getCode());
-//                    _m.setTargetId(userIdentifier.getOwnerUid());
-//                    _m.setNamespaceId(namespaceId);
-//                    organizationProvider.updateOrganizationMember(_m);
-//
-//                    //创建管理员的同时会同时创建一个用户，因此需要在user_organization中添加一条记录 modify at 17/6/20
-//                    //仅当target为user且grouptype为企业时添加
-//                    if(_m.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && _m.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
-//                        createOrUpdateUserOrganization(_m);
-//                    }
-//                    m = _m;
-//                }
-//            }
-
-
-            //刷新企业通讯录
-            if (null != userIdentifier)
-                processUserForMemberWithoutMessage(userIdentifier);
-
-            if (null != cmd.getAssignmentId())
-                aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
-
-            if (null != roleId) {
-                SetAclRoleAssignmentCommand roleCmd = new SetAclRoleAssignmentCommand();
-                roleCmd.setRoleId(roleId);
-                roleCmd.setTargetId(userIdentifier.getOwnerUid());
-                roleCmd.setOrganizationId(cmd.getOrganizationId());
-                this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
-            }
-
-            OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
-            if (null == detail) {
-                LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
-            } else {
-                // 如果是金蝶过来的数据，则不更新此两列
-                if (detail.getNamespaceOrganizationType() == null || !detail.getNamespaceOrganizationType().equals(NamespaceOrganizationType.JINDIE.getCode())) {
-                    detail.setContactor(cmd.getAccountName());
-                    detail.setContact(cmd.getAccountPhone());
-                    organizationProvider.updateOrganizationDetail(detail);
-                }
-            }
-            return member;
-        });
+        return member;
     }
 
+    private UserIdentifier createUserAndIdentifier(Integer namespaceId, String nickName, String identifierToken){
+        User user = new User();
+        user.setStatus(UserStatus.ACTIVE.getCode());
+        user.setNamespaceId(namespaceId);
+        user.setNickName(nickName);
+        user.setGender(UserGender.UNDISCLOSURED.getCode());
+        String salt = EncryptionUtils.createRandomSalt();
+        user.setSalt(salt);
+        try {
+            user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", salt)));
+        } catch (Exception e) {
+            LOGGER.error("encode password failed");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+        }
+        userProvider.createUser(user);
+        UserIdentifier userIdentifier = new UserIdentifier();
+        userIdentifier.setOwnerUid(user.getId());
+        userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+        userIdentifier.setIdentifierToken(identifierToken);
+        userIdentifier.setNamespaceId(namespaceId);
+        userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+        userProvider.createIdentifier(userIdentifier);
+        return userIdentifier;
+    }
 
     @Override
     public OrganizationMemberDTO processUserForMemberWithoutMessage(UserIdentifier identifier) {
@@ -6164,12 +6139,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 if (OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE) {
                     member.setTargetId(user.getId());
-
+                    member.setTargetType(OrganizationMemberTargetType.USER.getCode());
                     this.updateMemberUser(member);
                     DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
 
                     // 机构是公司的情况下 才发送短信
                     if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
+
+                        //创建管理员的同时会同时创建一个用户，因此需要在user_organization中添加一条记录 modify at 17/08/16
+                        //仅当target为user且grouptype为企业时添加
+                        createOrUpdateUserOrganization(member);
+
                         if (needSendMessage) {
                             sendMessageForContactApproved(member);
                         }
@@ -9158,34 +9138,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private void createUser(Integer namespaceId, String nickName, String identifierToken) {
 
-        User user = new User();
-        String password = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
-        user.setStatus(UserStatus.ACTIVE.getCode());
-        user.setNamespaceId(namespaceId);
-        user.setNickName(nickName);
-        user.setGender(UserGender.UNDISCLOSURED.getCode());
-        String salt = EncryptionUtils.createRandomSalt();
-        user.setSalt(salt);
-        try {
-            user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", password, salt)));
-        } catch (Exception e) {
-            LOGGER.error("encode password failed");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
-
-        }
-        userProvider.createUser(user);
-
-        UserIdentifier newIdentifier = new UserIdentifier();
-        newIdentifier.setOwnerUid(user.getId());
-        newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
-        newIdentifier.setIdentifierToken(identifierToken);
-        newIdentifier.setNamespaceId(namespaceId);
-
-        newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-        userProvider.createIdentifier(newIdentifier);
+        UserIdentifier userIdentifier = createUserAndIdentifier(namespaceId, nickName, identifierToken);
 
         //刷新地址信息
-        propertyMgrService.processUserForOwner(newIdentifier);
+        propertyMgrService.processUserForOwner(userIdentifier);
     }
 
     @Override
