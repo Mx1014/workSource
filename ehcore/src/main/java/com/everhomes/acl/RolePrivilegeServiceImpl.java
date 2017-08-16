@@ -422,10 +422,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return null;
 		});
 
-		/**
-		 * 分配权限
-		 */
-
 	}
 
 

@@ -6030,20 +6030,20 @@ public class OrganizationServiceImpl implements OrganizationService {
             userIdentifier = createUserAndIdentifier(namespaceId, cmd.getAccountName(), cmd.getAccountPhone());
         }
         if(null == member){
-            OrganizationMember organizationMember = new OrganizationMember();
-            organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-            organizationMember.setContactType(IdentifierType.MOBILE.getCode());
-            organizationMember.setCreatorUid(user.getId());
-            organizationMember.setNamespaceId(namespaceId);
-            organizationMember.setGroupId(0l);
-            organizationMember.setGroupType(org.getGroupType());
-            organizationMember.setGroupPath(org.getPath());
-            organizationMember.setGender(UserGender.UNDISCLOSURED.getCode());
-            organizationMember.setContactName(cmd.getAccountName());
-            organizationMember.setContactToken(cmd.getAccountPhone());
-            organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
-            organizationMember.setTargetId(userIdentifier.getOwnerUid());
-            createOrganiztionMemberWithDetailAndUserOrganization(organizationMember, org.getId());
+            member = new OrganizationMember();
+            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+            member.setContactType(IdentifierType.MOBILE.getCode());
+            member.setCreatorUid(user.getId());
+            member.setNamespaceId(namespaceId);
+            member.setGroupId(0l);
+            member.setGroupType(org.getGroupType());
+            member.setGroupPath(org.getPath());
+            member.setGender(UserGender.UNDISCLOSURED.getCode());
+            member.setContactName(cmd.getAccountName());
+            member.setContactToken(cmd.getAccountPhone());
+            member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+            member.setTargetId(userIdentifier.getOwnerUid());
+            createOrganiztionMemberWithDetailAndUserOrganization(member, org.getId());
         }else if(OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())){
             //把正在申请加入公司状态的 记录改成正常
             member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
