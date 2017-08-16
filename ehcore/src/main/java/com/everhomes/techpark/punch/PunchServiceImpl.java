@@ -6021,17 +6021,17 @@ public class PunchServiceImpl implements PunchService {
 			Workbook wb = new XSSFWorkbook();
 			Sheet sheet = wb.createSheet("sheet1"); 
 			this.createPunchSchedulingsBookSheetHead(sheet,queryTime);
-			ArrayList<String> textlist = new ArrayList<String>();
-			for(PunchTimeRule rule : targetTimeRules.get()){
-				textlist.add(rule.getName());
-			}
-			textlist.add("");
+//			ArrayList<String> textlist = new ArrayList<String>();
+//			for(PunchTimeRule rule : targetTimeRules.get()){
+//				textlist.add(rule.getName());
+//			}
+//			textlist.add("");
 			//设置格式
 			String[] a = {};
 			
 			
 			for (PunchSchedulingEmployeeDTO employee : employees )
-				setNewPunchSchedulingsBookRow(sheet, employee,textlist);
+				setNewPunchSchedulingsBookRow(sheet, employee );
 //			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
 		 	return wb;
 	}
@@ -6051,7 +6051,7 @@ public class PunchServiceImpl implements PunchService {
 			row.createCell(++i).setCellValue( startCalendar.get(Calendar.DAY_OF_MONTH)+startCalendar.get(Calendar.DAY_OF_WEEK));
 		} 
 	}
-	private void setNewPunchSchedulingsBookRow(Sheet sheet, PunchSchedulingEmployeeDTO employee, ArrayList<String> textlist) { 
+	private void setNewPunchSchedulingsBookRow(Sheet sheet, PunchSchedulingEmployeeDTO employee ) { 
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1;  
 		row.createCell(++i).setCellValue(employee.getContactName());
