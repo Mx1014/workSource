@@ -307,7 +307,7 @@ CREATE TABLE `eh_contract_attachments` (
 -- 合同计价条款表： 
 CREATE TABLE `eh_contract_charging_items` (
   `id` BIGINT NOT NULL 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT '0' COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `contract_id` BIGINT NOT NULL COMMENT 'id of eh_contracts',
   `charging_item_id` BIGINT COMMENT '收费项',
   `charging_standard_id` BIGINT COMMENT '收费标准',  
@@ -331,7 +331,7 @@ CREATE TABLE `eh_contract_charging_items` (
 -- 条款作用资产：
 CREATE TABLE `eh_contract_charging_item_addresses` (
   `id` BIGINT NOT NULL 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT '0' COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `contract_charging_item_id` BIGINT NOT NULL COMMENT 'id of eh_contract_charging_items',
   `address_id` BIGINT,
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
@@ -343,14 +343,14 @@ CREATE TABLE `eh_contract_charging_item_addresses` (
 -- 合同参数表
 CREATE TABLE `eh_contract_params` (
   `id` BIGINT NOT NULL 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT '0' COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `community_id` BIGINT COMMENT '园区id',
-  `expiring_period` INTEGER NOT NULL DEFAULT '0' COMMENT '合同到期日前多久为即将到期合同',
-  `expiring_unit` TINYINT NOT NULL DEFAULT '0' COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
-  `notify_period` INTEGER NOT NULL DEFAULT '0' COMMENT '提醒时间',
-  `notify_unit` TINYINT NOT NULL DEFAULT '0' COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
-  `expired_period` INTEGER NOT NULL DEFAULT '0' COMMENT '审批通过合同转为过期的时间',
-  `expired_unit` TINYINT NOT NULL DEFAULT '0' COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
+  `expiring_period` INTEGER NOT NULL DEFAULT 0 COMMENT '合同到期日前多久为即将到期合同',
+  `expiring_unit` TINYINT NOT NULL DEFAULT 0 COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
+  `notify_period` INTEGER NOT NULL DEFAULT 0 COMMENT '提醒时间',
+  `notify_unit` TINYINT NOT NULL DEFAULT 0 COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
+  `expired_period` INTEGER NOT NULL DEFAULT 0 COMMENT '审批通过合同转为过期的时间',
+  `expired_unit` TINYINT NOT NULL DEFAULT 0 COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
