@@ -14,6 +14,7 @@ import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
@@ -21,6 +22,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.techpark.punch.GetPunchQRCodeCommand;
 import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
 import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
@@ -956,5 +958,27 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
+	
+	/**
+	 * <b>URL: punch/getPunchQRCode</b>
+	 * <p>
+	 * 获取二维码图片 返回二进制流
+	 * </p>
+	 */
+	@RequestMapping("getPunchQRCode")
+	public  RestResponse getPunchQRCode(@Valid GetPunchQRCodeCommand cmd,HttpServletResponse response ) {
+		HttpServletResponse commandResponse = punchService.getPunchQRCode(cmd, response ); 
+		return new RestResponse();
+	}
+	
+	 /**
+	  * <b>URL: /siyinprint/getPunchQRCodeResult</b>
+	  * <p>web调用,长轮询得到扫码结果</p>
+	  */
+	 @RequestMapping("getPunchQRCodeResult")
+	 @RestReturn(value=String.class)
+	 @RequireAuthentication(false)
+	 public DeferredResult<RestResponse> getPunchQRCodeResult(@Valid GetPunchQRCodeCommand cmd){
+		 return punchService.getPunchQRCodeResult(cmd);
+	 }
 }

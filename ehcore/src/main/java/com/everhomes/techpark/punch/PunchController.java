@@ -74,23 +74,39 @@ public class PunchController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /techpark/punch/getPunchType</b>
+	 * <b>URL: /techpark/punch/getPunchDayStatus</b>
 	 * <p>
-	 * 获取现在打卡类型--上班或者下班
+	 * 获取获取当前/某日 的打卡状态(以及将要打卡的状态)
 	 * </p>
 	 */
-	@RequestMapping("getPunchType")
-	@RestReturn(value = GetPunchTypeResponse.class)
-	public RestResponse getPunchType(@Valid GetPunchTypeCommand cmd) {
+	@RequestMapping("getPunchDayStatus")
+	@RestReturn(value = GetPunchDayStatusResponse.class)
+	public RestResponse getPunchDayStatus(@Valid GetPunchDayStatusCommand cmd) {
 		// 打卡返回打卡时间
-		GetPunchTypeResponse resp = punchService.getPunchType(cmd);
+		GetPunchDayStatusResponse resp = punchService.getPunchDayStatus(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
-	
+	/**
+	 * <b>URL: /techpark/punch/listPunchMonthStatus</b>
+	 * <p>
+	 * 查询某月的打卡日历展示信息
+	 * </p>
+	 */
+	@RequestMapping("listPunchMonthStatus")
+	@RestReturn(value = ListPunchMonthStatusResponse.class)
+	public RestResponse listPunchMonthStatus(@Valid ListPunchMonthStatusCommand cmd) {
+		// 打卡返回打卡时间
+		ListPunchMonthStatusResponse resp = punchService.listPunchMonthStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 
 	/**
@@ -360,7 +376,7 @@ public class PunchController extends ControllerBase {
      */
     @RequestMapping("listPunchSupportiveAddress")
     @RestReturn(value = ListPunchSupportiveAddressCommandResponse.class)
-    public RestResponse listPunchCount(@Valid ListPunchSupportiveAddressCommand cmd) {
+    public RestResponse listPunchSupportiveAddress(@Valid ListPunchSupportiveAddressCommand cmd) {
         ListPunchSupportiveAddressCommandResponse res = punchService.listPunchSupportiveAddress(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -368,4 +384,38 @@ public class PunchController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /techpark/punch/addPunchPoints</b>
+     * <p>
+     * 上报经纬度坐标信息
+     * </p>
+     */
+    @RequestMapping("addPunchPoints")
+    @RestReturn(value = String.class)
+    public RestResponse addPunchPoints(@Valid AddPunchPointsCommand cmd) {
+        punchService.addPunchPoints(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /techpark/punch/addPunchWifis</b>
+     * <p>
+     * 上报wifi信息
+     * </p>
+     */
+    @RequestMapping("addPunchWifis")
+    @RestReturn(value = String.class)
+    public RestResponse addPunchWifis(@Valid AddPunchWifisCommand cmd) {
+        punchService.addPunchWifis(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    
 }

@@ -47,6 +47,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import ch.qos.logback.core.joran.conditional.ElseAction;
@@ -83,6 +84,7 @@ import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -100,7 +102,9 @@ import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
+import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
+import com.everhomes.rest.techpark.punch.AddPunchWifisCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
 import com.everhomes.rest.techpark.punch.ApprovalStatus;
 import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
@@ -114,10 +118,11 @@ import com.everhomes.rest.techpark.punch.ExtDTO;
 import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
+import com.everhomes.rest.techpark.punch.GetPunchQRCodeCommand;
 import com.everhomes.rest.techpark.punch.GetPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.GetPunchRuleCommandResponse;
-import com.everhomes.rest.techpark.punch.GetPunchTypeCommand;
-import com.everhomes.rest.techpark.punch.GetPunchTypeResponse;
+import com.everhomes.rest.techpark.punch.GetPunchDayStatusCommand;
+import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
 import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
 import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
@@ -125,6 +130,8 @@ import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchMonthStatusCommand;
+import com.everhomes.rest.techpark.punch.ListPunchMonthStatusResponse;
 import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
 import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommand;
@@ -6378,6 +6385,11 @@ public class PunchServiceImpl implements PunchService {
 	public PunchGroupDTO addPunchGroup(AddPunchGroupCommand cmd) {
 		// 
 		this.dbProvider.execute((status) -> {
+			if(cmd.getRuleType() == null)
+
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+						ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Invalid rule type parameter in the command");
 			//建立考勤组
 			Organization punchOrg = this.organizationService.createUniongroupOrganization(cmd.getOwnerId(),cmd.getGroupName(),UniongroupType.PUNCHGROUP.getCode());
 			//添加关联
@@ -6851,10 +6863,10 @@ public class PunchServiceImpl implements PunchService {
 		return null;
 	}
 	@Override
-	public GetPunchTypeResponse getPunchType(GetPunchTypeCommand cmd) {
+	public GetPunchDayStatusResponse getPunchDayStatus(GetPunchDayStatusCommand cmd) {
 		// 
 		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
-		GetPunchTypeResponse response = new GetPunchTypeResponse();
+		GetPunchDayStatusResponse response = new GetPunchDayStatusResponse();
 		Long userId = UserContext.current().getUser().getId();
 		Date punchTime = new Date();
 		response.setPunchType(getPunchType(userId,cmd.getEnterpriseId(),punchTime).get(0).byteValue());
@@ -7040,5 +7052,31 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private Long timeIsNull(Long value, Long defaultValue) {
 		 return value==null?defaultValue:value;
+	}
+	@Override
+	public ListPunchMonthStatusResponse listPunchMonthStatus(ListPunchMonthStatusCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public HttpServletResponse getPunchQRCode(GetPunchQRCodeCommand cmd,
+			HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void addPunchPoints(AddPunchPointsCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void addPunchWifis(AddPunchWifisCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

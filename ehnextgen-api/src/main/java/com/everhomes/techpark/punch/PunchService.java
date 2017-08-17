@@ -9,8 +9,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.organization.Organization;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.punch.*;
 
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.approval.ApprovalRule;
@@ -231,7 +233,7 @@ public interface PunchService {
 
 	public void deletePunchGroup(DeleteCommonCommand cmd);
 
-	public GetPunchTypeResponse getPunchType(GetPunchTypeCommand cmd);
+	public GetPunchDayStatusResponse getPunchDayStatus(GetPunchDayStatusCommand cmd);
 
 	public PunchGroupDTO getPunchGroup(GetPunchGroupCommand cmd); 
 
@@ -242,5 +244,16 @@ public interface PunchService {
 	boolean isWorkTime(Time time, PunchRule punchRule, Date date, Long userId);
 
 	boolean isWorkDay(Date date1, PunchRule punchRule, Long userId);
+
+	public ListPunchMonthStatusResponse listPunchMonthStatus(ListPunchMonthStatusCommand cmd);
+
+	public HttpServletResponse getPunchQRCode(GetPunchQRCodeCommand cmd,
+			HttpServletResponse response);
+
+	public void addPunchPoints(AddPunchPointsCommand cmd);
+ 
+	public void addPunchWifis(AddPunchWifisCommand cmd);
+
+	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd);
 
 }
