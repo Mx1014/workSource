@@ -6849,6 +6849,11 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
 		//
+		if(cmd.getRuleType() == null)
+
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid rule type parameter in the command");
 		//获取考勤组
 		Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
 		punchOrg.setName(cmd.getGroupName());
