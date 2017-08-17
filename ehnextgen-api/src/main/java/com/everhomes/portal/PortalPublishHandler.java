@@ -13,7 +13,7 @@ public interface PortalPublishHandler {
      * @param instanceConfig 具体模块配置的参数
      * @return instanceConfig 把json对象里面个个实体需要的id补充返回
      */
-    String publish(String instanceConfig);
+    String publish(Integer namespaceId, String instanceConfig);
 
     /**
      * 处理成服务广场item需要的actionData
@@ -21,7 +21,7 @@ public interface PortalPublishHandler {
      * @param instanceConfig
      * @return
      */
-    String getItemActionData(String instanceConfig);
+    String getItemActionData(Integer namespaceId, String instanceConfig);
 
     /**
      * 根据服务广场的actionData获取业务应用的instanceConfig
@@ -29,5 +29,5 @@ public interface PortalPublishHandler {
      * @param actionData
      * @return
      */
-    String getAppInstanceConfig(String actionData);
+    String getAppInstanceConfig(Integer namespaceId, String actionData);
 }

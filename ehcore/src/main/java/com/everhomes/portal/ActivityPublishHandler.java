@@ -10,18 +10,18 @@ import org.springframework.stereotype.Component;
 public class ActivityPublishHandler implements PortalPublishHandler{
 
     @Override
-    public String publish(String instanceConfig) {
+    public String publish(Integer namespaceId, String instanceConfig) {
 
         return instanceConfig;
     }
 
     @Override
-    public String getItemActionData(String instanceConfig) {
+    public String getItemActionData(Integer namespaceId, String instanceConfig) {
         return instanceConfig;
     }
 
     @Override
-    public String getAppInstanceConfig(String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
         return actionData;
     }
 }

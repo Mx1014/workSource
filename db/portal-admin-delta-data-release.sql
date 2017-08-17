@@ -1,5 +1,5 @@
 
-insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('4000000','域空间管理','0','icon-cube_zuolin','scope-management','1','2','/4000000','zuolin','2','0','1','namespace','classify');
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('4000000','域空间管理','0','icon-cube_zuolin','scope-management','1','2','/4000000','zuolin','30','0','1','namespace','classify');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('4100000','域空间配置','4000000',NULL,'scope-config','1','2','/4000000/4100000','zuolin','1','0','2','namespace','classify');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('4110000','业务应用配置','4100000',NULL,'business-app-config','1','2','/4000000/4100000/4110000','zuolin','1','70100','3','namespace','module');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('4120000','app配置','4100000',NULL,'app-config','1','2','/4000000/4100000/4120000','zuolin','2','70200','3','namespace','module');
@@ -7,18 +7,18 @@ insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('4121000','APP配置','4120000',NULL,'app-config','0','2','/4000000/4100000/4120000/4121000','zuolin','1','70200','4','namespace','page');
 
 
-insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('5000000','运营业务模块管理','0','icon-report_zuolin','operational-business-module-management','1','2','/5000000','zuolin','1','0','1','system','classify');
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('5000000','运营业务模块管理','0','icon-report_zuolin','operational-business-module-management','1','2','/5000000','zuolin','10','0','1','system','classify');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('5100000','第三方服务模块','5000000',NULL,'other-service-modules','1','2','/5000000/5100000','zuolin','1','0','2','system','module');
-insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('5110000','第三方服务模块','5100000',NULL,'business-app-config','0','2','/5000000/5100000/5110000','zuolin','1',NULL,'3','namespace','page');
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('5110000','第三方服务模块','5100000',NULL,'other-service-modules','0','2','/5000000/5100000/5110000','zuolin','1',NULL,'3','namespace','page');
 
 
-insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('1000000','系统管理','0','icon-setting_zuolin','system-management','1','2','/1000000','zuolin','4','0','1','system','classify');
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('1000000','系统管理','0','icon-setting_zuolin','system-management','1','2','/1000000','zuolin','100','0','1','system','classify');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('1100000','管理员管理','1000000',NULL,'admin-management','1','2','/1000000/1100000','zuolin','1','60100','2','system','module');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('1110000','管理员列表','1100000',NULL,'administrator-list','0','2','/1000000/1100000/1110000','zuolin','1','60100','3','system','page');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('1120000','管理员角色与权限','1100000',NULL,'administrator-roles-permissions','0','2','/1000000/1100000/1120000','zuolin','2','60100','3','system','page');
 
 
-insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('2000000','物业服务','0','icon-wrench_zuolin','property-service','1','2','/2000000','zuolin','3','0','1','project','classify');
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('2000000','物业服务','0','icon-wrench_zuolin','property-service','1','2','/2000000','zuolin','50','0','1','project','classify');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('2100000','物业报修','2000000',NULL,'property-repairs','1','2','/2000000/2100000','zuolin','1','20100','2','project','module');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('2110000','物业报修','2100000',NULL,'property-repairs','1','2','/2000000/2100000/2110000','zuolin','1','210000','3','project','page');
 
@@ -28,6 +28,10 @@ insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('2200000','能耗管理','2000000',NULL,'energy-management','1','2','/2000000/2200000','zuolin','2','49100','2','project','module');
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('2210000','能耗管理','2200000',NULL,'energy-management','1','2','/2000000/2200000/2210000','zuolin','2','49100','3','project','page');
+
+
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('6000000','日志管理','0','icon-cube_zuolin','logs','1','2','/6000000','zuolin','70','0','1','system','module');
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) values('6100000','日志管理','6000000',NULL,'log-parse','1','2','/6000000/6100000','zuolin','5','0','2','system','page');
 
 DELETE FROM eh_service_modules WHERE status = 2;
 

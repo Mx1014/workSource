@@ -1576,10 +1576,10 @@ public class PortalServiceImpl implements PortalService {
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
 			item.setActionType(moduleApp.getActionType());
 			if(null != handler){
-				String instanceConfig = handler.publish(moduleApp.getInstanceConfig());
+				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig());
 				moduleApp.setInstanceConfig(instanceConfig);
 				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
-				item.setActionData(handler.getItemActionData(instanceConfig));
+				item.setActionData(handler.getItemActionData(moduleApp.getNamespaceId(), instanceConfig));
 			}else{
 				item.setActionData(moduleApp.getInstanceConfig());
 			}
