@@ -322,14 +322,14 @@ public class ExpressThirdCallController {// extends ControllerBase
 	
 	public static void main(String[] args) {
 		 Map<String, String> params = new HashMap<String, String>();
-		 params.put("ns",999901+"");
+		 params.put("ns",999968+"");
 		 params.put("appkey","de875e40-1c5f-4a0c-94a6-0b37421b8554");
 		 params.put("nick","邓爽2");
 		 params.put("mobile","12345678902");
 		 params.put("uid","1234567xxxx");
 		 params.put("timestamp",System.currentTimeMillis()+"");
 		 params.put("avatar","core.zuolin.com");
-		 params.put("community","240111044331070561");
+		 params.put("community","240111044331050363");
 		 MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");
