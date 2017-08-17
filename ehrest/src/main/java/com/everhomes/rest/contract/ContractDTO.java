@@ -29,7 +29,7 @@ import com.everhomes.util.StringHelper;
  * <li>buildings: 楼栋门牌信息{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
  * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
- * <li>amount: 合同总金额</li>
+ * <li>rent: 合同总金额</li>
  * </ul>
  */
 public class ContractDTO {
@@ -64,7 +64,7 @@ public class ContractDTO {
 
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> buildings;
-	private BigDecimal amount;
+	private BigDecimal rent;
 
 	public Byte getContractType() {
 		return contractType;
@@ -74,12 +74,12 @@ public class ContractDTO {
 		this.contractType = contractType;
 	}
 
-	public BigDecimal getAmount() {
-		return amount;
+	public BigDecimal getRent() {
+		return rent;
 	}
 
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
+	public void setRent(BigDecimal rent) {
+		this.rent = rent;
 	}
 
 	public String getName() {

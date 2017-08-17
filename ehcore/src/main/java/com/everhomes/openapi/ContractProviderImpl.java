@@ -5,9 +5,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.server.schema.tables.records.EhContractsRecord;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.util.IterationMapReduceCallback;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -179,6 +184,57 @@ public class ContractProviderImpl implements ContractProvider {
 				.and(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(organizationId))
 				.fetch()
 				.map(r->ConvertHelper.convert(r, Contract.class));
+	}
+
+	@Override
+	public List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize) {
+		List<Contract> contracts = new ArrayList<Contract>();
+
+		if (locator.getShardIterator() == null) {
+			AccessSpec accessSpec = AccessSpec.readOnlyWith(EhContracts.class);
+			ShardIterator shardIterator = new ShardIterator(accessSpec);
+			locator.setShardIterator(shardIterator);
+		}
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+			SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+
+			if(locator.getAnchor() != null && locator.getAnchor() != 0L){
+				query.addConditions(Tables.EH_CONTRACTS.ID.lt(locator.getAnchor()));
+			}
+
+			query.addOrderBy(Tables.EH_CONTRACTS.ID.desc());
+			query.addLimit(pageSize - contracts.size());
+
+			query.fetch().map((r) -> {
+				contracts.add(ConvertHelper.convert(r, Contract.class));
+				return null;
+			});
+
+			if (contracts.size() >= pageSize) {
+				locator.setAnchor(contracts.get(contracts.size() - 1).getId());
+				return IterationMapReduceCallback.AfterAction.done;
+			} else {
+				locator.setAnchor(null);
+			}
+			return IterationMapReduceCallback.AfterAction.next;
+		});
+
+		return contracts;
+	}
+
+	@Override
+	public List<Contract> listContractsByIds(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+		query.addConditions(Tables.EH_CONTRACTS.ID.in(ids));
+
+		List<Contract> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Contract.class));
+			return null;
+		});
+
+		return result;
 	}
 
 	private EhContractsDao getReadWriteDao() {

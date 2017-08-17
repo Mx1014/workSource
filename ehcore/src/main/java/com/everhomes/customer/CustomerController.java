@@ -8,6 +8,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -32,6 +33,12 @@ public class CustomerController extends ControllerBase {
 
     @Autowired
     private PropertyMgrService propertyMgrService;
+
+    @Autowired
+    private CustomerService customerService;
+
+    @Autowired
+    private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
     /**
      * <b>URL: /customer/createCustomer</b>
      * <p>创建新客户</p>
@@ -57,6 +64,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("createEnterpriseCustomer")
     @RestReturn(value = String.class)
     public RestResponse createEnterpriseCustomer(@Valid CreateEnterpriseCustomerCommand cmd) {
+        customerService.createEnterpriseCustomer(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -70,6 +78,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("updateEnterpriseCustomer")
     @RestReturn(value = String.class)
     public RestResponse updateEnterpriseCustomer(@Valid UpdateEnterpriseCustomerCommand cmd) {
+        customerService.updateEnterpriseCustomer(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -83,6 +92,21 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("deleteEnterpriseCustomer")
     @RestReturn(value = String.class)
     public RestResponse deleteEnterpriseCustomer(@Valid DeleteEnterpriseCustomerCommand cmd) {
+        customerService.deleteEnterpriseCustomer(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getEnterpriseCustomer</b>
+     * <p>查看企业客户信息</p>
+     */
+    @RequestMapping("getEnterpriseCustomer")
+    @RestReturn(value = EnterpriseCustomerDTO.class)
+    public RestResponse getEnterpriseCustomer(@Valid GetEnterpriseCustomerCommand cmd) {
+        customerService.getEnterpriseCustomer(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -96,7 +120,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("searchEnterpriseCustomer")
     @RestReturn(value = SearchEnterpriseCustomerResponse.class)
     public RestResponse searchEnterpriseCustomer(@Valid SearchEnterpriseCustomerCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

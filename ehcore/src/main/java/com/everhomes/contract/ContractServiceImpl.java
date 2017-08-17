@@ -14,8 +14,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +92,21 @@ public class ContractServiceImpl implements ContractService {
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
+
+	@Autowired
+	private ContractAttachmentProvider contractAttachmentProvider;
+
+	@Autowired
+	private ContractChargingItemAddressProvider contractChargingItemAddressProvider;
+
+	@Autowired
+	private ContractChargingItemProvider contractChargingItemProvider;
+
+	@Autowired
+	private ContentServerService contentServerService;
+
+	@Autowired
+	private AddressProvider addressProvider;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -362,12 +386,148 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public void createContract(CreateContractCommand cmd) {
+		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		contractProvider.createContract(contract);
 
+		dealContractApartments(contract, cmd.getApartments());
+		dealContractChargingItems(contract, cmd.getChargingItems());
+		dealContractAttachments(contract.getId(), cmd.getAttachments());
+
+	}
+
+	private void dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
+		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+		Map<Long, ContractBuildingMapping> map = new HashMap<>();
+		if(existApartments != null && existApartments.size() > 0) {
+			existApartments.forEach(apartment -> {
+				map.put(apartment.getId(), apartment);
+			});
+		}
+		if(buildingApartments != null && buildingApartments.size() > 0) {
+			buildingApartments.forEach(buildingApartment -> {
+				if(buildingApartment.getId() == null) {
+					ContractBuildingMapping mapping = ConvertHelper.convert(buildingApartment, ContractBuildingMapping.class);
+					mapping.setNamespaceId(contract.getNamespaceId());
+//					mapping.setOrganizationName(contract.getCustomerName());
+					mapping.setContractId(contract.getId());
+					mapping.setContractNumber(contract.getContractNumber());
+					mapping.setStatus(CommonStatus.ACTIVE.getCode());
+					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					contractBuildingMappingProvider.createContractBuildingMapping(mapping);
+				} else {
+					map.remove(buildingApartment.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, apartment) -> {
+				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
+			});
+		}
+	}
+
+	private void dealContractChargingItems(Contract contract, List<ContractChargingItemDTO> chargingItems) {
+		List<ContractChargingItem> existChargingItems = contractChargingItemProvider.listByContractId(contract.getId());
+		Map<Long, ContractChargingItem> map = new HashMap<>();
+		if(existChargingItems != null && existChargingItems.size() > 0) {
+			existChargingItems.forEach(item -> {
+				map.put(item.getId(), item);
+			});
+		}
+
+		if(chargingItems != null && chargingItems.size() > 0) {
+			chargingItems.forEach(item -> {
+				ContractChargingItem contractChargingItem = ConvertHelper.convert(item, ContractChargingItem.class);
+				if(item.getId() == null) {
+					contractChargingItem.setContractId(contract.getId());
+					contractChargingItem.setNamespaceId(contract.getNamespaceId());
+					contractChargingItem.setStatus(CommonStatus.ACTIVE.getCode());
+					contractChargingItemProvider.createContractChargingItem(contractChargingItem);
+					dealContractChargingItemAddresses(contractChargingItem, item.getApartments());
+				} else {
+					ContractChargingItem exist = contractChargingItemProvider.findById(item.getId());
+					contractChargingItem.setCreateUid(exist.getCreateUid());
+					contractChargingItem.setCreateTime(exist.getCreateTime());
+					contractChargingItemProvider.updateContractChargingItem(contractChargingItem);
+					map.remove(item.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, item) -> {
+				contractChargingItemProvider.deleteContractChargingItem(item);
+			});
+		}
+	}
+
+	private void dealContractChargingItemAddresses(ContractChargingItem item, List<BuildingApartmentDTO> addresses) {
+		List<ContractChargingItemAddress> existItemAddresses = contractChargingItemAddressProvider.findByItemId(item.getId());
+		Map<Long, ContractChargingItemAddress> map = new HashMap<>();
+		if(existItemAddresses != null && existItemAddresses.size() > 0) {
+			existItemAddresses.forEach(address -> {
+				map.put(address.getId(), address);
+			});
+		}
+
+		if(addresses != null && addresses.size() > 0) {
+			addresses.forEach(itemAddress -> {
+				if(itemAddress.getId() == null) {
+					ContractChargingItemAddress address = ConvertHelper.convert(itemAddress, ContractChargingItemAddress.class);
+					address.setContractChargingItemId(item.getId());
+					address.setNamespaceId(item.getNamespaceId());
+					address.setStatus(CommonStatus.ACTIVE.getCode());
+					contractChargingItemAddressProvider.createContractChargingItemAddress(address);
+				} else {
+					map.remove(itemAddress.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, itemAddress) -> {
+				itemAddress.setStatus(CommonStatus.INACTIVE.getCode());
+				contractChargingItemAddressProvider.updateContractChargingItemAddress(itemAddress);
+			});
+		}
+	}
+
+	private void dealContractAttachments(Long contractId, List<ContractAttachmentDTO> attachments) {
+		List<ContractAttachment> existAttachments = contractAttachmentProvider.listByContractId(contractId);
+		Map<Long, ContractAttachment> map = new HashMap<>();
+		if(existAttachments != null && existAttachments.size() > 0) {
+			existAttachments.forEach(attachment -> {
+				map.put(attachment.getId(), attachment);
+			});
+		}
+
+		if(attachments != null && attachments.size() > 0) {
+			attachments.forEach(attachment -> {
+				if(attachment.getId() == null) {
+					ContractAttachment contractAttachment = ConvertHelper.convert(attachment, ContractAttachment.class);
+					contractAttachment.setContractId(contractId);
+					contractAttachmentProvider.createContractAttachment(contractAttachment);
+				} else {
+					map.remove(attachment.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, attachment) -> {
+				contractAttachmentProvider.deleteContractAttachment(attachment);
+			});
+		}
 	}
 
 	@Override
 	public void updateContract(UpdateContractCommand cmd) {
+		Contract exist = checkContract(cmd.getId());
+		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		contract.setCreateTime(exist.getCreateTime());
+		contract.setCreateUid(exist.getCreateUid());
+		contractProvider.updateContract(contract);
 
+		dealContractApartments(contract, cmd.getApartments());
+		dealContractChargingItems(contract, cmd.getChargingItems());
+		dealContractAttachments(contract.getId(), cmd.getAttachments());
 	}
 
 	@Override
@@ -377,6 +537,93 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public ContractDetailDTO findContract(FindContractCommand cmd) {
-		return null;
+		Contract contract = checkContract(cmd.getId());
+		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
+		processContractApartments(dto);
+		processContractChargingItems(dto);
+		processContractAttachments(dto);
+		return dto;
+	}
+
+	private Contract checkContract(Long id) {
+		Contract contract = contractProvider.findContractById(id);
+		if(contract == null) {
+			LOGGER.error("contract is not exit! id: {}", id);
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_NOT_EXIST,
+					"contract is not exit");
+		}
+		return contract;
+	}
+
+	private void processContractApartments(ContractDetailDTO dto) {
+		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(dto.getId());
+		if(contractApartments != null && contractApartments.size() > 0) {
+			List<BuildingApartmentDTO> apartmentDtos = contractApartments.stream().map(apartment -> {
+				BuildingApartmentDTO apartmentDto = ConvertHelper.convert(apartment, BuildingApartmentDTO.class);
+				return apartmentDto;
+			}).collect(Collectors.toList());
+			dto.setApartments(apartmentDtos);
+		}
+	}
+
+	private void processContractChargingItems(ContractDetailDTO dto) {
+		List<ContractChargingItem> contractChargingItems = contractChargingItemProvider.listByContractId(dto.getId());
+		if(contractChargingItems != null && contractChargingItems.size() > 0) {
+			List<ContractChargingItemDTO> chargingItemsDto = contractChargingItems.stream().map(item -> {
+				ContractChargingItemDTO itemDto = ConvertHelper.convert(item, ContractChargingItemDTO.class);
+				processContractChargingItemAddresses(itemDto);
+				return itemDto;
+			}).collect(Collectors.toList());
+			dto.setChargingItems(chargingItemsDto);
+		}
+	}
+
+	private void processContractChargingItemAddresses(ContractChargingItemDTO dto) {
+		List<ContractChargingItemAddress> itemAddresses = contractChargingItemAddressProvider.findByItemId(dto.getId());
+		if(itemAddresses != null && itemAddresses.size() > 0) {
+			List<BuildingApartmentDTO> addressDtos = null;
+			List<Long> addressIds = new ArrayList<>();
+			itemAddresses.forEach(address -> {
+				addressIds.add(address.getAddressId());
+			});
+
+			//一把取出关联的门牌地址
+			List<Address> addresses =  addressProvider.listAddressByIds(dto.getNamespaceId(), addressIds);
+			Map<Long, Address> addressMap = new HashMap<>();
+			if(addresses != null && addresses.size() > 0) {
+				addresses.forEach(address -> {
+					addressMap.put(address.getId(), address);
+				});
+			}
+
+			itemAddresses.forEach(itemAddress -> {
+				BuildingApartmentDTO apartmentDto = new BuildingApartmentDTO();
+				apartmentDto.setId(itemAddress.getId());
+				apartmentDto.setAddressId(itemAddress.getAddressId());
+				Address address = addressMap.get(itemAddress.getAddressId());
+				if(address != null) {
+					apartmentDto.setApartmentName(address.getApartmentName());
+					apartmentDto.setBuildingName(address.getBuildingName());
+				}
+				addressDtos.add(apartmentDto);
+			});
+
+			dto.setApartments(addressDtos);
+		}
+	}
+
+	private void processContractAttachments(ContractDetailDTO dto) {
+		List<ContractAttachment> contractAttachments = contractAttachmentProvider.listByContractId(dto.getId());
+		if(contractAttachments != null && contractAttachments.size() > 0) {
+			List<ContractAttachmentDTO> dtos = contractAttachments.stream().map(attachment -> {
+				ContractAttachmentDTO attachmentDto = ConvertHelper.convert(attachment, ContractAttachmentDTO.class);
+				if(attachmentDto.getContentUri() != null) {
+					String contentUrl = contentServerService.parserUri(attachmentDto.getContentUri(), EntityType.CONTRACT.getCode(), dto.getId());
+					attachmentDto.setContentUrl(contentUrl);
+				}
+				return attachmentDto;
+			}).collect(Collectors.toList());
+			dto.setAttachments(dtos);
+		}
 	}
 }

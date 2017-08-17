@@ -2081,7 +2081,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			address.setSharedArea(cmd.getSharedArea());
 			if(cmd.getCategoryItemId() != null) {
 				address.setCategoryItemId(cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
 				if(item != null) {
 					address.setCategoryItemName(item.getItemDisplayName());
 				}
@@ -2089,7 +2089,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 			if(cmd.getSourceItemId() != null) {
 				address.setSourceItemId(cmd.getSourceItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getSourceItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
 				if(item != null) {
 					address.setSourceItemName(item.getItemDisplayName());
 				}
@@ -2109,7 +2109,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			address.setSharedArea(cmd.getSharedArea());
 			if(cmd.getCategoryItemId() != null) {
 				address.setCategoryItemId(cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
 				if(item != null) {
 					address.setCategoryItemName(item.getItemDisplayName());
 				}
@@ -2117,7 +2117,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 			if(cmd.getSourceItemId() != null) {
 				address.setSourceItemId(cmd.getSourceItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getSourceItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
 				if(item != null) {
 					address.setSourceItemName(item.getItemDisplayName());
 				}
@@ -2223,13 +2223,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				address.setChargeArea(cmd.getChargeArea());
 			}else if (cmd.getCategoryItemId() != null) {
 				address.setCategoryItemId(cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
 				if(item != null) {
 					address.setCategoryItemName(item.getItemDisplayName());
 				}
 			}else if (cmd.getSourceItemId() != null) {
 				address.setSourceItemId(cmd.getSourceItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getSourceItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
 				if(item != null) {
 					address.setSourceItemName(item.getItemDisplayName());
 				}

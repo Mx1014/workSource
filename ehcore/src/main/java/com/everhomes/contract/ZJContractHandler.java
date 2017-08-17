@@ -63,7 +63,7 @@ public class ZJContractHandler implements ContractHandler{
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         String communityName = community == null ? "" : community.getName();
 
-        ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getCategoryItemId());
+        ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCategoryItemId());
         String categoryName = item == null ? "" : item.getItemDisplayName();
         Map<String, String> params = generateParams(communityName, contractStatus, contractAttribute, categoryName, cmd.getKeywords());
         String enterprises = postToShenzhou(params, LIST_CONTRACTS, null);

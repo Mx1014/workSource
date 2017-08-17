@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * <ul>
+ *     <li>id: id</li>
  *     <li>chargingItemId: 收费项id</li>
  *     <li>chargingStandardId: 收费标准id</li>
  *     <li>billingCycle: 计费周期</li>
@@ -20,7 +21,8 @@ import java.util.List;
  * Created by ying.xiong on 2017/8/3.
  */
 public class ContractChargingItemDTO {
-
+    private Long id;
+    private Integer namespaceId;
     private Long chargingItemId;
     private Long chargingStandardId;
     private Long lateFeeStandardId;
@@ -32,6 +34,22 @@ public class ContractChargingItemDTO {
     private Long chargingExpiredTime;
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Byte getBillingCycle() {
         return billingCycle;

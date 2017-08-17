@@ -335,6 +335,7 @@ public class AddressProviderImpl implements AddressProvider {
         return context.select().from(Tables.EH_ADDRESSES)
                 .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ADDRESSES.ID.in(ids))
+                .and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                 .fetchInto(Address.class);
     }
 

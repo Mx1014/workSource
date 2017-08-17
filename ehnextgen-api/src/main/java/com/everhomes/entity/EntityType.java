@@ -62,7 +62,8 @@ public enum EntityType {
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
 	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),    
 	ORGANIZATION_FILE("EhOrganizationFiles"),
-    CHILD_PROJECT("child_project");
+    CHILD_PROJECT("child_project"),
+    CONTRACT(EhContracts.class.getSimpleName());
 
     private String code;
     

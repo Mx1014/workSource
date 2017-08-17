@@ -2,6 +2,7 @@
 package com.everhomes.contract;
 
 import com.everhomes.rest.contract.*;
+import com.everhomes.search.ContractSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,9 @@ public class ContractController extends ControllerBase {
 	
 	@Autowired
 	private ContractService contractService;
+
+	@Autowired
+	private ContractSearcher contractSearcher;
 	
 	/**
 	 * <p>1.合同列表</p>
@@ -35,6 +39,16 @@ public class ContractController extends ControllerBase {
 	@RestReturn(ListContractsResponse.class)
 	public RestResponse listContractsByOraganizationId(ListContractsByOraganizationIdCommand cmd){
 		return new RestResponse(contractService.listContractsByOraganizationId(cmd));
+	}
+
+	/**
+	 * <p>搜索合同</p>
+	 * <b>URL: /contract/searchContracts</b>
+	 */
+	@RequestMapping("searchContracts")
+	@RestReturn(ListContractsResponse.class)
+	public RestResponse searchContracts(SearchContractCommand cmd){
+		return new RestResponse(contractSearcher.queryContracts(cmd));
 	}
 
 	/**

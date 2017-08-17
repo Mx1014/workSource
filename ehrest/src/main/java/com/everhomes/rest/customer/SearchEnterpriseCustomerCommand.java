@@ -4,8 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>keyword: 关键字：手机号或地址</li>
- *     <li>enterpriseName: 客户名称</li>
+ *     <li>keyword: 关键字：手机号或地址或客户名称</li>
  *     <li>customerCategoryId: 客户类型id</li>
  *     <li>levelId: 客户级别id</li>
  *     <li>communityId: 园区id</li>
@@ -17,8 +16,6 @@ import com.everhomes.util.StringHelper;
 public class SearchEnterpriseCustomerCommand {
 
     private String keyword;
-
-    private String enterpriseName;
 
     private Long customerCategoryId;
 
@@ -44,14 +41,6 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setCustomerCategoryId(Long customerCategoryId) {
         this.customerCategoryId = customerCategoryId;
-    }
-
-    public String getEnterpriseName() {
-        return enterpriseName;
-    }
-
-    public void setEnterpriseName(String enterpriseName) {
-        this.enterpriseName = enterpriseName;
     }
 
     public String getKeyword() {
