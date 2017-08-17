@@ -2686,6 +2686,8 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 		}
+		sceneList.addAll(residential_sceneList);
+
 		// 处于某个公司对应的场景
 		addOrganizationSceneToList(userId, namespaceId, commercial_sceneList);
 		// 当用户既没有选择园区时
@@ -2700,6 +2702,8 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 		}
+
+		sceneList.addAll(commercial_sceneList);
 
 		// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
 //		if(sceneList.size() == 0) {
