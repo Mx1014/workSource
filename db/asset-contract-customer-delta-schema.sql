@@ -233,6 +233,7 @@ CREATE TABLE `eh_enterprise_customers` (
 
 
 
+ALTER TABLE `eh_contracts` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 ALTER TABLE `eh_contracts` ADD COLUMN `contract_start_date` DATETIME COMMENT '合同开始日期';
 ALTER TABLE `eh_contracts` ADD COLUMN `name` VARCHAR(128) COMMENT '合同名称';
 ALTER TABLE `eh_contracts` ADD COLUMN `contract_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0:新签合同、1:续约合同、2:变更合同、3:退约合同';
@@ -318,7 +319,7 @@ CREATE TABLE `eh_contract_charging_items` (
   `charging_amount_value` DECIMAL(10,2) COMMENT '计费金额参数',
   `charging_start_time` DATETIME,
   `charging_expired_time` DATETIME,
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active', 
   `create_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -334,7 +335,7 @@ CREATE TABLE `eh_contract_charging_item_addresses` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `contract_charging_item_id` BIGINT NOT NULL COMMENT 'id of eh_contract_charging_items',
   `address_id` BIGINT,
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active', 
   `create_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
