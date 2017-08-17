@@ -287,6 +287,7 @@ ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_reason` VARCHAR(256) COMMENT
 -- 如果退约合同只是改状态而不是一个新合同时:
 ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_time` DATETIME COMMENT '为退约合同的时候';
 ALTER TABLE `eh_contracts` ADD COLUMN `denunciation_uid` BIGINT COMMENT '为退约合同的时候';
+ALTER TABLE `eh_contracts` ADD COLUMN `remark` TEXT COMMENT '备注';
  
  
 -- 合同-资产表： 

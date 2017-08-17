@@ -55,6 +55,7 @@ import java.util.List;
  *     <li>chargingItems: 合同计价条款 参考{@link com.everhomes.rest.contract.ContractChargingItemDTO}</li>
  *     <li>attachments: 合同附件 参考{@link com.everhomes.rest.contract.ContractAttachmentDTO}</li>
  *     <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
+ *     <li>remark: 备注</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -102,6 +103,8 @@ public class ContractDetailDTO {
     private String denunciationUserName;
     private Timestamp denunciationTime;
     private String denunciationReason;
+    private String remark;
+
     private Byte status;
 
     public Byte getStatus() {
@@ -120,6 +123,14 @@ public class ContractDetailDTO {
 
     @ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 
     public List<ContractAttachmentDTO> getAttachments() {
         return attachments;
