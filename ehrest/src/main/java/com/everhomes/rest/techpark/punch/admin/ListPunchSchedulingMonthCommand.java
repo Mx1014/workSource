@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -28,6 +29,7 @@ public class ListPunchSchedulingMonthCommand {
 	private Long targetId; 
 	private Long punchOriganizationId;
 	private Long queryTime; 
+	@ItemType(PunchSchedulingEmployeeDTO.class)
 	private List<PunchSchedulingEmployeeDTO> employees;
 	@Override
 	public String toString() {
