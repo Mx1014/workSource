@@ -70,8 +70,6 @@ public class BarcodeServiceImpl implements BarcodeService {
             if(result != null){
                 CheckForBizResponse response = (CheckForBizResponse)StringHelper.fromJsonString(result, CheckForBizResponse.class);
                 if(response != null &&  response.getBody() != null && response.getBody().getUrl() != null){
-                    //因客户端要求，电商的链接在前面加上路由信息“zl://browser/i/”   add by yanjun 20170816
-                    response.getBody().setUrl("zl://browser/i/" + response.getBody().getUrl());
                     return  response.getBody();
                 }
             }
