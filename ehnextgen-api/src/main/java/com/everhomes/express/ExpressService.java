@@ -47,6 +47,8 @@ import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
 import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
+import com.everhomes.rest.express.PrePayExpressOrderCommand;
+import com.everhomes.rest.express.PrePayExpressOrderResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
 import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
@@ -146,5 +148,8 @@ public interface ExpressService {
 	GetExpressInsuredDocumentsResponse getExpressInsuredDocuments(GetExpressInsuredDocumentsCommand cmd);
 
 	ListExpressOrderStatusResponse listExpressOrderStatus();
+
+
+	public PrePayExpressOrderResponse prePayExpressOrder(PrePayExpressOrderCommand cmd);
 
 }

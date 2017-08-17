@@ -6,7 +6,9 @@ import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -30,6 +32,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.parking.Utils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -102,6 +105,8 @@ import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
 import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
+import com.everhomes.rest.express.PrePayExpressOrderCommand;
+import com.everhomes.rest.express.PrePayExpressOrderResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
 import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
@@ -1148,7 +1153,9 @@ public class ExpressServiceImpl implements ExpressService {
 			dto.setExpressCompanyId(cmd.getExpressCompanyId());
 			if(cmd.getExpressCompanyId() == null){
 				//如果没有传快递公司id，那么需要通过顶层r.getId()和园区所有快递公司的parentId做对比，查出快递公司在园区的id
-				dto.setExpressCompanyId(getExpressCompanyId(expressCompany, r));
+				ExpressCompany topcompany = getExpressCompany(expressCompany, r);
+				dto.setExpressCompanyId(topcompany.getId());
+				dto.setExpressCompany(topcompany.getName());
 			}
 			return dto;
 		}).collect(Collectors.toList()));
@@ -1157,11 +1164,11 @@ public class ExpressServiceImpl implements ExpressService {
 	 * expressCompanies:当前园区下的快递公司
 	 * business：配置顶层快递公司的业务对象
 	 */
-	public Long getExpressCompanyId(List<ExpressCompany> expressCompanies,ExpressCompanyBusiness business){
+	public ExpressCompany getExpressCompany(List<ExpressCompany> expressCompanies,ExpressCompanyBusiness business){
 		for (ExpressCompany expressCompany : expressCompanies) {
 			ExpressCompany company = findTopExpressCompany(expressCompany.getId());
 			if(company.getId().longValue() == business.getExpressCompanyId().longValue()){
-				return expressCompany.getId();
+				return expressCompany;
 			}
 		}
 		return null;
@@ -1244,6 +1251,37 @@ public class ExpressServiceImpl implements ExpressService {
 			return dto;
 		}).collect(Collectors.toList());
 		return new ListExpressOrderStatusResponse(list);
+	}
+
+	@Override
+	public PrePayExpressOrderResponse prePayExpressOrder(PrePayExpressOrderCommand cmd) {
+		Map<String,Map<String,Object>> params = generatePrePayExpressOrderParams(cmd);
+		String result = Utils.post(configProvider.getValue(ExpressServiceErrorCode.PAYSERVER_URL, "http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record"), JSONObject.parseObject(StringHelper.toJsonString(params)));
+		return null;
+	}
+
+	private Map<String,Map<String,Object>> generatePrePayExpressOrderParams(PrePayExpressOrderCommand cmd) {
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressOrder order = expressOrderProvider.findExpressOrderById(cmd.getId());
+		if(order == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown order id = "+cmd.getId());
+		}
+		CommonOrderDTO dto = payExpressOrder(ConvertHelper.convert(cmd, PayExpressOrderCommand.class));
+		Map<String,Map<String,Object>> bodyparams = new HashMap<String,Map<String,Object>>();
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("realm","Web_Guomao");
+		params.put("orderType",dto.getOrderType());
+		params.put("onlinePayStyleNo","wechat");
+		params.put("orderNo",dto.getOrderNo());
+		params.put("orderAmount",dto.getTotalFee().floatValue());
+		params.put("subject",dto.getSubject());
+		params.put("body",dto.getBody());
+		params.put("appKey",dto.getAppKey());
+		params.put("timestamp",dto.getTimestamp());
+		params.put("randomNum",dto.getRandomNum());
+		params.put("signature",dto.getSignature());
+		bodyparams.put("body", params);
+		return bodyparams;
 	}
 
 }

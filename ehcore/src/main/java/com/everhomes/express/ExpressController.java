@@ -54,6 +54,8 @@ import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
 import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
+import com.everhomes.rest.express.PrePayExpressOrderCommand;
+import com.everhomes.rest.express.PrePayExpressOrderResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
 import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
@@ -396,6 +398,16 @@ public class ExpressController extends ControllerBase {
 	@RestReturn(ListExpressOrderStatusResponse.class)
 	public RestResponse listExpressOrderStatus(){
 		return new RestResponse(expressService.listExpressOrderStatus());
+	}
+	
+	/**
+	 * <p>33.国贸支付，直接调用我方payserver预支付</p>
+	 * <b>URL: /express/prePayExpressOrder</b>
+	 */
+	@RequestMapping("prePayExpressOrder")
+	@RestReturn(PrePayExpressOrderResponse.class)
+	public RestResponse prePayExpressOrder(PrePayExpressOrderCommand cmd){
+		return new RestResponse(expressService.prePayExpressOrder(cmd));
 	}
 	
 }
