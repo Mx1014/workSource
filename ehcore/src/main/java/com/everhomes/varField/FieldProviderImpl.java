@@ -128,10 +128,11 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public ScopeFieldItem findScopeFieldItemByFieldItemId(Long itemId) {
+    public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long itemId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         ScopeFieldItem item = context.select().from(Tables.EH_VAR_FIELD_ITEM_SCOPES)
                 .where(Tables.EH_VAR_FIELD_ITEM_SCOPES.ITEM_ID.eq(itemId))
+                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
                 .fetchAny().map((record)-> {
             return ConvertHelper.convert(record, ScopeFieldItem.class);
         });
