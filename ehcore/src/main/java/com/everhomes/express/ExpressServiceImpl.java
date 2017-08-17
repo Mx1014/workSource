@@ -481,7 +481,14 @@ public class ExpressServiceImpl implements ExpressService {
 			
 			//调用统一处理订单接口，返回统一订单格式
 			CommonOrderCommand orderCmd = new CommonOrderCommand();
-			orderCmd.setBody(expressOrder.getSendName());
+			String body = "";
+			if(expressOrder.getSendName()!=null){
+				body = expressOrder.getSendName();
+			}
+			else if(expressOrder.getReceiveName()!=null){
+				body = expressOrder.getReceiveName();
+			}
+			orderCmd.setBody(body);
 			orderCmd.setOrderNo(expressOrder.getId().toString());
 			orderCmd.setOrderType(OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode());
 			orderCmd.setSubject("快递订单简要描述");
