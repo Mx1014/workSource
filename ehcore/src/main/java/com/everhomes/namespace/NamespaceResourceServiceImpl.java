@@ -7,6 +7,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import com.everhomes.launchpad.LaunchPadItem;
+import com.everhomes.launchpad.LaunchPadProvider;
+import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.namespace.*;
+import org.elasticsearch.common.jackson.dataformat.yaml.snakeyaml.events.Event;
 import org.elasticsearch.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +25,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.namespace.GetNamespaceDetailCommand;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.namespace.NamespaceCommunityType;
-import com.everhomes.rest.namespace.NamespaceDetailDTO;
-import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -45,6 +44,9 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+
+	@Autowired
+	private LaunchPadProvider launchPadProvider;
 	
 	@Override
     public ListCommunityByNamespaceCommandResponse listCommunityByNamespace(ListCommunityByNamespaceCommand cmd) {
@@ -96,13 +98,45 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	
 	@Override
 	public NamespaceDetailDTO getNamespaceDetail(GetNamespaceDetailCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    NamespaceDetailDTO detailDto = null;
 	    
 	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(cmd.getNamespaceId());
         if(namespaceDetail != null) {
             detailDto = ConvertHelper.convert(namespaceDetail, NamespaceDetailDTO.class);
         }
-        
-        return detailDto;
+
+		//需要蒙版的信息
+		String sceneType_pm_admin = "pm_admin";
+		String itemLocation = "/home";
+		List<LaunchPadItem> items_pm_admin = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType_pm_admin, itemLocation, null, null, 0L, null);
+		List masks_pm = getMasksFromItemInfo(items_pm_admin);
+		if(masks_pm != null){
+			detailDto.setPmMasks(masks_pm);
+		}
+
+		String sceneType_park_tourist = "park_tourist";
+		List<LaunchPadItem> items_park_tourist = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType_park_tourist, itemLocation, null, null, 0L, null);
+		List masks_park = getMasksFromItemInfo(items_park_tourist);
+		if(masks_park != null){
+			detailDto.setParkMasks(masks_park);
+		}
+
+		return detailDto;
+	}
+
+	//从item信息中获得蒙版信息
+	private List<MaskDTO> getMasksFromItemInfo(List<LaunchPadItem> items){
+		if(items.size() != 0){
+			List masks = items.stream().map(r->{
+				MaskDTO pmMask = new MaskDTO();
+				pmMask.setId(r.getId());
+				pmMask.setIconName(r.getItemName());
+				pmMask.setTips("快速切换至园区主页");
+				return pmMask;
+			}).collect(Collectors.toList());
+			return masks;
+		}
+		return null;
 	}
 }
