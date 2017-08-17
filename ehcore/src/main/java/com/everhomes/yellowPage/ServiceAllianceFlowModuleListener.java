@@ -213,7 +213,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setId(flowCase.getId());
 		request.setCreatorUid(UserContext.current().getUser().getId());
 		request.setTemplateType("flowCase");
-	//	serviceAllianceRequestInfoSearcher.feedDoc(request);
+		serviceAllianceRequestInfoSearcher.feedDoc(request);
 
 		//推送消息
 		//给服务公司留的手机号推消息
