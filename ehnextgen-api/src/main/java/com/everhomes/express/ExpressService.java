@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.util.Map;
+
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.express.AddExpressUserCommand;
 import com.everhomes.rest.express.CancelExpressOrderCommand;
@@ -48,7 +50,6 @@ import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrePayExpressOrderCommand;
-import com.everhomes.rest.express.PrePayExpressOrderResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
 import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
@@ -149,7 +150,6 @@ public interface ExpressService {
 
 	ListExpressOrderStatusResponse listExpressOrderStatus();
 
-
-	public PrePayExpressOrderResponse prePayExpressOrder(PrePayExpressOrderCommand cmd);
+	public Map<String,String> prePayExpressOrder(PrePayExpressOrderCommand cmd);
 
 }

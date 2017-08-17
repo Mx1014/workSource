@@ -2,7 +2,6 @@
 package com.everhomes.express;
 
 import java.math.BigDecimal;
-import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,6 +26,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.express.guomao.pay.PayResponse;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
@@ -471,12 +470,12 @@ public class ExpressServiceImpl implements ExpressService {
 				expressOrder.setPaidFlag(TrueOrFalseFlag.TRUE.getCode());
 				expressOrderProvider.updateExpressOrder(expressOrder);
 			}
-			//TODO 这里是费代码 by dengs.-------------------正式环境需要注释掉-------------
-			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
-			ExpressHandler handler = getExpressHandler(expressCompany.getId());
-			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
-			handler.updateOrderStatus(expressOrder, expressCompany);
-			expressOrderProvider.updateExpressOrder(expressOrder);
+//			//TODO 这里是费代码 by dengs.-------------------正式环境需要注释掉-------------
+//			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
+//			ExpressHandler handler = getExpressHandler(expressCompany.getId());
+//			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
+//			handler.updateOrderStatus(expressOrder, expressCompany);
+//			expressOrderProvider.updateExpressOrder(expressOrder);
 			
 			createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
 			
@@ -511,8 +510,13 @@ public class ExpressServiceImpl implements ExpressService {
 			if (!expressOrder.getPaySummary().equals(new BigDecimal(cmd.getPayAmount()))) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
 			}
+			//modify by dengs,20170817,支付需要干什么，各个快递公司流程不一样
+			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
+			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
+			handler.updateOrderStatus(expressOrder, expressCompany);
 			expressOrderProvider.updateExpressOrder(expressOrder);
+			
 			ExpressOwner owner = new ExpressOwner(expressOrder.getNamespaceId(), ExpressOwnerType.fromCode(expressOrder.getOwnerType()), expressOrder.getOwnerId(), expressOrder.getCreatorUid());
 			createExpressOrderLog(owner, ExpressActionEnum.PAID, expressOrder, "pay success: " + StringHelper.toJsonString(cmd));
 			return null;
@@ -1254,10 +1258,14 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 
 	@Override
-	public PrePayExpressOrderResponse prePayExpressOrder(PrePayExpressOrderCommand cmd) {
+	public Map<String,String> prePayExpressOrder(PrePayExpressOrderCommand cmd) {
 		Map<String,Map<String,Object>> params = generatePrePayExpressOrderParams(cmd);
 		String result = Utils.post(configProvider.getValue(ExpressServiceErrorCode.PAYSERVER_URL, "http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record"), JSONObject.parseObject(StringHelper.toJsonString(params)));
-		return null;
+		PayResponse<Map<String,String>> payresponse = JSONObject.parseObject(result, new TypeReference<PayResponse<Map<String,String>>>(){});
+		if(payresponse.getSuccess()){
+			return payresponse.getData();
+		}
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "prePayFailed, payresponse = "+result);
 	}
 
 	private Map<String,Map<String,Object>> generatePrePayExpressOrderParams(PrePayExpressOrderCommand cmd) {

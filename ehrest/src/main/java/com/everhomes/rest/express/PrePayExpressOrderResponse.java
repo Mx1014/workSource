@@ -1,58 +1,88 @@
 // @formatter:off
 package com.everhomes.rest.express;
 
-import java.util.Map;
-
 import com.everhomes.util.StringHelper;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * <ul>参数:
- * <li>ownerType: 所属者类型，参考{@link com.everhomes.rest.express.ExpressOwnerType}</li>
- * <li>ownerId: 所属者id</li>
- * <li>id: 快递id</li>
+ * <li>appid: appid</li>
+ * <li>partnerid: 商户id</li>
+ * <li>prepayid: 预支付id</li>
+ * <li>package: package</li>
+ * <li>noncestr: 随机数</li>
+ * <li>timestamp: 时间搓</li>
+ * <li>sign: 签名</li>
  * </ul>
  */
 public class PrePayExpressOrderResponse {
-	private Integer errorCode;
-	private Byte success;
-	private String content;
-	private Map<String,String> data;
-
-	public Integer getErrorCode() {
-		return errorCode;
+	private String appid;
+	private String partnerid;
+	private String prepayid;
+	@JsonProperty("package")
+	private String packagetype;
+	private String noncestr;
+	private String timestamp;
+	private String sign;
+	
+	public String getAppid() {
+		return appid;
 	}
 
-	public void setErrorCode(Integer errorCode) {
-		this.errorCode = errorCode;
+	public void setAppid(String appid) {
+		this.appid = appid;
 	}
 
-	public Byte getSuccess() {
-		return success;
+	public String getPartnerid() {
+		return partnerid;
 	}
 
-	public void setSuccess(Byte success) {
-		this.success = success;
+	public void setPartnerid(String partnerid) {
+		this.partnerid = partnerid;
 	}
 
-	public String getContent() {
-		return content;
+	public String getPrepayid() {
+		return prepayid;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setPrepayid(String prepayid) {
+		this.prepayid = prepayid;
 	}
 
-	public Map<String, String> getData() {
-		return data;
+	public String getPackagetype() {
+		return packagetype;
 	}
 
-	public void setData(Map<String, String> data) {
-		this.data = data;
+	public void setPackagetype(String packagetype) {
+		this.packagetype = packagetype;
+	}
+
+	public String getNoncestr() {
+		return noncestr;
+	}
+
+	public void setNoncestr(String noncestr) {
+		this.noncestr = noncestr;
+	}
+
+	public String getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public String getSign() {
+		return sign;
+	}
+
+	public void setSign(String sign) {
+		this.sign = sign;
 	}
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
 }

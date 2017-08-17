@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,7 +57,6 @@ import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrePayExpressOrderCommand;
-import com.everhomes.rest.express.PrePayExpressOrderResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
 import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
@@ -405,7 +406,7 @@ public class ExpressController extends ControllerBase {
 	 * <b>URL: /express/prePayExpressOrder</b>
 	 */
 	@RequestMapping("prePayExpressOrder")
-	@RestReturn(PrePayExpressOrderResponse.class)
+	@RestReturn(Map.class)
 	public RestResponse prePayExpressOrder(PrePayExpressOrderCommand cmd){
 		return new RestResponse(expressService.prePayExpressOrder(cmd));
 	}

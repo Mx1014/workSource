@@ -134,12 +134,15 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 
 	@Override
 	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
-		Map<String, String> params = generateUpdateOrderParams(expressOrder, expressCompany);
-		String jsonResult = request(params, expressCompany.getOrderUrl());
-		GuoMaoEMSResponseEntity<List<String>> response = JSONObject.parseObject(jsonResult,new TypeReference<GuoMaoEMSResponseEntity<List<String>>>(){});
-		if(!response.isSuccess()){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"updateOrderStatus failed, response = "+jsonResult);
+		//国贸EMS线下支付，如果是快递是取消状态，才通知国贸EMS
+		if(ExpressOrderStatus.fromCode(expressOrder.getStatus())==ExpressOrderStatus.CANCELLED){
+			Map<String, String> params = generateUpdateOrderParams(expressOrder, expressCompany);
+			String jsonResult = request(params, expressCompany.getOrderUrl());
+			GuoMaoEMSResponseEntity<List<String>> response = JSONObject.parseObject(jsonResult,new TypeReference<GuoMaoEMSResponseEntity<List<String>>>(){});
+			if(!response.isSuccess()){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"updateOrderStatus failed, response = "+jsonResult);
+			}
 		}
 	}
 	
