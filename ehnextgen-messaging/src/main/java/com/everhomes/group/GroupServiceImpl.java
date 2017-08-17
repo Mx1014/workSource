@@ -606,10 +606,10 @@ public class GroupServiceImpl implements GroupService {
                     dto.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
 
                 // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
-                if(dto.getMemberCount() == 0){
-                    long count = getOrganizationMemberCount(organization.getId());
-                    dto.setMemberCount(count);
-                }
+                //if(dto.getMemberCount() == 0){
+                long count = getOrganizationMemberCount(organization.getId());
+                dto.setMemberCount(count);
+                //}
 
                 dto.setOrgId(organization.getId());
             }
@@ -752,10 +752,10 @@ public class GroupServiceImpl implements GroupService {
                         }
 
                         // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
-                        if(dto.getMemberCount() == 0){
-                            long count = getOrganizationMemberCount(org.getId());
-                            dto.setMemberCount(count);
-                        }
+                        //if(dto.getMemberCount() == 0){
+                        long count = getOrganizationMemberCount(org.getId());
+                        dto.setMemberCount(count);
+                        //}
 
                         dto.setOrgId(org.getId());
                         groupDtoList.add(dto);
@@ -875,15 +875,31 @@ public class GroupServiceImpl implements GroupService {
         ListMemberInStatusCommand cmd = new ListMemberInStatusCommand();
         cmd.setGroupId(groupId);
         cmd.setStatus(GroupMemberStatus.ACTIVE.getCode());
-        cmd.setPageSize(5);
+        cmd.setPageSize(10);
         ListMemberCommandResponse commandResponse = this.listMembersInStatus(cmd);
         if(commandResponse.getMembers() != null && commandResponse.getMembers().size() > 0){
             String  alias = "";
+            int count = 0;
             for(int i = 0; i< commandResponse.getMembers().size(); i++){
-                alias += commandResponse.getMembers().get(i).getMemberNickName();
+                String nickName = commandResponse.getMembers().get(i).getMemberNickName();
+
+                //居然会有名称为null的，而且还要返回5个  add by yanjun 20170816
+                if(nickName == null || nickName.isEmpty()){
+                    continue;
+                }
+                count++;
+                if(count > 5){
+                    break;
+                }
+
+                alias += nickName;
                 alias += "、";
             }
-           return alias.substring(0, alias.length()-1);
+
+            if(alias.length() > 0){
+                return alias.substring(0, alias.length()-1);
+            }
+
         }
         return "";
     }

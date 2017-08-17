@@ -3333,68 +3333,54 @@ public class UserServiceImpl implements UserService {
 			response.setLaunchPadItemDtos(itemDtos);
 			response.setShopDTOs(shopDtos);
 
-			SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.ACTIVITY.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.ACTIVITY.getCode());
-			}
+			//活动
+			SearchTypes searchType  = getSearchTypes(namespaceId, SearchContentType.ACTIVITY.getCode());
 			if(searchType != null) {
-				if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
-						&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
-					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
+				SearchContentsBySceneReponse res = forumService.searchContents(cmd, SearchContentType.ACTIVITY);
+				if(res != null && res.getDtos() != null) {
+					response.getDtos().addAll(res.getDtos());
 				}
 			}
 
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.POLL.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.POLL.getCode());
-			}
+			//投票
+			searchType  = getSearchTypes(namespaceId, SearchContentType.POLL.getCode());
 			if(searchType != null) {
-				if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
-						&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
-					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.POLL).getDtos());	
-				}
-			}
-			
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.TOPIC.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.TOPIC.getCode());
-			}
-			if(searchType != null) {
-				if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
-						&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
-					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
+				SearchContentsBySceneReponse res = forumService.searchContents(cmd, SearchContentType.POLL);
+				if(res != null && res != null) {
+					response.getDtos().addAll(res.getDtos());
 				}
 			}
 
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.NEWS.getCode());
-			}
+			//话题
+			searchType  = getSearchTypes(namespaceId, SearchContentType.TOPIC.getCode());
 			if(searchType != null) {
-				if(newsService.searchNewsByScene(cmd) != null 
-						&& newsService.searchNewsByScene(cmd).getDtos() != null) {
-					response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+				SearchContentsBySceneReponse res = forumService.searchContents(cmd, SearchContentType.TOPIC);
+				if(res != null
+						&& res.getDtos() != null) {
+					response.getDtos().addAll(res.getDtos());
+				}
+			}
+
+			//新闻
+			searchType  = getSearchTypes(namespaceId, SearchContentType.NEWS.getCode());
+			if(searchType != null) {
+				SearchContentsBySceneReponse res = newsService.searchNewsByScene(cmd);
+				if(res != null && res.getDtos() != null) {
+					response.getDtos().addAll(res.getDtos());
 				}
 			}
 			
 			//查询应用 add by yanjun 20170419
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.LAUNCHPADITEM.getCode());
-			}
+			searchType  = getSearchTypes(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
 			if(searchType != null) {
 				 SearchContentsBySceneReponse tempResp = launchPadService.searchLaunchPadItemByScene(cmd);
-				if( tempResp != null 
-						&& tempResp.getLaunchPadItemDtos() != null) {
+				if( tempResp != null  && tempResp.getLaunchPadItemDtos() != null) {
 					response.getLaunchPadItemDtos().addAll(tempResp.getLaunchPadItemDtos());
 				}
 			}
 			
 			//查询电商店铺 add by yanjun 20170419
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.SHOP.getCode());
-			}
+			searchType  = getSearchTypes(namespaceId, SearchContentType.SHOP.getCode());
 			if(searchType != null) {
 				SearchContentsBySceneReponse tempResp = businessService.searchShops(cmd);
 				if(tempResp != null 
@@ -3403,7 +3389,6 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			
-
 			break;
 
 		default:
@@ -3417,6 +3402,16 @@ public class UserServiceImpl implements UserService {
 					userId, namespaceId, (endTime - startTime), cmd);
 		}
 		return response;
+	}
+
+	private SearchTypes getSearchTypes(Integer namespaceId, String searchContentType){
+		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, searchContentType);
+		//找不到就找0域空间的
+		if(searchType == null){
+			searchType = userActivityProvider.findByContentAndNamespaceId(0, searchContentType);
+		}
+
+		return searchType;
 	}
 
 	@Override

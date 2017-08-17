@@ -74,7 +74,7 @@ INNER JOIN (
 		d.id = m.detail_id
 	AND m.`status` = '3' 
 ) AS t1 ON t1.detail_id = md.id
-SET md.target_id = t1.target_id
+SET md.target_id = t1.target_id, md.target_type = t1.target_type;
 
 -- 同步user_organization脚本
 DELETE
