@@ -64,3 +64,6 @@ update eh_groups set namespace_id = 999992 where id =  1021332 and namespace_id 
 update eh_groups set namespace_id = 999992 where id =  1041837 and namespace_id =   0 ;
 update eh_groups set namespace_id = 999975 where id =  1041838 and namespace_id =   0 ;
 update eh_groups set namespace_id = 999992 where id =  1041989 and namespace_id =   0 ;
+
+-- 更新数据，老数据将企业群设置为公有圈，现将其为私有。 add by yanjun 20170817
+UPDATE  eh_groups set private_flag = 1 where discriminator = 'enterprise';
