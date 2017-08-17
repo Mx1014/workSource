@@ -71,6 +71,7 @@ UPDATE  eh_groups set private_flag = 1 where discriminator = 'enterprise';
 
 
 -- 黑名单 add by sfyan 20170817
+delete from `eh_acl_privileges` where id in (10079, 10090);
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) values('30600','黑名单管理','30000','/30000/30600','1','2','2','0',now());
 set @service_module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), 999983, 30600, 2);
