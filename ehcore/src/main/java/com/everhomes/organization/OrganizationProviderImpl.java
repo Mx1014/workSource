@@ -40,6 +40,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -5061,5 +5062,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
                 .fetchInto(Long.class);
     }
+
+	@Override
+	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
+			CrossShardListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+		if(null != organizationId)
+			step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
+		if (null != locator) {
+			step.and(Tables.EH_ORGANIZATIONS.ID.gt(locator.getAnchor()));
+		}
+
+		step.orderBy(Tables.EH_ORGANIZATIONS.ID.asc());
+		if (null != pageSize) {
+			step.limit(pageSize);
+		}
+		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+	}
 	
 }

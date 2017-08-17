@@ -12,6 +12,7 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
 import com.everhomes.userOrganization.UserOrganizations;
+
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -444,5 +445,7 @@ public interface OrganizationProvider {
 	 * 查询非离职状态下所有员工的 detailId
 	 * added by R, 20170719
 	 */
-	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId);
+	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId); 
+	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
+			CrossShardListingLocator locator, Integer pageSize);
 }

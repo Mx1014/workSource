@@ -6631,8 +6631,22 @@ public class PunchServiceImpl implements PunchService {
 			}).collect(Collectors.toList()));
 
         //  获取所有批次
-        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.PUNCHGROUP.getCode(), cmd.getOwnerId());
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(0L);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		   
+        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.PUNCHGROUP.getCode(), cmd.getOwnerId(),locator,pageSize + 1 );
         
+        if (null == organizations)
+			return response;
+		Long nextPageAnchor = null;
+		if (organizations != null && organizations.size() > pageSize) {
+			organizations.remove(organizations.size() - 1);
+			nextPageAnchor = organizations.get(organizations.size() - 1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
         List<PunchGroupDTO> punchGroups = organizations.stream().map(r -> {
         	PunchGroupDTO dto = getPunchGroupDTOByOrg(r);
             return dto;
