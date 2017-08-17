@@ -640,6 +640,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("createBill")
     @RestReturn(value = String.class)
     public RestResponse createBill(CreateBillCommand cmd) {
+        assetService.createBill(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -730,6 +731,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("OneKeyNotice")
     @RestReturn(value = String.class)
     public RestResponse OneKeyNotice(OneKeyNoticeCommand cmd) {
+        assetService.OneKeyNotice(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

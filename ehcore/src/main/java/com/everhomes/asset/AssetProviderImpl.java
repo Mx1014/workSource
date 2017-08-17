@@ -33,10 +33,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -712,5 +709,12 @@ public class AssetProviderImpl implements AssetProvider {
         response.setDatestr(dateStr);
         response.setShowBillDetailForClientDTOList(dtos);
         return response;
+    }
+
+    @Override
+    public void creatPropertyBill(Long addressId, List<BillGroupDTO> billGroupDTOList, Date dateStr, Byte isSettled, String noticeTel, String ownerId, String ownerType, String targetName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //生成已出账单
+
     }
 }

@@ -38,6 +38,7 @@ CREATE TABLE `eh_payment_bills` (
   `noticeTel` varchar(32) DEFAULT '' COMMENT '催缴电话',
   `status` tinyint(4) DEFAULT '0' COMMENT '0: upfinished; 1: paid off',
   `notice_times` int(11) DEFAULT '0' COMMENT 'times bill owner has been called for dued payments',
+  `switch` tinyint(4) DEFAULT '0' COMMENT '0:未出账单；1：已出账单；3：其他作用状态',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='账单表';
 
@@ -87,6 +88,7 @@ CREATE TABLE `eh_payment_bill_items` (
   `namespace_id` int(20) NOT NULL DEFAULT '0',
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
   `owner_type` varchar(64) NOT NULL,
+  `bill_group_id` bigint(20) NOT NULL,
   `charging_items_id` bigint(20) NOT NULL DEFAULT '0',
   `bill_id` bigint(20) NOT NULL DEFAULT '0',
   `amount_receivable` decimal(10,2) NOT NULL DEFAULT '0.00',
@@ -94,6 +96,7 @@ CREATE TABLE `eh_payment_bill_items` (
   `amount_owed` decimal(10,2) NOT NULL DEFAULT '0.00',
   `target_type` varchar(32) NOT NULL,
   `target_id` bigint(20) NOT NULL,
+  `targetName` varchar(32) DEFAULT NULL COMMENT '客户名称，客户没有在系统中时填写',
   `addressId` bigint(20) DEFAULT NULL,
   `date_str` varchar(10) DEFAULT NULL COMMENT '账期',
   `creator_uid` bigint(20) DEFAULT NULL,
@@ -193,6 +196,7 @@ CREATE TABLE `eh_payment_exemption_items` (
   `bill_group_id` varchar(255) NOT NULL,
   `target_type` varchar(255) DEFAULT NULL,
   `target_id` bigint(20) DEFAULT NULL,
+  `targetName` varchar(255) DEFAULT NULL,
   `remarks` varchar(255) DEFAULT NULL,
   `amount` decimal(10,2) NOT NULL DEFAULT '0.00',
   `creator_uid` bigint(20) DEFAULT NULL,

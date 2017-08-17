@@ -5,6 +5,7 @@ import com.everhomes.rest.asset.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -54,4 +55,6 @@ public interface AssetProvider {
     ShowCreateBillDTO showCreateBill(Long billGroupId);
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr);
+
+    void creatPropertyBill(Long addressId, List<BillGroupDTO> billGroupDTOList, Date dateStr, Byte isSettled, String noticeTel, String ownerId, String ownerType, String targetName);
 }

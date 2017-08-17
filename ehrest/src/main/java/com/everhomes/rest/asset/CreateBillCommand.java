@@ -13,25 +13,25 @@ import java.util.List;
  * <li>ownerType:所属者type</li>
  * <li>ownerId:所属者id</li>
  * <li>dateStr:账期</li>
- * <li>contractNO:合同号</li>
  * <li>addressId:楼栋门牌id</li>
  * <li>targetType:客户类别</li>
  * <li>targetId:客户id</li>
  * <li>noticeTel:催缴电话</li>
  * <li>targetName:客户名称</li>
  * <li>billGroupDTOList:账单组列表，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ * <li>isSettled:是否是已出账单,1:新增已出账单;0:新增未出账单</li>
  *</ul>
  */
 public class CreateBillCommand {
     private String ownerType;
     private String ownerId;
     private Date dateStr;
-    private String contractNO;
     private Long addressId;
     private String noticeTel;
     private String targetName;
     @ItemType(BillGroupDTO.class)
     private List<BillGroupDTO> billGroupDTOList;
+    private Byte isSettled;
 
     public CreateBillCommand() {
     }
@@ -43,6 +43,14 @@ public class CreateBillCommand {
 
     public String getOwnerType() {
         return ownerType;
+    }
+
+    public Byte getIsSettled() {
+        return isSettled;
+    }
+
+    public void setIsSettled(Byte isSettled) {
+        this.isSettled = isSettled;
     }
 
     public void setOwnerType(String ownerType) {
@@ -63,14 +71,6 @@ public class CreateBillCommand {
 
     public void setDateStr(Date dateStr) {
         this.dateStr = dateStr;
-    }
-
-    public String getContractNO() {
-        return contractNO;
-    }
-
-    public void setContractNO(String contractNO) {
-        this.contractNO = contractNO;
     }
 
     public Long getAddressId() {

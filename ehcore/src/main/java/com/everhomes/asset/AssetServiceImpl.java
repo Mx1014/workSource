@@ -346,6 +346,39 @@ public class AssetServiceImpl implements AssetService {
         }
         return handler.listBillDetailOnDateChange(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr());
     }
+
+    @Override
+    public void createBill(CreateBillCommand cmd) {
+        assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTOList(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName());
+    }
+
+    @Override
+    public void OneKeyNotice(OneKeyNoticeCommand cmd) {
+        ListSettledBillCommand convertedCmd = ConvertHelper.convert(cmd, ListSettledBillCommand.class);
+        ListSettledBillResponse convertedResponse = listSettledBill(convertedCmd);
+        List<ListSettledBillDTO> listSettledBillDTOs = convertedResponse.getListSettledBillDTOs();
+        Map<OwnerEntity,List<Long>> noticeObjects = new HashMap<>();
+        for(int i = 0; i < listSettledBillDTOs.size(); i ++) {
+            ListSettledBillDTO convertedDto = listSettledBillDTOs.get(i);
+            OwnerEntity entity = new OwnerEntity();
+            entity.setOwnerId(convertedDto.getOwnerId());
+            entity.setOwnerType(convertedDto.getOwnerType());
+            if(noticeObjects.containsKey(entity)){
+                noticeObjects.get(entity).add(convertedDto.getBillId());
+            }else{
+                List<Long> ids = new ArrayList<>();
+                ids.add(convertedDto.getBillId());
+                noticeObjects.put(entity,ids);
+            }
+        }
+        for(Map.Entry<OwnerEntity,List<Long>> entry : noticeObjects.entrySet()){
+            SelectedNoticeCommand requestCmd = new SelectedNoticeCommand();
+            requestCmd.setOwnerType(entry.getKey().getOwnerType());
+            requestCmd.setOwnerId(entry.getKey().getOwnerId());
+            requestCmd.setBillIds(entry.getValue());
+            selectNotice(requestCmd);
+        }
+    }
 //    @Scheduled(cron = "0 0 23 * * ?")
 //    @Override
 //    public void synchronizeZJGKBill() {
