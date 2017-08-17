@@ -5,7 +5,6 @@ public interface SmsTemplateCode {
     String SCOPE = "sms.default";
 
     String YZX_SUFFIX = "yzx";
-    String SCOPE_YZX = SCOPE + "." + YZX_SUFFIX;
 
     String KEY_VCODE = "vcode";
     

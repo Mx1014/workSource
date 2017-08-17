@@ -252,59 +252,62 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         //张江高科的厂商的接口，还未写
         List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIds());
-
         if(noticeInfos.size()<1) return;
-        String[] phoneNums = new String[noticeInfos.size()];
-        List<Tuple<String, Object>> variables = new ArrayList<>();
-
+        List<Long> uids = new ArrayList<>();
         //"{targetName}先生/女士，您好，您的账单已出，应付{amount1}元，待缴{amount2}元，下载"{appName} APP"可及时查看账单并支持在线付款,还可体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。"
         for(int i = 0; i<noticeInfos.size(); i++) {
             NoticeInfo noticeInfo = noticeInfos.get(i);
-            smsProvider.addToTupleList(variables,"targetName",noticeInfo.getTargetName());
-            smsProvider.addToTupleList(variables,"amount1",noticeInfo.getAmountRecevable());
-            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
-            smsProvider.addToTupleList(variables,"appName",noticeInfo.getAppName());
-            phoneNums[i] = noticeInfo.getPhoneNum();
-            //客户在系统内，还需要推送，查看 推送接口
+            //收集短信的信息
+            List<Tuple<String, Object>> variables = new ArrayList<>();
+            smsProvider.addToTupleList(variables,"1",noticeInfo.getTargetName());
+            //模板改了，所以这个也要改
+            smsProvider.addToTupleList(variables,"2","2017-05");
+//            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
+            smsProvider.addToTupleList(variables,"3",noticeInfo.getAppName());
+            String phoneNums = noticeInfo.getPhoneNum();
+            String templateLocale = UserContext.current().getUser().getLocale();
+            smsProvider.sendSms(999971, phoneNums, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
+            //客户在系统内，把需要推送的uid放在list中
             if(noticeInfo.getTargetId()!=0l){
-                List<Long> uids = new ArrayList<>();
-                if (noticeInfo.getTargetType()=="eh_user") {
+                if (noticeInfo.getTargetType().equals("eh_user")) {
                     uids.add(noticeInfo.getTargetId());
-                } else if(noticeInfo.getTargetType()=="eh_organization") {
+                } else if(noticeInfo.getTargetType().equals("eh_organization")) {
                     ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
                     tempCmd.setOwnerId(cmd.getOwnerId());
                     tempCmd.setOwnerType(cmd.getOwnerType());
                     tempCmd.setOrganizationId(noticeInfo.getTargetId());
+                    //企业超管是1005？不是1001
                     List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
                     for(int j =0 ; i < organizationContactDTOS.size(); i++){
                         uids.add(organizationContactDTOS.get(0).getId());
                     }
                 }
-                //对所有的符合推送资格的用户推送账单已出信息
-                for(int k = 0; k < uids.size() ; k++) {
-                    MessageDTO messageDto = new MessageDTO();
-                    messageDto.setAppId(AppConstants.APPID_MESSAGING);
-                    messageDto.setSenderUid(User.SYSTEM_UID);
-                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
-                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-                    String content = "";
-                    //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999971)
-                    //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
-                    Map<String,Object> map = new HashMap<>();
-                    User targetUser = userProvider.findUserById(uids.get(k));
-                    map.put("targetName",targetUser.getNickName());
-                    String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
-                    messageDto.setBody(content);
-                    messageDto.setMetaAppId(AppConstants.APPID_USER);
-                    if(!content.trim().equals("")){
-                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                                uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-                    }
-                }
             }
         }
-        String templateLocale = UserContext.current().getUser().getLocale();
-        smsProvider.sendSms(UserContext.getCurrentNamespaceId(), phoneNums, SmsTemplateCode.SCOPE_YZX, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
+        //对所有的符合推送资格的用户推送账单已出信息
+        for(int k = 0; k < uids.size() ; k++) {
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
+            //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
+            Map<String,Object> map = new HashMap<>();
+            User targetUser = userProvider.findUserById(uids.get(k));
+            map.put("targetName",targetUser.getNickName());
+            // targetName没有被替换
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(),UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
+            notifyTextForApplicant.replace("targetName","南宫");
+            messageDto.setBody(notifyTextForApplicant);
+            messageDto.setMetaAppId(AppConstants.APPID_USER);
+            if(!notifyTextForApplicant.trim().equals("")){
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            }
+        }
+
+
     }
 
     @Override

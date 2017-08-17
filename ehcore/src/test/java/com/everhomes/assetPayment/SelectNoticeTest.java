@@ -25,11 +25,13 @@ public class SelectNoticeTest extends CoreServerTestCase {
         User u = new User();
         u.setId(238716l);
         UserContext.setCurrentUser(u);
+        UserContext.setCurrentNamespaceId(999985);
         List<Long> ids = new ArrayList<>();
         ids.add(3l);
         cmd.setBillIds(ids);
         cmd.setOwnerId(240111044331055035l);
         cmd.setOwnerType("community");
         assetService.selectNotice(cmd);
+        System.out.println("method over");
     }
 }

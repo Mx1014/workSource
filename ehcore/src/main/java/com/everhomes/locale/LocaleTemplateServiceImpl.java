@@ -59,7 +59,7 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
             try {
                 templateConfig.getTemplate(templateKey, "UTF8");
             }catch(Exception e) {
-                
+
             }
             if(freeMarkerTemplate == null) {
                 LocaleTemplate template = getLocalizedTemplate(namespaceId, scope, code, locale);

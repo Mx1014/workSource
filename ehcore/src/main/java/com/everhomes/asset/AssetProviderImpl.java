@@ -17,6 +17,7 @@ import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -553,6 +554,7 @@ public class AssetProviderImpl implements AssetProvider {
                 dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_APP_URLS.NAME,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGETNAME)
                 .from(Tables.EH_PAYMENT_BILLS,Tables.EH_APP_URLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                        .and(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
                 .fetch().map(r -> {
                     NoticeInfo info = new NoticeInfo();
                     info.setPhoneNum(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
