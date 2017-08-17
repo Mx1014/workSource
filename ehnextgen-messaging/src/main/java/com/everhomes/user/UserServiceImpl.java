@@ -2680,7 +2680,7 @@ public class UserServiceImpl implements UserService {
 			if(residential_community != null){
 				CommunityDTO residential_communityDTO = ConvertHelper.convert(residential_community, CommunityDTO.class);
 				SceneType residential_sceneType = DEFAULT;
-				SceneDTO residential_communityScene = toCommunitySceneDTO(namespaceId, userId, residential_communityDTO, sceneType);
+				SceneDTO residential_communityScene = toCommunitySceneDTO(namespaceId, userId, residential_communityDTO, residential_sceneType);
 				if (residential_communityScene != null) {
 					sceneList.add(residential_communityScene);
 				}
@@ -2691,31 +2691,12 @@ public class UserServiceImpl implements UserService {
 		// 当用户既没有选择园区时
 		if (commercial_sceneList.size() == 0) {
 			commercial_community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.COMMERCIAL.getCode());
-		}
-
-
-		// 当用户既没有选择家庭、也没有在某个公司内时，默认给一个有效场景
-		if (sceneList.size() == 0) {
-			Community community = new Community();
-			switch (SceneType.fromCode(cmd.getSceneType())) {
-				case DEFAULT:
-					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.RESIDENTIAL.getCode());
-					break;
-				case PARK_TOURIST:
-					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.COMMERCIAL.getCode());
-					break;
-			}
-
-			if (community != null) {
-				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
-				SceneType sceneType = DEFAULT;
-				CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
-				if (communityType == CommunityType.COMMERCIAL) {
-					sceneType = PARK_TOURIST;
-				}
-				SceneDTO communityScene = toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
-				if (communityScene != null) {
-					sceneList.add(communityScene);
+			if(commercial_community != null){
+				CommunityDTO commercial_communityDTO = ConvertHelper.convert(commercial_community, CommunityDTO.class);
+				SceneType commercial_sceneType = DEFAULT;
+				SceneDTO commercial_communityScene = toCommunitySceneDTO(namespaceId, userId, commercial_communityDTO, commercial_sceneType);
+				if (commercial_communityScene != null) {
+					sceneList.add(commercial_communityScene);
 				}
 			}
 		}
