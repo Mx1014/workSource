@@ -106,8 +106,8 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("getEnterpriseCustomer")
     @RestReturn(value = EnterpriseCustomerDTO.class)
     public RestResponse getEnterpriseCustomer(@Valid GetEnterpriseCustomerCommand cmd) {
-        customerService.getEnterpriseCustomer(cmd);
-        RestResponse response = new RestResponse();
+        EnterpriseCustomerDTO dto = customerService.getEnterpriseCustomer(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

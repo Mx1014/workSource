@@ -18,6 +18,7 @@ import java.sql.Timestamp;
  *     <li>sourceItemId: 来源途径id</li>
  *     <li>sourceItemName: 来源途径名</li>
  *     <li>contactAvatarUri: 联系人头像</li>
+ *     <li>contactAvatarUrl: 联系人头像url</li>
  *     <li>contactName: 联系人名称</li>
  *     <li>contactGenderItemId: 联系人性别id</li>
  *     <li>contactGenderItemName: 联系人性别名</li>
@@ -53,6 +54,7 @@ import java.sql.Timestamp;
  *     <li>corpQualificationItemId: 企业资质认证id</li>
  *     <li>corpQualificationItemName: 企业资质认证</li>
  *     <li>corpLogoUri: 企业LOGO</li>
+ *     <li>corpLogoUrl: 企业LOGO url</li>
  *     <li>corpDescription: 企业简介</li>
  *     <li>corpEmployeeAmount: 员工总数</li>
  *     <li>corpEmployeeAmountMale: 男员工总数</li>
@@ -81,6 +83,7 @@ public class EnterpriseCustomerDTO {
     private Long sourceItemId;
     private String sourceItemName;
     private String contactAvatarUri;
+    private String contactAvatarUrl;
     private String contactName;
     private Long contactGenderItemId;
     private String contactGenderItemName;
@@ -116,6 +119,7 @@ public class EnterpriseCustomerDTO {
     private Long corpQualificationItemId;
     private String corpQualificationItemName;
     private String corpLogoUri;
+    private String corpLogoUrl;
     private String corpDescription;
     private Integer corpEmployeeAmount;
     private Integer corpEmployeeAmountMale;
@@ -128,6 +132,22 @@ public class EnterpriseCustomerDTO {
     private String managerPhone;
     private String managerEmail;
     private String remark;
+
+    public String getContactAvatarUrl() {
+        return contactAvatarUrl;
+    }
+
+    public void setContactAvatarUrl(String contactAvatarUrl) {
+        this.contactAvatarUrl = contactAvatarUrl;
+    }
+
+    public String getCorpLogoUrl() {
+        return corpLogoUrl;
+    }
+
+    public void setCorpLogoUrl(String corpLogoUrl) {
+        this.corpLogoUrl = corpLogoUrl;
+    }
 
     public Long getCategoryItemId() {
         return categoryItemId;

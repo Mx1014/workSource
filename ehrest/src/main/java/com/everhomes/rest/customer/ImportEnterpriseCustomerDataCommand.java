@@ -9,9 +9,29 @@ package com.everhomes.rest.customer;
  */
 public class ImportEnterpriseCustomerDataCommand {
 
+    private String ownerType;
+
+    private Long ownerId;
+
     private Integer namespaceId;
 
     private Long communityId;
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
