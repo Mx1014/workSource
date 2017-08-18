@@ -1396,4 +1396,9 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         return null;
     }
+
+    @Override
+    public Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId) {
+        return null;
+    }
 }

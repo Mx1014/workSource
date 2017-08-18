@@ -2685,7 +2685,7 @@ public class UserServiceImpl implements UserService {
 			//轮询是否有默认的小区
 		}
 
-		
+
 
 		// 当用户既没有选择家庭
 		if (residential_sceneList.size() == 0) {

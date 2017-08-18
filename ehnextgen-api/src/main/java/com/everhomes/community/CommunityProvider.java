@@ -113,4 +113,7 @@ public interface CommunityProvider {
 
     //默认园区/小区
     Community findFirstCommunityByNameSpaceIdAndType(Integer namespaceId, Byte type);
+
+    //获取对应的目标communityId
+    Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId);
 }
