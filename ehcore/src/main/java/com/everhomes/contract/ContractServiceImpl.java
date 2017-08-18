@@ -22,6 +22,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.*;
+import com.everhomes.search.ContractSearcher;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -107,6 +108,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private AddressProvider addressProvider;
+
+	@Autowired
+	private ContractSearcher contractSearcher;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -406,6 +410,8 @@ public class ContractServiceImpl implements ContractService {
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
+		contractSearcher.feedDoc(contract);
+
 	}
 
 	private void dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
@@ -553,6 +559,8 @@ public class ContractServiceImpl implements ContractService {
 		dealContractApartments(contract, cmd.getApartments());
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
+
+		contractSearcher.feedDoc(contract);
 	}
 
 	@Override

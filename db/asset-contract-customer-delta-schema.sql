@@ -231,6 +231,7 @@ CREATE TABLE `eh_enterprise_customers` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE `eh_contracts` CHANGE `contract_end_date` `contract_end_date` DATETIME COMMENT '合同结束日期';
 ALTER TABLE `eh_contracts` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 ALTER TABLE `eh_contracts` ADD COLUMN `contract_start_date` DATETIME COMMENT '合同开始日期';
 ALTER TABLE `eh_contracts` ADD COLUMN `name` VARCHAR(128) COMMENT '合同名称';
@@ -521,6 +522,24 @@ CREATE TABLE `eh_customer_commercials` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
 -- 客户投融情况：
+CREATE TABLE `eh_customer_investments` (
+  `id` BIGINT NOT NULL 'id of the record',
+  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
+  `customer_id` BIGINT,
+  `customer_name` VARCHAR(64),
+  `government_project` VARCHAR(128),
+  `bank_loans` DECIMAL(10,2) COMMENT '银行贷款',
+  `equity_financing` DECIMAL(10,2) COMMENT '股权融资',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 客户经济指标：
 CREATE TABLE `eh_customer_economic_indicators` (
   `id` BIGINT NOT NULL 'id of the record',
@@ -529,8 +548,6 @@ CREATE TABLE `eh_customer_economic_indicators` (
   `customer_name` VARCHAR(64),
   `total_assets` DECIMAL(10,2) COMMENT '资产总计',
   `total_profit` DECIMAL(10,2) COMMENT '利润总额',
-  `bank_loans` DECIMAL(10,2) COMMENT '银行贷款',
-  `equity_financing` DECIMAL(10,2) COMMENT '股权融资',
   `sales` DECIMAL(10,2) COMMENT '销售额',
   `turnover` DECIMAL(10,2) COMMENT '营业额',
   `tax_index` DECIMAL(10,2) COMMENT '税收指标',

@@ -52,6 +52,17 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>同步合同</p>
+	 * <b>URL: /contract/syncContracts</b>
+	 */
+	@RequestMapping("syncContracts")
+	@RestReturn(String.class)
+	public RestResponse syncContracts(){
+		contractSearcher.syncFromDb();
+		return new RestResponse();
+	}
+
+	/**
 	 * <p>创建合同</p>
 	 * <b>URL: /contract/createContract</b>
 	 */
