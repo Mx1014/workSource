@@ -845,6 +845,10 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
 			return pdl;
 		}
+		pdl.setTimeRuleId(punchTimeRule.getId());
+		pdl.setTimeRuleName(punchTimeRule.getName());
+		pdl.setPunchOrganizationId(pr.getPunchOrganizationId());
+		pdl.setRuleType(punchTimeRule.getRuleType());
 		pdl.setPunchTimesPerDay(punchTimeRule.getPunchTimesPerDay());
 		//对于已离职和未入职的判断 
 		List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/"+companyId,userId );
@@ -6892,13 +6896,87 @@ public class PunchServiceImpl implements PunchService {
 	public GetPunchDayStatusResponse getPunchDayStatus(GetPunchDayStatusCommand cmd) {
 		// 
 		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
-		GetPunchDayStatusResponse response = new GetPunchDayStatusResponse();
 		Long userId = UserContext.current().getUser().getId();
 		Date punchTime = new Date();
 		PunchLogDTO punchLog = getPunchType(userId,cmd.getEnterpriseId(),punchTime);
-			
+		GetPunchDayStatusResponse response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
+		response.setPunchLogs(new ArrayList<>());
+		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
+		if (null == pr  )
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+					"公司没有设置打卡规则");
+		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr, punchTime, userId);
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,cmd.getEnterpriseId(), dateSF.get().format(punchTime),
+				ClockCode.SUCESS.getCode());
+		if (null != ptrId) {
+			PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(ptrId);
+			for(Integer punchIntervalNo= 1;punchIntervalNo <= ptr.getPunchTimesPerDay()/2;punchIntervalNo++) {
+				PunchLogDTO dto = null;
+				PunchLog pl = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntervalNo);
+				if(null == pl){
+					dto = new PunchLogDTO();
+					dto.setClockStatus(PunchStatus.ABSENCE.getCode());
+					dto.setPunchType(PunchType.ON_DUTY.getCode());
+					dto.setPunchIntervalNo(punchIntervalNo);
+					dto.setRuleTime(findRuleTime(ptr,dto.getPunchType(),punchIntervalNo));
+				}else{
+					dto = ConvertHelper.convert(pl, PunchLogDTO.class);
+				}
+				response.getPunchLogs().add(dto);
+
+				dto = null;
+				pl = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntervalNo);
+				if(null == pl){
+					dto = new PunchLogDTO();
+					dto.setClockStatus(PunchStatus.ABSENCE.getCode());
+					dto.setPunchType(PunchType.OFF_DUTY.getCode());
+					dto.setPunchIntervalNo(punchIntervalNo);
+					dto.setRuleTime(findRuleTime(ptr,dto.getPunchType(),punchIntervalNo));
+				}else{
+					dto = ConvertHelper.convert(pl, PunchLogDTO.class);
+				}
+				response.getPunchLogs().add(dto);
+			}
+		}
 		return response;
 	}
+
+	private long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
+		if(ptr.getPunchTimesPerDay().intValue() == 2){
+			if (punchType.equals(PunchType.ON_DUTY.getCode())) {
+				return ptr.getStartEarlyTimeLong();
+			}else{
+				return ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong();
+			}
+		}else if (ptr.getPunchTimesPerDay().intValue() ==4){
+			if(punchIntervalNo.equals(1)){
+				if (punchType.equals(PunchType.ON_DUTY.getCode())) {
+					return ptr.getStartEarlyTimeLong();
+				}else{
+					return ptr.getNoonLeaveTimeLong();
+				}
+			}else{
+				if (punchType.equals(PunchType.ON_DUTY.getCode())) {
+					return ptr.getAfternoonArriveTimeLong();
+				}else{
+					return ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong();
+				}
+			}
+		}else {
+			List<PunchTimeInterval> intervals = punchProvider.listPunchTimeIntervalByTimeRuleId(ptr.getId());
+			if (null == intervals)
+				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+						PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+						"公司没有设置打卡时间段");
+			if (punchType.equals(PunchType.ON_DUTY.getCode())) {
+				return intervals.get(punchIntervalNo - 1).getArriveTimeLong();
+			} else {
+				return intervals.get(punchIntervalNo - 1).getLeaveTimeLong();
+			}
+		}
+	}
+
 	static final Long ONE_DAY_MS = 24*3600*1000L;
 	/**
 	 * 获取打卡状态: 
@@ -7028,6 +7106,12 @@ public class PunchServiceImpl implements PunchService {
 			result.setClockStatus(PunchStatus.LEAVEEARLY.getCode());
 		else
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
+		result.setPunchNormalTime(result.getRuleTime());
+		if(punchIntevalNo.equals(intervals.size())){
+			result.setExpiryTime(intervals.get(punchIntevalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+		}else{
+			result.setExpiryTime(intervals.get(0).getArriveTimeLong());
+		}
 		return result ;
 	}
 
@@ -7043,6 +7127,12 @@ public class PunchServiceImpl implements PunchService {
 			result.setClockStatus(PunchStatus.BELATE.getCode());
 		else
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
+		result.setPunchNormalTime(intervals.get(punchIntevalNo-1).getArriveTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)));
+		if(punchIntevalNo.equals(intervals.size())){
+			result.setExpiryTime(intervals.get(punchIntevalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+		}else{
+			result.setExpiryTime(intervals.get(0).getArriveTimeLong());
+		}
 		return result ;
 	}
 
@@ -7068,6 +7158,8 @@ public class PunchServiceImpl implements PunchService {
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
 				else
 					result.setClockStatus(PunchStatus.BELATE.getCode());
+				result.setExpiryTime(ptr.getAfternoonArriveTimeLong());
+				result.setPunchNormalTime(ptr.getStartEarlyTimeLong());
 				return result ;
 			}
 			PunchLog offDutyPunch = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), punchIntevalNo);
@@ -7079,6 +7171,9 @@ public class PunchServiceImpl implements PunchService {
 					result.setClockStatus(PunchStatus.LEAVEEARLY.getCode());
 				else
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
+
+				result.setExpiryTime(ptr.getAfternoonArriveTimeLong());
+				result.setPunchNormalTime(ptr.getNoonLeaveTimeLong());
 				return result ;
 			}else{
 
@@ -7097,6 +7192,9 @@ public class PunchServiceImpl implements PunchService {
 				result.setClockStatus(PunchStatus.NORMAL.getCode());
 			else
 				result.setClockStatus(PunchStatus.BELATE.getCode());
+
+			result.setExpiryTime(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+			result.setPunchNormalTime(ptr.getAfternoonArriveTimeLong());
 			return result ;
 		}
 		PunchLog offDutyPunch = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntevalNo);
@@ -7127,7 +7225,9 @@ public class PunchServiceImpl implements PunchService {
 				if(punchTimeLong < ptr.getStartLateTimeLong())
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
 				else
-					result.setClockStatus(PunchStatus.BELATE.getCode()); 
+					result.setClockStatus(PunchStatus.BELATE.getCode());
+				result.setExpiryTime(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+				result.setPunchNormalTime(ptr.getStartLateTimeLong());
 				return result ;
 			}
 			PunchLog offDutyPunch = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),1);
@@ -7159,6 +7259,8 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
 		}
+		result.setExpiryTime(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+		result.setPunchNormalTime(leaveTime);
 	}
 
 	private long getLeaveTime (PunchTimeRule ptr,PunchLog onDutyPunch) {
@@ -7184,7 +7286,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	//上班取最早,下班取最晚
 	private PunchLog findPunchLog(List<PunchLog> punchLogs, Byte pucnhType, Integer punchIntevalNo) {
-		if(null == punchLogs)
+		if(null == punchLogs || punchLogs.size() == 0)
 			return null;
 		PunchLog result = null;
 		for(PunchLog log : punchLogs){

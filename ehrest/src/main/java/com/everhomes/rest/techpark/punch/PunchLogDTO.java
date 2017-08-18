@@ -13,7 +13,10 @@ import com.everhomes.util.StringHelper;
  * <li>clockStatus：打卡记录的状态 如 上班，下班  参考{@link com.everhomes.rest.techpark.punch.ClockStatus}</li>
  * </ul>
  */
-public class PunchLogDTO { 
+public class PunchLogDTO {
+
+	private Long expiryTime;
+	private Long punchNormalTime;
 	private Integer punchIntervalNo;
 	private Byte punchType;
 	private long ruleTime;
@@ -25,7 +28,23 @@ public class PunchLogDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	 
+
+	public Long getExpiryTime() {
+		return expiryTime;
+	}
+
+	public void setExpiryTime(Long expiryTime) {
+		this.expiryTime = expiryTime;
+	}
+
+	public Long getPunchNormalTime() {
+		return punchNormalTime;
+	}
+
+	public void setPunchNormalTime(Long punchNormalTime) {
+		this.punchNormalTime = punchNormalTime;
+	}
+
 	public long getPunchTime() {
 		return punchTime;
 	}

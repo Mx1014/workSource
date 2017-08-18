@@ -6,13 +6,15 @@ import com.everhomes.util.StringHelper;
 * <ul>  
 * <li>punchDate：long 日期</li>  
 * <li>ruleType：byte 规则类型 {@link PunchRuleType}</li>  
-* <li>timeRuleName: 班次名</li>  
-* <li>exceptionStatus :byte 异常状态 {@link ExceptionStatus}</li>    
+ * <li>timeRuleId: 班次id 如果为0或者空就是休息</li>
+ * <li>timeRuleName: 班次名</li>
+* <li>exceptionStatus :byte 异常状态 {@link ExceptionStatus}</li>
 * </ul>
 */
 public class MonthDayStatusDTO {
 	private Long punchDate;
 	private Byte ruleType;
+	private Long timeRuleId;
 	private String timeRuleName;
 	private Byte exceptionStatus;
 	
@@ -52,6 +54,13 @@ public class MonthDayStatusDTO {
 	public void setExceptionStatus(Byte exceptionStatus) {
 		this.exceptionStatus = exceptionStatus;
 	}
-    
-    
+
+
+	public Long getTimeRuleId() {
+		return timeRuleId;
+	}
+
+	public void setTimeRuleId(Long timeRuleId) {
+		this.timeRuleId = timeRuleId;
+	}
 }

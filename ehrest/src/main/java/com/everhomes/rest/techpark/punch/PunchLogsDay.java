@@ -78,7 +78,45 @@ public class PunchLogsDay{
     //added by wh 增加3.0 的字段
     private String statusList;
     private Integer punchCount;
-	public Byte getMorningPunchStatus() {
+
+	 private Long punchOrganizationId;
+	 private Byte ruleType;
+	 private String timeRuleName;
+	 private Long timeRuleId;
+
+	 public Long getPunchOrganizationId() {
+		 return punchOrganizationId;
+	 }
+
+	 public void setPunchOrganizationId(Long punchOrganizationId) {
+		 this.punchOrganizationId = punchOrganizationId;
+	 }
+
+	 public Byte getRuleType() {
+		 return ruleType;
+	 }
+
+	 public void setRuleType(Byte ruleType) {
+		 this.ruleType = ruleType;
+	 }
+
+	 public Long getTimeRuleId() {
+		 return timeRuleId;
+	 }
+
+	 public void setTimeRuleId(Long timeRuleId) {
+		 this.timeRuleId = timeRuleId;
+	 }
+
+	 public String getTimeRuleName() {
+		 return timeRuleName;
+	 }
+
+	 public void setTimeRuleName(String timeRuleName) {
+		 this.timeRuleName = timeRuleName;
+	 }
+
+	 public Byte getMorningPunchStatus() {
 		return morningPunchStatus;
 	}
 
