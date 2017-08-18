@@ -2375,6 +2375,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartment(), locator, pageSize + 1);
 		ListApartmentsResponse response = new ListApartmentsResponse();
 		List<ApartmentAbstractDTO> apartments = new ArrayList<>();
+		LOGGER.info("listApartments aptList: {}", aptList);
 		//设置门牌的入住状态
 		if(aptList != null && aptList.size() > 0) {
 			if(aptList.size() > pageSize) {
@@ -2385,6 +2386,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			List<Long> aptIdList = aptList.stream().map(a->a.getId()).collect(Collectors.toList());
 			//处理小区地址关联表
 			Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+			LOGGER.info("listApartments communityAddressMappingMap: {}", communityAddressMappingMap);
 			aptList.forEach(apt -> {
 				if (apt.getLivingStatus() == null) {
 					CommunityAddressMapping mapping = communityAddressMappingMap.get(apt.getId());
