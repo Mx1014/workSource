@@ -1,6 +1,6 @@
 SET FOREIGN_KEY_CHECKS = 0;
-SET @core_server_url = "core.zuolin.com"; -- 取具体环境连接core server的链接
-SET @biz_url = 'biz.zuolin.com'; -- 取具体环境的电商服务器连接，注意有两个域名要修改
+SET @core_server_url = "core.szbay.com"; -- 取具体环境连接core server的链接
+SET @biz_url = 'biz.szbay.com'; -- 取具体环境的电商服务器连接，注意有两个域名要修改
 SET @namespace_id=999966;
 
 
@@ -432,7 +432,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 SET @parent_id = @parent_id + 1;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES (@parent_id, 'community', 240111044331050369, '0', '门禁申请', '门禁申请', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
-SET @skip_rule_id = (SELECT MAX(id) FROM `eh_service_alliance_skip_rule`);
+SET @skip_rule_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_skip_rule`), 1);
 INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), '999966', @parent_id);
 SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliances`);
 INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`)
@@ -886,8 +886,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `service_categry_id`)
     VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Bizs', 'ROUTE', '物业报修', 'cs://1/image/aW1hZ2UvTVRvM1lqZ3pNRGt4WWprelpHRmlNbVptWWpCaU56aGlZbUl5WVRrek5ESmxZdw', '1', '1', '60', '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修"}', 18, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', 158);
 
-
-SET @module_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+SET @module_id = IFNULL((SELECT MAX(id) FROM `eh_service_module_scopes`), 0);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`) 
 SELECT (@module_id := @module_id + 1), owner_id, menu_id, '', NULL, '2' FROM eh_web_menu_scopes WHERE 
 menu_id IN (select id from eh_service_modules) AND `owner_id` = 999966;
