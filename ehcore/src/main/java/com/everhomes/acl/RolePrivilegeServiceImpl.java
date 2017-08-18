@@ -412,13 +412,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		command.setAccountPhone(cmd.getContactToken());
 
 		dbProvider.execute((TransactionStatus status) -> {
-			//创建机构账号，包括注册、把用户添加到公司
-			OrganizationMember member = organizationService.createOrganizationAccount(command, RoleConstants.PM_SUPER_ADMIN, namespaceId);
+			OrganizationMember member = organizationService.createOrganiztionMemberWithDetailAndUserOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken());
 
-			/**
-			 * 分配权限
-			 */
-			this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+
+				//分配权限
+				this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+
+
+				//分配公司管理员角色
+				assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), org.getId(), EntityType.USER.getCode(), member.getTargetId(), namespaceId, UserContext.current().getUser().getId(), RoleConstants.ENTERPRISE_SUPER_ADMIN);
+
+			}
+
 			return null;
 		});
 
@@ -1395,20 +1401,24 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-
+		User user = UserContext.current().getUser();
 		CreateOrganizationAccountCommand command = new CreateOrganizationAccountCommand();
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
 
 		dbProvider.execute((TransactionStatus status) -> {
-			//创建机构账号，包括注册、把用户添加到公司
-			OrganizationMember member = organizationService.createOrganizationAccount(command, RoleConstants.ENTERPRISE_SUPER_ADMIN, namespaceId);
 
-			/**
-			 * 分配权限
-			 */
-			this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
+			//创建机构账号，包括注册、把用户添加到公司
+			OrganizationMember member = organizationService.createOrganiztionMemberWithDetailAndUserOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken());
+
+			if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+				//分配具体公司管理员权限
+				assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
+
+				//分配公司管理员角色
+				assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), org.getId(), EntityType.USER.getCode(), member.getTargetId(), namespaceId, user.getId(), RoleConstants.ENTERPRISE_SUPER_ADMIN);
+			}
 			return null;
 		});
 
@@ -2954,7 +2964,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
-	private void assignmentAclRole(String ownerType, Long ownerId, String targetType, Long targetId, Integer namespaceId, Long creatorUid, Long roleId){
+	@Override
+	public void assignmentAclRole(String ownerType, Long ownerId, String targetType, Long targetId, Integer namespaceId, Long creatorUid, Long roleId){
+
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(ownerType, ownerId, targetType, targetId);
+		if (null != roleAssignments && 0 < roleAssignments.size()) {
+			for (RoleAssignment assignment : roleAssignments) {
+				if (assignment.getRoleId().equals(roleId)) {
+					LOGGER.debug("target role already exists. targetType = {}, targetId= {}, roleId = {}", targetType, targetId, roleId);
+					return;
+				}
+			}
+		}
+
 		RoleAssignment roleAssignment = new RoleAssignment();
 		roleAssignment.setOwnerType(ownerType);
 		roleAssignment.setOwnerId(ownerId);
@@ -2965,6 +2987,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		roleAssignment.setRoleId(roleId);
 		aclProvider.createRoleAssignment(roleAssignment);
 	}
+
+
 
 	private List<Role> getRoleManageByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId){
 		List<Authorization> authorizations =  authorizationProvider.listManageAuthorizationsByTarget(ownerType, ownerId, targetType, targetId , authType, authId);

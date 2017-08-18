@@ -1420,7 +1420,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		member.setContactDescription(contactDescription);
 		member.setContactName(user.getNickName());
-		member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
 		member.setOrganizationId(organizationId);
 		member.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		member.setTargetId(user.getId());
@@ -5379,6 +5378,30 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
+    private void joinOrganizationAfterOperation(OrganizationMember member){
+        userSearcher.feedDoc(member);
+
+        if (OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER) {
+            sendMessageForContactApproved(member);
+        }
+
+        //记录新增 log
+        OrganizationMemberLog orgLog = ConvertHelper.convert(member, OrganizationMemberLog.class);
+        orgLog.setOrganizationId(member.getOrganizationId());
+        orgLog.setContactName(member.getContactName());
+        orgLog.setContactToken(member.getContactToken());
+        orgLog.setUserId(member.getTargetId());
+        orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        orgLog.setOperationType(OperationType.JOIN.getCode());
+        orgLog.setRequestType(RequestType.ADMIN.getCode());
+        orgLog.setOperatorUid(UserContext.current().getUser().getId());
+        orgLog.setContactDescription(member.getContactDescription());
+        this.organizationProvider.createOrganizationMemberLog(orgLog);
+
+        //自动加入公司
+        this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
+    }
+
     /**
      * 退出企业
      */
@@ -5768,7 +5791,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
         organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-        organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
         organizationMember.setContactType(IdentifierType.MOBILE.getCode());
         organizationMember.setCreatorUid(user.getId());
         organizationMember.setNamespaceId(namespaceId);
@@ -6027,11 +6049,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization org = checkOrganization(cmd.getOrganizationId());
 
         OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
-        //创建用户
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getAccountPhone());
-        if (null == userIdentifier) {
-            userIdentifier = createUserAndIdentifier(namespaceId, cmd.getAccountName(), cmd.getAccountPhone());
-        }
         if(null == member){
             member = new OrganizationMember();
             member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -6044,8 +6062,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setGender(UserGender.UNDISCLOSURED.getCode());
             member.setContactName(cmd.getAccountName());
             member.setContactToken(cmd.getAccountPhone());
-            member.setTargetType(OrganizationMemberTargetType.USER.getCode());
-            member.setTargetId(userIdentifier.getOwnerUid());
+            if(null != userIdentifier){
+                member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                member.setTargetId(userIdentifier.getOwnerUid());
+            }else{
+                member.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+                member.setTargetId(0L);
+            }
+
             createOrganiztionMemberWithDetailAndUserOrganization(member, org.getId());
         }else if(OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())){
             //把正在申请加入公司状态的 记录改成正常
@@ -6082,6 +6106,73 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return member;
     }
+
+    @Override
+    public OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken){
+
+        if (null == contactToken) {
+            LOGGER.error("contactToken can not be empty.");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "contactToken can not be empty.");
+        }
+
+        if (null == contactName) {
+            LOGGER.error("contactName can not be empty.");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "contactName can not be empty.");
+        }
+
+
+        User user = UserContext.current().getUser();
+        Organization org = checkOrganization(organizationId);
+        Integer namespaceId = UserContext.getCurrentNamespaceId(org.getNamespaceId());
+        OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(organizationId, contactToken);
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId,contactToken);
+        boolean sendMsgFlag = false;
+        if(null == member){
+            member = new OrganizationMember();
+            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+            member.setContactType(IdentifierType.MOBILE.getCode());
+            member.setCreatorUid(user.getId());
+            member.setNamespaceId(namespaceId);
+            member.setGroupId(0l);
+            member.setGroupType(org.getGroupType());
+            member.setGroupPath(org.getPath());
+            member.setGender(UserGender.UNDISCLOSURED.getCode());
+            member.setContactName(contactName);
+            member.setContactToken(contactToken);
+            member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+            if(null != userIdentifier){
+                member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                member.setTargetId(userIdentifier.getOwnerUid());
+                sendMsgFlag = true;
+            }else{
+                member.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+                member.setTargetId(0L);
+            }
+            createOrganiztionMemberWithDetailAndUserOrganization(member, org.getId());
+        }else{
+            member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+            if(OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())){
+                //把正在申请加入公司状态的 记录改成正常
+                member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(member.getTargetType())){
+                    UserOrganizations userOrganizations = userOrganizationProvider.findUserOrganizations(namespaceId, organizationId, member.getTargetId());
+                    if(null != userOrganizations){
+                        userOrganizations.setStatus(UserOrganizationStatus.ACTIVE.getCode());
+                        userOrganizationProvider.updateUserOrganizations(userOrganizations);
+                    }
+                    sendMsgFlag = true;
+                }
+            }
+            organizationProvider.updateOrganizationMember(member);
+        }
+
+        //是注册用户或者从加入公司待审核的注册用户 则需要发送消息等等操作
+        if(sendMsgFlag){
+            joinOrganizationAfterOperation(member);
+        }
+        return member;
+    }
+
 
     private UserIdentifier createUserAndIdentifier(Integer namespaceId, String nickName, String identifierToken){
         User user = new User();
@@ -6149,10 +6240,32 @@ public class OrganizationServiceImpl implements OrganizationService {
                     // 机构是公司的情况下 才发送短信
                     if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
 
+                        //标识了管理员的人员 需要分配具体管理员的权限 add by sfyan 20170818
+                        if(OrganizationMemberGroupType.MANAGER == OrganizationMemberGroupType.fromCode(member.getMemberGroup())){
+                            Long adminPrivilegeId = null;
+                            Long adminRoleId = null;
+                            if(OrganizationType.PM == OrganizationType.fromCode(org.getOrganizationType())){
+                                adminPrivilegeId = PrivilegeConstants.ORGANIZATION_SUPER_ADMIN;
+                                adminRoleId = RoleConstants.PM_SUPER_ADMIN;
+                            }else if(OrganizationType.ENTERPRISE == OrganizationType.fromCode(org.getOrganizationType())){
+                                adminPrivilegeId = PrivilegeConstants.ORGANIZATION_ADMIN;
+                                adminRoleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
+                            }
+
+                            if(null != adminPrivilegeId){
+                                //分配具体公司管理员权限
+                                rolePrivilegeService.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",adminPrivilegeId);
+
+                                //分配管理员角色
+                                rolePrivilegeService.assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), org.getId(), EntityType.USER.getCode(), member.getTargetId(), identifier.getNamespaceId(), user.getId(), adminRoleId);
+                            }
+
+                        }
+
+
                         //创建管理员的同时会同时创建一个用户，因此需要在user_organization中添加一条记录 modify at 17/08/16
                         //仅当target为user且grouptype为企业时添加
                         createOrUpdateUserOrganization(member);
-
                         if (needSendMessage) {
                             sendMessageForContactApproved(member);
                         }
@@ -9053,7 +9166,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         orgMember.setContactType(ContactType.MOBILE.getCode());
         orgMember.setTargetId(useridentifier.getOwnerUid());
         orgMember.setCreatorUid(UserContext.current().getUser().getId());
-        orgMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
         orgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
         orgMember.setGroupPath(org.getPath());
         orgMember.setGroupType(org.getGroupType());
@@ -9197,7 +9309,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
         organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-        organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
         organizationMember.setContactType(IdentifierType.MOBILE.getCode());
         organizationMember.setCreatorUid(user.getId());
         organizationMember.setNamespaceId(namespaceId);
@@ -9429,40 +9540,23 @@ public class OrganizationServiceImpl implements OrganizationService {
         });
 
 
-        // 如果有加入的公司 需要发送加入公司的消息等系列操作
-        for (Long enterpriseId : enterpriseIds) {
-
-            organizationMember.setOrganizationId(enterpriseId);
-            userSearcher.feedDoc(organizationMember);
-            //是往公司添加新成员就需要发消息
-            if (null != joinEnterpriseMap.get(enterpriseId) && joinEnterpriseMap.get(enterpriseId)) {
-                if (OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER) {
-                    sendMessageForContactApproved(organizationMember);
+        // 如果有加入的公司 已注册用户需要发送加入公司的消息等系列操作 add sfyan 20170818
+        if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
+            for (Long enterpriseId : enterpriseIds) {
+                //是往公司添加新成员就需要发消息
+                if (null != joinEnterpriseMap.get(enterpriseId) && joinEnterpriseMap.get(enterpriseId)) {
+                    organizationMember.setOrganizationId(enterpriseId);
+                    joinOrganizationAfterOperation(organizationMember);
                 }
-
-                //记录新增 log
-                OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
-                orgLog.setOrganizationId(enterpriseId);
-                orgLog.setContactName(cmd.getContactName());
-                orgLog.setContactToken(cmd.getContactToken());
-                orgLog.setUserId(organizationMember.getTargetId());
-                orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                orgLog.setOperationType(OperationType.JOIN.getCode());
-                orgLog.setRequestType(RequestType.ADMIN.getCode());
-                orgLog.setOperatorUid(UserContext.current().getUser().getId());
-                orgLog.setContactDescription(organizationMember.getContactDescription());
-                this.organizationProvider.createOrganizationMemberLog(orgLog);
-
-				//自动加入公司
-				this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), enterpriseId, organizationMember.getTargetId());
             }
-        }
-        // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
-        if (leaveMembers.size() > 0) {
-            leaveOrganizationAfterOperation(user.getId(), leaveMembers);
+            // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
+            if (leaveMembers.size() > 0) {
+                leaveOrganizationAfterOperation(user.getId(), leaveMembers);
+            }
         }
         return dto;
     }
+
 
 
 
