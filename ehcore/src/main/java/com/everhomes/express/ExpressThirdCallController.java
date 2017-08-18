@@ -298,8 +298,8 @@ public class ExpressThirdCallController {// extends ControllerBase
     }
     
 	private void checkSign(String mobile, String timestamp, String checksum, String secretkey) {
-		Long currentTimestamp = System.currentTimeMillis();
-		if(Math.abs(currentTimestamp-Long.parseLong(timestamp))>1000*60*2L){
+		Long currentTimestamp = System.currentTimeMillis()/1000;//国贸这里是秒
+		if(Math.abs(currentTimestamp-Long.parseLong(timestamp))>60*2L){
 			// TODO 重定向到登录页面
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "时间戳不匹配");
 		}

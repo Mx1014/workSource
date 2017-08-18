@@ -2,6 +2,7 @@
 package com.everhomes.express;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +13,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -126,6 +129,7 @@ import com.everhomes.util.StringHelper;
 
 @Component
 public class ExpressServiceImpl implements ExpressService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressServiceImpl.class);
 	
 	private static final int ORDER_NO_LENGTH = 18;
 	
@@ -1267,7 +1271,8 @@ public class ExpressServiceImpl implements ExpressService {
 	@Override
 	public Map<String,String> prePayExpressOrder(PrePayExpressOrderCommand cmd) {
 		Map<String,Map<String,Object>> params = generatePrePayExpressOrderParams(cmd);
-		String result = Utils.post(configProvider.getValue(ExpressServiceErrorCode.PAYSERVER_URL, "http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record"), JSONObject.parseObject(StringHelper.toJsonString(params)));
+		String url = configProvider.getValue(ExpressServiceErrorCode.PAYSERVER_URL, "http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record");
+		String result = Utils.post(url, JSONObject.parseObject(StringHelper.toJsonString(params)),null,StandardCharsets.UTF_8);
 		PayResponse<Map<String,String>> payresponse = JSONObject.parseObject(result, new TypeReference<PayResponse<Map<String,String>>>(){});
 		if(payresponse.getSuccess()){
 			return payresponse.getData();
@@ -1296,6 +1301,7 @@ public class ExpressServiceImpl implements ExpressService {
 		params.put("randomNum",dto.getRandomNum());
 		params.put("signature",dto.getSignature());
 		bodyparams.put("body", params);
+		LOGGER.info("request payserver params = {}",bodyparams);
 		return bodyparams;
 	}
 
