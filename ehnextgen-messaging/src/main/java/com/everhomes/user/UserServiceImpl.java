@@ -2671,9 +2671,22 @@ public class UserServiceImpl implements UserService {
 		Community commercial_community = new Community();
 
 
-		// 处于家庭对应的场景
+		// 处于小区场景
 		// 列出用户有效家庭 mod by xiongying 20160523
 		addFamilySceneToList(userId, namespaceId, residential_sceneList);
+		// 处于某个公司对应的场景
+		addOrganizationSceneToList(userId, namespaceId, commercial_sceneList);
+
+
+		//从配置项中查询是否开启
+
+
+		for(SceneDTO scene : residential_sceneList){
+			//轮询是否有默认的小区
+		}
+
+		
+
 		// 当用户既没有选择家庭
 		if (residential_sceneList.size() == 0) {
 			residential_community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.RESIDENTIAL.getCode());
