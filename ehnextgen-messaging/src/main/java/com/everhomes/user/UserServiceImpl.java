@@ -3045,6 +3045,7 @@ public class UserServiceImpl implements UserService {
 		SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, community, sceneType);
 		String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
 		sceneDto.setSceneToken(sceneToken);
+		sceneDto.setCommunityType(community.getCommunityType());
 
 		return sceneDto;
 	}
