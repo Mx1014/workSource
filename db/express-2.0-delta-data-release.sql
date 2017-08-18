@@ -52,4 +52,4 @@ UPDATE eh_web_menus SET  `name` = '订单管理' where id = 40720;
 -- payserverapp支付接口地址
 SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-    VALUES (@configuration_id:=@configuration_id+1, 'payserver.url', 'http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record', '左邻支付平台地址', @namespaceId, NULL);
+    VALUES (@configuration_id:=@configuration_id+1, 'guomao.payserver.url', 'http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record', '左邻支付平台地址', @namespaceId, NULL);

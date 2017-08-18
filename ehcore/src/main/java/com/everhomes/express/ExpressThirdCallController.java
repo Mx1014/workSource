@@ -185,6 +185,10 @@ public class ExpressThirdCallController {// extends ControllerBase
 	 */
 	private void vaildParams(Map<String, String> params,  Integer namespaceId) {
 		String appkey = params.get(APPKEY);
+		if(appkey == null){
+			LOGGER.error("app not found.key = {}", appkey);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "非法的appkey等于null");
+		}
 		//appkey和namespace校验
 		App app = appProvider.findAppByKey(appkey);
 		if(app == null){
@@ -327,7 +331,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 		 params.put("nick","邓爽2");
 		 params.put("mobile","12345678902");
 		 params.put("uid","1234567xxxx");
-		 params.put("timestamp",System.currentTimeMillis()+"");
+		 params.put("timestamp",System.currentTimeMillis()/1000+"");
 		 params.put("avatar","core.zuolin.com");
 		 params.put("community","240111044331050363");
 		 MessageDigest md = null;
