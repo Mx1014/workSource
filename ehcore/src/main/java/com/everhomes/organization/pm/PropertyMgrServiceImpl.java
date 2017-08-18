@@ -2363,6 +2363,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
 	@Override
+	public ListApartmentsResponse listApartments(ListApartmentsCommand cmd) {
+		return null;
+	}
+
+	@Override
 	public ListPropApartmentsResponse listNewPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
 		//检查参数
 		checkListPropApartmentByKeywordParamters(cmd);

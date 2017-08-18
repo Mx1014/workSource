@@ -61,7 +61,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ImportFileTaskDTO importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, MultipartFile[] files) {
+    public ImportFileTaskDTO importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
         return null;
     }
 

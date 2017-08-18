@@ -12,6 +12,6 @@ public interface CustomerService {
     void updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd);
     void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd);
     SearchEnterpriseCustomerResponse searchEnterpriseCustomer(SearchEnterpriseCustomerCommand cmd);
-    ImportFileTaskDTO importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, MultipartFile[] files);
+    ImportFileTaskDTO importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId);
     EnterpriseCustomerDTO getEnterpriseCustomer(GetEnterpriseCustomerCommand cmd);
 }
