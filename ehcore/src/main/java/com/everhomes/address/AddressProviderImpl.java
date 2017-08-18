@@ -394,7 +394,14 @@ public class AddressProviderImpl implements AddressProvider {
         query.addLimit(count - addresses.size());
 
         query.fetch().map((r) -> {
-            addresses.add(ConvertHelper.convert(r, ApartmentAbstractDTO.class));
+            ApartmentAbstractDTO dto = new ApartmentAbstractDTO();
+            dto.setId(r.getId());
+            dto.setBuildingName(r.getBuildingName());
+            dto.setChargeArea(r.getChargeArea());
+            dto.setLivingStatus(r.getLivingStatus());
+            dto.setName(r.getApartmentName());
+            dto.setOrientation(r.getOrientation());
+            addresses.add(dto);
             return null;
         });
         return addresses;
