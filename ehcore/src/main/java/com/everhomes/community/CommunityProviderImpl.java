@@ -1400,7 +1400,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         SelectQuery<EhCommunityDefaultRecord> query = context.selectQuery(Tables.EH_COMMUNITY_DEFAULT);
         query.addConditions(Tables.EH_COMMUNITY_DEFAULT.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_COMMUNITY_DEFAULT.ORIGIN_COMMUNITY_ID.eq(originId));
-        query.addOrderBy(Tables.EH_COMMUNITIES.ID.desc());
+        query.addOrderBy(Tables.EH_COMMUNITY_DEFAULT.ID.desc());
         query.addLimit(1);
         EhCommunityDefaultRecord record = query.fetchAny();
         if (record != null) {
