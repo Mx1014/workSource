@@ -2799,6 +2799,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneToken(sceneToken);
 
 		sceneDto.setCommunityType(CommunityType.RESIDENTIAL.getCode());
+		sceneDto.setStatus(familyDto.getMembershipStatus());
 
 		return sceneDto;
 	}
@@ -2872,6 +2873,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneToken(sceneToken);
 
 		sceneDto.setCommunityType(CommunityType.COMMERCIAL.getCode());
+		sceneDto.setStatus(organizationDto.getStatus());
 
 
 		return sceneDto;
