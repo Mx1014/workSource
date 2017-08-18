@@ -2798,6 +2798,8 @@ public class UserServiceImpl implements UserService {
 		String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
 		sceneDto.setSceneToken(sceneToken);
 
+		sceneDto.setCommunityType(CommunityType.RESIDENTIAL.getCode());
+
 		return sceneDto;
 	}
 
@@ -2868,6 +2870,9 @@ public class UserServiceImpl implements UserService {
 		SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, organizationDto, sceneType);
 		String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
 		sceneDto.setSceneToken(sceneToken);
+
+		sceneDto.setCommunityType(CommunityType.COMMERCIAL.getCode());
+
 
 		return sceneDto;
 	}
