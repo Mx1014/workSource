@@ -6149,20 +6149,21 @@ public class OrganizationServiceImpl implements OrganizationService {
                 member.setTargetId(0L);
             }
             createOrganiztionMemberWithDetailAndUserOrganization(member, org.getId());
-        }else if(OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())){
-            //把正在申请加入公司状态的 记录改成正常
-            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+        }else{
             member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
-            organizationProvider.updateOrganizationMember(member);
-            if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(member.getTargetType())){
-                UserOrganizations userOrganizations = userOrganizationProvider.findUserOrganizations(namespaceId, organizationId, member.getTargetId());
-                if(null != userOrganizations){
-                    userOrganizations.setStatus(UserOrganizationStatus.ACTIVE.getCode());
-                    userOrganizationProvider.updateUserOrganizations(userOrganizations);
+            if(OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())){
+                //把正在申请加入公司状态的 记录改成正常
+                member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(member.getTargetType())){
+                    UserOrganizations userOrganizations = userOrganizationProvider.findUserOrganizations(namespaceId, organizationId, member.getTargetId());
+                    if(null != userOrganizations){
+                        userOrganizations.setStatus(UserOrganizationStatus.ACTIVE.getCode());
+                        userOrganizationProvider.updateUserOrganizations(userOrganizations);
+                    }
+                    sendMsgFlag = true;
                 }
-                sendMsgFlag = true;
             }
-
+            organizationProvider.updateOrganizationMember(member);
         }
 
         //是注册用户或者从加入公司待审核的注册用户 则需要发送消息等等操作
