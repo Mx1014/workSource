@@ -466,7 +466,7 @@ CREATE TABLE `eh_customer_apply_projects` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
-  `customer_name` VARCHAR(64)
+  `customer_name` VARCHAR(64),
   `project_name` VARCHAR(128) COMMENT '获批项目名称',
   `project_source` VARCHAR(128) COMMENT 'json of id list from eh_var_field_items and customer input text, split by ,',
   `project_establish_date` DATETIME COMMENT '项目立项日期',
