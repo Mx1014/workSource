@@ -387,6 +387,19 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public void createContract(CreateContractCommand cmd) {
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		if(cmd.getContractStartDate() != null) {
+			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+		}
+		if(cmd.getContractEndDate() != null) {
+			contract.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+		}
+		if(cmd.getDecorateBeginDate() != null) {
+			contract.setDecorateBeginDate(new Timestamp(cmd.getDecorateBeginDate()));
+		}
+		if(cmd.getDecorateEndDate() != null) {
+			contract.setDecorateEndDate(new Timestamp(cmd.getDecorateEndDate()));
+		}
+
 		contractProvider.createContract(contract);
 
 		dealContractApartments(contract, cmd.getApartments());
@@ -521,6 +534,18 @@ public class ContractServiceImpl implements ContractService {
 	public void updateContract(UpdateContractCommand cmd) {
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		if(cmd.getContractStartDate() != null) {
+			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+		}
+		if(cmd.getContractEndDate() != null) {
+			contract.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+		}
+		if(cmd.getDecorateBeginDate() != null) {
+			contract.setDecorateBeginDate(new Timestamp(cmd.getDecorateBeginDate()));
+		}
+		if(cmd.getDecorateEndDate() != null) {
+			contract.setDecorateEndDate(new Timestamp(cmd.getDecorateEndDate()));
+		}
 		contract.setCreateTime(exist.getCreateTime());
 		contract.setCreateUid(exist.getCreateUid());
 		contractProvider.updateContract(contract);
