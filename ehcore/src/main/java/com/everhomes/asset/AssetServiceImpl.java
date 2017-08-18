@@ -12,14 +12,12 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleTemplateService;
@@ -33,8 +31,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.community.admin.SmsTemplate;
-import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -42,19 +38,13 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
-import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.OrganizationSearcher;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhPaymentBillGroups;
-import com.everhomes.server.schema.tables.pojos.EhAssetBills;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
@@ -71,12 +61,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -198,13 +186,13 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public ListSettledBillResponse listSettledBill(ListSettledBillCommand cmd) {
+    public ListBillsResponse listBills(ListBillsCommand cmd) {
         String dateStrBegin = cmd.getDateStrBegin();
         String dateStrEnd = cmd.getDateStrEnd();
         AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        ListSettledBillResponse response = new ListSettledBillResponse();
+        ListBillsResponse response = new ListBillsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             cmd.setPageAnchor(1l);
         }
@@ -212,8 +200,8 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
-        List<ListSettledBillDTO> list = handler.listSettledBill(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getAddressName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName());
-        response.setListSettledBillDTOs(list);
+        List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getAddressName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus());
+        response.setListBillsDTOS(list);
         if(list.size() != cmd.getPageSize()){
             response.setNextPageAnchor(cmd.getPageAnchor());
         }else{
@@ -223,11 +211,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public ListSettledBillItemsResponse listSettledBillItems(ListSettledBillItemsCommand cmd) {
+    public ListBillItemsResponse listBillItems(ListBillItemsCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        ListSettledBillItemsResponse response = new ListSettledBillItemsResponse();
+        ListBillItemsResponse response = new ListBillItemsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             cmd.setPageAnchor(1l);
         }
@@ -235,9 +223,9 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
-        List<SettledBillDTO> settledBillDTOS = handler.listSettledBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
-        response.setSettledBillDTOS(settledBillDTOS);
-        if(settledBillDTOS.size() <= cmd.getPageSize()) {
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
+        response.setBillDTOS(billDTOS);
+        if(billDTOS.size() <= cmd.getPageSize()) {
             response.setNextPageAnchor(cmd.getPageAnchor());
         }else{
             response.setNextPageAnchor(cmd.getPageAnchor()+1);
@@ -349,17 +337,22 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void createBill(CreateBillCommand cmd) {
-        assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTOList(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName());
+        if(!cmd.getOwnerType().equals("community")){
+            throw new RuntimeException("保存账单不在一个园区");
+        }
+        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
+        assetProvider.creatPropertyBill(addressByPossibleName,cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType());
     }
 
     @Override
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
-        ListSettledBillCommand convertedCmd = ConvertHelper.convert(cmd, ListSettledBillCommand.class);
-        ListSettledBillResponse convertedResponse = listSettledBill(convertedCmd);
-        List<ListSettledBillDTO> listSettledBillDTOs = convertedResponse.getListSettledBillDTOs();
+        ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
+        convertedCmd.setStatus((byte)1);
+        ListBillsResponse convertedResponse = listBills(convertedCmd);
+        List<ListBillsDTO> listBillsDTOS = convertedResponse.getListBillsDTOS();
         Map<OwnerEntity,List<Long>> noticeObjects = new HashMap<>();
-        for(int i = 0; i < listSettledBillDTOs.size(); i ++) {
-            ListSettledBillDTO convertedDto = listSettledBillDTOs.get(i);
+        for(int i = 0; i < listBillsDTOS.size(); i ++) {
+            ListBillsDTO convertedDto = listBillsDTOS.get(i);
             OwnerEntity entity = new OwnerEntity();
             entity.setOwnerId(convertedDto.getOwnerId());
             entity.setOwnerType(convertedDto.getOwnerType());
@@ -378,6 +371,15 @@ public class AssetServiceImpl implements AssetService {
             requestCmd.setBillIds(entry.getValue());
             selectNotice(requestCmd);
         }
+    }
+
+    @Override
+    public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
+        ListBillDetailVO vo = assetProvider.listBillDetail(cmd.getBillId());
+        ListBillDetailResponse response = ConvertHelper.convert(vo, ListBillDetailResponse.class);
+        response.setBuildingName(cmd.getBuildingName());
+        response.setApartmentName(cmd.getApartmentName());
+        return response;
     }
 //    @Scheduled(cron = "0 0 23 * * ?")
 //    @Override

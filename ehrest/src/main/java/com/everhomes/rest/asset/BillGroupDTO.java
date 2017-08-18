@@ -8,35 +8,17 @@ import java.util.List;
 
 /**
  *<ul>
- * <li>billGroupId:账单组Id</li>
- * <li>billGroupName:账单组名称</li>
+ * <li>billGroupId:账单组id</li>
  * <li>billItemDTOList:账单组收费项目的集合，参考{@link com.everhomes.rest.asset.BillItemDTO}</li>
  * <li>exemptionItemDTOList:减免项集合，参考{@link com.everhomes.rest.asset.ExemptionItemDTO}</li>
  *</ul>
  */
 public class BillGroupDTO {
-    private String billGroupId;
-    private String billGroupName;
+    private Long billGroupId;
     @ItemType(BillItemDTO.class)
     private List<BillItemDTO> billItemDTOList;
     @ItemType(ExemptionItemDTO.class)
     private List<ExemptionItemDTO> exemptionItemDTOList;
-
-    public String getBillGroupId() {
-        return billGroupId;
-    }
-
-    public void setBillGroupId(String billGroupId) {
-        this.billGroupId = billGroupId;
-    }
-
-    public String getBillGroupName() {
-        return billGroupName;
-    }
-
-    public void setBillGroupName(String billGroupName) {
-        this.billGroupName = billGroupName;
-    }
 
     public List<BillItemDTO> getBillItemDTOList() {
         return billItemDTOList;
@@ -48,6 +30,14 @@ public class BillGroupDTO {
 
     public List<ExemptionItemDTO> getExemptionItemDTOList() {
         return exemptionItemDTOList;
+    }
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
     }
 
     public void setExemptionItemDTOList(List<ExemptionItemDTO> exemptionItemDTOList) {

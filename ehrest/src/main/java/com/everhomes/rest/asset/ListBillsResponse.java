@@ -8,16 +8,16 @@ import java.util.List;
 
 /**
  *<ul>
- * <li>listSettledBillDTOs: 已出账单的收费项，参考{@link ListSettledBillDTO}</li>
+ * <li>listBillsDTOS: 已出账单的收费项，参考{@link ListBillsDTO}</li>
  * <li>nextPageAnchor: 下一次锚点</li>
  *</ul>
  */
-public class ListSettledBillResponse {
-    @ItemType(ListSettledBillDTO.class)
-    private List<ListSettledBillDTO> listSettledBillDTOs;
+public class ListBillsResponse {
+    @ItemType(ListBillsDTO.class)
+    private List<ListBillsDTO> listBillsDTOS;
     private Long nextPageAnchor;
 
-    public ListSettledBillResponse() {
+    public ListBillsResponse() {
     }
 
     @Override
@@ -25,12 +25,12 @@ public class ListSettledBillResponse {
         return StringHelper.toJsonString(this);
     }
 
-    public List<ListSettledBillDTO> getListSettledBillDTOs() {
-        return listSettledBillDTOs;
+    public List<ListBillsDTO> getListBillsDTOS() {
+        return listBillsDTOS;
     }
 
-    public void setListSettledBillDTOs(List<ListSettledBillDTO> listSettledBillDTOs) {
-        this.listSettledBillDTOs = listSettledBillDTOs;
+    public void setListBillsDTOS(List<ListBillsDTO> listBillsDTOS) {
+        this.listBillsDTOS = listBillsDTOS;
     }
 
     public Long getNextPageAnchor() {

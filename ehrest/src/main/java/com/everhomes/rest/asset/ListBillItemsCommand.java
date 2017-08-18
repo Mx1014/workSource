@@ -8,12 +8,12 @@ import com.everhomes.util.StringHelper;
  * <li>billId:账单id</li>
  * <li>ownerId:所属者id</li>
  * <li>ownerType:所属者类型</li>
- * <li>targetName:账户名称</li>
+ * <li>targetName:客户名称</li>
  * <li>pageAnchor:锚点</li>
  * <li>pageSize:每页数量</li>
  *</ul>
  */
-public class ListSettledBillItemsCommand {
+public class ListBillItemsCommand {
     private Long billId;
     private Long ownerId;
     private String ownerType;
@@ -74,7 +74,7 @@ public class ListSettledBillItemsCommand {
         this.pageSize = pageSize;
     }
 
-    public ListSettledBillItemsCommand() {
+    public ListBillItemsCommand() {
 
     }
 }

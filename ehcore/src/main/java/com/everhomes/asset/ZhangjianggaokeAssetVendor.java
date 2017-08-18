@@ -1,30 +1,20 @@
 //@formatter:off
 package com.everhomes.asset;
 
-import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.oauth2client.HttpResponseEntity;
 import com.everhomes.oauth2client.handler.RestCallTemplate;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.asset.BillDetailDTO;
-import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
-import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
-import com.everhomes.rest.asset.ShowBillForClientDTO;
-import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.rest.asset.*;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static com.everhomes.util.SignatureHelper.computeSignature;
@@ -261,7 +251,17 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         return body;
     }
 
-    public HttpResponseEntity<?> postGo(String body,String url,Class T) {
+    @Override
+    public List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status) {
+        return null;
+    }
+
+    @Override
+    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
+        return super.listBillItems(billId, targetName, pageOffSet, pageSize);
+    }
+
+    public HttpResponseEntity<?> postGo(String body, String url, Class T) {
     HttpResponseEntity<?> entity = RestCallTemplate.url(url)
             .body(body)
             .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)

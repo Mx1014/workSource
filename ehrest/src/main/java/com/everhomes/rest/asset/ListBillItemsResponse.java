@@ -10,13 +10,13 @@ import java.util.List;
 /**
  *<ul>
  * <li>nextPageAnchor:下一次的锚点</li>
- * <li>settledBillDTOS:已出账单的收费项目的集合，参考{@link com.everhomes.rest.asset.SettledBillDTO}</li>
+ * <li>billDTOS:已出账单的收费项目的集合，参考{@link BillDTO}</li>
  *</ul>
  */
-public class ListSettledBillItemsResponse {
+public class ListBillItemsResponse {
     private Long nextPageAnchor;
-    @ItemType(SettledBillDTO.class)
-    private List<SettledBillDTO> settledBillDTOS;
+    @ItemType(BillDTO.class)
+    private List<BillDTO> billDTOS;
 
     @Override
     public String toString() {
@@ -31,15 +31,15 @@ public class ListSettledBillItemsResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<SettledBillDTO> getSettledBillDTOS() {
-        return settledBillDTOS;
+    public List<BillDTO> getBillDTOS() {
+        return billDTOS;
     }
 
-    public void setSettledBillDTOS(List<SettledBillDTO> settledBillDTOS) {
-        this.settledBillDTOS = settledBillDTOS;
+    public void setBillDTOS(List<BillDTO> billDTOS) {
+        this.billDTOS = billDTOS;
     }
 
-    public ListSettledBillItemsResponse() {
+    public ListBillItemsResponse() {
 
     }
 }

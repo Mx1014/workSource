@@ -120,13 +120,13 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName) {
-        return zuolinAssetVendorHandler.listSettledBill( currentNamespaceId,  ownerId,  ownerType,  addressName,  addressId,  billGroupName,  billGroupId,  billStatus,  dateStrBegin,  dateStrEnd,  pageOffSet,  pageSize,  targetName);
+    public List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status) {
+        return zuolinAssetVendorHandler.listBills( currentNamespaceId,  ownerId,  ownerType,  addressName,  addressId,  billGroupName,  billGroupId,  billStatus,  dateStrBegin,  dateStrEnd,  pageOffSet,  pageSize,  targetName, status);
     }
 
     @Override
-    public List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
-        return zuolinAssetVendorHandler.listSettledBillItems( billId,  targetName,  pageOffSet,  pageSize);
+    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
+        return zuolinAssetVendorHandler.listBillItems( billId,  targetName,  pageOffSet,  pageSize);
     }
 
     @Override

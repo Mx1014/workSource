@@ -16,15 +16,14 @@ public class BillGroupIdCommand {
         return StringHelper.toJsonString(this);
     }
 
+    public BillGroupIdCommand() {
+    }
+
     public Long getBillGroupId() {
         return billGroupId;
     }
 
     public void setBillGroupId(Long billGroupId) {
-        billGroupId = billGroupId;
-    }
-
-    public BillGroupIdCommand() {
-
+        this.billGroupId = billGroupId;
     }
 }

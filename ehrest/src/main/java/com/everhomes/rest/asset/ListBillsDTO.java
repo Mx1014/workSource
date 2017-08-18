@@ -26,7 +26,7 @@ import java.math.BigDecimal;
  * <li>ownerType:所属者类型</li>
  *</ul>
  */
-public class ListSettledBillDTO {
+public class ListBillsDTO {
     private Integer defaultOrder;
     private String dateStr;
     private Long billId;
@@ -177,7 +177,7 @@ public class ListSettledBillDTO {
         this.ownerType = ownerType;
     }
 
-    public ListSettledBillDTO() {
+    public ListBillsDTO() {
 
     }
 }

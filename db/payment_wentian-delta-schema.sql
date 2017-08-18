@@ -193,7 +193,7 @@ DROP TABLE IF EXISTS `eh_payment_exemption_items`;
 CREATE TABLE `eh_payment_exemption_items` (
   `id` bigint(20) NOT NULL,
   `bill_id` bigint(20) NOT NULL DEFAULT '0',
-  `bill_group_id` varchar(255) NOT NULL,
+  `bill_group_id` bigint(255) NOT NULL,
   `target_type` varchar(255) DEFAULT NULL,
   `target_id` bigint(20) DEFAULT NULL,
   `targetName` varchar(255) DEFAULT NULL,

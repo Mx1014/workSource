@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
  *<ul>
  * <li>ownerId: 所属者id</li>
  * <li>ownerType: 所属者type</li>
-// * <li>organizationId: 物业公司id</li>
  * <li>addressId: 楼栋门牌id</li>
  * <li>pageSize: 显示数量</li>
  * <li>pageAnchor: 下页锚点</li>
@@ -22,13 +21,13 @@ import javax.validation.constraints.NotNull;
  * <li>pageSize:每页数量</li>
  * <li>billGroupId:账单组id</li>
  * <li>addressName:门牌楼栋名称</li>
+ * <li>status:账单属性，0:未出账单;1:已出账单</li>
  *</ul>
  */
-public class ListSettledBillCommand {
+public class ListBillsCommand {
     @NotNull
     private Long ownerId;
     private Long addressId;
-//    private Long organizationId;
     @NotNull
     private String ownerType;
     private Integer pageSize;
@@ -41,6 +40,7 @@ public class ListSettledBillCommand {
 
     private Long billGroupId;
     private String addressName;
+    private Byte status;
 
     public Long getBillGroupId() {
         return billGroupId;
@@ -48,6 +48,14 @@ public class ListSettledBillCommand {
 
     public void setBillGroupId(Long billGroupId) {
         this.billGroupId = billGroupId;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     public String getAddressName() {
@@ -144,7 +152,7 @@ public class ListSettledBillCommand {
         this.ownerType = ownerType;
     }
 
-    public ListSettledBillCommand() {
+    public ListBillsCommand() {
 
     }
 }

@@ -4,6 +4,7 @@ package com.everhomes.address;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.asset.AddressIdAndName;
 import org.jooq.Record2;
 import org.jooq.Result;
 
@@ -49,4 +50,6 @@ public interface AddressProvider {
 	void updateOrganizationOwnerAddress(Long id);
 	void updateOrganizationAddress(Long id);
 	void updateOrganizationAddressMapping(Long id);
+
+    List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName);
 }

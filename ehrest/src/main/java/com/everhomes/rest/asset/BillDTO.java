@@ -21,7 +21,7 @@ import java.math.BigDecimal;
  * <li>billStatus:缴费状态,0:待缴;1:已缴</li>
  *</ul>
  */
-public class SettledBillDTO {
+public class BillDTO {
     private Long billItemId;
     private Integer defaultOrder;
     private String dateStr;
@@ -136,7 +136,7 @@ public class SettledBillDTO {
         this.billStatus = billStatus;
     }
 
-    public SettledBillDTO() {
+    public BillDTO() {
 
     }
 }

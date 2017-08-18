@@ -16,19 +16,19 @@ public class ListSettledBillTest extends CoreServerTestCase {
 
     @Test
     public void fun(){
-        ListSettledBillCommand cmd = new ListSettledBillCommand();
+        ListBillsCommand cmd = new ListBillsCommand();
         cmd.setOwnerId(240111044331055036l);
         cmd.setOwnerType("community");
         cmd.setPageAnchor(null);
         cmd.setPageSize(3);
         cmd.setDateStrBegin(null);
         cmd.setDateStrEnd(null);
-        ListSettledBillResponse listSettledBillResponse = assetService.listSettledBill(cmd);
+        ListBillsResponse listBillsResponse = assetService.listBills(cmd);
 
     }
     @Test
     public void fun1(){
-        ListSettledBillCommand cmd = new ListSettledBillCommand();
+        ListBillsCommand cmd = new ListBillsCommand();
         cmd.setOwnerId(240111044331055036l);
         cmd.setOwnerType("community");
 //        cmd.setPageAnchor(null);
@@ -38,15 +38,15 @@ public class ListSettledBillTest extends CoreServerTestCase {
 //        cmd.setBillGroupName("物业");
 //        cmd.setTargetName("lisi");
         cmd.setAddressName("beijing");
-        ListSettledBillResponse listSettledBillResponse = assetService.listSettledBill(cmd);
+        ListBillsResponse listBillsResponse = assetService.listBills(cmd);
         for(int i = 0; i<1000; i++){
             System.out.println(i);
         }
-        System.out.println(listSettledBillResponse);
+        System.out.println(listBillsResponse);
     }
     @Test
     public void fun2(){
-        ListSettledBillItemsCommand cmd = new ListSettledBillItemsCommand();
+        ListBillItemsCommand cmd = new ListBillItemsCommand();
         cmd.setOwnerId(240111044331055036l);
         cmd.setOwnerType("community");
 //        cmd.setPageAnchor(null);
@@ -66,7 +66,7 @@ public class ListSettledBillTest extends CoreServerTestCase {
         User u = new User();
         u.setId(240278l);
         UserContext.current().setUser(u);
-        ListSettledBillItemsResponse response = assetService.listSettledBillItems(cmd);
+        ListBillItemsResponse response = assetService.listBillItems(cmd);
         ShowBillForClientDTO showBillForClientDTO = assetService.showBillForClient(c);
         for(int i = 0; i<1000; i++){
             System.out.println(i);

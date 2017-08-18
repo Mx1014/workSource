@@ -260,14 +260,14 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListSettledBillDTO> listSettledBill(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName) {
-        List<ListSettledBillDTO> list = assetProvider.listSettledBill(currentNamespaceId,ownerId,ownerType,addressName, addressId, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName);
+    public List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status) {
+        List<ListBillsDTO> list = assetProvider.listBills(currentNamespaceId,ownerId,ownerType,addressName, addressId, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName,status);
         return list;
     }
 
     @Override
-    public List<SettledBillDTO> listSettledBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
-        List<SettledBillDTO> list = assetProvider.listSettledBillItems(billId,targetName,pageOffSet,pageSize);
+    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
+        List<BillDTO> list = assetProvider.listBillItems(billId,targetName,pageOffSet,pageSize);
         return list;
     }
 

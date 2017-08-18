@@ -4,7 +4,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.pmkexing.PmKeXingBillService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -505,29 +504,31 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 按照账单组展示未出账单          2
+    // this is for 按照账单组展示未出账单          4
     /**
      * <p>按照账单组展示未出账单,先按照账期排序，再按照公司，最后按照账单组的defaultOrder</p>
      * <b>URL: /asset/listNotSettledBill</b>
      */
     @RequestMapping("listNotSettledBill")
-    @RestReturn(value = ListNotSettledBillResponse.class)
-    public RestResponse listNotSettledBill(ListNotSettledBillCommand cmd) {
-        RestResponse response = new RestResponse();
+    @RestReturn(value = ListBillsResponse.class)
+    public RestResponse listNotSettledBill(ListBillsCommand cmd) {
+        ListBillsResponse res = assetService.listBills(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
 
-    // this is for 展示未出账单的一项的详情         2
+    // this is for 展示未出账单的一项的详情         4
     /**
      * <p>编辑账单，展示未出账单的一项的详情</p>
      * <b>URL: /asset/listNotSettledBillDetail</b>
      */
     @RequestMapping("listNotSettledBillDetail")
-    @RestReturn(value = ListNotSettledBillDetailResponse.class)
-    public RestResponse listNotSettledBillDetail(ListNotSettledBillDetailCommand cmd) {
-        RestResponse response = new RestResponse();
+    @RestReturn(value = ListBillDetailResponse.class)
+    public RestResponse listNotSettledBillDetail(ListBillDetailCommand cmd) {
+        ListBillDetailResponse res = assetService.listBillDetail(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -535,7 +536,7 @@ public class AssetController extends ControllerBase {
 
     // this is for 修改后保存一个未出账单          2
     /**
-     * <p>保存一个未出账单的修改</p>
+     * <p>保存一个未出账单的修改,若账单状态更改为已出，则不能修改</p>
      * <b>URL: /asset/modifyNotSettledBill</b>
      */
     @RequestMapping("modifyNotSettledBill")
@@ -547,14 +548,15 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 展示一个未出账单的收费项详情       1
+    // this is for 展示一个未出账单的收费项详情       4
     /**
      * <p>展示一个未出账单的收费项详情</p>
      * <b>URL: /asset/listNotSettledBillItems</b>
      */
     @RequestMapping("listNotSettledBillItems")
-    @RestReturn(value = ListNotSettledBillItemsResponse.class)
-    public RestResponse listNotSettledBillItems(ListNotSettledBillItemsCommand cmd) {
+    @RestReturn(value = ListBillItemsResponse.class)
+    public RestResponse listNotSettledBillItems(ListBillItemsCommand cmd) {
+        ListBillItemsResponse res = assetService.listBillItems(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -568,7 +570,7 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("listNotSettledBillExemptionItems")
     @RestReturn(value = ListNotSettledBillExemptionItemsResponse.class)
-    public RestResponse listNotSettledBillExemptionItems(ListNotSettledBillItemsCommand cmd) {
+    public RestResponse listNotSettledBillExemptionItems(ListBillItemsCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -669,10 +671,10 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/listSettledBill</b>
      */
     @RequestMapping("listSettledBill")
-    @RestReturn(value = ListSettledBillResponse.class)
-    public RestResponse listSettledBill(ListSettledBillCommand cmd) {
-        ListSettledBillResponse listSettledBillResponse = assetService.listSettledBill(cmd);
-        RestResponse response = new RestResponse(listSettledBillResponse);
+    @RestReturn(value = ListBillsResponse.class)
+    public RestResponse listSettledBill(ListBillsCommand cmd) {
+        ListBillsResponse listBillsResponse = assetService.listBills(cmd);
+        RestResponse response = new RestResponse(listBillsResponse);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -684,9 +686,9 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/listSettledBillItems</b>
      */
     @RequestMapping("listSettledBillItems")
-    @RestReturn(value = ListSettledBillItemsResponse.class)
-    public RestResponse listSettledBillItems(ListSettledBillItemsCommand cmd) {
-        ListSettledBillItemsResponse res = assetService.listSettledBillItems(cmd);
+    @RestReturn(value = ListBillItemsResponse.class)
+    public RestResponse listSettledBillItems(ListBillItemsCommand cmd) {
+        ListBillItemsResponse res = assetService.listBillItems(cmd);
         RestResponse response = new RestResponse(res);
         System.out.println(3434);
         response.setErrorDescription("OK");

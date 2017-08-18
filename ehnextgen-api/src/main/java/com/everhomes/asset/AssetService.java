@@ -31,9 +31,9 @@ public interface AssetService {
     AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
     List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
 
-    ListSettledBillResponse listSettledBill(ListSettledBillCommand cmd);
+    ListBillsResponse listBills(ListBillsCommand cmd);
 
-    ListSettledBillItemsResponse listSettledBillItems(ListSettledBillItemsCommand cmd);
+    ListBillItemsResponse listBillItems(ListBillItemsCommand cmd);
 
     void selectNotice(SelectedNoticeCommand cmd);
 
@@ -50,6 +50,8 @@ public interface AssetService {
     void createBill(CreateBillCommand cmd);
 
     void OneKeyNotice(OneKeyNoticeCommand cmd);
+
+    ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
 
 //    void synchronizeZJGKBill();
 }

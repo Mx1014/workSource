@@ -13,24 +13,28 @@ import java.util.List;
  * <li>ownerType:所属者type</li>
  * <li>ownerId:所属者id</li>
  * <li>dateStr:账期</li>
- * <li>addressId:楼栋门牌id</li>
+ * <li>buildingName:楼栋名称</li>
+ * <li>apartmentName:门牌名称</li>
  * <li>targetType:客户类别</li>
  * <li>targetId:客户id</li>
  * <li>noticeTel:催缴电话</li>
  * <li>targetName:客户名称</li>
- * <li>billGroupDTOList:账单组列表，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ * <li>billGroupDTO:账单组数据，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
  * <li>isSettled:是否是已出账单,1:新增已出账单;0:新增未出账单</li>
  *</ul>
  */
 public class CreateBillCommand {
     private String ownerType;
-    private String ownerId;
-    private Date dateStr;
-    private Long addressId;
+    private Long ownerId;
+    private String dateStr;
+    private String buildingName;
+    private String apartmentName;
     private String noticeTel;
     private String targetName;
+    private String targetType;
+    private Long targetId;
     @ItemType(BillGroupDTO.class)
-    private List<BillGroupDTO> billGroupDTOList;
+    private BillGroupDTO billGroupDTO;
     private Byte isSettled;
 
     public CreateBillCommand() {
@@ -57,36 +61,60 @@ public class CreateBillCommand {
         this.ownerType = ownerType;
     }
 
-    public String getOwnerId() {
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public Long getOwnerId() {
         return ownerId;
     }
 
-    public void setOwnerId(String ownerId) {
+    public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
     }
 
-    public Date getDateStr() {
+    public String getDateStr() {
         return dateStr;
     }
 
-    public void setDateStr(Date dateStr) {
+    public void setDateStr(String dateStr) {
         this.dateStr = dateStr;
     }
 
-    public Long getAddressId() {
-        return addressId;
+    public String getBuildingName() {
+        return buildingName;
     }
 
-    public void setAddressId(Long addressId) {
-        this.addressId = addressId;
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 
-    public List<BillGroupDTO> getBillGroupDTOList() {
-        return billGroupDTOList;
+    public String getApartmentName() {
+        return apartmentName;
     }
 
-    public void setBillGroupDTOList(List<BillGroupDTO> billGroupDTOList) {
-        this.billGroupDTOList = billGroupDTOList;
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
+    }
+
+    public BillGroupDTO getBillGroupDTO() {
+        return billGroupDTO;
+    }
+
+    public void setBillGroupDTO(BillGroupDTO billGroupDTO) {
+        this.billGroupDTO = billGroupDTO;
     }
 
     public String getNoticeTel() {
