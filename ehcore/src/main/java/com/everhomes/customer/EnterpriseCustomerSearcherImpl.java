@@ -184,7 +184,6 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(customers != null && customers.size() > 0) {
             customers.forEach(customer -> {
                 EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
-                LOGGER.info("customer: {}", customer);
                 ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
                 if(categoryItem != null) {
                     dto.setCategoryItemName(categoryItem.getItemDisplayName());

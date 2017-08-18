@@ -3,11 +3,15 @@ package com.everhomes.varField;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhVarFieldItemScopes;
+import com.everhomes.server.schema.tables.records.EhVarFieldItemScopesRecord;
 import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -145,12 +149,19 @@ public class FieldProviderImpl implements FieldProvider {
     @Override
     public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long itemId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        ScopeFieldItem item = context.select().from(Tables.EH_VAR_FIELD_ITEM_SCOPES)
-                .where(Tables.EH_VAR_FIELD_ITEM_SCOPES.ITEM_ID.eq(itemId))
-                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
-                .fetchAny().map((record)-> {
-            return ConvertHelper.convert(record, ScopeFieldItem.class);
+        List<ScopeFieldItem> item = new ArrayList<>();
+        SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.ITEM_ID.eq(itemId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
+
+        query.fetch().map((r) -> {
+            item.add(ConvertHelper.convert(r, ScopeFieldItem.class));
+            return null;
         });
-        return item;
+
+        if(item.size()==0)
+            return null;
+
+        return item.get(0);
     }
 }

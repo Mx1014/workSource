@@ -293,7 +293,202 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
-    //人才团队 知识产权 申报项目 工商信息 投融情况 经济指标 的增删改查
+    //人才团队
+    /**
+     * <b>URL: /customer/createCustomerTalent</b>
+     * <p>新建企业人才</p>
+     */
+    @RequestMapping("createCustomerTalent")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerTalent(@Valid CreateCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updateCustomerTalent</b>
+     * <p>修改企业人才</p>
+     */
+    @RequestMapping("updateCustomerTalent")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerTalent(@Valid UpdateCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerTalent</b>
+     * <p>删除企业人才</p>
+     */
+    @RequestMapping("deleteCustomerTalent")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerTalent(@Valid DeleteCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerTalent</b>
+     * <p>查看企业人才</p>
+     */
+    @RequestMapping("getCustomerTalent")
+    @RestReturn(value = CustomerAccountDTO.class)
+    public RestResponse getCustomerTalent(@Valid FindCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerTalents</b>
+     * <p>列出企业人才</p>
+     */
+    @RequestMapping("listCustomerTalents")
+    @RestReturn(value = CustomerAccountDTO.class, collection = true)
+    public RestResponse listCustomerTalents(@Valid ListCustomerAccountsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+//    知识产权 申报项目 工商信息 投融情况 经济指标 的增删改查
+    /**
+     * <b>URL: /customer/createCustomerTrademark</b>
+     * <p>新建企业商标</p>
+     */
+    @RequestMapping("createCustomerTrademark")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerTrademark(@Valid CreateCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updateCustomerTrademark</b>
+     * <p>修改企业商标</p>
+     */
+    @RequestMapping("updateCustomerTrademark")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerTrademark(@Valid UpdateCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerTrademark</b>
+     * <p>删除企业商标</p>
+     */
+    @RequestMapping("deleteCustomerTrademark")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerTrademark(@Valid DeleteCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerTrademark</b>
+     * <p>查看企业商标</p>
+     */
+    @RequestMapping("getCustomerTrademark")
+    @RestReturn(value = CustomerAccountDTO.class)
+    public RestResponse getCustomerTrademark(@Valid FindCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerTrademarks</b>
+     * <p>列出企业商标</p>
+     */
+    @RequestMapping("listCustomerTrademarks")
+    @RestReturn(value = CustomerAccountDTO.class, collection = true)
+    public RestResponse listCustomerTrademarks(@Valid ListCustomerAccountsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/createCustomerPatent</b>
+     * <p>新建企业专利</p>
+     */
+    @RequestMapping("createCustomerPatent")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerPatent(@Valid CreateCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updateCustomerPatent</b>
+     * <p>修改企业专利</p>
+     */
+    @RequestMapping("updateCustomerPatent")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerPatent(@Valid UpdateCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerPatent</b>
+     * <p>删除企业专利</p>
+     */
+    @RequestMapping("deleteCustomerPatent")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerPatent(@Valid DeleteCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerPatent</b>
+     * <p>查看企业专利</p>
+     */
+    @RequestMapping("getCustomerPatent")
+    @RestReturn(value = CustomerAccountDTO.class)
+    public RestResponse getCustomerPatent(@Valid FindCustomerAccountCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerPatents</b>
+     * <p>列出企业专利</p>
+     */
+    @RequestMapping("listCustomerPatents")
+    @RestReturn(value = CustomerAccountDTO.class, collection = true)
+    public RestResponse listCustomerPatents(@Valid ListCustomerAccountsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /customer/listEnterpriseCustomerStatistics</b>
