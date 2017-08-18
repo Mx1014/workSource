@@ -606,10 +606,10 @@ public class GroupServiceImpl implements GroupService {
                     dto.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
 
                 // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
-                if(dto.getMemberCount() == 0){
-                    long count = getOrganizationMemberCount(organization.getId());
-                    dto.setMemberCount(count);
-                }
+                //if(dto.getMemberCount() == 0){
+                long count = getOrganizationMemberCount(organization.getId());
+                dto.setMemberCount(count);
+                //}
 
                 dto.setOrgId(organization.getId());
             }
@@ -752,10 +752,10 @@ public class GroupServiceImpl implements GroupService {
                         }
 
                         // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
-                        if(dto.getMemberCount() == 0){
-                            long count = getOrganizationMemberCount(org.getId());
-                            dto.setMemberCount(count);
-                        }
+                        //if(dto.getMemberCount() == 0){
+                        long count = getOrganizationMemberCount(org.getId());
+                        dto.setMemberCount(count);
+                        //}
 
                         dto.setOrgId(org.getId());
                         groupDtoList.add(dto);

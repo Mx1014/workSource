@@ -100,8 +100,9 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		
 		request.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-		request.setOwnerType(cmd.getOwnerType());
-		request.setOwnerId(cmd.getOwnerId());
+		request.setOwnerType(com.everhomes.rest.common.EntityType.ORGANIZATIONS.getCode());
+		List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(cmd.getOwnerId());
+		request.setOwnerId(communityList.get(0).getId());
 		request.setType(cmd.getType());
 		request.setCategoryId(cmd.getCategoryId());
 		request.setCreatorOrganizationId(cmd.getCreatorOrganizationId());

@@ -1056,6 +1056,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             group.setNamespaceId(namespaceId);
 
             group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+
+            group.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
+
             groupProvider.createGroup(group);
 
             organization.setParentId(0L);

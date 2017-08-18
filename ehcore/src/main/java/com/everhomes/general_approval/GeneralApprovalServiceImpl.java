@@ -158,8 +158,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			cmd21.setApplyUserId(userId);
 			// cmd21.setReferId(null);
 			cmd21.setReferType(FlowReferType.APPROVAL.getCode());
-			cmd21.setProjectId(ga.getProjectId());
-			cmd21.setProjectType(ga.getProjectType());
+
+			cmd21.setProjectType(ga.getOwnerType());
+			cmd21.setProjectId(ga.getOwnerId());
+
 			// 把command作为json传到content里，给flowcase的listener进行处理
 			cmd21.setContent(JSON.toJSONString(cmd));
 			// 修改正中会工作流显示名称，暂时写死 add by sw 20170331

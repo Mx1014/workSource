@@ -64,3 +64,17 @@ update eh_groups set namespace_id = 999992 where id =  1021332 and namespace_id 
 update eh_groups set namespace_id = 999992 where id =  1041837 and namespace_id =   0 ;
 update eh_groups set namespace_id = 999975 where id =  1041838 and namespace_id =   0 ;
 update eh_groups set namespace_id = 999992 where id =  1041989 and namespace_id =   0 ;
+
+-- 更新数据，老数据将企业群设置为公有圈，现将其为私有。 add by yanjun 20170817
+UPDATE  eh_groups set private_flag = 1 where discriminator = 'enterprise';
+
+
+
+-- 黑名单 add by sfyan 20170817
+delete from `eh_acl_privileges` where id in (10079, 10090);
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) values('30600','黑名单管理','30000','/30000/30600','1','2','2','0',now());
+set @service_module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), 999983, 30600, 2);
+insert into `eh_acl_privileges` (`id`, `app_id`, `name`, `description`) values(10090,'0','black.list.super','黑名单超级权限');
+set @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+insert into `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) values((@module_privilege_id := @module_privilege_id + 1),'30600','1','10090','黑名单管理 管理员','0',now());

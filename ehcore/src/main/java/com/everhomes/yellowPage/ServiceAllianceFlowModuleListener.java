@@ -80,6 +80,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
 	@Override
 	public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
@@ -89,6 +90,36 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
         return moduleInfo;
 	}
 
+	private void changeContentsToObject(String contents,Long userId) {
+		GeneralApproval ga;
+		GeneralForm form;
+		List<PostApprovalFormItem> values;
+		List<GeneralFormFieldDTO> fieldDTOs;
+		ServiceAlliances serviceOrg;
+		ServiceAllianceCategories category = null;
+		User user;
+		PostApprovalFormItem userCompanyItem;
+
+		user = this.userProvider.findUserById(userId);
+		PostApprovalFormCommand cmd = JSONObject.parseObject(contents, PostApprovalFormCommand.class);
+		ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
+				.getApprovalId());
+		form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
+				.getFormOriginId());
+		values = cmd.getValues();
+		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
+		if(null != sourceVal){
+			Long yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+			serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
+			category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
+		}
+		userCompanyItem = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(category.getOwnerType(), category.getOwnerId(), ContactType.EMAIL.getCode(),
+				category.getId(), locator, Integer.MAX_VALUE);
+	}
 
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
@@ -103,6 +134,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		PostApprovalFormCommand cmd = JSONObject.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
 		//and by dengs 20170427 异步发送邮件
 		sendEmailAsynchronizedTask(flowCase.getContent(),flowCase.getApplyUserId());
+		//changeContentsToObject(flowCase.getContent(),flowCase.getApplyUserId());
+
 		StringBuffer contentBuffer = new StringBuffer();
 		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
 				.getApprovalId());
@@ -168,8 +201,14 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setCreatorName(user.getNickName());
 		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(identifier.getIdentifierToken());
-		request.setOwnerType(OwnerType.COMMUNITY.getCode());
-		request.setOwnerId(flowCase.getProjectId());
+		if (OwnerType.COMMUNITY.getCode().equals(flowCase.getProjectType())){
+			request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+			List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
+			request.setOwnerId(communityList.get(0).getId());
+		}else{
+			request.setOwnerType(flowCase.getProjectType());
+			request.setOwnerId(flowCase.getProjectId());
+		}
 		request.setFlowCaseId(flowCase.getId());
 		request.setId(flowCase.getId());
 		request.setCreatorUid(UserContext.current().getUser().getId());
