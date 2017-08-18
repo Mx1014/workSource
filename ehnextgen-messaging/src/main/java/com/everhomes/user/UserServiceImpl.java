@@ -302,9 +302,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
 
-	@Autowired
-	private UserService userService;
-
 	private static final String DEVICE_KEY = "device_login";
 
 	@PostConstruct
@@ -4357,32 +4354,58 @@ public class UserServiceImpl implements UserService {
 			// 处于某个公司对应的场景
 			addOrganizationSceneToList(userId, namespaceId, sceneList);
 		}
+		/** 从配置项中查询是否开启 **/
 
+		/** 查询默认场景 **/
 		// 如果没有有效场景
+		Community default_community = new Community();
 		if (sceneList.size() == 0) {
-			Community community = new Community();
 			switch (SceneType.fromCode(cmd.getSceneType())) {
 				case DEFAULT:
-					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.RESIDENTIAL.getCode());
+					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.COMMERCIAL.getCode());
 					break;
 				case PARK_TOURIST:
-					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.COMMERCIAL.getCode());
+					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.RESIDENTIAL.getCode());
 					break;
 			}
-
-			if (community != null) {
-				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
-				SceneType sceneType = DEFAULT;
-				CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
-				if (communityType == CommunityType.COMMERCIAL) {
-					sceneType = PARK_TOURIST;
-				}
-				SceneDTO communityScene = toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
-				if (communityScene != null) {
-					sceneList.add(communityScene);
-				}
-			}
 		}
+
+		//把community转换成场景
+		SceneType sceneType = DEFAULT;
+		CommunityType communityType = CommunityType.fromCode(default_community.getCommunityType());
+		if(communityType == CommunityType.COMMERCIAL) {
+			sceneType = PARK_TOURIST;
+		}
+
+		CommunityDTO default_communityDTO = ConvertHelper.convert(default_community, CommunityDTO.class);
+		SceneDTO default_communityScene = toCommunitySceneDTO(namespaceId, userId, default_communityDTO, sceneType);
+		sceneList.add(default_communityScene);
+
+//		// 如果没有有效场景
+//		if (sceneList.size() == 0) {
+//			Community community = new Community();
+//			switch (SceneType.fromCode(cmd.getSceneType())) {
+//				case DEFAULT:
+//					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.RESIDENTIAL.getCode());
+//					break;
+//				case PARK_TOURIST:
+//					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.COMMERCIAL.getCode());
+//					break;
+//			}
+//
+//			if (community != null) {
+//				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+//				SceneType sceneType = DEFAULT;
+//				CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
+//				if (communityType == CommunityType.COMMERCIAL) {
+//					sceneType = PARK_TOURIST;
+//				}
+//				SceneDTO communityScene = toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
+//				if (communityScene != null) {
+//					sceneList.add(communityScene);
+//				}
+//			}
+//		}
 
 		//modify by lei.lv --2017.8.15
 //		// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
@@ -4432,7 +4455,7 @@ public class UserServiceImpl implements UserService {
 		Community defalut_community = null;
 		for(SceneDTO scene : sceneList){
 			//轮询是否有默认的小区
-			SceneTokenDTO sceneToken = userService.checkSceneToken(userId, scene.getSceneToken());
+			SceneTokenDTO sceneToken = this.checkSceneToken(userId, scene.getSceneToken());
 			defalut_communityId = this.communityProvider.findDefaultCommunityByCommunityId(namespaceId, sceneToken.getEntityId());
 			if(defalut_communityId != null){
 				break;
