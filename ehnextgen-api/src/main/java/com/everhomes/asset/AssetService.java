@@ -53,5 +53,7 @@ public interface AssetService {
 
     ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
 
+    List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
+
 //    void synchronizeZJGKBill();
 }

@@ -773,7 +773,8 @@ public class AssetController extends ControllerBase {
     @RequestMapping("billStatics")
     @RestReturn(value = BillStaticsDTO.class, collection = true)
     public RestResponse billStatics(BillStaticsCommand cmd) {
-        RestResponse response = new RestResponse();
+        List<BillStaticsDTO> list = assetService.listBillStatics(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

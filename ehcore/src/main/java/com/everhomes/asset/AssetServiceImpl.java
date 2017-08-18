@@ -202,7 +202,7 @@ public class AssetServiceImpl implements AssetService {
         int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
         List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getAddressName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus());
         response.setListBillsDTOS(list);
-        if(list.size() != cmd.getPageSize()){
+        if(list.size() <= cmd.getPageSize()){
             response.setNextPageAnchor(cmd.getPageAnchor());
         }else{
             response.setNextPageAnchor(cmd.getPageAnchor()+1);
@@ -380,6 +380,20 @@ public class AssetServiceImpl implements AssetService {
         response.setBuildingName(cmd.getBuildingName());
         response.setApartmentName(cmd.getApartmentName());
         return response;
+    }
+
+    @Override
+    public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
+        List<BillStaticsDTO> list = new ArrayList<>();
+        Byte dimension = cmd.getDimension();
+        if(dimension==1){
+            list = assetProvider.listBillStaticsByDateStrs(cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getOwnerId(),cmd.getOwnerType());
+        }else if(dimension==2){
+            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
+        }else if(dimension==3){
+            list = assetProvider.listBillStaticsByCommunities(UserContext.getCurrentNamespaceId());
+        }
+        return list;
     }
 //    @Scheduled(cron = "0 0 23 * * ?")
 //    @Override

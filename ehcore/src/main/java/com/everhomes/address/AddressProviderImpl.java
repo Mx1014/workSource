@@ -435,6 +435,7 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhAddresses r = Tables.EH_ADDRESSES.as("r");
         SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(r);
         query.addSelect(r.ID,r.ADDRESS);
         if (buildingName != null && buildingName.trim().length()>0){
             query.addConditions(r.BUILDING_NAME.eq(buildingName));

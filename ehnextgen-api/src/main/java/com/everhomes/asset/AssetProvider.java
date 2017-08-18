@@ -59,4 +59,10 @@ public interface AssetProvider {
     void creatPropertyBill(List<AddressIdAndName> addressIdAndNames, BillGroupDTO billGroupDTO, String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType);
 
     ListBillDetailVO listBillDetail(Long billId);
+
+    List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType);
+
+    List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId);
+
+    List<BillStaticsDTO> listBillStaticsByCommunities(Integer currentNamespaceId);
 }

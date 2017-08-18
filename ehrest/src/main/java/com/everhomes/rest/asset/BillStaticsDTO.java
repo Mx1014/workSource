@@ -8,7 +8,10 @@ import java.math.BigDecimal;
 
 /**
  *<ul>
- * <li></li>
+ * <li>valueOfX:x轴名称</li>
+ * <li>amountReceivable:应缴金额</li>
+ * <li>amountReceived:实收金额</li>
+ * <li>amountOwed:欠收金额</li>
  *</ul>
  */
 public class BillStaticsDTO {

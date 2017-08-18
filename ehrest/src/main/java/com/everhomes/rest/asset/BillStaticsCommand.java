@@ -17,8 +17,8 @@ import java.util.Date;
  */
 public class BillStaticsCommand {
     private Byte dimension;
-    private Date beginLimit;
-    private Date endLimit;
+    private String beginLimit;
+    private String endLimit;
     private String ownerType;
     private Long ownerId;
 
@@ -35,19 +35,19 @@ public class BillStaticsCommand {
         this.dimension = dimension;
     }
 
-    public Date getBeginLimit() {
+    public String getBeginLimit() {
         return beginLimit;
     }
 
-    public void setBeginLimit(Date beginLimit) {
+    public void setBeginLimit(String beginLimit) {
         this.beginLimit = beginLimit;
     }
 
-    public Date getEndLimit() {
+    public String getEndLimit() {
         return endLimit;
     }
 
-    public void setEndLimit(Date endLimit) {
+    public void setEndLimit(String endLimit) {
         this.endLimit = endLimit;
     }
 
