@@ -2684,9 +2684,11 @@ public class UserServiceImpl implements UserService {
 
 		/** 查询默认场景 **/
 		Community default_community = new Community();
-		if(residential_sceneList != null && commercial_sceneList == null){
+		if(residential_sceneList.size() != 0 && commercial_sceneList.size() == 0){
+			//查询默认园区
 			default_community = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.RESIDENTIAL.getCode());
-		}else if(residential_sceneList == null && commercial_sceneList != null){
+		}else if(residential_sceneList.size() == 0 && commercial_sceneList.size() != 0){
+			//查询默认小区
 			default_community = findDefaultCommunity(namespaceId,userId,commercial_sceneList,CommunityType.COMMERCIAL.getCode());
 		}
 
