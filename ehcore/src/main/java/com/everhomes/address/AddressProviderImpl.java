@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record2;
@@ -366,7 +367,29 @@ public class AddressProviderImpl implements AddressProvider {
 		return null;
 	}
 
-	@Override
+    @Override
+    public List<Address> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Address> addresses = new ArrayList<>();
+        SelectQuery<EhAddressesRecord> query = context.selectQuery(Tables.EH_ADDRESSES);
+        query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId));
+        if(StringUtils.isNotBlank(buildingName)) {
+            query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)
+                    .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(buildingName)));
+        }
+        if(StringUtils.isNotBlank(apartmentName)) {
+            query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + apartmentName + "%"));
+        }
+
+        query.fetch().map((r) -> {
+            addresses.add(ConvertHelper.convert(r, Address.class));
+            return null;
+        });
+        return addresses;
+    }
+
+    @Override
 	public List<Address> listAddressByNamespaceType(Integer namespaceId, Long communityId, String namespaceType) {
 		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ADDRESSES)
 	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))

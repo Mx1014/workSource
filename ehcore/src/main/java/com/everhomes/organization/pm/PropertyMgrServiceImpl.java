@@ -2365,7 +2365,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public ListApartmentsResponse listApartments(ListApartmentsCommand cmd) {
 		//取得门牌列表
-//		List<ApartmentDTO> aptList = addressService.listApartmentsByKeyword(cmd).second();
+		List<ApartmentDTO> aptList = addressService.listApartmentsByKeyword(cmd).second();
+
+		//设置门牌的入住状态
+		setLivingStatus(dto, communityAddressMappingMap, apartmentDTO.getLivingStatus());
 		return null;
 	}
 

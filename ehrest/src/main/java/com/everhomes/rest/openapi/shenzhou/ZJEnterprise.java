@@ -1,5 +1,7 @@
 package com.everhomes.rest.openapi.shenzhou;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -8,6 +10,7 @@ import java.util.List;
 public class ZJEnterprise {
     private String communityIdentifier;
     private Long communityId;
+    @ItemType(String.class)
     private List<String> apartmentIdentifierList;
     private String enterpriseIdentifier;
     private String name;

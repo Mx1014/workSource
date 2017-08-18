@@ -51,4 +51,6 @@ public interface AddressProvider {
 	void updateOrganizationAddress(Long id);
 	void updateOrganizationAddressMapping(Long id);
     Address findAddressByNamespaceTypeAndName(String namespaceType, String namespaceToken);
+
+    List<Address> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName);
 }
