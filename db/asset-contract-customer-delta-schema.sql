@@ -417,7 +417,7 @@ CREATE TABLE `eh_customer_talents` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 -- 客户知识产权：
 CREATE TABLE `eh_customer_trademarks` (
-  `id` BIGINT NOT NULL 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
@@ -438,7 +438,7 @@ CREATE TABLE `eh_customer_trademarks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_customer_patents` (
-  `id` BIGINT NOT NULL 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
@@ -463,7 +463,7 @@ CREATE TABLE `eh_customer_patents` (
  
 -- 客户申报项目：
 CREATE TABLE `eh_customer_apply_projects` (
-  `id` BIGINT NOT NULL 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64)
@@ -485,7 +485,7 @@ CREATE TABLE `eh_customer_apply_projects` (
  
 -- 客户工商信息：
 CREATE TABLE `eh_customer_commercials` (
-  `id` BIGINT NOT NULL 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: enterprise; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
@@ -523,7 +523,7 @@ CREATE TABLE `eh_customer_commercials` (
  
 -- 客户投融情况：
 CREATE TABLE `eh_customer_investments` (
-  `id` BIGINT NOT NULL 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
@@ -542,7 +542,7 @@ CREATE TABLE `eh_customer_investments` (
 
 -- 客户经济指标：
 CREATE TABLE `eh_customer_economic_indicators` (
-  `id` BIGINT NOT NULL 'id of the record',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
