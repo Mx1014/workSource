@@ -19,6 +19,7 @@ public interface PunchServiceErrorCode {
     static final int ERROR_GEOPOINT_NULL = 13000;  //没有定位信息,请定位后再此请求
     static final int ERROR_WIFI_NULL = 10006;  //用户wifi位空
     static final int ERROR_WIFI_WRONG = 10007;  //用户wifi地址错误
+    static final int ERROR_PUNCH_TYPE = 10008;  //用户打卡类型错误,重新请求
     
     
 }

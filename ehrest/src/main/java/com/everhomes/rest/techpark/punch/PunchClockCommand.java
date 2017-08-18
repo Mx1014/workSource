@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>enterpriseId：企业Id</li>
- * <li>punchType：0上班 1下班 2不打卡 参考 {@link PunchType}</li>
+ * <li>punchType：0上班 1下班 这里只有上班或者下班</li>
  * <li>latitude: 坐标纬度</li>
  * <li>longitude： 坐标经度</li>
  * <li>wifiMac： wifiMac地址信息</li>

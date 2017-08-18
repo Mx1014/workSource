@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class PunchLogDTO { 
-	private Integer punchIntevalNo;
+	private Integer punchIntervalNo;
 	private Byte punchType;
 	private long ruleTime;
     private long punchTime; 
@@ -40,14 +40,7 @@ public class PunchLogDTO {
 	public void setClockStatus(Byte clockStatus) {
 		this.clockStatus = clockStatus;
 	}
-
-	public Integer getPunchIntevalNo() {
-		return punchIntevalNo;
-	}
-
-	public void setPunchIntevalNo(Integer punchIntevalNo) {
-		this.punchIntevalNo = punchIntevalNo;
-	}
+ 
 
 	public Byte getPunchType() {
 		return punchType;
@@ -63,6 +56,14 @@ public class PunchLogDTO {
 
 	public void setRuleTime(long ruleTime) {
 		this.ruleTime = ruleTime;
+	}
+
+	public Integer getPunchIntervalNo() {
+		return punchIntervalNo;
+	}
+
+	public void setPunchIntervalNo(Integer punchIntervalNo) {
+		this.punchIntervalNo = punchIntervalNo;
 	}
  
     
