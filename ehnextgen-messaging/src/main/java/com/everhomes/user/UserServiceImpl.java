@@ -4364,10 +4364,10 @@ public class UserServiceImpl implements UserService {
 		if (sceneList.size() == 0) {
 			switch (SceneType.fromCode(cmd.getSceneType())) {
 				case DEFAULT:
-					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.COMMERCIAL.getCode());
+					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.RESIDENTIAL.getCode());
 					break;
 				case PARK_TOURIST:
-					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.RESIDENTIAL.getCode());
+					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.COMMERCIAL.getCode());
 					break;
 			}
 		}
