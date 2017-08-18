@@ -2711,3 +2711,67 @@ update eh_web_menus set status=2 where id in(41300, 41310, 41320);
 
 -- 停车缴费 add by sw 20170808
 UPDATE eh_parking_lots set vendor_name = 'JIN_YI' where id = 10007;
+
+
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`)
+	VALUES ('18191', '15305', '东莞市', 'DONGGUANSHI', 'DGS', '/广东/东莞市', '2', '2', NULL, '0769', '2', '0', 999984);
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`)
+	VALUES ('18192', '18191', '清溪镇', 'QINGXIZHEN', 'QXZ', '/广东/东莞市/清溪镇', '3', '3', NULL, '0769', '2', '0', 999984);
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`)
+	VALUES ('18193', '15305', '珠海市', 'ZHUHAISHI', 'ZHS', '/广东/珠海市', '2', '2', NULL, '0756', '2', '0', 999984);
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`)
+	VALUES ('18194', '18193', '香洲区', 'XIANGZHOUQU', 'XZQ', '/广东/珠海市/香洲区', '3', '3', NULL, '0756', '2', '0', 999984);
+
+SET @community_geopoint_id = (SELECT max(id) FROM `eh_community_geopoints`);
+SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
+
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES(190620, UUID(), @namespace_id, 2, 'EhGroups', 0,'力合双清创新基地论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES(190619, UUID(), @namespace_id, 2, 'EhGroups', 0,'力合双清创新基地意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES(190618, UUID(), @namespace_id, 2, 'EhGroups', 0,'大湾区科创园论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES(190617, UUID(), @namespace_id, 2, 'EhGroups', 0,'大湾区科创园意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(240111044331050379, UUID(), 18191, '东莞市',  18192, '清溪镇', '力合双清创新基地', '力合双清创新基地', '“力合双清创新基地”位居深莞惠几何中心——东莞清溪，占地面积1200亩，建筑面积140万平方米。基地承载清华大学、深圳清华大学研究院、清华东莞创新中心科技成果产业化转移的功能，通过整合清华体系的科研、人才等优质资源，构建“创业苗圃+孵化器+加速器+企业总部基地”的全链条发展环境，为企业提供全生命周期的科技创新服务，致力于成为东莞市乃至广东省产城融合创新孵化示范基地、产业转型升级示范园区。', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 98, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, 190620, 190619, UTC_TIMESTAMP(), 999984);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
+	VALUES((@community_geopoint_id := @community_geopoint_id + 1), 240111044331050379, '', 114.174205, 22.816999, 'ws11y1eneucs');
+INSERT INTO `eh_organization_communities`(organization_id, community_id)
+	VALUES(1008218, 240111044331050379);
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`)
+	VALUES((@namespace_resource_id := @namespace_resource_id + 1), 999984, 'COMMUNITY', 240111044331050379, UTC_TIMESTAMP());
+
+
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(240111044331050378, UUID(), 18193, '珠海市',  18194, '香洲区', '清华科技园（珠海）', '大湾区科创园', '清华科技园（珠海）是清华大学和珠海市人民政府于2000年协议共建的大学科技园区与高科技企业孵化器，依托清华大学的科技、人才优势，形成具有持续创新能力和国际竞争能力的产学研资结合体。它位于美丽的海滨城市珠海高新区，毗邻中山大学珠海校区，占地约14.46万㎡，规划总建筑面积36.15万㎡，一期工程6.52万㎡，于2002年投入使用；二期工程29.63万㎡，总投资19亿元，含研发办公、总部经济、中试基地、检测中心和生活配套等建筑形态。园区将打造集苗圃、孵化器、加速器为一体的创新孵化体系，实现战略新兴产业的集聚。', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 98, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, 190618, 190617, UTC_TIMESTAMP(), 999984);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
+	VALUES((@community_geopoint_id := @community_geopoint_id + 1), 240111044331050378, '', 113.592252, 22.349651, 'webz0uek5kfj');
+INSERT INTO `eh_organization_communities`(organization_id, community_id)
+	VALUES(1008218, 240111044331050378);
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`)
+	VALUES((@namespace_resource_id := @namespace_resource_id + 1), 999984, 'COMMUNITY', 240111044331050378, UTC_TIMESTAMP());
+
+SET @building_id = 1960773;
+INSERT INTO `eh_buildings` (`id`, `community_id`, `default_order`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(@building_id, 240111044331050378, @building_id, '创业大厦A座', '创业大厦A座', 0, '', '生态园', NULL, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999984);
+SET @building_id = @building_id + 1;
+INSERT INTO `eh_buildings` (`id`, `community_id`, `default_order`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(@building_id, 240111044331050378, @building_id, '创业大厦B座', '创业大厦B座', 0, '', '生态园', NULL, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999984);
+SET @building_id = @building_id + 1;
+INSERT INTO `eh_buildings` (`id`, `community_id`, `default_order`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(@building_id, 240111044331050378, @building_id, '综合楼C座', '综合楼C座', 0, '', '广东省珠海市香洲区大学路101号', NULL, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999984);
+SET @building_id = @building_id + 1;
+INSERT INTO `eh_buildings` (`id`, `community_id`, `default_order`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(@building_id, 240111044331050378, @building_id, '综合楼D座', '综合楼D座', 0, '', '广东省珠海市香洲区大学路101号', NULL, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999984);
+SET @building_id = @building_id + 1;
+INSERT INTO `eh_buildings` (`id`, `community_id`, `default_order`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(@building_id, 240111044331050378, @building_id, '创新大厦G座', '创新大厦G座', 0, '', '广东省珠海市香洲区大学路101号', NULL, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999984);
+SET @building_id = @building_id + 1;
+INSERT INTO `eh_buildings` (`id`, `community_id`, `default_order`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(@building_id, 240111044331050378, @building_id, '创新大厦H座', '创新大厦H座', 0, '', '广东省珠海市香洲区大学路101号', NULL, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999984);
+
+SET @building_id = @building_id + 1;
+INSERT INTO `eh_buildings` (`id`, `community_id`, `default_order`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(@building_id, 240111044331050378, @building_id, '清湖工业园办公楼', '办公楼', 0, '', '东莞市清溪镇青湖工业区富士工业城办公楼', NULL, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999984);
