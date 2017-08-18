@@ -28,3 +28,5 @@ CREATE TABLE `eh_profile_dismiss_employees` (
 	`operator_uid` BIGINT COMMENT '操作人id',
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
+ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
