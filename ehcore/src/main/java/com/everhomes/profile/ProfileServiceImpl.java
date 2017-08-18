@@ -2,14 +2,22 @@ package com.everhomes.profile;
 
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.profile.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.jooq.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.sql.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ProfileServiceImpl implements ProfileService {
@@ -90,7 +98,60 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public ListProfileDismissEmployeesResponse listProfileDismissEmployees(ListProfileDismissEmployeesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ListProfileDismissEmployeesResponse response = new ListProfileDismissEmployeesResponse();
+
+        Condition condition = listDismissEmployeesCondition(cmd);
+
+        List<ProfileDismissEmployees> results = profileProvider.listProfileDismissEmployees(cmd.getPageAnchor(), cmd.getPageSize()+1, namespaceId, condition);
+
+        if (results != null) {
+            response.setDismissEmployees(results.stream().map(r -> {
+                ProfileDismissEmployeeDTO dto = ConvertHelper.convert(r, ProfileDismissEmployeeDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+            Long nextPageAnchor = null;
+            if (results.size() > cmd.getPageSize()) {
+                results.remove(results.size() - 1);
+                nextPageAnchor = results.get(results.size() - 1).getId();
+            }
+            response.setNextPageAnchor(nextPageAnchor);
+            return response;
+        }
+
         return null;
+    }
+
+    private Condition listDismissEmployeesCondition(ListProfileDismissEmployeesCommand cmd){
+        Condition condition = Tables.EH_PROFILE_DISMISS_EMPLOYEES.ORGANIZATION_ID.eq(cmd.getOrganizationId());
+
+        //   离职日期判断
+        if(cmd.getDismissTimeStart()!=null && cmd.getDismissTimeEnd() != null) {
+            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_TIME.ge(cmd.getDismissTimeStart()));
+            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_TIME.le(cmd.getDismissTimeEnd()));
+        }
+
+        //   入职日期判断
+        if(cmd.getCheckInTimeStart()!=null && cmd.getCheckInTimeEnd() != null) {
+            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.CHECK_IN_TIME.ge(cmd.getCheckInTimeStart()));
+            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.CHECK_IN_TIME.le(cmd.getCheckInTimeEnd()));
+        }
+
+        //   离职类型
+        if(cmd.getDismissType()!=null) {
+            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_TYPE.eq(cmd.getDismissType()));
+        }
+
+        //   离职原因
+        if(cmd.getDismissType()!=null) {
+            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_REASON.eq(cmd.getDismissReason()));
+        }
+
+        //   姓名搜索
+        if(cmd.getContactName() != null){
+            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.CONTACT_NAME.like("%" + cmd.getContactName()+ "%"));
+        }
+        return condition;
     }
 
     @Override

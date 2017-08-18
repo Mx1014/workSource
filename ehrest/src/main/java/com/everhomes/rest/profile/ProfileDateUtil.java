@@ -1,0 +1,20 @@
+package com.everhomes.rest.profile;
+
+import java.text.SimpleDateFormat;
+
+public class ProfileDateUtil {
+
+    public static java.sql.Date parseDate(String strDate) {
+        String str = strDate;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        java.util.Date d = null;
+        try {
+            d = format.parse(str);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        java.sql.Date date = new java.sql.Date(d.getTime());
+        return date;
+    }
+
+}
