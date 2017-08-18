@@ -8,10 +8,12 @@ ALTER TABLE `eh_punch_day_logs` ADD COLUMN punch_count INT COMMENT '打卡次数
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN `punch_organization_id` BIGINT;
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN `rule_type` TINYINT DEFAULT '0' COMMENT '0- 排班制 ; 1- 固定班次';
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN `time_rule_name` VARCHAR(64) COMMENT '排班规则名称';
+ALTER TABLE `eh_punch_day_logs` ADD COLUMN `time_rule_id` BIGINT COMMENT '排班规则id';
 
 ALTER TABLE `eh_punch_logs` ADD COLUMN `punch_type` TINYINT DEFAULT '0' COMMENT '0- 上班打卡 ; 1- 下班打卡'; 
 ALTER TABLE `eh_punch_logs` ADD COLUMN `punch_interval_no` INT DEFAULT '1' COMMENT '第几次排班的打卡'; 
-ALTER TABLE `eh_punch_logs` ADD COLUMN `rule_time` DATETIME COMMENT '规则设置的该次打卡时间';  
+ALTER TABLE `eh_punch_logs` ADD COLUMN `rule_time` BIGINT COMMENT '规则设置的该次打卡时间';  
+ALTER TABLE `eh_punch_logs` ADD COLUMN `status` TINYINT COMMENT '打卡状态 0-正常 1-迟到 2-早退 3-缺勤 14-缺卡';  
 
 ALTER TABLE `eh_punch_statistics` ADD COLUMN `punch_org_name` VARCHAR(64) COMMENT '所属规则-考勤组';
 
