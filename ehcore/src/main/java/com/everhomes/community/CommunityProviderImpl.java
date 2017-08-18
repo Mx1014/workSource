@@ -21,10 +21,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
-import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhResourceCategoryAssignmentsRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -1399,6 +1396,16 @@ public class CommunityProviderImpl implements CommunityProvider {
 
     @Override
     public Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunityDefault.class));
+        SelectQuery<EhCommunityDefaultRecord> query = context.selectQuery(Tables.EH_COMMUNITY_DEFAULT);
+        query.addConditions(Tables.EH_COMMUNITY_DEFAULT.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITY_DEFAULT.ORIGIN_COMMUNITY_ID.eq(originId));
+        query.addOrderBy(Tables.EH_COMMUNITIES.ID.desc());
+        query.addLimit(1);
+        EhCommunityDefaultRecord record = query.fetchAny();
+        if (record != null) {
+            return record.getTargetCommunityId();
+        }
         return null;
     }
 }
