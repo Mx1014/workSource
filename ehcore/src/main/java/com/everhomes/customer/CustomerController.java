@@ -130,7 +130,7 @@ public class CustomerController extends ControllerBase {
      * <b>URL: /customer/syncEnterpriseCustomer</b>
      * <p>同步企业客户</p>
      */
-    @RequestMapping("searchEnterpriseCustomer")
+    @RequestMapping("syncEnterpriseCustomer")
     @RestReturn(value = String.class)
     public RestResponse syncEnterpriseCustomer() {
         enterpriseCustomerSearcher.syncFromDb();

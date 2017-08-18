@@ -231,8 +231,6 @@ CREATE TABLE `eh_enterprise_customers` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-
 ALTER TABLE `eh_contracts` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 ALTER TABLE `eh_contracts` ADD COLUMN `contract_start_date` DATETIME COMMENT '合同开始日期';
 ALTER TABLE `eh_contracts` ADD COLUMN `name` VARCHAR(128) COMMENT '合同名称';
@@ -382,3 +380,173 @@ ALTER TABLE `eh_addresses` ADD COLUMN  `source_item_id` BIGINT COMMENT '资产�
 ALTER TABLE `eh_addresses` ADD COLUMN  `source_item_name` VARCHAR(128) COMMENT '资产来源：自管、业主放盘、大业主交管、其他..., refer to the display_name of eh_var_field_items';
 ALTER TABLE `eh_addresses` ADD COLUMN `decorate_status` TINYINT COMMENT '装修状态';
 ALTER TABLE `eh_addresses` ADD COLUMN `orientation` VARCHAR(32) COMMENT '朝向';
+
+
+-- 企业人才：
+CREATE TABLE `eh_customer_talents` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
+  `customer_id` BIGINT,
+  `name` VARCHAR(64),
+  `gender` TINYINT,
+  `phone` VARCHAR(32),
+  `nationality_item_id` BIGINT COMMENT '国籍, refer to the id of eh_var_field_items',
+  `degree_item_id` BIGINT COMMENT '最高学历, refer to the id of eh_var_field_items',
+  `graduate_school` VARCHAR(128) COMMENT '毕业学校',
+  `major` VARCHAR(128) COMMENT '所属专业',
+  `experience` INTEGER COMMENT '工作经验',
+  `returnee_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否海归 0: no; 1: yes',
+  `abroad_item_id` BIGINT COMMENT '留学国家, refer to the id of eh_var_field_items',
+  `job_position` VARCHAR(128),
+  `technical_title_item_id` BIGINT COMMENT '技术职称, refer to the id of eh_var_field_items',
+  `individual_evaluation_item_id` BIGINT COMMENT '个人评定, refer to the id of eh_var_field_items',
+  `personal_certificate` VARCHAR(256) COMMENT '个人证书',
+  `career_experience` TEXT COMMENT '主要职业经历',
+  `remark` TEXT,
+  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
+-- 客户知识产权：
+CREATE TABLE `eh_customer_trademarks` (
+  `id` BIGINT NOT NULL 'id of the record',
+  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
+  `customer_id` BIGINT,
+  `customer_name` VARCHAR(64),
+  `name` VARCHAR(128) COMMENT '商标名称',
+  `registe_date` DATETIME COMMENT '注册日期',
+  `trademark_type_item_id` BIGINT COMMENT '商标类型: 文字商标、图片商标、品牌商标、著名商标..., refer to the id of eh_var_field_items',
+  `trademark_type_item_name` VARCHAR(128) COMMENT '商标类型: 文字商标、图片商标、品牌商标、著名商标..., refer to the display_name of eh_var_field_items',
+--  `trademark_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none; 1: text; 2: brand; 3: famous; 4: picture',
+  `trademark_amount` INTEGER COMMENT '商标数量',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_customer_patents` (
+  `id` BIGINT NOT NULL 'id of the record',
+  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
+  `customer_id` BIGINT,
+  `customer_name` VARCHAR(64),
+  `name` VARCHAR(128) COMMENT '证书名称',
+  `registe_date` DATETIME COMMENT '注册日期',
+  `patent_status_item_id` BIGINT COMMENT '专利状态 申请 授权..., refer to the id of eh_var_field_items',
+  `patent_status_item_name` VARCHAR(128) COMMENT '专利状态 申请 授权..., refer to the display_name of eh_var_field_items',
+  `patent_type_item_id` BIGINT COMMENT '专利类型 发明专利\实用新型\外观设计\集成电路布图\软件著作权\证书..., refer to the id of eh_var_field_items',
+  `patent_type_item_name` VARCHAR(128) COMMENT '专利类型 发明专利\实用新型\外观设计\集成电路布图\软件著作权\证书..., refer to the display_name of eh_var_field_items',
+  `patent_name` VARCHAR(128) COMMENT '专利名称',
+  `application_number` VARCHAR(64) COMMENT '授权号',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ 
+ 
+-- 客户申报项目：
+CREATE TABLE `eh_customer_apply_projects` (
+  `id` BIGINT NOT NULL 'id of the record',
+  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
+  `customer_id` BIGINT,
+  `customer_name` VARCHAR(64)
+  `project_name` VARCHAR(128) COMMENT '获批项目名称',
+  `project_source` VARCHAR(128) COMMENT 'json of id list from eh_var_field_items and customer input text, split by ,',
+  `project_establish_date` DATETIME COMMENT '项目立项日期',
+  `project_complete_date` DATETIME COMMENT '项目完成日期',
+  `project_amount` DECIMAL(10,2) COMMENT '获批项目金额 “万元”为单位',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: in progress; 2: completed', 
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ 
+-- 客户工商信息：
+CREATE TABLE `eh_customer_commercials` (
+  `id` BIGINT NOT NULL 'id of the record',
+  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: enterprise; 1: individual',
+  `customer_id` BIGINT,
+  `customer_name` VARCHAR(64),
+  `enterprise_type_item_id` BIGINT COMMENT '企业类型: 企业、事业单位、政府机关、社会团体、民办非企业单位、基金会、其他组织机构..., refer to the id of eh_var_field_items',
+  `enterprise_type_item_name` VARCHAR(128) COMMENT '企业类型: 企业、事业单位、政府机关、社会团体、民办非企业单位、基金会、其他组织机构..., refer to the display_name of eh_var_field_items',
+  `share_type_item_id` BIGINT COMMENT '控股情况: 国有控股、集体控股、私人控股、港澳台商控股、外商投资、其他..., refer to the id of eh_var_field_items',
+  `share_type_item_name` VARCHAR(128) COMMENT '控股情况: 国有控股、集体控股、私人控股、港澳台商控股、外商投资、其他..., refer to the display_name of eh_var_field_items',
+--  `enterprise_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none; 1: enterprise; 2: institution; 3: government; 4: social group; 5: Private Non-enterprise Units; 6: Foundation; 7: other organizations',
+--  `share_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none; 1: State holding; 2: collective holding; 3: private holding; 4: Hong Kong, Macao, Taiwan holding; 5: foreign investment; 6: others',
+  `contact` VARCHAR(32)  COMMENT '联系人',
+  `contact_number` VARCHAR(32) COMMENT '联系电话',
+  `unified_social_credit_code` VARCHAR(64) COMMENT '统一社会信用代码',
+  `business_scope` VARCHAR(128) COMMENT '主营业务',
+  `foundation_date` DATETIME COMMENT '成立日期',
+  `tax_registration_date` DATETIME COMMENT '税务登记日期',
+  `validity_begin_date` DATETIME COMMENT '',
+  `validity_end_date` DATETIME,
+  `registered_addr` VARCHAR(128),
+  `registered_capital` DECIMAL(10,2) COMMENT '注册资金',
+  `paidup_apital` DECIMAL(10,2) COMMENT '实到资金',
+  `property_type` TINYINT, 
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `change_date` DATETIME COMMENT '变更日期',
+  `business_licence_date` DATETIME,
+  `liquidation_committee_recored_date` DATETIME COMMENT '清算组备案日期',
+  `cancel_date` DATETIME COMMENT '注销日期',
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ 
+-- 客户投融情况：
+-- 客户经济指标：
+CREATE TABLE `eh_customer_economic_indicators` (
+  `id` BIGINT NOT NULL 'id of the record',
+  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
+  `customer_id` BIGINT,
+  `customer_name` VARCHAR(64),
+  `total_assets` DECIMAL(10,2) COMMENT '资产总计',
+  `total_profit` DECIMAL(10,2) COMMENT '利润总额',
+  `bank_loans` DECIMAL(10,2) COMMENT '银行贷款',
+  `equity_financing` DECIMAL(10,2) COMMENT '股权融资',
+  `sales` DECIMAL(10,2) COMMENT '销售额',
+  `turnover` DECIMAL(10,2) COMMENT '营业额',
+  `tax_index` DECIMAL(10,2) COMMENT '税收指标',
+  `tax_payment` DECIMAL(10,2) COMMENT '纳税额',
+  `value_added_tax` DECIMAL(10,2) COMMENT '增值税',
+  `business_tax` DECIMAL(10,2) COMMENT '营业税',
+  `business_income_tax` DECIMAL(10,2) COMMENT '企业所得税',
+  `foreign_company_income_tax` DECIMAL(10,2) COMMENT '外企所得税',
+  `individual_income_tax` DECIMAL(10,2) COMMENT '个人所得税',
+  `total_tax_amount` DECIMAL(10,2) COMMENT '税额合计',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
