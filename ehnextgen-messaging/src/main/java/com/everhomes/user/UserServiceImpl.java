@@ -161,6 +161,7 @@ public class UserServiceImpl implements UserService {
 	private static final String VCODE_SEND_TYPE = "sms.handler.type";
 
 	private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
+	private static final Byte SCENE_EXAMPLE = 'E';
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -2701,6 +2702,7 @@ public class UserServiceImpl implements UserService {
 
 		CommunityDTO default_communityDTO = ConvertHelper.convert(default_community, CommunityDTO.class);
 		SceneDTO default_communityScene = toCommunitySceneDTO(namespaceId, userId, default_communityDTO, sceneType);
+		default_communityScene.setStatus(SCENE_EXAMPLE);
 		sceneList.add(default_communityScene);
 
 		return sceneList;
@@ -4378,18 +4380,19 @@ public class UserServiceImpl implements UserService {
 					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.COMMERCIAL.getCode());
 					break;
 			}
-		}
 
-		//把community转换成场景
-		SceneType sceneType = DEFAULT;
-		CommunityType communityType = CommunityType.fromCode(default_community.getCommunityType());
-		if(communityType == CommunityType.COMMERCIAL) {
-			sceneType = PARK_TOURIST;
-		}
+			//把community转换成场景
+			SceneType sceneType = DEFAULT;
+			CommunityType communityType = CommunityType.fromCode(default_community.getCommunityType());
+			if(communityType == CommunityType.COMMERCIAL) {
+				sceneType = PARK_TOURIST;
+			}
 
-		CommunityDTO default_communityDTO = ConvertHelper.convert(default_community, CommunityDTO.class);
-		SceneDTO default_communityScene = toCommunitySceneDTO(namespaceId, userId, default_communityDTO, sceneType);
-		sceneList.add(default_communityScene);
+			CommunityDTO default_communityDTO = ConvertHelper.convert(default_community, CommunityDTO.class);
+			SceneDTO default_communityScene = toCommunitySceneDTO(namespaceId, userId, default_communityDTO, sceneType);
+			default_communityScene.setStatus(SCENE_EXAMPLE);
+			sceneList.add(default_communityScene);
+		}
 
 //		// 如果没有有效场景
 //		if (sceneList.size() == 0) {
