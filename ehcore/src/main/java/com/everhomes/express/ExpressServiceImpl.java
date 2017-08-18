@@ -978,8 +978,8 @@ public class ExpressServiceImpl implements ExpressService {
 			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			dbProvider.execute(status->{
-				expressOrderProvider.updateExpressOrder(expressOrder);
 				handler.updateOrderStatus(expressOrder, expressCompany);
+				expressOrderProvider.updateExpressOrder(expressOrder);
 				return null;
 			});
 			createExpressOrderLog(owner, ExpressActionEnum.CANCEL, expressOrder, null);

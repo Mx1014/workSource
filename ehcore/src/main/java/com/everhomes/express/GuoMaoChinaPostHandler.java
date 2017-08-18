@@ -176,7 +176,7 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		}else{
 			//参数
 			String params = getRequestUpdateOrderJsonParam(expressOrder, expressCompany);
-			//发送 创建订单 请求
+			//发送 更新订单 请求
 			GuoMaoChinaPostResponseEntity<GuoMaoChinaPostResponse> entity = request(params, expressCompany.getOrderUrl()+UPDATE_ORDER_CONTEXT);
 			//验证订单是否生成 
 			checkErrorCode(entity);
