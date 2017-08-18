@@ -7,6 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.quality.QualityInspectionSampleCommunityMap;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
@@ -47,6 +48,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         customer.setId(id);
         customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         customer.setCreatorUid(UserContext.current().getUser().getId());
+        customer.setStatus(CommonStatus.ACTIVE.getCode());
 
         LOGGER.info("createEnterpriseCustomer: " + customer);
 

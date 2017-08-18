@@ -2364,12 +2364,43 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public ListApartmentsResponse listApartments(ListApartmentsCommand cmd) {
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if(cmd.getPageAnchor() != null) {
+			locator.setAnchor(cmd.getPageAnchor());
+		}
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		//取得门牌列表
-//		List<ApartmentDTO> aptList = addressService.listApartmentsByKeyword(cmd).second();
-//
-//		//设置门牌的入住状态
-//		setLivingStatus(dto, communityAddressMappingMap, apartmentDTO.getLivingStatus());
-		return null;
+		List<ApartmentAbstractDTO> aptList = addressProvider.listAddressByBuildingApartmentName(cmd.getNamespaceId(),
+				cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartment(), locator, pageSize + 1);
+		ListApartmentsResponse response = new ListApartmentsResponse();
+		List<ApartmentAbstractDTO> apartments = new ArrayList<>();
+		//设置门牌的入住状态
+		if(aptList != null && aptList.size() > 0) {
+			if(aptList.size() > pageSize) {
+				aptList.remove(aptList.size() - 1);
+				response.setNextPageAnchor(aptList.get(aptList.size() - 1).getId());
+			}
+			//门牌转化成门牌id列表
+			List<Long> aptIdList = aptList.stream().map(a->a.getId()).collect(Collectors.toList());
+			//处理小区地址关联表
+			Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+			aptList.forEach(apt -> {
+				if (apt.getLivingStatus() == null) {
+					CommunityAddressMapping mapping = communityAddressMappingMap.get(apt.getId());
+					if(mapping != null){
+						apt.setLivingStatus(mapping.getLivingStatus());
+					}
+					else{
+						apt.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+					}
+				}
+				apartments.add(apt);
+			});
+			response.setApartments(apartments);
+		}
+
+		return response;
 	}
 
 	@Override

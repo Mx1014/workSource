@@ -1,9 +1,6 @@
 package com.everhomes.varField;
 
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.*;
 
 import java.util.List;
 
@@ -14,4 +11,5 @@ public interface FieldService {
 
     List<FieldDTO> listFields(ListFieldCommand cmd);
     List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd);
+    List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd);
 }

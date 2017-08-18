@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.everhomes.rest.address.ApartmentAbstractDTO;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -368,12 +369,18 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
     @Override
-    public List<Address> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName) {
+    public List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId,
+                String buildingName, String apartmentName, CrossShardListingLocator locator, int count) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Address> addresses = new ArrayList<>();
+        List<ApartmentAbstractDTO> addresses = new ArrayList<>();
         SelectQuery<EhAddressesRecord> query = context.selectQuery(Tables.EH_ADDRESSES);
+
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_ADDRESSES.ID.gt(locator.getAnchor()));
+
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()));
         if(StringUtils.isNotBlank(buildingName)) {
             query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)
                     .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(buildingName)));
@@ -382,8 +389,12 @@ public class AddressProviderImpl implements AddressProvider {
             query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + apartmentName + "%"));
         }
 
+
+        query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
+        query.addLimit(count - addresses.size());
+
         query.fetch().map((r) -> {
-            addresses.add(ConvertHelper.convert(r, Address.class));
+            addresses.add(ConvertHelper.convert(r, ApartmentAbstractDTO.class));
             return null;
         });
         return addresses;

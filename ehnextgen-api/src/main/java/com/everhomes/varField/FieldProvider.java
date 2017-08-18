@@ -13,6 +13,7 @@ public interface FieldProvider {
     List<Field> listFields(List<Long> ids);
     List<Field> listFields(String moduleName, String groupPath);
     List<FieldItem> listFieldItems(List<Long> fieldIds);
-    List<ScopeFieldItem> listScopeFieldItems(List<Long> fieldIds);
+    List<ScopeFieldItem> listScopeFieldItems(List<Long> fieldIds, Integer namespaceId);
+    List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId);
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long itemId);
 }

@@ -127,6 +127,20 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /customer/syncEnterpriseCustomer</b>
+     * <p>同步企业客户</p>
+     */
+    @RequestMapping("searchEnterpriseCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse syncEnterpriseCustomer() {
+        enterpriseCustomerSearcher.syncFromDb();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /customer/importEnterpriseCustomerData</b>
      * <p>导入企业客户信息</p>
      */

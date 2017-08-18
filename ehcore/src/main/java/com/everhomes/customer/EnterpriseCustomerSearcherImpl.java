@@ -184,13 +184,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(customers != null && customers.size() > 0) {
             customers.forEach(customer -> {
                 EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
-                ScopeFieldItem CategoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
-                if(CategoryItem != null) {
-                    dto.setCategoryItemName(CategoryItem.getItemDisplayName());
+                LOGGER.info("customer: {}", customer);
+                ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
+                if(categoryItem != null) {
+                    dto.setCategoryItemName(categoryItem.getItemDisplayName());
                 }
-                ScopeFieldItem LevelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
-                if(LevelItem != null) {
-                    dto.setLevelItemName(LevelItem.getItemDisplayName());
+                ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+                if(levelItem != null) {
+                    dto.setLevelItemName(levelItem.getItemDisplayName());
                 }
                 dtos.add(dto);
             });

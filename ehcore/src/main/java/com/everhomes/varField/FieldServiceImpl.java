@@ -3,6 +3,7 @@ package com.everhomes.varField;
 import com.everhomes.rest.varField.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
+import jdk.nashorn.internal.ir.ReturnNode;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,7 +53,7 @@ public class FieldServiceImpl implements FieldService {
             //一把取出scope field对应的所有系统的field 然后把对应信息塞进fielddto中
             //一把取出所有的scope field对应的scope items信息
             List<Field> fields = fieldProvider.listFields(fieldIds);
-            List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(fieldIds);
+            List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(fieldIds, cmd.getNamespaceId());
 
             if(fields != null && fields.size() > 0) {
                 List<FieldDTO> dtos = new ArrayList<>();
@@ -84,6 +85,25 @@ public class FieldServiceImpl implements FieldService {
                 return dtos;
             }
         }
+        return null;
+    }
+
+    @Override
+    public List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd) {
+        List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId());
+        if(fieldItems != null && fieldItems.size() > 0) {
+            List<FieldItemDTO> dtos = fieldItems.stream().map(item -> {
+                FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
+                return fieldItem;
+            }).collect(Collectors.toList());
+
+            //按default order排序
+            Collections.sort(dtos, (a,b) -> {
+                return a.getDefaultOrder() - b.getDefaultOrder();
+            });
+            return dtos;
+        }
+
         return null;
     }
 

@@ -103,7 +103,8 @@ public class FieldController extends ControllerBase {
     @RequestMapping("listFieldItems")
     @RestReturn(value=FieldItemDTO.class, collection = true)
     public RestResponse listFieldItems(@Valid ListFieldItemCommand cmd) {
-        RestResponse res = new RestResponse();
+        List<FieldItemDTO> items = fieldService.listFieldItems(cmd);
+        RestResponse res = new RestResponse(items);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;

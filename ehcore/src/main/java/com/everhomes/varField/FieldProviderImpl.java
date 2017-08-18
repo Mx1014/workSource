@@ -115,11 +115,26 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeFieldItem> listScopeFieldItems(List<Long> fieldIds) {
+    public List<ScopeFieldItem> listScopeFieldItems(List<Long> fieldIds, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<ScopeFieldItem> items = context.select().from(Tables.EH_VAR_FIELD_ITEM_SCOPES)
                 .where(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.in(fieldIds))
+                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
+                .fetch().map((record)-> {
+                    return ConvertHelper.convert(record, ScopeFieldItem.class);
+                });
+
+        return items;
+    }
+
+    @Override
+    public List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<ScopeFieldItem> items = context.select().from(Tables.EH_VAR_FIELD_ITEM_SCOPES)
+                .where(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.eq(fieldId))
+                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, ScopeFieldItem.class);
                 });

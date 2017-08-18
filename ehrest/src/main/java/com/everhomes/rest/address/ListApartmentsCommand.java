@@ -4,6 +4,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ * <li>namespaceId: 域空间id</li>
  * <li>organizationId: 组织id</li>
  * <li>communityId: 小区id</li>
  * <li>buildingName: 楼栋号</li>
@@ -15,6 +16,8 @@ import javax.validation.constraints.NotNull;
  * Created by ying.xiong on 2017/8/18.
  */
 public class ListApartmentsCommand {
+
+    private Integer namespaceId;
     @NotNull
     private Long organizationId;
 
@@ -29,6 +32,14 @@ public class ListApartmentsCommand {
     private Integer pageSize;
 
     private Long pageAnchor;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;

@@ -158,7 +158,7 @@ CREATE TABLE `eh_var_field_item_scopes` (
 CREATE TABLE `eh_enterprise_customers` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `organization_id` BIGINT NOT NULL COMMENT 'id of eh_organizations',
+  `organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_organizations',
   `community_id` BIGINT NOT NULL COMMENT 'id of eh_communities',
   `customer_number` VARCHAR(128) COMMENT 'default is id if not defined',
   `name` VARCHAR(128),
