@@ -198,7 +198,7 @@ CREATE TABLE `eh_enterprise_customers` (
   `corp_business_scope` TEXT COMMENT '营业范围',
   `corp_business_license` VARCHAR(128) COMMENT '营业执照号',
   `corp_site_area` DECIMAL(10,2) COMMENT '场地面积',
-  `corp_entry_date` DATE COMMENT '入住园区日期',
+  `corp_entry_date` DATETIME COMMENT '入住园区日期',
   `corp_product_category_item_id` BIGINT COMMENT '产品类型, refer to the id of eh_var_field_items',
   `corp_product_category_item_name` VARCHAR(128) COMMENT '产品类型, refer to the display_name of eh_var_field_items',
   `corp_product_desc` TEXT COMMENT '主要技术及产品',
