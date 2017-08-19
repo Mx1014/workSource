@@ -63,7 +63,9 @@ public class CustomerServiceImpl implements CustomerService {
     public void createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId(UserContext.getCurrentNamespaceId());
-        customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
+        if(cmd.getCorpEntryDate() != null) {
+            customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
+        }
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
         enterpriseCustomerSearcher.feedDoc(customer);
@@ -77,6 +79,9 @@ public class CustomerServiceImpl implements CustomerService {
         updateCustomer.setOrganizationId(customer.getOrganizationId());
         updateCustomer.setCreateTime(customer.getCreateTime());
         updateCustomer.setCreatorUid(customer.getCreatorUid());
+        if(cmd.getCorpEntryDate() != null) {
+            updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
+        }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
 
         enterpriseCustomerSearcher.feedDoc(customer);

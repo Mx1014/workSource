@@ -112,7 +112,7 @@ public class EnterpriseCustomerDTO {
     private String corpBusinessScope;
     private String corpBusinessLicense;
     private BigDecimal corpSiteArea;
-    private Date corpEntryDate;
+    private Timestamp corpEntryDate;
     private Long corpProductCategoryItemId;
     private String corpProductCategoryItemName;
     private String corpProductDesc;
@@ -333,12 +333,11 @@ public class EnterpriseCustomerDTO {
         this.corpEmployeeAmountRd = corpEmployeeAmountRd;
     }
 
-
-    public Date getCorpEntryDate() {
+    public Timestamp getCorpEntryDate() {
         return corpEntryDate;
     }
 
-    public void setCorpEntryDate(Date corpEntryDate) {
+    public void setCorpEntryDate(Timestamp corpEntryDate) {
         this.corpEntryDate = corpEntryDate;
     }
 

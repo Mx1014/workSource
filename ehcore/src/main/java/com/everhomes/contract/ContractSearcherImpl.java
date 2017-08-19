@@ -151,7 +151,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", ContractStatus.INACTIVE.getCode());
         fb = FilterBuilders.notFilter(nfb);
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getStatus() != null)
@@ -192,6 +192,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             contracts.forEach(contract -> {
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
                 processContractApartments(dto);
+                dtos.add(dto);
             });
         }
         response.setContracts(dtos);
