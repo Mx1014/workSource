@@ -142,7 +142,7 @@ public class ParkingServiceImpl implements ParkingService {
 		String vendorName = parkingLot.getVendorName();
 		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
-		List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
+		List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, cmd.getPlateNumber());
 
 		Long organizationId = cmd.getOrganizationId();
 		User user = UserContext.current().getUser();
@@ -188,8 +188,8 @@ public class ParkingServiceImpl implements ParkingService {
         String vendorName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
         
-        List<ParkingRechargeRateDTO> parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(),
-        		parkingLotId, cmd.getPlateNumber(), cmd.getCardNo());
+        List<ParkingRechargeRateDTO> parkingRechargeRateList = handler.getParkingRechargeRates(parkingLot,
+				cmd.getPlateNumber(), cmd.getCardNo());
         
         return parkingRechargeRateList;
     }
@@ -257,8 +257,7 @@ public class ParkingServiceImpl implements ParkingService {
     	String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
 
-		List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(),
-        		cmd.getPlateNumber());
+		List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, cmd.getPlateNumber());
         User user = UserContext.current().getUser();
         int cardListSize = cards.size();
 		if(cardListSize > 0){
@@ -544,8 +543,7 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		parkingRechargeOrder.setPrice(cmd.getPrice());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
-    		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(),
-					cmd.getParkingLotId(), cmd.getPlateNumber());
+    		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 
     		if (null != dto ) {
 				if(null != dto.getPrice() && 0 != dto.getPrice().compareTo(cmd.getPrice())) {
@@ -1138,7 +1136,7 @@ public class ParkingServiceImpl implements ParkingService {
     	String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
     	
-    	ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
+    	ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 		return dto;
 	}
 
@@ -1650,4 +1648,5 @@ public class ParkingServiceImpl implements ParkingService {
 
 		return deferredResult;
 	}
+
 }

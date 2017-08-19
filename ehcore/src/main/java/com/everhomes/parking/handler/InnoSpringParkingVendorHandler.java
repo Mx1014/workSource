@@ -50,8 +50,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
     private ConfigurationProvider configProvider;
 
 	@Override
-    public List<ParkingCardDTO> listParkingCardsByPlate(String ownerType, Long ownerId,
-    		Long parkingLotId, String plateNumber) {
+    public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
 
     	List<ParkingCardDTO> resultList = new ArrayList<>();
 
@@ -66,7 +65,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 			long now = System.currentTimeMillis();
 			long cardReserveTime = 0;
 
-	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
 			//是否支持过期充值
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
@@ -78,9 +76,9 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 			if(expireTime + cardReserveTime < now){
 				return resultList;
 			}
-			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
-			parkingCardDTO.setOwnerId(ownerId);
-			parkingCardDTO.setParkingLotId(parkingLotId);
+			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
+			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
+			parkingCardDTO.setParkingLotId(parkingLot.getId());
 
 			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone("");
@@ -99,16 +97,16 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
     }
 
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	List<ParkingRechargeRateDTO> result;
 
 		List<InnoSpringCardRate> rates = getCardRule();
 		InnoSpringCardType cardType = createDefaultCardType();
     	result = rates.stream().map( r -> {
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
-			dto.setOwnerId(ownerId);
-			dto.setOwnerType(ownerType);
-			dto.setParkingLotId(parkingLotId);
+			dto.setOwnerType(parkingLot.getOwnerType());
+			dto.setOwnerId(parkingLot.getOwnerId());
+			dto.setParkingLotId(parkingLot.getId());
 			dto.setRateToken("");
 			Integer monthCount = convertCardType(r.getCard_type());
 			Map<String, Object> map = new HashMap<>();
@@ -431,8 +429,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	@Override
-	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
-			Long parkingLotId, String plateNumber) {
+	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		InnoSpringTempFee tempFee = getTempFee(plateNumber);
 
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();

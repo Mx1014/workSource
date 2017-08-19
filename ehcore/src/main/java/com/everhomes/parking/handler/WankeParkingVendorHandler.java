@@ -60,8 +60,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     private ConfigurationProvider configProvider;
 	
 	@Override
-    public List<ParkingCardDTO> listParkingCardsByPlate(String ownerType, Long ownerId,
-    		Long parkingLotId, String plateNumber) {
+    public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
 
@@ -76,7 +75,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 			long now = System.currentTimeMillis();
 			long cardReserveTime = 0;
 			
-	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+//	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
 	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
@@ -87,9 +86,9 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 			if(expireTime + cardReserveTime < now){
 				return resultList;
 			}
-			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
-			parkingCardDTO.setOwnerId(ownerId);
-			parkingCardDTO.setParkingLotId(parkingLotId);
+			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
+			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
+			parkingCardDTO.setParkingLotId(parkingLot.getId());
 			
 			String plateOwnerName = card.getUserName();
 			String plateOwnerPhone = card.getMobile();
@@ -117,17 +116,19 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     }
 
 	@Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	List<ParkingRechargeRate> parkingRechargeRateList = null;
     	List<ParkingRechargeRateDTO> result = null;
     	if(StringUtils.isBlank(plateNumber)) {
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, null);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+					parkingLot.getId(), null);
     		
     	}else{
     		WankeCardInfo cardInfo = getCard(plateNumber);           
 			
     		String cardType = cardInfo.getCardType();
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, cardType);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+					parkingLot.getId(), cardType);
     	}
     	
     	
@@ -373,7 +374,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     }
 
 	@Override
-	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId, Long parkingLotId, String plateNumber) {
+	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		
 		WankeTempFee tempFee = getTempFee(plateNumber);
 		

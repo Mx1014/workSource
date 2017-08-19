@@ -80,4 +80,5 @@ public interface ParkingService {
     void refundParkingOrder(UpdateParkingOrderCommand cmd);
 
     DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd);
+
 }

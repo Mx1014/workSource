@@ -65,8 +65,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Override
-    public List<ParkingCardDTO> listParkingCardsByPlate(String ownerType, Long ownerId,
-    		Long parkingLotId, String plateNumber) {
+    public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<>();
 
@@ -82,7 +81,6 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 			long now = System.currentTimeMillis();
 			long cardReserveTime = 0;
 			
-	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
 	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
@@ -100,9 +98,9 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 			ParkingCardType parkingCardType = createDefaultCardType();
 			String cardType = parkingCardType.getTypeName();
 			
-			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
-			parkingCardDTO.setOwnerId(ownerId);
-			parkingCardDTO.setParkingLotId(parkingLotId);
+			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
+			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
+			parkingCardDTO.setParkingLotId(parkingLot.getId());
 			
 			parkingCardDTO.setPlateOwnerName(plateOwnerName);
 			parkingCardDTO.setPlateNumber(card.getPlateno());
@@ -305,7 +303,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	}
 
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	
     	List<ParkingRechargeRateDTO> parkingRechargeRateList = new ArrayList<>();
 
@@ -316,9 +314,9 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 
     		if (null != card) {
 				ParkingRechargeRateDTO rate = new ParkingRechargeRateDTO();
-				rate.setOwnerId(ownerId);
-				rate.setOwnerType(ownerType);
-				rate.setParkingLotId(parkingLotId);
+				rate.setOwnerId(parkingLot.getOwnerId());
+				rate.setOwnerType(parkingLot.getOwnerType());
+				rate.setParkingLotId(parkingLot.getId());
 				rate.setRateToken("");
 
 				Map<String, Object> map = new HashMap<>();
@@ -372,7 +370,7 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	@Override
-	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId, Long parkingLotId, String plateNumber) {
+	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 
 		return null;
 	}

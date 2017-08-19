@@ -49,8 +49,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
     private ConfigurationProvider configProvider;
 	
 	@Override
-    public List<ParkingCardDTO> listParkingCardsByPlate(String ownerType, Long ownerId,
-    		Long parkingLotId, String plateNumber) {
+    public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<>();
 
@@ -64,7 +63,6 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 			long now = System.currentTimeMillis();
 			long cardReserveTime = 0;
 			
-	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
 	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
@@ -80,10 +78,10 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
 			String cardNumber = card.getCardID();
 			String cardType = card.getOldCardTypeName();
-			
-			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
-			parkingCardDTO.setOwnerId(ownerId);
-			parkingCardDTO.setParkingLotId(parkingLotId);
+
+			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
+			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
+			parkingCardDTO.setParkingLotId(parkingLot.getId());
 			
 			parkingCardDTO.setPlateOwnerName(plateOwnerName);
 			parkingCardDTO.setPlateNumber(card.getPlateNumber());
@@ -270,16 +268,18 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
     }
     
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	
     	List<ParkingRechargeRate> parkingRechargeRateList = new ArrayList<>();
     	
     	if(StringUtils.isBlank(plateNumber)) {
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, null);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+					parkingLot.getId(), null);
     	}else{
     		BosigaoCardInfo card = getCardInfo(plateNumber);
     		String cardType = card.getOldCardTypeName();
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, cardType);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+					parkingLot.getId(), cardType);
     	}
     	
     	List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
@@ -378,7 +378,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	@Override
-	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId, Long parkingLotId, String plateNumber) {
+	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		BosigaoTempFee tempFee = getTempFee(plateNumber);
 
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();

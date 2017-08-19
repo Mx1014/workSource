@@ -96,7 +96,7 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 						parkingProvider.updateParkingRechargeOrder(order);
 
-						LOGGER.info("Notify parking recharge failed, cmd={}, order={}", cmd, order);
+						LOGGER.info("Notify parking recharge success, cmd={}, order={}", cmd, order);
 					}else {
 						//充值失败
 						order.setStatus(ParkingRechargeOrderStatus.FAILED.getCode());

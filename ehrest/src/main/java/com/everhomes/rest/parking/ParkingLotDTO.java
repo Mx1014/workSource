@@ -13,7 +13,6 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>name: 停车场名称</li>
  * <li>vendorName: 厂商名称（用于作逻辑，不用于显示），{@link com.everhomes.rest.parking.ParkingLotVendor}</li>
- * <li>cardReserveDays: 在该停车场所发的月卡，保留多少天等待申请者来领取</li>
  * <li>createTime: 停车场创建时间</li>
  * </ul>
  */
@@ -23,19 +22,24 @@ public class ParkingLotDTO {
     private Long ownerId;
     private String name;
     private String vendorName;
-    private Integer cardReserveDays;
     private Timestamp createTime;
-    
+    //是否支持临时车缴费
     private Byte tempfeeFlag;
+    //是否支持添加/删除费率
     private Byte rateFlag;
-    
+    //是否支持过期充值
     private Byte isSupportRecharge;
+    //支持过期充值时，最多过期天数
+    private Integer cardReserveDays;
+    //支持过期充值时，至少充值几个月
     private Integer rechargeMonthCount;
+    //支持过期充值时，按照什么模式充值 {@link ParkingLotRechargeType}
     private Byte rechargeType;
-    
+    //申请月卡的模式
     private Integer flowMode;
-
+    //是否支持锁车
     private Byte lockCarFlag;
+    //停车场客服联系方式
     private String contact;
 
     public String getContact() {
