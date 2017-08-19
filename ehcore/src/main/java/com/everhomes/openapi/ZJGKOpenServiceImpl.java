@@ -1306,10 +1306,10 @@ public class ZJGKOpenServiceImpl {
         }
     }
 
-    private Date dateStrToTimestamp(String str) {
+    private Timestamp dateStrToTimestamp(String str) {
         LocalDate localDate = LocalDate.parse(str,dateSF);
-        Date date = Date.valueOf(localDate);
-        return date;
+        Timestamp ts = new Timestamp(Date.valueOf(localDate).getTime());
+        return ts;
     }
 
     private void deleteEnterpriseCustomer(EnterpriseCustomer customer) {
