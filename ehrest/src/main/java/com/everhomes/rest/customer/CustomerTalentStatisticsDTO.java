@@ -1,5 +1,7 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>talentCategoryId:人才类型在系统中的id </li>
@@ -38,5 +40,10 @@ public class CustomerTalentStatisticsDTO {
 
     public void setCustomerMemberCount(Long customerMemberCount) {
         this.customerMemberCount = customerMemberCount;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

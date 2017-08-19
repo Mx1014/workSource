@@ -95,7 +95,12 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("categoryItemId", contract.getCategoryItemId());
             builder.field("contractStartDate", contract.getContractStartDate());
             builder.field("contractEndDate", contract.getContractEndDate());
-            builder.field("amount", contract.getRent());
+            if(contract.getRent() != null) {
+                builder.field("amount", contract.getRent());
+            } else {
+                builder.field("amount", "");
+            }
+
 
             builder.endObject();
             return builder;

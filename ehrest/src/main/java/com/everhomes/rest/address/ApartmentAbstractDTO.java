@@ -1,5 +1,7 @@
 package com.everhomes.rest.address;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>id: id</li>
@@ -71,5 +73,10 @@ public class ApartmentAbstractDTO {
 
     public void setOrientation(String orientation) {
         this.orientation = orientation;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

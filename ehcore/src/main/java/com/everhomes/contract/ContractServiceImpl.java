@@ -388,9 +388,24 @@ public class ContractServiceImpl implements ContractService {
 		return new ListContractsResponse(null, resultList);
 	}
 
+	private void checkContractNumberUnique(Integer namespaceId, String contractNumber) {
+		Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, contractNumber);
+		if(contract != null) {
+			LOGGER.error("contractNumber {} in namespace {} already exist!", contractNumber, namespaceId);
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
+					"contractNumber is already exist");
+		}
+	}
+
+	private String generateContractNumber() {
+		return null;
+	}
+
 	@Override
 	public void createContract(CreateContractCommand cmd) {
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
+
 		if(cmd.getContractStartDate() != null) {
 			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
 		}
@@ -403,7 +418,8 @@ public class ContractServiceImpl implements ContractService {
 		if(cmd.getDecorateEndDate() != null) {
 			contract.setDecorateEndDate(new Timestamp(cmd.getDecorateEndDate()));
 		}
-
+		contract.setCreateUid(UserContext.currentUserId());
+		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.createContract(contract);
 
 		dealContractApartments(contract, cmd.getApartments());

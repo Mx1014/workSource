@@ -19,6 +19,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeFieldItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/15.
@@ -52,10 +56,14 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private ContentServerService contentServerService;
 
+    @Autowired
+    private FieldProvider fieldProvider;
+
     @Override
     public void createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId(UserContext.getCurrentNamespaceId());
+        customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
         enterpriseCustomerSearcher.feedDoc(customer);
@@ -158,5 +166,363 @@ public class CustomerServiceImpl implements CustomerService {
                         "customer is not exist or active");
         }
         return customer;
+    }
+
+    @Override
+    public void createCustomerTalent(CreateCustomerTalentCommand cmd) {
+        CustomerTalent talent = ConvertHelper.convert(cmd, CustomerTalent.class);
+        enterpriseCustomerProvider.createCustomerTalent(talent);
+    }
+
+    @Override
+    public void deleteCustomerTalent(DeleteCustomerTalentCommand cmd) {
+        CustomerTalent talent = checkCustomerTalent(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerTalent(talent);
+
+    }
+
+    @Override
+    public CustomerTalentDTO getCustomerTalent(GetCustomerTalentCommand cmd) {
+        CustomerTalent talent = checkCustomerTalent(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerTalentDTO(talent);
+    }
+
+    private CustomerTalentDTO convertCustomerTalentDTO(CustomerTalent talent) {
+        CustomerTalentDTO dto = ConvertHelper.convert(talent, CustomerTalentDTO.class);
+        if(dto.getAbroadItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getAbroadItemId());
+            if(scopeFieldItem != null) {
+                dto.setAbroadItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getDegreeItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getDegreeItemId());
+            if(scopeFieldItem != null) {
+                dto.setDegreeItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getNationalityItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getNationalityItemId());
+            if(scopeFieldItem != null) {
+                dto.setNationalityItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getIndividualEvaluationItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getIndividualEvaluationItemId());
+            if(scopeFieldItem != null) {
+                dto.setIndividualEvaluationItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getTechnicalTitleItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getTechnicalTitleItemId());
+            if(scopeFieldItem != null) {
+                dto.setTechnicalTitleItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        return dto;
+    }
+
+    @Override
+    public List<CustomerTalentDTO> listCustomerTalents(ListCustomerTalentsCommand cmd) {
+        List<CustomerTalent> talents = enterpriseCustomerProvider.listCustomerTalentsByCustomerId(cmd.getCustomerId());
+        if(talents != null && talents.size() > 0) {
+            return talents.stream().map(talent -> {
+                return convertCustomerTalentDTO(talent);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    private CustomerTalent checkCustomerTalent(Long id, Long customerId) {
+        CustomerTalent talent = enterpriseCustomerProvider.findCustomerTalentById(id);
+        if(talent == null || talent.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(talent.getStatus()))) {
+            LOGGER.error("enterprise customer talent is not exist or active. id: {}, talent: {}", id, talent);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TALENT_NOT_EXIST,
+                    "customer talent is not exist or active");
+        }
+        return talent;
+    }
+
+    @Override
+    public void updateCustomerTalent(UpdateCustomerTalentCommand cmd) {
+        CustomerTalent exist = checkCustomerTalent(cmd.getId(), cmd.getCustomerId());
+        CustomerTalent talent = ConvertHelper.convert(cmd, CustomerTalent.class);
+        talent.setCreateTime(exist.getCreateTime());
+        talent.setCreatorUid(exist.getCreatorUid());
+        enterpriseCustomerProvider.updateCustomerTalent(talent);
+    }
+
+    @Override
+    public void createCustomerApplyProject(CreateCustomerApplyProjectCommand cmd) {
+        CustomerApplyProject project = ConvertHelper.convert(cmd, CustomerApplyProject.class);
+        enterpriseCustomerProvider.createCustomerApplyProject(project);
+    }
+
+    @Override
+    public void createCustomerCommercial(CreateCustomerCommercialCommand cmd) {
+        CustomerCommercial commercial = ConvertHelper.convert(cmd, CustomerCommercial.class);
+        enterpriseCustomerProvider.createCustomerCommercial(commercial);
+    }
+
+    @Override
+    public void createCustomerPatent(CreateCustomerPatentCommand cmd) {
+        CustomerPatent patent = ConvertHelper.convert(cmd, CustomerPatent.class);
+        enterpriseCustomerProvider.createCustomerPatent(patent);
+    }
+
+    @Override
+    public void createCustomerTrademark(CreateCustomerTrademarkCommand cmd) {
+        CustomerTrademark trademark = ConvertHelper.convert(cmd, CustomerTrademark.class);
+        enterpriseCustomerProvider.createCustomerTrademark(trademark);
+    }
+
+    @Override
+    public void deleteCustomerApplyProject(DeleteCustomerApplyProjectCommand cmd) {
+        CustomerApplyProject project = checkCustomerApplyProject(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerApplyProject(project);
+    }
+
+    private CustomerApplyProject checkCustomerApplyProject(Long id, Long customerId) {
+        CustomerApplyProject project = enterpriseCustomerProvider.findCustomerApplyProjectById(id);
+        if(project == null || project.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(project.getStatus()))) {
+            LOGGER.error("enterprise customer project is not exist or active. id: {}, project: {}", id, project);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PROJECT_NOT_EXIST,
+                    "customer project is not exist or active");
+        }
+        return project;
+    }
+
+    @Override
+    public void deleteCustomerCommercial(DeleteCustomerCommercialCommand cmd) {
+        CustomerCommercial commercial = checkCustomerCommercial(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerCommercial(commercial);
+    }
+
+    private CustomerCommercial checkCustomerCommercial(Long id, Long customerId) {
+        CustomerCommercial commercial = enterpriseCustomerProvider.findCustomerCommercialById(id);
+        if(commercial == null || commercial.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(commercial.getStatus()))) {
+            LOGGER.error("enterprise customer commercial is not exist or active. id: {}, commercial: {}", id, commercial);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_COMMERCIAL_NOT_EXIST,
+                    "customer commercial is not exist or active");
+        }
+        return commercial;
+    }
+
+    @Override
+    public void deleteCustomerPatent(DeleteCustomerPatentCommand cmd) {
+        CustomerPatent patent = checkCustomerPatent(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerPatent(patent);
+    }
+
+    private CustomerPatent checkCustomerPatent(Long id, Long customerId) {
+        CustomerPatent patent = enterpriseCustomerProvider.findCustomerPatentById(id);
+        if(patent == null || patent.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(patent.getStatus()))) {
+            LOGGER.error("enterprise customer patent is not exist or active. id: {}, patent: {}", id, patent);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PATENT_NOT_EXIST,
+                    "customer patent is not exist or active");
+        }
+        return patent;
+    }
+
+    @Override
+    public void deleteCustomerTrademark(DeleteCustomerTrademarkCommand cmd) {
+        CustomerTrademark talent = checkCustomerTrademark(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerTrademark(talent);
+    }
+
+    private CustomerTrademark checkCustomerTrademark(Long id, Long customerId) {
+        CustomerTrademark trademark = enterpriseCustomerProvider.findCustomerTrademarkById(id);
+        if(trademark == null || trademark.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(trademark.getStatus()))) {
+            LOGGER.error("enterprise customer patent is not exist or active. id: {}, trademark: {}", id, trademark);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRADEMARK_NOT_EXIST,
+                    "customer trademark is not exist or active");
+        }
+        return trademark;
+    }
+
+    @Override
+    public CustomerApplyProjectDTO getCustomerApplyProject(GetCustomerApplyProjectCommand cmd) {
+        CustomerApplyProject project = checkCustomerApplyProject(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerApplyProjectDTO(project);
+    }
+
+    private CustomerApplyProjectDTO convertCustomerApplyProjectDTO(CustomerApplyProject project) {
+        CustomerApplyProjectDTO dto = ConvertHelper.convert(project, CustomerApplyProjectDTO.class);
+
+        if(dto.getProjectSource() != null) {
+            String[] ids = dto.getProjectSource().split(",");
+            StringBuilder sb = new StringBuilder();
+            for(String id : ids) {
+                ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(project.getNamespaceId(), Long.valueOf(id));
+                if(scopeFieldItem != null) {
+                    if(sb.length() == 0) {
+                        sb.append(scopeFieldItem.getItemDisplayName());
+                    } else {
+                        sb.append(",");
+                        sb.append(scopeFieldItem.getItemDisplayName());
+                    }
+                }
+            }
+            dto.setProjectSourceNames(sb.toString());
+
+        }
+        return dto;
+    }
+
+    @Override
+    public CustomerCommercialDTO getCustomerCommercial(GetCustomerCommercialCommand cmd) {
+        CustomerCommercial commercial = checkCustomerCommercial(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerCommercialDTO(commercial);
+    }
+
+    private CustomerCommercialDTO convertCustomerCommercialDTO(CustomerCommercial commercial) {
+        CustomerCommercialDTO dto = ConvertHelper.convert(commercial, CustomerCommercialDTO.class);
+
+        if(dto.getEnterpriseTypeItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getEnterpriseTypeItemId());
+            if(scopeFieldItem != null) {
+                dto.setEnterpriseTypeItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getShareTypeItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getShareTypeItemId());
+            if(scopeFieldItem != null) {
+                dto.setShareTypeItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getPropertyType() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getPropertyType());
+            if(scopeFieldItem != null) {
+                dto.setPropertyTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        return dto;
+    }
+
+    @Override
+    public CustomerPatentDTO getCustomerPatent(GetCustomerPatentCommand cmd) {
+        CustomerPatent patent = checkCustomerPatent(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerPatentDTO(patent);
+    }
+
+    private CustomerPatentDTO convertCustomerPatentDTO(CustomerPatent patent) {
+        CustomerPatentDTO dto = ConvertHelper.convert(patent, CustomerPatentDTO.class);
+
+        if(dto.getPatentStatusItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), dto.getPatentStatusItemId());
+            if(scopeFieldItem != null) {
+                dto.setPatentStatusItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getPatentTypeItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), dto.getPatentTypeItemId());
+            if(scopeFieldItem != null) {
+                dto.setPatentTypeItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        return dto;
+    }
+
+    @Override
+    public CustomerTrademarkDTO getCustomerTrademark(GetCustomerTrademarkCommand cmd) {
+        CustomerTrademark trademark = checkCustomerTrademark(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerTrademarkDTO(trademark);
+    }
+
+    private CustomerTrademarkDTO convertCustomerTrademarkDTO(CustomerTrademark trademark) {
+        CustomerTrademarkDTO dto = ConvertHelper.convert(trademark, CustomerTrademarkDTO.class);
+
+        if(dto.getTrademarkTypeItemId() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(trademark.getNamespaceId(), dto.getTrademarkTypeItemId());
+            if(scopeFieldItem != null) {
+                dto.setTrademarkTypeItemName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        return dto;
+    }
+
+    @Override
+    public List<CustomerApplyProjectDTO> listCustomerApplyProjects(ListCustomerApplyProjectsCommand cmd) {
+        List<CustomerApplyProject> projects = enterpriseCustomerProvider.listCustomerApplyProjectsByCustomerId(cmd.getCustomerId());
+        if(projects != null && projects.size() > 0) {
+            return projects.stream().map(project -> {
+                return convertCustomerApplyProjectDTO(project);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<CustomerCommercialDTO> listCustomerCommercials(ListCustomerCommercialsCommand cmd) {
+        List<CustomerCommercial> commercials = enterpriseCustomerProvider.listCustomerCommercialsByCustomerId(cmd.getCustomerId());
+        if(commercials != null && commercials.size() > 0) {
+            return commercials.stream().map(commercial -> {
+                return convertCustomerCommercialDTO(commercial);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<CustomerPatentDTO> listCustomerPatents(ListCustomerPatentsCommand cmd) {
+        List<CustomerPatent> patents = enterpriseCustomerProvider.listCustomerPatentsByCustomerId(cmd.getCustomerId());
+        if(patents != null && patents.size() > 0) {
+            return patents.stream().map(patent -> {
+                return convertCustomerPatentDTO(patent);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<CustomerTrademarkDTO> listCustomerTrademarks(ListCustomerTrademarksCommand cmd) {
+        List<CustomerTrademark> trademarks = enterpriseCustomerProvider.listCustomerTrademarksByCustomerId(cmd.getCustomerId());
+        if(trademarks != null && trademarks.size() > 0) {
+            return trademarks.stream().map(trademark -> {
+                return convertCustomerTrademarkDTO(trademark);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public void updateCustomerApplyProject(UpdateCustomerApplyProjectCommand cmd) {
+        CustomerApplyProject exist = checkCustomerApplyProject(cmd.getId(), cmd.getCustomerId());
+        CustomerApplyProject project = ConvertHelper.convert(cmd, CustomerApplyProject.class);
+        project.setCreateTime(exist.getCreateTime());
+        project.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerApplyProject(project);
+    }
+
+    @Override
+    public void updateCustomerCommercial(UpdateCustomerCommercialCommand cmd) {
+        CustomerCommercial exist = checkCustomerCommercial(cmd.getId(), cmd.getCustomerId());
+        CustomerCommercial commercial = ConvertHelper.convert(cmd, CustomerCommercial.class);
+        commercial.setCreateTime(exist.getCreateTime());
+        commercial.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerCommercial(commercial);
+    }
+
+    @Override
+    public void updateCustomerPatent(UpdateCustomerPatentCommand cmd) {
+        CustomerPatent exist = checkCustomerPatent(cmd.getId(), cmd.getCustomerId());
+        CustomerPatent patent = ConvertHelper.convert(cmd, CustomerPatent.class);
+        patent.setCreateTime(exist.getCreateTime());
+        patent.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerPatent(patent);
+    }
+
+    @Override
+    public void updateCustomerTrademark(UpdateCustomerTrademarkCommand cmd) {
+        CustomerTrademark exist = checkCustomerTrademark(cmd.getId(), cmd.getCustomerId());
+        CustomerTrademark trademark = ConvertHelper.convert(cmd, CustomerTrademark.class);
+        trademark.setCreateTime(exist.getCreateTime());
+        trademark.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerTrademark(trademark);
     }
 }

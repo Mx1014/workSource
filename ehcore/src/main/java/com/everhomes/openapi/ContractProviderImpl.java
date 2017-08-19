@@ -113,6 +113,21 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
+	public Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber) {
+		Record result = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
+				.fetchAny();
+
+		if (result != null) {
+			return ConvertHelper.convert(result, Contract.class);
+		}
+		return null;
+	}
+
+	@Override
 	public List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)

@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
+ *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 项目id</li>
  *     <li>parentId: 原合同id</li>
  *     <li>rootParentId: 初始合同id</li>
@@ -51,6 +52,7 @@ import java.util.List;
  * Created by ying.xiong on 2017/8/2.
  */
 public class CreateContractCommand {
+    private Integer namespaceId;
     private Long communityId;
     private Long parentId;
     private Long rootParentId;
@@ -98,6 +100,14 @@ public class CreateContractCommand {
     private List<ContractAttachmentDTO> attachments;
 
     private Byte status;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public String getRemark() {
         return remark;

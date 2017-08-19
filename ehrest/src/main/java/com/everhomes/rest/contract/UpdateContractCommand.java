@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>id: 合同id</li>
+ *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 项目id</li>
  *     <li>parentId: 原合同id</li>
  *     <li>rootParentId: 初始合同id</li>
@@ -53,6 +54,7 @@ import java.util.List;
  */
 public class UpdateContractCommand {
     private Long id;
+    private Integer namespaceId;
     private Long communityId;
     private Long parentId;
     private Long rootParentId;
@@ -100,6 +102,14 @@ public class UpdateContractCommand {
     private List<ContractAttachmentDTO> attachments;
 
     private Byte status;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public List<BuildingApartmentDTO> getApartments() {
         return apartments;

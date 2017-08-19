@@ -12,6 +12,7 @@ import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.tools.ant.taskdefs.Get;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -300,7 +301,8 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("createCustomerTalent")
     @RestReturn(value = String.class)
-    public RestResponse createCustomerTalent(@Valid CreateCustomerAccountCommand cmd) {
+    public RestResponse createCustomerTalent(@Valid CreateCustomerTalentCommand cmd) {
+        customerService.createCustomerTalent(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -313,7 +315,8 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("updateCustomerTalent")
     @RestReturn(value = String.class)
-    public RestResponse updateCustomerTalent(@Valid UpdateCustomerAccountCommand cmd) {
+    public RestResponse updateCustomerTalent(@Valid UpdateCustomerTalentCommand cmd) {
+        customerService.updateCustomerTalent(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -326,7 +329,8 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("deleteCustomerTalent")
     @RestReturn(value = String.class)
-    public RestResponse deleteCustomerTalent(@Valid DeleteCustomerAccountCommand cmd) {
+    public RestResponse deleteCustomerTalent(@Valid DeleteCustomerTalentCommand cmd) {
+        customerService.deleteCustomerTalent(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -338,9 +342,9 @@ public class CustomerController extends ControllerBase {
      * <p>查看企业人才</p>
      */
     @RequestMapping("getCustomerTalent")
-    @RestReturn(value = CustomerAccountDTO.class)
-    public RestResponse getCustomerTalent(@Valid FindCustomerAccountCommand cmd) {
-        RestResponse response = new RestResponse();
+    @RestReturn(value = CustomerTalentDTO.class)
+    public RestResponse getCustomerTalent(@Valid GetCustomerTalentCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerTalent(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -351,22 +355,23 @@ public class CustomerController extends ControllerBase {
      * <p>列出企业人才</p>
      */
     @RequestMapping("listCustomerTalents")
-    @RestReturn(value = CustomerAccountDTO.class, collection = true)
-    public RestResponse listCustomerTalents(@Valid ListCustomerAccountsCommand cmd) {
-        RestResponse response = new RestResponse();
+    @RestReturn(value = CustomerTalentDTO.class, collection = true)
+    public RestResponse listCustomerTalents(@Valid ListCustomerTalentsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerTalents(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
-//    知识产权 申报项目 工商信息 投融情况 经济指标 的增删改查
+//    知识产权
     /**
      * <b>URL: /customer/createCustomerTrademark</b>
      * <p>新建企业商标</p>
      */
     @RequestMapping("createCustomerTrademark")
     @RestReturn(value = String.class)
-    public RestResponse createCustomerTrademark(@Valid CreateCustomerAccountCommand cmd) {
+    public RestResponse createCustomerTrademark(@Valid CreateCustomerTrademarkCommand cmd) {
+        customerService.createCustomerTrademark(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -379,7 +384,8 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("updateCustomerTrademark")
     @RestReturn(value = String.class)
-    public RestResponse updateCustomerTrademark(@Valid UpdateCustomerAccountCommand cmd) {
+    public RestResponse updateCustomerTrademark(@Valid UpdateCustomerTrademarkCommand cmd) {
+        customerService.updateCustomerTrademark(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -392,7 +398,8 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("deleteCustomerTrademark")
     @RestReturn(value = String.class)
-    public RestResponse deleteCustomerTrademark(@Valid DeleteCustomerAccountCommand cmd) {
+    public RestResponse deleteCustomerTrademark(@Valid DeleteCustomerTrademarkCommand cmd) {
+        customerService.deleteCustomerTrademark(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -404,9 +411,9 @@ public class CustomerController extends ControllerBase {
      * <p>查看企业商标</p>
      */
     @RequestMapping("getCustomerTrademark")
-    @RestReturn(value = CustomerAccountDTO.class)
-    public RestResponse getCustomerTrademark(@Valid FindCustomerAccountCommand cmd) {
-        RestResponse response = new RestResponse();
+    @RestReturn(value = CustomerTrademarkDTO.class)
+    public RestResponse getCustomerTrademark(@Valid GetCustomerTrademarkCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerTrademark(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -417,9 +424,9 @@ public class CustomerController extends ControllerBase {
      * <p>列出企业商标</p>
      */
     @RequestMapping("listCustomerTrademarks")
-    @RestReturn(value = CustomerAccountDTO.class, collection = true)
-    public RestResponse listCustomerTrademarks(@Valid ListCustomerAccountsCommand cmd) {
-        RestResponse response = new RestResponse();
+    @RestReturn(value = CustomerTrademarkDTO.class, collection = true)
+    public RestResponse listCustomerTrademarks(@Valid ListCustomerTrademarksCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerTrademarks(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -431,7 +438,8 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("createCustomerPatent")
     @RestReturn(value = String.class)
-    public RestResponse createCustomerPatent(@Valid CreateCustomerAccountCommand cmd) {
+    public RestResponse createCustomerPatent(@Valid CreateCustomerPatentCommand cmd) {
+        customerService.createCustomerPatent(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -444,7 +452,8 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("updateCustomerPatent")
     @RestReturn(value = String.class)
-    public RestResponse updateCustomerPatent(@Valid UpdateCustomerAccountCommand cmd) {
+    public RestResponse updateCustomerPatent(@Valid UpdateCustomerPatentCommand cmd) {
+        customerService.updateCustomerPatent(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -457,7 +466,8 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("deleteCustomerPatent")
     @RestReturn(value = String.class)
-    public RestResponse deleteCustomerPatent(@Valid DeleteCustomerAccountCommand cmd) {
+    public RestResponse deleteCustomerPatent(@Valid DeleteCustomerPatentCommand cmd) {
+        customerService.deleteCustomerPatent(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -469,9 +479,9 @@ public class CustomerController extends ControllerBase {
      * <p>查看企业专利</p>
      */
     @RequestMapping("getCustomerPatent")
-    @RestReturn(value = CustomerAccountDTO.class)
-    public RestResponse getCustomerPatent(@Valid FindCustomerAccountCommand cmd) {
-        RestResponse response = new RestResponse();
+    @RestReturn(value = CustomerPatentDTO.class)
+    public RestResponse getCustomerPatent(@Valid GetCustomerPatentCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerPatent(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -482,13 +492,283 @@ public class CustomerController extends ControllerBase {
      * <p>列出企业专利</p>
      */
     @RequestMapping("listCustomerPatents")
-    @RestReturn(value = CustomerAccountDTO.class, collection = true)
-    public RestResponse listCustomerPatents(@Valid ListCustomerAccountsCommand cmd) {
+    @RestReturn(value = CustomerPatentDTO.class, collection = true)
+    public RestResponse listCustomerPatents(@Valid ListCustomerPatentsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerPatents(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+//    申报项目
+    /**
+     * <b>URL: /customer/createCustomerApplyProject</b>
+     * <p>新建企业申报项目</p>
+     */
+    @RequestMapping("createCustomerApplyProject")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerApplyProject(@Valid CreateCustomerApplyProjectCommand cmd) {
+        customerService.createCustomerApplyProject(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /customer/updateCustomerApplyProject</b>
+     * <p>修改企业申报项目</p>
+     */
+    @RequestMapping("updateCustomerApplyProject")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerApplyProject(@Valid UpdateCustomerApplyProjectCommand cmd) {
+        customerService.updateCustomerApplyProject(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerApplyProject</b>
+     * <p>删除企业申报项目</p>
+     */
+    @RequestMapping("deleteCustomerApplyProject")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerApplyProject(@Valid DeleteCustomerApplyProjectCommand cmd) {
+        customerService.deleteCustomerApplyProject(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerApplyProject</b>
+     * <p>查看企业申报项目</p>
+     */
+    @RequestMapping("getCustomerApplyProject")
+    @RestReturn(value = CustomerApplyProjectDTO.class)
+    public RestResponse getCustomerApplyProject(@Valid GetCustomerApplyProjectCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerApplyProject(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerApplyProjects</b>
+     * <p>列出企业申报项目</p>
+     */
+    @RequestMapping("listCustomerApplyProjects")
+    @RestReturn(value = CustomerApplyProjectDTO.class, collection = true)
+    public RestResponse listCustomerApplyProjects(@Valid ListCustomerApplyProjectsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerApplyProjects(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    //工商信息
+    /**
+     * <b>URL: /customer/createCustomerCommercial</b>
+     * <p>新建企业工商信息</p>
+     */
+    @RequestMapping("createCustomerCommercial")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerCommercial(@Valid CreateCustomerCommercialCommand cmd) {
+        customerService.createCustomerCommercial(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updateCustomerCommercial</b>
+     * <p>修改企业工商信息</p>
+     */
+    @RequestMapping("updateCustomerCommercial")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerCommercial(@Valid UpdateCustomerCommercialCommand cmd) {
+        customerService.updateCustomerCommercial(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerCommercial</b>
+     * <p>删除企业工商信息</p>
+     */
+    @RequestMapping("deleteCustomerCommercial")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerCommercial(@Valid DeleteCustomerCommercialCommand cmd) {
+        customerService.deleteCustomerCommercial(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerCommercial</b>
+     * <p>查看企业工商信息</p>
+     */
+    @RequestMapping("getCustomerCommercial")
+    @RestReturn(value = CustomerCommercialDTO.class)
+    public RestResponse getCustomerCommercial(@Valid GetCustomerCommercialCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerCommercial(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerCommercials</b>
+     * <p>列出企业工商信息</p>
+     */
+    @RequestMapping("listCustomerCommercials")
+    @RestReturn(value = CustomerCommercialDTO.class, collection = true)
+    public RestResponse listCustomerCommercials(@Valid ListCustomerCommercialsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerCommercials(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+////    投融情况
+//    /**
+//     * <b>URL: /customer/createCustomerInvestment</b>
+//     * <p>新建企业投融情况</p>
+//     */
+//    @RequestMapping("createCustomerInvestment")
+//    @RestReturn(value = String.class)
+//    public RestResponse createCustomerInvestment(@Valid CreateCustomerInvestmentCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /customer/updateCustomerInvestment</b>
+//     * <p>修改企业投融情况</p>
+//     */
+//    @RequestMapping("updateCustomerInvestment")
+//    @RestReturn(value = String.class)
+//    public RestResponse updateCustomerInvestment(@Valid UpdateCustomerInvestmentCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /customer/deleteCustomerInvestment</b>
+//     * <p>删除企业投融情况</p>
+//     */
+//    @RequestMapping("deleteCustomerInvestment")
+//    @RestReturn(value = String.class)
+//    public RestResponse deleteCustomerInvestment(@Valid DeleteCustomerInvestmentCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /customer/getCustomerInvestment</b>
+//     * <p>查看企业投融情况</p>
+//     */
+//    @RequestMapping("getCustomerInvestment")
+//    @RestReturn(value = CustomerInvestmentDTO.class)
+//    public RestResponse getCustomerInvestment(@Valid FindCustomerInvestmentCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /customer/listCustomerInvestments</b>
+//     * <p>列出企业投融情况</p>
+//     */
+//    @RequestMapping("listCustomerInvestments")
+//    @RestReturn(value = CustomerInvestmentDTO.class, collection = true)
+//    public RestResponse listCustomerInvestments(@Valid ListCustomerInvestmentsCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+////    经济指标 的增删改查
+//    /**
+//     * <b>URL: /customer/createCustomerEconomicIndicator</b>
+//     * <p>新建企业经济指标</p>
+//     */
+//    @RequestMapping("createCustomerEconomicIndicator")
+//    @RestReturn(value = String.class)
+//    public RestResponse createCustomerEconomicIndicator(@Valid CreateCustomerEconomicIndicatorCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /customer/updateCustomerEconomicIndicator</b>
+//     * <p>修改企业经济指标</p>
+//     */
+//    @RequestMapping("updateCustomerEconomicIndicator")
+//    @RestReturn(value = String.class)
+//    public RestResponse updateCustomerEconomicIndicator(@Valid UpdateCustomerEconomicIndicatorCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /customer/deleteCustomerEconomicIndicator</b>
+//     * <p>删除企业经济指标</p>
+//     */
+//    @RequestMapping("deleteCustomerEconomicIndicator")
+//    @RestReturn(value = String.class)
+//    public RestResponse deleteCustomerEconomicIndicator(@Valid DeleteCustomerEconomicIndicatorCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /customer/getCustomerEconomicIndicator</b>
+//     * <p>查看企业经济指标</p>
+//     */
+//    @RequestMapping("getCustomerEconomicIndicator")
+//    @RestReturn(value = CustomerEconomicIndicatorDTO.class)
+//    public RestResponse getCustomerEconomicIndicator(@Valid FindCustomerEconomicIndicatorCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /customer/listCustomerEconomicIndicators</b>
+//     * <p>列出企业经济指标</p>
+//     */
+//    @RequestMapping("listCustomerEconomicIndicators")
+//    @RestReturn(value = CustomerEconomicIndicatorDTO.class, collection = true)
+//    public RestResponse listCustomerEconomicIndicators(@Valid ListCustomerEconomicIndicatorsCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
      * <b>URL: /customer/listEnterpriseCustomerStatistics</b>
