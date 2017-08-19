@@ -14,7 +14,7 @@ import java.sql.Date;
  * <li>dismissType: 离职类型： 1-辞职 2-解雇 3-其他 参考{@link com.everhomes.rest.profile.DismissType}</li>
  * <li>dismissReason: 离职原因</li>
  * <li>contactName: 姓名</li>
- * <li>pageAnchor: 锚点值</li>
+ * <li>pageOffset: 页码(不能为null)</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
@@ -36,7 +36,7 @@ public class ListProfileDismissEmployeesCommand {
 
     private String contactName;
 
-    private Long pageAnchor;
+    private Integer pageOffset;
 
     private Integer pageSize;
 
@@ -107,12 +107,12 @@ public class ListProfileDismissEmployeesCommand {
         this.contactName = contactName;
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
+    public Integer getPageOffset() {
+        return pageOffset;
     }
 
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
+    public void setPageOffset(Integer pageOffset) {
+        this.pageOffset = pageOffset;
     }
 
     public Integer getPageSize() {

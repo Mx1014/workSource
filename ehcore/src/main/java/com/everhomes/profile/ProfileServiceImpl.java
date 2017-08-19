@@ -103,19 +103,18 @@ public class ProfileServiceImpl implements ProfileService {
 
         Condition condition = listDismissEmployeesCondition(cmd);
 
-        List<ProfileDismissEmployees> results = profileProvider.listProfileDismissEmployees(cmd.getPageAnchor(), cmd.getPageSize()+1, namespaceId, condition);
+        List<ProfileDismissEmployees> results = profileProvider.listProfileDismissEmployees(cmd.getPageOffset(), cmd.getPageSize()+1, namespaceId, condition);
 
         if (results != null) {
             response.setDismissEmployees(results.stream().map(r -> {
                 ProfileDismissEmployeeDTO dto = ConvertHelper.convert(r, ProfileDismissEmployeeDTO.class);
                 return dto;
             }).collect(Collectors.toList()));
-            Long nextPageAnchor = null;
+            Integer nextPageOffset = null;
             if (results.size() > cmd.getPageSize()) {
-                results.remove(results.size() - 1);
-                nextPageAnchor = results.get(results.size() - 1).getId();
+                nextPageOffset = cmd.getPageOffset() +1;
             }
-            response.setNextPageAnchor(nextPageAnchor);
+            response.setNextPageOffset(nextPageOffset);
             return response;
         }
 
@@ -143,7 +142,7 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         //   离职原因
-        if(cmd.getDismissType()!=null) {
+        if(cmd.getDismissReason()!=null) {
             condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_REASON.eq(cmd.getDismissReason()));
         }
 

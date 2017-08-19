@@ -7,13 +7,13 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>nextPageAnchor: 下一页起始锚点</li>
+ * <li>nextPageOffset: 下一页页码</li>
  * <li>dismissEmployees: 离职员工信息，参考{@link com.everhomes.rest.profile.ProfileDismissEmployeeDTO}</li>
  * </ul>
  */
 public class ListProfileDismissEmployeesResponse {
 
-    private Long nextPageAnchor;
+    private Integer nextPageOffset;
 
     @ItemType(ProfileDismissEmployeeDTO.class)
     private List<ProfileDismissEmployeeDTO> dismissEmployees;
@@ -21,12 +21,12 @@ public class ListProfileDismissEmployeesResponse {
     public ListProfileDismissEmployeesResponse() {
     }
 
-    public Long getNextPageAnchor() {
-        return nextPageAnchor;
+    public Integer getNextPageOffset() {
+        return nextPageOffset;
     }
 
-    public void setNextPageAnchor(Long nextPageAnchor) {
-        this.nextPageAnchor = nextPageAnchor;
+    public void setNextPageOffset(Integer nextPageOffset) {
+        this.nextPageOffset = nextPageOffset;
     }
 
     public List<ProfileDismissEmployeeDTO> getDismissEmployees() {

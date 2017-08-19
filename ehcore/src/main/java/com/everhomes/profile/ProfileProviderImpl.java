@@ -103,15 +103,19 @@ public class ProfileProviderImpl implements ProfileProvider {
     }
 
     @Override
-    public List<ProfileDismissEmployees> listProfileDismissEmployees(Long anchor, Integer count, Integer namespaceId, Condition condition) {
+    public List<ProfileDismissEmployees> listProfileDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhProfileDismissEmployeesRecord> query = context.selectQuery(Tables.EH_PROFILE_DISMISS_EMPLOYEES);
         query.addConditions(Tables.EH_PROFILE_DISMISS_EMPLOYEES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(condition);
-        if (anchor != null)
-            query.addConditions(Tables.EH_PROFILE_DISMISS_EMPLOYEES.ID.gt(anchor));
-        query.addOrderBy(Tables.EH_PROFILE_DISMISS_EMPLOYEES.ID.asc());
-        query.addLimit(count);
+
+        //  计算从第几行开始读
+        int pageOffset = (offset -1) * (count - 1);
+
+        /*if (anchor != null)
+            query.addConditions(Tables.EH_PROFILE_DISMISS_EMPLOYEES.ID.gt(anchor));*/
+        query.addOrderBy(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_TIME.desc());
+        query.addLimit(pageOffset,count);
         List<ProfileDismissEmployees> results = new ArrayList<>();
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, ProfileDismissEmployees.class));

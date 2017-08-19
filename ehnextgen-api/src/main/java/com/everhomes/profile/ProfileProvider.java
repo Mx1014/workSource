@@ -18,6 +18,6 @@ public interface ProfileProvider {
 
     void createProfileDismissEmployee(ProfileDismissEmployees profileDismissEmployee);
 
-    List<ProfileDismissEmployees> listProfileDismissEmployees(Long anchor, Integer count, Integer namespaceId, Condition condition);
+    List<ProfileDismissEmployees> listProfileDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
 
 }
