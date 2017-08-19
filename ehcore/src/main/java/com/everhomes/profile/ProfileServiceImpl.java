@@ -1,6 +1,9 @@
 package com.everhomes.profile;
 
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.profile.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sms.DateUtil;
@@ -22,10 +25,30 @@ import java.util.stream.Collectors;
 @Component
 public class ProfileServiceImpl implements ProfileService {
 
-    @Autowired ProfileProvider profileProvider;
+    @Autowired
+    ProfileProvider profileProvider;
+
+    @Autowired
+    OrganizationService organizationService;
 
     @Override
     public ProfileContactDTO addProfileContact(AddProfileContactCommand cmd) {
+
+        //TODO: visibleFlag 的判断
+
+        //
+        AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
+        addCommand.setContactName(cmd.getContactName());
+        addCommand.setGender(cmd.getGender());
+        addCommand.setContactToken(cmd.getContactToken());
+        addCommand.setDepartmentIds(cmd.getDepartmentIds());
+        addCommand.setJobPositionIds(cmd.getJobPositionIds());
+        OrganizationMemberDTO dto = organizationService.addOrganizationPersonnel(addCommand);
+
+        Long detailId = null;
+        if(dto !=null)
+            detailId = dto.getDetailId();
+
         return null;
     }
 

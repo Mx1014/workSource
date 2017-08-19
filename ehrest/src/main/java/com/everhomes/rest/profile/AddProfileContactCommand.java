@@ -45,6 +45,86 @@ public class AddProfileContactCommand {
     public AddProfileContactCommand() {
     }
 
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactEnName() {
+        return contactEnName;
+    }
+
+    public void setContactEnName(String contactEnName) {
+        this.contactEnName = contactEnName;
+    }
+
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
+
+    public String getAreaCode() {
+        return areaCode;
+    }
+
+    public void setAreaCode(String areaCode) {
+        this.areaCode = areaCode;
+    }
+
+    public String getContactToken() {
+        return contactToken;
+    }
+
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
+    }
+
+    public String getContactShortToken() {
+        return contactShortToken;
+    }
+
+    public void setContactShortToken(String contactShortToken) {
+        this.contactShortToken = contactShortToken;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<Long> getDepartmentIds() {
+        return departmentIds;
+    }
+
+    public void setDepartmentIds(List<Long> departmentIds) {
+        this.departmentIds = departmentIds;
+    }
+
+    public List<Long> getJobPositionIds() {
+        return jobPositionIds;
+    }
+
+    public void setJobPositionIds(List<Long> jobPositionIds) {
+        this.jobPositionIds = jobPositionIds;
+    }
+
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
