@@ -386,7 +386,7 @@ ALTER TABLE `eh_addresses` ADD COLUMN `orientation` VARCHAR(32) COMMENT '朝向'
 -- 企业人才：
 CREATE TABLE `eh_customer_talents` (
   `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 ,
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `name` VARCHAR(64),
@@ -405,7 +405,7 @@ CREATE TABLE `eh_customer_talents` (
   `personal_certificate` VARCHAR(256) COMMENT '个人证书',
   `career_experience` TEXT COMMENT '主要职业经历',
   `remark` TEXT,
-  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
+  `status` TINYINT NOT NULL COMMENT '0: inactive; 1: waiting for approval; 2: active',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,
@@ -418,6 +418,7 @@ CREATE TABLE `eh_customer_talents` (
 -- 客户知识产权：
 CREATE TABLE `eh_customer_trademarks` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 ,
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
@@ -427,7 +428,7 @@ CREATE TABLE `eh_customer_trademarks` (
   `trademark_type_item_name` VARCHAR(128) COMMENT '商标类型: 文字商标、图片商标、品牌商标、著名商标..., refer to the display_name of eh_var_field_items',
 --  `trademark_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none; 1: text; 2: brand; 3: famous; 4: picture',
   `trademark_amount` INTEGER COMMENT '商标数量',
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active', 
   `create_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -439,6 +440,7 @@ CREATE TABLE `eh_customer_trademarks` (
 
 CREATE TABLE `eh_customer_patents` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 ,
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
@@ -450,7 +452,7 @@ CREATE TABLE `eh_customer_patents` (
   `patent_type_item_name` VARCHAR(128) COMMENT '专利类型 发明专利\实用新型\外观设计\集成电路布图\软件著作权\证书..., refer to the display_name of eh_var_field_items',
   `patent_name` VARCHAR(128) COMMENT '专利名称',
   `application_number` VARCHAR(64) COMMENT '授权号',
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active', 
   `create_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -464,6 +466,7 @@ CREATE TABLE `eh_customer_patents` (
 -- 客户申报项目：
 CREATE TABLE `eh_customer_apply_projects` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 ,
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
@@ -486,6 +489,7 @@ CREATE TABLE `eh_customer_apply_projects` (
 -- 客户工商信息：
 CREATE TABLE `eh_customer_commercials` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 ,
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: enterprise; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
@@ -506,12 +510,12 @@ CREATE TABLE `eh_customer_commercials` (
   `registered_addr` VARCHAR(128),
   `registered_capital` DECIMAL(10,2) COMMENT '注册资金',
   `paidup_apital` DECIMAL(10,2) COMMENT '实到资金',
-  `property_type` TINYINT, 
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `property_type` BIGINT COMMENT ' refer to the id of eh_var_field_items', 
   `change_date` DATETIME COMMENT '变更日期',
   `business_licence_date` DATETIME,
   `liquidation_committee_recored_date` DATETIME COMMENT '清算组备案日期',
   `cancel_date` DATETIME COMMENT '注销日期',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active', 
   `create_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -524,13 +528,14 @@ CREATE TABLE `eh_customer_commercials` (
 -- 客户投融情况：
 CREATE TABLE `eh_customer_investments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 ,
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
   `government_project` VARCHAR(128),
   `bank_loans` DECIMAL(10,2) COMMENT '银行贷款',
   `equity_financing` DECIMAL(10,2) COMMENT '股权融资',
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active', 
   `create_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -543,6 +548,7 @@ CREATE TABLE `eh_customer_investments` (
 -- 客户经济指标：
 CREATE TABLE `eh_customer_economic_indicators` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 ,
   `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
   `customer_id` BIGINT,
   `customer_name` VARCHAR(64),
@@ -558,7 +564,7 @@ CREATE TABLE `eh_customer_economic_indicators` (
   `foreign_company_income_tax` DECIMAL(10,2) COMMENT '外企所得税',
   `individual_income_tax` DECIMAL(10,2) COMMENT '个人所得税',
   `total_tax_amount` DECIMAL(10,2) COMMENT '税额合计',
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: active', 
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active', 
   `create_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
