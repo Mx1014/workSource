@@ -52,6 +52,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -394,6 +395,42 @@ public class AssetServiceImpl implements AssetService {
             list = assetProvider.listBillStaticsByCommunities(UserContext.getCurrentNamespaceId());
         }
         return list;
+    }
+
+    @Override
+    public void modifyBillStatus(BillIdCommand cmd) {
+        assetProvider.modifyBillStatus(cmd.getBillId());
+    }
+
+    @Override
+    public HttpServletResponse exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
+        ListBillsResponse bills = listBills(cmd);
+        Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int date = c.get(Calendar.DATE);
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        int minute = c.get(Calendar.MINUTE);
+        int second = c.get(Calendar.SECOND);
+        String fileName = "bill"+"/"+year + "/" + month + "/" + date + " " +hour + ":" +minute + ":" + second;
+        List<ListBillsDTO> dtos = bills.getListBillsDTOS();
+        String[] propertyNames = new String[10];
+        String[] titleName = new String[10];
+        int[] titleSize = new int[10];
+        List<?> dataList = new ArrayList<>();
+        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
+        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+        return null;
+    }
+
+    @Override
+    public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
+        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
+    }
+
+    @Override
+    public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
+        return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId());
     }
 //    @Scheduled(cron = "0 0 23 * * ?")
 //    @Override

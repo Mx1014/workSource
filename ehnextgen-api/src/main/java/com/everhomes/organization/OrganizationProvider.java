@@ -10,6 +10,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.userOrganization.UserOrganizations;
@@ -454,4 +455,6 @@ public interface OrganizationProvider {
 	List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId);
 
     String getOrganizationNameById(Long targetId);
+
+	List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids);
 }

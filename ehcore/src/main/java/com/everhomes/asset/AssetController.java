@@ -295,13 +295,14 @@ public class AssetController extends ControllerBase {
 
     // this is for 展示所有收费项目   1
     /**
-     * <p>获取客户可见的所有的收费项目列表</p>
+     * <p>获取园区启用的收费项目列表</p>
      * <b>URL: /asset/listChargingItems</b>
      */
     @RequestMapping("listChargingItems")
     @RestReturn(value = ListChargingItemsDTO.class, collection = true)
     public RestResponse listChargingItems(OwnerIdentityCommand cmd) {
-        RestResponse response = new RestResponse();
+        List<ListChargingItemsDTO> list = assetService.listChargingItems(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -309,13 +310,14 @@ public class AssetController extends ControllerBase {
 
     // this is for 展示一个收费项目的客户可见的所有标准列表         1
     /**
-     * <p>展示一个收费项目的客户可见的所有标准列表</p>
+     * <p>展示一个收费项目的园区下的所有标准列表</p>
      * <b>URL: /asset/listChargingStandards</b>
      */
     @RequestMapping("listChargingStandards")
     @RestReturn(value = ListChargingStandardsDTO.class, collection = true)
     public RestResponse listChargingStandards(ListChargingStandardsCommand cmd) {
-        RestResponse response = new RestResponse();
+        List<ListChargingStandardsDTO> list = assetService.listChargingStandards(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -719,6 +721,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("modifyBillStatus")
     @RestReturn(value = String.class)
     public RestResponse modifyBillStatus(BillIdCommand cmd) {
+        assetService.modifyBillStatus(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -746,9 +749,9 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/exportPaymentBills</b>
      */
     @RequestMapping("exportPaymentBills")
-    public HttpServletResponse exportPaymentBills(OneKeyNoticeCommand cmd,HttpServletResponse response) {
-
-        return response;
+    public HttpServletResponse exportPaymentBills(ListBillsCommand cmd,HttpServletResponse response) {
+        HttpServletResponse commandResponse = assetService.exportPaymentBills(cmd,response);
+        return null;
     }
 
     // this is for 展示已出账单的减免项           2

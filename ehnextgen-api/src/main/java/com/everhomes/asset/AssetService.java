@@ -55,5 +55,13 @@ public interface AssetService {
 
     List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
 
+    void modifyBillStatus(BillIdCommand cmd);
+
+    HttpServletResponse exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
+
+    List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
+
+    List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
+
 //    void synchronizeZJGKBill();
 }

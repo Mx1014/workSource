@@ -10,12 +10,17 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhPaymentBills;
+import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
 import com.everhomes.server.schema.tables.EhPaymentChargingItems;
+import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
+import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
@@ -26,15 +31,20 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
+import com.everhomes.util.StringHelper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 import freemarker.core.ArithmeticEngine;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jca.cci.CciOperationNotSupportedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
@@ -905,19 +915,23 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        context.select(r.AMOUNT_RECEIVABLE,r.AMOUNT_RECEIVED,r.AMOUNT_OWED)
-                .from(r)
-                .where(r.OWNER_TYPE.eq(ownerType))
-                .and(r.OWNER_ID.eq(ownerId))
-                .and(r.DATE_STR.greaterOrEqual(beginLimit))
-                .and(r.DATE_STR.lessOrEqual(endLimit))
-                .orderBy(r.DATE_STR)
-                .fetchOne()
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(r);
+        query.addSelect(DSL.sum(r.AMOUNT_RECEIVABLE),DSL.sum(r.AMOUNT_RECEIVED),DSL.sum(r.AMOUNT_OWED),r.DATE_STR);
+        if(beginLimit!=null) {
+            query.addConditions(r.DATE_STR.greaterOrEqual(beginLimit));
+        }
+        if(endLimit!=null) {
+            query.addConditions(r.DATE_STR.lessOrEqual(endLimit));
+        }
+        query.addGroupBy(r.DATE_STR);
+        query.addOrderBy(r.DATE_STR);
+        query.fetch()
                 .map(f -> {
                     BillStaticsDTO dto = new BillStaticsDTO();
-                    dto.setAmountOwed(f.getValue(r.AMOUNT_OWED));
-                    dto.setAmountReceivable(f.getValue(r.AMOUNT_RECEIVABLE));
-                    dto.setAmountReceived(f.getValue(r.AMOUNT_RECEIVED));
+                    dto.setAmountOwed(f.getValue(DSL.sum(r.AMOUNT_OWED)));
+                    dto.setAmountReceivable(f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE)));
+                    dto.setAmountReceived(f.getValue(DSL.sum(r.AMOUNT_RECEIVED)));
                     dto.setValueOfX(f.getValue(r.DATE_STR));
                     list.add(dto);
                     return null;
@@ -928,22 +942,23 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId) {
         List<BillStaticsDTO> list = new ArrayList<>();
-        EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
+        EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
+        EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        context.select(r.AMOUNT_RECEIVABLE,r.AMOUNT_RECEIVED,r.AMOUNT_OWED)
-                .from(r)
-                .where(r.OWNER_TYPE.eq(ownerType))
-                .and(r.OWNER_ID.eq(ownerId))
-//                .and(r.DATE_STR.greaterOrEqual(beginLimit))
-//                .and(r.DATE_STR.lessOrEqual(endLimit))
-                .orderBy(r.DATE_STR)
-                .fetchOne()
+        context.select(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),o.CHARGING_ITEM_NAME)
+                .from(o,t)
+                .where(o.OWNER_TYPE.eq(ownerType))
+                .and(o.OWNER_ID.eq(ownerId))
+                .and(o.CHARGING_ITEMS_ID.eq(t.ID))
+                .groupBy(o.CHARGING_ITEMS_ID)
+                .orderBy(t.DEFAULT_ORDER)
+                .fetch()
                 .map(f -> {
                     BillStaticsDTO dto = new BillStaticsDTO();
-                    dto.setAmountOwed(f.getValue(r.AMOUNT_OWED));
-                    dto.setAmountReceivable(f.getValue(r.AMOUNT_RECEIVABLE));
-                    dto.setAmountReceived(f.getValue(r.AMOUNT_RECEIVED));
-                    dto.setValueOfX(f.getValue(r.DATE_STR));
+                    dto.setAmountOwed(f.getValue(DSL.sum(o.AMOUNT_OWED)));
+                    dto.setAmountReceivable(f.getValue(DSL.sum(o.AMOUNT_RECEIVABLE)));
+                    dto.setAmountReceived(f.getValue(DSL.sum(o.AMOUNT_RECEIVED)));
+                    dto.setValueOfX(f.getValue(o.CHARGING_ITEM_NAME));
                     list.add(dto);
                     return null;
                 });
@@ -952,6 +967,129 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<BillStaticsDTO> listBillStaticsByCommunities(Integer currentNamespaceId) {
-        return null;
+        List<BillStaticsDTO> list = new ArrayList<>();
+        EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
+        EhCommunities o = Tables.EH_COMMUNITIES.as("o");
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.select(DSL.sum(r.AMOUNT_RECEIVABLE),DSL.sum(r.AMOUNT_RECEIVED),DSL.sum(r.AMOUNT_OWED),o.NAME)
+                .from(r,o)
+                .where(r.NAMESPACE_ID.eq(currentNamespaceId))
+                .and(r.TARGET_ID.eq(o.ID))
+                .groupBy(r.TARGET_TYPE,r.TARGET_ID)
+                .fetch()
+                .map(f -> {
+                    BillStaticsDTO dto = new BillStaticsDTO();
+                    dto.setAmountOwed(f.getValue(DSL.sum(r.AMOUNT_OWED)));
+                    dto.setAmountReceivable(f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE)));
+                    dto.setAmountReceived(f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE)));
+                    dto.setValueOfX(f.getValue(o.NAME));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
     }
+
+    @Override
+    public void modifyBillStatus(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //更新 状态，更新 金钱数目，不可逆
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        EhPaymentBillItems item = Tables.EH_PAYMENT_BILL_ITEMS.as("item");
+        //BILL
+        context.update(bill)
+                .set(bill.STATUS,(byte)1)
+                .set(bill.AMOUNT_RECEIVED,bill.AMOUNT_RECEIVABLE)
+                .set(bill.AMOUNT_OWED,new BigDecimal("0"))
+                .where(bill.ID.eq(billId))
+                .execute();
+        //bill item
+        context.update(item)
+                .set(item.STATUS,(byte)1)
+                .set(item.AMOUNT_RECEIVED,item.AMOUNT_RECEIVABLE)
+                .set(item.AMOUNT_OWED,new BigDecimal("0"))
+                .where(item.BILL_ID.eq(billId))
+                .execute();
+        //bill exemption已经减到bill中了
+    }
+
+    @Override
+    public List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId) {
+        List<ListChargingItemsDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
+        EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.ID);
+        query.addSelect(t.NAME);
+        query.addFrom(t);
+        query.addFrom(t1);
+        query.addConditions(t1.OWNER_ID.eq(ownerId));
+        query.addConditions(t1.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t1.CHARGING_ITEM_ID.eq(t.ID));
+        query.fetch().map(r -> {
+            ListChargingItemsDTO dto = new ListChargingItemsDTO();
+            dto.setChargingItemId(r.getValue(t.ID));
+            dto.setChargingItemName(r.getValue(t.NAME));
+            list.add(dto);
+            return null;
+        });
+        return list;
+    }
+
+    @Override
+    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId) {
+        List<ListChargingStandardsDTO> list = new ArrayList<>();
+        List<Long> ids = new ArrayList<>();
+        List<String> variableInjectionJson = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
+        EhPaymentVariables t2 = Tables.EH_PAYMENT_VARIABLES.as("t2");
+        EhPaymentBillGroupsRules t3 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t3");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA);
+        query.addFrom(t,t1,t3);
+        query.addConditions(t.CHARGING_ITEMS_ID.eq(chargingItemId));
+        query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
+        query.addConditions(t3.CHARGING_STANDARDS_ID.eq(t.ID));
+        query.addConditions(t1.OWNER_ID.eq(ownerId));
+        query.addConditions(t1.OWNER_TYPE.eq(ownerType));
+        query.fetch().map(r -> {
+            ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
+            dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
+            Long chargingStandardId = r.getValue(t.ID);
+            dto.setChargingStandardId(chargingStandardId);
+            dto.setChargingStandardName(r.getValue(t.NAME));
+            dto.setFormula(r.getValue(t.FORMULA));
+            variableInjectionJson.add(r.getValue(t3.VARIABLES_JSON_STRING));
+            list.add(dto);
+            return null;
+        });
+        for(int i = 0; i < ids.size(); i++) {
+            String json = variableInjectionJson.get(i);
+            ListChargingStandardsDTO dto = list.get(i);
+            Gson gson = new Gson();
+            List<VariableIdAndValue> idAndValues = gson.fromJson(json,new TypeToken<List<VariableIdAndValue>>(){}.getType());
+            List<PaymentVariable> variables = new ArrayList<>();
+            for(int j = 0; j < idAndValues.size(); j++) {
+                PaymentVariable variable = new PaymentVariable();
+                VariableIdAndValue idAndValue = idAndValues.get(j);
+                long variableId = (long)idAndValue.getVariableId();
+                double variableValueDouble = (double)idAndValue.getVariableValue();
+                BigDecimal variableValue = new BigDecimal(variableValueDouble);
+                variableValue = variableValue.setScale(2);
+                String variableName = context.select(t2.NAME)
+                        .from(t2)
+                        .where(t2.ID.eq(variableId))
+                        .fetchOne(0, String.class);
+                variable.setVariableId(variableId);
+                variable.setVariableName(variableName);
+                variable.setVariableValue(variableValue);
+                variables.add(variable);
+            }
+            list.get(i).setVariables(variables);
+        }
+        return list;
+    }
+
 }

@@ -3,6 +3,7 @@ package com.everhomes.address;
 
 import java.util.List;
 
+import com.everhomes.asset.AddressIdAndName;
 import com.everhomes.rest.address.*;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -60,4 +61,5 @@ public interface AddressService {
 	Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloorForBusiness(ListApartmentFloorCommand cmd);
 	Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordForBusiness(ListPropApartmentsByKeywordCommand cmd);
 	Object importParkAddressData(ImportAddressCommand cmd, MultipartFile file);
+    List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName);
 }

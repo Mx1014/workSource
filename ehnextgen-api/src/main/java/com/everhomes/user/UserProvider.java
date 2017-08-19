@@ -8,6 +8,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
 
@@ -127,4 +128,6 @@ public interface UserProvider {
      * @return  返回该记录的id
      */
     long createUserNotificationSetting(UserNotificationSetting setting);
+
+    List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel);
 }

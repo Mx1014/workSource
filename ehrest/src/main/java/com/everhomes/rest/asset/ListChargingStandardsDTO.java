@@ -13,7 +13,7 @@ import java.util.List;
  * <li>chargingStandardName:收费标准名称</li>
  * <li>formula:公式</li>
  * <li>BillingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年</li>
- * <li>variables:变量列表</li>
+ * <li>variables:变量列表，参考{@link com.everhomes.rest.asset.PaymentVariable}</li>
  *</ul>
  */
 public class ListChargingStandardsDTO {
@@ -22,7 +22,7 @@ public class ListChargingStandardsDTO {
     private String formula;
     private Byte BillingCycle;
     @ItemType(String.class)
-    private List<String> variables;
+    private List<PaymentVariable> variables;
 
     @Override
     public String toString() {
@@ -61,11 +61,11 @@ public class ListChargingStandardsDTO {
         BillingCycle = billingCycle;
     }
 
-    public List<String> getVariables() {
+    public List<PaymentVariable> getVariables() {
         return variables;
     }
 
-    public void setVariables(List<String> variables) {
+    public void setVariables(List<PaymentVariable> variables) {
         this.variables = variables;
     }
 

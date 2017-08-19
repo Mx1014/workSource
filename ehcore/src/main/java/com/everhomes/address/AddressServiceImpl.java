@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.address;
 
+import com.everhomes.asset.AddressIdAndName;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.*;
@@ -1682,7 +1683,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 	}
 
-	private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,
+    @Override
+    public List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName) {
+        return addressProvider.findAddressByPossibleName( currentNamespaceId,  ownerId,  buildingName,  apartmentName);
+    }
+
+    private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,
 			Long userId, ImportAddressCommand cmd) {
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 

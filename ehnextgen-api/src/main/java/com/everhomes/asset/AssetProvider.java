@@ -65,4 +65,10 @@ public interface AssetProvider {
     List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId);
 
     List<BillStaticsDTO> listBillStaticsByCommunities(Integer currentNamespaceId);
+
+    void modifyBillStatus(Long billId);
+
+    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId);
+
+    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId);
 }
