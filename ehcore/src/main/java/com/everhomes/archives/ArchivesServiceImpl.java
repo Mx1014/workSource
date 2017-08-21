@@ -1,8 +1,12 @@
-package com.everhomes.profile;
+package com.everhomes.archives;
 
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.profile.ProfileContactsSticky;
+import com.everhomes.profile.ProfileDismissEmployees;
+import com.everhomes.profile.ProfileProvider;
+import com.everhomes.profile.ProfileService;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.profile.*;
 import com.everhomes.server.schema.Tables;
