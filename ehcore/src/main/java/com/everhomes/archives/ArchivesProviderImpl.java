@@ -36,38 +36,38 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void createArchivesContactsSticky(ArchivesContactsSticky profileContactsSticky) {
+    public void createArchivesContactsSticky(ArchivesContactsSticky archivesContactsSticky) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesContactsSticky.class));
-        profileContactsSticky.setId(id);
-        profileContactsSticky.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        profileContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
-        profileContactsSticky.setUpdateTime(profileContactsSticky.getCreateTime());
+        archivesContactsSticky.setId(id);
+        archivesContactsSticky.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        archivesContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
+        archivesContactsSticky.setUpdateTime(archivesContactsSticky.getCreateTime());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesContactsStickyDao dao = new EhArchivesContactsStickyDao(context.configuration());
-        dao.insert(profileContactsSticky);
+        dao.insert(archivesContactsSticky);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesContactsSticky.class, null);
     }
 
     @Override
-    public void updateArchivesContactsSticky(ArchivesContactsSticky profileContactsSticky) {
-        profileContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
-        profileContactsSticky.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    public void updateArchivesContactsSticky(ArchivesContactsSticky archivesContactsSticky) {
+        archivesContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
+        archivesContactsSticky.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesContactsStickyDao dao = new EhArchivesContactsStickyDao(context.configuration());
-        dao.update(profileContactsSticky);
+        dao.update(archivesContactsSticky);
 
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesContactsSticky.class, profileContactsSticky.getId());
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesContactsSticky.class, archivesContactsSticky.getId());
     }
 
     @Override
-    public void deleteArchivesContactsSticky(ArchivesContactsSticky profileContactsSticky) {
+    public void deleteArchivesContactsSticky(ArchivesContactsSticky archivesContactsSticky) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesContactsStickyDao dao = new EhArchivesContactsStickyDao(context.configuration());
-        dao.deleteById(profileContactsSticky.getId());
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesContactsSticky.class, profileContactsSticky.getId());
+        dao.deleteById(archivesContactsSticky.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesContactsSticky.class, archivesContactsSticky.getId());
     }
 
     @Override
@@ -102,14 +102,14 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public void createArchivesDismissEmployee(ArchivesDismissEmployees profileDismissEmployee) {
+    public void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesDismissEmployees.class));
-        profileDismissEmployee.setId(id);
-        profileDismissEmployee.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        profileDismissEmployee.setOperatorUid(UserContext.current().getUser().getId());
+        archivesDismissEmployee.setId(id);
+        archivesDismissEmployee.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        archivesDismissEmployee.setOperatorUid(UserContext.current().getUser().getId());
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesDismissEmployeesDao dao = new EhArchivesDismissEmployeesDao(context.configuration());
-        dao.insert(profileDismissEmployee);
+        dao.insert(archivesDismissEmployee);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesDismissEmployees.class, null);
     }
@@ -124,8 +124,6 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         //  计算从第几行开始读
         int pageOffset = (offset -1) * (count - 1);
 
-        /*if (anchor != null)
-            query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ID.gt(anchor));*/
         query.addOrderBy(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DISMISS_TIME.desc());
         query.addLimit(pageOffset,count);
         List<ArchivesDismissEmployees> results = new ArrayList<>();
@@ -138,16 +136,4 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         }
         return null;
     }
-
-    /*  List<Long> results = new ArrayList<>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DETAIL_ID)
-                .from(Tables.EH_PROFILE_DISMISS_EMPLOYEES)
-                .where(Tables.EH_PROFILE_DISMISS_EMPLOYEES.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.ORGANIZATION_ID.eq(organizationId))
-                .and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.CREATE_TIME.lt(new Timestamp(anchor)))
-                .orderBy(Tables.EH_PROFILE_DISMISS_EMPLOYEES.CREATE_TIME.desc())
-                .limit(count)
-                .fetchInto(ArchivesDismissEmployees.class);*/
-
 }

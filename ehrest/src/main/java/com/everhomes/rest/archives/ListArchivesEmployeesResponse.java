@@ -16,7 +16,7 @@ public class ListArchivesEmployeesResponse {
     private Long nextPageAnchor;
 
     @ItemType(ArchivesEmployeeDTO.class)
-    private List<ArchivesEmployeeDTO> profilePersonnels;
+    private List<ArchivesEmployeeDTO> archivesEmployees;
 
     public ListArchivesEmployeesResponse() {
     }
@@ -29,12 +29,12 @@ public class ListArchivesEmployeesResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<ArchivesEmployeeDTO> getProfilePersonnels() {
-        return profilePersonnels;
+    public List<ArchivesEmployeeDTO> getArchivesEmployees() {
+        return archivesEmployees;
     }
 
-    public void setProfilePersonnels(List<ArchivesEmployeeDTO> profilePersonnels) {
-        this.profilePersonnels = profilePersonnels;
+    public void setArchivesEmployees(List<ArchivesEmployeeDTO> archivesEmployees) {
+        this.archivesEmployees = archivesEmployees;
     }
 
     @Override

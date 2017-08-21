@@ -22,20 +22,20 @@ import javax.servlet.http.HttpServletResponse;
  */
 
 @RestController
-@RequestMapping("/profile")
+@RequestMapping("/archives")
 public class ArchivesController extends ControllerBase{
 
     @Autowired
-    private ArchivesService profileService;
+    private ArchivesService archivesService;
 
     /**
-     * <b>URL: /profile/addArchivesContact</b>
+     * <b>URL: /archives/addArchivesContact</b>
      * <p>1.添加、编辑通讯录成员</p>
      */
     @RequestMapping("addArchivesContact")
     @RestReturn(value = ArchivesContactDTO.class)
     public RestResponse addArchivesContact(AddArchivesContactCommand cmd){
-        ArchivesContactDTO res = profileService.addArchivesContact(cmd);
+        ArchivesContactDTO res = archivesService.addArchivesContact(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -43,13 +43,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/transferArchivesContacts</b>
+     * <b>URL: /archives/transferArchivesContacts</b>
      * <p>2-1.调整通讯录成员</p>
      */
     @RequestMapping("transferArchivesContacts")
     @RestReturn(value = String.class)
     public RestResponse transferArchivesContacts(TransferArchivesContactsCommand cmd){
-        profileService.transferArchivesContacts(cmd);
+        archivesService.transferArchivesContacts(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -57,13 +57,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/deleteArchivesContacts</b>
+     * <b>URL: /archives/deleteArchivesContacts</b>
      * <p>2-2.删除通讯录成员</p>
      */
     @RequestMapping("deleteArchivesContacts")
     @RestReturn(value = String.class)
     public RestResponse deleteArchivesContacts(DeleteArchivesContactsCommand cmd){
-        profileService.deleteArchivesContacts(cmd);
+        archivesService.deleteArchivesContacts(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -71,13 +71,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/stickArchivesContact</b>
+     * <b>URL: /archives/stickArchivesContact</b>
      * <p>3.通讯录成员置顶</p>
      */
     @RequestMapping("stickArchivesContact")
     @RestReturn(value = String.class)
     public RestResponse stickArchivesContact(StickArchivesContactCommand cmd){
-        profileService.stickArchivesContact(cmd);
+        archivesService.stickArchivesContact(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -85,13 +85,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/listArchivesContacts</b>
+     * <b>URL: /archives/listArchivesContacts</b>
      * <p>4.通讯录成员列表</p>
      */
     @RequestMapping("listArchivesContacts")
     @RestReturn(value = ListArchivesContactsResponse.class)
     public RestResponse listArchivesContacts(ListArchivesContactsCommand cmd){
-        ListArchivesContactsResponse res = profileService.listArchivesContacts(cmd);
+        ListArchivesContactsResponse res = archivesService.listArchivesContacts(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -99,38 +99,38 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/importArchivesContacts</b>
+     * <b>URL: /archives/importArchivesContacts</b>
      * <p>5-1.导入通讯录成员</p>
      */
     @RequestMapping("importArchivesContacts")
     @RestReturn(value = String.class)
     public RestResponse importArchivesContacts(ImportArchivesContactsCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
         User user = UserContext.current().getUser();
-        RestResponse response = new RestResponse(profileService.importArchivesContacts(files[0], user.getId(),user.getNamespaceId(),cmd));
+        RestResponse response = new RestResponse(archivesService.importArchivesContacts(files[0], user.getId(),user.getNamespaceId(),cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
     /**
-     * <b>URL: /profile/exportArchivesContacts</b>
+     * <b>URL: /archives/exportArchivesContacts</b>
      * <p>5-2.导出通讯录成员</p>
      */
     @RequestMapping("exportArchivesContacts")
     @RestReturn(value = String.class)
     public RestResponse exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse){
-        profileService.exportArchivesContacts(cmd,httpResponse);
+        archivesService.exportArchivesContacts(cmd,httpResponse);
         return new RestResponse();
     }
 
     /**
-     * <b>URL: /profile/verifyPersonnelByPassword</b>
+     * <b>URL: /archives/verifyPersonnelByPassword</b>
      * <p>5-3.导出通讯录身份校验</p>
      */
     @RequestMapping("verifyPersonnelByPassword")
     @RestReturn(value = String.class)
     public RestResponse verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd){
-        profileService.verifyPersonnelByPassword(cmd);
+        archivesService.verifyPersonnelByPassword(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -138,13 +138,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/listArchivesEmployees</b>
+     * <b>URL: /archives/listArchivesEmployees</b>
      * <p>7.员工列表</p>
      */
     @RequestMapping("listArchivesEmployees")
     @RestReturn(value = ListArchivesEmployeesResponse.class)
     public RestResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd){
-        ListArchivesEmployeesResponse res = profileService.listArchivesEmployees(cmd);
+        ListArchivesEmployeesResponse res = archivesService.listArchivesEmployees(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -152,13 +152,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/addArchivesEmployee</b>
+     * <b>URL: /archives/addArchivesEmployee</b>
      * <p>8.添加成员至员工档案</p>
      */
     @RequestMapping("addArchivesEmployee")
     @RestReturn(value = ArchivesEmployeeDTO.class)
     public RestResponse addArchivesEmployee(AddArchivesEmployeeCommand cmd){
-        ArchivesEmployeeDTO res = profileService.addArchivesEmployee(cmd);
+        ArchivesEmployeeDTO res = archivesService.addArchivesEmployee(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -166,13 +166,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/listArchivesDismissEmployees</b>
+     * <b>URL: /archives/listArchivesDismissEmployees</b>
      * <p>9.离职员工列表</p>
      */
     @RequestMapping("listArchivesDismissEmployees")
     @RestReturn(value = ListArchivesEmployeesResponse.class)
     public RestResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd){
-        ListArchivesDismissEmployeesResponse res = profileService.listArchivesDismissEmployees(cmd);
+        ListArchivesDismissEmployeesResponse res = archivesService.listArchivesDismissEmployees(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -180,13 +180,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/employArchivesEmployees</b>
+     * <b>URL: /archives/employArchivesEmployees</b>
      * <p>10-1.员工批量转正</p>
      */
     @RequestMapping("employArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse employArchivesEmployees(EmployArchivesEmployeesCommand cmd){
-        profileService.employArchivesEmployees(cmd);
+        archivesService.employArchivesEmployees(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -194,13 +194,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/transferArchivesEmployees</b>
+     * <b>URL: /archives/transferArchivesEmployees</b>
      * <p>10-2.员工批量调整</p>
      */
     @RequestMapping("transferArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse transferArchivesEmployees(TransferArchivesEmployeesCommand cmd){
-        profileService.transferArchivesEmployees(cmd);
+        archivesService.transferArchivesEmployees(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -208,13 +208,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/dismissArchivesEmployees</b>
+     * <b>URL: /archives/dismissArchivesEmployees</b>
      * <p>10-3.员工批量离职</p>
      */
     @RequestMapping("dismissArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd){
-        profileService.dismissArchivesEmployees(cmd);
+        archivesService.dismissArchivesEmployees(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -222,13 +222,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/addArchivesField</b>
+     * <b>URL: /archives/addArchivesField</b>
      * <p>11-1.增加、修改档案字段</p>
      */
     @RequestMapping("addArchivesField")
     @RestReturn(value = String.class)
     public RestResponse addArchivesField(AddArchivesFieldCommand cmd){
-        profileService.addArchivesField(cmd);
+        archivesService.addArchivesField(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -236,13 +236,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/addArchivesFieldGroup</b>
+     * <b>URL: /archives/addArchivesFieldGroup</b>
      * <p>11-2.添加档案字段分组</p>
      */
     @RequestMapping("addArchivesFieldGroup")
     @RestReturn(value = String.class)
     public RestResponse addArchivesFieldGroup(AddArchivesFieldGroupCommand cmd){
-        profileService.addArchivesFieldGroup(cmd);
+        archivesService.addArchivesFieldGroup(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -250,13 +250,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/updateArchivesFieldOrder</b>
+     * <b>URL: /archives/updateArchivesFieldOrder</b>
      * <p>11-3.批量调整档案字段</p>
      */
     @RequestMapping("updateArchivesFieldOrder")
     @RestReturn(value = String.class)
     public RestResponse updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd){
-        profileService.updateArchivesFieldOrder(cmd);
+        archivesService.updateArchivesFieldOrder(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -264,13 +264,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /profile/getArchivesField</b>
+     * <b>URL: /archives/getArchivesField</b>
      * <p>11-4.获取档案字段</p>
      */
     @RequestMapping("getArchivesField")
     @RestReturn(value = String.class)
     public RestResponse getArchivesField(GetArchivesFieldCommand cmd){
-        GetArchivesFieldResponse res = profileService.getArchivesField(cmd);
+        GetArchivesFieldResponse res = archivesService.getArchivesField(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

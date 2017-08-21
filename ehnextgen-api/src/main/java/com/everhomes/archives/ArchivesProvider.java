@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface ArchivesProvider {
 
-    void createArchivesContactsSticky(ArchivesContactsSticky profileContactsSticky);
+    void createArchivesContactsSticky(ArchivesContactsSticky archivesContactsSticky);
 
-    void updateArchivesContactsSticky(ArchivesContactsSticky profileContactsSticky);
+    void updateArchivesContactsSticky(ArchivesContactsSticky archivesContactsSticky);
 
-    void deleteArchivesContactsSticky(ArchivesContactsSticky profileContactsSticky);
+    void deleteArchivesContactsSticky(ArchivesContactsSticky archivesContactsSticky);
 
     ArchivesContactsSticky findArchivesContactsStickyById(Long id);
 
@@ -18,7 +18,7 @@ public interface ArchivesProvider {
 
     ArchivesContactsSticky findArchivesContactsStickyByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
 
-    void createArchivesDismissEmployee(ArchivesDismissEmployees profileDismissEmployee);
+    void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee);
 
     List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
 

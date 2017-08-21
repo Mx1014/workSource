@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
-    ArchivesProvider profileProvider;
+    ArchivesProvider archivesProvider;
 
     @Autowired
     OrganizationService organizationService;
@@ -101,24 +101,24 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  状态码为 0 时删除
         if (cmd.getStick().equals("0")) {
-            ArchivesContactsSticky result = profileProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(
+            ArchivesContactsSticky result = archivesProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(
                     user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
             if (result != null)
-                profileProvider.deleteArchivesContactsSticky(result);
+                archivesProvider.deleteArchivesContactsSticky(result);
         }
 
         //  状态码为 1 时新增置顶
         if (cmd.getStick().equals("1")) {
-            ArchivesContactsSticky result = profileProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
+            ArchivesContactsSticky result = archivesProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
             if (result == null) {
                 ArchivesContactsSticky contactsSticky = new ArchivesContactsSticky();
                 contactsSticky.setNamespaceId(user.getNamespaceId());
                 contactsSticky.setOrganizationId(cmd.getOrganizationId());
                 contactsSticky.setDetailId(cmd.getDetailId());
                 contactsSticky.setOperatorUid(user.getId());
-                profileProvider.createArchivesContactsSticky(contactsSticky);
+                archivesProvider.createArchivesContactsSticky(contactsSticky);
             } else {
-                profileProvider.updateArchivesContactsSticky(result);
+                archivesProvider.updateArchivesContactsSticky(result);
             }
         }
     }
@@ -130,7 +130,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  没有查询时显示主体
         if (StringUtils.isEmpty(cmd.getKeywords())) {
             //  1.首先从置顶的表读取置顶人员
-            List<Long> detailIds = profileProvider.listArchivesContactsStickyIds(namespaceId,cmd.getOrganizationId());
+            List<Long> detailIds = archivesProvider.listArchivesContactsStickyIds(namespaceId,cmd.getOrganizationId());
             //  TODO: 2.从组织架构读取对应人员，确定置顶个数
             //  TODO: 3.获取其余人员
 
@@ -199,7 +199,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         Condition condition = listDismissEmployeesCondition(cmd);
 
-        List<ArchivesDismissEmployees> results = profileProvider.listArchivesDismissEmployees(cmd.getPageOffset(), cmd.getPageSize()+1, namespaceId, condition);
+        List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(cmd.getPageOffset(), cmd.getPageSize()+1, namespaceId, condition);
 
         if (results != null) {
             response.setDismissEmployees(results.stream().map(r -> {
