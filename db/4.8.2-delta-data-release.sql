@@ -246,3 +246,9 @@ SET @id = (SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'organization', '900024', 'zh_CN', '性别仅支持"男""女"');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'organization', '900025', 'zh_CN', '姓名长度需小于20个字');
 -- merge from profile-1.2 ended by R
+
+-- merge from barcode-2.0 start  yanjun
+-- 电商一维码查询uri add by yanjun 20170816
+SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'biz.zuolin.checkBarcode','/zl-ec/rest/openapi/commodity/barcodeByCommodityUrl','电商一维码查询uri','0',NULL);
+-- merge from barcode-1.2 end  yanjun
