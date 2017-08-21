@@ -20,6 +20,7 @@ public class CommunityMapBuildingDTO {
 
     private String address;
 
+    @ItemType(CommunityMapBuildingGeoDTO.class)
     private List<CommunityMapBuildingGeoDTO> geos;
 
     @ItemType(ApartmentDTO.class)
