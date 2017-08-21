@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchType：上班还是下班 0-上班 1-下班 2-不打卡 参考 {@link PunchType}</li> 
  * <li>ruleTime： 规则时间(设置上下班打卡时间)</li> 
  * <li>punchTime： 实际打卡时间</li> 
- * <li>clockStatus：打卡记录的状态 如 上班，下班  参考{@link com.everhomes.rest.techpark.punch.ClockStatus}</li>
+ * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * </ul>
  */
 public class PunchLogDTO {
