@@ -771,7 +771,6 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal zero = new BigDecimal("0");
 
             long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-            nextBillId = 20l;
 
             //billItems assemble
             List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
@@ -865,9 +864,13 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
             newBill.setNoticetel(noticeTel);
             newBill.setOwnerId(ownerId);
+            newBill.setTargetname(targetName);
             newBill.setOwnerType(ownerType);
             newBill.setTargetType(targetType);
             newBill.setTargetId(targetId);
+            newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            newBill.setCreatorId(UserContext.currentUserId());
+            newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             newBill.setNoticeTimes(0);
             newBill.setStatus((byte)0);
             newBill.setSwitch(isSettled);
@@ -1204,6 +1207,8 @@ public class AssetProviderImpl implements AssetProvider {
                     .set(t.AMOUNT_OWED,amountReceivable)
                     .set(t.AMOUNT_SUPPLEMENT,amountSupplement)
                     .set(t.AMOUNT_EXEMPTION,amountExemption)
+                    .set(t.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+                    .set(t.OPERATOR_UID,UserContext.currentUserId())
                     .where(t1.ID.eq(billId))
                     .execute();
             return null;
