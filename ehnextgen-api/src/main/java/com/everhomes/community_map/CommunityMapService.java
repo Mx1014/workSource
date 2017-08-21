@@ -11,4 +11,6 @@ public interface CommunityMapService {
     SearchCommunityMapContentsResponse searchContentsByScene(SearchCommunityMapContentsCommand cmd);
 
     CommunityMapBuildingDetailDTO getCommunityMapBuildingDetailById(GetCommunityMapBuildingDetailByIdCommand cmd);
+
+    CommunityMapInitDataDTO getCommunityMapInitData(GetCommunityMapInitDataCommand cmd);
 }

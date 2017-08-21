@@ -20,13 +20,11 @@ public class CommunityMapBuildingDetailDTO {
 
     private String address;
 
-    private Double longitude;
-
-    private Double latitude;
-
     private String posterUri;
 
     private String posterUrl;
+
+    private String description;
 
     @ItemType(BuildingAttachmentDTO.class)
     private List<BuildingAttachmentDTO> attachments;
@@ -39,6 +37,14 @@ public class CommunityMapBuildingDetailDTO {
 
     @ItemType(CommunityMapShopDTO.class)
     private List<CommunityMapShopDTO> shops;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public List<ApartmentDTO> getApartments() {
         return apartments;
@@ -70,22 +76,6 @@ public class CommunityMapBuildingDetailDTO {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
     }
 
     public String getPosterUri() {

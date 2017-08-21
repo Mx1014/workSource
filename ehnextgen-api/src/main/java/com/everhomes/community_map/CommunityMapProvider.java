@@ -7,4 +7,8 @@ import java.util.List;
  */
 public interface CommunityMapProvider {
     List<CommunityMapSearchType> listCommunityMapSearchTypesByNamespaceId(Integer namespaceId);
+
+    CommunityMapInfo findCommunityMapInfo(Integer namespaceId);
+
+    List<CommunityBuildingGeo> listCommunityBuildingGeos(Long BuildingId);
 }

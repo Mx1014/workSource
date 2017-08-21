@@ -61,4 +61,18 @@ public class CommunityMapController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /community_map/getCommunityMapInitData</b>
+     * <p>获取园区地图初始化数据</p>
+     */
+    @RequestMapping("getCommunityMapInitData")
+    @RestReturn(value=CommunityMapInitDataDTO.class)
+    public RestResponse getCommunityMapInitData(GetCommunityMapInitDataCommand cmd) {
+        RestResponse response = new RestResponse(communityMapService.getCommunityMapInitData(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
 }

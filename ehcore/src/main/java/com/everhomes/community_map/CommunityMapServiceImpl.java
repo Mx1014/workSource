@@ -198,7 +198,7 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         List<CommunityMapOrganizationDTO> organizations = orgResponse.getDtos().stream().map(r -> {
 
             CommunityMapOrganizationDTO org = new CommunityMapOrganizationDTO();
-            org.setId(r.getId());
+            org.setId(r.getOrganizationId());
             org.setName(r.getName());
             org.setLogo(r.getAvatarUrl());
 
@@ -266,5 +266,13 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         dto.setOrganizations(orgResponse.getOrganizations());
         dto.setShops(shopResponse.getShops());
         return dto;
+    }
+
+    @Override
+    public CommunityMapInitDataDTO getCommunityMapInitData(GetCommunityMapInitDataCommand cmd) {
+
+        CommunityMapInitDataDTO dto = new CommunityMapInitDataDTO();
+
+        return null;
     }
 }
