@@ -155,7 +155,7 @@ public class CustomerController extends ControllerBase {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }
-        customerService.importEnterpriseCustomerData(cmd, files[0], userId);
+        customerService.importEnterpriseCustomer(cmd, files[0], userId);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

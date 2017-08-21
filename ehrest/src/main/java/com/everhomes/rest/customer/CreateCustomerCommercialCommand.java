@@ -30,6 +30,7 @@ import java.math.BigDecimal;
  * Created by ying.xiong on 2017/8/19.
  */
 public class CreateCustomerCommercialCommand {
+    private Integer namespaceId;
     private Byte customerType;
     private Long customerId;
     private Long enterpriseTypeItemId;
@@ -50,6 +51,14 @@ public class CreateCustomerCommercialCommand {
     private Long businessLicenceDate;
     private Long liquidationCommitteeRecoredDate;
     private Long cancelDate;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getBusinessLicenceDate() {
         return businessLicenceDate;

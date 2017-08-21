@@ -18,6 +18,8 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.rest.approval.CommonStatus;
@@ -111,6 +113,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private ContractSearcher contractSearcher;
+
+	@Autowired
+	private EnterpriseCustomerProvider enterpriseCustomerProvider;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -402,10 +407,9 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public void createContract(CreateContractCommand cmd) {
+	public ContractDetailDTO createContract(CreateContractCommand cmd) {
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
 		checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
-
 		if(cmd.getContractStartDate() != null) {
 			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
 		}
@@ -418,6 +422,15 @@ public class ContractServiceImpl implements ContractService {
 		if(cmd.getDecorateEndDate() != null) {
 			contract.setDecorateEndDate(new Timestamp(cmd.getDecorateEndDate()));
 		}
+		if(cmd.getSignedTime() != null) {
+			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
+		}
+		if(cmd.getDepositTime() != null) {
+			contract.setDepositTime(new Timestamp(cmd.getDepositTime()));
+		}
+		if(cmd.getDownpaymentTime() != null) {
+			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
+		}
 		contract.setCreateUid(UserContext.currentUserId());
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.createContract(contract);
@@ -427,7 +440,11 @@ public class ContractServiceImpl implements ContractService {
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
 		contractSearcher.feedDoc(contract);
-
+		FindContractCommand command = new FindContractCommand();
+		command.setId(contract.getId());
+		command.setPartyAId(contract.getPartyAId());
+		ContractDetailDTO contractDetailDTO = findContract(command);
+		return contractDetailDTO;
 	}
 
 	private void dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
@@ -553,7 +570,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public void updateContract(UpdateContractCommand cmd) {
+	public ContractDTO updateContract(UpdateContractCommand cmd) {
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
 		if(cmd.getContractStartDate() != null) {
@@ -568,6 +585,15 @@ public class ContractServiceImpl implements ContractService {
 		if(cmd.getDecorateEndDate() != null) {
 			contract.setDecorateEndDate(new Timestamp(cmd.getDecorateEndDate()));
 		}
+		if(cmd.getSignedTime() != null) {
+			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
+		}
+		if(cmd.getDepositTime() != null) {
+			contract.setDepositTime(new Timestamp(cmd.getDepositTime()));
+		}
+		if(cmd.getDownpaymentTime() != null) {
+			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
+		}
 		contract.setCreateTime(exist.getCreateTime());
 		contract.setCreateUid(exist.getCreateUid());
 		contractProvider.updateContract(contract);
@@ -577,6 +603,7 @@ public class ContractServiceImpl implements ContractService {
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
 		contractSearcher.feedDoc(contract);
+		return ConvertHelper.convert(contract, ContractDTO.class);
 	}
 
 	@Override
@@ -588,6 +615,10 @@ public class ContractServiceImpl implements ContractService {
 	public ContractDetailDTO findContract(FindContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
+		EnterpriseCustomer customer = enterpriseCustomerProvider.findById(dto.getCustomerId());
+		if(customer != null) {
+			dto.setCustomerName(customer.getName());
+		}
 		processContractApartments(dto);
 		processContractChargingItems(dto);
 		processContractAttachments(dto);

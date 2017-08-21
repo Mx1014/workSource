@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2017/8/19.
  */
 public class CreateCustomerPatentCommand {
+    private Integer namespaceId;
     private Long customerId;
     private String name;
     private Long registeDate;
@@ -23,6 +24,14 @@ public class CreateCustomerPatentCommand {
     private Long patentTypeItemId;
     private String patentName;
     private String applicationNumber;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public String getApplicationNumber() {
         return applicationNumber;

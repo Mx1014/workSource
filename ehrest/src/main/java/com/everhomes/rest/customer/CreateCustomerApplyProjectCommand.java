@@ -17,6 +17,7 @@ import java.math.BigDecimal;
  * Created by ying.xiong on 2017/8/19.
  */
 public class CreateCustomerApplyProjectCommand {
+    private Integer namespaceId;
     private Byte customerType;
     private Long customerId;
     private String projectName;
@@ -24,6 +25,14 @@ public class CreateCustomerApplyProjectCommand {
     private Long projectEstablishDate;
     private Long projectCompleteDate;
     private BigDecimal projectAmount;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getCustomerId() {
         return customerId;

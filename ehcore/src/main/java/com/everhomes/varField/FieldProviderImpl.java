@@ -164,4 +164,24 @@ public class FieldProviderImpl implements FieldProvider {
 
         return item.get(0);
     }
+
+    @Override
+    public ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, String moduleName, String displayName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<ScopeFieldItem> item = new ArrayList<>();
+        SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.ITEM_DISPLAY_NAME.eq(displayName));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
+
+        query.fetch().map((r) -> {
+            item.add(ConvertHelper.convert(r, ScopeFieldItem.class));
+            return null;
+        });
+
+        if(item.size()==0)
+            return null;
+
+        return item.get(0);
+    }
 }

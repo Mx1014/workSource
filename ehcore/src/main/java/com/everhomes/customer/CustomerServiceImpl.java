@@ -14,13 +14,17 @@ import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.varField.ModuleName;
+import com.everhomes.rest.warehouse.ImportWarehouseMaterialDataDTO;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,7 +106,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ImportFileTaskDTO importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
+    public ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
 
         ImportFileTask task = new ImportFileTask();
         try {
@@ -123,16 +128,16 @@ public class CustomerServiceImpl implements CustomerService {
                 @Override
                 public ImportFileResponse importFile() {
                     ImportFileResponse response = new ImportFileResponse();
-//                    List<ImportWarehouseMaterialDataDTO> datas = handleImportWarehouseMaterialsData(resultList);
-//                    if(datas.size() > 0){
-//                        //设置导出报错的结果excel的标题
-//                        response.setTitle(datas.get(0));
-//                        datas.remove(0);
-//                    }
-//                    List<ImportFileResultLog<ImportWarehouseMaterialDataDTO>> results = importWarehouseMaterialsData(cmd, datas, userId);
-//                    response.setTotalCount((long)datas.size());
-//                    response.setFailCount((long)results.size());
-//                    response.setLogs(results);
+                    List<ImportEnterpriseCustomerDataDTO> datas = handleImportEnterpriseCustomerData(resultList);
+                    if(datas.size() > 0){
+                        //设置导出报错的结果excel的标题
+                        response.setTitle(datas.get(0));
+                        datas.remove(0);
+                    }
+                    List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> results = importEnterpriseCustomerData(cmd, datas, userId);
+                    response.setTotalCount((long)datas.size());
+                    response.setFailCount((long)results.size());
+                    response.setLogs(results);
                     return response;
                 }
             }, task);
@@ -142,6 +147,139 @@ public class CustomerServiceImpl implements CustomerService {
             e.printStackTrace();
         }
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+    }
+
+    private List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, List<ImportEnterpriseCustomerDataDTO> list, Long userId){
+        List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> errorDataLogs = new ArrayList<>();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        for (ImportEnterpriseCustomerDataDTO str : list) {
+            ImportFileResultLog<ImportEnterpriseCustomerDataDTO> log = new ImportFileResultLog<>(CustomerErrorCode.SCOPE);
+            EnterpriseCustomer customer = new EnterpriseCustomer();
+
+            if(StringUtils.isBlank(str.getName())){
+                LOGGER.error("enterpirse customer name is null, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("enterpirse customer name is null");
+                log.setCode(CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_NULL);
+                errorDataLogs.add(log);
+                continue;
+            }
+            customer.setName(str.getName());
+
+            if(StringUtils.isBlank(str.getContactName())){
+                LOGGER.error("enterpirse customer contact name is null, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("enterpirse customer contact name is null");
+                log.setCode(CustomerErrorCode.ERROR_CUSTOMER_CONTACT_IS_NULL);
+                errorDataLogs.add(log);
+                continue;
+            }
+            customer.setContactName(str.getContactName());
+
+            if(StringUtils.isBlank(str.getContactMobile())){
+                LOGGER.error("enterpirse customer contact mobile is null, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("enterpirse customer contact mobile is null");
+                log.setCode(CustomerErrorCode.ERROR_CUSTOMER_CONTACT_MOBILE_IS_NULL);
+                errorDataLogs.add(log);
+                continue;
+            }
+            customer.setContactMobile(str.getContactMobile());
+            customer.setContactPhone(str.getContactPhone());
+            customer.setContactAddress(str.getContactAddress());
+
+            ScopeFieldItem scopeCategoryFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getCategoryItemName());
+            if(scopeCategoryFieldItem != null) {
+                customer.setCategoryItemId(scopeCategoryFieldItem.getItemId());
+            }
+            ScopeFieldItem scopeLevelFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getLevelItemName());
+            if(scopeLevelFieldItem != null) {
+                customer.setLevelItemId(scopeLevelFieldItem.getItemId());
+            }
+
+
+            customer.setNamespaceId(namespaceId);
+            customer.setCreatorUid(userId);
+            enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+        }
+        return errorDataLogs;
+    }
+
+    private List<ImportEnterpriseCustomerDataDTO> handleImportEnterpriseCustomerData(List list){
+        List<ImportEnterpriseCustomerDataDTO> result = new ArrayList<>();
+        int row = 1;
+//        int i = 1;
+        for (Object o : list) {
+            if(row < 2){
+                row ++;
+                continue;
+            }
+
+//            if(i > 9 && result.size() < 2) {
+//                break;
+//            }
+//            i++;
+
+            RowResult r = (RowResult)o;
+            ImportEnterpriseCustomerDataDTO data = null;
+            if(StringUtils.isNotBlank(r.getA())) {
+                if(data == null) {
+                    data = new ImportEnterpriseCustomerDataDTO();
+                }
+                data.setName(r.getA().trim());
+            }
+
+            if(StringUtils.isNotBlank(r.getB())) {
+                if(data == null) {
+                    data = new ImportEnterpriseCustomerDataDTO();
+                }
+                data.setCategoryItemName(r.getB().trim());
+            }
+
+            if(StringUtils.isNotBlank(r.getC())) {
+                if(data == null) {
+                    data = new ImportEnterpriseCustomerDataDTO();
+                }
+                data.setLevelItemName(r.getC().trim());
+            }
+
+            if(StringUtils.isNotBlank(r.getD())) {
+                if(data == null) {
+                    data = new ImportEnterpriseCustomerDataDTO();
+                }
+                data.setContactName(r.getD().trim());
+            }
+
+            if(StringUtils.isNotBlank(r.getE())) {
+                if(data == null) {
+                    data = new ImportEnterpriseCustomerDataDTO();
+                }
+                data.setContactMobile(r.getE().trim());
+            }
+
+            if(StringUtils.isNotBlank(r.getF())) {
+                if(data == null) {
+                    data = new ImportEnterpriseCustomerDataDTO();
+                }
+                data.setContactPhone(r.getF().trim());
+            }
+
+            if(StringUtils.isNotBlank(r.getG())) {
+                if(data == null) {
+                    data = new ImportEnterpriseCustomerDataDTO();
+                }
+                data.setContactAddress(r.getG().trim());
+            }
+
+            if(data != null) {
+                result.add(data);
+            }
+        }
+        LOGGER.info("result size : " + result.size());
+        return result;
+
     }
 
     @Override
@@ -240,7 +378,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerTalent checkCustomerTalent(Long id, Long customerId) {
         CustomerTalent talent = enterpriseCustomerProvider.findCustomerTalentById(id);
-        if(talent == null || talent.getCustomerId().equals(customerId)
+        if(talent == null || !talent.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(talent.getStatus()))) {
             LOGGER.error("enterprise customer talent is not exist or active. id: {}, talent: {}", id, talent);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TALENT_NOT_EXIST,
@@ -261,6 +399,12 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void createCustomerApplyProject(CreateCustomerApplyProjectCommand cmd) {
         CustomerApplyProject project = ConvertHelper.convert(cmd, CustomerApplyProject.class);
+        if(cmd.getProjectCompleteDate() != null) {
+            project.setProjectCompleteDate(new Timestamp(cmd.getProjectCompleteDate()));
+        }
+        if(cmd.getProjectEstablishDate() != null) {
+            project.setProjectEstablishDate(new Timestamp(cmd.getProjectEstablishDate()));
+        }
         enterpriseCustomerProvider.createCustomerApplyProject(project);
     }
 
@@ -290,7 +434,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerApplyProject checkCustomerApplyProject(Long id, Long customerId) {
         CustomerApplyProject project = enterpriseCustomerProvider.findCustomerApplyProjectById(id);
-        if(project == null || project.getCustomerId().equals(customerId)
+        if(project == null || !project.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(project.getStatus()))) {
             LOGGER.error("enterprise customer project is not exist or active. id: {}, project: {}", id, project);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PROJECT_NOT_EXIST,
@@ -307,7 +451,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerCommercial checkCustomerCommercial(Long id, Long customerId) {
         CustomerCommercial commercial = enterpriseCustomerProvider.findCustomerCommercialById(id);
-        if(commercial == null || commercial.getCustomerId().equals(customerId)
+        if(commercial == null || !commercial.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(commercial.getStatus()))) {
             LOGGER.error("enterprise customer commercial is not exist or active. id: {}, commercial: {}", id, commercial);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_COMMERCIAL_NOT_EXIST,
@@ -324,7 +468,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerPatent checkCustomerPatent(Long id, Long customerId) {
         CustomerPatent patent = enterpriseCustomerProvider.findCustomerPatentById(id);
-        if(patent == null || patent.getCustomerId().equals(customerId)
+        if(patent == null || !patent.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(patent.getStatus()))) {
             LOGGER.error("enterprise customer patent is not exist or active. id: {}, patent: {}", id, patent);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PATENT_NOT_EXIST,
@@ -341,7 +485,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerTrademark checkCustomerTrademark(Long id, Long customerId) {
         CustomerTrademark trademark = enterpriseCustomerProvider.findCustomerTrademarkById(id);
-        if(trademark == null || trademark.getCustomerId().equals(customerId)
+        if(trademark == null || !trademark.getCustomerId().equals(customerId)
                 || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(trademark.getStatus()))) {
             LOGGER.error("enterprise customer patent is not exist or active. id: {}, trademark: {}", id, trademark);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRADEMARK_NOT_EXIST,
@@ -361,9 +505,11 @@ public class CustomerServiceImpl implements CustomerService {
 
         if(dto.getProjectSource() != null) {
             String[] ids = dto.getProjectSource().split(",");
+            LOGGER.info("project source: {}", ids);
             StringBuilder sb = new StringBuilder();
             for(String id : ids) {
                 ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(project.getNamespaceId(), Long.valueOf(id));
+                LOGGER.info("project source scopeFieldItem: {}", scopeFieldItem);
                 if(scopeFieldItem != null) {
                     if(sb.length() == 0) {
                         sb.append(scopeFieldItem.getItemDisplayName());
@@ -499,6 +645,12 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateCustomerApplyProject(UpdateCustomerApplyProjectCommand cmd) {
         CustomerApplyProject exist = checkCustomerApplyProject(cmd.getId(), cmd.getCustomerId());
         CustomerApplyProject project = ConvertHelper.convert(cmd, CustomerApplyProject.class);
+        if(cmd.getProjectCompleteDate() != null) {
+            project.setProjectCompleteDate(new Timestamp(cmd.getProjectCompleteDate()));
+        }
+        if(cmd.getProjectEstablishDate() != null) {
+            project.setProjectEstablishDate(new Timestamp(cmd.getProjectEstablishDate()));
+        }
         project.setCreateTime(exist.getCreateTime());
         project.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerApplyProject(project);

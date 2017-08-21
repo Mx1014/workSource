@@ -14,11 +14,20 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2017/8/19.
  */
 public class CreateCustomerTrademarkCommand {
+    private Integer namespaceId;
     private Long customerId;
     private String name;
     private Long registeDate;
     private Long trademarkTypeItemId;
     private Integer trademarkAmount;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getCustomerId() {
         return customerId;

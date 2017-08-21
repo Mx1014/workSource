@@ -67,10 +67,9 @@ public class ContractController extends ControllerBase {
 	 * <b>URL: /contract/createContract</b>
 	 */
 	@RequestMapping("createContract")
-	@RestReturn(String.class)
+	@RestReturn(ContractDetailDTO.class)
 	public RestResponse createContract(CreateContractCommand cmd){
-		contractService.createContract(cmd);
-		return new RestResponse();
+		return new RestResponse(contractService.createContract(cmd));
 	}
 
 	/**
@@ -78,10 +77,9 @@ public class ContractController extends ControllerBase {
 	 * <b>URL: /contract/updateContract</b>
 	 */
 	@RequestMapping("updateContract")
-	@RestReturn(String.class)
+	@RestReturn(ContractDTO.class)
 	public RestResponse updateContract(UpdateContractCommand cmd){
-		contractService.updateContract(cmd);
-		return new RestResponse();
+		return new RestResponse(contractService.updateContract(cmd));
 	}
 
 	/**
