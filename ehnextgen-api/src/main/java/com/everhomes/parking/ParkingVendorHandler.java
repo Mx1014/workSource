@@ -9,9 +9,9 @@ import com.everhomes.rest.parking.*;
 public interface ParkingVendorHandler {
     String PARKING_VENDOR_PREFIX = "ParkingVendor-";
 
-    GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId, Long parkingLotId, String plateNumber);
+    List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber);
     
-    List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String palteNumber,String cardNo);
+    List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo);
 
     Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order);
    
@@ -23,7 +23,7 @@ public interface ParkingVendorHandler {
     
     void updateParkingRechargeOrderRate(ParkingRechargeOrder order);
     
-    ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId, Long parkingLotId, String plateNumber);
+    ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber);
     
     OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd);
 

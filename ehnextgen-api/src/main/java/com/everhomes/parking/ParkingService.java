@@ -6,7 +6,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.*;
@@ -14,8 +13,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
-
-    GetParkingCardsResponse getParkingCards(GetParkingCardsCommand cmd);
 
     List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd);
     
@@ -59,9 +56,7 @@ public interface ParkingService {
     void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd);
     
     ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd);
-    
-    void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd);
-    
+
     void issueParkingCards(IssueParkingCardsCommand cmd);
     
     OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd);
@@ -85,4 +80,5 @@ public interface ParkingService {
     void refundParkingOrder(UpdateParkingOrderCommand cmd);
 
     DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd);
+
 }

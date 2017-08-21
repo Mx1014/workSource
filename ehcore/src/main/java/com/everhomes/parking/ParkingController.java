@@ -54,26 +54,11 @@ public class ParkingController extends ControllerBase {
      */
     @RequestMapping("listParkingCards")
     @RestReturn(value=ParkingCardDTO.class, collection=true)
-    @Deprecated
     public RestResponse listParkingCards(@Valid ListParkingCardsCommand cmd) {
         List<ParkingCardDTO> parkingCardList;
         
         parkingCardList = parkingService.listParkingCards(cmd);
         RestResponse response = new RestResponse(parkingCardList);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /parking/getParkingCards</b>
-     * <p>查询指定园区/小区、停车场、车牌号对应的月卡列表</p>
-     */
-    @RequestMapping("getParkingCards")
-    @RestReturn(value=GetParkingCardsResponse.class)
-    public RestResponse getParkingCards(GetParkingCardsCommand cmd) {
-
-        RestResponse response = new RestResponse(parkingService.getParkingCards(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

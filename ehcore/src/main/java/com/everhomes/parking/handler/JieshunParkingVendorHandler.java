@@ -77,12 +77,9 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
     private DbProvider dbProvider;
 	
 	@Override
-    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
-    		Long parkingLotId, String plateNumber) {
+    public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-		GetParkingCardsResponse response = new GetParkingCardsResponse();
-		response.setCards(resultList);
 
     	KetuoCard card = getCard(plateNumber);
 
@@ -95,7 +92,6 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 			long now = System.currentTimeMillis();
 			long cardReserveTime = 0;
 			
-	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
 	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
@@ -104,13 +100,11 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 			
 			if(expireTime + cardReserveTime < now){
-				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
-
-				return response;
+				return resultList;
 			}
-			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
-			parkingCardDTO.setOwnerId(ownerId);
-			parkingCardDTO.setParkingLotId(parkingLotId);
+			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
+			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
+			parkingCardDTO.setParkingLotId(parkingLot.getId());
 			
 			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone("");
@@ -128,16 +122,13 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
-		}else {
-			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
-
 		}
         
-        return response;
+        return resultList;
     }
 
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	List<ParkingRechargeRateDTO> result = null;
     	List<KetuoCardRate> list = new ArrayList<>();
 		List<KetuoCardType> types = getCardType();
@@ -174,9 +165,9 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
     	}
     	result = list.stream().map( r -> {
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
-			dto.setOwnerId(ownerId);
-			dto.setOwnerType(ownerType);
-			dto.setParkingLotId(parkingLotId);
+			dto.setOwnerId(parkingLot.getOwnerId());
+			dto.setOwnerType(parkingLot.getOwnerType());
+			dto.setParkingLotId(parkingLot.getId());
 			dto.setRateToken(r.getRuleId());
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("count", r.getRuleAmount());
@@ -496,8 +487,7 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
     }
 
 	@Override
-	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
-			Long parkingLotId, String plateNumber) {
+	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		KetuoTempFee tempFee = getTempFee(plateNumber);
 		
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();

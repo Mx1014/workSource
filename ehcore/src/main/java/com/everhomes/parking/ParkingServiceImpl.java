@@ -26,9 +26,6 @@ import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 
-import com.everhomes.scheduler.RunningFlag;
-import com.everhomes.scheduler.ScheduleProvider;
-
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -43,23 +40,17 @@ import org.jooq.SortField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -77,12 +68,10 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -137,26 +126,14 @@ public class ParkingServiceImpl implements ParkingService {
     @Autowired
     private FlowCaseProvider flowCaseProvider;
     @Autowired
-    private BigCollectionProvider bigCollectionProvider;
-    @Autowired
     private OrganizationProvider organizationProvider;
     @Autowired
     private AppProvider appProvider;
-	@Autowired
-	private ScheduleProvider scheduleProvider;
 	@Autowired
 	private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
 
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
-
-		GetParkingCardsCommand getParkingCardsCommand = ConvertHelper.convert(cmd, GetParkingCardsCommand.class);
-		GetParkingCardsResponse response = getParkingCards(getParkingCardsCommand);
-        
-        return response.getCards();
-    }
-
-	public GetParkingCardsResponse getParkingCards(GetParkingCardsCommand cmd) {
 
 		checkPlateNumber(cmd.getPlateNumber());
 		Long parkingLotId = cmd.getParkingLotId();
@@ -165,7 +142,7 @@ public class ParkingServiceImpl implements ParkingService {
 		String vendorName = parkingLot.getVendorName();
 		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
-		GetParkingCardsResponse response = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
+		List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, cmd.getPlateNumber());
 
 		Long organizationId = cmd.getOrganizationId();
 		User user = UserContext.current().getUser();
@@ -179,14 +156,15 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 
-		for(ParkingCardDTO card: response.getCards()) {
+		for(ParkingCardDTO card: cards) {
 			if(StringUtils.isBlank(card.getPlateOwnerName())) {
 				card.setPlateOwnerName(plateOwnerName);
 			}
 		}
 
-		return response;
-	}
+		return cards;
+    }
+
 
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	
@@ -210,8 +188,8 @@ public class ParkingServiceImpl implements ParkingService {
         String vendorName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
         
-        List<ParkingRechargeRateDTO> parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(),
-        		parkingLotId, cmd.getPlateNumber(), cmd.getCardNo());
+        List<ParkingRechargeRateDTO> parkingRechargeRateList = handler.getParkingRechargeRates(parkingLot,
+				cmd.getPlateNumber(), cmd.getCardNo());
         
         return parkingRechargeRateList;
     }
@@ -270,110 +248,6 @@ public class ParkingServiceImpl implements ParkingService {
     	return parkingLotList;
     }
     
-//    @Scheduled(cron="0 1 0 * * ? ")
-	public void createParkingStatistics(){
-
-//    	long now = System.currentTimeMillis();
-//    	Timestamp startDate = getBeginOfDay(now);
-//    	Timestamp endDate = getEndOfDay(now);
-//
-//		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_STATISTICS.getCode()).tryEnter(()-> {
-//
-//			List<ParkingStatistic> list = parkingProvider.listParkingStatistics(null, null, null, startDate);
-//			if(list.size() != 0)
-//				return ;
-//	    	List<ParkingLot> lots = parkingProvider.listParkingLots(null, null);
-//
-//	    	lots.forEach(l -> {
-//	    		List<ParkingRechargeOrder> orders = parkingProvider.searchParkingRechargeOrders(l.getOwnerType(),
-//						l.getOwnerId(), l.getId(), null, null, null, startDate,
-//						endDate, null, null, null, null, null, null);
-//	    		BigDecimal totalAmount = new BigDecimal(0);
-//	    		for(ParkingRechargeOrder o: orders) {
-//	    			if(ParkingRechargeOrderStatus.RECHARGED.getCode() == o.getRechargeStatus()) {
-//	    				totalAmount = totalAmount.add(o.getPrice());
-//	    			}
-//	    		}
-//
-//	    		ParkingStatistic parkingStatistic = new ParkingStatistic();
-//	    		parkingStatistic.setNamespaceId(l.getNamespaceId());
-//	    		parkingStatistic.setOwnerId(l.getOwnerId());
-//	    		parkingStatistic.setOwnerType(l.getOwnerType());
-//	    		parkingStatistic.setParkingLotId(l.getId());
-//	    		parkingStatistic.setCreateTime(new Timestamp(now));
-//	    		parkingStatistic.setAmount(totalAmount);
-//	    		parkingStatistic.setDateStr(startDate);
-//
-//	    		parkingProvider.createParkingStatistic(parkingStatistic);
-//	    	});
-//
-//        });
-//		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
-//			//执行任务区
-//			long now = System.currentTimeMillis();
-//			Timestamp startDate = getBeginOfDay(now);
-//			Timestamp endDate = getEndOfDay(now);
-//
-//			this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_STATISTICS.getCode()).tryEnter(()-> {
-//
-//				List<ParkingStatistic> list = parkingProvider.listParkingStatistics(null, null, null, startDate);
-//				if(list.size() != 0)
-//					return ;
-//				List<ParkingLot> lots = parkingProvider.listParkingLots(null, null);
-//
-//				lots.forEach(l -> {
-//					List<ParkingRechargeOrder> orders = parkingProvider.searchParkingRechargeOrders(l.getOwnerType(), l.getOwnerId(), l.getId(),
-//							null, null, null, startDate, endDate, null, null,
-//							null,null, null, null);
-//					BigDecimal totalAmount = new BigDecimal(0);
-//					for(ParkingRechargeOrder o: orders) {
-//						if(ParkingRechargeOrderStatus.RECHARGED.getCode() == o.getRechargeStatus()) {
-//							totalAmount = totalAmount.add(o.getPrice());
-//						}
-//					}
-//
-//					ParkingStatistic parkingStatistic = new ParkingStatistic();
-//					parkingStatistic.setNamespaceId(l.getNamespaceId());
-//					parkingStatistic.setOwnerId(l.getOwnerId());
-//					parkingStatistic.setOwnerType(l.getOwnerType());
-//					parkingStatistic.setParkingLotId(l.getId());
-//					parkingStatistic.setCreateTime(new Timestamp(now));
-//					parkingStatistic.setAmount(totalAmount);
-//					parkingStatistic.setDateStr(startDate);
-//
-//					parkingProvider.createParkingStatistic(parkingStatistic);
-//				});
-//
-//			});
-//		}
-
-	}
-    
-    private static Timestamp getBeginOfDay(Long time){
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(time);
-		
-		calendar.add(Calendar.DAY_OF_MONTH, -1);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		
-		return new Timestamp(calendar.getTimeInMillis());
-	}
-	
-	private static Timestamp getEndOfDay(Long time){
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(time);
-		
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		
-		return new Timestamp(calendar.getTimeInMillis());
-	}
-    
     @Override
 	public ParkingCardRequestDTO requestParkingCard(RequestParkingCardCommand cmd) {
 		
@@ -383,10 +257,9 @@ public class ParkingServiceImpl implements ParkingService {
     	String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
 
-		GetParkingCardsResponse resp = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(),
-        		cmd.getPlateNumber());
+		List<ParkingCardDTO> cards = handler.listParkingCardsByPlate(parkingLot, cmd.getPlateNumber());
         User user = UserContext.current().getUser();
-        int cardListSize = resp.getCards().size();
+        int cardListSize = cards.size();
 		if(cardListSize > 0){
 			LOGGER.error("PlateNumber card is existed, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_EXIST,
@@ -670,8 +543,7 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		parkingRechargeOrder.setPrice(cmd.getPrice());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
-    		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(),
-					cmd.getParkingLotId(), cmd.getPlateNumber());
+    		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 
     		if (null != dto ) {
 				if(null != dto.getPrice() && 0 != dto.getPrice().compareTo(cmd.getPrice())) {
@@ -894,34 +766,6 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		parkingLot.setIsSupportRecharge(cmd.getIsSupportRecharge());
         parkingProvider.setParkingLotConfig(parkingLot);
-	}
-	
-	@Override
-	public void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd){
-		
-        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-        if(null == cmd.getId()){
-        	LOGGER.error("Id cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Id cannot be null.");
-        }
-        
-        ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getId());
-        if(null == parkingCardRequest){
-        	LOGGER.error("ParkingCardRequest not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"ParkingCardRequest not found");
-        }
-//        if(parkingCardRequest.getStatus() != ParkingCardRequestStatus.NOTIFIED.getCode()){
-//        	LOGGER.error("ParkingCardRequest status is not notified, cmd={}", cmd);
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//				"ParkingCardRequest status is not notified.");
-//        }
-        //设置已领取状态和 领取时间
-//        parkingCardRequest.setStatus(ParkingCardRequestStatus.ISSUED.getCode());
-        parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.ISSUED.getCode());
-        parkingCardRequest.setIssueTime(new Timestamp(System.currentTimeMillis()));
-        parkingProvider.updateParkingCardRequest(Collections.singletonList(parkingCardRequest));
 	}
 
 	@Override
@@ -1292,7 +1136,7 @@ public class ParkingServiceImpl implements ParkingService {
     	String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
     	
-    	ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
+    	ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 		return dto;
 	}
 
@@ -1454,8 +1298,6 @@ public class ParkingServiceImpl implements ParkingService {
 		return dto;
 	}
 
-    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-
 	@Override
 	public ParkingCardDTO getRechargeResult(GetRechargeResultCommand cmd) {
 
@@ -1467,11 +1309,11 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void synchronizedData(ListParkingCardRequestsCommand cmd) {
 		
-		Integer namesapceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		User user = UserContext.current().getUser();
 		
 		String ownerType = FlowOwnerType.PARKING.getCode();
-    	Flow flow = flowService.getEnabledFlow(namesapceId, ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
+    	Flow flow = flowService.getEnabledFlow(namespaceId, ParkingFlowConstant.PARKING_RECHARGE_MODULE,
     			FlowModuleType.NO_MODULE.getCode(), cmd.getParkingLotId(), ownerType);
     	
     	if(null == flow) {
@@ -1781,7 +1623,10 @@ public class ParkingServiceImpl implements ParkingService {
 			@Override
 			public Action onLocalBusMessage(Object sender, String subject,
 											Object pingResponse, String path) {
-				ParkingRechargeOrderDTO dto = (ParkingRechargeOrderDTO) pingResponse;
+
+				String respStr = (String) pingResponse;
+
+				ParkingRechargeOrderDTO dto = ConvertHelper.convert(respStr, ParkingRechargeOrderDTO.class);
 				ParkingLot parkingLot = checkParkingLot(order.getOwnerType(), order.getOwnerId(), order.getParkingLotId());
 				dto.setParkingLotName(parkingLot.getName());
 				dto.setContact(parkingLot.getContact());
@@ -1803,4 +1648,5 @@ public class ParkingServiceImpl implements ParkingService {
 
 		return deferredResult;
 	}
+
 }
