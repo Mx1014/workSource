@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Component
 public class ContractFlowModuleListener implements FlowModuleListener {
-    private static final long MODULE_ID = 21000;
+    private static final long MODULE_ID = 32500L;
     private static final Logger LOGGER = LoggerFactory.getLogger(ContractFlowModuleListener.class);
 
     @Autowired
@@ -75,8 +75,6 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             LOGGER.debug("step into onFlowCaseEnd, ctx: {}", ctx);
         }
         FlowCase flowCase = ctx.getFlowCase();
-        Long operatorId = ctx.getOperator().getId();
-        Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
         Contract contract = contractProvider.findContractById(flowCase.getReferId());
         if(FlowCaseStatus.ABSORTED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
             contract.setStatus(ContractStatus.APPROVE_NOT_QUALITIED.getCode());

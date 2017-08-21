@@ -62,7 +62,9 @@ import java.util.List;
 public class ContractDetailDTO {
     private Long id;
     private Long parentId;
+    private String parentContractNumber;
     private Long rootParentId;
+    private String rootContractNumber;
     private Long customerId;
     private String customerName;
     private String contractNumber;
@@ -123,6 +125,22 @@ public class ContractDetailDTO {
 
     @ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
+
+    public String getParentContractNumber() {
+        return parentContractNumber;
+    }
+
+    public void setParentContractNumber(String parentContractNumber) {
+        this.parentContractNumber = parentContractNumber;
+    }
+
+    public String getRootContractNumber() {
+        return rootContractNumber;
+    }
+
+    public void setRootContractNumber(String rootContractNumber) {
+        this.rootContractNumber = rootContractNumber;
+    }
 
     public String getRemark() {
         return remark;

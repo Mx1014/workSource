@@ -453,6 +453,10 @@ public class ContractServiceImpl implements ContractService {
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
 		contractSearcher.feedDoc(contract);
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			addToFlowCase(contract);
+		}
+
 		FindContractCommand command = new FindContractCommand();
 		command.setId(contract.getId());
 		command.setPartyAId(contract.getPartyAId());
@@ -464,7 +468,7 @@ public class ContractServiceImpl implements ContractService {
 		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
 				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
 		if(null == flow) {
-			LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.WAREHOUSE_REQUEST);
+			LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ENABLE_FLOW,
 					localeStringService.getLocalizedString(String.valueOf(ContractErrorCode.SCOPE),
 							String.valueOf(ContractErrorCode.ERROR_ENABLE_FLOW),
@@ -478,7 +482,7 @@ public class ContractServiceImpl implements ContractService {
 		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 		createFlowCaseCommand.setReferId(contract.getId());
 		createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
-		createFlowCaseCommand.setContent(contract.getRemark());
+		createFlowCaseCommand.setContent(contract.getContractNumber());
 
 		createFlowCaseCommand.setProjectId(contract.getCommunityId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
@@ -642,6 +646,9 @@ public class ContractServiceImpl implements ContractService {
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
 		contractSearcher.feedDoc(contract);
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			addToFlowCase(contract);
+		}
 		return ConvertHelper.convert(contract, ContractDTO.class);
 	}
 
@@ -666,6 +673,18 @@ public class ContractServiceImpl implements ContractService {
 		EnterpriseCustomer customer = enterpriseCustomerProvider.findById(dto.getCustomerId());
 		if(customer != null) {
 			dto.setCustomerName(customer.getName());
+		}
+		if(contract.getParentId() != null) {
+			Contract parentContract = contractProvider.findContractById(contract.getParentId());
+			if(parentContract != null) {
+				dto.setParentContractNumber(parentContract.getContractNumber());
+			}
+		}
+		if(contract.getRootParentId() != null) {
+			Contract rootContract = contractProvider.findContractById(contract.getRootParentId());
+			if(rootContract != null) {
+				dto.setRootContractNumber(rootContract.getContractNumber());
+			}
 		}
 		processContractApartments(dto);
 		processContractChargingItems(dto);
