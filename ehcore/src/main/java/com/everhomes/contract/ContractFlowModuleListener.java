@@ -1,10 +1,14 @@
 package com.everhomes.contract;
 
 import com.everhomes.flow.*;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
@@ -29,6 +33,12 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private ContractProvider contractProvider;
+
+    @Autowired
+    private ContractSearcher contractSearcher;
 
     @Override
     public FlowModuleInfo initModule() {
@@ -67,20 +77,18 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         FlowCase flowCase = ctx.getFlowCase();
         Long operatorId = ctx.getOperator().getId();
         Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
-//        WarehouseRequests request = warehouseProvider.findWarehouseRequests(flowCase.getReferId(), flowCase.getProjectType(), flowCase.getProjectId());
-//        if(FlowCaseStatus.ABSORTED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
-//            request.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
-//            request.setUpdateTime(current);
-//            warehouseProvider.updateWarehouseRequest(request);
-//            updateWarehouseRequestMaterials(request, operatorId);
-//        }
-//
-//        else if(FlowCaseStatus.FINISHED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
-//            request.setReviewResult(ReviewResult.QUALIFIED.getCode());
-//            request.setUpdateTime(current);
-//            warehouseProvider.updateWarehouseRequest(request);
-//            updateWarehouseRequestMaterials(request, operatorId);
-//        }
+        Contract contract = contractProvider.findContractById(flowCase.getReferId());
+        if(FlowCaseStatus.ABSORTED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
+            contract.setStatus(ContractStatus.APPROVE_NOT_QUALITIED.getCode());
+            contractProvider.updateContract(contract);
+            contractSearcher.feedDoc(contract);
+        }
+
+        else if(FlowCaseStatus.FINISHED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
+            contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
+            contractProvider.updateContract(contract);
+            contractSearcher.feedDoc(contract);
+        }
     }
 
     @Override
