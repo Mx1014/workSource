@@ -20,6 +20,9 @@ public class CommunityMapBuildingDTO {
 
     private String address;
 
+    private Double centerLongitude;
+    private Double centerLatitude;
+
     @ItemType(CommunityMapBuildingGeoDTO.class)
     private List<CommunityMapBuildingGeoDTO> geos;
 
@@ -40,6 +43,22 @@ public class CommunityMapBuildingDTO {
 
     public void setApartments(List<ApartmentDTO> apartments) {
         this.apartments = apartments;
+    }
+
+    public Double getCenterLongitude() {
+        return centerLongitude;
+    }
+
+    public void setCenterLongitude(Double centerLongitude) {
+        this.centerLongitude = centerLongitude;
+    }
+
+    public Double getCenterLatitude() {
+        return centerLatitude;
+    }
+
+    public void setCenterLatitude(Double centerLatitude) {
+        this.centerLatitude = centerLatitude;
     }
 
     public Long getId() {
