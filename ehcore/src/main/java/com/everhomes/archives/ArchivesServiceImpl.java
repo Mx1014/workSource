@@ -1,4 +1,4 @@
-package com.everhomes.profile;
+package com.everhomes.archives;
 
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;

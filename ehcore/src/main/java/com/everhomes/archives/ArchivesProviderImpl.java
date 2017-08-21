@@ -1,10 +1,13 @@
-package com.everhomes.profile;
+package com.everhomes.archives;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.profile.ProfileContactsSticky;
+import com.everhomes.profile.ProfileDismissEmployees;
+import com.everhomes.profile.ProfileProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhProfileDismissEmployeesDao;
