@@ -1,5 +1,7 @@
 package com.everhomes.profile;
 
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -31,25 +33,43 @@ public class ProfileServiceImpl implements ProfileService {
     @Autowired
     OrganizationService organizationService;
 
+    @Autowired
+    OrganizationProvider organizationProvider;
+
     @Override
     public ProfileContactDTO addProfileContact(AddProfileContactCommand cmd) {
 
-        //TODO: visibleFlag 的判断
+        ProfileContactDTO dto = new ProfileContactDTO();
+        //  TODO: visibleFlag 的判断
 
-        //
+        //  组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
         addCommand.setContactName(cmd.getContactName());
         addCommand.setGender(cmd.getGender());
         addCommand.setContactToken(cmd.getContactToken());
         addCommand.setDepartmentIds(cmd.getDepartmentIds());
         addCommand.setJobPositionIds(cmd.getJobPositionIds());
-        OrganizationMemberDTO dto = organizationService.addOrganizationPersonnel(addCommand);
+        OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
+        //  获得 detailId 然后处理其它信息
         Long detailId = null;
-        if(dto !=null)
-            detailId = dto.getDetailId();
+        if (memberDTO != null)
+            detailId = memberDTO.getDetailId();
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if(memberDetail != null){
+            memberDetail.setEnName(cmd.getContactEnName());
+            //  TODO: areaCode 区号与 contactShortToken 短号,部门与职位的转化
+            memberDetail.setEmail(cmd.getEmail());
+            organizationProvider.updateOrganizationMemberDetails(memberDetail,memberDetail.getId());
+            dto.setDetailId(detailId);
+            dto.setContactName(memberDetail.getContactName());
+            dto.setContactToken(memberDetail.getContactToken());
+            dto.setEmail(memberDetail.getEmail());
+        }
 
-        return null;
+        //  TODO:添加档案记录
+
+        return dto;
     }
 
     @Override
