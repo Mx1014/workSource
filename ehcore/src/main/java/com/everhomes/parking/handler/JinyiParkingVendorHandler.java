@@ -450,8 +450,8 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 
 		LocalDateTime end = clearanceTime.toLocalDateTime();
 		//加一天 减一秒
-		end.plusDays(1L);
-		end.minusSeconds(1L);
+		end = end.plusDays(1L);
+		end = end.minusSeconds(1L);
 		json.put("effectivedate", start.format(dtf2));
 		json.put("expiredate", end.format(dtf2));
 		return json;

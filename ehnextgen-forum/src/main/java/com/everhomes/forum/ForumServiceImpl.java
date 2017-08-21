@@ -283,7 +283,8 @@ public class ForumServiceImpl implements ForumService {
         populatePost(creatorUid, post, communityId, false);
 
         //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
-        if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE) {
+        //客户端传来的status可能为空，edit by yanjun
+        if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE || PostStatus.fromCode(post.getStatus()) == null) {
             try {
                 postSearcher.feedDoc(post);
 
@@ -5565,8 +5566,20 @@ public class ForumServiceImpl implements ForumService {
 	private SearchContentsBySceneReponse analyzeSearchResponse(SearchResponse rsp, int pageSize, Long anchor, String searchContentType) {
     	SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
     	
-    	SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(UserContext.getCurrentNamespaceId(), searchContentType);
     	List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
+
+        SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(UserContext.getCurrentNamespaceId(), searchContentType);
+        //找不到就找0域空间的
+        if(searchType == null){
+            searchType = userActivityProvider.findByContentAndNamespaceId(0, searchContentType);
+        }
+
+        //找不到直接返回，没有searchType客户端会报错的。 add by yanjun 20170816
+        if(searchType == null){
+            response.setDtos(dtos);
+            return response;
+        }
+
     	SearchHit[] docs = rsp.getHits().getHits();
     	
         for (SearchHit sd : docs) {

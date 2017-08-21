@@ -12,11 +12,11 @@ import com.everhomes.util.StringHelper;
  * 	<li>nonce : 随机数</li>
  * 	<li>crypto : 参数value加密算法名，有值时表示对指定的参数进行加密；无值则表示参数value不加密；</li>
  * 	<li>type : 申请类型：1.用户认证，2.企业认证</li>
- * 	<li>phone : 公钥</li>
+ * 	<li>phone : 电话号码</li>
  * <ul>
  * 
  */
-public class UnrentFeedbackCommand {
+public class CancelAuthFeedbackCommand {
 	@NotNull
 	private String appKey;
 	@NotNull

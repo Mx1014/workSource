@@ -62,4 +62,6 @@ public interface DoorAuthProvider {
 	Long getNextDoorAuth();
 
     List<DoorAuth> searchVisitorDoorAuthByAdmin(Long doorId, String keyword, Byte status, int pageSize, Long startTime, Long endTime);
+
+    public List<User> listDoorAuthByBuildingName(Long communityId, String buildingName, CrossShardListingLocator locator, int pageSize);
 }

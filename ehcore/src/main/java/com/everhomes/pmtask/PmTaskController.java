@@ -560,4 +560,20 @@ public class PmTaskController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /pmtask/exportTasksCard</b>
+     * <p>导出维修单</p>
+     */
+    @RequestMapping("exportTasksCard")
+    @RestReturn(value = String.class)
+    public RestResponse exportTasksCard(ExportTasksCardCommand cmd, HttpServletResponse response) {
+
+        pmTaskService.exportTasksCard(cmd, response);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 }

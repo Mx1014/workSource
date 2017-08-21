@@ -38,6 +38,8 @@ public class ListAclinkUserCommand {
     
     private String buildingName;
     
+    private Long communityId;
+    
     private Byte isAuth;
     
     private Byte isOpenAuth;
@@ -120,6 +122,14 @@ public class ListAclinkUserCommand {
 
     public void setIsOpenAuth(Byte isOpenAuth) {
         this.isOpenAuth = isOpenAuth;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override

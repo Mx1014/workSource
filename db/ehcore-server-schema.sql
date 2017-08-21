@@ -4363,10 +4363,10 @@ CREATE TABLE `eh_group_member_logs` (
   `create_time` datetime(3),
   `uuid` VARCHAR(128) NOT NULL DEFAULT '',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `community_id` BIGINT NOT NULL,
-  `address_id` BIGINT NOT NULL,
-  `group_id` BIGINT NOT NULL,
-  `member_type` VARCHAR(32) NOT NULL COMMENT 'member object type; for example; type could be User; Group; etc',
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `address_id` BIGINT NOT NULL DEFAULT 0,
+  `group_id` BIGINT NOT NULL DEFAULT 0,
+  `member_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'member object type; for example; type could be User; Group; etc',
   `member_id` BIGINT,
   `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',
   `member_avatar` VARCHAR(128) COMMENT 'avatar image identifier in storage sub-system',
@@ -4380,7 +4380,7 @@ CREATE TABLE `eh_group_member_logs` (
   `operation_type` TINYINT COMMENT '1: request to join; 2: invite to join',
   `inviter_uid` BIGINT COMMENT 'record inviter user id',
   `invite_time` DATETIME COMMENT 'the time the member is invited',
-  `update_time` DATETIME NOT NULL,
+  `update_time` DATETIME,
   `integral_tag1` BIGINT,
   `integral_tag2` BIGINT,
   `integral_tag3` BIGINT,
@@ -6905,6 +6905,8 @@ CREATE TABLE `eh_pm_tasks` (
   `string_tag1` VARCHAR(128),
   `building_name` VARCHAR(128),
   `organization_uid` BIGINT,
+  `remark_source` VARCHAR(32),
+  `remark` VARCHAR(1024),
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

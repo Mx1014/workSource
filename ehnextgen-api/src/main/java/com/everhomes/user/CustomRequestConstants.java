@@ -11,4 +11,7 @@ public interface CustomRequestConstants {
 	public static final String GYM_REQUEST_CUSTOM = "Gym";
 	public static final String SERVER_REQUEST_CUSTOM = "Server";
 
+	public static final String USER_NAME = "申请人";
+	public static final String APPROVAL_TYPE = "申请类型";
+
 }

@@ -580,3 +580,6 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),600000,'', 'EhNamespaces', 999973,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),604000,'', 'EhNamespaces', 999973,2);
 
+-- 现网【保集e智谷】icon可迁移 add by sw 20170816
+UPDATE eh_launch_pad_items set delete_flag = 1 where namespace_id = 999973;
+UPDATE eh_launch_pad_items set delete_flag = 0 where namespace_id = 999973 and item_label = '更多';

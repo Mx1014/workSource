@@ -58,8 +58,8 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 	VALUES(1035718, 0, 'PM', '国贸物业管理有限公司', '', '/1035718', 1, 2, 'ENTERPRISE', @namespace_id, 1041997);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
 	VALUES(1143614, 240111044331050363, 'organization', 1035718, 3, 0, UTC_TIMESTAMP());
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES(1041997, UUID(), '国贸物业管理有限公司', '国贸物业管理有限公司', 1, 1, 1035718, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 190694, 1, @namespace_id);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag2`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES(1041997, UUID(), '国贸物业管理有限公司', '国贸物业管理有限公司', 1, 1, 1035718, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 240111044331050363, 190694, 1, @namespace_id);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
 	VALUES(190694, UUID(), @namespace_id, 2, 'EhGroups', 1041997,'国贸物业管理有限公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
@@ -78,6 +78,16 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
 	VALUES (289470, 316710 ,  '0',  '13910755049',  null,  3, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, `status`, `namespace_id`)
 	VALUES (2157937, 1035718, 'USER', 316710  , 'manager', '杨雷', 0, '13910755049', 3, @namespace_id);
+
+SELECT MAX(id) FROM `eh_user_organizations` INTO @user_organizations_id;
+INSERT INTO `eh_user_organizations` (`id`, `user_id`, `organization_id`, `group_path`, `group_type`, `status`, `namespace_id`, `create_time`, `visible_flag`, `update_time`)
+VALUES ((@user_organizations_id := @user_organizations_id + 1), 316710, 1035718, '/1035718', 'ENTERPRISE', 3, @namespace_id, NULL, 0, NOW());
+
+SELECT MAX(id) FROM `eh_group_members` INTO @group_members_id;
+INSERT INTO `eh_group_members` (`id`, `uuid`, `group_id`, `member_type`, `member_id`, `member_role`, `member_avatar`, `member_nick_name`, `member_status`, `create_time`, `creator_uid`, `operator_uid`, `process_code`, `process_details`, `proof_resource_uri`, `approve_time`, `requestor_comment`, `operation_type`, `inviter_uid`, `invite_time`, `update_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`)
+VALUES ((@group_members_id := @group_members_id + 1), UUID(), 1041997, 'EhUsers', 316710, 5, '', '杨雷', 3, NOW(), 1, 1, NULL, NULL, NULL, NOW(), NULL, NULL, NULL, NOW(), NOW(), NULL, NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, NULL);
+
+
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES (18814, 'EhOrganizations', 1035718, 'EhUsers', 316710  , 1001, 1, UTC_TIMESTAMP());
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
@@ -92,6 +102,16 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
 	VALUES (289471, 316711 ,  '0',  '15010499864',  null,  3, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, `status`, `namespace_id`)
 	VALUES(2157938, 1035718, 'USER', 316711  , 'manager', '孙振华', 0, '15010499864', 3, @namespace_id);
+
+SELECT MAX(id) FROM `eh_user_organizations` INTO @user_organizations_id;
+INSERT INTO `eh_user_organizations` (`id`, `user_id`, `organization_id`, `group_path`, `group_type`, `status`, `namespace_id`, `create_time`, `visible_flag`, `update_time`)
+VALUES ((@user_organizations_id := @user_organizations_id + 1), 316711, 1035718, '/1035718', 'ENTERPRISE', 3, @namespace_id, NULL, 0, NOW());
+
+SELECT MAX(id) FROM `eh_group_members` INTO @group_members_id;
+INSERT INTO `eh_group_members` (`id`, `uuid`, `group_id`, `member_type`, `member_id`, `member_role`, `member_avatar`, `member_nick_name`, `member_status`, `create_time`, `creator_uid`, `operator_uid`, `process_code`, `process_details`, `proof_resource_uri`, `approve_time`, `requestor_comment`, `operation_type`, `inviter_uid`, `invite_time`, `update_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`)
+VALUES ((@group_members_id := @group_members_id + 1), UUID(), 1041997, 'EhUsers', 316711, 5, '', '孙振华', 3, NOW(), 1, 1, NULL, NULL, NULL, NOW(), NULL, NULL, NULL, NOW(), NOW(), NULL, NULL, NULL, 1, 0, NULL, NULL, NULL, NULL, NULL);
+
+
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(18815, 'EhOrganizations', 1035718, 'EhUsers', 316711  , 1001, 1, UTC_TIMESTAMP());
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
@@ -154,9 +174,9 @@ SELECT MAX(id) FROM `eh_organization_details` INTO @organization_details_id;
 INSERT INTO `eh_organization_details` (`id`, `organization_id`, `description`, `contact`, `address`, `create_time`, `longitude`, `latitude`, `geohash`, `display_name`)
 VALUES ((@organization_details_id := @organization_details_id + 1), 1035718, NULL, '', '建国门外大街1号', NOW(), NULL, NULL, NULL, '国贸物业管理有限公司');
 
-SELECT MAX(id) FROM `eh_enterprise_community_map` INTO @enterprise_community_map_id;
-INSERT INTO `eh_enterprise_community_map` (`id`, `community_id`, `member_type`, `member_id`, `member_status`, `creator_uid`, `create_time`, `update_time`)
-VALUES ((@enterprise_community_map_id := @enterprise_community_map_id + 1), 240111044331050363, 'enterprise', 1035718, 3, NULL, NOW(), NOW());
+# SELECT MAX(id) FROM `eh_enterprise_community_map` INTO @enterprise_community_map_id;
+# INSERT INTO `eh_enterprise_community_map` (`id`, `community_id`, `member_type`, `member_id`, `member_status`, `creator_uid`, `create_time`, `update_time`)
+# VALUES ((@enterprise_community_map_id := @enterprise_community_map_id + 1), 240111044331050363, 'enterprise', 1035718, 3, NULL, NOW(), NOW());
 -- NEW END--- 08/04 17:59
 
 SET FOREIGN_KEY_CHECKS = 1;
