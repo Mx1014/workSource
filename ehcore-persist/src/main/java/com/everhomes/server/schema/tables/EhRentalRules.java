@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalRulesRecord> {
 
-	private static final long serialVersionUID = -1284124022;
+	private static final long serialVersionUID = -972085618;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_rules</code>
@@ -32,14 +32,14 @@ public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_rules.owner_id</code>.     community id or organization id 
+	 * The column <code>ehcore.eh_rental_rules.owner_id</code>. community id or organization id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "    community id or organization id ");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "community id or organization id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_rules.site_type</code>. rule for what function 
+	 * The column <code>ehcore.eh_rental_rules.site_type</code>. rule for what function
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "rule for what function ");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "rule for what function");
 
 	/**
 	 * The column <code>ehcore.eh_rental_rules.rental_start_time</code>.
@@ -67,9 +67,9 @@ public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Integer> PAYMENT_RATIO = createField("payment_ratio", org.jooq.impl.SQLDataType.INTEGER, this, "payment ratio");
 
 	/**
-	 * The column <code>ehcore.eh_rental_rules.refund_flag</code>. 0 allow refund , 1 can not refund 
+	 * The column <code>ehcore.eh_rental_rules.refund_flag</code>. 0: allow refund, 1: can not refund
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Byte> REFUND_FLAG = createField("refund_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0 allow refund , 1 can not refund ");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Byte> REFUND_FLAG = createField("refund_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: allow refund, 1: can not refund");
 
 	/**
 	 * The column <code>ehcore.eh_rental_rules.contact_num</code>. phone number
@@ -177,14 +177,14 @@ public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_rules.owner_type</code>. owner type : community ; organization
+	 * The column <code>ehcore.eh_rental_rules.owner_type</code>. owner type: community, organization
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type : community ; organization");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type: community, organization");
 
 	/**
-	 * The column <code>ehcore.eh_rental_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
+	 * The column <code>ehcore.eh_rental_rules.rental_type</code>. 0: as hour:min, 1-as half day 2-as day
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min  1-as half day 2-as day");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min, 1-as half day 2-as day");
 
 	/**
 	 * The column <code>ehcore.eh_rental_rules.cancel_time</code>.

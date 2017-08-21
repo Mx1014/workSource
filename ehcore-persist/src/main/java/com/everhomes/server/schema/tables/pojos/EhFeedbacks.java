@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFeedbacks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1161313147;
+	private static final long serialVersionUID = -1816787239;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
@@ -24,6 +24,11 @@ public class EhFeedbacks implements java.io.Serializable {
 	private java.lang.Long     targetId;
 	private java.lang.Long     contentCategory;
 	private java.lang.String   proofResourceUri;
+	private java.lang.Byte     status;
+	private java.lang.Byte     verifyType;
+	private java.lang.Byte     handleType;
+	private java.lang.Integer  namespaceId;
+	private java.sql.Timestamp handleTime;
 
 	public EhFeedbacks() {}
 
@@ -38,7 +43,12 @@ public class EhFeedbacks implements java.io.Serializable {
 		java.lang.Byte     targetType,
 		java.lang.Long     targetId,
 		java.lang.Long     contentCategory,
-		java.lang.String   proofResourceUri
+		java.lang.String   proofResourceUri,
+		java.lang.Byte     status,
+		java.lang.Byte     verifyType,
+		java.lang.Byte     handleType,
+		java.lang.Integer  namespaceId,
+		java.sql.Timestamp handleTime
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
@@ -51,6 +61,11 @@ public class EhFeedbacks implements java.io.Serializable {
 		this.targetId = targetId;
 		this.contentCategory = contentCategory;
 		this.proofResourceUri = proofResourceUri;
+		this.status = status;
+		this.verifyType = verifyType;
+		this.handleType = handleType;
+		this.namespaceId = namespaceId;
+		this.handleTime = handleTime;
 	}
 
 	public java.lang.Long getId() {
@@ -139,5 +154,45 @@ public class EhFeedbacks implements java.io.Serializable {
 
 	public void setProofResourceUri(java.lang.String proofResourceUri) {
 		this.proofResourceUri = proofResourceUri;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
+	}
+
+	public java.lang.Byte getVerifyType() {
+		return this.verifyType;
+	}
+
+	public void setVerifyType(java.lang.Byte verifyType) {
+		this.verifyType = verifyType;
+	}
+
+	public java.lang.Byte getHandleType() {
+		return this.handleType;
+	}
+
+	public void setHandleType(java.lang.Byte handleType) {
+		this.handleType = handleType;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public java.sql.Timestamp getHandleTime() {
+		return this.handleTime;
+	}
+
+	public void setHandleTime(java.sql.Timestamp handleTime) {
+		this.handleTime = handleTime;
 	}
 }

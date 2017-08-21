@@ -172,4 +172,39 @@ public class EhEnterpriseOpRequestsDao extends org.jooq.impl.DAOImpl<com.everhom
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByProcessTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS.PROCESS_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>contract_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByContractId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS.CONTRACT_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>issuer_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByIssuerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS.ISSUER_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>building_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByBuildingId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS.BUILDING_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>address_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByAddressId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS.ADDRESS_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>flowcase_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByFlowcaseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS.FLOWCASE_ID, values);
+	}
 }

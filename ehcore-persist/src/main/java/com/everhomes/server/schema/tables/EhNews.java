@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhNewsRecord> {
 
-	private static final long serialVersionUID = 488435264;
+	private static final long serialVersionUID = -1756646495;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_news</code>
@@ -39,7 +39,7 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 	/**
 	 * The column <code>ehcore.eh_news.owner_type</code>. ORGANIZATION
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(32).defaulted(true), this, "ORGANIZATION");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "ORGANIZATION");
 
 	/**
 	 * The column <code>ehcore.eh_news.owner_id</code>. organization_id
@@ -145,6 +145,16 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 	 * The column <code>ehcore.eh_news.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy. historic data may be useful");
+
+	/**
+	 * The column <code>ehcore.eh_news.category_id</code>. category id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "category id");
+
+	/**
+	 * The column <code>ehcore.eh_news.visible_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> VISIBLE_TYPE = createField("visible_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_news</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord> {
 
-	private static final long serialVersionUID = 1688730698;
+	private static final long serialVersionUID = 642672063;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_items_bills</code>
@@ -30,6 +30,16 @@ public class EhRentalItemsBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_rental_items_bills.id</code>. id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_items_bills.community_id</code>. enterprise, community id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "enterprise, community id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_items_bills.site_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_items_bills.rental_bill_id</code>.
@@ -70,26 +80,6 @@ public class EhRentalItemsBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_rental_items_bills.operate_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
-
-	/**
-	 * The column <code>ehcore.eh_rental_items_bills.resource_type_id</code>. 广场图标id
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Long> RESOURCE_TYPE_ID = createField("resource_type_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
-
-	/**
-	 * The column <code>ehcore.eh_rental_items_bills.item_name</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.String> ITEM_NAME = createField("item_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_rental_items_bills.img_uri</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.String> IMG_URI = createField("img_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_rental_items_bills.item_type</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Byte> ITEM_TYPE = createField("item_type", org.jooq.impl.SQLDataType.TINYINT, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_items_bills</code> table reference

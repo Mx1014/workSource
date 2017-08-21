@@ -8,8 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
 import com.everhomes.rest.address.ApartmentAbstractDTO;
 import org.apache.commons.lang.StringUtils;
+
+import com.everhomes.asset.AddressIdAndName;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record2;
@@ -495,5 +499,34 @@ public class AddressProviderImpl implements AddressProvider {
             return null;
         }
         return addresses.get(0);
+    }
+
+    public List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAddresses r = Tables.EH_ADDRESSES.as("r");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(r);
+        query.addSelect(r.ID,r.ADDRESS);
+        if (buildingName != null && buildingName.trim().length()>0){
+            query.addConditions(r.BUILDING_NAME.eq(buildingName));
+        }
+        if (apartmentName != null && apartmentName.trim().length()>0){
+            query.addConditions(r.APARTMENT_NAME.eq(apartmentName));
+        }
+        query.addConditions(r.NAMESPACE_ID.eq(currentNamespaceId));
+        query.addConditions(r.COMMUNITY_ID.eq(ownerId));
+        Object[] objects = query.fetchAnyArray();
+        List<AddressIdAndName> list = new ArrayList<>();
+        try {
+            for (int i = 1; i < objects.length; i++) {
+                AddressIdAndName ian = new AddressIdAndName();
+                ian.setAddressName((String)objects[i]);
+                ian.setAddressId((Long)objects[i-1]);
+                list.add(ian);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

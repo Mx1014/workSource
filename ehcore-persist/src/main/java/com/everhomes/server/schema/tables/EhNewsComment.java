@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNewsComment extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhNewsCommentRecord> {
 
-	private static final long serialVersionUID = 1205259499;
+	private static final long serialVersionUID = -724985334;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_news_comment</code>
@@ -34,7 +34,7 @@ public class EhNewsComment extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_news_comment.owner_id</code>. owner id, e.g news_id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsCommentRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner id, e.g news_id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsCommentRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "owner id, e.g news_id");
 
 	/**
 	 * The column <code>ehcore.eh_news_comment.content_type</code>. object content type
@@ -54,12 +54,12 @@ public class EhNewsComment extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_news_comment.creator_uid</code>. creator uid
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsCommentRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "creator uid");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsCommentRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "creator uid");
 
 	/**
 	 * The column <code>ehcore.eh_news_comment.create_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsCommentRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsCommentRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_news_comment.deleter_uid</code>. deleter uid

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionApprovalsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord> implements org.jooq.Record13<java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Date, java.lang.Byte, java.lang.Byte, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp, java.lang.Byte, java.lang.Byte> {
 
-	private static final long serialVersionUID = 550015020;
+	private static final long serialVersionUID = -1232528604;
 
 	/**
 	 * Setter for <code>ehcore.eh_punch_exception_approvals.id</code>. id
@@ -70,42 +70,42 @@ public class EhPunchExceptionApprovalsRecord extends org.jooq.impl.UpdatableReco
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_exception_approvals.approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 * Setter for <code>ehcore.eh_punch_exception_approvals.approval_status</code>. NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)
 	 */
 	public void setApprovalStatus(java.lang.Byte value) {
 		setValue(4, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_exception_approvals.approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 * Getter for <code>ehcore.eh_punch_exception_approvals.approval_status</code>. NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)
 	 */
 	public java.lang.Byte getApprovalStatus() {
 		return (java.lang.Byte) getValue(4);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_exception_approvals.morning_approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 * Setter for <code>ehcore.eh_punch_exception_approvals.morning_approval_status</code>. NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)
 	 */
 	public void setMorningApprovalStatus(java.lang.Byte value) {
 		setValue(5, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_exception_approvals.morning_approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 * Getter for <code>ehcore.eh_punch_exception_approvals.morning_approval_status</code>. NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)
 	 */
 	public java.lang.Byte getMorningApprovalStatus() {
 		return (java.lang.Byte) getValue(5);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_exception_approvals.afternoon_approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 * Setter for <code>ehcore.eh_punch_exception_approvals.afternoon_approval_status</code>. NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)
 	 */
 	public void setAfternoonApprovalStatus(java.lang.Byte value) {
 		setValue(6, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_exception_approvals.afternoon_approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 * Getter for <code>ehcore.eh_punch_exception_approvals.afternoon_approval_status</code>. NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)
 	 */
 	public java.lang.Byte getAfternoonApprovalStatus() {
 		return (java.lang.Byte) getValue(6);

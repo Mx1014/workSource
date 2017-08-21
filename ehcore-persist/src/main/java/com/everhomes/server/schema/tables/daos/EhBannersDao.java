@@ -186,4 +186,11 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByApplyPolicy(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.APPLY_POLICY, values);
 	}
+
+	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.UPDATE_TIME, values);
+	}
 }

@@ -202,17 +202,17 @@ public class EhParkingRechargeOrdersDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>old_expired_time IN (values)</code>
+	 * Fetch records that have <code>start_period IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByOldExpiredTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.OLD_EXPIRED_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByStartPeriod(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.START_PERIOD, values);
 	}
 
 	/**
-	 * Fetch records that have <code>new_expired_time IN (values)</code>
+	 * Fetch records that have <code>end_period IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByNewExpiredTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.NEW_EXPIRED_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByEndPeriod(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.END_PERIOD, values);
 	}
 
 	/**
@@ -227,5 +227,54 @@ public class EhParkingRechargeOrdersDao extends org.jooq.impl.DAOImpl<com.everho
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByIsDelete(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.IS_DELETE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>recharge_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByRechargeType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>order_token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByOrderToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.ORDER_TOKEN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>parking_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByParkingTime(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.PARKING_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>error_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByErrorDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.ERROR_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>error_description_json IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByErrorDescriptionJson(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.ERROR_DESCRIPTION_JSON, values);
+	}
+
+	/**
+	 * Fetch records that have <code>refund_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByRefundTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.REFUND_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>delay_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByDelayTime(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.DELAY_TIME, values);
 	}
 }

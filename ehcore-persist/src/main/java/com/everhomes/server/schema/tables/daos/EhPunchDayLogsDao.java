@@ -76,20 +76,6 @@ public class EhPunchDayLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch records that have <code>noon_leave_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByNoonLeaveTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.NOON_LEAVE_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>afternoon_arrive_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByAfternoonArriveTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.AFTERNOON_ARRIVE_TIME, values);
-	}
-
-	/**
 	 * Fetch records that have <code>leave_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByLeaveTime(java.sql.Time... values) {
@@ -108,20 +94,6 @@ public class EhPunchDayLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.STATUS, values);
-	}
-
-	/**
-	 * Fetch records that have <code>morning_status IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByMorningStatus(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.MORNING_STATUS, values);
-	}
-
-	/**
-	 * Fetch records that have <code>afternoon_status IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByAfternoonStatus(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.AFTERNOON_STATUS, values);
 	}
 
 	/**
@@ -146,9 +118,51 @@ public class EhPunchDayLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
+	 * Fetch records that have <code>morning_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByMorningStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.MORNING_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>afternoon_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByAfternoonStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.AFTERNOON_STATUS, values);
+	}
+
+	/**
 	 * Fetch records that have <code>punch_times_per_day IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByPunchTimesPerDay(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.PUNCH_TIMES_PER_DAY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>noon_leave_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByNoonLeaveTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.NOON_LEAVE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>afternoon_arrive_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByAfternoonArriveTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.AFTERNOON_ARRIVE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>exception_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByExceptionStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.EXCEPTION_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>device_change_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByDeviceChangeFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.DEVICE_CHANGE_FLAG, values);
 	}
 }

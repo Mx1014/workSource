@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingCardRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord> {
 
-	private static final long serialVersionUID = 1589787989;
+	private static final long serialVersionUID = 824673820;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_card_requests</code>
@@ -100,6 +100,61 @@ public class EhParkingCardRequests extends org.jooq.impl.TableImpl<com.everhomes
 	 * The column <code>ehcore.eh_parking_card_requests.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.car_brand</code>. car brand
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.String> CAR_BRAND = createField("car_brand", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "car brand");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.car_color</code>. car color
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.String> CAR_COLOR = createField("car_color", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "car color");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.car_serie_name</code>. car serie name
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.String> CAR_SERIE_NAME = createField("car_serie_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "car serie name");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.car_serie_id</code>. car serie id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.Long> CAR_SERIE_ID = createField("car_serie_id", org.jooq.impl.SQLDataType.BIGINT, this, "car serie id");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.flow_id</code>. flow id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.Long> FLOW_ID = createField("flow_id", org.jooq.impl.SQLDataType.BIGINT, this, "flow id");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.flow_version</code>. current flow version
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.Integer> FLOW_VERSION = createField("flow_version", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "current flow version");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.flow_case_id</code>. flow case id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.Long> FLOW_CASE_ID = createField("flow_case_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "flow case id");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.audit_succeed_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.sql.Timestamp> AUDIT_SUCCEED_TIME = createField("audit_succeed_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.process_succeed_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.sql.Timestamp> PROCESS_SUCCEED_TIME = createField("process_succeed_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.open_card_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.sql.Timestamp> OPEN_CARD_TIME = createField("open_card_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_parking_card_requests.cancel_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.sql.Timestamp> CANCEL_TIME = createField("cancel_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_parking_card_requests</code> table reference

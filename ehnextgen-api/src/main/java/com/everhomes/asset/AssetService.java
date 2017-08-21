@@ -30,4 +30,40 @@ public interface AssetService {
 
     AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
     List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
+
+    ListBillsResponse listBills(ListBillsCommand cmd);
+
+    ListBillItemsResponse listBillItems(ListBillItemsCommand cmd);
+
+    void selectNotice(SelectedNoticeCommand cmd);
+
+    ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
+
+    ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
+
+    List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd);
+
+    ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
+
+    ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
+
+    void createBill(CreateBillCommand cmd);
+
+    void OneKeyNotice(OneKeyNoticeCommand cmd);
+
+    ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
+
+    List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
+
+    void modifyBillStatus(BillIdCommand cmd);
+
+    HttpServletResponse exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
+
+    List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
+
+    List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
+
+    void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
+
+//    void synchronizeZJGKBill();
 }

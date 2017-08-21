@@ -48,6 +48,20 @@ public class EhRentalBillPaybillMapDao extends org.jooq.impl.DAOImpl<com.everhom
 	}
 
 	/**
+	 * Fetch records that have <code>owner_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap> fetchByOwnerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP.OWNER_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>site_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap> fetchBySiteType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP.SITE_TYPE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>rental_bill_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap> fetchByRentalBillId(java.lang.Long... values) {
@@ -90,9 +104,9 @@ public class EhRentalBillPaybillMapDao extends org.jooq.impl.DAOImpl<com.everhom
 	}
 
 	/**
-	 * Fetch records that have <code>vendor_type IN (values)</code>
+	 * Fetch records that have <code>owner_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap> fetchByVendorType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP.VENDOR_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP.OWNER_TYPE, values);
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchDayLogs extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord> {
 
-	private static final long serialVersionUID = -1746748317;
+	private static final long serialVersionUID = 1405491326;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_day_logs</code>
@@ -52,16 +52,6 @@ public class EhPunchDayLogs extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.sql.Time> ARRIVE_TIME = createField("arrive_time", org.jooq.impl.SQLDataType.TIME, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_punch_day_logs.noon_leave_time</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.sql.Time> NOON_LEAVE_TIME = createField("noon_leave_time", org.jooq.impl.SQLDataType.TIME, this, "");
-
-	/**
-	 * The column <code>ehcore.eh_punch_day_logs.afternoon_arrive_time</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.sql.Time> AFTERNOON_ARRIVE_TIME = createField("afternoon_arrive_time", org.jooq.impl.SQLDataType.TIME, this, "");
-
-	/**
 	 * The column <code>ehcore.eh_punch_day_logs.leave_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.sql.Time> LEAVE_TIME = createField("leave_time", org.jooq.impl.SQLDataType.TIME, this, "");
@@ -75,16 +65,6 @@ public class EhPunchDayLogs extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_punch_day_logs.status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
-
-	/**
-	 * The column <code>ehcore.eh_punch_day_logs.morning_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> MORNING_STATUS = createField("morning_status", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
-
-	/**
-	 * The column <code>ehcore.eh_punch_day_logs.afternoon_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> AFTERNOON_STATUS = createField("afternoon_status", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
 
 	/**
 	 * The column <code>ehcore.eh_punch_day_logs.creator_uid</code>.
@@ -102,9 +82,39 @@ public class EhPunchDayLogs extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> VIEW_FLAG = createField("view_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "is view(0) not view(1)");
 
 	/**
+	 * The column <code>ehcore.eh_punch_day_logs.morning_status</code>. NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> MORNING_STATUS = createField("morning_status", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)");
+
+	/**
+	 * The column <code>ehcore.eh_punch_day_logs.afternoon_status</code>. NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> AFTERNOON_STATUS = createField("afternoon_status", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "NORMAL(0), BELATE(1), LEAVEEARLY(2), UNPUNCH(3), BLANDLE(4), ABSENCE(5), SICK(6), EXCHANGE(7)");
+
+	/**
 	 * The column <code>ehcore.eh_punch_day_logs.punch_times_per_day</code>. 2 or 4 times
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> PUNCH_TIMES_PER_DAY = createField("punch_times_per_day", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "2 or 4 times");
+
+	/**
+	 * The column <code>ehcore.eh_punch_day_logs.noon_leave_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.sql.Time> NOON_LEAVE_TIME = createField("noon_leave_time", org.jooq.impl.SQLDataType.TIME, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_punch_day_logs.afternoon_arrive_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.sql.Time> AFTERNOON_ARRIVE_TIME = createField("afternoon_arrive_time", org.jooq.impl.SQLDataType.TIME, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_punch_day_logs.exception_status</code>. 异常状态: 0-正常;1-异常
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> EXCEPTION_STATUS = createField("exception_status", org.jooq.impl.SQLDataType.TINYINT, this, "异常状态: 0-正常;1-异常");
+
+	/**
+	 * The column <code>ehcore.eh_punch_day_logs.device_change_flag</code>. 0- unchange 1-changed
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> DEVICE_CHANGE_FLAG = createField("device_change_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0- unchange 1-changed");
 
 	/**
 	 * Create a <code>ehcore.eh_punch_day_logs</code> table reference

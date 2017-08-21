@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.address.ApartmentAbstractDTO;
+
+import com.everhomes.asset.AddressIdAndName;
+
 import org.jooq.Record2;
 import org.jooq.Result;
 
@@ -51,7 +54,12 @@ public interface AddressProvider {
 	void updateOrganizationOwnerAddress(Long id);
 	void updateOrganizationAddress(Long id);
 	void updateOrganizationAddressMapping(Long id);
+
     Address findAddressByNamespaceTypeAndName(String namespaceType, String namespaceToken);
 
     List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName, CrossShardListingLocator locator, int count);
+
+
+    List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName);
+
 }

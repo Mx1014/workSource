@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = -1772069099;
+	private static final long serialVersionUID = -813442525;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_bills</code>
@@ -32,9 +32,14 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.bill_number</code>. 订单编号
+	 * The column <code>ehcore.eh_rental_bills.owner_id</code>. community id or organization id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.String> BILL_NUMBER = createField("bill_number", org.jooq.impl.SQLDataType.VARCHAR.length(20).nullable(false), this, "订单编号");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "community id or organization id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_bills.site_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.rental_site_id</code>. id
@@ -47,29 +52,29 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Long> RENTAL_UID = createField("rental_uid", org.jooq.impl.SQLDataType.BIGINT, this, "rental user id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.rental_date</code>. 使用日期
+	 * The column <code>ehcore.eh_rental_bills.rental_date</code>. rental target date
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Date> RENTAL_DATE = createField("rental_date", org.jooq.impl.SQLDataType.DATE, this, "使用日期");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Date> RENTAL_DATE = createField("rental_date", org.jooq.impl.SQLDataType.DATE, this, "rental target date");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.start_time</code>. 使用开始时间
+	 * The column <code>ehcore.eh_rental_bills.start_time</code>. begin datetime unuse
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> START_TIME = createField("start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "使用开始时间");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> START_TIME = createField("start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "begin datetime unuse");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.end_time</code>. 使用结束时间
+	 * The column <code>ehcore.eh_rental_bills.end_time</code>. end datetime unuse
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "使用结束时间");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "end datetime unuse");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.rental_count</code>. 预约数
+	 * The column <code>ehcore.eh_rental_bills.rental_count</code>. amount of rental sites
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Double> RENTAL_COUNT = createField("rental_count", org.jooq.impl.SQLDataType.DOUBLE, this, "预约数");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Double> RENTAL_COUNT = createField("rental_count", org.jooq.impl.SQLDataType.DOUBLE, this, "amount of rental sites");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.pay_total_money</code>. 总价
+	 * The column <code>ehcore.eh_rental_bills.pay_total_money</code>. total money ,include items and site
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> PAY_TOTAL_MONEY = createField("pay_total_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "总价");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> PAY_TOTAL_MONEY = createField("pay_total_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "total money ,include items and site");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.site_total_money</code>.
@@ -77,9 +82,9 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> SITE_TOTAL_MONEY = createField("site_total_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.reserve_money</code>.
+	 * The column <code>ehcore.eh_rental_bills.reserve_money</code>. total money * reserve ratio
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> RESERVE_MONEY = createField("reserve_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> RESERVE_MONEY = createField("reserve_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "total money * reserve ratio");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time
@@ -107,34 +112,34 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> CANCEL_TIME = createField("cancel_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.paid_money</code>.
+	 * The column <code>ehcore.eh_rental_bills.paid_money</code>. already paid money
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> PAID_MONEY = createField("paid_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> PAID_MONEY = createField("paid_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "already paid money");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve 2:paid all money reserve success 3:wait for final payment 4:unlock reserve fail
+	 * The column <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve, 1:paid reserve, 2:paid all money reserve success, 3:wait for final payment, 4:unlock reserve fail
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "0:wait for reserve 1:paid reserve 2:paid all money reserve success 3:wait for final payment 4:unlock reserve fail");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "0:wait for reserve, 1:paid reserve, 2:paid all money reserve success, 3:wait for final payment, 4:unlock reserve fail");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.visible_flag</code>. 0:visible 1:unvisible
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> VISIBLE_FLAG = createField("visible_flag", org.jooq.impl.SQLDataType.TINYINT, this, "0:visible 1:unvisible");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> VISIBLE_FLAG = createField("visible_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0:visible 1:unvisible");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.invoice_flag</code>. 0:want invocie 1 no need
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> INVOICE_FLAG = createField("invoice_flag", org.jooq.impl.SQLDataType.TINYINT, this, "0:want invocie 1 no need");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> INVOICE_FLAG = createField("invoice_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0:want invocie 1 no need");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.creator_uid</code>. 预约人
+	 * The column <code>ehcore.eh_rental_bills.creator_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "预约人");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.create_time</code>. 下单时间
+	 * The column <code>ehcore.eh_rental_bills.create_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "下单时间");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.operator_uid</code>.
@@ -147,29 +152,9 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.site_name</code>. 名称
+	 * The column <code>ehcore.eh_rental_bills.owner_type</code>. owner type: community, organization
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.String> SITE_NAME = createField("site_name", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "名称");
-
-	/**
-	 * The column <code>ehcore.eh_rental_bills.use_time</code>. 使用时间
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.String> USE_TIME = createField("use_time", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "使用时间");
-
-	/**
-	 * The column <code>ehcore.eh_rental_bills.vendor_type</code>. 支付方式,10001-支付宝，10002-微信
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.String> VENDOR_TYPE = createField("vendor_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "支付方式,10001-支付宝，10002-微信");
-
-	/**
-	 * The column <code>ehcore.eh_rental_bills.resource_type_id</code>. 广场图标id
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Long> RESOURCE_TYPE_ID = createField("resource_type_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
-
-	/**
-	 * The column <code>ehcore.eh_rental_bills.organization_id</code>. 所属公司的ID
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Long> ORGANIZATION_ID = createField("organization_id", org.jooq.impl.SQLDataType.BIGINT, this, "所属公司的ID");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type: community, organization");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_bills</code> table reference

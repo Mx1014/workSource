@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhYellowPagesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhYellowPagesRecord> {
 
-	private static final long serialVersionUID = 369014437;
+	private static final long serialVersionUID = -1718362731;
 
 	/**
 	 * Setter for <code>ehcore.eh_yellow_pages.id</code>.
@@ -405,6 +405,20 @@ public class EhYellowPagesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		return (java.sql.Timestamp) getValue(27);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_yellow_pages.building_id</code>. eh_buildings id
+	 */
+	public void setBuildingId(java.lang.Long value) {
+		setValue(28, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_yellow_pages.building_id</code>. eh_buildings id
+	 */
+	public java.lang.Long getBuildingId() {
+		return (java.lang.Long) getValue(28);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -431,7 +445,7 @@ public class EhYellowPagesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhYellowPagesRecord
 	 */
-	public EhYellowPagesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.String ownerType, java.lang.Long ownerId, java.lang.String name, java.lang.String nickName, java.lang.Byte type, java.lang.String address, java.lang.String contact, java.lang.String description, java.lang.String posterUri, java.lang.Byte status, java.lang.Integer defaultOrder, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long creatorUid, java.sql.Timestamp createTime) {
+	public EhYellowPagesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.String ownerType, java.lang.Long ownerId, java.lang.String name, java.lang.String nickName, java.lang.Byte type, java.lang.String address, java.lang.String contact, java.lang.String description, java.lang.String posterUri, java.lang.Byte status, java.lang.Integer defaultOrder, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long buildingId) {
 		super(com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES);
 
 		setValue(0, id);
@@ -462,5 +476,6 @@ public class EhYellowPagesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(25, stringTag5);
 		setValue(26, creatorUid);
 		setValue(27, createTime);
+		setValue(28, buildingId);
 	}
 }

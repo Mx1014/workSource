@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhYellowPages extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhYellowPagesRecord> {
 
-	private static final long serialVersionUID = 31793452;
+	private static final long serialVersionUID = -1838448534;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_yellow_pages</code>
@@ -165,6 +165,11 @@ public class EhYellowPages extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_yellow_pages.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhYellowPagesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_yellow_pages.building_id</code>. eh_buildings id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhYellowPagesRecord, java.lang.Long> BUILDING_ID = createField("building_id", org.jooq.impl.SQLDataType.BIGINT, this, "eh_buildings id");
 
 	/**
 	 * Create a <code>ehcore.eh_yellow_pages</code> table reference

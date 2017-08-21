@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 174166935;
+	private static final long serialVersionUID = -867703462;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_items</code>
@@ -139,7 +139,7 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	/**
 	 * The column <code>ehcore.eh_launch_pad_items.target_id</code>. the entity id linked back to the orginal resource
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT, this, "the entity id linked back to the orginal resource");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "the entity id linked back to the orginal resource");
 
 	/**
 	 * The column <code>ehcore.eh_launch_pad_items.delete_flag</code>. whether the item can be deleted from desk, 0: no, 1: yes
@@ -155,6 +155,26 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 * The column <code>ehcore.eh_launch_pad_items.scale_type</code>. 0: 不需要, 1: 需要
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Byte> SCALE_TYPE = createField("scale_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: 不需要, 1: 需要");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.service_categry_id</code>. service categry id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Long> SERVICE_CATEGRY_ID = createField("service_categry_id", org.jooq.impl.SQLDataType.BIGINT, this, "service categry id");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.selected_icon_uri</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> SELECTED_ICON_URI = createField("selected_icon_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.more_order</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Integer> MORE_ORDER = createField("more_order", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.alias_icon_uri</code>. 原有icon_uri有圆形、方形等，展现风格不一致。应对这样的场景增加alias_icon_uri，存储圆形默认图片。
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ALIAS_ICON_URI = createField("alias_icon_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "原有icon_uri有圆形、方形等，展现风格不一致。应对这样的场景增加alias_icon_uri，存储圆形默认图片。");
 
 	/**
 	 * Create a <code>ehcore.eh_launch_pad_items</code> table reference

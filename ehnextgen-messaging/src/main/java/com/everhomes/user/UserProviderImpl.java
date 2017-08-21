@@ -17,6 +17,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -27,8 +28,17 @@ import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
+import com.everhomes.server.schema.tables.pojos.EhUserGroups;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
+import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
+import com.everhomes.server.schema.tables.pojos.EhUserLikes;
+import com.everhomes.server.schema.tables.pojos.EhUserNotificationSettings;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -1494,5 +1504,44 @@ public class UserProviderImpl implements UserProvider {
         dao.insert(setting);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserNotificationSettings.class, id);
         return id;
+    }
+
+    @Override
+    public List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<TargetDTO> list = new ArrayList<>();
+        com.everhomes.server.schema.tables.EhUsers r = Tables.EH_USERS.as("r");
+        com.everhomes.server.schema.tables.EhUserIdentifiers o = Tables.EH_USER_IDENTIFIERS.as("o");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(r.ID);
+        query.addSelect(r.NICK_NAME);
+        query.addSelect(o.IDENTIFIER_TOKEN);
+        query.addFrom(r);
+        query.addFrom(o);
+        query.addConditions(r.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        if(tel!=null){
+            query.addConditions(o.IDENTIFIER_TOKEN.eq(tel));
+        }
+        if(targetName!=null){
+            query.addConditions(r.NICK_NAME.eq(targetName));
+        }
+        query.addConditions(r.ID.eq(o.OWNER_UID));
+        if(ids.size() == 1){
+            query.addConditions(r.ADDRESS_ID.eq(ids.get(0)));
+        }
+        if(ids.size() > 1){
+            query.addConditions(r.ADDRESS_ID.in(ids));
+        }
+        query.fetch()
+                .map(f -> {
+                    TargetDTO dto = new TargetDTO();
+                    dto.setTargetId(f.getValue(r.ID));
+                    dto.setTargetName(f.getValue(r.NICK_NAME));
+                    dto.setTargetType("eh_user");
+                    dto.setUserIdentifier(f.getValue(o.IDENTIFIER_TOKEN));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
     }
 }

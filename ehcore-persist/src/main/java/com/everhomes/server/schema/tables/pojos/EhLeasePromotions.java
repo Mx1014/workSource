@@ -11,46 +11,72 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLeasePromotions implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1513245831;
+	private static final long serialVersionUID = -1776625073;
 
-	private java.lang.Long     id;
-	private java.lang.Integer  namespaceId;
-	private java.lang.Long     communityId;
-	private java.lang.String   rentType;
-	private java.lang.String   posterUri;
-	private java.lang.String   subject;
-	private java.lang.String   rentAreas;
-	private java.lang.String   description;
-	private java.lang.Long     createUid;
-	private java.sql.Timestamp createTime;
-	private java.sql.Timestamp updateTime;
-	private java.lang.Byte     status;
-	private java.lang.Long     buildingId;
-	private java.lang.String   rentPosition;
-	private java.lang.String   contacts;
-	private java.lang.String   contactPhone;
-	private java.sql.Timestamp enterTime;
+	private java.lang.Long       id;
+	private java.lang.Integer    namespaceId;
+	private java.lang.Long       communityId;
+	private java.lang.String     rentType;
+	private java.lang.String     posterUri;
+	private java.lang.String     subject;
+	private java.lang.String     rentAreas;
+	private java.lang.String     description;
+	private java.lang.Long       createUid;
+	private java.sql.Timestamp   createTime;
+	private java.sql.Timestamp   updateTime;
+	private java.lang.Byte       status;
+	private java.lang.Long       buildingId;
+	private java.lang.String     rentPosition;
+	private java.lang.String     contacts;
+	private java.lang.String     contactPhone;
+	private java.sql.Timestamp   enterTime;
+	private java.lang.String     namespaceType;
+	private java.lang.String     namespaceToken;
+	private java.lang.Byte       enterTimeFlag;
+	private java.lang.Long       addressId;
+	private java.lang.String     orientation;
+	private java.math.BigDecimal rentAmount;
+	private java.lang.String     issuerType;
+	private java.lang.Double     longitude;
+	private java.lang.Double     latitude;
+	private java.lang.String     address;
+	private java.lang.Long       generalFormId;
+	private java.lang.Byte       customFormFlag;
+	private java.lang.Long       defaultOrder;
 
 	public EhLeasePromotions() {}
 
 	public EhLeasePromotions(
-		java.lang.Long     id,
-		java.lang.Integer  namespaceId,
-		java.lang.Long     communityId,
-		java.lang.String   rentType,
-		java.lang.String   posterUri,
-		java.lang.String   subject,
-		java.lang.String   rentAreas,
-		java.lang.String   description,
-		java.lang.Long     createUid,
-		java.sql.Timestamp createTime,
-		java.sql.Timestamp updateTime,
-		java.lang.Byte     status,
-		java.lang.Long     buildingId,
-		java.lang.String   rentPosition,
-		java.lang.String   contacts,
-		java.lang.String   contactPhone,
-		java.sql.Timestamp enterTime
+		java.lang.Long       id,
+		java.lang.Integer    namespaceId,
+		java.lang.Long       communityId,
+		java.lang.String     rentType,
+		java.lang.String     posterUri,
+		java.lang.String     subject,
+		java.lang.String     rentAreas,
+		java.lang.String     description,
+		java.lang.Long       createUid,
+		java.sql.Timestamp   createTime,
+		java.sql.Timestamp   updateTime,
+		java.lang.Byte       status,
+		java.lang.Long       buildingId,
+		java.lang.String     rentPosition,
+		java.lang.String     contacts,
+		java.lang.String     contactPhone,
+		java.sql.Timestamp   enterTime,
+		java.lang.String     namespaceType,
+		java.lang.String     namespaceToken,
+		java.lang.Byte       enterTimeFlag,
+		java.lang.Long       addressId,
+		java.lang.String     orientation,
+		java.math.BigDecimal rentAmount,
+		java.lang.String     issuerType,
+		java.lang.Double     longitude,
+		java.lang.Double     latitude,
+		java.lang.String     address,
+		java.lang.Long       generalFormId,
+		java.lang.Byte       customFormFlag,
+		java.lang.Long       defaultOrder
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -69,6 +95,19 @@ public class EhLeasePromotions implements java.io.Serializable {
 		this.contacts = contacts;
 		this.contactPhone = contactPhone;
 		this.enterTime = enterTime;
+		this.namespaceType = namespaceType;
+		this.namespaceToken = namespaceToken;
+		this.enterTimeFlag = enterTimeFlag;
+		this.addressId = addressId;
+		this.orientation = orientation;
+		this.rentAmount = rentAmount;
+		this.issuerType = issuerType;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.address = address;
+		this.generalFormId = generalFormId;
+		this.customFormFlag = customFormFlag;
+		this.defaultOrder = defaultOrder;
 	}
 
 	public java.lang.Long getId() {
@@ -205,5 +244,109 @@ public class EhLeasePromotions implements java.io.Serializable {
 
 	public void setEnterTime(java.sql.Timestamp enterTime) {
 		this.enterTime = enterTime;
+	}
+
+	public java.lang.String getNamespaceType() {
+		return this.namespaceType;
+	}
+
+	public void setNamespaceType(java.lang.String namespaceType) {
+		this.namespaceType = namespaceType;
+	}
+
+	public java.lang.String getNamespaceToken() {
+		return this.namespaceToken;
+	}
+
+	public void setNamespaceToken(java.lang.String namespaceToken) {
+		this.namespaceToken = namespaceToken;
+	}
+
+	public java.lang.Byte getEnterTimeFlag() {
+		return this.enterTimeFlag;
+	}
+
+	public void setEnterTimeFlag(java.lang.Byte enterTimeFlag) {
+		this.enterTimeFlag = enterTimeFlag;
+	}
+
+	public java.lang.Long getAddressId() {
+		return this.addressId;
+	}
+
+	public void setAddressId(java.lang.Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public java.lang.String getOrientation() {
+		return this.orientation;
+	}
+
+	public void setOrientation(java.lang.String orientation) {
+		this.orientation = orientation;
+	}
+
+	public java.math.BigDecimal getRentAmount() {
+		return this.rentAmount;
+	}
+
+	public void setRentAmount(java.math.BigDecimal rentAmount) {
+		this.rentAmount = rentAmount;
+	}
+
+	public java.lang.String getIssuerType() {
+		return this.issuerType;
+	}
+
+	public void setIssuerType(java.lang.String issuerType) {
+		this.issuerType = issuerType;
+	}
+
+	public java.lang.Double getLongitude() {
+		return this.longitude;
+	}
+
+	public void setLongitude(java.lang.Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public java.lang.Double getLatitude() {
+		return this.latitude;
+	}
+
+	public void setLatitude(java.lang.Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public java.lang.String getAddress() {
+		return this.address;
+	}
+
+	public void setAddress(java.lang.String address) {
+		this.address = address;
+	}
+
+	public java.lang.Long getGeneralFormId() {
+		return this.generalFormId;
+	}
+
+	public void setGeneralFormId(java.lang.Long generalFormId) {
+		this.generalFormId = generalFormId;
+	}
+
+	public java.lang.Byte getCustomFormFlag() {
+		return this.customFormFlag;
+	}
+
+	public void setCustomFormFlag(java.lang.Byte customFormFlag) {
+		this.customFormFlag = customFormFlag;
+	}
+
+	public java.lang.Long getDefaultOrder() {
+		return this.defaultOrder;
+	}
+
+	public void setDefaultOrder(java.lang.Long defaultOrder) {
+		this.defaultOrder = defaultOrder;
 	}
 }

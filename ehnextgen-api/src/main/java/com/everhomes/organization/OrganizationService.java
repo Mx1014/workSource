@@ -498,7 +498,7 @@ public interface OrganizationService {
 
 	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
 													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
-    List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId);
+    Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId);
 
     void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
 
@@ -526,4 +526,7 @@ public interface OrganizationService {
 	/**人事管理-离职**/
 	void leaveTheJob(LeaveTheJobCommand cmd);
 
+	ListOrganizationMemberCommandResponse syncOrganizationMemberStatus();
+
+    List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId);
 }

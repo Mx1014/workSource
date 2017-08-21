@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationDetails extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord> {
 
-	private static final long serialVersionUID = -785203324;
+	private static final long serialVersionUID = -1272773332;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_details</code>
@@ -150,6 +150,21 @@ public class EhOrganizationDetails extends org.jooq.impl.TableImpl<com.everhomes
 	 * The column <code>ehcore.eh_organization_details.string_tag5</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_details.service_user_id</code>. customer service staff
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord, java.lang.Long> SERVICE_USER_ID = createField("service_user_id", org.jooq.impl.SQLDataType.BIGINT, this, "customer service staff");
+
+	/**
+	 * The column <code>ehcore.eh_organization_details.namespace_organization_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord, java.lang.String> NAMESPACE_ORGANIZATION_TYPE = createField("namespace_organization_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_details.namespace_organization_token</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord, java.lang.String> NAMESPACE_ORGANIZATION_TOKEN = createField("namespace_organization_token", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_details</code> table reference

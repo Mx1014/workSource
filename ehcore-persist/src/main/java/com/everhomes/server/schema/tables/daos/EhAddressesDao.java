@@ -55,13 +55,6 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
-	 * Fetch a unique record that has <code>uuid = value</code>
-	 */
-	public com.everhomes.server.schema.tables.pojos.EhAddresses fetchOneByUuid(java.lang.String value) {
-		return fetchOne(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.UUID, value);
-	}
-
-	/**
 	 * Fetch records that have <code>community_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCommunityId(java.lang.Long... values) {
@@ -290,5 +283,68 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByNamespaceId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>rent_area IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByRentArea(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.RENT_AREA, values);
+	}
+
+	/**
+	 * Fetch records that have <code>build_area IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByBuildArea(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.BUILD_AREA, values);
+	}
+
+	/**
+	 * Fetch records that have <code>inner_area IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByInnerArea(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.INNER_AREA, values);
+	}
+
+	/**
+	 * Fetch records that have <code>layout IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByLayout(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.LAYOUT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>living_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByLivingStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.LIVING_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_address_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByNamespaceAddressType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_address_token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByNamespaceAddressToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>business_building_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByBusinessBuildingName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.BUSINESS_BUILDING_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>business_apartment_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByBusinessApartmentName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.BUSINESS_APARTMENT_NAME, values);
 	}
 }

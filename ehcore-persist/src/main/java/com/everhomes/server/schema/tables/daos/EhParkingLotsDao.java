@@ -109,4 +109,67 @@ public class EhParkingLotsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>max_request_num IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByMaxRequestNum(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.MAX_REQUEST_NUM, values);
+	}
+
+	/**
+	 * Fetch records that have <code>tempfee_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByTempfeeFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.TEMPFEE_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>rate_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByRateFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.RATE_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>recharge_month_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByRechargeMonthCount(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.RECHARGE_MONTH_COUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>recharge_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByRechargeType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.RECHARGE_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>is_support_recharge IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByIsSupportRecharge(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.IS_SUPPORT_RECHARGE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>lock_car_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByLockCarFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.LOCK_CAR_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>contact IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByContact(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.CONTACT, values);
+	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLinks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLinksRecord> {
 
-	private static final long serialVersionUID = 165711734;
+	private static final long serialVersionUID = 1203359303;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_links</code>
@@ -95,6 +95,11 @@ public class EhLinks extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 * The column <code>ehcore.eh_links.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLinksRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy. historic data may be useful");
+
+	/**
+	 * The column <code>ehcore.eh_links.rich_content</code>. rich_content
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLinksRecord, java.lang.String> RICH_CONTENT = createField("rich_content", org.jooq.impl.SQLDataType.CLOB, this, "rich_content");
 
 	/**
 	 * Create a <code>ehcore.eh_links</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWebMenus extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhWebMenusRecord> {
 
-	private static final long serialVersionUID = -1408270587;
+	private static final long serialVersionUID = -1964202089;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_web_menus</code>
@@ -49,7 +49,7 @@ public class EhWebMenus extends org.jooq.impl.TableImpl<com.everhomes.server.sch
 	/**
 	 * The column <code>ehcore.eh_web_menus.data_type</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenusRecord, java.lang.String> DATA_TYPE = createField("data_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenusRecord, java.lang.String> DATA_TYPE = createField("data_type", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_web_menus.leaf_flag</code>. Whether leaf nodes, non leaf nodes can be folded 0: false, 1: true
@@ -75,6 +75,26 @@ public class EhWebMenus extends org.jooq.impl.TableImpl<com.everhomes.server.sch
 	 * The column <code>ehcore.eh_web_menus.sort_num</code>. sort number
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenusRecord, java.lang.Integer> SORT_NUM = createField("sort_num", org.jooq.impl.SQLDataType.INTEGER, this, "sort number");
+
+	/**
+	 * The column <code>ehcore.eh_web_menus.module_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenusRecord, java.lang.Long> MODULE_ID = createField("module_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_web_menus.level</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenusRecord, java.lang.Integer> LEVEL = createField("level", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_web_menus.condition_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenusRecord, java.lang.String> CONDITION_TYPE = createField("condition_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_web_menus.category</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenusRecord, java.lang.String> CATEGORY = createField("category", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_web_menus</code> table reference

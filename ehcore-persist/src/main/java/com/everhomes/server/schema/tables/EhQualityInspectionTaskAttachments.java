@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTaskAttachments extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord> {
 
-	private static final long serialVersionUID = -2075518405;
+	private static final long serialVersionUID = -572206009;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_task_attachments</code>
@@ -32,9 +32,9 @@ public class EhQualityInspectionTaskAttachments extends org.jooq.impl.TableImpl<
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_task_attachments.record_id</code>. refernece to the id of eh_quality_inspection_task_records
+	 * The column <code>ehcore.eh_quality_inspection_task_attachments.record_id</code>. refernece to the id of eh_quality_inspection_tasks
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord, java.lang.Long> RECORD_ID = createField("record_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "refernece to the id of eh_quality_inspection_task_records");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord, java.lang.Long> RECORD_ID = createField("record_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "refernece to the id of eh_quality_inspection_tasks");
 
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_task_attachments.content_type</code>. attachment object content type

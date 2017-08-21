@@ -95,4 +95,11 @@ public class EhQualityInspectionEvaluationFactorsDao extends org.jooq.impl.DAOIm
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.NAMESPACE_ID, values);
+	}
 }

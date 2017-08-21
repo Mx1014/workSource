@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 460043827;
+	private static final long serialVersionUID = 1479189892;
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.id</code>. id of the record
@@ -503,6 +503,34 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 		return (java.lang.Long) getValue(34);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_groups.approval_status</code>. approval status
+	 */
+	public void setApprovalStatus(java.lang.Byte value) {
+		setValue(35, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_groups.approval_status</code>. approval status
+	 */
+	public java.lang.Byte getApprovalStatus() {
+		return (java.lang.Byte) getValue(35);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_groups.operator_uid</code>.
+	 */
+	public void setOperatorUid(java.lang.Long value) {
+		setValue(36, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_groups.operator_uid</code>.
+	 */
+	public java.lang.Long getOperatorUid() {
+		return (java.lang.Long) getValue(36);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -529,7 +557,7 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 	/**
 	 * Create a detached, initialised EhGroupsRecord
 	 */
-	public EhGroupsRecord(java.lang.Long id, java.lang.String uuid, java.lang.Integer namespaceId, java.lang.String name, java.lang.String displayName, java.lang.String avatar, java.lang.String description, java.lang.Long creatorUid, java.lang.Byte privateFlag, java.lang.Integer joinPolicy, java.lang.String discriminator, java.lang.Byte visibilityScope, java.lang.Long visibilityScopeId, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Byte status, java.lang.Long memberCount, java.lang.Long shareCount, java.lang.Byte postFlag, java.lang.String tag, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId) {
+	public EhGroupsRecord(java.lang.Long id, java.lang.String uuid, java.lang.Integer namespaceId, java.lang.String name, java.lang.String displayName, java.lang.String avatar, java.lang.String description, java.lang.Long creatorUid, java.lang.Byte privateFlag, java.lang.Integer joinPolicy, java.lang.String discriminator, java.lang.Byte visibilityScope, java.lang.Long visibilityScopeId, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Byte status, java.lang.Long memberCount, java.lang.Long shareCount, java.lang.Byte postFlag, java.lang.String tag, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.Byte approvalStatus, java.lang.Long operatorUid) {
 		super(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS);
 
 		setValue(0, id);
@@ -567,5 +595,7 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 		setValue(32, deleteTime);
 		setValue(33, visibleRegionType);
 		setValue(34, visibleRegionId);
+		setValue(35, approvalStatus);
+		setValue(36, operatorUid);
 	}
 }

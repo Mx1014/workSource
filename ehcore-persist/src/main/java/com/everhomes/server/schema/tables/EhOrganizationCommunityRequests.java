@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationCommunityRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord> {
 
-	private static final long serialVersionUID = 962673232;
+	private static final long serialVersionUID = -1410675889;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_community_requests</code>
@@ -109,7 +109,7 @@ public class EhOrganizationCommunityRequests extends org.jooq.impl.TableImpl<com
 	/**
 	 * The column <code>ehcore.eh_organization_community_requests.update_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_organization_community_requests.integral_tag1</code>.

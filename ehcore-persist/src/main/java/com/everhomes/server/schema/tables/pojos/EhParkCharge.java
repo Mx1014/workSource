@@ -11,28 +11,28 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkCharge implements java.io.Serializable {
 
-	private static final long serialVersionUID = -104415693;
+	private static final long serialVersionUID = 1052518975;
 
 	private java.lang.Long   id;
 	private java.lang.Byte   months;
-	private java.lang.String cardType;
 	private java.lang.Double amount;
 	private java.lang.Long   communityId;
+	private java.lang.String cardType;
 
 	public EhParkCharge() {}
 
 	public EhParkCharge(
 		java.lang.Long   id,
 		java.lang.Byte   months,
-		java.lang.String cardType,
 		java.lang.Double amount,
-		java.lang.Long   communityId
+		java.lang.Long   communityId,
+		java.lang.String cardType
 	) {
 		this.id = id;
 		this.months = months;
-		this.cardType = cardType;
 		this.amount = amount;
 		this.communityId = communityId;
+		this.cardType = cardType;
 	}
 
 	public java.lang.Long getId() {
@@ -51,14 +51,6 @@ public class EhParkCharge implements java.io.Serializable {
 		this.months = months;
 	}
 
-	public java.lang.String getCardType() {
-		return this.cardType;
-	}
-
-	public void setCardType(java.lang.String cardType) {
-		this.cardType = cardType;
-	}
-
 	public java.lang.Double getAmount() {
 		return this.amount;
 	}
@@ -73,5 +65,13 @@ public class EhParkCharge implements java.io.Serializable {
 
 	public void setCommunityId(java.lang.Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public java.lang.String getCardType() {
+		return this.cardType;
+	}
+
+	public void setCardType(java.lang.String cardType) {
+		this.cardType = cardType;
 	}
 }

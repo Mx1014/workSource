@@ -214,4 +214,25 @@ public class EhOrganizationDetailsDao extends org.jooq.impl.DAOImpl<com.everhome
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationDetails> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationDetails.EH_ORGANIZATION_DETAILS.STRING_TAG5, values);
 	}
+
+	/**
+	 * Fetch records that have <code>service_user_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationDetails> fetchByServiceUserId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationDetails.EH_ORGANIZATION_DETAILS.SERVICE_USER_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_organization_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationDetails> fetchByNamespaceOrganizationType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationDetails.EH_ORGANIZATION_DETAILS.NAMESPACE_ORGANIZATION_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_organization_token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationDetails> fetchByNamespaceOrganizationToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationDetails.EH_ORGANIZATION_DETAILS.NAMESPACE_ORGANIZATION_TOKEN, values);
+	}
 }

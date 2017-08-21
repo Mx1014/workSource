@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1045523561;
+	private static final long serialVersionUID = -32732019;
 
 	private java.lang.Long       id;
 	private java.lang.Long       orderNo;
@@ -36,10 +36,17 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 	private java.sql.Timestamp   rechargeTime;
 	private java.lang.Long       creatorUid;
 	private java.sql.Timestamp   createTime;
-	private java.sql.Timestamp   oldExpiredTime;
-	private java.sql.Timestamp   newExpiredTime;
+	private java.sql.Timestamp   startPeriod;
+	private java.sql.Timestamp   endPeriod;
 	private java.lang.String     paidType;
 	private java.lang.Byte       isDelete;
+	private java.lang.Byte       rechargeType;
+	private java.lang.String     orderToken;
+	private java.lang.Integer    parkingTime;
+	private java.lang.String     errorDescription;
+	private java.lang.String     errorDescriptionJson;
+	private java.sql.Timestamp   refundTime;
+	private java.lang.Integer    delayTime;
 
 	public EhParkingRechargeOrders() {}
 
@@ -67,10 +74,17 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		java.sql.Timestamp   rechargeTime,
 		java.lang.Long       creatorUid,
 		java.sql.Timestamp   createTime,
-		java.sql.Timestamp   oldExpiredTime,
-		java.sql.Timestamp   newExpiredTime,
+		java.sql.Timestamp   startPeriod,
+		java.sql.Timestamp   endPeriod,
 		java.lang.String     paidType,
-		java.lang.Byte       isDelete
+		java.lang.Byte       isDelete,
+		java.lang.Byte       rechargeType,
+		java.lang.String     orderToken,
+		java.lang.Integer    parkingTime,
+		java.lang.String     errorDescription,
+		java.lang.String     errorDescriptionJson,
+		java.sql.Timestamp   refundTime,
+		java.lang.Integer    delayTime
 	) {
 		this.id = id;
 		this.orderNo = orderNo;
@@ -95,10 +109,17 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		this.rechargeTime = rechargeTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
-		this.oldExpiredTime = oldExpiredTime;
-		this.newExpiredTime = newExpiredTime;
+		this.startPeriod = startPeriod;
+		this.endPeriod = endPeriod;
 		this.paidType = paidType;
 		this.isDelete = isDelete;
+		this.rechargeType = rechargeType;
+		this.orderToken = orderToken;
+		this.parkingTime = parkingTime;
+		this.errorDescription = errorDescription;
+		this.errorDescriptionJson = errorDescriptionJson;
+		this.refundTime = refundTime;
+		this.delayTime = delayTime;
 	}
 
 	public java.lang.Long getId() {
@@ -285,20 +306,20 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
-	public java.sql.Timestamp getOldExpiredTime() {
-		return this.oldExpiredTime;
+	public java.sql.Timestamp getStartPeriod() {
+		return this.startPeriod;
 	}
 
-	public void setOldExpiredTime(java.sql.Timestamp oldExpiredTime) {
-		this.oldExpiredTime = oldExpiredTime;
+	public void setStartPeriod(java.sql.Timestamp startPeriod) {
+		this.startPeriod = startPeriod;
 	}
 
-	public java.sql.Timestamp getNewExpiredTime() {
-		return this.newExpiredTime;
+	public java.sql.Timestamp getEndPeriod() {
+		return this.endPeriod;
 	}
 
-	public void setNewExpiredTime(java.sql.Timestamp newExpiredTime) {
-		this.newExpiredTime = newExpiredTime;
+	public void setEndPeriod(java.sql.Timestamp endPeriod) {
+		this.endPeriod = endPeriod;
 	}
 
 	public java.lang.String getPaidType() {
@@ -315,5 +336,61 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 
 	public void setIsDelete(java.lang.Byte isDelete) {
 		this.isDelete = isDelete;
+	}
+
+	public java.lang.Byte getRechargeType() {
+		return this.rechargeType;
+	}
+
+	public void setRechargeType(java.lang.Byte rechargeType) {
+		this.rechargeType = rechargeType;
+	}
+
+	public java.lang.String getOrderToken() {
+		return this.orderToken;
+	}
+
+	public void setOrderToken(java.lang.String orderToken) {
+		this.orderToken = orderToken;
+	}
+
+	public java.lang.Integer getParkingTime() {
+		return this.parkingTime;
+	}
+
+	public void setParkingTime(java.lang.Integer parkingTime) {
+		this.parkingTime = parkingTime;
+	}
+
+	public java.lang.String getErrorDescription() {
+		return this.errorDescription;
+	}
+
+	public void setErrorDescription(java.lang.String errorDescription) {
+		this.errorDescription = errorDescription;
+	}
+
+	public java.lang.String getErrorDescriptionJson() {
+		return this.errorDescriptionJson;
+	}
+
+	public void setErrorDescriptionJson(java.lang.String errorDescriptionJson) {
+		this.errorDescriptionJson = errorDescriptionJson;
+	}
+
+	public java.sql.Timestamp getRefundTime() {
+		return this.refundTime;
+	}
+
+	public void setRefundTime(java.sql.Timestamp refundTime) {
+		this.refundTime = refundTime;
+	}
+
+	public java.lang.Integer getDelayTime() {
+		return this.delayTime;
+	}
+
+	public void setDelayTime(java.lang.Integer delayTime) {
+		this.delayTime = delayTime;
 	}
 }

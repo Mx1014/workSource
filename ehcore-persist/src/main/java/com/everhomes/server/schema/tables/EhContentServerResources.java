@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhContentServerResources extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhContentServerResourcesRecord> {
 
-	private static final long serialVersionUID = 1268766741;
+	private static final long serialVersionUID = -2099927963;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_content_server_resources</code>
@@ -39,7 +39,7 @@ public class EhContentServerResources extends org.jooq.impl.TableImpl<com.everho
 	/**
 	 * The column <code>ehcore.eh_content_server_resources.resource_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhContentServerResourcesRecord, java.lang.String> RESOURCE_ID = createField("resource_id", org.jooq.impl.SQLDataType.CLOB.length(65535).nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhContentServerResourcesRecord, java.lang.String> RESOURCE_ID = createField("resource_id", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_content_server_resources.resource_md5</code>.

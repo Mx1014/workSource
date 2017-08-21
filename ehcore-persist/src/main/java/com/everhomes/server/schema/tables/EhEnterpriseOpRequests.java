@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseOpRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord> {
 
-	private static final long serialVersionUID = -1086950307;
+	private static final long serialVersionUID = 1571181416;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_enterprise_op_requests</code>
@@ -54,7 +54,7 @@ public class EhEnterpriseOpRequests extends org.jooq.impl.TableImpl<com.everhome
 	/**
 	 * The column <code>ehcore.eh_enterprise_op_requests.enterprise_name</code>. enterprise name
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.String> ENTERPRISE_NAME = createField("enterprise_name", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false), this, "enterprise name");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.String> ENTERPRISE_NAME = createField("enterprise_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "enterprise name");
 
 	/**
 	 * The column <code>ehcore.eh_enterprise_op_requests.enterprise_id</code>.
@@ -120,6 +120,31 @@ public class EhEnterpriseOpRequests extends org.jooq.impl.TableImpl<com.everhome
 	 * The column <code>ehcore.eh_enterprise_op_requests.process_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.sql.Timestamp> PROCESS_TIME = createField("process_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_enterprise_op_requests.contract_id</code>. eh_contracts id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.Long> CONTRACT_ID = createField("contract_id", org.jooq.impl.SQLDataType.BIGINT, this, "eh_contracts id");
+
+	/**
+	 * The column <code>ehcore.eh_enterprise_op_requests.issuer_type</code>. 1: organization 2: normal_user
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.String> ISSUER_TYPE = createField("issuer_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "1: organization 2: normal_user");
+
+	/**
+	 * The column <code>ehcore.eh_enterprise_op_requests.building_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.Long> BUILDING_ID = createField("building_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_enterprise_op_requests.address_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_enterprise_op_requests.flowcase_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.Long> FLOWCASE_ID = createField("flowcase_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_enterprise_op_requests</code> table reference

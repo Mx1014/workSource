@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -476980932;
+	private static final long serialVersionUID = 2144178988;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalSiteId;
@@ -23,9 +23,6 @@ public class EhRentalSiteItems implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
-	private java.lang.Integer    defaultOrder;
-	private java.lang.String     imgUri;
-	private java.lang.Byte       itemType;
 
 	public EhRentalSiteItems() {}
 
@@ -39,10 +36,7 @@ public class EhRentalSiteItems implements java.io.Serializable {
 		java.lang.Long       creatorUid,
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
-		java.sql.Timestamp   operateTime,
-		java.lang.Integer    defaultOrder,
-		java.lang.String     imgUri,
-		java.lang.Byte       itemType
+		java.sql.Timestamp   operateTime
 	) {
 		this.id = id;
 		this.rentalSiteId = rentalSiteId;
@@ -54,9 +48,6 @@ public class EhRentalSiteItems implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.defaultOrder = defaultOrder;
-		this.imgUri = imgUri;
-		this.itemType = itemType;
 	}
 
 	public java.lang.Long getId() {
@@ -137,29 +128,5 @@ public class EhRentalSiteItems implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
-	}
-
-	public java.lang.Integer getDefaultOrder() {
-		return this.defaultOrder;
-	}
-
-	public void setDefaultOrder(java.lang.Integer defaultOrder) {
-		this.defaultOrder = defaultOrder;
-	}
-
-	public java.lang.String getImgUri() {
-		return this.imgUri;
-	}
-
-	public void setImgUri(java.lang.String imgUri) {
-		this.imgUri = imgUri;
-	}
-
-	public java.lang.Byte getItemType() {
-		return this.itemType;
-	}
-
-	public void setItemType(java.lang.Byte itemType) {
-		this.itemType = itemType;
 	}
 }

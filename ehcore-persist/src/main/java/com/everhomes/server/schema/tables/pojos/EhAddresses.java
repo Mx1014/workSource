@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 10988029;
+	private static final long serialVersionUID = -1766554013;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -48,6 +48,15 @@ public class EhAddresses implements java.io.Serializable {
 	private java.lang.String   stringTag5;
 	private java.lang.Double   areaSize;
 	private java.lang.Integer  namespaceId;
+	private java.lang.Double   rentArea;
+	private java.lang.Double   buildArea;
+	private java.lang.Double   innerArea;
+	private java.lang.String   layout;
+	private java.lang.Byte     livingStatus;
+	private java.lang.String   namespaceAddressType;
+	private java.lang.String   namespaceAddressToken;
+	private java.lang.String   businessBuildingName;
+	private java.lang.String   businessApartmentName;
 
 	public EhAddresses() {}
 
@@ -86,7 +95,16 @@ public class EhAddresses implements java.io.Serializable {
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
 		java.lang.Double   areaSize,
-		java.lang.Integer  namespaceId
+		java.lang.Integer  namespaceId,
+		java.lang.Double   rentArea,
+		java.lang.Double   buildArea,
+		java.lang.Double   innerArea,
+		java.lang.String   layout,
+		java.lang.Byte     livingStatus,
+		java.lang.String   namespaceAddressType,
+		java.lang.String   namespaceAddressToken,
+		java.lang.String   businessBuildingName,
+		java.lang.String   businessApartmentName
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -123,6 +141,15 @@ public class EhAddresses implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 		this.areaSize = areaSize;
 		this.namespaceId = namespaceId;
+		this.rentArea = rentArea;
+		this.buildArea = buildArea;
+		this.innerArea = innerArea;
+		this.layout = layout;
+		this.livingStatus = livingStatus;
+		this.namespaceAddressType = namespaceAddressType;
+		this.namespaceAddressToken = namespaceAddressToken;
+		this.businessBuildingName = businessBuildingName;
+		this.businessApartmentName = businessApartmentName;
 	}
 
 	public java.lang.Long getId() {
@@ -403,5 +430,77 @@ public class EhAddresses implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Double getRentArea() {
+		return this.rentArea;
+	}
+
+	public void setRentArea(java.lang.Double rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public java.lang.Double getBuildArea() {
+		return this.buildArea;
+	}
+
+	public void setBuildArea(java.lang.Double buildArea) {
+		this.buildArea = buildArea;
+	}
+
+	public java.lang.Double getInnerArea() {
+		return this.innerArea;
+	}
+
+	public void setInnerArea(java.lang.Double innerArea) {
+		this.innerArea = innerArea;
+	}
+
+	public java.lang.String getLayout() {
+		return this.layout;
+	}
+
+	public void setLayout(java.lang.String layout) {
+		this.layout = layout;
+	}
+
+	public java.lang.Byte getLivingStatus() {
+		return this.livingStatus;
+	}
+
+	public void setLivingStatus(java.lang.Byte livingStatus) {
+		this.livingStatus = livingStatus;
+	}
+
+	public java.lang.String getNamespaceAddressType() {
+		return this.namespaceAddressType;
+	}
+
+	public void setNamespaceAddressType(java.lang.String namespaceAddressType) {
+		this.namespaceAddressType = namespaceAddressType;
+	}
+
+	public java.lang.String getNamespaceAddressToken() {
+		return this.namespaceAddressToken;
+	}
+
+	public void setNamespaceAddressToken(java.lang.String namespaceAddressToken) {
+		this.namespaceAddressToken = namespaceAddressToken;
+	}
+
+	public java.lang.String getBusinessBuildingName() {
+		return this.businessBuildingName;
+	}
+
+	public void setBusinessBuildingName(java.lang.String businessBuildingName) {
+		this.businessBuildingName = businessBuildingName;
+	}
+
+	public java.lang.String getBusinessApartmentName() {
+		return this.businessApartmentName;
+	}
+
+	public void setBusinessApartmentName(java.lang.String businessApartmentName) {
+		this.businessApartmentName = businessApartmentName;
 	}
 }

@@ -2117,14 +2117,16 @@ public class CommunityServiceImpl implements CommunityService {
 			Row tempRow = sheet.createRow(i + 1);
 			CommunityUserDto dto = dtos.get(i);
 			List<OrganizationDetailDTO> organizations = dto.getOrganizations();
-			StringBuilder enterprises = new StringBuilder();
 
-			for (int k = 0,l = organizations.size(); k < l; k++) {
-				if (k == l-1)
-					enterprises.append(organizations.get(k).getDisplayName());
-				else
-					enterprises.append(organizations.get(k).getDisplayName()).append(",");
-			}
+			StringBuilder enterprises = new StringBuilder();
+            if (organizations != null) {
+                for (int k = 0,l = organizations.size(); k < l; k++) {
+                    if (k == l-1)
+                        enterprises.append(organizations.get(k).getDisplayName());
+                    else
+                        enterprises.append(organizations.get(k).getDisplayName()).append(",");
+                }
+            }
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
 			tempRow.createCell(1).setCellValue(UserGender.fromCode(dto.getGender()).getText());
@@ -2880,6 +2882,7 @@ public class CommunityServiceImpl implements CommunityService {
                             if (list != null && list.size() > 0) {
                                 list = list.stream()
                                         .filter(member -> OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE)
+                                        .filter(member -> OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER)
                                         // .limit(1)
                                         .map(member -> {
                                             member.setOperatorUid(r.getOperatorUid());

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1221713428;
+	private static final long serialVersionUID = -1374576882;
 
 	private java.lang.Long       id;
 	private java.lang.Long       ownerId;
@@ -33,6 +33,7 @@ public class EhConfOrders implements java.io.Serializable {
 	private java.lang.String     buyerContact;
 	private java.lang.Byte       vendorType;
 	private java.lang.String     email;
+	private java.sql.Timestamp   expiredDate;
 
 	public EhConfOrders() {}
 
@@ -56,7 +57,8 @@ public class EhConfOrders implements java.io.Serializable {
 		java.lang.String     buyerName,
 		java.lang.String     buyerContact,
 		java.lang.Byte       vendorType,
-		java.lang.String     email
+		java.lang.String     email,
+		java.sql.Timestamp   expiredDate
 	) {
 		this.id = id;
 		this.ownerId = ownerId;
@@ -78,6 +80,7 @@ public class EhConfOrders implements java.io.Serializable {
 		this.buyerContact = buyerContact;
 		this.vendorType = vendorType;
 		this.email = email;
+		this.expiredDate = expiredDate;
 	}
 
 	public java.lang.Long getId() {
@@ -238,5 +241,13 @@ public class EhConfOrders implements java.io.Serializable {
 
 	public void setEmail(java.lang.String email) {
 		this.email = email;
+	}
+
+	public java.sql.Timestamp getExpiredDate() {
+		return this.expiredDate;
+	}
+
+	public void setExpiredDate(java.sql.Timestamp expiredDate) {
+		this.expiredDate = expiredDate;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1082243395;
+	private static final long serialVersionUID = 1617526411;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
@@ -35,10 +35,14 @@ public class EhLaunchPadItems implements java.io.Serializable {
 	private java.lang.Integer bgcolor;
 	private java.lang.String  tag;
 	private java.lang.String  targetType;
-	private java.lang.Long    targetId;
+	private java.lang.String  targetId;
 	private java.lang.Byte    deleteFlag;
 	private java.lang.String  sceneType;
 	private java.lang.Byte    scaleType;
+	private java.lang.Long    serviceCategryId;
+	private java.lang.String  selectedIconUri;
+	private java.lang.Integer moreOrder;
+	private java.lang.String  aliasIconUri;
 
 	public EhLaunchPadItems() {}
 
@@ -65,10 +69,14 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.Integer bgcolor,
 		java.lang.String  tag,
 		java.lang.String  targetType,
-		java.lang.Long    targetId,
+		java.lang.String  targetId,
 		java.lang.Byte    deleteFlag,
 		java.lang.String  sceneType,
-		java.lang.Byte    scaleType
+		java.lang.Byte    scaleType,
+		java.lang.Long    serviceCategryId,
+		java.lang.String  selectedIconUri,
+		java.lang.Integer moreOrder,
+		java.lang.String  aliasIconUri
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -96,6 +104,10 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.deleteFlag = deleteFlag;
 		this.sceneType = sceneType;
 		this.scaleType = scaleType;
+		this.serviceCategryId = serviceCategryId;
+		this.selectedIconUri = selectedIconUri;
+		this.moreOrder = moreOrder;
+		this.aliasIconUri = aliasIconUri;
 	}
 
 	public java.lang.Long getId() {
@@ -274,11 +286,11 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.targetType = targetType;
 	}
 
-	public java.lang.Long getTargetId() {
+	public java.lang.String getTargetId() {
 		return this.targetId;
 	}
 
-	public void setTargetId(java.lang.Long targetId) {
+	public void setTargetId(java.lang.String targetId) {
 		this.targetId = targetId;
 	}
 
@@ -304,5 +316,37 @@ public class EhLaunchPadItems implements java.io.Serializable {
 
 	public void setScaleType(java.lang.Byte scaleType) {
 		this.scaleType = scaleType;
+	}
+
+	public java.lang.Long getServiceCategryId() {
+		return this.serviceCategryId;
+	}
+
+	public void setServiceCategryId(java.lang.Long serviceCategryId) {
+		this.serviceCategryId = serviceCategryId;
+	}
+
+	public java.lang.String getSelectedIconUri() {
+		return this.selectedIconUri;
+	}
+
+	public void setSelectedIconUri(java.lang.String selectedIconUri) {
+		this.selectedIconUri = selectedIconUri;
+	}
+
+	public java.lang.Integer getMoreOrder() {
+		return this.moreOrder;
+	}
+
+	public void setMoreOrder(java.lang.Integer moreOrder) {
+		this.moreOrder = moreOrder;
+	}
+
+	public java.lang.String getAliasIconUri() {
+		return this.aliasIconUri;
+	}
+
+	public void setAliasIconUri(java.lang.String aliasIconUri) {
+		this.aliasIconUri = aliasIconUri;
 	}
 }

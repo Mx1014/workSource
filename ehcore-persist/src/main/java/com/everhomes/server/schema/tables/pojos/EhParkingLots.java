@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingLots implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1021369243;
+	private static final long serialVersionUID = -957469741;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -23,6 +23,15 @@ public class EhParkingLots implements java.io.Serializable {
 	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.Integer  maxRequestNum;
+	private java.lang.Byte     tempfeeFlag;
+	private java.lang.Byte     rateFlag;
+	private java.lang.Integer  rechargeMonthCount;
+	private java.lang.Byte     rechargeType;
+	private java.lang.Byte     isSupportRecharge;
+	private java.lang.Integer  namespaceId;
+	private java.lang.Byte     lockCarFlag;
+	private java.lang.String   contact;
 
 	public EhParkingLots() {}
 
@@ -36,7 +45,16 @@ public class EhParkingLots implements java.io.Serializable {
 		java.lang.Integer  cardReserveDays,
 		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Integer  maxRequestNum,
+		java.lang.Byte     tempfeeFlag,
+		java.lang.Byte     rateFlag,
+		java.lang.Integer  rechargeMonthCount,
+		java.lang.Byte     rechargeType,
+		java.lang.Byte     isSupportRecharge,
+		java.lang.Integer  namespaceId,
+		java.lang.Byte     lockCarFlag,
+		java.lang.String   contact
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -48,6 +66,15 @@ public class EhParkingLots implements java.io.Serializable {
 		this.status = status;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.maxRequestNum = maxRequestNum;
+		this.tempfeeFlag = tempfeeFlag;
+		this.rateFlag = rateFlag;
+		this.rechargeMonthCount = rechargeMonthCount;
+		this.rechargeType = rechargeType;
+		this.isSupportRecharge = isSupportRecharge;
+		this.namespaceId = namespaceId;
+		this.lockCarFlag = lockCarFlag;
+		this.contact = contact;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +155,77 @@ public class EhParkingLots implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Integer getMaxRequestNum() {
+		return this.maxRequestNum;
+	}
+
+	public void setMaxRequestNum(java.lang.Integer maxRequestNum) {
+		this.maxRequestNum = maxRequestNum;
+	}
+
+	public java.lang.Byte getTempfeeFlag() {
+		return this.tempfeeFlag;
+	}
+
+	public void setTempfeeFlag(java.lang.Byte tempfeeFlag) {
+		this.tempfeeFlag = tempfeeFlag;
+	}
+
+	public java.lang.Byte getRateFlag() {
+		return this.rateFlag;
+	}
+
+	public void setRateFlag(java.lang.Byte rateFlag) {
+		this.rateFlag = rateFlag;
+	}
+
+	public java.lang.Integer getRechargeMonthCount() {
+		return this.rechargeMonthCount;
+	}
+
+	public void setRechargeMonthCount(java.lang.Integer rechargeMonthCount) {
+		this.rechargeMonthCount = rechargeMonthCount;
+	}
+
+	public java.lang.Byte getRechargeType() {
+		return this.rechargeType;
+	}
+
+	public void setRechargeType(java.lang.Byte rechargeType) {
+		this.rechargeType = rechargeType;
+	}
+
+	public java.lang.Byte getIsSupportRecharge() {
+		return this.isSupportRecharge;
+	}
+
+	public void setIsSupportRecharge(java.lang.Byte isSupportRecharge) {
+		this.isSupportRecharge = isSupportRecharge;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Byte getLockCarFlag() {
+		return this.lockCarFlag;
+	}
+
+	public void setLockCarFlag(java.lang.Byte lockCarFlag) {
+		this.lockCarFlag = lockCarFlag;
+	}
+
+	public java.lang.String getContact() {
+		return this.contact;
+	}
+
+	public void setContact(java.lang.String contact) {
+		this.contact = contact;
 	}
 }

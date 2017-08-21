@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingCardRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2123306765;
+	private static final long serialVersionUID = -1210622185;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -28,6 +28,17 @@ public class EhParkingCardRequests implements java.io.Serializable {
 	private java.sql.Timestamp issueTime;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.String   carBrand;
+	private java.lang.String   carColor;
+	private java.lang.String   carSerieName;
+	private java.lang.Long     carSerieId;
+	private java.lang.Long     flowId;
+	private java.lang.Integer  flowVersion;
+	private java.lang.Long     flowCaseId;
+	private java.sql.Timestamp auditSucceedTime;
+	private java.sql.Timestamp processSucceedTime;
+	private java.sql.Timestamp openCardTime;
+	private java.sql.Timestamp cancelTime;
 
 	public EhParkingCardRequests() {}
 
@@ -46,7 +57,18 @@ public class EhParkingCardRequests implements java.io.Serializable {
 		java.lang.Byte     issueFlag,
 		java.sql.Timestamp issueTime,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.String   carBrand,
+		java.lang.String   carColor,
+		java.lang.String   carSerieName,
+		java.lang.Long     carSerieId,
+		java.lang.Long     flowId,
+		java.lang.Integer  flowVersion,
+		java.lang.Long     flowCaseId,
+		java.sql.Timestamp auditSucceedTime,
+		java.sql.Timestamp processSucceedTime,
+		java.sql.Timestamp openCardTime,
+		java.sql.Timestamp cancelTime
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -63,6 +85,17 @@ public class EhParkingCardRequests implements java.io.Serializable {
 		this.issueTime = issueTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.carBrand = carBrand;
+		this.carColor = carColor;
+		this.carSerieName = carSerieName;
+		this.carSerieId = carSerieId;
+		this.flowId = flowId;
+		this.flowVersion = flowVersion;
+		this.flowCaseId = flowCaseId;
+		this.auditSucceedTime = auditSucceedTime;
+		this.processSucceedTime = processSucceedTime;
+		this.openCardTime = openCardTime;
+		this.cancelTime = cancelTime;
 	}
 
 	public java.lang.Long getId() {
@@ -183,5 +216,93 @@ public class EhParkingCardRequests implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.String getCarBrand() {
+		return this.carBrand;
+	}
+
+	public void setCarBrand(java.lang.String carBrand) {
+		this.carBrand = carBrand;
+	}
+
+	public java.lang.String getCarColor() {
+		return this.carColor;
+	}
+
+	public void setCarColor(java.lang.String carColor) {
+		this.carColor = carColor;
+	}
+
+	public java.lang.String getCarSerieName() {
+		return this.carSerieName;
+	}
+
+	public void setCarSerieName(java.lang.String carSerieName) {
+		this.carSerieName = carSerieName;
+	}
+
+	public java.lang.Long getCarSerieId() {
+		return this.carSerieId;
+	}
+
+	public void setCarSerieId(java.lang.Long carSerieId) {
+		this.carSerieId = carSerieId;
+	}
+
+	public java.lang.Long getFlowId() {
+		return this.flowId;
+	}
+
+	public void setFlowId(java.lang.Long flowId) {
+		this.flowId = flowId;
+	}
+
+	public java.lang.Integer getFlowVersion() {
+		return this.flowVersion;
+	}
+
+	public void setFlowVersion(java.lang.Integer flowVersion) {
+		this.flowVersion = flowVersion;
+	}
+
+	public java.lang.Long getFlowCaseId() {
+		return this.flowCaseId;
+	}
+
+	public void setFlowCaseId(java.lang.Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+
+	public java.sql.Timestamp getAuditSucceedTime() {
+		return this.auditSucceedTime;
+	}
+
+	public void setAuditSucceedTime(java.sql.Timestamp auditSucceedTime) {
+		this.auditSucceedTime = auditSucceedTime;
+	}
+
+	public java.sql.Timestamp getProcessSucceedTime() {
+		return this.processSucceedTime;
+	}
+
+	public void setProcessSucceedTime(java.sql.Timestamp processSucceedTime) {
+		this.processSucceedTime = processSucceedTime;
+	}
+
+	public java.sql.Timestamp getOpenCardTime() {
+		return this.openCardTime;
+	}
+
+	public void setOpenCardTime(java.sql.Timestamp openCardTime) {
+		this.openCardTime = openCardTime;
+	}
+
+	public java.sql.Timestamp getCancelTime() {
+		return this.cancelTime;
+	}
+
+	public void setCancelTime(java.sql.Timestamp cancelTime) {
+		this.cancelTime = cancelTime;
 	}
 }

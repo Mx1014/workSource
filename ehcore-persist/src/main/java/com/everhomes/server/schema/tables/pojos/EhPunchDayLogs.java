@@ -11,24 +11,26 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchDayLogs implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1688434268;
+	private static final long serialVersionUID = -942950390;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
 	private java.lang.Long     enterpriseId;
 	private java.sql.Date      punchDate;
 	private java.sql.Time      arriveTime;
-	private java.sql.Time      noonLeaveTime;
-	private java.sql.Time      afternoonArriveTime;
 	private java.sql.Time      leaveTime;
 	private java.sql.Time      workTime;
 	private java.lang.Byte     status;
-	private java.lang.Byte     morningStatus;
-	private java.lang.Byte     afternoonStatus;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     viewFlag;
+	private java.lang.Byte     morningStatus;
+	private java.lang.Byte     afternoonStatus;
 	private java.lang.Byte     punchTimesPerDay;
+	private java.sql.Time      noonLeaveTime;
+	private java.sql.Time      afternoonArriveTime;
+	private java.lang.Byte     exceptionStatus;
+	private java.lang.Byte     deviceChangeFlag;
 
 	public EhPunchDayLogs() {}
 
@@ -38,34 +40,38 @@ public class EhPunchDayLogs implements java.io.Serializable {
 		java.lang.Long     enterpriseId,
 		java.sql.Date      punchDate,
 		java.sql.Time      arriveTime,
-		java.sql.Time      noonLeaveTime,
-		java.sql.Time      afternoonArriveTime,
 		java.sql.Time      leaveTime,
 		java.sql.Time      workTime,
 		java.lang.Byte     status,
-		java.lang.Byte     morningStatus,
-		java.lang.Byte     afternoonStatus,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Byte     viewFlag,
-		java.lang.Byte     punchTimesPerDay
+		java.lang.Byte     morningStatus,
+		java.lang.Byte     afternoonStatus,
+		java.lang.Byte     punchTimesPerDay,
+		java.sql.Time      noonLeaveTime,
+		java.sql.Time      afternoonArriveTime,
+		java.lang.Byte     exceptionStatus,
+		java.lang.Byte     deviceChangeFlag
 	) {
 		this.id = id;
 		this.userId = userId;
 		this.enterpriseId = enterpriseId;
 		this.punchDate = punchDate;
 		this.arriveTime = arriveTime;
-		this.noonLeaveTime = noonLeaveTime;
-		this.afternoonArriveTime = afternoonArriveTime;
 		this.leaveTime = leaveTime;
 		this.workTime = workTime;
 		this.status = status;
-		this.morningStatus = morningStatus;
-		this.afternoonStatus = afternoonStatus;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.viewFlag = viewFlag;
+		this.morningStatus = morningStatus;
+		this.afternoonStatus = afternoonStatus;
 		this.punchTimesPerDay = punchTimesPerDay;
+		this.noonLeaveTime = noonLeaveTime;
+		this.afternoonArriveTime = afternoonArriveTime;
+		this.exceptionStatus = exceptionStatus;
+		this.deviceChangeFlag = deviceChangeFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -108,22 +114,6 @@ public class EhPunchDayLogs implements java.io.Serializable {
 		this.arriveTime = arriveTime;
 	}
 
-	public java.sql.Time getNoonLeaveTime() {
-		return this.noonLeaveTime;
-	}
-
-	public void setNoonLeaveTime(java.sql.Time noonLeaveTime) {
-		this.noonLeaveTime = noonLeaveTime;
-	}
-
-	public java.sql.Time getAfternoonArriveTime() {
-		return this.afternoonArriveTime;
-	}
-
-	public void setAfternoonArriveTime(java.sql.Time afternoonArriveTime) {
-		this.afternoonArriveTime = afternoonArriveTime;
-	}
-
 	public java.sql.Time getLeaveTime() {
 		return this.leaveTime;
 	}
@@ -146,22 +136,6 @@ public class EhPunchDayLogs implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
-	}
-
-	public java.lang.Byte getMorningStatus() {
-		return this.morningStatus;
-	}
-
-	public void setMorningStatus(java.lang.Byte morningStatus) {
-		this.morningStatus = morningStatus;
-	}
-
-	public java.lang.Byte getAfternoonStatus() {
-		return this.afternoonStatus;
-	}
-
-	public void setAfternoonStatus(java.lang.Byte afternoonStatus) {
-		this.afternoonStatus = afternoonStatus;
 	}
 
 	public java.lang.Long getCreatorUid() {
@@ -188,11 +162,59 @@ public class EhPunchDayLogs implements java.io.Serializable {
 		this.viewFlag = viewFlag;
 	}
 
+	public java.lang.Byte getMorningStatus() {
+		return this.morningStatus;
+	}
+
+	public void setMorningStatus(java.lang.Byte morningStatus) {
+		this.morningStatus = morningStatus;
+	}
+
+	public java.lang.Byte getAfternoonStatus() {
+		return this.afternoonStatus;
+	}
+
+	public void setAfternoonStatus(java.lang.Byte afternoonStatus) {
+		this.afternoonStatus = afternoonStatus;
+	}
+
 	public java.lang.Byte getPunchTimesPerDay() {
 		return this.punchTimesPerDay;
 	}
 
 	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
 		this.punchTimesPerDay = punchTimesPerDay;
+	}
+
+	public java.sql.Time getNoonLeaveTime() {
+		return this.noonLeaveTime;
+	}
+
+	public void setNoonLeaveTime(java.sql.Time noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
+	}
+
+	public java.sql.Time getAfternoonArriveTime() {
+		return this.afternoonArriveTime;
+	}
+
+	public void setAfternoonArriveTime(java.sql.Time afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
+	}
+
+	public java.lang.Byte getExceptionStatus() {
+		return this.exceptionStatus;
+	}
+
+	public void setExceptionStatus(java.lang.Byte exceptionStatus) {
+		this.exceptionStatus = exceptionStatus;
+	}
+
+	public java.lang.Byte getDeviceChangeFlag() {
+		return this.deviceChangeFlag;
+	}
+
+	public void setDeviceChangeFlag(java.lang.Byte deviceChangeFlag) {
+		this.deviceChangeFlag = deviceChangeFlag;
 	}
 }

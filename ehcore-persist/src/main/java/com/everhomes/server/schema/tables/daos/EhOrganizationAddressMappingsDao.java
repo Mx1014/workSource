@@ -81,4 +81,25 @@ public class EhOrganizationAddressMappingsDao extends org.jooq.impl.DAOImpl<com.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings> fetchByLivingStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings> fetchByNamespaceType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS.NAMESPACE_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS.CREATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS.UPDATE_TIME, values);
+	}
 }

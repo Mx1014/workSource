@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord> {
 
-	private static final long serialVersionUID = -1710090738;
+	private static final long serialVersionUID = 747088194;
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.id</code>. id of the record
@@ -336,30 +336,30 @@ public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecord
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_parking_recharge_orders.old_expired_time</code>.
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.start_period</code>.
 	 */
-	public void setOldExpiredTime(java.sql.Timestamp value) {
+	public void setStartPeriod(java.sql.Timestamp value) {
 		setValue(23, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_parking_recharge_orders.old_expired_time</code>.
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.start_period</code>.
 	 */
-	public java.sql.Timestamp getOldExpiredTime() {
+	public java.sql.Timestamp getStartPeriod() {
 		return (java.sql.Timestamp) getValue(23);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_parking_recharge_orders.new_expired_time</code>.
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.end_period</code>.
 	 */
-	public void setNewExpiredTime(java.sql.Timestamp value) {
+	public void setEndPeriod(java.sql.Timestamp value) {
 		setValue(24, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_parking_recharge_orders.new_expired_time</code>.
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.end_period</code>.
 	 */
-	public java.sql.Timestamp getNewExpiredTime() {
+	public java.sql.Timestamp getEndPeriod() {
 		return (java.sql.Timestamp) getValue(24);
 	}
 
@@ -391,6 +391,104 @@ public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecord
 		return (java.lang.Byte) getValue(26);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.recharge_type</code>. 1: monthly, 2: temporary
+	 */
+	public void setRechargeType(java.lang.Byte value) {
+		setValue(27, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.recharge_type</code>. 1: monthly, 2: temporary
+	 */
+	public java.lang.Byte getRechargeType() {
+		return (java.lang.Byte) getValue(27);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.order_token</code>. it may be from 3rd system
+	 */
+	public void setOrderToken(java.lang.String value) {
+		setValue(28, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.order_token</code>. it may be from 3rd system
+	 */
+	public java.lang.String getOrderToken() {
+		return (java.lang.String) getValue(28);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.parking_time</code>. parking-time
+	 */
+	public void setParkingTime(java.lang.Integer value) {
+		setValue(29, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.parking_time</code>. parking-time
+	 */
+	public java.lang.Integer getParkingTime() {
+		return (java.lang.Integer) getValue(29);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.error_description</code>. error description
+	 */
+	public void setErrorDescription(java.lang.String value) {
+		setValue(30, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.error_description</code>. error description
+	 */
+	public java.lang.String getErrorDescription() {
+		return (java.lang.String) getValue(30);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.error_description_json</code>. error description
+	 */
+	public void setErrorDescriptionJson(java.lang.String value) {
+		setValue(31, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.error_description_json</code>. error description
+	 */
+	public java.lang.String getErrorDescriptionJson() {
+		return (java.lang.String) getValue(31);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.refund_time</code>. refund time
+	 */
+	public void setRefundTime(java.sql.Timestamp value) {
+		setValue(32, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.refund_time</code>. refund time
+	 */
+	public java.sql.Timestamp getRefundTime() {
+		return (java.sql.Timestamp) getValue(32);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.delay_time</code>. delay time
+	 */
+	public void setDelayTime(java.lang.Integer value) {
+		setValue(33, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.delay_time</code>. delay time
+	 */
+	public java.lang.Integer getDelayTime() {
+		return (java.lang.Integer) getValue(33);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -417,7 +515,7 @@ public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecord
 	/**
 	 * Create a detached, initialised EhParkingRechargeOrdersRecord
 	 */
-	public EhParkingRechargeOrdersRecord(java.lang.Long id, java.lang.Long orderNo, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long parkingLotId, java.lang.String plateNumber, java.lang.String plateOwnerName, java.lang.String plateOwnerPhone, java.lang.Long payerEnterpriseId, java.lang.Long payerUid, java.lang.String payerPhone, java.sql.Timestamp paidTime, java.lang.String vendorName, java.lang.String cardNumber, java.lang.String rateToken, java.lang.String rateName, java.math.BigDecimal monthCount, java.math.BigDecimal price, java.lang.Byte status, java.lang.Byte rechargeStatus, java.sql.Timestamp rechargeTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp oldExpiredTime, java.sql.Timestamp newExpiredTime, java.lang.String paidType, java.lang.Byte isDelete) {
+	public EhParkingRechargeOrdersRecord(java.lang.Long id, java.lang.Long orderNo, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long parkingLotId, java.lang.String plateNumber, java.lang.String plateOwnerName, java.lang.String plateOwnerPhone, java.lang.Long payerEnterpriseId, java.lang.Long payerUid, java.lang.String payerPhone, java.sql.Timestamp paidTime, java.lang.String vendorName, java.lang.String cardNumber, java.lang.String rateToken, java.lang.String rateName, java.math.BigDecimal monthCount, java.math.BigDecimal price, java.lang.Byte status, java.lang.Byte rechargeStatus, java.sql.Timestamp rechargeTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp startPeriod, java.sql.Timestamp endPeriod, java.lang.String paidType, java.lang.Byte isDelete, java.lang.Byte rechargeType, java.lang.String orderToken, java.lang.Integer parkingTime, java.lang.String errorDescription, java.lang.String errorDescriptionJson, java.sql.Timestamp refundTime, java.lang.Integer delayTime) {
 		super(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS);
 
 		setValue(0, id);
@@ -443,9 +541,16 @@ public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecord
 		setValue(20, rechargeTime);
 		setValue(21, creatorUid);
 		setValue(22, createTime);
-		setValue(23, oldExpiredTime);
-		setValue(24, newExpiredTime);
+		setValue(23, startPeriod);
+		setValue(24, endPeriod);
 		setValue(25, paidType);
 		setValue(26, isDelete);
+		setValue(27, rechargeType);
+		setValue(28, orderToken);
+		setValue(29, parkingTime);
+		setValue(30, errorDescription);
+		setValue(31, errorDescriptionJson);
+		setValue(32, refundTime);
+		setValue(33, delayTime);
 	}
 }

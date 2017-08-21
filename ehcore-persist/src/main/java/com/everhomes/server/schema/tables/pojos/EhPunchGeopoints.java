@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchGeopoints implements java.io.Serializable {
 
-	private static final long serialVersionUID = -481338775;
+	private static final long serialVersionUID = -719210773;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
@@ -24,6 +24,9 @@ public class EhPunchGeopoints implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
+	private java.lang.String   ownerType;
+	private java.lang.Long     ownerId;
+	private java.lang.Long     locationRuleId;
 
 	public EhPunchGeopoints() {}
 
@@ -38,7 +41,10 @@ public class EhPunchGeopoints implements java.io.Serializable {
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime
+		java.sql.Timestamp operateTime,
+		java.lang.String   ownerType,
+		java.lang.Long     ownerId,
+		java.lang.Long     locationRuleId
 	) {
 		this.id = id;
 		this.enterpriseId = enterpriseId;
@@ -51,6 +57,9 @@ public class EhPunchGeopoints implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.ownerType = ownerType;
+		this.ownerId = ownerId;
+		this.locationRuleId = locationRuleId;
 	}
 
 	public java.lang.Long getId() {
@@ -139,5 +148,29 @@ public class EhPunchGeopoints implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
+	}
+
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
+	}
+
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public java.lang.Long getLocationRuleId() {
+		return this.locationRuleId;
+	}
+
+	public void setLocationRuleId(java.lang.Long locationRuleId) {
+		this.locationRuleId = locationRuleId;
 	}
 }

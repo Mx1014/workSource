@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationDetailsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord> {
 
-	private static final long serialVersionUID = 1834947049;
+	private static final long serialVersionUID = 495248283;
 
 	/**
 	 * Setter for <code>ehcore.eh_organization_details.id</code>. id of the record
@@ -363,6 +363,48 @@ public class EhOrganizationDetailsRecord extends org.jooq.impl.UpdatableRecordIm
 		return (java.lang.String) getValue(24);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_organization_details.service_user_id</code>. customer service staff
+	 */
+	public void setServiceUserId(java.lang.Long value) {
+		setValue(25, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_details.service_user_id</code>. customer service staff
+	 */
+	public java.lang.Long getServiceUserId() {
+		return (java.lang.Long) getValue(25);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_details.namespace_organization_type</code>.
+	 */
+	public void setNamespaceOrganizationType(java.lang.String value) {
+		setValue(26, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_details.namespace_organization_type</code>.
+	 */
+	public java.lang.String getNamespaceOrganizationType() {
+		return (java.lang.String) getValue(26);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_details.namespace_organization_token</code>.
+	 */
+	public void setNamespaceOrganizationToken(java.lang.String value) {
+		setValue(27, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_details.namespace_organization_token</code>.
+	 */
+	public java.lang.String getNamespaceOrganizationToken() {
+		return (java.lang.String) getValue(27);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -389,7 +431,7 @@ public class EhOrganizationDetailsRecord extends org.jooq.impl.UpdatableRecordIm
 	/**
 	 * Create a detached, initialised EhOrganizationDetailsRecord
 	 */
-	public EhOrganizationDetailsRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String description, java.lang.String contact, java.lang.String address, java.sql.Timestamp createTime, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String displayName, java.lang.String contactor, java.lang.Long memberCount, java.sql.Timestamp checkinDate, java.lang.String avatar, java.lang.String postUri, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhOrganizationDetailsRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String description, java.lang.String contact, java.lang.String address, java.sql.Timestamp createTime, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String displayName, java.lang.String contactor, java.lang.Long memberCount, java.sql.Timestamp checkinDate, java.lang.String avatar, java.lang.String postUri, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long serviceUserId, java.lang.String namespaceOrganizationType, java.lang.String namespaceOrganizationToken) {
 		super(com.everhomes.server.schema.tables.EhOrganizationDetails.EH_ORGANIZATION_DETAILS);
 
 		setValue(0, id);
@@ -417,5 +459,8 @@ public class EhOrganizationDetailsRecord extends org.jooq.impl.UpdatableRecordIm
 		setValue(22, stringTag3);
 		setValue(23, stringTag4);
 		setValue(24, stringTag5);
+		setValue(25, serviceUserId);
+		setValue(26, namespaceOrganizationType);
+		setValue(27, namespaceOrganizationToken);
 	}
 }

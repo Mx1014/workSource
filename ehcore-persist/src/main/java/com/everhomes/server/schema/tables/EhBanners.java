@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> {
 
-	private static final long serialVersionUID = 1367119059;
+	private static final long serialVersionUID = -1213715715;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_banners</code>
@@ -124,12 +124,17 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	/**
 	 * The column <code>ehcore.eh_banners.scene_type</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> SCENE_TYPE = createField("scene_type", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> SCENE_TYPE = createField("scene_type", org.jooq.impl.SQLDataType.VARCHAR.length(64).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_banners.apply_policy</code>. 0: default, 1: override, 2: revert 3:customized
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Byte> APPLY_POLICY = createField("apply_policy", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: default, 1: override, 2: revert 3:customized");
+
+	/**
+	 * The column <code>ehcore.eh_banners.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_banners</code> table reference

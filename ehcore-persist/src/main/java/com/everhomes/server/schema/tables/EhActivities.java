@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhActivitiesRecord> {
 
-	private static final long serialVersionUID = 25777745;
+	private static final long serialVersionUID = -2065568468;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_activities</code>
@@ -215,6 +215,111 @@ public class EhActivities extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_activities.official_flag</code>. whether it is an official activity, 0 not, 1 yes
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Byte> OFFICIAL_FLAG = createField("official_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "whether it is an official activity, 0 not, 1 yes");
+
+	/**
+	 * The column <code>ehcore.eh_activities.video_url</code>. url of video support
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> VIDEO_URL = createField("video_url", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "url of video support");
+
+	/**
+	 * The column <code>ehcore.eh_activities.is_video_support</code>. is video support
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Byte> IS_VIDEO_SUPPORT = createField("is_video_support", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "is video support");
+
+	/**
+	 * The column <code>ehcore.eh_activities.max_quantity</code>. max person quantity
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Integer> MAX_QUANTITY = createField("max_quantity", org.jooq.impl.SQLDataType.INTEGER, this, "max person quantity");
+
+	/**
+	 * The column <code>ehcore.eh_activities.content_type</code>. content type, text/rich_text
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> CONTENT_TYPE = createField("content_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "content type, text/rich_text");
+
+	/**
+	 * The column <code>ehcore.eh_activities.version</code>. version
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> VERSION = createField("version", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "version");
+
+	/**
+	 * The column <code>ehcore.eh_activities.category_id</code>. activity category id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Long> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "activity category id");
+
+	/**
+	 * The column <code>ehcore.eh_activities.forum_id</code>. activity post forum that it belongs
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Long> FORUM_ID = createField("forum_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "activity post forum that it belongs");
+
+	/**
+	 * The column <code>ehcore.eh_activities.creator_tag</code>. activity post creator tag
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> CREATOR_TAG = createField("creator_tag", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "activity post creator tag");
+
+	/**
+	 * The column <code>ehcore.eh_activities.target_tag</code>. activity post target tag
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> TARGET_TAG = createField("target_tag", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "activity post target tag");
+
+	/**
+	 * The column <code>ehcore.eh_activities.visible_region_type</code>. define the visible region type
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Byte> VISIBLE_REGION_TYPE = createField("visible_region_type", org.jooq.impl.SQLDataType.TINYINT, this, "define the visible region type");
+
+	/**
+	 * The column <code>ehcore.eh_activities.visible_region_id</code>. visible region id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Long> VISIBLE_REGION_ID = createField("visible_region_id", org.jooq.impl.SQLDataType.BIGINT, this, "visible region id");
+
+	/**
+	 * The column <code>ehcore.eh_activities.achievement</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> ACHIEVEMENT = createField("achievement", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activities.achievement_type</code>. richtext, link
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> ACHIEVEMENT_TYPE = createField("achievement_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "richtext, link");
+
+	/**
+	 * The column <code>ehcore.eh_activities.achievement_richtext_url</code>. richtext page
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> ACHIEVEMENT_RICHTEXT_URL = createField("achievement_richtext_url", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "richtext page");
+
+	/**
+	 * The column <code>ehcore.eh_activities.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activities.content_category_id</code>. content category id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Long> CONTENT_CATEGORY_ID = createField("content_category_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "content category id");
+
+	/**
+	 * The column <code>ehcore.eh_activities.signup_end_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.sql.Timestamp> SIGNUP_END_TIME = createField("signup_end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activities.all_day_flag</code>. whether it is an all day activity, 0 not, 1 yes
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Byte> ALL_DAY_FLAG = createField("all_day_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "whether it is an all day activity, 0 not, 1 yes");
+
+	/**
+	 * The column <code>ehcore.eh_activities.charge_flag</code>. 0: no charge, 1: charge
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Byte> CHARGE_FLAG = createField("charge_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0: no charge, 1: charge");
+
+	/**
+	 * The column <code>ehcore.eh_activities.charge_price</code>. charge_price
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.math.BigDecimal> CHARGE_PRICE = createField("charge_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "charge_price");
+
+	/**
+	 * The column <code>ehcore.eh_activities.wechat_signup</code>. is support wechat signup 0:no, 1:yes
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Byte> WECHAT_SIGNUP = createField("wechat_signup", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "is support wechat signup 0:no, 1:yes");
 
 	/**
 	 * Create a <code>ehcore.eh_activities</code> table reference

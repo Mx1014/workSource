@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingLots extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingLotsRecord> {
 
-	private static final long serialVersionUID = 1527594262;
+	private static final long serialVersionUID = -1100983017;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_lots</code>
@@ -75,6 +75,51 @@ public class EhParkingLots extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_parking_lots.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_parking_lots.max_request_num</code>. the max num of the request card
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.Integer> MAX_REQUEST_NUM = createField("max_request_num", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the max num of the request card");
+
+	/**
+	 * The column <code>ehcore.eh_parking_lots.tempfee_flag</code>. is support temp fee
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.Byte> TEMPFEE_FLAG = createField("tempfee_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "is support temp fee");
+
+	/**
+	 * The column <code>ehcore.eh_parking_lots.rate_flag</code>. is support add or delete rate
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.Byte> RATE_FLAG = createField("rate_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "is support add or delete rate");
+
+	/**
+	 * The column <code>ehcore.eh_parking_lots.recharge_month_count</code>. organization of address
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.Integer> RECHARGE_MONTH_COUNT = createField("recharge_month_count", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "organization of address");
+
+	/**
+	 * The column <code>ehcore.eh_parking_lots.recharge_type</code>. 1: all month, 2: number of days
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.Byte> RECHARGE_TYPE = createField("recharge_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "1: all month, 2: number of days");
+
+	/**
+	 * The column <code>ehcore.eh_parking_lots.is_support_recharge</code>. out date card recharge flag , 1: support recharge , 0: not 
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.Byte> IS_SUPPORT_RECHARGE = createField("is_support_recharge", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "out date card recharge flag , 1: support recharge , 0: not ");
+
+	/**
+	 * The column <code>ehcore.eh_parking_lots.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_parking_lots.lock_car_flag</code>.  1: support, 0: not 
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.Byte> LOCK_CAR_FLAG = createField("lock_car_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, " 1: support, 0: not ");
+
+	/**
+	 * The column <code>ehcore.eh_parking_lots.contact</code>. service contact
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.String> CONTACT = createField("contact", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "service contact");
 
 	/**
 	 * Create a <code>ehcore.eh_parking_lots</code> table reference

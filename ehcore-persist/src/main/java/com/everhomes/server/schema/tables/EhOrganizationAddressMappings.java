@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationAddressMappings extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationAddressMappingsRecord> {
 
-	private static final long serialVersionUID = 408855680;
+	private static final long serialVersionUID = -903448408;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_address_mappings</code>
@@ -55,6 +55,21 @@ public class EhOrganizationAddressMappings extends org.jooq.impl.TableImpl<com.e
 	 * The column <code>ehcore.eh_organization_address_mappings.living_status</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationAddressMappingsRecord, java.lang.Byte> LIVING_STATUS = createField("living_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_address_mappings.namespace_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationAddressMappingsRecord, java.lang.String> NAMESPACE_TYPE = createField("namespace_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_address_mappings.create_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationAddressMappingsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_address_mappings.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationAddressMappingsRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_address_mappings</code> table reference

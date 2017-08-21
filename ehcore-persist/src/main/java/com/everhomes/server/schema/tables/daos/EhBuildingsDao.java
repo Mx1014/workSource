@@ -249,4 +249,144 @@ public class EhBuildingsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByNamespaceId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.NAMESPACE_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>product_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByProductType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.PRODUCT_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>complete_date IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByCompleteDate(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.COMPLETE_DATE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>joinin_date IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByJoininDate(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.JOININ_DATE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>floor_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByFloorCount(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.FLOOR_COUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_building_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByNamespaceBuildingType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.NAMESPACE_BUILDING_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_building_token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByNamespaceBuildingToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.NAMESPACE_BUILDING_TOKEN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>traffic_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByTrafficDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.TRAFFIC_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>lift_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByLiftDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.LIFT_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>pm_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByPmDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.PM_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>parking_lot_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByParkingLotDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.PARKING_LOT_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>environmental_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByEnvironmentalDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.ENVIRONMENTAL_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>power_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByPowerDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.POWER_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>telecommunication_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByTelecommunicationDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.TELECOMMUNICATION_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>air_condition_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByAirConditionDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.AIR_CONDITION_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>security_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchBySecurityDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.SECURITY_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>fire_control_description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByFireControlDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.FIRE_CONTROL_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>general_form_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByGeneralFormId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.GENERAL_FORM_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>custom_form_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByCustomFormFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.CUSTOM_FORM_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>default_order IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByDefaultOrder(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.DEFAULT_ORDER, values);
+	}
+
+	/**
+	 * Fetch records that have <code>manager_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByManagerName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.MANAGER_NAME, values);
+	}
 }

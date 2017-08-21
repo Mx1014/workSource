@@ -11,9 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1944184051;
+	private static final long serialVersionUID = 108782339;
 
 	private java.lang.Long       id;
+	private java.lang.Long       ownerId;
+	private java.lang.String     siteType;
 	private java.lang.Long       rentalSiteId;
 	private java.lang.Byte       rentalType;
 	private java.lang.Byte       amorpm;
@@ -29,21 +31,15 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
+	private java.lang.String     ownerType;
 	private java.lang.Double     timeStep;
-	private java.math.BigDecimal originalPrice;
-	private java.lang.Byte       exclusiveFlag;
-	private java.lang.Byte       autoAssign;
-	private java.lang.Byte       multiUnit;
-	private java.lang.Byte       multiTimeInterval;
-	private java.lang.Long       resourceTypeId;
-	private java.lang.Integer    siteNumber;
-	private java.math.BigDecimal halfsitePrice;
-	private java.math.BigDecimal halfsiteOriginalPrice;
 
 	public EhRentalSiteRules() {}
 
 	public EhRentalSiteRules(
 		java.lang.Long       id,
+		java.lang.Long       ownerId,
+		java.lang.String     siteType,
 		java.lang.Long       rentalSiteId,
 		java.lang.Byte       rentalType,
 		java.lang.Byte       amorpm,
@@ -59,18 +55,12 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.Double     timeStep,
-		java.math.BigDecimal originalPrice,
-		java.lang.Byte       exclusiveFlag,
-		java.lang.Byte       autoAssign,
-		java.lang.Byte       multiUnit,
-		java.lang.Byte       multiTimeInterval,
-		java.lang.Long       resourceTypeId,
-		java.lang.Integer    siteNumber,
-		java.math.BigDecimal halfsitePrice,
-		java.math.BigDecimal halfsiteOriginalPrice
+		java.lang.String     ownerType,
+		java.lang.Double     timeStep
 	) {
 		this.id = id;
+		this.ownerId = ownerId;
+		this.siteType = siteType;
 		this.rentalSiteId = rentalSiteId;
 		this.rentalType = rentalType;
 		this.amorpm = amorpm;
@@ -86,16 +76,8 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.ownerType = ownerType;
 		this.timeStep = timeStep;
-		this.originalPrice = originalPrice;
-		this.exclusiveFlag = exclusiveFlag;
-		this.autoAssign = autoAssign;
-		this.multiUnit = multiUnit;
-		this.multiTimeInterval = multiTimeInterval;
-		this.resourceTypeId = resourceTypeId;
-		this.siteNumber = siteNumber;
-		this.halfsitePrice = halfsitePrice;
-		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
 
 	public java.lang.Long getId() {
@@ -104,6 +86,22 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
+	}
+
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public java.lang.String getSiteType() {
+		return this.siteType;
+	}
+
+	public void setSiteType(java.lang.String siteType) {
+		this.siteType = siteType;
 	}
 
 	public java.lang.Long getRentalSiteId() {
@@ -226,83 +224,19 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
+	}
+
 	public java.lang.Double getTimeStep() {
 		return this.timeStep;
 	}
 
 	public void setTimeStep(java.lang.Double timeStep) {
 		this.timeStep = timeStep;
-	}
-
-	public java.math.BigDecimal getOriginalPrice() {
-		return this.originalPrice;
-	}
-
-	public void setOriginalPrice(java.math.BigDecimal originalPrice) {
-		this.originalPrice = originalPrice;
-	}
-
-	public java.lang.Byte getExclusiveFlag() {
-		return this.exclusiveFlag;
-	}
-
-	public void setExclusiveFlag(java.lang.Byte exclusiveFlag) {
-		this.exclusiveFlag = exclusiveFlag;
-	}
-
-	public java.lang.Byte getAutoAssign() {
-		return this.autoAssign;
-	}
-
-	public void setAutoAssign(java.lang.Byte autoAssign) {
-		this.autoAssign = autoAssign;
-	}
-
-	public java.lang.Byte getMultiUnit() {
-		return this.multiUnit;
-	}
-
-	public void setMultiUnit(java.lang.Byte multiUnit) {
-		this.multiUnit = multiUnit;
-	}
-
-	public java.lang.Byte getMultiTimeInterval() {
-		return this.multiTimeInterval;
-	}
-
-	public void setMultiTimeInterval(java.lang.Byte multiTimeInterval) {
-		this.multiTimeInterval = multiTimeInterval;
-	}
-
-	public java.lang.Long getResourceTypeId() {
-		return this.resourceTypeId;
-	}
-
-	public void setResourceTypeId(java.lang.Long resourceTypeId) {
-		this.resourceTypeId = resourceTypeId;
-	}
-
-	public java.lang.Integer getSiteNumber() {
-		return this.siteNumber;
-	}
-
-	public void setSiteNumber(java.lang.Integer siteNumber) {
-		this.siteNumber = siteNumber;
-	}
-
-	public java.math.BigDecimal getHalfsitePrice() {
-		return this.halfsitePrice;
-	}
-
-	public void setHalfsitePrice(java.math.BigDecimal halfsitePrice) {
-		this.halfsitePrice = halfsitePrice;
-	}
-
-	public java.math.BigDecimal getHalfsiteOriginalPrice() {
-		return this.halfsiteOriginalPrice;
-	}
-
-	public void setHalfsiteOriginalPrice(java.math.BigDecimal halfsiteOriginalPrice) {
-		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
 }

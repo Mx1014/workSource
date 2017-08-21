@@ -151,4 +151,11 @@ public class EhPunchExceptionRequestsDao extends org.jooq.impl.DAOImpl<com.everh
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests> fetchByViewFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.VIEW_FLAG, values);
 	}
+
+	/**
+	 * Fetch records that have <code>request_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests> fetchByRequestId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_ID, values);
+	}
 }

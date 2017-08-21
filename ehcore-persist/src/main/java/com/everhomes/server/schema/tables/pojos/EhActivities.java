@@ -11,88 +11,130 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2105055402;
+	private static final long serialVersionUID = -1831748956;
 
-	private java.lang.Long     id;
-	private java.lang.String   uuid;
-	private java.lang.Integer  namespaceId;
-	private java.lang.String   subject;
-	private java.lang.String   description;
-	private java.lang.String   posterUri;
-	private java.lang.String   tag;
-	private java.lang.Double   longitude;
-	private java.lang.Double   latitude;
-	private java.lang.String   geohash;
-	private java.lang.String   location;
-	private java.lang.String   contactPerson;
-	private java.lang.String   contactNumber;
-	private java.lang.Long     startTimeMs;
-	private java.sql.Timestamp startTime;
-	private java.lang.Long     endTimeMs;
-	private java.sql.Timestamp endTime;
-	private java.lang.Byte     signupFlag;
-	private java.lang.Byte     confirmFlag;
-	private java.lang.Integer  maxAttendeeCount;
-	private java.lang.Integer  signupAttendeeCount;
-	private java.lang.Integer  signupFamilyCount;
-	private java.lang.Integer  checkinAttendeeCount;
-	private java.lang.Integer  checkinFamilyCount;
-	private java.lang.Integer  confirmAttendeeCount;
-	private java.lang.Integer  confirmFamilyCount;
-	private java.lang.Long     creatorUid;
-	private java.lang.Long     creatorFamilyId;
-	private java.lang.Long     postId;
-	private java.lang.String   groupDiscriminator;
-	private java.lang.Long     groupId;
-	private java.lang.Byte     status;
-	private java.lang.Integer  changeVersion;
-	private java.sql.Timestamp createTime;
-	private java.sql.Timestamp deleteTime;
-	private java.lang.String   guest;
-	private java.lang.String   mediaUrl;
-	private java.lang.Byte     officialFlag;
+	private java.lang.Long       id;
+	private java.lang.String     uuid;
+	private java.lang.Integer    namespaceId;
+	private java.lang.String     subject;
+	private java.lang.String     description;
+	private java.lang.String     posterUri;
+	private java.lang.String     tag;
+	private java.lang.Double     longitude;
+	private java.lang.Double     latitude;
+	private java.lang.String     geohash;
+	private java.lang.String     location;
+	private java.lang.String     contactPerson;
+	private java.lang.String     contactNumber;
+	private java.lang.Long       startTimeMs;
+	private java.sql.Timestamp   startTime;
+	private java.lang.Long       endTimeMs;
+	private java.sql.Timestamp   endTime;
+	private java.lang.Byte       signupFlag;
+	private java.lang.Byte       confirmFlag;
+	private java.lang.Integer    maxAttendeeCount;
+	private java.lang.Integer    signupAttendeeCount;
+	private java.lang.Integer    signupFamilyCount;
+	private java.lang.Integer    checkinAttendeeCount;
+	private java.lang.Integer    checkinFamilyCount;
+	private java.lang.Integer    confirmAttendeeCount;
+	private java.lang.Integer    confirmFamilyCount;
+	private java.lang.Long       creatorUid;
+	private java.lang.Long       creatorFamilyId;
+	private java.lang.Long       postId;
+	private java.lang.String     groupDiscriminator;
+	private java.lang.Long       groupId;
+	private java.lang.Byte       status;
+	private java.lang.Integer    changeVersion;
+	private java.sql.Timestamp   createTime;
+	private java.sql.Timestamp   deleteTime;
+	private java.lang.String     guest;
+	private java.lang.String     mediaUrl;
+	private java.lang.Byte       officialFlag;
+	private java.lang.String     videoUrl;
+	private java.lang.Byte       isVideoSupport;
+	private java.lang.Integer    maxQuantity;
+	private java.lang.String     contentType;
+	private java.lang.String     version;
+	private java.lang.Long       categoryId;
+	private java.lang.Long       forumId;
+	private java.lang.String     creatorTag;
+	private java.lang.String     targetTag;
+	private java.lang.Byte       visibleRegionType;
+	private java.lang.Long       visibleRegionId;
+	private java.lang.String     achievement;
+	private java.lang.String     achievementType;
+	private java.lang.String     achievementRichtextUrl;
+	private java.sql.Timestamp   updateTime;
+	private java.lang.Long       contentCategoryId;
+	private java.sql.Timestamp   signupEndTime;
+	private java.lang.Byte       allDayFlag;
+	private java.lang.Byte       chargeFlag;
+	private java.math.BigDecimal chargePrice;
+	private java.lang.Byte       wechatSignup;
 
 	public EhActivities() {}
 
 	public EhActivities(
-		java.lang.Long     id,
-		java.lang.String   uuid,
-		java.lang.Integer  namespaceId,
-		java.lang.String   subject,
-		java.lang.String   description,
-		java.lang.String   posterUri,
-		java.lang.String   tag,
-		java.lang.Double   longitude,
-		java.lang.Double   latitude,
-		java.lang.String   geohash,
-		java.lang.String   location,
-		java.lang.String   contactPerson,
-		java.lang.String   contactNumber,
-		java.lang.Long     startTimeMs,
-		java.sql.Timestamp startTime,
-		java.lang.Long     endTimeMs,
-		java.sql.Timestamp endTime,
-		java.lang.Byte     signupFlag,
-		java.lang.Byte     confirmFlag,
-		java.lang.Integer  maxAttendeeCount,
-		java.lang.Integer  signupAttendeeCount,
-		java.lang.Integer  signupFamilyCount,
-		java.lang.Integer  checkinAttendeeCount,
-		java.lang.Integer  checkinFamilyCount,
-		java.lang.Integer  confirmAttendeeCount,
-		java.lang.Integer  confirmFamilyCount,
-		java.lang.Long     creatorUid,
-		java.lang.Long     creatorFamilyId,
-		java.lang.Long     postId,
-		java.lang.String   groupDiscriminator,
-		java.lang.Long     groupId,
-		java.lang.Byte     status,
-		java.lang.Integer  changeVersion,
-		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime,
-		java.lang.String   guest,
-		java.lang.String   mediaUrl,
-		java.lang.Byte     officialFlag
+		java.lang.Long       id,
+		java.lang.String     uuid,
+		java.lang.Integer    namespaceId,
+		java.lang.String     subject,
+		java.lang.String     description,
+		java.lang.String     posterUri,
+		java.lang.String     tag,
+		java.lang.Double     longitude,
+		java.lang.Double     latitude,
+		java.lang.String     geohash,
+		java.lang.String     location,
+		java.lang.String     contactPerson,
+		java.lang.String     contactNumber,
+		java.lang.Long       startTimeMs,
+		java.sql.Timestamp   startTime,
+		java.lang.Long       endTimeMs,
+		java.sql.Timestamp   endTime,
+		java.lang.Byte       signupFlag,
+		java.lang.Byte       confirmFlag,
+		java.lang.Integer    maxAttendeeCount,
+		java.lang.Integer    signupAttendeeCount,
+		java.lang.Integer    signupFamilyCount,
+		java.lang.Integer    checkinAttendeeCount,
+		java.lang.Integer    checkinFamilyCount,
+		java.lang.Integer    confirmAttendeeCount,
+		java.lang.Integer    confirmFamilyCount,
+		java.lang.Long       creatorUid,
+		java.lang.Long       creatorFamilyId,
+		java.lang.Long       postId,
+		java.lang.String     groupDiscriminator,
+		java.lang.Long       groupId,
+		java.lang.Byte       status,
+		java.lang.Integer    changeVersion,
+		java.sql.Timestamp   createTime,
+		java.sql.Timestamp   deleteTime,
+		java.lang.String     guest,
+		java.lang.String     mediaUrl,
+		java.lang.Byte       officialFlag,
+		java.lang.String     videoUrl,
+		java.lang.Byte       isVideoSupport,
+		java.lang.Integer    maxQuantity,
+		java.lang.String     contentType,
+		java.lang.String     version,
+		java.lang.Long       categoryId,
+		java.lang.Long       forumId,
+		java.lang.String     creatorTag,
+		java.lang.String     targetTag,
+		java.lang.Byte       visibleRegionType,
+		java.lang.Long       visibleRegionId,
+		java.lang.String     achievement,
+		java.lang.String     achievementType,
+		java.lang.String     achievementRichtextUrl,
+		java.sql.Timestamp   updateTime,
+		java.lang.Long       contentCategoryId,
+		java.sql.Timestamp   signupEndTime,
+		java.lang.Byte       allDayFlag,
+		java.lang.Byte       chargeFlag,
+		java.math.BigDecimal chargePrice,
+		java.lang.Byte       wechatSignup
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -132,6 +174,27 @@ public class EhActivities implements java.io.Serializable {
 		this.guest = guest;
 		this.mediaUrl = mediaUrl;
 		this.officialFlag = officialFlag;
+		this.videoUrl = videoUrl;
+		this.isVideoSupport = isVideoSupport;
+		this.maxQuantity = maxQuantity;
+		this.contentType = contentType;
+		this.version = version;
+		this.categoryId = categoryId;
+		this.forumId = forumId;
+		this.creatorTag = creatorTag;
+		this.targetTag = targetTag;
+		this.visibleRegionType = visibleRegionType;
+		this.visibleRegionId = visibleRegionId;
+		this.achievement = achievement;
+		this.achievementType = achievementType;
+		this.achievementRichtextUrl = achievementRichtextUrl;
+		this.updateTime = updateTime;
+		this.contentCategoryId = contentCategoryId;
+		this.signupEndTime = signupEndTime;
+		this.allDayFlag = allDayFlag;
+		this.chargeFlag = chargeFlag;
+		this.chargePrice = chargePrice;
+		this.wechatSignup = wechatSignup;
 	}
 
 	public java.lang.Long getId() {
@@ -436,5 +499,173 @@ public class EhActivities implements java.io.Serializable {
 
 	public void setOfficialFlag(java.lang.Byte officialFlag) {
 		this.officialFlag = officialFlag;
+	}
+
+	public java.lang.String getVideoUrl() {
+		return this.videoUrl;
+	}
+
+	public void setVideoUrl(java.lang.String videoUrl) {
+		this.videoUrl = videoUrl;
+	}
+
+	public java.lang.Byte getIsVideoSupport() {
+		return this.isVideoSupport;
+	}
+
+	public void setIsVideoSupport(java.lang.Byte isVideoSupport) {
+		this.isVideoSupport = isVideoSupport;
+	}
+
+	public java.lang.Integer getMaxQuantity() {
+		return this.maxQuantity;
+	}
+
+	public void setMaxQuantity(java.lang.Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
+	}
+
+	public java.lang.String getContentType() {
+		return this.contentType;
+	}
+
+	public void setContentType(java.lang.String contentType) {
+		this.contentType = contentType;
+	}
+
+	public java.lang.String getVersion() {
+		return this.version;
+	}
+
+	public void setVersion(java.lang.String version) {
+		this.version = version;
+	}
+
+	public java.lang.Long getCategoryId() {
+		return this.categoryId;
+	}
+
+	public void setCategoryId(java.lang.Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public java.lang.Long getForumId() {
+		return this.forumId;
+	}
+
+	public void setForumId(java.lang.Long forumId) {
+		this.forumId = forumId;
+	}
+
+	public java.lang.String getCreatorTag() {
+		return this.creatorTag;
+	}
+
+	public void setCreatorTag(java.lang.String creatorTag) {
+		this.creatorTag = creatorTag;
+	}
+
+	public java.lang.String getTargetTag() {
+		return this.targetTag;
+	}
+
+	public void setTargetTag(java.lang.String targetTag) {
+		this.targetTag = targetTag;
+	}
+
+	public java.lang.Byte getVisibleRegionType() {
+		return this.visibleRegionType;
+	}
+
+	public void setVisibleRegionType(java.lang.Byte visibleRegionType) {
+		this.visibleRegionType = visibleRegionType;
+	}
+
+	public java.lang.Long getVisibleRegionId() {
+		return this.visibleRegionId;
+	}
+
+	public void setVisibleRegionId(java.lang.Long visibleRegionId) {
+		this.visibleRegionId = visibleRegionId;
+	}
+
+	public java.lang.String getAchievement() {
+		return this.achievement;
+	}
+
+	public void setAchievement(java.lang.String achievement) {
+		this.achievement = achievement;
+	}
+
+	public java.lang.String getAchievementType() {
+		return this.achievementType;
+	}
+
+	public void setAchievementType(java.lang.String achievementType) {
+		this.achievementType = achievementType;
+	}
+
+	public java.lang.String getAchievementRichtextUrl() {
+		return this.achievementRichtextUrl;
+	}
+
+	public void setAchievementRichtextUrl(java.lang.String achievementRichtextUrl) {
+		this.achievementRichtextUrl = achievementRichtextUrl;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public java.lang.Long getContentCategoryId() {
+		return this.contentCategoryId;
+	}
+
+	public void setContentCategoryId(java.lang.Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public java.sql.Timestamp getSignupEndTime() {
+		return this.signupEndTime;
+	}
+
+	public void setSignupEndTime(java.sql.Timestamp signupEndTime) {
+		this.signupEndTime = signupEndTime;
+	}
+
+	public java.lang.Byte getAllDayFlag() {
+		return this.allDayFlag;
+	}
+
+	public void setAllDayFlag(java.lang.Byte allDayFlag) {
+		this.allDayFlag = allDayFlag;
+	}
+
+	public java.lang.Byte getChargeFlag() {
+		return this.chargeFlag;
+	}
+
+	public void setChargeFlag(java.lang.Byte chargeFlag) {
+		this.chargeFlag = chargeFlag;
+	}
+
+	public java.math.BigDecimal getChargePrice() {
+		return this.chargePrice;
+	}
+
+	public void setChargePrice(java.math.BigDecimal chargePrice) {
+		this.chargePrice = chargePrice;
+	}
+
+	public java.lang.Byte getWechatSignup() {
+		return this.wechatSignup;
+	}
+
+	public void setWechatSignup(java.lang.Byte wechatSignup) {
+		this.wechatSignup = wechatSignup;
 	}
 }

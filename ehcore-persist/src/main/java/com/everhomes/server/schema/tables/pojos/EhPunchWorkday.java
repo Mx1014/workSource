@@ -11,37 +11,37 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchWorkday implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1731405398;
+	private static final long serialVersionUID = -1692021832;
 
 	private java.lang.Long     id;
-	private java.lang.Long     enterpriseId;
 	private java.lang.Byte     dateStatus;
 	private java.sql.Date      dateTag;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
+	private java.lang.Long     enterpriseId;
 
 	public EhPunchWorkday() {}
 
 	public EhPunchWorkday(
 		java.lang.Long     id,
-		java.lang.Long     enterpriseId,
 		java.lang.Byte     dateStatus,
 		java.sql.Date      dateTag,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime
+		java.sql.Timestamp operateTime,
+		java.lang.Long     enterpriseId
 	) {
 		this.id = id;
-		this.enterpriseId = enterpriseId;
 		this.dateStatus = dateStatus;
 		this.dateTag = dateTag;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.enterpriseId = enterpriseId;
 	}
 
 	public java.lang.Long getId() {
@@ -50,14 +50,6 @@ public class EhPunchWorkday implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
-	}
-
-	public java.lang.Long getEnterpriseId() {
-		return this.enterpriseId;
-	}
-
-	public void setEnterpriseId(java.lang.Long enterpriseId) {
-		this.enterpriseId = enterpriseId;
 	}
 
 	public java.lang.Byte getDateStatus() {
@@ -106,5 +98,13 @@ public class EhPunchWorkday implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
+	}
+
+	public java.lang.Long getEnterpriseId() {
+		return this.enterpriseId;
+	}
+
+	public void setEnterpriseId(java.lang.Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 }

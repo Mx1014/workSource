@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners implements java.io.Serializable {
 
-	private static final long serialVersionUID = 860415296;
+	private static final long serialVersionUID = -471781100;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -34,6 +34,7 @@ public class EhBanners implements java.io.Serializable {
 	private java.sql.Timestamp deleteTime;
 	private java.lang.String   sceneType;
 	private java.lang.Byte     applyPolicy;
+	private java.sql.Timestamp updateTime;
 
 	public EhBanners() {}
 
@@ -58,7 +59,8 @@ public class EhBanners implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime,
 		java.lang.String   sceneType,
-		java.lang.Byte     applyPolicy
+		java.lang.Byte     applyPolicy,
+		java.sql.Timestamp updateTime
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -81,6 +83,7 @@ public class EhBanners implements java.io.Serializable {
 		this.deleteTime = deleteTime;
 		this.sceneType = sceneType;
 		this.applyPolicy = applyPolicy;
+		this.updateTime = updateTime;
 	}
 
 	public java.lang.Long getId() {
@@ -249,5 +252,13 @@ public class EhBanners implements java.io.Serializable {
 
 	public void setApplyPolicy(java.lang.Byte applyPolicy) {
 		this.applyPolicy = applyPolicy;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
 	}
 }

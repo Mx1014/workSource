@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBuildingsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhBuildingsRecord> {
 
-	private static final long serialVersionUID = 2114311730;
+	private static final long serialVersionUID = 1730028668;
 
 	/**
 	 * Setter for <code>ehcore.eh_buildings.id</code>. id of the record
@@ -433,6 +433,286 @@ public class EhBuildingsRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 		return (java.lang.Integer) getValue(29);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_buildings.product_type</code>.
+	 */
+	public void setProductType(java.lang.String value) {
+		setValue(30, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.product_type</code>.
+	 */
+	public java.lang.String getProductType() {
+		return (java.lang.String) getValue(30);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.complete_date</code>.
+	 */
+	public void setCompleteDate(java.sql.Timestamp value) {
+		setValue(31, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.complete_date</code>.
+	 */
+	public java.sql.Timestamp getCompleteDate() {
+		return (java.sql.Timestamp) getValue(31);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.joinin_date</code>.
+	 */
+	public void setJoininDate(java.sql.Timestamp value) {
+		setValue(32, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.joinin_date</code>.
+	 */
+	public java.sql.Timestamp getJoininDate() {
+		return (java.sql.Timestamp) getValue(32);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.floor_count</code>.
+	 */
+	public void setFloorCount(java.lang.String value) {
+		setValue(33, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.floor_count</code>.
+	 */
+	public java.lang.String getFloorCount() {
+		return (java.lang.String) getValue(33);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.namespace_building_type</code>.
+	 */
+	public void setNamespaceBuildingType(java.lang.String value) {
+		setValue(34, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.namespace_building_type</code>.
+	 */
+	public java.lang.String getNamespaceBuildingType() {
+		return (java.lang.String) getValue(34);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.namespace_building_token</code>.
+	 */
+	public void setNamespaceBuildingToken(java.lang.String value) {
+		setValue(35, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.namespace_building_token</code>.
+	 */
+	public java.lang.String getNamespaceBuildingToken() {
+		return (java.lang.String) getValue(35);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.traffic_description</code>.
+	 */
+	public void setTrafficDescription(java.lang.String value) {
+		setValue(36, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.traffic_description</code>.
+	 */
+	public java.lang.String getTrafficDescription() {
+		return (java.lang.String) getValue(36);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.lift_description</code>.
+	 */
+	public void setLiftDescription(java.lang.String value) {
+		setValue(37, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.lift_description</code>.
+	 */
+	public java.lang.String getLiftDescription() {
+		return (java.lang.String) getValue(37);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.pm_description</code>.
+	 */
+	public void setPmDescription(java.lang.String value) {
+		setValue(38, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.pm_description</code>.
+	 */
+	public java.lang.String getPmDescription() {
+		return (java.lang.String) getValue(38);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.parking_lot_description</code>.
+	 */
+	public void setParkingLotDescription(java.lang.String value) {
+		setValue(39, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.parking_lot_description</code>.
+	 */
+	public java.lang.String getParkingLotDescription() {
+		return (java.lang.String) getValue(39);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.environmental_description</code>.
+	 */
+	public void setEnvironmentalDescription(java.lang.String value) {
+		setValue(40, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.environmental_description</code>.
+	 */
+	public java.lang.String getEnvironmentalDescription() {
+		return (java.lang.String) getValue(40);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.power_description</code>.
+	 */
+	public void setPowerDescription(java.lang.String value) {
+		setValue(41, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.power_description</code>.
+	 */
+	public java.lang.String getPowerDescription() {
+		return (java.lang.String) getValue(41);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.telecommunication_description</code>.
+	 */
+	public void setTelecommunicationDescription(java.lang.String value) {
+		setValue(42, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.telecommunication_description</code>.
+	 */
+	public java.lang.String getTelecommunicationDescription() {
+		return (java.lang.String) getValue(42);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.air_condition_description</code>.
+	 */
+	public void setAirConditionDescription(java.lang.String value) {
+		setValue(43, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.air_condition_description</code>.
+	 */
+	public java.lang.String getAirConditionDescription() {
+		return (java.lang.String) getValue(43);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.security_description</code>.
+	 */
+	public void setSecurityDescription(java.lang.String value) {
+		setValue(44, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.security_description</code>.
+	 */
+	public java.lang.String getSecurityDescription() {
+		return (java.lang.String) getValue(44);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.fire_control_description</code>.
+	 */
+	public void setFireControlDescription(java.lang.String value) {
+		setValue(45, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.fire_control_description</code>.
+	 */
+	public java.lang.String getFireControlDescription() {
+		return (java.lang.String) getValue(45);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.general_form_id</code>. id of eh_general_form
+	 */
+	public void setGeneralFormId(java.lang.Long value) {
+		setValue(46, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.general_form_id</code>. id of eh_general_form
+	 */
+	public java.lang.Long getGeneralFormId() {
+		return (java.lang.Long) getValue(46);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.custom_form_flag</code>. 0: not add custom field, 1: add custom field
+	 */
+	public void setCustomFormFlag(java.lang.Byte value) {
+		setValue(47, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.custom_form_flag</code>. 0: not add custom field, 1: add custom field
+	 */
+	public java.lang.Byte getCustomFormFlag() {
+		return (java.lang.Byte) getValue(47);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.default_order</code>.
+	 */
+	public void setDefaultOrder(java.lang.Long value) {
+		setValue(48, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.default_order</code>.
+	 */
+	public java.lang.Long getDefaultOrder() {
+		return (java.lang.Long) getValue(48);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_buildings.manager_name</code>.
+	 */
+	public void setManagerName(java.lang.String value) {
+		setValue(49, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_buildings.manager_name</code>.
+	 */
+	public java.lang.String getManagerName() {
+		return (java.lang.String) getValue(49);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -459,7 +739,7 @@ public class EhBuildingsRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	/**
 	 * Create a detached, initialised EhBuildingsRecord
 	 */
-	public EhBuildingsRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String name, java.lang.String aliasName, java.lang.Long managerUid, java.lang.String contact, java.lang.String address, java.lang.Double areaSize, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String description, java.lang.String posterUri, java.lang.Byte status, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Integer namespaceId) {
+	public EhBuildingsRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String name, java.lang.String aliasName, java.lang.Long managerUid, java.lang.String contact, java.lang.String address, java.lang.Double areaSize, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String description, java.lang.String posterUri, java.lang.Byte status, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Integer namespaceId, java.lang.String productType, java.sql.Timestamp completeDate, java.sql.Timestamp joininDate, java.lang.String floorCount, java.lang.String namespaceBuildingType, java.lang.String namespaceBuildingToken, java.lang.String trafficDescription, java.lang.String liftDescription, java.lang.String pmDescription, java.lang.String parkingLotDescription, java.lang.String environmentalDescription, java.lang.String powerDescription, java.lang.String telecommunicationDescription, java.lang.String airConditionDescription, java.lang.String securityDescription, java.lang.String fireControlDescription, java.lang.Long generalFormId, java.lang.Byte customFormFlag, java.lang.Long defaultOrder, java.lang.String managerName) {
 		super(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS);
 
 		setValue(0, id);
@@ -492,5 +772,25 @@ public class EhBuildingsRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 		setValue(27, stringTag4);
 		setValue(28, stringTag5);
 		setValue(29, namespaceId);
+		setValue(30, productType);
+		setValue(31, completeDate);
+		setValue(32, joininDate);
+		setValue(33, floorCount);
+		setValue(34, namespaceBuildingType);
+		setValue(35, namespaceBuildingToken);
+		setValue(36, trafficDescription);
+		setValue(37, liftDescription);
+		setValue(38, pmDescription);
+		setValue(39, parkingLotDescription);
+		setValue(40, environmentalDescription);
+		setValue(41, powerDescription);
+		setValue(42, telecommunicationDescription);
+		setValue(43, airConditionDescription);
+		setValue(44, securityDescription);
+		setValue(45, fireControlDescription);
+		setValue(46, generalFormId);
+		setValue(47, customFormFlag);
+		setValue(48, defaultOrder);
+		setValue(49, managerName);
 	}
 }

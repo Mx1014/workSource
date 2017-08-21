@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivityRoster extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> {
 
-	private static final long serialVersionUID = 407153360;
+	private static final long serialVersionUID = 1987174396;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_activity_roster</code>
@@ -107,6 +107,121 @@ public class EhActivityRoster extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "remove-deletion policy, user directly managed data");
 
 	/**
+	 * The column <code>ehcore.eh_activity_roster.phone</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.String> PHONE = createField("phone", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.real_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.String> REAL_NAME = createField("real_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.gender</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Byte> GENDER = createField("gender", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.community_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.String> COMMUNITY_NAME = createField("community_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.organization_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.String> ORGANIZATION_NAME = createField("organization_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.position</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.String> POSITION = createField("position", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.leader_flag</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Byte> LEADER_FLAG = createField("leader_flag", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.source_flag</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Byte> SOURCE_FLAG = createField("source_flag", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.email</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.String> EMAIL = createField("email", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.pay_flag</code>. 0: no pay, 1:have pay, 2:refund
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Byte> PAY_FLAG = createField("pay_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0: no pay, 1:have pay, 2:refund");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.order_no</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Long> ORDER_NO = createField("order_no", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.order_start_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.sql.Timestamp> ORDER_START_TIME = createField("order_start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.order_expire_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.sql.Timestamp> ORDER_EXPIRE_TIME = createField("order_expire_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.vendor_type</code>. 10001: alipay, 10002: wechatpay
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.String> VENDOR_TYPE = createField("vendor_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "10001: alipay, 10002: wechatpay");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.pay_amount</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.math.BigDecimal> PAY_AMOUNT = createField("pay_amount", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.pay_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.sql.Timestamp> PAY_TIME = createField("pay_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.refund_order_no</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Long> REFUND_ORDER_NO = createField("refund_order_no", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.refund_amount</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.math.BigDecimal> REFUND_AMOUNT = createField("refund_amount", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.refund_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.sql.Timestamp> REFUND_TIME = createField("refund_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.status</code>. 0: cancel, 1: reject, 2:normal
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0: cancel, 1: reject, 2:normal");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.organization_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Long> ORGANIZATION_ID = createField("organization_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.cancel_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.sql.Timestamp> CANCEL_TIME = createField("cancel_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activity_roster.order_type</code>. orderType
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.String> ORDER_TYPE = createField("order_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "orderType");
+
+	/**
 	 * Create a <code>ehcore.eh_activity_roster</code> table reference
 	 */
 	public EhActivityRoster() {
@@ -141,7 +256,7 @@ public class EhActivityRoster extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_UUID, com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_USER);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_UUID);
 	}
 
 	/**

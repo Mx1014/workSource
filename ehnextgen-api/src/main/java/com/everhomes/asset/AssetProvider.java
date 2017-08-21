@@ -1,10 +1,11 @@
 package com.everhomes.asset;
 
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,4 +39,38 @@ public interface AssetProvider {
     List<AssetBill> listUnpaidBills(String tenantType, Long tenantId, Long addressId);
 
     AssetBill findAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr, Long tenantId, String tenantType, Long addressId);
+
+    List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status);
+
+    List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize);
+
+    List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
+
+    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill);
+
+    ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
+
+    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType);
+
+    ShowCreateBillDTO showCreateBill(Long billGroupId);
+
+    ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr);
+
+    void creatPropertyBill(List<AddressIdAndName> addressIdAndNames, BillGroupDTO billGroupDTO, String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType);
+
+    ListBillDetailVO listBillDetail(Long billId);
+
+    List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType);
+
+    List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId);
+
+    List<BillStaticsDTO> listBillStaticsByCommunities(Integer currentNamespaceId);
+
+    void modifyBillStatus(Long billId);
+
+    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId);
+
+    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId);
+
+    void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId,String targetName);
 }

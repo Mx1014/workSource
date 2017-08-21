@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = -557001515;
+	private static final long serialVersionUID = -1769559833;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -48,6 +48,8 @@ public class EhGroups implements java.io.Serializable {
 	private java.sql.Timestamp deleteTime;
 	private java.lang.Byte     visibleRegionType;
 	private java.lang.Long     visibleRegionId;
+	private java.lang.Byte     approvalStatus;
+	private java.lang.Long     operatorUid;
 
 	public EhGroups() {}
 
@@ -86,7 +88,9 @@ public class EhGroups implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime,
 		java.lang.Byte     visibleRegionType,
-		java.lang.Long     visibleRegionId
+		java.lang.Long     visibleRegionId,
+		java.lang.Byte     approvalStatus,
+		java.lang.Long     operatorUid
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -123,6 +127,8 @@ public class EhGroups implements java.io.Serializable {
 		this.deleteTime = deleteTime;
 		this.visibleRegionType = visibleRegionType;
 		this.visibleRegionId = visibleRegionId;
+		this.approvalStatus = approvalStatus;
+		this.operatorUid = operatorUid;
 	}
 
 	public java.lang.Long getId() {
@@ -403,5 +409,21 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setVisibleRegionId(java.lang.Long visibleRegionId) {
 		this.visibleRegionId = visibleRegionId;
+	}
+
+	public java.lang.Byte getApprovalStatus() {
+		return this.approvalStatus;
+	}
+
+	public void setApprovalStatus(java.lang.Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+	public java.lang.Long getOperatorUid() {
+		return this.operatorUid;
+	}
+
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
 	}
 }

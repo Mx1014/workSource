@@ -76,13 +76,6 @@ public class EhRechargeInfoDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch records that have <code>card_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByCardType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.CARD_TYPE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>recharge_userid IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByRechargeUserid(java.lang.Long... values) {
@@ -157,5 +150,12 @@ public class EhRechargeInfoDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByCommunityId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.COMMUNITY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>card_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByCardType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.CARD_TYPE, values);
 	}
 }

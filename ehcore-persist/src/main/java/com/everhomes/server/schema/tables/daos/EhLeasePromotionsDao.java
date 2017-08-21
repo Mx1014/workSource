@@ -158,4 +158,95 @@ public class EhLeasePromotionsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByEnterTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.ENTER_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByNamespaceType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.NAMESPACE_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByNamespaceToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.NAMESPACE_TOKEN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>enter_time_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByEnterTimeFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.ENTER_TIME_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>address_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByAddressId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.ADDRESS_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>orientation IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByOrientation(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.ORIENTATION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>rent_amount IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByRentAmount(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.RENT_AMOUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>issuer_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByIssuerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.ISSUER_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>longitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByLongitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.LONGITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>latitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByLatitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.LATITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>address IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByAddress(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.ADDRESS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>general_form_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByGeneralFormId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.GENERAL_FORM_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>custom_form_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByCustomFormFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.CUSTOM_FORM_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>default_order IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByDefaultOrder(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.DEFAULT_ORDER, values);
+	}
 }

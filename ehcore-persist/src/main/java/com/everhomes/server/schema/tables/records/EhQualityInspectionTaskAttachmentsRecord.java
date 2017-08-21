@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTaskAttachmentsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord> implements org.jooq.Record6<java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1186260375;
+	private static final long serialVersionUID = 1691452979;
 
 	/**
 	 * Setter for <code>ehcore.eh_quality_inspection_task_attachments.id</code>. id of the record
@@ -28,14 +28,14 @@ public class EhQualityInspectionTaskAttachmentsRecord extends org.jooq.impl.Upda
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_quality_inspection_task_attachments.record_id</code>. refernece to the id of eh_quality_inspection_task_records
+	 * Setter for <code>ehcore.eh_quality_inspection_task_attachments.record_id</code>. refernece to the id of eh_quality_inspection_tasks
 	 */
 	public void setRecordId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_quality_inspection_task_attachments.record_id</code>. refernece to the id of eh_quality_inspection_task_records
+	 * Getter for <code>ehcore.eh_quality_inspection_task_attachments.record_id</code>. refernece to the id of eh_quality_inspection_tasks
 	 */
 	public java.lang.Long getRecordId() {
 		return (java.lang.Long) getValue(1);

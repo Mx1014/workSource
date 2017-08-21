@@ -69,6 +69,8 @@ public class SearchUtils {
     public static final String CONTRACT= "contract";
     public static final String ENTERPRISE_CUSTOMER= "enterpriseCustomer";
 
+    public static final String UNIONGROUP_DETAILS= "uniongroupDetails";
+
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2070284580;
+	private static final long serialVersionUID = -1319657416;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
@@ -29,6 +29,7 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
 	private java.lang.Byte     viewFlag;
+	private java.lang.Long     requestId;
 
 	public EhPunchExceptionRequests() {}
 
@@ -48,7 +49,8 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime,
-		java.lang.Byte     viewFlag
+		java.lang.Byte     viewFlag,
+		java.lang.Long     requestId
 	) {
 		this.id = id;
 		this.userId = userId;
@@ -66,6 +68,7 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
 		this.viewFlag = viewFlag;
+		this.requestId = requestId;
 	}
 
 	public java.lang.Long getId() {
@@ -194,5 +197,13 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 
 	public void setViewFlag(java.lang.Byte viewFlag) {
 		this.viewFlag = viewFlag;
+	}
+
+	public java.lang.Long getRequestId() {
+		return this.requestId;
+	}
+
+	public void setRequestId(java.lang.Long requestId) {
+		this.requestId = requestId;
 	}
 }

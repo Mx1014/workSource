@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionStandards extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord> {
 
-	private static final long serialVersionUID = 1090346101;
+	private static final long serialVersionUID = 620442473;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_standards</code>
@@ -50,11 +50,6 @@ public class EhQualityInspectionStandards extends org.jooq.impl.TableImpl<com.ev
 	 * The column <code>ehcore.eh_quality_inspection_standards.name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_quality_inspection_standards.category_id</code>. refernece to the id of eh_categories
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord, java.lang.Long> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "refernece to the id of eh_categories");
 
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_standards.repeat_setting_id</code>. refernece to the id of eh_repeat_settings
@@ -100,6 +95,36 @@ public class EhQualityInspectionStandards extends org.jooq.impl.TableImpl<com.ev
 	 * The column <code>ehcore.eh_quality_inspection_standards.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy. historic data may be useful");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_standards.target_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_standards.target_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord, java.lang.String> TARGET_TYPE = createField("target_type", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_standards.review_result</code>. 0:none, 1: qualified, 2: unqualified
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord, java.lang.Byte> REVIEW_RESULT = createField("review_result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0:none, 1: qualified, 2: unqualified");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_standards.reviewer_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord, java.lang.Long> REVIEWER_UID = createField("reviewer_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_standards.review_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord, java.sql.Timestamp> REVIEW_TIME = createField("review_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_standards.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_quality_inspection_standards</code> table reference

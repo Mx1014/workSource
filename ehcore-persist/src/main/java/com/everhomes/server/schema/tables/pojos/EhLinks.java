@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLinks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1393386170;
+	private static final long serialVersionUID = 1380261184;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
@@ -27,6 +27,7 @@ public class EhLinks implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     deleterUid;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.String   richContent;
 
 	public EhLinks() {}
 
@@ -44,7 +45,8 @@ public class EhLinks implements java.io.Serializable {
 		java.lang.Byte     status,
 		java.sql.Timestamp createTime,
 		java.lang.Long     deleterUid,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.String   richContent
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
@@ -60,6 +62,7 @@ public class EhLinks implements java.io.Serializable {
 		this.createTime = createTime;
 		this.deleterUid = deleterUid;
 		this.deleteTime = deleteTime;
+		this.richContent = richContent;
 	}
 
 	public java.lang.Long getId() {
@@ -172,5 +175,13 @@ public class EhLinks implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.String getRichContent() {
+		return this.richContent;
+	}
+
+	public void setRichContent(java.lang.String richContent) {
+		this.richContent = richContent;
 	}
 }

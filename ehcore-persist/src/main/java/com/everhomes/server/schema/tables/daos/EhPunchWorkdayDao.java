@@ -48,13 +48,6 @@ public class EhPunchWorkdayDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch records that have <code>enterprise_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchWorkday> fetchByEnterpriseId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY.ENTERPRISE_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>date_status IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchWorkday> fetchByDateStatus(java.lang.Byte... values) {
@@ -94,5 +87,12 @@ public class EhPunchWorkdayDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchWorkday> fetchByOperateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY.OPERATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>enterprise_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchWorkday> fetchByEnterpriseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY.ENTERPRISE_ID, values);
 	}
 }

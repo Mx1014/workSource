@@ -69,6 +69,13 @@ public class EhQualityInspectionStandardGroupMapDao extends org.jooq.impl.DAOImp
 	}
 
 	/**
+	 * Fetch records that have <code>inspector_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap> fetchByInspectorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandardGroupMap.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.INSPECTOR_UID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>create_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap> fetchByCreateTime(java.sql.Timestamp... values) {
@@ -76,9 +83,9 @@ public class EhQualityInspectionStandardGroupMapDao extends org.jooq.impl.DAOImp
 	}
 
 	/**
-	 * Fetch records that have <code>inspector_uid IN (values)</code>
+	 * Fetch records that have <code>position_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap> fetchByInspectorUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandardGroupMap.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.INSPECTOR_UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap> fetchByPositionId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionStandardGroupMap.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.POSITION_ID, values);
 	}
 }

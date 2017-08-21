@@ -1425,6 +1425,26 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
+	public List<EquipmentStandardMap> findEquipmentStandardMap(Long standardId, Long targetId, String targetType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standardId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_ID.eq(targetId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_TYPE.eq(targetType));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
+
+		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+
+		return result;
+	}
+
+	@Override
 	public void createEquipmentInspectionItemResults(
 			EquipmentInspectionItemResults result) {
 

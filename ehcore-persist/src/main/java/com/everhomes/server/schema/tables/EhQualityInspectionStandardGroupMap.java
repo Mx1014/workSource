@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionStandardGroupMap extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord> {
 
-	private static final long serialVersionUID = 1450041433;
+	private static final long serialVersionUID = 854677133;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_standard_group_map</code>
@@ -47,14 +47,19 @@ public class EhQualityInspectionStandardGroupMap extends org.jooq.impl.TableImpl
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "refernece to the id of eh_organizations");
 
 	/**
+	 * The column <code>ehcore.eh_quality_inspection_standard_group_map.inspector_uid</code>. refernece to the id of eh_organizations
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord, java.lang.Long> INSPECTOR_UID = createField("inspector_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "refernece to the id of eh_organizations");
+
+	/**
 	 * The column <code>ehcore.eh_quality_inspection_standard_group_map.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_standard_group_map.inspector_uid</code>. refernece to the id of eh_organizations
+	 * The column <code>ehcore.eh_quality_inspection_standard_group_map.position_id</code>. refernece to the id of eh_organization_job_positions
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord, java.lang.Long> INSPECTOR_UID = createField("inspector_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "refernece to the id of eh_organizations");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord, java.lang.Long> POSITION_ID = createField("position_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "refernece to the id of eh_organization_job_positions");
 
 	/**
 	 * Create a <code>ehcore.eh_quality_inspection_standard_group_map</code> table reference

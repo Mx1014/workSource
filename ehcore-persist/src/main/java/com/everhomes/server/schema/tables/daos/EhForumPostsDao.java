@@ -403,4 +403,39 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByOfficialFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.OFFICIAL_FLAG, values);
 	}
+
+	/**
+	 * Fetch records that have <code>media_display_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByMediaDisplayFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.MEDIA_DISPLAY_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>max_quantity IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByMaxQuantity(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.MAX_QUANTITY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>activity_category_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByActivityCategoryId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.ACTIVITY_CATEGORY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>activity_content_category_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByActivityContentCategoryId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.ACTIVITY_CONTENT_CATEGORY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>parent_comment_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByParentCommentId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.PARENT_COMMENT_ID, values);
+	}
 }

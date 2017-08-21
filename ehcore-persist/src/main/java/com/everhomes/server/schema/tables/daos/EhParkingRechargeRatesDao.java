@@ -109,4 +109,11 @@ public class EhParkingRechargeRatesDao extends org.jooq.impl.DAOImpl<com.everhom
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeRates.EH_PARKING_RECHARGE_RATES.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>card_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates> fetchByCardType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeRates.EH_PARKING_RECHARGE_RATES.CARD_TYPE, values);
+	}
 }

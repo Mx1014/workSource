@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNews implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1979163714;
+	private static final long serialVersionUID = 1888682826;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -37,6 +37,8 @@ public class EhNews implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     deleterUid;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.Long     categoryId;
+	private java.lang.String   visibleType;
 
 	public EhNews() {}
 
@@ -64,7 +66,9 @@ public class EhNews implements java.io.Serializable {
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     deleterUid,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.Long     categoryId,
+		java.lang.String   visibleType
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -90,6 +94,8 @@ public class EhNews implements java.io.Serializable {
 		this.createTime = createTime;
 		this.deleterUid = deleterUid;
 		this.deleteTime = deleteTime;
+		this.categoryId = categoryId;
+		this.visibleType = visibleType;
 	}
 
 	public java.lang.Long getId() {
@@ -282,5 +288,21 @@ public class EhNews implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.Long getCategoryId() {
+		return this.categoryId;
+	}
+
+	public void setCategoryId(java.lang.Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public java.lang.String getVisibleType() {
+		return this.visibleType;
+	}
+
+	public void setVisibleType(java.lang.String visibleType) {
+		this.visibleType = visibleType;
 	}
 }

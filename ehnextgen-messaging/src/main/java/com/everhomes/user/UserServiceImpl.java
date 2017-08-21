@@ -29,6 +29,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhGroupMemberLogs;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -151,48 +156,15 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.*;
-import com.everhomes.util.*;
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.FamilyButtonStatusType;
@@ -273,7 +245,6 @@ import com.everhomes.rest.user.admin.SendUserTestMailCommand;
 import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
 import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
 import com.everhomes.rest.user.admin.UsersWithAddrResponse;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsBlackList;
 import com.everhomes.sms.SmsBlackListCreateType;
 import com.everhomes.sms.SmsBlackListProvider;
@@ -1350,6 +1321,7 @@ public class UserServiceImpl implements UserService {
 		foundLogin.setAppVersion(appVersion);
 		String hkeyLogin = String.valueOf(ref.getNextLoginId());
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		LOGGER.debug("createLogin|hId = "+hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
 
 		if(isNew && deviceIdentifier != null && (!deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name()))) {
@@ -1393,6 +1365,7 @@ public class UserServiceImpl implements UserService {
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 
 			LOGGER.debug("Unregister login connection for login: {}", login.toString());
+			LOGGER.debug("unregisterLoginConnection|hId = "+hkeyLogin);
 			accessor.putMapValueObject(hkeyLogin, login);
 		} 
 	}
@@ -1515,6 +1488,7 @@ public class UserServiceImpl implements UserService {
 		if(login != null) {
 			login.setLoginBorderId(null);
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+			LOGGER.debug("unregisterLoginConnection|hId = "+hkeyLogin);
 			accessor.putMapValueObject(hkeyLogin, login);
 
 			if(userLogin.getLoginBorderId() != null) {
@@ -1530,11 +1504,16 @@ public class UserServiceImpl implements UserService {
 		String userKey = NameMapper.getCacheKey("user", login.getUserId(), null);
 		String hkeyLogin = String.valueOf(login.getLoginId());
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		LOGGER.debug("saveLogin|hId = "+hkeyLogin);
 		accessor.putMapValueObject(hkeyLogin, login);
 	}
 
 	@Override
 	public List<UserLogin> listUserLogins(long uid) {
+	    if(uid == 0) {
+	        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "uid=0 not found");
+	    }
+	    
 		List<UserLogin> logins = new ArrayList<>();
 		String userKey = NameMapper.getCacheKey("user", uid, null);
 
@@ -1543,6 +1522,8 @@ public class UserServiceImpl implements UserService {
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
 		Object maxLoginId = accessor.getMapValueObject(hkeyIndex);
 		if(maxLoginId != null) {
+			LOGGER.debug("maxLoginId: "+maxLoginId);
+			LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
 			for(int i = 1; i <= Integer.parseInt(maxLoginId.toString()); i++) {
 				String hkeyLogin = String.valueOf(i);
 				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
@@ -4407,6 +4388,7 @@ public class UserServiceImpl implements UserService {
 			else {
 				SceneContactV2DTO dto = new SceneContactV2DTO();
 				dto.setUserId(detail.getTargetId());
+				dto.setTargetType(detail.getTargetType());
 				dto.setDetailId(detail.getId());
 				if (!StringUtils.isEmpty(detail.getAvatar()))
 					dto.setContactAvatar(detail.getAvatar());
@@ -4417,7 +4399,7 @@ public class UserServiceImpl implements UserService {
 				dto.setContactToken(detail.getContactToken());
 				if (!StringUtils.isEmpty(detail.getEmail()))
 					dto.setEmail(detail.getEmail());
-				getRelevantContactEnterprise(dto, detail.getOrganizationId());
+				getRelevantContactEnterpriseWithAvatar(dto, detail.getOrganizationId());
 				return dto;
 			}
 		}
@@ -4442,7 +4424,7 @@ public class UserServiceImpl implements UserService {
 		}
 	} 
 
-    private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
+    private void getRelevantContactEnterpriseWithAvatar(SceneContactV2DTO dto, Long organizationId) {
 
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
@@ -4472,6 +4454,14 @@ public class UserServiceImpl implements UserService {
         //  设置岗位
         dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
 
+
+        //  设置头像(由于迁移数据detail表中可能没有头像信息，故由原始的组织架构接口获得)
+        if (OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())) {
+            User user = userProvider.findUserById(dto.getUserId());
+            if (null != user) {
+                dto.setContactAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+            }
+        }
     }
 	
 	@Override
@@ -4487,4 +4477,50 @@ public class UserServiceImpl implements UserService {
 		}
 		return response;
 	}
+
+	@Override
+	public List<String[]> listBuildingAndApartmentById(Long uid) {
+	    List<String[]> list = new ArrayList<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhGroupMemberLogs t1 = Tables.EH_GROUP_MEMBER_LOGS.as("t1");
+        EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
+//        EhCommunities t3 = Tables.EH_COMMUNITIES.as("t3");
+//        context.select(t2.BUILDING_NAME,t2.APARTMENT_NAME,t3.NAME)
+        context.select(t2.BUILDING_NAME,t2.APARTMENT_NAME)
+//				.from(t1,t2,t3)
+				.from(t1,t2)
+				.where(t1.MEMBER_ID.eq(uid))
+                .and(t1.ADDRESS_ID.eq(t2.ID))
+//                .and(t2.COMMUNITY_ID.eq(t3.ID))
+                .fetch(r -> {
+//                    String[] v = new String[3];
+                    String[] v = new String[2];
+//                    v[0] = r.getValue(t3.NAME);
+                    v[0] = r.getValue(t2.BUILDING_NAME);
+                    v[1] = r.getValue(t2.APARTMENT_NAME);
+                    list.add(v);
+                    return null;
+                });
+		return list;
+	}
+
+	@Override
+	public TargetDTO findTargetByNameAndAddress(String targetName, String buildingName, String apartmentName, Long communityId, String tel) {
+        List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
+        List<Long> ids = new ArrayList<>();
+        for (int i = 0; i < addressByPossibleName.size(); i++){
+            ids.add(addressByPossibleName.get(i).getAddressId());
+        }
+        //想在eh_user中找
+        List<TargetDTO> users = userProvider.findUesrIdByNameAndAddressId(targetName,ids,tel);
+		//再在eh_organization中找
+        List<TargetDTO> organizations = organizationProvider.findOrganizationIdByNameAndAddressId(targetName,ids);
+        if(users.size() == 1 && organizations.size() == 0) {
+            return users.get(0);
+        }else if(organizations.size() == 1 && users.size() == 0) {
+            return organizations.get(0);
+        }
+        return null;
+	}
+
 }

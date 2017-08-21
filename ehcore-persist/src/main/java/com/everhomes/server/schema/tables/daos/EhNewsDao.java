@@ -207,4 +207,18 @@ public class EhNewsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schema
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.DELETE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>category_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByCategoryId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.CATEGORY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>visible_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByVisibleType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.VISIBLE_TYPE, values);
+	}
 }

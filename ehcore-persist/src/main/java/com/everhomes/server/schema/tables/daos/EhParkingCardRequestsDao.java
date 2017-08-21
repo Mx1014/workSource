@@ -144,4 +144,81 @@ public class EhParkingCardRequestsDao extends org.jooq.impl.DAOImpl<com.everhome
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>car_brand IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByCarBrand(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.CAR_BRAND, values);
+	}
+
+	/**
+	 * Fetch records that have <code>car_color IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByCarColor(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.CAR_COLOR, values);
+	}
+
+	/**
+	 * Fetch records that have <code>car_serie_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByCarSerieName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.CAR_SERIE_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>car_serie_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByCarSerieId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.CAR_SERIE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>flow_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByFlowId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.FLOW_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>flow_version IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByFlowVersion(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.FLOW_VERSION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>flow_case_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByFlowCaseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.FLOW_CASE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>audit_succeed_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByAuditSucceedTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.AUDIT_SUCCEED_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>process_succeed_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByProcessSucceedTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.PROCESS_SUCCEED_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>open_card_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByOpenCardTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.OPEN_CARD_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>cancel_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByCancelTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.CANCEL_TIME, values);
+	}
 }

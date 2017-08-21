@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalRulesRecord> {
 
-	private static final long serialVersionUID = -1176848678;
+	private static final long serialVersionUID = 1424596232;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.id</code>. id
@@ -28,28 +28,28 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_rules.owner_id</code>.     community id or organization id 
+	 * Setter for <code>ehcore.eh_rental_rules.owner_id</code>. community id or organization id
 	 */
 	public void setOwnerId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_rules.owner_id</code>.     community id or organization id 
+	 * Getter for <code>ehcore.eh_rental_rules.owner_id</code>. community id or organization id
 	 */
 	public java.lang.Long getOwnerId() {
 		return (java.lang.Long) getValue(1);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_rules.site_type</code>. rule for what function 
+	 * Setter for <code>ehcore.eh_rental_rules.site_type</code>. rule for what function
 	 */
 	public void setSiteType(java.lang.String value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_rules.site_type</code>. rule for what function 
+	 * Getter for <code>ehcore.eh_rental_rules.site_type</code>. rule for what function
 	 */
 	public java.lang.String getSiteType() {
 		return (java.lang.String) getValue(2);
@@ -126,14 +126,14 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_rules.refund_flag</code>. 0 allow refund , 1 can not refund 
+	 * Setter for <code>ehcore.eh_rental_rules.refund_flag</code>. 0: allow refund, 1: can not refund
 	 */
 	public void setRefundFlag(java.lang.Byte value) {
 		setValue(8, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_rules.refund_flag</code>. 0 allow refund , 1 can not refund 
+	 * Getter for <code>ehcore.eh_rental_rules.refund_flag</code>. 0: allow refund, 1: can not refund
 	 */
 	public java.lang.Byte getRefundFlag() {
 		return (java.lang.Byte) getValue(8);
@@ -434,28 +434,28 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_rules.owner_type</code>. owner type : community ; organization
+	 * Setter for <code>ehcore.eh_rental_rules.owner_type</code>. owner type: community, organization
 	 */
 	public void setOwnerType(java.lang.String value) {
 		setValue(30, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_rules.owner_type</code>. owner type : community ; organization
+	 * Getter for <code>ehcore.eh_rental_rules.owner_type</code>. owner type: community, organization
 	 */
 	public java.lang.String getOwnerType() {
 		return (java.lang.String) getValue(30);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
+	 * Setter for <code>ehcore.eh_rental_rules.rental_type</code>. 0: as hour:min, 1-as half day 2-as day
 	 */
 	public void setRentalType(java.lang.Byte value) {
 		setValue(31, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
+	 * Getter for <code>ehcore.eh_rental_rules.rental_type</code>. 0: as hour:min, 1-as half day 2-as day
 	 */
 	public java.lang.Byte getRentalType() {
 		return (java.lang.Byte) getValue(31);

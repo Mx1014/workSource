@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLeasePromotions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord> {
 
-	private static final long serialVersionUID = -1492500668;
+	private static final long serialVersionUID = -411990984;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_lease_promotions</code>
@@ -59,7 +59,7 @@ public class EhLeasePromotions extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_lease_promotions.rent_areas</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> RENT_AREAS = createField("rent_areas", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> RENT_AREAS = createField("rent_areas", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_lease_promotions.description</code>.
@@ -110,6 +110,71 @@ public class EhLeasePromotions extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_lease_promotions.enter_time</code>. enter time
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.sql.Timestamp> ENTER_TIME = createField("enter_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "enter time");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.namespace_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> NAMESPACE_TYPE = createField("namespace_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.namespace_token</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> NAMESPACE_TOKEN = createField("namespace_token", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.enter_time_flag</code>. 0: disabled, 1: enabled
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Byte> ENTER_TIME_FLAG = createField("enter_time_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: disabled, 1: enabled");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.address_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.orientation</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> ORIENTATION = createField("orientation", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.rent_amount</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.math.BigDecimal> RENT_AMOUNT = createField("rent_amount", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.issuer_type</code>. 1: organization 2: normal_user
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> ISSUER_TYPE = createField("issuer_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "1: organization 2: normal_user");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.longitude</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Double> LONGITUDE = createField("longitude", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.latitude</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Double> LATITUDE = createField("latitude", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.address</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.general_form_id</code>. id of eh_general_form
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Long> GENERAL_FORM_ID = createField("general_form_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "id of eh_general_form");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.custom_form_flag</code>. 0: not add custom field, 1: add custom field
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Byte> CUSTOM_FORM_FLAG = createField("custom_form_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: not add custom field, 1: add custom field");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.default_order</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Long> DEFAULT_ORDER = createField("default_order", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_lease_promotions</code> table reference

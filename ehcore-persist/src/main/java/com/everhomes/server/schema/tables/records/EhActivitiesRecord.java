@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhActivitiesRecord> {
 
-	private static final long serialVersionUID = -762894764;
+	private static final long serialVersionUID = -514143031;
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.id</code>. id of the record
@@ -545,6 +545,300 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 		return (java.lang.Byte) getValue(37);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_activities.video_url</code>. url of video support
+	 */
+	public void setVideoUrl(java.lang.String value) {
+		setValue(38, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.video_url</code>. url of video support
+	 */
+	public java.lang.String getVideoUrl() {
+		return (java.lang.String) getValue(38);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.is_video_support</code>. is video support
+	 */
+	public void setIsVideoSupport(java.lang.Byte value) {
+		setValue(39, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.is_video_support</code>. is video support
+	 */
+	public java.lang.Byte getIsVideoSupport() {
+		return (java.lang.Byte) getValue(39);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.max_quantity</code>. max person quantity
+	 */
+	public void setMaxQuantity(java.lang.Integer value) {
+		setValue(40, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.max_quantity</code>. max person quantity
+	 */
+	public java.lang.Integer getMaxQuantity() {
+		return (java.lang.Integer) getValue(40);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.content_type</code>. content type, text/rich_text
+	 */
+	public void setContentType(java.lang.String value) {
+		setValue(41, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.content_type</code>. content type, text/rich_text
+	 */
+	public java.lang.String getContentType() {
+		return (java.lang.String) getValue(41);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.version</code>. version
+	 */
+	public void setVersion(java.lang.String value) {
+		setValue(42, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.version</code>. version
+	 */
+	public java.lang.String getVersion() {
+		return (java.lang.String) getValue(42);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.category_id</code>. activity category id
+	 */
+	public void setCategoryId(java.lang.Long value) {
+		setValue(43, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.category_id</code>. activity category id
+	 */
+	public java.lang.Long getCategoryId() {
+		return (java.lang.Long) getValue(43);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.forum_id</code>. activity post forum that it belongs
+	 */
+	public void setForumId(java.lang.Long value) {
+		setValue(44, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.forum_id</code>. activity post forum that it belongs
+	 */
+	public java.lang.Long getForumId() {
+		return (java.lang.Long) getValue(44);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.creator_tag</code>. activity post creator tag
+	 */
+	public void setCreatorTag(java.lang.String value) {
+		setValue(45, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.creator_tag</code>. activity post creator tag
+	 */
+	public java.lang.String getCreatorTag() {
+		return (java.lang.String) getValue(45);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.target_tag</code>. activity post target tag
+	 */
+	public void setTargetTag(java.lang.String value) {
+		setValue(46, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.target_tag</code>. activity post target tag
+	 */
+	public java.lang.String getTargetTag() {
+		return (java.lang.String) getValue(46);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.visible_region_type</code>. define the visible region type
+	 */
+	public void setVisibleRegionType(java.lang.Byte value) {
+		setValue(47, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.visible_region_type</code>. define the visible region type
+	 */
+	public java.lang.Byte getVisibleRegionType() {
+		return (java.lang.Byte) getValue(47);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.visible_region_id</code>. visible region id
+	 */
+	public void setVisibleRegionId(java.lang.Long value) {
+		setValue(48, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.visible_region_id</code>. visible region id
+	 */
+	public java.lang.Long getVisibleRegionId() {
+		return (java.lang.Long) getValue(48);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.achievement</code>.
+	 */
+	public void setAchievement(java.lang.String value) {
+		setValue(49, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.achievement</code>.
+	 */
+	public java.lang.String getAchievement() {
+		return (java.lang.String) getValue(49);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.achievement_type</code>. richtext, link
+	 */
+	public void setAchievementType(java.lang.String value) {
+		setValue(50, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.achievement_type</code>. richtext, link
+	 */
+	public java.lang.String getAchievementType() {
+		return (java.lang.String) getValue(50);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.achievement_richtext_url</code>. richtext page
+	 */
+	public void setAchievementRichtextUrl(java.lang.String value) {
+		setValue(51, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.achievement_richtext_url</code>. richtext page
+	 */
+	public java.lang.String getAchievementRichtextUrl() {
+		return (java.lang.String) getValue(51);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.update_time</code>.
+	 */
+	public void setUpdateTime(java.sql.Timestamp value) {
+		setValue(52, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.update_time</code>.
+	 */
+	public java.sql.Timestamp getUpdateTime() {
+		return (java.sql.Timestamp) getValue(52);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.content_category_id</code>. content category id
+	 */
+	public void setContentCategoryId(java.lang.Long value) {
+		setValue(53, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.content_category_id</code>. content category id
+	 */
+	public java.lang.Long getContentCategoryId() {
+		return (java.lang.Long) getValue(53);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.signup_end_time</code>.
+	 */
+	public void setSignupEndTime(java.sql.Timestamp value) {
+		setValue(54, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.signup_end_time</code>.
+	 */
+	public java.sql.Timestamp getSignupEndTime() {
+		return (java.sql.Timestamp) getValue(54);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.all_day_flag</code>. whether it is an all day activity, 0 not, 1 yes
+	 */
+	public void setAllDayFlag(java.lang.Byte value) {
+		setValue(55, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.all_day_flag</code>. whether it is an all day activity, 0 not, 1 yes
+	 */
+	public java.lang.Byte getAllDayFlag() {
+		return (java.lang.Byte) getValue(55);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.charge_flag</code>. 0: no charge, 1: charge
+	 */
+	public void setChargeFlag(java.lang.Byte value) {
+		setValue(56, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.charge_flag</code>. 0: no charge, 1: charge
+	 */
+	public java.lang.Byte getChargeFlag() {
+		return (java.lang.Byte) getValue(56);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.charge_price</code>. charge_price
+	 */
+	public void setChargePrice(java.math.BigDecimal value) {
+		setValue(57, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.charge_price</code>. charge_price
+	 */
+	public java.math.BigDecimal getChargePrice() {
+		return (java.math.BigDecimal) getValue(57);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.wechat_signup</code>. is support wechat signup 0:no, 1:yes
+	 */
+	public void setWechatSignup(java.lang.Byte value) {
+		setValue(58, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.wechat_signup</code>. is support wechat signup 0:no, 1:yes
+	 */
+	public java.lang.Byte getWechatSignup() {
+		return (java.lang.Byte) getValue(58);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -571,7 +865,7 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhActivitiesRecord
 	 */
-	public EhActivitiesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Integer namespaceId, java.lang.String subject, java.lang.String description, java.lang.String posterUri, java.lang.String tag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String location, java.lang.String contactPerson, java.lang.String contactNumber, java.lang.Long startTimeMs, java.sql.Timestamp startTime, java.lang.Long endTimeMs, java.sql.Timestamp endTime, java.lang.Byte signupFlag, java.lang.Byte confirmFlag, java.lang.Integer maxAttendeeCount, java.lang.Integer signupAttendeeCount, java.lang.Integer signupFamilyCount, java.lang.Integer checkinAttendeeCount, java.lang.Integer checkinFamilyCount, java.lang.Integer confirmAttendeeCount, java.lang.Integer confirmFamilyCount, java.lang.Long creatorUid, java.lang.Long creatorFamilyId, java.lang.Long postId, java.lang.String groupDiscriminator, java.lang.Long groupId, java.lang.Byte status, java.lang.Integer changeVersion, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.String guest, java.lang.String mediaUrl, java.lang.Byte officialFlag) {
+	public EhActivitiesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Integer namespaceId, java.lang.String subject, java.lang.String description, java.lang.String posterUri, java.lang.String tag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String location, java.lang.String contactPerson, java.lang.String contactNumber, java.lang.Long startTimeMs, java.sql.Timestamp startTime, java.lang.Long endTimeMs, java.sql.Timestamp endTime, java.lang.Byte signupFlag, java.lang.Byte confirmFlag, java.lang.Integer maxAttendeeCount, java.lang.Integer signupAttendeeCount, java.lang.Integer signupFamilyCount, java.lang.Integer checkinAttendeeCount, java.lang.Integer checkinFamilyCount, java.lang.Integer confirmAttendeeCount, java.lang.Integer confirmFamilyCount, java.lang.Long creatorUid, java.lang.Long creatorFamilyId, java.lang.Long postId, java.lang.String groupDiscriminator, java.lang.Long groupId, java.lang.Byte status, java.lang.Integer changeVersion, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.String guest, java.lang.String mediaUrl, java.lang.Byte officialFlag, java.lang.String videoUrl, java.lang.Byte isVideoSupport, java.lang.Integer maxQuantity, java.lang.String contentType, java.lang.String version, java.lang.Long categoryId, java.lang.Long forumId, java.lang.String creatorTag, java.lang.String targetTag, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.String achievement, java.lang.String achievementType, java.lang.String achievementRichtextUrl, java.sql.Timestamp updateTime, java.lang.Long contentCategoryId, java.sql.Timestamp signupEndTime, java.lang.Byte allDayFlag, java.lang.Byte chargeFlag, java.math.BigDecimal chargePrice, java.lang.Byte wechatSignup) {
 		super(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES);
 
 		setValue(0, id);
@@ -612,5 +906,26 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 		setValue(35, guest);
 		setValue(36, mediaUrl);
 		setValue(37, officialFlag);
+		setValue(38, videoUrl);
+		setValue(39, isVideoSupport);
+		setValue(40, maxQuantity);
+		setValue(41, contentType);
+		setValue(42, version);
+		setValue(43, categoryId);
+		setValue(44, forumId);
+		setValue(45, creatorTag);
+		setValue(46, targetTag);
+		setValue(47, visibleRegionType);
+		setValue(48, visibleRegionId);
+		setValue(49, achievement);
+		setValue(50, achievementType);
+		setValue(51, achievementRichtextUrl);
+		setValue(52, updateTime);
+		setValue(53, contentCategoryId);
+		setValue(54, signupEndTime);
+		setValue(55, allDayFlag);
+		setValue(56, chargeFlag);
+		setValue(57, chargePrice);
+		setValue(58, wechatSignup);
 	}
 }

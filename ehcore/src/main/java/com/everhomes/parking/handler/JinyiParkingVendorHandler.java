@@ -32,6 +32,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * 清华信息港 停车
+ */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "JIN_YI")
 public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JinyiParkingVendorHandler.class);
@@ -447,8 +450,8 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 
 		LocalDateTime end = clearanceTime.toLocalDateTime();
 		//加一天 减一秒
-		end.plusDays(1L);
-		end.minusSeconds(1L);
+		end = end.plusDays(1L);
+		end = end.minusSeconds(1L);
 		json.put("effectivedate", start.format(dtf2));
 		json.put("expiredate", end.format(dtf2));
 		return json;

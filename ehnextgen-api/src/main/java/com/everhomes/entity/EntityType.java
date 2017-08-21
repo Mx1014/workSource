@@ -60,11 +60,18 @@ public enum EntityType {
     ALL("EhAll"),
     LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
-	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),    
-	ORGANIZATION_FILE("EhOrganizationFiles"),
-    CHILD_PROJECT("child_project"),
+
+
+
+
     CONTRACT(EhContracts.class.getSimpleName()),
-    ENTERPRISE_CUSTOMER(EhEnterpriseCustomers.class.getSimpleName());
+    ENTERPRISE_CUSTOMER(EhEnterpriseCustomers.class.getSimpleName()),
+
+    ORGANIZATION_FILE("EhOrganizationFiles"),
+    COMMUNITY_APPROVE(EhCommunityApprove.class.getSimpleName()),
+	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),
+    CHILD_PROJECT("child_project");
+
 
     private String code;
     

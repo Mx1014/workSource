@@ -244,16 +244,44 @@ public class EhQualityInspectionTasksDao extends org.jooq.impl.DAOImpl<com.everh
 	}
 
 	/**
-	 * Fetch records that have <code>create_uid IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByCreateUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.CREATE_UID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>manual_flag IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByManualFlag(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByTargetId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.TARGET_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByTargetType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.CREATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>executive_position_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByExecutivePositionId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID, values);
 	}
 }

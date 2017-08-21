@@ -291,4 +291,18 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByVisibleRegionId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.VISIBLE_REGION_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>approval_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByApprovalStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.APPROVAL_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByOperatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.OPERATOR_UID, values);
+	}
 }

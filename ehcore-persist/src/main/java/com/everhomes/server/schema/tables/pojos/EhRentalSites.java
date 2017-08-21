@@ -11,107 +11,65 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites implements java.io.Serializable {
 
-	private static final long serialVersionUID = -788735491;
+	private static final long serialVersionUID = 750950511;
 
-	private java.lang.Long       id;
-	private java.lang.Long       parentId;
-	private java.lang.String     siteName;
-	private java.lang.Byte       siteType2;
-	private java.lang.String     buildingName;
-	private java.lang.Long       buildingId;
-	private java.lang.String     address;
-	private java.lang.Long       addressId;
-	private java.lang.String     spec;
-	private java.lang.String     ownCompanyName;
-	private java.lang.String     contactName;
-	private java.lang.String     contactPhonenum;
-	private java.lang.String     contactPhonenum2;
-	private java.lang.String     contactPhonenum3;
-	private java.lang.Byte       status;
-	private java.lang.Long       creatorUid;
-	private java.sql.Timestamp   createTime;
-	private java.lang.Long       operatorUid;
-	private java.sql.Timestamp   operateTime;
-	private java.lang.String     introduction;
-	private java.lang.String     notice;
-	private java.lang.Long       chargeUid;
-	private java.lang.String     coverUri;
-	private java.lang.Byte       discountType;
-	private java.math.BigDecimal fullPrice;
-	private java.math.BigDecimal cutPrice;
-	private java.lang.Double     discountRatio;
-	private java.lang.Byte       rentalType;
-	private java.lang.Double     timeStep;
-	private java.lang.Byte       exclusiveFlag;
-	private java.lang.Byte       autoAssign;
-	private java.lang.Byte       multiUnit;
-	private java.lang.Byte       multiTimeInterval;
-	private java.lang.Byte       cancelFlag;
-	private java.lang.Byte       needPay;
-	private java.lang.Long       resourceTypeId;
-	private java.lang.Long       cancelTime;
-	private java.lang.Long       rentalStartTime;
-	private java.lang.Long       rentalEndTime;
-	private java.lang.Byte       refundFlag;
-	private java.lang.Integer    refundRatio;
-	private java.lang.Double     longitude;
-	private java.lang.Double     latitude;
-	private java.lang.Long       organizationId;
-	private java.sql.Time        dayBeginTime;
-	private java.sql.Time        dayEndTime;
+	private java.lang.Long     id;
+	private java.lang.Long     parentId;
+	private java.lang.Long     ownerId;
+	private java.lang.String   siteType;
+	private java.lang.String   siteName;
+	private java.lang.Byte     siteType2;
+	private java.lang.String   buildingName;
+	private java.lang.Long     buildingId;
+	private java.lang.String   address;
+	private java.lang.Long     addressId;
+	private java.lang.String   spec;
+	private java.lang.String   ownCompanyName;
+	private java.lang.String   contactName;
+	private java.lang.String   contactPhonenum;
+	private java.lang.String   contactPhonenum2;
+	private java.lang.String   contactPhonenum3;
+	private java.lang.Byte     status;
+	private java.lang.Long     creatorUid;
+	private java.sql.Timestamp createTime;
+	private java.lang.Long     operatorUid;
+	private java.sql.Timestamp operateTime;
+	private java.lang.String   ownerType;
+	private java.lang.String   introduction;
+	private java.lang.String   notice;
 
 	public EhRentalSites() {}
 
 	public EhRentalSites(
-		java.lang.Long       id,
-		java.lang.Long       parentId,
-		java.lang.String     siteName,
-		java.lang.Byte       siteType2,
-		java.lang.String     buildingName,
-		java.lang.Long       buildingId,
-		java.lang.String     address,
-		java.lang.Long       addressId,
-		java.lang.String     spec,
-		java.lang.String     ownCompanyName,
-		java.lang.String     contactName,
-		java.lang.String     contactPhonenum,
-		java.lang.String     contactPhonenum2,
-		java.lang.String     contactPhonenum3,
-		java.lang.Byte       status,
-		java.lang.Long       creatorUid,
-		java.sql.Timestamp   createTime,
-		java.lang.Long       operatorUid,
-		java.sql.Timestamp   operateTime,
-		java.lang.String     introduction,
-		java.lang.String     notice,
-		java.lang.Long       chargeUid,
-		java.lang.String     coverUri,
-		java.lang.Byte       discountType,
-		java.math.BigDecimal fullPrice,
-		java.math.BigDecimal cutPrice,
-		java.lang.Double     discountRatio,
-		java.lang.Byte       rentalType,
-		java.lang.Double     timeStep,
-		java.lang.Byte       exclusiveFlag,
-		java.lang.Byte       autoAssign,
-		java.lang.Byte       multiUnit,
-		java.lang.Byte       multiTimeInterval,
-		java.lang.Byte       cancelFlag,
-		java.lang.Byte       needPay,
-		java.lang.Long       resourceTypeId,
-		java.lang.Long       cancelTime,
-		java.lang.Long       rentalStartTime,
-		java.lang.Long       rentalEndTime,
-		java.lang.Byte       refundFlag,
-		java.lang.Integer    refundRatio,
-		java.lang.Double     longitude,
-		java.lang.Double     latitude,
-		java.lang.Long       organizationId,
-		java.sql.Time        dayBeginTime,
-		java.sql.Time        dayEndTime
+		java.lang.Long     id,
+		java.lang.Long     parentId,
+		java.lang.Long     ownerId,
+		java.lang.String   siteType,
+		java.lang.String   siteName,
+		java.lang.Byte     siteType2,
+		java.lang.String   buildingName,
+		java.lang.Long     buildingId,
+		java.lang.String   address,
+		java.lang.Long     addressId,
+		java.lang.String   spec,
+		java.lang.String   ownCompanyName,
+		java.lang.String   contactName,
+		java.lang.String   contactPhonenum,
+		java.lang.String   contactPhonenum2,
+		java.lang.String   contactPhonenum3,
+		java.lang.Byte     status,
+		java.lang.Long     creatorUid,
+		java.sql.Timestamp createTime,
+		java.lang.Long     operatorUid,
+		java.sql.Timestamp operateTime,
+		java.lang.String   ownerType,
+		java.lang.String   introduction,
+		java.lang.String   notice
 	) {
 		this.id = id;
 		this.parentId = parentId;
+		this.ownerId = ownerId;
+		this.siteType = siteType;
 		this.siteName = siteName;
 		this.siteType2 = siteType2;
 		this.buildingName = buildingName;
@@ -129,33 +87,9 @@ public class EhRentalSites implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.ownerType = ownerType;
 		this.introduction = introduction;
 		this.notice = notice;
-		this.chargeUid = chargeUid;
-		this.coverUri = coverUri;
-		this.discountType = discountType;
-		this.fullPrice = fullPrice;
-		this.cutPrice = cutPrice;
-		this.discountRatio = discountRatio;
-		this.rentalType = rentalType;
-		this.timeStep = timeStep;
-		this.exclusiveFlag = exclusiveFlag;
-		this.autoAssign = autoAssign;
-		this.multiUnit = multiUnit;
-		this.multiTimeInterval = multiTimeInterval;
-		this.cancelFlag = cancelFlag;
-		this.needPay = needPay;
-		this.resourceTypeId = resourceTypeId;
-		this.cancelTime = cancelTime;
-		this.rentalStartTime = rentalStartTime;
-		this.rentalEndTime = rentalEndTime;
-		this.refundFlag = refundFlag;
-		this.refundRatio = refundRatio;
-		this.longitude = longitude;
-		this.latitude = latitude;
-		this.organizationId = organizationId;
-		this.dayBeginTime = dayBeginTime;
-		this.dayEndTime = dayEndTime;
 	}
 
 	public java.lang.Long getId() {
@@ -172,6 +106,22 @@ public class EhRentalSites implements java.io.Serializable {
 
 	public void setParentId(java.lang.Long parentId) {
 		this.parentId = parentId;
+	}
+
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
+	}
+
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public java.lang.String getSiteType() {
+		return this.siteType;
+	}
+
+	public void setSiteType(java.lang.String siteType) {
+		this.siteType = siteType;
 	}
 
 	public java.lang.String getSiteName() {
@@ -310,6 +260,14 @@ public class EhRentalSites implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
+	}
+
 	public java.lang.String getIntroduction() {
 		return this.introduction;
 	}
@@ -324,205 +282,5 @@ public class EhRentalSites implements java.io.Serializable {
 
 	public void setNotice(java.lang.String notice) {
 		this.notice = notice;
-	}
-
-	public java.lang.Long getChargeUid() {
-		return this.chargeUid;
-	}
-
-	public void setChargeUid(java.lang.Long chargeUid) {
-		this.chargeUid = chargeUid;
-	}
-
-	public java.lang.String getCoverUri() {
-		return this.coverUri;
-	}
-
-	public void setCoverUri(java.lang.String coverUri) {
-		this.coverUri = coverUri;
-	}
-
-	public java.lang.Byte getDiscountType() {
-		return this.discountType;
-	}
-
-	public void setDiscountType(java.lang.Byte discountType) {
-		this.discountType = discountType;
-	}
-
-	public java.math.BigDecimal getFullPrice() {
-		return this.fullPrice;
-	}
-
-	public void setFullPrice(java.math.BigDecimal fullPrice) {
-		this.fullPrice = fullPrice;
-	}
-
-	public java.math.BigDecimal getCutPrice() {
-		return this.cutPrice;
-	}
-
-	public void setCutPrice(java.math.BigDecimal cutPrice) {
-		this.cutPrice = cutPrice;
-	}
-
-	public java.lang.Double getDiscountRatio() {
-		return this.discountRatio;
-	}
-
-	public void setDiscountRatio(java.lang.Double discountRatio) {
-		this.discountRatio = discountRatio;
-	}
-
-	public java.lang.Byte getRentalType() {
-		return this.rentalType;
-	}
-
-	public void setRentalType(java.lang.Byte rentalType) {
-		this.rentalType = rentalType;
-	}
-
-	public java.lang.Double getTimeStep() {
-		return this.timeStep;
-	}
-
-	public void setTimeStep(java.lang.Double timeStep) {
-		this.timeStep = timeStep;
-	}
-
-	public java.lang.Byte getExclusiveFlag() {
-		return this.exclusiveFlag;
-	}
-
-	public void setExclusiveFlag(java.lang.Byte exclusiveFlag) {
-		this.exclusiveFlag = exclusiveFlag;
-	}
-
-	public java.lang.Byte getAutoAssign() {
-		return this.autoAssign;
-	}
-
-	public void setAutoAssign(java.lang.Byte autoAssign) {
-		this.autoAssign = autoAssign;
-	}
-
-	public java.lang.Byte getMultiUnit() {
-		return this.multiUnit;
-	}
-
-	public void setMultiUnit(java.lang.Byte multiUnit) {
-		this.multiUnit = multiUnit;
-	}
-
-	public java.lang.Byte getMultiTimeInterval() {
-		return this.multiTimeInterval;
-	}
-
-	public void setMultiTimeInterval(java.lang.Byte multiTimeInterval) {
-		this.multiTimeInterval = multiTimeInterval;
-	}
-
-	public java.lang.Byte getCancelFlag() {
-		return this.cancelFlag;
-	}
-
-	public void setCancelFlag(java.lang.Byte cancelFlag) {
-		this.cancelFlag = cancelFlag;
-	}
-
-	public java.lang.Byte getNeedPay() {
-		return this.needPay;
-	}
-
-	public void setNeedPay(java.lang.Byte needPay) {
-		this.needPay = needPay;
-	}
-
-	public java.lang.Long getResourceTypeId() {
-		return this.resourceTypeId;
-	}
-
-	public void setResourceTypeId(java.lang.Long resourceTypeId) {
-		this.resourceTypeId = resourceTypeId;
-	}
-
-	public java.lang.Long getCancelTime() {
-		return this.cancelTime;
-	}
-
-	public void setCancelTime(java.lang.Long cancelTime) {
-		this.cancelTime = cancelTime;
-	}
-
-	public java.lang.Long getRentalStartTime() {
-		return this.rentalStartTime;
-	}
-
-	public void setRentalStartTime(java.lang.Long rentalStartTime) {
-		this.rentalStartTime = rentalStartTime;
-	}
-
-	public java.lang.Long getRentalEndTime() {
-		return this.rentalEndTime;
-	}
-
-	public void setRentalEndTime(java.lang.Long rentalEndTime) {
-		this.rentalEndTime = rentalEndTime;
-	}
-
-	public java.lang.Byte getRefundFlag() {
-		return this.refundFlag;
-	}
-
-	public void setRefundFlag(java.lang.Byte refundFlag) {
-		this.refundFlag = refundFlag;
-	}
-
-	public java.lang.Integer getRefundRatio() {
-		return this.refundRatio;
-	}
-
-	public void setRefundRatio(java.lang.Integer refundRatio) {
-		this.refundRatio = refundRatio;
-	}
-
-	public java.lang.Double getLongitude() {
-		return this.longitude;
-	}
-
-	public void setLongitude(java.lang.Double longitude) {
-		this.longitude = longitude;
-	}
-
-	public java.lang.Double getLatitude() {
-		return this.latitude;
-	}
-
-	public void setLatitude(java.lang.Double latitude) {
-		this.latitude = latitude;
-	}
-
-	public java.lang.Long getOrganizationId() {
-		return this.organizationId;
-	}
-
-	public void setOrganizationId(java.lang.Long organizationId) {
-		this.organizationId = organizationId;
-	}
-
-	public java.sql.Time getDayBeginTime() {
-		return this.dayBeginTime;
-	}
-
-	public void setDayBeginTime(java.sql.Time dayBeginTime) {
-		this.dayBeginTime = dayBeginTime;
-	}
-
-	public java.sql.Time getDayEndTime() {
-		return this.dayEndTime;
-	}
-
-	public void setDayEndTime(java.sql.Time dayEndTime) {
-		this.dayEndTime = dayEndTime;
 	}
 }

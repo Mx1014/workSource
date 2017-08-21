@@ -158,4 +158,165 @@ public class EhActivityRosterDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>phone IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByPhone(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.PHONE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>real_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByRealName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.REAL_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>gender IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByGender(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.GENDER, values);
+	}
+
+	/**
+	 * Fetch records that have <code>community_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByCommunityName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.COMMUNITY_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>organization_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByOrganizationName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.ORGANIZATION_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>position IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByPosition(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.POSITION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>leader_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByLeaderFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.LEADER_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>source_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchBySourceFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.SOURCE_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>email IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByEmail(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.EMAIL, values);
+	}
+
+	/**
+	 * Fetch records that have <code>pay_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByPayFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.PAY_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>order_no IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByOrderNo(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.ORDER_NO, values);
+	}
+
+	/**
+	 * Fetch records that have <code>order_start_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByOrderStartTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.ORDER_START_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>order_expire_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByOrderExpireTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.ORDER_EXPIRE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>vendor_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByVendorType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.VENDOR_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>pay_amount IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByPayAmount(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.PAY_AMOUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>pay_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByPayTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.PAY_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>refund_order_no IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByRefundOrderNo(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.REFUND_ORDER_NO, values);
+	}
+
+	/**
+	 * Fetch records that have <code>refund_amount IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByRefundAmount(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.REFUND_AMOUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>refund_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByRefundTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.REFUND_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>organization_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByOrganizationId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.ORGANIZATION_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>cancel_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByCancelTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.CANCEL_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>order_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByOrderType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.ORDER_TYPE, values);
+	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = 195979951;
+	private static final long serialVersionUID = 1841018981;
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.id</code>. id of the record
@@ -476,14 +476,14 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_addresses.area_size</code>. the area size of the room according to the address
+	 * Setter for <code>ehcore.eh_addresses.area_size</code>.
 	 */
 	public void setAreaSize(java.lang.Double value) {
 		setValue(33, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_addresses.area_size</code>. the area size of the room according to the address
+	 * Getter for <code>ehcore.eh_addresses.area_size</code>.
 	 */
 	public java.lang.Double getAreaSize() {
 		return (java.lang.Double) getValue(33);
@@ -501,6 +501,132 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	public java.lang.Integer getNamespaceId() {
 		return (java.lang.Integer) getValue(34);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.rent_area</code>.
+	 */
+	public void setRentArea(java.lang.Double value) {
+		setValue(35, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.rent_area</code>.
+	 */
+	public java.lang.Double getRentArea() {
+		return (java.lang.Double) getValue(35);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.build_area</code>.
+	 */
+	public void setBuildArea(java.lang.Double value) {
+		setValue(36, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.build_area</code>.
+	 */
+	public java.lang.Double getBuildArea() {
+		return (java.lang.Double) getValue(36);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.inner_area</code>.
+	 */
+	public void setInnerArea(java.lang.Double value) {
+		setValue(37, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.inner_area</code>.
+	 */
+	public java.lang.Double getInnerArea() {
+		return (java.lang.Double) getValue(37);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.layout</code>.
+	 */
+	public void setLayout(java.lang.String value) {
+		setValue(38, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.layout</code>.
+	 */
+	public java.lang.String getLayout() {
+		return (java.lang.String) getValue(38);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.living_status</code>.
+	 */
+	public void setLivingStatus(java.lang.Byte value) {
+		setValue(39, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.living_status</code>.
+	 */
+	public java.lang.Byte getLivingStatus() {
+		return (java.lang.Byte) getValue(39);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.namespace_address_type</code>.
+	 */
+	public void setNamespaceAddressType(java.lang.String value) {
+		setValue(40, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.namespace_address_type</code>.
+	 */
+	public java.lang.String getNamespaceAddressType() {
+		return (java.lang.String) getValue(40);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.namespace_address_token</code>.
+	 */
+	public void setNamespaceAddressToken(java.lang.String value) {
+		setValue(41, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.namespace_address_token</code>.
+	 */
+	public java.lang.String getNamespaceAddressToken() {
+		return (java.lang.String) getValue(41);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.business_building_name</code>.
+	 */
+	public void setBusinessBuildingName(java.lang.String value) {
+		setValue(42, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.business_building_name</code>.
+	 */
+	public java.lang.String getBusinessBuildingName() {
+		return (java.lang.String) getValue(42);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.business_apartment_name</code>.
+	 */
+	public void setBusinessApartmentName(java.lang.String value) {
+		setValue(43, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.business_apartment_name</code>.
+	 */
+	public java.lang.String getBusinessApartmentName() {
+		return (java.lang.String) getValue(43);
 	}
 
 	// -------------------------------------------------------------------------
@@ -529,7 +655,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	/**
 	 * Create a detached, initialised EhAddressesRecord
 	 */
-	public EhAddressesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long communityId, java.lang.Long cityId, java.lang.String cityName, java.lang.Long areaId, java.lang.String areaName, java.lang.String zipcode, java.lang.String address, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String addressAlias, java.lang.String buildingName, java.lang.String buildingAliasName, java.lang.String apartmentName, java.lang.String apartmentFloor, java.lang.Byte status, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Double areaSize, java.lang.Integer namespaceId) {
+	public EhAddressesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long communityId, java.lang.Long cityId, java.lang.String cityName, java.lang.Long areaId, java.lang.String areaName, java.lang.String zipcode, java.lang.String address, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String addressAlias, java.lang.String buildingName, java.lang.String buildingAliasName, java.lang.String apartmentName, java.lang.String apartmentFloor, java.lang.Byte status, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Double areaSize, java.lang.Integer namespaceId, java.lang.Double rentArea, java.lang.Double buildArea, java.lang.Double innerArea, java.lang.String layout, java.lang.Byte livingStatus, java.lang.String namespaceAddressType, java.lang.String namespaceAddressToken, java.lang.String businessBuildingName, java.lang.String businessApartmentName) {
 		super(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES);
 
 		setValue(0, id);
@@ -567,5 +693,14 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 		setValue(32, stringTag5);
 		setValue(33, areaSize);
 		setValue(34, namespaceId);
+		setValue(35, rentArea);
+		setValue(36, buildArea);
+		setValue(37, innerArea);
+		setValue(38, layout);
+		setValue(39, livingStatus);
+		setValue(40, namespaceAddressType);
+		setValue(41, namespaceAddressToken);
+		setValue(42, businessBuildingName);
+		setValue(43, businessApartmentName);
 	}
 }

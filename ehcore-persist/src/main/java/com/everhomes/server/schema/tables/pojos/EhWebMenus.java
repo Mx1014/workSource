@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWebMenus implements java.io.Serializable {
 
-	private static final long serialVersionUID = 393407001;
+	private static final long serialVersionUID = -300401951;
 
 	private java.lang.Long    id;
 	private java.lang.String  name;
@@ -23,6 +23,10 @@ public class EhWebMenus implements java.io.Serializable {
 	private java.lang.String  path;
 	private java.lang.String  type;
 	private java.lang.Integer sortNum;
+	private java.lang.Long    moduleId;
+	private java.lang.Integer level;
+	private java.lang.String  conditionType;
+	private java.lang.String  category;
 
 	public EhWebMenus() {}
 
@@ -36,7 +40,11 @@ public class EhWebMenus implements java.io.Serializable {
 		java.lang.Byte    status,
 		java.lang.String  path,
 		java.lang.String  type,
-		java.lang.Integer sortNum
+		java.lang.Integer sortNum,
+		java.lang.Long    moduleId,
+		java.lang.Integer level,
+		java.lang.String  conditionType,
+		java.lang.String  category
 	) {
 		this.id = id;
 		this.name = name;
@@ -48,6 +56,10 @@ public class EhWebMenus implements java.io.Serializable {
 		this.path = path;
 		this.type = type;
 		this.sortNum = sortNum;
+		this.moduleId = moduleId;
+		this.level = level;
+		this.conditionType = conditionType;
+		this.category = category;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +140,37 @@ public class EhWebMenus implements java.io.Serializable {
 
 	public void setSortNum(java.lang.Integer sortNum) {
 		this.sortNum = sortNum;
+	}
+
+	public java.lang.Long getModuleId() {
+		return this.moduleId;
+	}
+
+	public void setModuleId(java.lang.Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public java.lang.Integer getLevel() {
+		return this.level;
+	}
+
+	public void setLevel(java.lang.Integer level) {
+		this.level = level;
+	}
+
+	public java.lang.String getConditionType() {
+		return this.conditionType;
+	}
+
+	public void setConditionType(java.lang.String conditionType) {
+		this.conditionType = conditionType;
+	}
+
+	public java.lang.String getCategory() {
+		return this.category;
+	}
+
+	public void setCategory(java.lang.String category) {
+		this.category = category;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord> {
 
-	private static final long serialVersionUID = -1155107543;
+	private static final long serialVersionUID = 162160156;
 
 	/**
 	 * Setter for <code>ehcore.eh_organization_members.id</code>. id of the record
@@ -405,6 +405,76 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 		return (java.lang.Integer) getValue(27);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.visible_flag</code>. 0 show 1 hide
+	 */
+	public void setVisibleFlag(java.lang.Byte value) {
+		setValue(28, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.visible_flag</code>. 0 show 1 hide
+	 */
+	public java.lang.Byte getVisibleFlag() {
+		return (java.lang.Byte) getValue(28);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.group_type</code>. ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER
+	 */
+	public void setGroupType(java.lang.String value) {
+		setValue(29, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.group_type</code>. ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER
+	 */
+	public java.lang.String getGroupType() {
+		return (java.lang.String) getValue(29);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.creator_uid</code>.
+	 */
+	public void setCreatorUid(java.lang.Long value) {
+		setValue(30, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.creator_uid</code>.
+	 */
+	public java.lang.Long getCreatorUid() {
+		return (java.lang.Long) getValue(30);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.operator_uid</code>.
+	 */
+	public void setOperatorUid(java.lang.Long value) {
+		setValue(31, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.operator_uid</code>.
+	 */
+	public java.lang.Long getOperatorUid() {
+		return (java.lang.Long) getValue(31);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.detail_id</code>. id for detail records
+	 */
+	public void setDetailId(java.lang.Long value) {
+		setValue(32, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.detail_id</code>. id for detail records
+	 */
+	public java.lang.Long getDetailId() {
+		return (java.lang.Long) getValue(32);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -431,7 +501,7 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 	/**
 	 * Create a detached, initialised EhOrganizationMembersRecord
 	 */
-	public EhOrganizationMembersRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String targetType, java.lang.Long targetId, java.lang.String memberGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status, java.lang.Long groupId, java.lang.String employeeNo, java.lang.String avatar, java.lang.String groupPath, java.lang.Byte gender, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Integer namespaceId) {
+	public EhOrganizationMembersRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String targetType, java.lang.Long targetId, java.lang.String memberGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status, java.lang.Long groupId, java.lang.String employeeNo, java.lang.String avatar, java.lang.String groupPath, java.lang.Byte gender, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Integer namespaceId, java.lang.Byte visibleFlag, java.lang.String groupType, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Long detailId) {
 		super(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS);
 
 		setValue(0, id);
@@ -462,5 +532,10 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 		setValue(25, stringTag4);
 		setValue(26, stringTag5);
 		setValue(27, namespaceId);
+		setValue(28, visibleFlag);
+		setValue(29, groupType);
+		setValue(30, creatorUid);
+		setValue(31, operatorUid);
+		setValue(32, detailId);
 	}
 }

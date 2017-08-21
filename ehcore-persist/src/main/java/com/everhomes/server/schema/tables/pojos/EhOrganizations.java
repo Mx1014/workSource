@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations implements java.io.Serializable {
 
-	private static final long serialVersionUID = 890634029;
+	private static final long serialVersionUID = -1682753409;
 
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
@@ -28,6 +28,7 @@ public class EhOrganizations implements java.io.Serializable {
 	private java.sql.Timestamp updateTime;
 	private java.lang.Long     directlyEnterpriseId;
 	private java.lang.Integer  namespaceId;
+	private java.lang.Long     groupId;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -38,8 +39,13 @@ public class EhOrganizations implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
-	private java.lang.Long     groupId;
 	private java.lang.Byte     showFlag;
+	private java.lang.String   namespaceOrganizationToken;
+	private java.lang.String   namespaceOrganizationType;
+	private java.lang.Integer  size;
+	private java.lang.Long     creatorUid;
+	private java.lang.Long     operatorUid;
+	private java.lang.Byte     setAdminFlag;
 
 	public EhOrganizations() {}
 
@@ -59,6 +65,7 @@ public class EhOrganizations implements java.io.Serializable {
 		java.sql.Timestamp updateTime,
 		java.lang.Long     directlyEnterpriseId,
 		java.lang.Integer  namespaceId,
+		java.lang.Long     groupId,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -69,8 +76,13 @@ public class EhOrganizations implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
-		java.lang.Long     groupId,
-		java.lang.Byte     showFlag
+		java.lang.Byte     showFlag,
+		java.lang.String   namespaceOrganizationToken,
+		java.lang.String   namespaceOrganizationType,
+		java.lang.Integer  size,
+		java.lang.Long     creatorUid,
+		java.lang.Long     operatorUid,
+		java.lang.Byte     setAdminFlag
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -87,6 +99,7 @@ public class EhOrganizations implements java.io.Serializable {
 		this.updateTime = updateTime;
 		this.directlyEnterpriseId = directlyEnterpriseId;
 		this.namespaceId = namespaceId;
+		this.groupId = groupId;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -97,8 +110,13 @@ public class EhOrganizations implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
-		this.groupId = groupId;
 		this.showFlag = showFlag;
+		this.namespaceOrganizationToken = namespaceOrganizationToken;
+		this.namespaceOrganizationType = namespaceOrganizationType;
+		this.size = size;
+		this.creatorUid = creatorUid;
+		this.operatorUid = operatorUid;
+		this.setAdminFlag = setAdminFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -221,6 +239,14 @@ public class EhOrganizations implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 	}
 
+	public java.lang.Long getGroupId() {
+		return this.groupId;
+	}
+
+	public void setGroupId(java.lang.Long groupId) {
+		this.groupId = groupId;
+	}
+
 	public java.lang.Long getIntegralTag1() {
 		return this.integralTag1;
 	}
@@ -301,19 +327,59 @@ public class EhOrganizations implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 	}
 
-	public java.lang.Long getGroupId() {
-		return this.groupId;
-	}
-
-	public void setGroupId(java.lang.Long groupId) {
-		this.groupId = groupId;
-	}
-
 	public java.lang.Byte getShowFlag() {
 		return this.showFlag;
 	}
 
 	public void setShowFlag(java.lang.Byte showFlag) {
 		this.showFlag = showFlag;
+	}
+
+	public java.lang.String getNamespaceOrganizationToken() {
+		return this.namespaceOrganizationToken;
+	}
+
+	public void setNamespaceOrganizationToken(java.lang.String namespaceOrganizationToken) {
+		this.namespaceOrganizationToken = namespaceOrganizationToken;
+	}
+
+	public java.lang.String getNamespaceOrganizationType() {
+		return this.namespaceOrganizationType;
+	}
+
+	public void setNamespaceOrganizationType(java.lang.String namespaceOrganizationType) {
+		this.namespaceOrganizationType = namespaceOrganizationType;
+	}
+
+	public java.lang.Integer getSize() {
+		return this.size;
+	}
+
+	public void setSize(java.lang.Integer size) {
+		this.size = size;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public java.lang.Long getOperatorUid() {
+		return this.operatorUid;
+	}
+
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+
+	public java.lang.Byte getSetAdminFlag() {
+		return this.setAdminFlag;
+	}
+
+	public void setSetAdminFlag(java.lang.Byte setAdminFlag) {
+		this.setAdminFlag = setAdminFlag;
 	}
 }

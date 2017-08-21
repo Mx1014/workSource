@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord> {
 
-	private static final long serialVersionUID = -698651723;
+	private static final long serialVersionUID = 355916392;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_members</code>
@@ -165,6 +165,31 @@ public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes
 	 * The column <code>ehcore.eh_organization_members.namespace_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.visible_flag</code>. 0 show 1 hide
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Byte> VISIBLE_FLAG = createField("visible_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0 show 1 hide");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.group_type</code>. ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.String> GROUP_TYPE = createField("group_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.creator_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.operator_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.detail_id</code>. id for detail records
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Long> DETAIL_ID = createField("detail_id", org.jooq.impl.SQLDataType.BIGINT, this, "id for detail records");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_members</code> table reference

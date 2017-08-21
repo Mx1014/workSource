@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasksRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord> {
 
-	private static final long serialVersionUID = -499149611;
+	private static final long serialVersionUID = 1552827609;
 
 	/**
 	 * Setter for <code>ehcore.eh_quality_inspection_tasks.id</code>. id
@@ -420,31 +420,87 @@ public class EhQualityInspectionTasksRecord extends org.jooq.impl.UpdatableRecor
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_quality_inspection_tasks.create_uid</code>.
-	 */
-	public void setCreateUid(java.lang.Long value) {
-		setValue(29, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_quality_inspection_tasks.create_uid</code>.
-	 */
-	public java.lang.Long getCreateUid() {
-		return (java.lang.Long) getValue(29);
-	}
-
-	/**
 	 * Setter for <code>ehcore.eh_quality_inspection_tasks.manual_flag</code>. 0: auto 1:manual
 	 */
 	public void setManualFlag(java.lang.Long value) {
-		setValue(30, value);
+		setValue(29, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_quality_inspection_tasks.manual_flag</code>. 0: auto 1:manual
 	 */
 	public java.lang.Long getManualFlag() {
+		return (java.lang.Long) getValue(29);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_quality_inspection_tasks.target_id</code>.
+	 */
+	public void setTargetId(java.lang.Long value) {
+		setValue(30, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_quality_inspection_tasks.target_id</code>.
+	 */
+	public java.lang.Long getTargetId() {
 		return (java.lang.Long) getValue(30);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_quality_inspection_tasks.target_type</code>.
+	 */
+	public void setTargetType(java.lang.String value) {
+		setValue(31, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_quality_inspection_tasks.target_type</code>.
+	 */
+	public java.lang.String getTargetType() {
+		return (java.lang.String) getValue(31);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_quality_inspection_tasks.creator_uid</code>. record creator user id
+	 */
+	public void setCreatorUid(java.lang.Long value) {
+		setValue(32, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_quality_inspection_tasks.creator_uid</code>. record creator user id
+	 */
+	public java.lang.Long getCreatorUid() {
+		return (java.lang.Long) getValue(32);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_quality_inspection_tasks.executive_position_id</code>. refernece to the id of eh_organization_job_positions
+	 */
+	public void setExecutivePositionId(java.lang.Long value) {
+		setValue(33, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_quality_inspection_tasks.executive_position_id</code>. refernece to the id of eh_organization_job_positions
+	 */
+	public java.lang.Long getExecutivePositionId() {
+		return (java.lang.Long) getValue(33);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_quality_inspection_tasks.namespace_id</code>.
+	 */
+	public void setNamespaceId(java.lang.Integer value) {
+		setValue(34, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_quality_inspection_tasks.namespace_id</code>.
+	 */
+	public java.lang.Integer getNamespaceId() {
+		return (java.lang.Integer) getValue(34);
 	}
 
 	// -------------------------------------------------------------------------
@@ -473,7 +529,7 @@ public class EhQualityInspectionTasksRecord extends org.jooq.impl.UpdatableRecor
 	/**
 	 * Create a detached, initialised EhQualityInspectionTasksRecord
 	 */
-	public EhQualityInspectionTasksRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long standardId, java.lang.String taskNumber, java.lang.String taskName, java.lang.Byte taskType, java.lang.Long parentId, java.lang.Long childCount, java.lang.Long executiveGroupId, java.sql.Timestamp executiveStartTime, java.sql.Timestamp executiveExpireTime, java.sql.Timestamp executiveTime, java.lang.String executorType, java.lang.Long executorId, java.lang.String operatorType, java.lang.Long operatorId, java.sql.Timestamp processExpireTime, java.lang.Byte processResult, java.sql.Timestamp processTime, java.lang.Byte status, java.lang.Byte result, java.lang.String reviewerType, java.lang.Long reviewerId, java.lang.Byte reviewResult, java.sql.Timestamp reviewTime, java.sql.Timestamp createTime, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long createUid, java.lang.Long manualFlag) {
+	public EhQualityInspectionTasksRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long standardId, java.lang.String taskNumber, java.lang.String taskName, java.lang.Byte taskType, java.lang.Long parentId, java.lang.Long childCount, java.lang.Long executiveGroupId, java.sql.Timestamp executiveStartTime, java.sql.Timestamp executiveExpireTime, java.sql.Timestamp executiveTime, java.lang.String executorType, java.lang.Long executorId, java.lang.String operatorType, java.lang.Long operatorId, java.sql.Timestamp processExpireTime, java.lang.Byte processResult, java.sql.Timestamp processTime, java.lang.Byte status, java.lang.Byte result, java.lang.String reviewerType, java.lang.Long reviewerId, java.lang.Byte reviewResult, java.sql.Timestamp reviewTime, java.sql.Timestamp createTime, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long manualFlag, java.lang.Long targetId, java.lang.String targetType, java.lang.Long creatorUid, java.lang.Long executivePositionId, java.lang.Integer namespaceId) {
 		super(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS);
 
 		setValue(0, id);
@@ -505,7 +561,11 @@ public class EhQualityInspectionTasksRecord extends org.jooq.impl.UpdatableRecor
 		setValue(26, createTime);
 		setValue(27, categoryId);
 		setValue(28, categoryPath);
-		setValue(29, createUid);
-		setValue(30, manualFlag);
+		setValue(29, manualFlag);
+		setValue(30, targetId);
+		setValue(31, targetType);
+		setValue(32, creatorUid);
+		setValue(33, executivePositionId);
+		setValue(34, namespaceId);
 	}
 }

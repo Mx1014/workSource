@@ -197,7 +197,7 @@ public class EhLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	/**
 	 * Fetch records that have <code>target_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByTargetId(java.lang.Long... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByTargetId(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.TARGET_ID, values);
 	}
 
@@ -220,5 +220,33 @@ public class EhLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByScaleType(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.SCALE_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>service_categry_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByServiceCategryId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.SERVICE_CATEGRY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>selected_icon_uri IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchBySelectedIconUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.SELECTED_ICON_URI, values);
+	}
+
+	/**
+	 * Fetch records that have <code>more_order IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByMoreOrder(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.MORE_ORDER, values);
+	}
+
+	/**
+	 * Fetch records that have <code>alias_icon_uri IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByAliasIconUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ALIAS_ICON_URI, values);
 	}
 }

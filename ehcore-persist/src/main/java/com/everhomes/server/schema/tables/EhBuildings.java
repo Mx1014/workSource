@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBuildings extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBuildingsRecord> {
 
-	private static final long serialVersionUID = -1135328553;
+	private static final long serialVersionUID = 1823373828;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_buildings</code>
@@ -175,6 +175,106 @@ public class EhBuildings extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_buildings.namespace_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.product_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> PRODUCT_TYPE = createField("product_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.complete_date</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.sql.Timestamp> COMPLETE_DATE = createField("complete_date", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.joinin_date</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.sql.Timestamp> JOININ_DATE = createField("joinin_date", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.floor_count</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> FLOOR_COUNT = createField("floor_count", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.namespace_building_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> NAMESPACE_BUILDING_TYPE = createField("namespace_building_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.namespace_building_token</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> NAMESPACE_BUILDING_TOKEN = createField("namespace_building_token", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.traffic_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> TRAFFIC_DESCRIPTION = createField("traffic_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.lift_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> LIFT_DESCRIPTION = createField("lift_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.pm_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> PM_DESCRIPTION = createField("pm_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.parking_lot_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> PARKING_LOT_DESCRIPTION = createField("parking_lot_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.environmental_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> ENVIRONMENTAL_DESCRIPTION = createField("environmental_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.power_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> POWER_DESCRIPTION = createField("power_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.telecommunication_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> TELECOMMUNICATION_DESCRIPTION = createField("telecommunication_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.air_condition_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> AIR_CONDITION_DESCRIPTION = createField("air_condition_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.security_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> SECURITY_DESCRIPTION = createField("security_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.fire_control_description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> FIRE_CONTROL_DESCRIPTION = createField("fire_control_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.general_form_id</code>. id of eh_general_form
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.Long> GENERAL_FORM_ID = createField("general_form_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "id of eh_general_form");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.custom_form_flag</code>. 0: not add custom field, 1: add custom field
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.Byte> CUSTOM_FORM_FLAG = createField("custom_form_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: not add custom field, 1: add custom field");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.default_order</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.Long> DEFAULT_ORDER = createField("default_order", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_buildings.manager_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> MANAGER_NAME = createField("manager_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_buildings</code> table reference

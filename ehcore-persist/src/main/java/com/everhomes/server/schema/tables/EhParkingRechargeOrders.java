@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord> {
 
-	private static final long serialVersionUID = -500774431;
+	private static final long serialVersionUID = -1540516323;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_recharge_orders</code>
@@ -69,7 +69,7 @@ public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhom
 	/**
 	 * The column <code>ehcore.eh_parking_recharge_orders.payer_enterprise_id</code>. the id of organization where the payer is in
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Long> PAYER_ENTERPRISE_ID = createField("payer_enterprise_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the id of organization where the payer is in");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Long> PAYER_ENTERPRISE_ID = createField("payer_enterprise_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "the id of organization where the payer is in");
 
 	/**
 	 * The column <code>ehcore.eh_parking_recharge_orders.payer_uid</code>. the user id of payer
@@ -142,14 +142,14 @@ public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_parking_recharge_orders.old_expired_time</code>.
+	 * The column <code>ehcore.eh_parking_recharge_orders.start_period</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> OLD_EXPIRED_TIME = createField("old_expired_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> START_PERIOD = createField("start_period", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_parking_recharge_orders.new_expired_time</code>.
+	 * The column <code>ehcore.eh_parking_recharge_orders.end_period</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> NEW_EXPIRED_TIME = createField("new_expired_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> END_PERIOD = createField("end_period", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_parking_recharge_orders.paid_type</code>. the type of payer
@@ -160,6 +160,41 @@ public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhom
 	 * The column <code>ehcore.eh_parking_recharge_orders.is_delete</code>. the order is delete, 0 : is not deleted, 1: deleted
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Byte> IS_DELETE = createField("is_delete", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the order is delete, 0 : is not deleted, 1: deleted");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.recharge_type</code>. 1: monthly, 2: temporary
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Byte> RECHARGE_TYPE = createField("recharge_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "1: monthly, 2: temporary");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.order_token</code>. it may be from 3rd system
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> ORDER_TOKEN = createField("order_token", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "it may be from 3rd system");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.parking_time</code>. parking-time
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Integer> PARKING_TIME = createField("parking_time", org.jooq.impl.SQLDataType.INTEGER, this, "parking-time");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.error_description</code>. error description
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> ERROR_DESCRIPTION = createField("error_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "error description");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.error_description_json</code>. error description
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> ERROR_DESCRIPTION_JSON = createField("error_description_json", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "error description");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.refund_time</code>. refund time
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> REFUND_TIME = createField("refund_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "refund time");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.delay_time</code>. delay time
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Integer> DELAY_TIME = createField("delay_time", org.jooq.impl.SQLDataType.INTEGER, this, "delay time");
 
 	/**
 	 * Create a <code>ehcore.eh_parking_recharge_orders</code> table reference

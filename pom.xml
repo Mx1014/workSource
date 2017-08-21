@@ -4,12 +4,11 @@
     <groupId>com.everhomes</groupId>
     <artifactId>servers</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
 
     <modules>
         <module>ehrest</module> 
-        <!--<module>ehcore-persist</module>
-        <module>ehrest-response</module>-->
+       <!--<module>ehcore-persist</module>-->
+        <!--<module>ehrest-response</module>-->
         <module>ehnextgen-api</module>
         <module>ehnextgen-messaging</module>
         <module>ehnextgen-forum</module>

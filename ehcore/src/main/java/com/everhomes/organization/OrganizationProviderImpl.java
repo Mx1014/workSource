@@ -19,6 +19,7 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
@@ -27,8 +28,35 @@ import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhImportFileTasks;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositionMaps;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositions;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberContracts;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberDetails;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberEducations;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberInsurances;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberProfileLogs;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberWorkExperiences;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -55,18 +83,18 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
- 
+
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
-	
+
 	@Autowired
     private ShardingProvider shardingProvider;
-	
-	@Autowired 
+
+	@Autowired
 	private SequenceProvider sequenceProvider;
 
     @Override
@@ -148,17 +176,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
 		return ConvertHelper.convert(dao.findById(id), Organization.class);
 	}
-	
+
 	@Override
 	public List<Organization> listOrganizationsByIds(Set<Long> ids) {
 		return listOrganizationsByIds(ids.toArray(new Long[ids.size()]));
 	}
-	
+
 	@Override
 	public List<Organization> listOrganizationsByIds(List<Long> ids) {
 		return listOrganizationsByIds(ids.toArray(new Long[ids.size()]));
 	}
-	
+
 	@Override
 	public List<Organization> listOrganizationsByIds(Long ... ids) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -181,19 +209,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;
 		});
-		
+
 		if(null != result && 0 != result.size()){
 			return result.get(0);
 		}
 		return null;
 	}
-	
+
 	@Override
 	public List<Organization> findOrganizationByCommunityId(Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-		query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.LEFT_OUTER_JOIN, 
+		query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.LEFT_OUTER_JOIN,
 				Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
 		query.setDistinct(true);
 		if(communityId != null)
@@ -206,7 +234,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		return organizations;
 	}
-	
+
     @Override
     public List<Organization> findOrganizationByPath(String path) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -218,10 +246,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 result.add(ConvertHelper.convert(r, Organization.class));
                 return null;
             });
-        
+
         return result;
-    }	
-    
+    }
+
 	@Override
 	public OrganizationMember findAnyOrganizationMemberByNamespaceIdAndUserId(Integer namespaceId, Long userId,
 			String groupType) {
@@ -233,7 +261,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
 			.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType))
 			.fetchAny();
-		
+
 		if (record != null) {
 			return record.map(r->ConvertHelper.convert(r, OrganizationMember.class));
 		}
@@ -335,7 +363,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
-	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
+	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true),@CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
 	@Override
 	public void createOrganizationMember(OrganizationMember organizationMember) {
 		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -348,7 +376,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			Integer namespaceId = UserContext.getCurrentNamespaceId(null);
 			organizationMember.setNamespaceId(namespaceId);
 		}
-		
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMembers.class));
 		organizationMember.setId(id);
@@ -359,7 +387,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 	}
 
-	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
+	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true), @CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
 	@Override
 	public void updateOrganizationMember(OrganizationMember departmentMember){
 		assert(departmentMember.getId() == null);
@@ -370,6 +398,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, departmentMember.getId());
 	}
 
+	@Caching(evict = { @CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
 	@Override
 	public void updateOrganizationMemberByOrgPaths(String path, Byte status, Long uid, Timestamp now) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -381,7 +410,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, null);
 	}
 
-	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
+	@Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true), @CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
 	@Override
 	public void deleteOrganizationMemberById(Long id){
 
@@ -423,7 +452,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return result;
 	}
-	
+
 
 	@Override
 	public List<OrganizationMember> listOrganizationMembers(Long memberUid) {
@@ -431,9 +460,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-		
+
 		if(memberUid != null && memberUid > 0) {
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
 		}
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		//added by wh 2016-10-13 把被拒绝的过滤掉
@@ -452,7 +482,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId));
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())); 
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 		if(memberUids != null ) {
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.in(memberUids));
 		}
@@ -480,7 +510,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return result;
 	}
-	
+
 	@Override
 	public List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -512,7 +542,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.execute();
 
 		departmentCommunity.setId(query.getReturnedRecord().getId());
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationCommunities.class, null); 
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationCommunities.class, null);
 
 	}
 
@@ -687,7 +717,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		        condition = Tables.EH_ORGANIZATIONS.NAME.eq(name);
 		    }
 		}
-		
+
 		if(condition == null)
 			return step.fetchOneInto(Integer.class);
 		return step.where(condition).fetchOneInto(Integer.class);
@@ -759,7 +789,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.execute();
 		task.setId(query.getReturnedRecord().value1());
 
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationTasks.class, null); 
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationTasks.class, null);
 	}
 
 	@Override
@@ -1173,11 +1203,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     /**
-     * modify cause member_detail by lei lv
+     * modify cause member_detail by lei lv 7.224
      **/
     @Override
-    public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId,
-                                                                  Long organizationId) {
+    public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId) {
+
+		Long enterpriseId = getTopOrganizationId(organizationId);
+
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 //        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
@@ -1200,9 +1232,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
         Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
 
-        if (r != null)
-            return ConvertHelper.convert(r, OrganizationMember.class);
-        return null;
+        if (r != null){
+			OrganizationMember organizationMember = ConvertHelper.convert(r, OrganizationMember.class);
+			if(enterpriseId != null) {
+                organizationMember.setEnterpriserId(enterpriseId);
+            }
+			return organizationMember;
+		}
+
+		return null;
     }
 
     /**
@@ -2075,6 +2113,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //        return result;
     }
 
+	@Caching(evict = { @CacheEvict(value="ListOrganizationMemberByPath", allEntries=true)})
     @Override
     public boolean updateOrganizationMemberByIds(List<Long> ids, Organization org) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -2390,7 +2429,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //                    return true;
 //                }
 //            });
-//        
+//
 //        return result[0];
 
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
@@ -2739,16 +2778,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
 		oa.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(oa);
-		
+
 	}
-	
+
 	@Override
 	public OrganizationAddress findOrganizationAddressByAddressId(Long addressId) {
 		final OrganizationAddress[] result = new OrganizationAddress[1];
 
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
-        // this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationAddresses.class), result, 
-        this.dbProvider.mapReduce(AccessSpec.readOnly(), result, 
+        // this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationAddresses.class), result,
+        this.dbProvider.mapReduce(AccessSpec.readOnly(), result,
             (DSLContext context, Object reducingContext) -> {
            	 context.select().from(Tables.EH_ORGANIZATION_ADDRESSES)
        		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId).and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode())))
@@ -2756,9 +2795,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
        			return result[0] = ConvertHelper.convert(r,OrganizationAddress.class);
        		});
            	 return true;
-       				 
+
             });
-        
+
         return result[0];
 	}
 
@@ -2766,8 +2805,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public List<OrganizationAddress> listOrganizationAddressByBuildingId(Long buildingId, Integer pageSize, CrossShardListingLocator locator) {
 		List<OrganizationAddress> addresses = new ArrayList<OrganizationAddress>();
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
-		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class), null, 
-		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
+		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class), null,
+		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					int size = pageSize + 1;
 					Condition cond = Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId);
@@ -2784,10 +2823,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						addresses.add(ConvertHelper.convert(record, OrganizationAddress.class));
 		            	return null;
 					});
-					
+
 					return true;
 				});
-        
+
 		locator.setAnchor(null);
 		if(addresses.size() >= pageSize){
 			addresses.remove(addresses.size() - 1);
@@ -2795,7 +2834,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
         return addresses;
 	}
-	
+
 
 	@Override
 	public List<Long> listOrganizationIdByBuildingId(Long buildingId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator) {
@@ -2818,7 +2857,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			);
 			return true;
 		});
-		
+
 		locator.setAnchor(null);
 		if(organizationIds.size() >= pageSize){
 			organizationIds.remove(organizationIds.size() - 1);
@@ -2850,7 +2889,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			);
 			return true;
 		});
-		
+
 		locator.setAnchor(null);
 		if(organizationIds.size() >= pageSize){
 			organizationIds.remove(organizationIds.size() - 1);
@@ -2863,8 +2902,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName) {
 		List<OrganizationAddress> addresses = new ArrayList<OrganizationAddress>();
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
-		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class), null, 
-		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
+		// dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class), null,
+		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					Condition cond = Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME.eq(buildingName);
 					cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()));
@@ -2874,12 +2913,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						addresses.add(ConvertHelper.convert(record, OrganizationAddress.class));
 		            	return null;
 					});
-					
+
 					return true;
 				});
         return addresses;
 	}
-	
+
 	@Override
 	public Organization getOrganizationByGoupId(Long groupId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2908,7 +2947,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
-	
+
 	@Override
 	public List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, Condition cond) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -3400,7 +3439,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return results;
- 
+
 	}
 
     /**
@@ -3458,7 +3497,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			query.addConditions(Tables.EH_COMMUNITIES.NAME.like("%"+keyword+"%")
 					.or(Tables.EH_COMMUNITIES.ALIAS_NAME.like("%"+keyword+"%")));
 		}
-			
+
 		query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITIES.ID.desc());
 		result = query.fetch().map(new DefaultRecordMapper(Tables.EH_COMMUNITIES.recordType(), Community.class));
 
@@ -3530,13 +3569,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public void createOrganizationMemberLog(OrganizationMemberLog orgLog) {
- 
+
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberLogs.class));
-		orgLog.setId(id);  
+		orgLog.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationMemberLogsDao dao = new EhOrganizationMemberLogsDao(context.configuration());
 		dao.insert(orgLog);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberLogs.class, null); 
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberLogs.class, null);
 	}
 
 	@Override
@@ -3544,7 +3583,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<OrganizationMemberLog> results = new ArrayList<OrganizationMemberLog>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID.eq(id)); 
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID.eq(id));
 		query.fetch().map(r -> {
 			results.add(ConvertHelper.convert(r, OrganizationMemberLog.class));
 			return null;
@@ -3593,9 +3632,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<OrganizationMemberLog> results = new ArrayList<OrganizationMemberLog>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID.eq(userId)); 
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.in(organizationIds)); 
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATION_TYPE.eq(operationType)); 
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID.eq(userId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.in(organizationIds));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATION_TYPE.eq(operationType));
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
 		query.fetch().map(r -> {
 			results.add(ConvertHelper.convert(r, OrganizationMemberLog.class));
@@ -3677,60 +3716,60 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public void createOrganizationJobPosition(OrganizationJobPosition organizationJobPosition) {
-		
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationJobPositionsDao dao = new EhOrganizationJobPositionsDao(context.configuration());
-		
+
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationJobPositions.class));
 		organizationJobPosition.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationJobPosition.setId(id);
 		dao.insert(organizationJobPosition);
-		
+
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationJobPositions.class, null);
 	}
-	
+
 	@Override
 	public void updateOrganizationJobPosition(OrganizationJobPosition organizationJobPosition) {
-		
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationJobPositionsDao dao = new EhOrganizationJobPositionsDao(context.configuration());
-		
+
 		organizationJobPosition.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.update(organizationJobPosition);
-		
+
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationJobPositions.class, null);
 	}
-	
+
 	@Override
 	public OrganizationJobPosition findOrganizationJobPositionById(Long id) {
-		
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationJobPositions.class));
 		EhOrganizationJobPositionsDao dao = new EhOrganizationJobPositionsDao(context.configuration());
-		
+
 		return ConvertHelper.convert(dao.findById(id), OrganizationJobPosition.class);
 	}
-	
+
 	@Override
 	public OrganizationJobPosition findOrganizationJobPositionByName(String ownerType, Long ownerId, String name) {
-		
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationJobPositions.class));
 		SelectQuery<EhOrganizationJobPositionsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITIONS);
-		
+
 		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.NAME.eq(name));
 		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.STATUS.eq(OrganizationJobPositionStatus.ACTIVE.getCode()));
-		
+
 		return ConvertHelper.convert(query.fetchOne(), OrganizationJobPosition.class);
 	}
-	
+
 	@Override
 	public List<OrganizationJobPosition> listOrganizationJobPositions(String ownerType, Long ownerId, String keyword,
 			Long pageAnchor, Integer pageSize) {
-		
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationJobPositions.class));
 		SelectQuery<EhOrganizationJobPositionsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITIONS);
-		
+
 		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.STATUS.eq(OrganizationJobPositionStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.OWNER_TYPE.eq(ownerType));
@@ -3745,10 +3784,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return query.fetch().stream().map(r -> ConvertHelper.convert(r, OrganizationJobPosition.class))
 				.collect(Collectors.toList());
 	}
-	
+
 	@Override
 	public void deleteOrganizationJobPositionById(Long id) {
-		
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationJobPositions.class));
 		EhOrganizationJobPositionsDao dao = new EhOrganizationJobPositionsDao(context.configuration());
 		dao.deleteById(id);
@@ -3759,7 +3798,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public OrganizationAddress findOrganizationAddress(Long organizationId, Long addressId, Long buildingId) {
 		final OrganizationAddress[] result = new OrganizationAddress[1];
 
-        this.dbProvider.mapReduce(AccessSpec.readOnly(), result, 
+        this.dbProvider.mapReduce(AccessSpec.readOnly(), result,
             (DSLContext context, Object reducingContext) -> {
            	 context.select().from(Tables.EH_ORGANIZATION_ADDRESSES)
        		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
@@ -3769,9 +3808,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
        			return result[0] = ConvertHelper.convert(r,OrganizationAddress.class);
        		});
            	 return true;
-       				 
+
             });
-        
+
         return result[0];
 	}
 
@@ -3806,7 +3845,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
 	       		 .and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()))
 	       		 .fetch()
-	       		 .map(r->ConvertHelper.convert(r, OrganizationAddress.class));	       		 
+	       		 .map(r->ConvertHelper.convert(r, OrganizationAddress.class));
 	}
 
 	@Override
@@ -3834,7 +3873,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
 	       		 .and(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
 	       		 .fetchOne();
-		
+
 		if (record != null) {
 			return ConvertHelper.convert(record, OrganizationAddress.class);
 		}
@@ -3857,9 +3896,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
 		dao.delete(organizationAddressMapping);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null); 
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null);
 	}
 
+	@Cacheable(value="ListOrganizationMemberByPath", key="#path+#groupTypes+#contactToken")
 	@Override
 	public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken){
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
@@ -4003,7 +4043,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			.orderBy(Tables.EH_ORGANIZATIONS.ID.asc())
 			.limit(pageSize)
 			.fetch();
-		
+
 		if (result != null && result.isNotEmpty()) {
 			return result.map(r->ConvertHelper.convert(r, Organization.class));
 		}
@@ -4022,7 +4062,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			.orderBy(Tables.EH_ORGANIZATIONS.UPDATE_TIME.asc(), Tables.EH_ORGANIZATIONS.ID.asc())
 			.limit(pageSize)
 			.fetch();
-			
+
 		if (result != null && result.isNotEmpty()) {
 			return result.map(r->ConvertHelper.convert(r, Organization.class));
 		}
@@ -4066,7 +4106,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			.orderBy(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.UPDATE_TIME.asc(), Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.asc())
 			.limit(pageSize)
 			.fetch();
-			
+
 		if (result != null && result.isNotEmpty()) {
 			return result.map(r->RecordHelper.convert(r, CommunityAddressMapping.class));
 		}
@@ -4623,11 +4663,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken) {
+		Long enterpriseId = getTopOrganizationId(organizationId);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMemberDetails.class));
         SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(contactToken));
-        Record record = query.fetchAny();
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(enterpriseId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(contactToken));
+		Record record = query.fetchAny();
         if (record != null) {
             return ConvertHelper.convert(record, OrganizationMemberDetails.class);
         }
@@ -4738,9 +4779,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	 */
 	@Override
 	public List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(Long organizationId, Long buildId) {
-		
+
 		List<OrganizationAddress> ea = new ArrayList<OrganizationAddress>();
-		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
+		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
 					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId));
@@ -4750,7 +4791,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						ea.add(ConvertHelper.convert(record, OrganizationAddress.class));
 		            	return null;
 					});
-					
+
 					return true;
 				});
 		return ea;
@@ -4847,10 +4888,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		//added by wh 2016-10-13 把被拒绝的过滤掉
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(big_path);
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(big_path+"%");
 		if (small_path != null) {
 			for (String p : small_path) {
-				cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.notLike(p));
+				cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.notLike(p+"%"));
 			}
 		}
 		query.addConditions(cond);
@@ -4902,7 +4943,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return false;
 	}
 
-    @Override
+	@Override
     public List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds) {
         List<OrganizationCommunityRequest> results = new ArrayList<OrganizationCommunityRequest>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -4941,5 +4982,236 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return orgMap;
         }
         return null;
+    }
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId, List<String> groupTypes) {
+		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> query = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
+		query = query.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		if(groupTypes != null && groupTypes.size()>0){
+			query = query.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+		}
+		List<Record> records = query.fetch();
+
+		if (records != null && !records.isEmpty()) {
+			for (Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationMember.class));
+		}
+
+		return list;
+	}
+
+	private Long getTopOrganizationId(Long organizationId) {
+		Organization organization = findOrganizationById(organizationId);
+		if (organization != null) {
+			String path = organization.getPath();
+			String[] ogs = path.split("/");
+			return Long.valueOf(ogs[1]);
+		}
+		return null;
+	}
+
+	
+	@Override
+	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+		if(null != organizationId)
+			step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
+		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+	}
+
+	@Override
+	public Integer countOrganizationMemberDetailsByOrgId(Integer namespaceId, Long organizationId) {
+		Organization org = this.findOrganizationById(organizationId);
+		if(org == null){
+			LOGGER.error("org is not matched, orgId={},", organizationId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"org is not matched");
+		}
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId);
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath()+"%"));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		return context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).groupBy(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).fetchCount();
+	}
+
+	@Override
+	public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMemberDetails> results =  context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+				.where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId))
+				.fetchInto(OrganizationMemberDetails.class);
+		if(null == results || results.size() == 0)
+			return  null ;
+		return results.get(0);
+	}
+
+	@Override
+	public List<Organization> listHeadEnterprises() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+		step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
+		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+	}
+
+
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByPathHavingDetailId(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+		/**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+		SelectJoinStep step = context.select().from(t1).join(t2).on(t1.field("detail_id").eq(t2.field("id")));
+		Condition condition = t1.field("group_path").like(path + "%");
+		if (null != groupTypes && groupTypes.size() > 0)
+			condition = condition.and(t1.field("group_type").in(groupTypes));
+		if (!StringUtils.isEmpty(keywords)) {
+			condition = condition.and(t2.field("contact_token").eq(keywords).or(t2.field("contact_name").like(keywords + "%")));
+		}
+
+		if (null != visibleFlag) {
+			condition = condition.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
+		}
+
+		if (null != locator.getAnchor()) {
+			condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+		}
+		condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		List<OrganizationMember> records = step.where(condition).groupBy(t2.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
+		if (records != null) {
+			records.stream().map(r -> {
+				result.add(ConvertHelper.convert(r, OrganizationMember.class));
+				return null;
+			}).collect(Collectors.toList());
+		}
+		locator.setAnchor(null);
+		if (result.size() > pageSize) {
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+
+		return result;
+	}
+
+	/**
+	 * 查询非离职状态下所有员工的 detailId
+	 * added by R, 20170719
+	 */
+	@Override
+	public List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId){
+	    DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+	    return context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
+                .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
+                .fetchInto(Long.class);
+    }
+
+	@Override
+	public List listOrganizationMembersGroupByToken() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<EhOrganizationMembers> list = new ArrayList<>();
+		context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.notEqual(0))
+				.groupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN).having("count(*) > 1").fetch().map(r->{
+					list.add(ConvertHelper.convert(r,EhOrganizationMembers.class));
+					return null;
+				});
+		return list;
+	}
+
+	@Override
+	public List listOrganizationMemberByToken(String token) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<EhOrganizationMembers> list = new ArrayList<>();
+		context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(token))
+				.fetch().map(r->{
+					list.add(ConvertHelper.convert(r,EhOrganizationMembers.class));
+					return null;
+				});
+		return list;
+	}
+
+	@Override
+	public List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<EhOrganizationMembers> list = new ArrayList<>();
+		context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(token))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/"+enterpriseId+"%"))
+				.fetch().map(r->{
+					list.add(ConvertHelper.convert(r,EhOrganizationMembers.class));
+					return null;
+				});
+		return list;
+	}
+
+	@Override
+	public List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId) {
+		List<ListAddressIdsByOrganizationIdDTO> dtos = new ArrayList<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhAddresses t = Tables.EH_ADDRESSES.as("t");
+		context.select(t.ID,t.ADDRESS,t.AREA_SIZE)
+				.from(t,Tables.EH_ORGANIZATION_ADDRESSES)
+				.where(t.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID))
+				.and(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+				.fetch()
+				.map(r -> {
+					ListAddressIdsByOrganizationIdDTO dto = new ListAddressIdsByOrganizationIdDTO();
+					dto.setAddressId(r.getValue(t.ID));
+					dto.setAddressName(r.getValue(t.ADDRESS));
+					dto.setAreaSize(r.getValue(t.AREA_SIZE));
+					dtos.add(dto);
+					return null;});
+		return dtos;
+	}
+
+	@Override
+	public String getOrganizationNameById(Long targetId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_ORGANIZATIONS.NAME)
+				.from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.ID.eq(targetId))
+				.fetchOne(Tables.EH_ORGANIZATIONS.NAME);
+	}
+
+	@Override
+	public List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<TargetDTO> list = new ArrayList<>();
+        com.everhomes.server.schema.tables.EhOrganizations r = Tables.EH_ORGANIZATIONS.as("r");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(r.ID);
+        query.addSelect(r.NAME);
+        query.addSelect(r.ID);
+        query.addFrom(r);
+        query.addConditions(r.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        if(targetName!=null){
+            query.addConditions(r.NAME.eq(targetName));
+        }
+        if(ids.size() == 1){
+            query.addConditions(r.ADDRESS_ID.eq(ids.get(0)));
+        }
+        if(ids.size() > 1){
+            query.addConditions(r.ADDRESS_ID.in(ids));
+        }
+        query.fetch()
+                .map(f -> {
+                    TargetDTO dto = new TargetDTO();
+                    dto.setTargetId(f.getValue(r.ID));
+                    dto.setTargetName(f.getValue(r.NAME));
+                    dto.setTargetType("eh_organization");
+                    list.add(dto);
+                    return null;
+                });
+        return list;
     }
 }

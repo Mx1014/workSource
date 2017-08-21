@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.records.EhPollItemsRecord;
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -74,14 +76,20 @@ public class PollProviderImpl implements PollProvider {
 
     @Override
     public List<PollItem> listPollItemByPollId(Long pollId) {
-        List<PollItem> values=new ArrayList<PollItem>();
+        //List<PollItem> values=new ArrayList<PollItem>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, pollId));
-        EhPollItemsDao dao=new EhPollItemsDao(context.configuration());
-        List<PollItem> result = dao.fetchByPollId(pollId).stream().map(r->ConvertHelper.convert(r, PollItem.class)).collect(Collectors.toList());
-        if(CollectionUtils.isNotEmpty(result)){
-            values.addAll(result);
-        }
-       return values;
+//        EhPollItemsDao dao=new EhPollItemsDao(context.configuration());
+//        List<PollItem> result = dao.fetchByPollId(pollId).stream().map(r->ConvertHelper.convert(r, PollItem.class)).collect(Collectors.toList());
+//        if(CollectionUtils.isNotEmpty(result)){
+//            values.addAll(result);
+//        }
+
+        //增加排序功能按照resourceId升序排列  edit by yanjun 20170803
+        SelectQuery<EhPollItemsRecord> query = context.selectQuery(Tables.EH_POLL_ITEMS);
+        query.addConditions(Tables.EH_POLL_ITEMS.POLL_ID.eq(pollId));
+        query.addOrderBy(Tables.EH_POLL_ITEMS.RESOURCE_ID.asc());
+
+        return query.fetch().stream().map(r->ConvertHelper.convert(r, PollItem.class)).collect(Collectors.toList());
     }
 
     @Override

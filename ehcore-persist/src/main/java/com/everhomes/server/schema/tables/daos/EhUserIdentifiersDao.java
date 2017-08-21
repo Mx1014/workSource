@@ -102,4 +102,11 @@ public class EhUserIdentifiersDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserIdentifiers> fetchByNamespaceId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.NAMESPACE_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>region_code IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserIdentifiers> fetchByRegionCode(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.REGION_CODE, values);
+	}
 }
