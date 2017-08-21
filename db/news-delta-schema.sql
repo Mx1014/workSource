@@ -36,7 +36,7 @@ CREATE TABLE `eh_community_map_infos` (
 
 CREATE TABLE `eh_community_building_geos` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `building_id` int(11) NOT NULL DEFAULT '0',
+  `building_id` bigint(20) NOT NULL DEFAULT '0',
   `longitude` double DEFAULT NULL,
   `latitude` double DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 1: confirming, 2: active',
