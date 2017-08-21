@@ -11542,7 +11542,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTNAME_ISNULL);
             return log;
         }else{
-            if(data.getContactName().length() > 32){
+            if(data.getContactName().length() > 40){
                 LOGGER.warn("Organization member contactName format wrong. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Organization member contactName format wrong");
