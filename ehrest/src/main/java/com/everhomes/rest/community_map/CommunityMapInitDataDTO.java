@@ -27,7 +27,7 @@ public class CommunityMapInitDataDTO {
     private Double latitudeDelta;
 
     @ItemType(CommunityMapBuildingDTO.class)
-    private List<CommunityMapBuildingDTO> buildingS;
+    private List<CommunityMapBuildingDTO> buildings;
 
     public Double getNorthEastLatitude() {
         return northEastLatitude;
@@ -61,12 +61,12 @@ public class CommunityMapInitDataDTO {
         this.version = version;
     }
 
-    public List<CommunityMapBuildingDTO> getBuildingS() {
-        return buildingS;
+    public List<CommunityMapBuildingDTO> getBuildings() {
+        return buildings;
     }
 
-    public void setBuildingS(List<CommunityMapBuildingDTO> buildingS) {
-        this.buildingS = buildingS;
+    public void setBuildings(List<CommunityMapBuildingDTO> buildings) {
+        this.buildings = buildings;
     }
 
     public Double getLatitudeDelta() {
