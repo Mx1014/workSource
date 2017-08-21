@@ -94,7 +94,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 	private ContentServerService contentServerService;
 	
 	@Override
-	public void addCustomRequest(AddRequestCommand cmd) {
+	public Long addCustomRequest(AddRequestCommand cmd) {
 		ReservationRequests request = GsonUtil.fromJson(cmd.getRequestJson(), ReservationRequests.class);
 		
 		request.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -114,7 +114,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 			request.setCreatorMobile(identifier.getIdentifierToken());
 
 		LOGGER.info("ReserveCustomRequestHandler addCustomRequest request:" + request);
-		yellowPageProvider.createReservationRequests(request);
+		Long id = yellowPageProvider.createReservationRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
 		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
@@ -211,6 +211,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		}
 		//删除生成的pdf文件，附件
 		attementList.stream().forEach(file->{file.delete();});
+		return id;
 	}
 	
 

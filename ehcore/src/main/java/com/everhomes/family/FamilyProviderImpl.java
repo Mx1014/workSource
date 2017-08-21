@@ -185,11 +185,14 @@ public class FamilyProviderImpl implements FamilyProvider {
 								family.setCreatorUid(newCreator.getMemberId());
 							}
 						}
-						//删除正常家庭成员，成员数-1
-	                    if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()){
-                            long memberCount = family.getMemberCount() - 1;
-                            family.setMemberCount(memberCount >= 0 ? memberCount : 0);
-	                    }
+
+						//上面的this.groupProvider.deleteGroupMember(m);已经减过人数啦，这里不能再减啦 [大哭]   edit by yanjun 20170808
+//						//删除正常家庭成员，成员数-1
+//	                    if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()){
+//                            long memberCount = family.getMemberCount() - 1;
+//                            family.setMemberCount(memberCount >= 0 ? memberCount : 0);
+//	                    }
+
 						this.groupProvider.updateGroup(family);
 					}
 				}

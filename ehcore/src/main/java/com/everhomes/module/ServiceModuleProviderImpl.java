@@ -6,7 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
+import com.everhomes.acl.AuthorizationRelation;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -24,13 +28,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.module.ServiceModuleStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhServiceModules;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentRelationsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignmentRelations;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleScopes;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentRelationsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceModulePrivilegesRecord;
@@ -303,6 +300,11 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
+    public List<ServiceModule> listServiceModule() {
+        return listServiceModule("");
+    }
+
+    @Override
     public List<ServiceModule> listServiceModule(Integer level, Byte type) {
         List<ServiceModule> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
@@ -329,7 +331,10 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
 
         Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
-        cond = cond.and(Tables.EH_SERVICE_MODULES.PATH.like(path));
+        if(!org.springframework.util.StringUtils.isEmpty(path)){
+            cond = cond.and(Tables.EH_SERVICE_MODULES.PATH.like(path));
+        }
+
         query.addConditions(cond);
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModule.class));
@@ -359,12 +364,53 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
+    public List<ServiceModule> listServiceModule(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback){
+        List<ServiceModule> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+        SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+        pageSize = pageSize + 1;
+        if(null != queryBuilderCallback)
+            queryBuilderCallback.buildCondition(locator, query);
+        if(null != locator && null != locator.getAnchor())
+            query.addConditions(Tables.EH_SERVICE_MODULES.ID.lt(locator.getAnchor()));
+        query.addOrderBy(Tables.EH_SERVICE_MODULES.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModule.class));
+            return null;
+        });
+        if(null!= locator)
+            locator.setAnchor(null);
+
+        if(results.size() >= pageSize){
+            results.remove(results.size() - 1);
+            locator.setAnchor(results.get(results.size() - 1).getId());
+        }
+        return results;
+    }
+
+    @Override
     public List<ServiceModule> listServiceModule(List<Long> ids) {
         List<ServiceModule> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
         SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
         Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
         cond = cond.and(Tables.EH_SERVICE_MODULES.ID.in(ids));
+        query.addConditions(cond);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModule.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<ServiceModule> listServiceModule(Byte actionType) {
+        List<ServiceModule> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+        SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+        Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
+        cond = cond.and(Tables.EH_SERVICE_MODULES.ACTION_TYPE.eq(actionType));
         query.addConditions(cond);
         query.fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, ServiceModule.class));
@@ -475,4 +521,38 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         return results;
     }
 
+    @Override
+    public void createServiceModule(ServiceModule serviceModule) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModules.class));
+        serviceModule.setId(id);
+        if(null == serviceModule.getCreateTime())
+            serviceModule.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(null == serviceModule.getUpdateTime())
+            serviceModule.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(null == serviceModule.getPath()){
+            serviceModule.setPath("");
+        }
+        serviceModule.setPath(serviceModule.getPath() + "/" + id);
+        EhServiceModulesDao dao = new EhServiceModulesDao(context.configuration());
+        dao.insert(serviceModule);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModules.class, id);
+    }
+
+    @Override
+    public void updateServiceModule(ServiceModule serviceModule) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        if(null == serviceModule.getUpdateTime())
+            serviceModule.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhServiceModulesDao dao = new EhServiceModulesDao(context.configuration());
+        dao.update(serviceModule);
+    }
+
+    @Override
+    public void deleteServiceModuleById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModules.class));
+        EhServiceModulesDao dao = new EhServiceModulesDao(context.configuration());
+        dao.deleteById(id);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModules.class, id);
+    }
 }

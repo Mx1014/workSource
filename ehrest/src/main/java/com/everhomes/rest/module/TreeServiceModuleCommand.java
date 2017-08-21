@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType：范围类型，固定EhOrganizations，如果是左邻运营后台的域名可以定义一个类型  参考{@link com.everhomes.rest.common.EntityType}</li>
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司</li>
+ * <li>namespaceId：域空间</li>
  * <li>moduleId：模块id</li>
  * </ul>
  */

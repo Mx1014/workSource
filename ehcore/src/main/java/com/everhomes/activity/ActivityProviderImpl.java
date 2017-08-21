@@ -690,6 +690,52 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
+    public void createActivityCategories(ActivityCategories activityCategory) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(ActivityCategories.class));
+
+        activityCategory.setId(id);
+        activityCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("createActivityCategories: " + activityCategory);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(ActivityCategories.class, id));
+        EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
+        dao.insert(activityCategory);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, ActivityCategories.class, null);
+    }
+
+    @Override
+    public void updateActivityCategories(ActivityCategories activityCategory) {
+
+        activityCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("updateActivityCategories: " + activityCategory);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(ActivityCategories.class, activityCategory.getId()));
+        EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
+        dao.update(activityCategory);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, ActivityCategories.class, null);
+    }
+
+    @Override
+    public void deleteActivityCategories(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
+        dao.deleteById(id);
+    }
+
+    @Override
+    public Long findActivityCategoriesMaxEntryId(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityCategories.class));
+        return context.select(DSL.max(Tables.EH_ACTIVITY_CATEGORIES.ENTRY_ID))
+                .from(Tables.EH_ACTIVITY_CATEGORIES)
+                .where(Tables.EH_ACTIVITY_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+                .fetchOneInto(Long.class);
+    }
+
+    @Override
     public void createActivityAttachment(ActivityAttachment attachment) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityAttachments.class));
 

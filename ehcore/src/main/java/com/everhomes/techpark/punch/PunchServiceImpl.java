@@ -6040,6 +6040,8 @@ public class PunchServiceImpl implements PunchService {
 
         ListPunchSupportiveAddressCommandResponse response = new ListPunchSupportiveAddressCommandResponse();
 
+        cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
+
 	    Long userId = UserContext.current().getUser().getId();
         PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
         if (null == pr  )
