@@ -240,3 +240,9 @@ update `eh_item_service_categries` set `scope_code` = 5, `scope_id` = 0 where `s
 update `eh_item_service_categries` set `scope_code` = 1, `scope_id` = 0 where `scene_type` = 'park_tourist'; 
 update `eh_item_service_categries` set `scope_code` = 6, `scope_id` = 0 where `scene_type` = 'default'; 
 update `eh_launch_pad_items` elpi set categry_name = (select name from eh_item_service_categries where id = elpi.service_categry_id);
+
+-- merge from profile-1.2 started by R
+SET @id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'organization', '900024', 'zh_CN', '性别仅支持"男""女"');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'organization', '900025', 'zh_CN', '姓名长度需小于20个字');
+-- merge from profile-1.2 ended by R
