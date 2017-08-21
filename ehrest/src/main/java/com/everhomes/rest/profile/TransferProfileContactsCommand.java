@@ -1,5 +1,6 @@
 package com.everhomes.rest.profile;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
  */
 public class TransferProfileContactsCommand {
 
+    @ItemType(Long.class)
     private List<Long> detailIds;
 
     private Long departmentId;
