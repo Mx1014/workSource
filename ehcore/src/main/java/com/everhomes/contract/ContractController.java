@@ -83,6 +83,17 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>删除合同</p>
+	 * <b>URL: /contract/deleteContract</b>
+	 */
+	@RequestMapping("deleteContract")
+	@RestReturn(String.class)
+	public RestResponse deleteContract(DeleteContractCommand cmd){
+		contractService.deleteContract(cmd);
+		return new RestResponse();
+	}
+
+	/**
 	 * <p>退约合同</p>
 	 * <b>URL: /contract/denunciationContract</b>
 	 */

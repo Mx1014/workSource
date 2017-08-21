@@ -17,5 +17,6 @@ public interface ContractService {
 
 	void denunciationContract(DenunciationContractCommand cmd);
 	ContractDetailDTO findContract(FindContractCommand cmd);
+	void deleteContract(DeleteContractCommand cmd);
 
 }

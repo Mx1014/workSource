@@ -612,6 +612,15 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
+	public void deleteContract(DeleteContractCommand cmd) {
+		Contract contract = checkContract(cmd.getId());
+		contract.setStatus(ContractStatus.INACTIVE.getCode());
+
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
+	}
+
+	@Override
 	public ContractDetailDTO findContract(FindContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);

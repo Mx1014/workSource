@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>id: id</li>
+ * <li>partyAId: 甲方id</li>
  * <li>contractNumber: 合同编号</li>
  * <li>name: 合同名称</li>
  * <li>contractStartDate: 合同开始日期</li>
@@ -34,6 +35,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ContractDTO {
 	private Long id;
+
+	private Long partyAId;
 	
 	private String contractNumber;
 
@@ -65,6 +68,14 @@ public class ContractDTO {
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> buildings;
 	private BigDecimal rent;
+
+	public Long getPartyAId() {
+		return partyAId;
+	}
+
+	public void setPartyAId(Long partyAId) {
+		this.partyAId = partyAId;
+	}
 
 	public Byte getContractType() {
 		return contractType;
