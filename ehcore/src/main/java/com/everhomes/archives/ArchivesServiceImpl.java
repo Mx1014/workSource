@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class ProfileServiceImpl implements ProfileService {
+public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
-    ProfileProvider profileProvider;
+    ArchivesProvider profileProvider;
 
     @Autowired
     OrganizationService organizationService;
@@ -32,7 +32,7 @@ public class ProfileServiceImpl implements ProfileService {
     OrganizationProvider organizationProvider;
 
     @Override
-    public ArchivesContactDTO addProfileContact(AddArchivesContactCommand cmd) {
+    public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
         ArchivesContactDTO dto = new ArchivesContactDTO();
         //  TODO: visibleFlag 的判断
@@ -69,7 +69,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void transferProfileContacts(TransferArchivesContactsCommand cmd) {
+    public void transferArchivesContacts(TransferArchivesContactsCommand cmd) {
         if(cmd.getDetailIds() != null){
             //  TODO: 根据提供的方法获取部门名称
             for(Long detailId : cmd.getDetailIds()){
@@ -79,7 +79,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void deleteProfileContacts(DeleteArchivesContactsCommand cmd) {
+    public void deleteArchivesContacts(DeleteArchivesContactsCommand cmd) {
         if(cmd.getDetailIds() != null){
             for(Long detailId : cmd.getDetailIds()){
                 //  组织架构删除
@@ -96,41 +96,41 @@ public class ProfileServiceImpl implements ProfileService {
 
     //  通讯录成员置顶接口
     @Override
-    public void stickProfileContact(StickArchivesContactCommand cmd) {
+    public void stickArchivesContact(StickArchivesContactCommand cmd) {
         User user = UserContext.current().getUser();
 
         //  状态码为 0 时删除
         if (cmd.getStick().equals("0")) {
-            ProfileContactsSticky result = profileProvider.findProfileContactsStickyByDetailIdAndOrganizationId(
+            ArchivesContactsSticky result = profileProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(
                     user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
             if (result != null)
-                profileProvider.deleteProfileContactsSticky(result);
+                profileProvider.deleteArchivesContactsSticky(result);
         }
 
         //  状态码为 1 时新增置顶
         if (cmd.getStick().equals("1")) {
-            ProfileContactsSticky result = profileProvider.findProfileContactsStickyByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
+            ArchivesContactsSticky result = profileProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
             if (result == null) {
-                ProfileContactsSticky contactsSticky = new ProfileContactsSticky();
+                ArchivesContactsSticky contactsSticky = new ArchivesContactsSticky();
                 contactsSticky.setNamespaceId(user.getNamespaceId());
                 contactsSticky.setOrganizationId(cmd.getOrganizationId());
                 contactsSticky.setDetailId(cmd.getDetailId());
                 contactsSticky.setOperatorUid(user.getId());
-                profileProvider.createProfileContactsSticky(contactsSticky);
+                profileProvider.createArchivesContactsSticky(contactsSticky);
             } else {
-                profileProvider.updateProfileContactsSticky(result);
+                profileProvider.updateArchivesContactsSticky(result);
             }
         }
     }
 
     @Override
-    public ListArchivesContactsResponse listProfileContacts(ListArchivesContactsCommand cmd) {
+    public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //  没有查询时显示主体
         if (StringUtils.isEmpty(cmd.getKeywords())) {
             //  1.首先从置顶的表读取置顶人员
-            List<Long> detailIds = profileProvider.listProfileContactsStickyIds(namespaceId,cmd.getOrganizationId());
+            List<Long> detailIds = profileProvider.listArchivesContactsStickyIds(namespaceId,cmd.getOrganizationId());
             //  TODO: 2.从组织架构读取对应人员，确定置顶个数
             //  TODO: 3.获取其余人员
 
@@ -142,12 +142,12 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ImportFileTaskDTO importProfileContacts(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd) {
+    public ImportFileTaskDTO importArchivesContacts(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd) {
         return null;
     }
 
     @Override
-    public void exportProfileContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
+    public void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
 
     }
 
@@ -162,13 +162,13 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ListArchivesEmployeesResponse listProfileEmployees(ListArchivesEmployeesCommand cmd) {
+    public ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd) {
 
         return null;
     }
 
     @Override
-    public ArchivesEmployeeDTO addProfileEmployee(AddArchivesEmployeeCommand cmd) {
+    public ArchivesEmployeeDTO addArchivesEmployee(AddArchivesEmployeeCommand cmd) {
 
         //  1.组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
@@ -193,13 +193,13 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ListArchivesDismissEmployeesResponse listProfileDismissEmployees(ListArchivesDismissEmployeesCommand cmd) {
+    public ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesDismissEmployeesResponse response = new ListArchivesDismissEmployeesResponse();
 
         Condition condition = listDismissEmployeesCondition(cmd);
 
-        List<ProfileDismissEmployees> results = profileProvider.listProfileDismissEmployees(cmd.getPageOffset(), cmd.getPageSize()+1, namespaceId, condition);
+        List<ArchivesDismissEmployees> results = profileProvider.listArchivesDismissEmployees(cmd.getPageOffset(), cmd.getPageSize()+1, namespaceId, condition);
 
         if (results != null) {
             response.setDismissEmployees(results.stream().map(r -> {
@@ -216,71 +216,70 @@ public class ProfileServiceImpl implements ProfileService {
 
         return null;
     }
-
     private Condition listDismissEmployeesCondition(ListArchivesDismissEmployeesCommand cmd){
-        Condition condition = Tables.EH_PROFILE_DISMISS_EMPLOYEES.ORGANIZATION_ID.eq(cmd.getOrganizationId());
+        Condition condition = Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ORGANIZATION_ID.eq(cmd.getOrganizationId());
 
         //   离职日期判断
         if(cmd.getDismissTimeStart()!=null && cmd.getDismissTimeEnd() != null) {
-            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_TIME.ge(cmd.getDismissTimeStart()));
-            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_TIME.le(cmd.getDismissTimeEnd()));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DISMISS_TIME.ge(cmd.getDismissTimeStart()));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DISMISS_TIME.le(cmd.getDismissTimeEnd()));
         }
 
         //   入职日期判断
         if(cmd.getCheckInTimeStart()!=null && cmd.getCheckInTimeEnd() != null) {
-            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.CHECK_IN_TIME.ge(cmd.getCheckInTimeStart()));
-            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.CHECK_IN_TIME.le(cmd.getCheckInTimeEnd()));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.CHECK_IN_TIME.ge(cmd.getCheckInTimeStart()));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.CHECK_IN_TIME.le(cmd.getCheckInTimeEnd()));
         }
 
         //   离职类型
         if(cmd.getDismissType()!=null) {
-            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_TYPE.eq(cmd.getDismissType()));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DISMISS_TYPE.eq(cmd.getDismissType()));
         }
 
         //   离职原因
         if(cmd.getDismissReason()!=null) {
-            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.DISMISS_REASON.eq(cmd.getDismissReason()));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DISMISS_REASON.eq(cmd.getDismissReason()));
         }
 
         //   姓名搜索
         if(cmd.getContactName() != null){
-            condition = condition.and(Tables.EH_PROFILE_DISMISS_EMPLOYEES.CONTACT_NAME.like("%" + cmd.getContactName()+ "%"));
+            condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.CONTACT_NAME.like("%" + cmd.getContactName()+ "%"));
         }
         return condition;
     }
 
     @Override
-    public void employProfileEmployees(EmployArchivesEmployeesCommand cmd) {
+    public void employArchivesEmployees(EmployArchivesEmployeesCommand cmd) {
 
     }
 
     @Override
-    public void transferProfileEmployees(TransferArchivesEmployeesCommand cmd) {
+    public void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd) {
 
     }
 
     @Override
-    public void dismissProfileEmployees(DismissArchivesEmployeesCommand cmd) {
+    public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd) {
 
     }
 
     @Override
-    public void addProfileField(AddArchivesFieldCommand cmd) {
+    public void addArchivesField(AddArchivesFieldCommand cmd) {
 
     }
 
     @Override
-    public void addProfileFieldGroup(AddArchivesFieldGroupCommand cmd) {
+    public void addArchivesFieldGroup(AddArchivesFieldGroupCommand cmd) {
 
     }
 
     @Override
-    public void updateProfileFieldOrder(UpdateArchivesFieldOrderCommand cmd) {
+    public void updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd) {
 
     }
 
     @Override
-    public GetArchivesFieldResponse getProfileField(GetArchivesFieldCommand cmd) {
+    public GetArchivesFieldResponse getArchivesField(GetArchivesFieldCommand cmd) {
         return null;
     }
 
