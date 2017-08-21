@@ -1,5 +1,6 @@
 package com.everhomes.rest.community_map;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -8,18 +9,25 @@ import java.util.List;
  * @author sw on 2017/8/19.
  */
 public class CommunityMapInitDataDTO {
+
+    private Long id;
+    private Integer namespaceId;
+    private Long communityId;
+    private String mapUri;
     private String mapUrl;
+    private String mapName;
     private String version;
-    private List<CommunityMapBuildingDTO> buildingS;
-
-    private Double latitudeDelta;
-    private Double longitudeDelta;
-
-    private Double centerLatitude;
     private Double centerLongitude;
-
+    private Double centerLatitude;
+    private Double northEastLongitude;
     private Double northEastLatitude;
     private Double southWestLongitude;
+    private Double southWestLatitude;
+    private Double longitudeDelta;
+    private Double latitudeDelta;
+
+    @ItemType(CommunityMapBuildingDTO.class)
+    private List<CommunityMapBuildingDTO> buildingS;
 
     public Double getNorthEastLatitude() {
         return northEastLatitude;
@@ -91,6 +99,63 @@ public class CommunityMapInitDataDTO {
 
     public void setCenterLongitude(Double centerLongitude) {
         this.centerLongitude = centerLongitude;
+    }
+
+    public Long getId() {
+
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getMapUri() {
+        return mapUri;
+    }
+
+    public void setMapUri(String mapUri) {
+        this.mapUri = mapUri;
+    }
+
+    public String getMapName() {
+        return mapName;
+    }
+
+    public void setMapName(String mapName) {
+        this.mapName = mapName;
+    }
+
+    public Double getNorthEastLongitude() {
+        return northEastLongitude;
+    }
+
+    public void setNorthEastLongitude(Double northEastLongitude) {
+        this.northEastLongitude = northEastLongitude;
+    }
+
+    public Double getSouthWestLatitude() {
+        return southWestLatitude;
+    }
+
+    public void setSouthWestLatitude(Double southWestLatitude) {
+        this.southWestLatitude = southWestLatitude;
     }
 
     @Override
