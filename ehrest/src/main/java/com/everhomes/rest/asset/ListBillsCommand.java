@@ -20,7 +20,8 @@ import javax.validation.constraints.NotNull;
  * <li>pageAnchor:锚点</li>
  * <li>pageSize:每页数量</li>
  * <li>billGroupId:账单组id</li>
- * <li>addressName:门牌楼栋名称</li>
+ * <li>buildingName:楼栋名称</li>
+ * <li>apartmentName:门牌名称</li>
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
  *</ul>
  */
@@ -39,11 +40,28 @@ public class ListBillsCommand {
     private String billGroupName;
 
     private Long billGroupId;
-    private String addressName;
+    private String buildingName;
+    private String apartmentName;
     private Byte status;
 
     public Long getBillGroupId() {
         return billGroupId;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     public void setBillGroupId(Long billGroupId) {
@@ -58,13 +76,6 @@ public class ListBillsCommand {
         this.status = status;
     }
 
-    public String getAddressName() {
-        return addressName;
-    }
-
-    public void setAddressName(String addressName) {
-        this.addressName = addressName;
-    }
 
     public Byte getBillStatus() {
         return billStatus;

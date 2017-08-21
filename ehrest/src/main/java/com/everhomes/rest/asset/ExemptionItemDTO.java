@@ -12,6 +12,7 @@ import java.math.BigDecimal;
  * <li>exemptionId:减免项id,可为空</li>
  * <li>amount:减免金额，当为正数时项目为减免金额，当为负数时项目为增收金额</li>
  * <li>remark:减免项的备注</li>
+ * <li>isPlus:1:为加项;0:为减项</li>
  *</ul>
  */
 public class ExemptionItemDTO {
@@ -19,6 +20,7 @@ public class ExemptionItemDTO {
     @NotNull
     private BigDecimal amount;
     private String remark;
+    private Byte isPlus;
 
     @Override
     public String toString() {
@@ -31,6 +33,14 @@ public class ExemptionItemDTO {
 
     public void setExemptionId(Long exemptionId) {
         this.exemptionId = exemptionId;
+    }
+
+    public Byte getIsPlus() {
+        return isPlus;
+    }
+
+    public void setIsPlus(Byte isPlus) {
+        this.isPlus = isPlus;
     }
 
     public BigDecimal getAmount() {

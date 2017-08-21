@@ -15,7 +15,8 @@ import java.math.BigDecimal;
  * <li>targetName:客户名称</li>
  * <li>targetId:客户id</li>
  * <li>targetType:客户类型</li>
- * <li>addressName:楼栋门牌</li>
+ * <li>buildingName:楼栋门牌</li>
+ * <li>apartmentName:楼栋门牌</li>
  * <li>noticeTel:催缴联系号码</li>
  * <li>amountReceivable:应收(元)</li>
  * <li>amountReceived:实收(元)</li>
@@ -34,7 +35,8 @@ public class ListBillsDTO {
     private String targetName;
     private Long targetId;
     private String targetType;
-    private String addressName;
+    private String buildingName;
+    private String apartmentName;
     private String noticeTel;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
@@ -49,12 +51,20 @@ public class ListBillsDTO {
         return StringHelper.toJsonString(this);
     }
 
-    public String getAddressName() {
-        return addressName;
+    public String getBuildingName() {
+        return buildingName;
     }
 
-    public void setAddressName(String addressName) {
-        this.addressName = addressName;
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     public Integer getDefaultOrder() {

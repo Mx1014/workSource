@@ -8,7 +8,9 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Wentian Wang on 2017/8/19.
@@ -20,20 +22,27 @@ public class UtilTest {
         List<container> list = new ArrayList<>();
         container x1 = new container();
         container x2 = new container();
-        x1.setA("单位");
-        x1.setB(new BigDecimal("232.343"));
-        x2.setA("面积");
-        x2.setB(new BigDecimal("103"));
+        x1.setA("1");
+        x1.setB(new BigDecimal("80"));
+        x2.setA("2");
+        x2.setB(new BigDecimal("0"));
         list.add(x1);
         list.add(x2);
         Gson gson = new Gson();
-        String s = gson.toJson(list);
+        Map<String,String> map = new LinkedHashMap<>();
+        map.put("1","80");
+        map.put("2","0");
+        String s = gson.toJson(map);
+//        String kick = "[{"1":"80"},{"2":"0"}]";
+        String kick="";
         System.out.println(s);
         System.out.println("============");
-        List<container> o = gson.fromJson(s, new TypeToken<List<container>>() {
-        }.getType());
-        BigDecimal b = new BigDecimal((double)o.get(0).getB());
-        System.out.println(b);
+//        List<container> o = gson.fromJson(s, new TypeToken<List<Map>>() {
+//        }.getType());
+        Map map1 = gson.fromJson(s, Map.class);
+        System.out.println(map1);
+//        BigDecimal b = new BigDecimal((double)o.get(0).getB());
+//        System.out.println(b);
     }
 }
 class container{

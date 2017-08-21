@@ -8,6 +8,8 @@ import java.util.List;
  */
 
 public class ListBillDetailVO {
+    private Long billId;
+    private Long billGroupId;
     private String dateStr;
     private String contractNO;
     private String noticeTel;
@@ -26,6 +28,22 @@ public class ListBillDetailVO {
 
     public String getContractNO() {
         return contractNO;
+    }
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
+
+    public Long getBillId() {
+        return billId;
+    }
+
+    public void setBillId(Long billId) {
+        this.billId = billId;
     }
 
     public void setContractNO(String contractNO) {

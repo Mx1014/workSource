@@ -544,6 +544,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("modifyNotSettledBill")
     @RestReturn(value = String.class)
     public RestResponse modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
+        assetService.modifyNotSettledBill(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -621,7 +622,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 新增账单的页面          2
+    // this is for 新增账单的页面          4
     /**
      * <p>新增账单的页面</p>
      * <b>URL: /asset/showCreateBill</b>
@@ -636,7 +637,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 保存一个新增账单         2
+    // this is for 保存一个新增账单         4    id的策略还没改
     /**
      * <p>保存一个新增账单</p>
      * <b>URL: /asset/createBill</b>

@@ -9,17 +9,21 @@ import java.util.List;
 
 /**
  *<ul>
+ * <li>billId:账单id</li>
  * <li>billGroupId:账单组id</li>
  * <li>targetId:客户id</li>
  * <li>targetType:客户type</li>
- * <li>billGroupDTOList:账单组列表，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ * <li>billGroupDTO:账单组，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
  *</ul>
  */
 public class ModifyNotSettledBillCommand {
+    private Long billId;
     private Long billGroupId;
     private Long targetId;
+    private String targetType;
+    private String targetName;
     @ItemType(BillGroupDTO.class)
-    private List<BillGroupDTO> billGroupDTOList;
+    private BillGroupDTO billGroupDTOList;
 
     @Override
     public String toString() {
@@ -31,19 +35,41 @@ public class ModifyNotSettledBillCommand {
         return billGroupId;
     }
 
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
+    }
+
+    public Long getBillId() {
+        return billId;
+    }
+
+    public void setBillId(Long billId) {
+        this.billId = billId;
+    }
+
     public void setBillGroupId(Long billGroupId) {
         this.billGroupId = billGroupId;
     }
 
-    public List<BillGroupDTO> getBillGroupDTOList() {
+    public BillGroupDTO getBillGroupDTOList() {
         return billGroupDTOList;
     }
 
-    public void setBillGroupDTOList(List<BillGroupDTO> billGroupDTOList) {
+    public void setBillGroupDTOList(BillGroupDTO billGroupDTOList) {
         this.billGroupDTOList = billGroupDTOList;
     }
-
-
 
     public Long getTargetId() {
         return targetId;

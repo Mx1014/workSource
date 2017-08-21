@@ -453,7 +453,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status) {
+    public List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status) {
         List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -491,8 +491,9 @@ public class AssetProviderImpl implements AssetProvider {
         List<Object[]> billAddresses = new ArrayList<>();
         query.fetch().map(r -> {
             ListBillsDTO dto = new ListBillsDTO();
-            if(addressName!=null){
-                dto.setAddressName(addressName);
+            if(buildingName!=null && apartmentName!=null){
+                dto.setBuildingName(buildingName);
+                dto.setApartmentName(apartmentName);
             }else{
                 Object[] billAddress = new Object[2];
                 billAddress[0] = r.getValue(t.TARGET_TYPE);
@@ -520,24 +521,35 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setOwnerType(r.getOwnerType());
             list.add(dto);
             return null;});
-        for(int i = 0; i < list.size(); i++) {
+        for(int i = 0; i < billAddresses.size(); i++) {
             ListBillsDTO dto = list.get(i);
             Object[] objs = billAddresses.get(i);
-            String buildingApartmentName = "";
+            final String[] buildingNameFound = {""};
+            final String[] apartmentNameFound = {""};
             try {
                 String targetType = (String) objs[0];
                 Long targetId = (Long) objs[1];
                 if(targetType.equals("eh_user")){
-                    buildingApartmentName = context.select(Tables.EH_ADDRESSES.ADDRESS).from(Tables.EH_USERS,Tables.EH_ADDRESSES).where(Tables.EH_USERS.ID.eq(targetId))
-                            .and(Tables.EH_USERS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID)).fetchOne(0,String.class);
-                }else if(targetType.equals("eh_organization")){
-                    buildingApartmentName = context.select(Tables.EH_ADDRESSES.ADDRESS).from(Tables.EH_ORGANIZATIONS,Tables.EH_ADDRESSES).where(Tables.EH_ORGANIZATIONS.ID.eq(targetId))
-                            .and(Tables.EH_ORGANIZATIONS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID)).fetchOne(0,String.class);
+                    context.select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME).from(Tables.EH_USERS,Tables.EH_ADDRESSES)
+                            .where(Tables.EH_USERS.ID.eq(targetId)).and(Tables.EH_USERS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
+                            .fetch().map(r -> {
+                                buildingNameFound[0] = r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME);
+                                apartmentNameFound[0] = r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME);
+                                return null;
+                            });
+            } else if(targetType.equals("eh_organization")){
+                    context.select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME).from(Tables.EH_ORGANIZATIONS,Tables.EH_ADDRESSES)
+                            .where(Tables.EH_ORGANIZATIONS.ID.eq(targetId)).and(Tables.EH_ORGANIZATIONS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
+                            .fetch().map(r -> {
+                                buildingNameFound[0] = r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME);
+                                apartmentNameFound[0] = r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME);
+                                return null;});
                 }
             } catch (Exception e) {
 
             }
-            dto.setAddressName(buildingApartmentName);
+            dto.setBuildingName(buildingNameFound[0]);
+            dto.setApartmentName(apartmentNameFound[0]);
         }
         return list;
     }
@@ -805,7 +817,7 @@ public class AssetProviderImpl implements AssetProvider {
             List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
             long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), exemptionItems.size());
             long currentExemItemSeq = nextExemItemBlock - exemptionItems.size() + 1;
-            currentExemItemSeq = 100l;
+//            currentExemItemSeq = 100l;
             for(int i = 0; i < list2.size(); i++){
                 ExemptionItemDTO exemptionItemDTO = list2.get(i);
                 PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
@@ -863,7 +875,6 @@ public class AssetProviderImpl implements AssetProvider {
             billsDao.insert(newBill);
             return null;
         });
-
     }
 
     @Override
@@ -877,33 +888,49 @@ public class AssetProviderImpl implements AssetProvider {
         BillGroupDTO dto = new BillGroupDTO();
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
-        context.select()
-                .from(r,o,t,k)
+
+        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGETNAME,r.TARGET_TYPE,r.BILL_GROUP_ID)
+                .from(r)
                 .where(r.ID.eq(billId))
-                .and(o.BILL_ID.eq(r.ID))
-                .and(t.BILL_ID.eq(r.ID))
-                .and(k.ID.in(o.CHARGING_ITEMS_ID))
-                .orderBy(k.DEFAULT_ORDER)
                 .fetch()
-                //batch DML操作用lambda这种方式会慢，这里是少量数据多连表DQL操作
                 .map(f -> {
-                    BillItemDTO itemDTO = new BillItemDTO();
-                    ExemptionItemDTO exemDto = new ExemptionItemDTO();
-                    itemDTO.setBillItemName(f.getValue(o.CHARGING_ITEM_NAME));
-                    itemDTO.setBillItemId(f.getValue(o.ID));
-                    itemDTO.setAmountReceivable(f.getValue(o.AMOUNT_RECEIVABLE));
-                    list1.add(itemDTO);
-                    exemDto.setAmount(f.getValue(t.AMOUNT));
-                    exemDto.setExemptionId(f.getValue(t.ID));
-                    exemDto.setRemark(f.getValue(t.REMARKS));
-                    list2.add(exemDto);
-                    vo.setTargetId(f.getValue(r.ID));
+                    vo.setBillId(f.getValue(r.ID));
+                    vo.setBillGroupId(f.getValue(r.BILL_GROUP_ID));
+                    vo.setTargetId(f.getValue(r.TARGET_ID));
                     vo.setNoticeTel(f.getValue(r.NOTICETEL));
                     vo.setDateStr(f.getValue(r.DATE_STR));
                     vo.setTargetName(f.getValue(r.TARGETNAME));
                     vo.setTargetType(f.getValue(r.TARGET_TYPE));
                     return null;
                 });
+        context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE)
+                .from(o)
+                .leftOuterJoin(k)
+                .on(o.BILL_ID.eq(billId))
+                .and(o.CHARGING_ITEMS_ID.eq(k.ID))
+                .orderBy(k.DEFAULT_ORDER)
+                .fetch()
+                .map(f -> {
+                    BillItemDTO itemDTO = new BillItemDTO();
+                    itemDTO.setBillItemName(f.getValue(o.CHARGING_ITEM_NAME));
+                    itemDTO.setBillItemId(f.getValue(o.ID));
+                    itemDTO.setAmountReceivable(f.getValue(o.AMOUNT_RECEIVABLE));
+                    list1.add(itemDTO);
+                    return null;
+                });
+         context.select()
+                 .from(t)
+                 .where(t.BILL_ID.eq(billId))
+                 .fetch()
+                 .map(f -> {
+                     ExemptionItemDTO exemDto = new ExemptionItemDTO();
+                     exemDto.setAmount(f.getValue(t.AMOUNT));
+                     exemDto.setExemptionId(f.getValue(t.ID));
+                     exemDto.setRemark(f.getValue(t.REMARKS));
+                     list2.add(exemDto);
+                     return null;
+                 });
+
         dto.setBillItemDTOList(list1);
         dto.setExemptionItemDTOList(list2);
         vo.setBillGroupDTO(dto);
@@ -1039,7 +1066,6 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId) {
         List<ListChargingStandardsDTO> list = new ArrayList<>();
-        List<Long> ids = new ArrayList<>();
         List<String> variableInjectionJson = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
@@ -1047,7 +1073,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentVariables t2 = Tables.EH_PAYMENT_VARIABLES.as("t2");
         EhPaymentBillGroupsRules t3 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t3");
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA);
+        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t3.VARIABLES_JSON_STRING);
         query.addFrom(t,t1,t3);
         query.addConditions(t.CHARGING_ITEMS_ID.eq(chargingItemId));
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
@@ -1061,21 +1087,29 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setChargingStandardId(chargingStandardId);
             dto.setChargingStandardName(r.getValue(t.NAME));
             dto.setFormula(r.getValue(t.FORMULA));
+            dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
             variableInjectionJson.add(r.getValue(t3.VARIABLES_JSON_STRING));
             list.add(dto);
             return null;
         });
-        for(int i = 0; i < ids.size(); i++) {
+        for(int i = 0; i < list.size(); i++) {
             String json = variableInjectionJson.get(i);
             ListChargingStandardsDTO dto = list.get(i);
             Gson gson = new Gson();
-            List<VariableIdAndValue> idAndValues = gson.fromJson(json,new TypeToken<List<VariableIdAndValue>>(){}.getType());
+            List<VariableIdAndValue> idAndValues = new ArrayList<>();
+            Map<String,String> map = gson.fromJson(json, Map.class);
+            for(Map.Entry<?,?> entry : map.entrySet()){
+                VariableIdAndValue var = new VariableIdAndValue();
+                var.setVariableId(entry.getKey());
+                var.setVariableValue(entry.getValue());
+                idAndValues.add(var);
+            }
             List<PaymentVariable> variables = new ArrayList<>();
             for(int j = 0; j < idAndValues.size(); j++) {
                 PaymentVariable variable = new PaymentVariable();
                 VariableIdAndValue idAndValue = idAndValues.get(j);
-                long variableId = (long)idAndValue.getVariableId();
-                double variableValueDouble = (double)idAndValue.getVariableValue();
+                long variableId = Long.parseLong((String)idAndValue.getVariableId());
+                double variableValueDouble = Double.parseDouble((String)idAndValue.getVariableValue());
                 BigDecimal variableValue = new BigDecimal(variableValueDouble);
                 variableValue = variableValue.setScale(2);
                 String variableName = context.select(t2.NAME)
@@ -1090,6 +1124,90 @@ public class AssetProviderImpl implements AssetProvider {
             list.get(i).setVariables(variables);
         }
         return list;
+    }
+
+    @Override
+    public void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId,String targetName) {
+        this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+            EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+            EhPaymentExemptionItems t2 = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t2");
+            Long billGroupId = billGroupDTO.getBillGroupId();
+            List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
+            List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+
+            //需要组装的信息
+            BigDecimal amountExemption = new BigDecimal("0");
+            BigDecimal amountSupplement = new BigDecimal("0");
+            BigDecimal amountReceivable = new BigDecimal("0");
+            BigDecimal zero = new BigDecimal("0");
+
+
+            for(int i = 0; i < list1.size() ; i++) {
+                BillItemDTO dto = list1.get(i);
+                context.update(t1)
+                        .set(t1.AMOUNT_RECEIVABLE,dto.getAmountReceivable())
+                        .set(t1.AMOUNT_OWED,dto.getAmountReceivable())
+                        .set(t1.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+                        .set(t1.OPERATOR_UID,UserContext.currentUserId())
+                        .where(t1.BILL_ID.in(billId))
+                        .and(t1.ID.eq(dto.getBillItemId()))
+                        .execute();
+                amountReceivable = amountReceivable.add(dto.getAmountReceivable());
+            }
+            //bill exemption
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
+            for(int i = 0; i < list2.size(); i++){
+                ExemptionItemDTO exemptionItemDTO = list2.get(i);
+                if(exemptionItemDTO.getExemptionId()!=null){
+                    context.update(t2)
+                            .set(t2.AMOUNT,exemptionItemDTO.getAmount())
+                            .set(t2.REMARKS,exemptionItemDTO.getRemark())
+                            .set(t2.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
+                            .set(t2.OPERATOR_UID,UserContext.currentUserId())
+                            .where(t2.BILL_ID.eq(billId))
+                            .and(t2.ID.eq(exemptionItemDTO.getExemptionId()))
+                            .execute();
+                }else{
+                    long nextId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()));
+                    PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
+                    BigDecimal amount = exemptionItemDTO.getAmount();
+                    exemptionItem.setAmount(amount);
+                    exemptionItem.setBillGroupId(billGroupId);
+                    exemptionItem.setBillId(billId);
+                    exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    exemptionItem.setCreatorUid(UserContext.currentUserId());
+                    exemptionItem.setId(nextId);
+                    exemptionItem.setRemarks(exemptionItemDTO.getRemark());
+                    exemptionItem.setTargetType(targetType);
+                    exemptionItem.setTargetId(targetId);
+                    exemptionItem.setTargetname(targetName);
+                    exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    exemptionItems.add(exemptionItem);
+                }
+
+                if(exemptionItemDTO.getAmount().compareTo(zero)==-1){
+                    amountExemption = amountExemption.add(exemptionItemDTO.getAmount());
+                }else if(exemptionItemDTO.getAmount().compareTo(zero)==1){
+                    amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
+                }
+            }
+            EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
+            exemptionItemsDao.insert(exemptionItems);
+
+            //  缺少创造者信息，先保存在其他地方，比如持久化日志
+            amountReceivable = amountReceivable.add(amountExemption);
+            amountReceivable = amountReceivable.add(amountSupplement);
+            context.update(t)
+                    .set(t.AMOUNT_RECEIVABLE,amountReceivable)
+                    .set(t.AMOUNT_OWED,amountReceivable)
+                    .set(t.AMOUNT_SUPPLEMENT,amountSupplement)
+                    .set(t.AMOUNT_EXEMPTION,amountExemption)
+                    .where(t1.ID.eq(billId))
+                    .execute();
+            return null;
+        });
     }
 
 }

@@ -120,8 +120,8 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String addressName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status) {
-        return zuolinAssetVendorHandler.listBills( currentNamespaceId,  ownerId,  ownerType,  addressName,  addressId,  billGroupName,  billGroupId,  billStatus,  dateStrBegin,  dateStrEnd,  pageOffSet,  pageSize,  targetName, status);
+    public List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status) {
+        return zuolinAssetVendorHandler.listBills( currentNamespaceId,  ownerId,  ownerType,  buildingName,apartmentName,  addressId,  billGroupName,  billGroupId,  billStatus,  dateStrBegin,  dateStrEnd,  pageOffSet,  pageSize,  targetName, status);
     }
 
     @Override

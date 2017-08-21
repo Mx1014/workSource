@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  *<ul>
+ * <li>billId:账单id</li>
  * <li>dateStr:账期</li>
  * <li>contractNO:合同号</li>
  * <li>buildingName: 楼栋名称</li>
@@ -21,6 +22,8 @@ import java.util.List;
  *</ul>
  */
 public class ListBillDetailResponse {
+    private Long billId;
+    private Long billGroupId;
     private String dateStr;
     private String contractNO;
     private String buildingName;
@@ -40,6 +43,22 @@ public class ListBillDetailResponse {
 
     public String getDateStr() {
         return dateStr;
+    }
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
+
+    public Long getBillId() {
+        return billId;
+    }
+
+    public void setBillId(Long billId) {
+        this.billId = billId;
     }
 
     public void setDateStr(String dateStr) {

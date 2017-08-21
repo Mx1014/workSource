@@ -37,7 +37,7 @@ public class ListSettledBillTest extends CoreServerTestCase {
 //        cmd.setDateStrEnd(null);
 //        cmd.setBillGroupName("物业");
 //        cmd.setTargetName("lisi");
-        cmd.setAddressName("beijing");
+//        cmd.setAddressName("beijing");
         ListBillsResponse listBillsResponse = assetService.listBills(cmd);
         for(int i = 0; i<1000; i++){
             System.out.println(i);

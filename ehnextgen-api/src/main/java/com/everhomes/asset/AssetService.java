@@ -63,5 +63,7 @@ public interface AssetService {
 
     List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
 
+    void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
+
 //    void synchronizeZJGKBill();
 }

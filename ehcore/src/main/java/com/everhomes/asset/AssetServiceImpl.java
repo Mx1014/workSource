@@ -201,7 +201,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
-        List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getAddressName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus());
+        List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus());
         response.setListBillsDTOS(list);
         if(list.size() <= cmd.getPageSize()){
             response.setNextPageAnchor(cmd.getPageAnchor());
@@ -378,6 +378,15 @@ public class AssetServiceImpl implements AssetService {
     public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
         ListBillDetailVO vo = assetProvider.listBillDetail(cmd.getBillId());
         ListBillDetailResponse response = ConvertHelper.convert(vo, ListBillDetailResponse.class);
+        List<ExemptionItemDTO> dtos = response.getBillGroupDTO().getExemptionItemDTOList();
+        for(int i = 0; i< dtos.size(); i ++) {
+            ExemptionItemDTO dto = dtos.get(i);
+            if(dto.getAmount().compareTo(new BigDecimal("0"))==-1) {
+                dto.setIsPlus((byte)0);
+            }else{
+                dto.setIsPlus((byte)1);
+            }
+        }
         response.setBuildingName(cmd.getBuildingName());
         response.setApartmentName(cmd.getApartmentName());
         return response;
@@ -431,6 +440,11 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
         return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId());
+    }
+
+    @Override
+    public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
+        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTOList(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName());
     }
 //    @Scheduled(cron = "0 0 23 * * ?")
 //    @Override

@@ -4517,7 +4517,7 @@ public class UserServiceImpl implements UserService {
         List<TargetDTO> organizations = organizationProvider.findOrganizationIdByNameAndAddressId(targetName,ids);
         if(users.size() == 1 && organizations.size() == 0) {
             return users.get(0);
-        }else if(organizations.size() == 1 || users.size() == 0) {
+        }else if(organizations.size() == 1 && users.size() == 0) {
             return organizations.get(0);
         }
         return null;
