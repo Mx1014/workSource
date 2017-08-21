@@ -8,6 +8,8 @@ public interface ProfileProvider {
 
     void createProfileContactsSticky(ProfileContactsSticky profileContactsSticky);
 
+    void updateProfileContactsSticky(ProfileContactsSticky profileContactsSticky);
+
     void deleteProfileContactsSticky(ProfileContactsSticky profileContactsSticky);
 
     ProfileContactsSticky findProfileContactsStickyById(Long id);

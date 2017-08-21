@@ -3,9 +3,7 @@ package com.everhomes.profile;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.profile.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sms.DateUtil;
@@ -17,6 +15,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.jooq.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -44,6 +43,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         //  组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
+        addCommand.setOrganizationId(cmd.getOrganizationId());
         addCommand.setContactName(cmd.getContactName());
         addCommand.setGender(cmd.getGender());
         addCommand.setContactToken(cmd.getContactToken());
@@ -67,46 +67,81 @@ public class ProfileServiceImpl implements ProfileService {
             dto.setEmail(memberDetail.getEmail());
         }
 
-        //  TODO:添加档案记录
+        //  TODO: 添加档案记录
 
         return dto;
     }
 
     @Override
     public void transferProfileContacts(TransferProfileContactsCommand cmd) {
-
+        if(cmd.getDetailIds() != null){
+            //  TODO: 根据提供的方法获取部门名称
+            for(Long detailId : cmd.getDetailIds()){
+                // TODO: 循环添加档案记录
+            }
+        }
     }
 
     @Override
     public void deleteProfileContacts(DeleteProfileContactsCommand cmd) {
-
+        if(cmd.getDetailIds() != null){
+            for(Long detailId : cmd.getDetailIds()){
+                //  组织架构删除
+                OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
+                deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(cmd.getOrganizationId());
+                deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
+                deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
+                organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
+                // TODO: 循环添加档案记录
+            }
+        }
     }
 
+    //  通讯录成员置顶接口
     @Override
     public void stickProfileContact(StickProfileContactCommand cmd) {
         User user = UserContext.current().getUser();
 
         //  状态码为 0 时删除
-        if(cmd.getStick().equals("0")){
+        if (cmd.getStick().equals("0")) {
             ProfileContactsSticky result = profileProvider.findProfileContactsStickyByDetailIdAndOrganizationId(
-                    user.getNamespaceId(),cmd.getOrganizationId(),cmd.getDetailId());
-            if(result != null)
+                    user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
+            if (result != null)
                 profileProvider.deleteProfileContactsSticky(result);
         }
 
         //  状态码为 1 时新增置顶
-        if(cmd.getStick().equals("1")){
-            ProfileContactsSticky contactsSticky = new ProfileContactsSticky();
-            contactsSticky.setNamespaceId(user.getNamespaceId());
-            contactsSticky.setOrganizationId(cmd.getOrganizationId());
-            contactsSticky.setDetailId(cmd.getDetailId());
-            contactsSticky.setOperatorUid(user.getId());
-            profileProvider.createProfileContactsSticky(contactsSticky);
+        if (cmd.getStick().equals("1")) {
+            ProfileContactsSticky result = profileProvider.findProfileContactsStickyByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
+            if (result == null) {
+                ProfileContactsSticky contactsSticky = new ProfileContactsSticky();
+                contactsSticky.setNamespaceId(user.getNamespaceId());
+                contactsSticky.setOrganizationId(cmd.getOrganizationId());
+                contactsSticky.setDetailId(cmd.getDetailId());
+                contactsSticky.setOperatorUid(user.getId());
+                profileProvider.createProfileContactsSticky(contactsSticky);
+            } else {
+                profileProvider.updateProfileContactsSticky(result);
+            }
         }
     }
 
     @Override
     public ListProfileContactsResponse listProfileContacts(ListProfileContactsCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        //  没有查询时显示主体
+        if (StringUtils.isEmpty(cmd.getKeywords())) {
+            //  1.首先从置顶的表读取置顶人员
+            List<Long> detailIds = profileProvider.listProfileContactsStickyIds(namespaceId,cmd.getOrganizationId());
+            //  TODO: 2.从组织架构读取对应人员，确定置顶个数
+            //  TODO: 3.获取其余人员
+
+        } else {
+            //  查询则显示特定人员
+
+        }
         return null;
     }
 
@@ -122,6 +157,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd) {
+        //  TODO: 校验密码
         //   校验有误时抛出异常
 /*        if(member != null){
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PHONE_ALREADY_EXIST,
@@ -131,11 +167,32 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public ListProfileEmployeesResponse listProfileEmployees(ListProfileEmployeesCommand cmd) {
+
         return null;
     }
 
     @Override
     public ProfileEmployeeDTO addProfileEmployee(AddProfileEmployeeCommand cmd) {
+
+        //  1.组织架构添加人员
+        AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
+        addCommand.setOrganizationId(cmd.getOrganizationId());
+        addCommand.setContactName(cmd.getContactName());
+        addCommand.setCheckInTime(cmd.getCheckInTime());
+        addCommand.setEmployeeType(cmd.getEmployeeType());
+        addCommand.setEmployeeStatus(cmd.getEmployeeStatus());
+        addCommand.setEmploymentTime(cmd.getEmploymentTime());
+//        addCommand.setGender(cmd.getGender());
+        addCommand.setContactToken(cmd.getContactToken());
+//        addCommand.setDepartmentIds(cmd.getDepartmentId());
+//        addCommand.setJobPositionIds(cmd.getJobPositionId());
+        if(cmd.getEmployeeNo() != null)
+            addCommand.setEmployeeNo(cmd.getEmployeeNo());
+        OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
+
+        //  2.修改其余的信息
+        OrganizationMemberDetails result = organizationProvider.findOrganizationMemberDetailsByDetailId(memberDTO.getDetailId());
+
         return null;
     }
 

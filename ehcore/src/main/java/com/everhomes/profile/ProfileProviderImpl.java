@@ -51,6 +51,18 @@ public class ProfileProviderImpl implements ProfileProvider {
     }
 
     @Override
+    public void updateProfileContactsSticky(ProfileContactsSticky profileContactsSticky) {
+        profileContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
+        profileContactsSticky.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhProfileContactsStickyDao dao = new EhProfileContactsStickyDao(context.configuration());
+        dao.update(profileContactsSticky);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhProfileContactsSticky.class, profileContactsSticky.getId());
+    }
+
+    @Override
     public void deleteProfileContactsSticky(ProfileContactsSticky profileContactsSticky) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhProfileContactsStickyDao dao = new EhProfileContactsStickyDao(context.configuration());

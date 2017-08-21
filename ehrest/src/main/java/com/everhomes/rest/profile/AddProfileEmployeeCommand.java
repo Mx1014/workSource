@@ -6,15 +6,17 @@ import java.sql.Date;
 
 public class AddProfileEmployeeCommand {
 
+    private Long organizationId;
+
     private String contactName;
 
-    private Date checkInTime;
+    private String checkInTime;
 
     private Byte employeeType;
 
     private Byte employeeStatus;
 
-    private Date employmentTime;
+    private String employmentTime;
 
     private Long departmentId;
 
@@ -28,7 +30,7 @@ public class AddProfileEmployeeCommand {
 
     private String workingPlace;
 
-    private Long organizationId;
+    private Long contractParty;
 
     private String areaCode;
 
@@ -45,11 +47,11 @@ public class AddProfileEmployeeCommand {
         this.contactName = contactName;
     }
 
-    public Date getCheckInTime() {
+    public String getCheckInTime() {
         return checkInTime;
     }
 
-    public void setCheckInTime(Date checkInTime) {
+    public void setCheckInTime(String checkInTime) {
         this.checkInTime = checkInTime;
     }
 
@@ -69,11 +71,11 @@ public class AddProfileEmployeeCommand {
         this.employeeStatus = employeeStatus;
     }
 
-    public Date getEmploymentTime() {
+    public String getEmploymentTime() {
         return employmentTime;
     }
 
-    public void setEmploymentTime(Date employmentTime) {
+    public void setEmploymentTime(String employmentTime) {
         this.employmentTime = employmentTime;
     }
 
@@ -123,6 +125,14 @@ public class AddProfileEmployeeCommand {
 
     public void setWorkingPlace(String workingPlace) {
         this.workingPlace = workingPlace;
+    }
+
+    public Long getContractParty() {
+        return contractParty;
+    }
+
+    public void setContractParty(Long contractParty) {
+        this.contractParty = contractParty;
     }
 
     public Long getOrganizationId() {

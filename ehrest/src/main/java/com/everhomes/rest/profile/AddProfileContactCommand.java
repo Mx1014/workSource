@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>organizationId: 公司 id</li>
  * <li>contactName: 成员姓名</li>
  * <li>contactEnName: 成员英文名</li>
  * <li>gender: 成员性别</li>
@@ -20,6 +21,9 @@ import java.util.List;
  * </ul>
  */
 public class AddProfileContactCommand {
+
+    private Long organizationId;
+
     private String contactName;
 
     private String contactEnName;
@@ -43,6 +47,14 @@ public class AddProfileContactCommand {
     private Byte visibleFlag;
 
     public AddProfileContactCommand() {
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public String getContactName() {
