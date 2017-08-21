@@ -31,8 +31,7 @@ CREATE TABLE `eh_community_map_infos` (
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
 
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_community_id_name` (`community_id`,`name`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_community_building_geos` (
@@ -44,6 +43,5 @@ CREATE TABLE `eh_community_building_geos` (
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
 
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_community_id_name` (`community_id`,`name`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
