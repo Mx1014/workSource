@@ -1073,7 +1073,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentVariables t2 = Tables.EH_PAYMENT_VARIABLES.as("t2");
         EhPaymentBillGroupsRules t3 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t3");
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t3.VARIABLES_JSON_STRING);
+        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t3.VARIABLES_JSON_STRING,t.FORMULA_TYPE);
         query.addFrom(t,t1,t3);
         query.addConditions(t.CHARGING_ITEMS_ID.eq(chargingItemId));
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
