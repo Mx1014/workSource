@@ -179,7 +179,7 @@
         eh_user_identifier_logs | eh_user_appeal_logs |
         eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve|
         eh_community_approve_requests |
-            eh_profile_contacts_sticky | eh_profile_dismiss_employees |
+            eh_archives_contacts_sticky | eh_archives_dismiss_employees |
 
 
         </includes>
