@@ -2858,6 +2858,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 UPDATE eh_launch_pad_items set scope_id = 240111044331050379 where namespace_id = 999984 and item_label = '双清孵化';
 
+SET @parent_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
 SET @parent_id = @parent_id + 1;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES (@parent_id, 'community', 240111044331050379, '0', '场地费用', '场地费用', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, 999984, '');
