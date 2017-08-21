@@ -8,13 +8,13 @@ import java.util.List;
 
 /**
  *<ul>
- * <li>listSettledBillDTOs: 已出账单的减免项，参考{@link ListSettledBillExemptionItemsDTO}</li>
+ * <li>listSettledBillDTOs: 账单的减免项，参考{@link ListBillExemptionItemsDTO}</li>
  * <li>nextPageAnchor:下一次的锚点</li>
  *</ul>
  */
 public class ListSettledBillExemptionItemsResponse {
-    @ItemType(ListSettledBillExemptionItemsDTO.class)
-    private List<ListSettledBillExemptionItemsDTO> listNotSettledBillDTOs;
+    @ItemType(ListBillExemptionItemsDTO.class)
+    private List<ListBillExemptionItemsDTO> listNotSettledBillDTOs;
     private Long nextPageAnchor;
 
     @Override
@@ -22,11 +22,11 @@ public class ListSettledBillExemptionItemsResponse {
         return StringHelper.toJsonString(this);
     }
 
-    public List<ListSettledBillExemptionItemsDTO> getListNotSettledBillDTOs() {
+    public List<ListBillExemptionItemsDTO> getListNotSettledBillDTOs() {
         return listNotSettledBillDTOs;
     }
 
-    public void setListNotSettledBillDTOs(List<ListSettledBillExemptionItemsDTO> listNotSettledBillDTOs) {
+    public void setListNotSettledBillDTOs(List<ListBillExemptionItemsDTO> listNotSettledBillDTOs) {
         this.listNotSettledBillDTOs = listNotSettledBillDTOs;
     }
 

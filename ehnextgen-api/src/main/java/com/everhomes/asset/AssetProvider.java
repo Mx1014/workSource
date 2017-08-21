@@ -73,4 +73,12 @@ public interface AssetProvider {
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId);
 
     void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId,String targetName);
+
+    List<ListBillExemptionItemsDTO> listBillExemptionItems(Long billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
+
+    void deleteBill(Long billId);
+
+    void deleteBillItem(Long billItemId);
+
+    void deletExemptionItem(Long exemptionItemId);
 }

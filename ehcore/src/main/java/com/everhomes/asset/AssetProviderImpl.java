@@ -771,12 +771,12 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal zero = new BigDecimal("0");
 
             long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-
+            nextBillId = nextBillId+1;
             //billItems assemble
             List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-            long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsList.size());
-            long currentBillItemSeq = nextBillItemBlock - billItemsList.size() + 1;
-            currentBillItemSeq=100l;
+            long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), list1.size());
+            long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
+            currentBillItemSeq = currentBillItemSeq + 1;
             for(int i = 0; i < list1.size() ; i++) {
                 BillItemDTO dto = list1.get(i);
                 PaymentBillItems item = new PaymentBillItems();
@@ -814,9 +814,9 @@ public class AssetProviderImpl implements AssetProvider {
 
             //bill exemption
             List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
-            long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), exemptionItems.size());
-            long currentExemItemSeq = nextExemItemBlock - exemptionItems.size() + 1;
-//            currentExemItemSeq = 100l;
+            long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), list2.size());
+            long currentExemItemSeq = nextExemItemBlock - list2.size() + 1;
+            currentExemItemSeq = currentExemItemSeq+1;
             for(int i = 0; i < list2.size(); i++){
                 ExemptionItemDTO exemptionItemDTO = list2.get(i);
                 PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
@@ -909,8 +909,8 @@ public class AssetProviderImpl implements AssetProvider {
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE)
                 .from(o)
                 .leftOuterJoin(k)
-                .on(o.BILL_ID.eq(billId))
-                .and(o.CHARGING_ITEMS_ID.eq(k.ID))
+                .on(o.CHARGING_ITEMS_ID.eq(k.ID))
+                .where(o.BILL_ID.eq(billId))
                 .orderBy(k.DEFAULT_ORDER)
                 .fetch()
                 .map(f -> {
@@ -1076,7 +1076,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentVariables t2 = Tables.EH_PAYMENT_VARIABLES.as("t2");
         EhPaymentBillGroupsRules t3 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t3");
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t3.VARIABLES_JSON_STRING);
+        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t3.VARIABLES_JSON_STRING,t.FORMULA);
         query.addFrom(t,t1,t3);
         query.addConditions(t.CHARGING_ITEMS_ID.eq(chargingItemId));
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
@@ -1214,5 +1214,51 @@ public class AssetProviderImpl implements AssetProvider {
             return null;
         });
     }
+
+    @Override
+    public List<ListBillExemptionItemsDTO> listBillExemptionItems(Long billId, int pageOffSet, Integer pageSize, String dateStr, String targetName) {
+        List<ListBillExemptionItemsDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentExemptionItems t = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t");
+        context.select()
+                .from(t)
+                .where(t.BILL_ID.eq(billId))
+                .fetch()
+                .map(r -> {
+                    ListBillExemptionItemsDTO dto = new ListBillExemptionItemsDTO();
+                    dto.setAmount(r.getValue(t.AMOUNT));
+                    dto.setDateStr(dateStr);
+                    dto.setExemptionId(r.getValue(t.ID));
+                    dto.setRemark(r.getValue(t.REMARKS));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
+    public void deleteBill(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .execute();
+    }
+
+    @Override
+    public void deleteBillItem(Long billItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+                .execute();
+    }
+
+    @Override
+    public void deletExemptionItem(Long exemptionItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
+                .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.ID.eq(exemptionItemId))
+                .execute();
+    }
+
 
 }

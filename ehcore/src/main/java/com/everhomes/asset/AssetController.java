@@ -536,7 +536,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 修改后保存一个未出账单          2
+    // this is for 修改后保存一个未出账单          4?
     /**
      * <p>保存一个未出账单的修改,若账单状态更改为已出，则不能修改</p>
      * <b>URL: /asset/modifyNotSettledBill</b>
@@ -566,35 +566,36 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 展示一个未出账单的减免项列表           2
-    /**
-     * <p>展示一个未出账单的减免项列表</p>
-     * <b>URL: /asset/listNotSettledBillExemptionItems</b>
-     */
-    @RequestMapping("listNotSettledBillExemptionItems")
-    @RestReturn(value = ListNotSettledBillExemptionItemsResponse.class)
-    public RestResponse listNotSettledBillExemptionItems(ListBillItemsCommand cmd) {
-        RestResponse response = new RestResponse();
-        response.setErrorDescription("OK");
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        return response;
-    }
+//    // this is for 展示一个未出账单的减免项列表           2
+//    /**
+//     * <p>展示一个未出账单的减免项列表</p>
+//     * <b>URL: /asset/listNotSettledBillExemptionItems</b>
+//     */
+//    @RequestMapping("listNotSettledBillExemptionItems")
+//    @RestReturn(value = ListBillExemptionItemsResponse.class)
+//    public RestResponse listNotSettledBillExemptionItems(ListBillItemsCommand cmd) {
+//        RestResponse response = new RestResponse();
+//        response.setErrorDescription("OK");
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        return response;
+//    }
 
-    // this is for 删除一个未出账单         2
+    // this is for 删除一个账单         2
     /**
      * <p>删除一个未出账单</p>
-     * <b>URL: /asset/deletUnSettledBill</b>
+     * <b>URL: /asset/deletBill</b>
      */
-    @RequestMapping("deletUnSettledBill")
+    @RequestMapping("deletBill")
     @RestReturn(value = String.class)
-    public RestResponse deletUnSettledBill(DeletUnSettledBillCommand cmd) {
+    public RestResponse deletBill(BillIdCommand cmd) {
+        assetService.deleteBill(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
 
-    // this is for 删除一个未出账单的收费项     1
+    // this is for 删除一个账单的收费项     1
     /**
      * <p>删除一个未出账单的收费项</p>
      * <b>URL: /asset/deletBillItem</b>
@@ -602,13 +603,14 @@ public class AssetController extends ControllerBase {
     @RequestMapping("deletBillItem")
     @RestReturn(value = String.class)
     public RestResponse deletBillItem(BillItemIdCommand cmd) {
+        assetService.deleteBillItem(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
 
-    // this is for 删除一个未出账单的减免项     2
+    // this is for 删除一个账单的减免项     2
     /**
      * <p>删除一个未出账单的减免项</p>
      * <b>URL: /asset/deletExemptionItem</b>
@@ -616,6 +618,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("deletExemptionItem")
     @RestReturn(value = String.class)
     public RestResponse deletExemptionItem(ExemptionItemIdCommand cmd) {
+        assetService.deletExemptionItem(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -668,7 +671,7 @@ public class AssetController extends ControllerBase {
 
 
 
-    // this is for 按照账单组展示已出账单          2
+    // this is for 按照账单组展示已出账单          4
     /**
      * <p>按照账单组展示已出账单</p>
      * <b>URL: /asset/listSettledBill</b>
@@ -683,7 +686,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 展示已出账单的收费项       2
+    // this is for 展示已出账单的收费项       4
     /**
      * <p>展示已出账单的收费项</p>
      * <b>URL: /asset/listSettledBillItems</b>
@@ -699,7 +702,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 一键部分催缴           2
+    // this is for 一键部分催缴           4
     /**
      * <p>一键部分催缴</p>
      * <b>URL: /asset/selectedNotice</b>
@@ -714,7 +717,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 更改缴费状态           2
+    // this is for 更改缴费状态           4
     /**
      * <p>更改账单的缴费状态</p>
      * <b>URL: /asset/modifyBillStatus</b>
@@ -729,7 +732,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 一键全部催缴       2
+    // this is for 一键全部催缴       4
     /**
      * <p>一键全部催缴</p>
      * <b>URL: /asset/OneKeyNotice</b>
@@ -755,21 +758,22 @@ public class AssetController extends ControllerBase {
         return null;
     }
 
-    // this is for 展示已出账单的减免项           2
+    // this is for 展示账单的减免项           4
     /**
-     * <p>展示已出账单的减免项</p>
-     * <b>URL: /asset/listSettledBillExemptionItems</b>
+     * <p>展示账单的减免项</p>
+     * <b>URL: /asset/listBillExemptionItems</b>
      */
     @RequestMapping("listSettledBillExemptionItems")
     @RestReturn(value = ListSettledBillExemptionItemsResponse.class)
-    public RestResponse listSettledBillExemptionItems(BillGroupAndTargetCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
+        ListSettledBillExemptionItemsResponse res = assetService.listBillExemptionItems(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
 
-    // this is for 按照不同维度统计应收，已收，欠收的数额信息            2
+    // this is for 按照不同维度统计应收，已收，欠收的数额信息            4
     /**
      * <p>按照不同维度统计应收，已收，欠收的数额信息</p>
      * <b>URL: /asset/billStatics</b>
@@ -784,7 +788,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 显示一个用户的物业账单          2
+    // this is for 显示一个用户的物业账单          4
     /**
      * <p>显示一个用户的物业账单</p>
      * <b>URL: /asset/showBillForClient</b>

@@ -446,6 +446,50 @@ public class AssetServiceImpl implements AssetService {
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
         assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTOList(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName());
     }
+
+    @Override
+    public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
+        ListSettledBillExemptionItemsResponse response = new ListSettledBillExemptionItemsResponse();
+
+        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
+            cmd.setPageAnchor(1l);
+        }
+        if(cmd.getPageSize() == null){
+            cmd.setPageSize(20);
+        }
+        int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
+        List<ListBillExemptionItemsDTO> list = assetProvider.listBillExemptionItems(cmd.getBillId(),pageOffSet,cmd.getPageSize(),cmd.getDateStr(),cmd.getTargetName());
+        for(int i = 0; i < list.size(); i++){
+            ListBillExemptionItemsDTO dto = list.get(i);
+            if(dto.getAmount().compareTo(new BigDecimal("0"))==-1){
+                dto.setIsPlus((byte)0);
+            }else if(dto.getAmount().compareTo(new BigDecimal("0"))==1 || dto.getAmount().compareTo(new BigDecimal("0"))==0){
+                dto.setIsPlus((byte)1);
+            }
+        }
+        response.setListNotSettledBillDTOs(list);
+        if(list.size() <= cmd.getPageSize()) {
+            response.setNextPageAnchor(cmd.getPageAnchor());
+        }else{
+            response.setNextPageAnchor(cmd.getPageAnchor()+1);
+        }
+        return response;
+    }
+
+    @Override
+    public void deleteBill(BillIdCommand cmd) {
+        assetProvider.deleteBill(cmd.getBillId());
+    }
+
+    @Override
+    public void deleteBillItem(BillItemIdCommand cmd) {
+        assetProvider.deleteBillItem(cmd.getBillItemId());
+    }
+
+    @Override
+    public void deletExemptionItem(ExemptionItemIdCommand cmd) {
+        assetProvider.deletExemptionItem(cmd.getExemptionItemId());
+    }
 //    @Scheduled(cron = "0 0 23 * * ?")
 //    @Override
 //    public void synchronizeZJGKBill() {

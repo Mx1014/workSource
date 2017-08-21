@@ -65,5 +65,13 @@ public interface AssetService {
 
     void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
 
+    ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd);
+
+    void deleteBill(BillIdCommand cmd);
+
+    void deleteBillItem(BillItemIdCommand cmd);
+
+    void deletExemptionItem(ExemptionItemIdCommand cmd);
+
 //    void synchronizeZJGKBill();
 }
