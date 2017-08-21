@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -9,13 +9,13 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailIds: (List)员工detailId</li>
- * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link com.everhomes.rest.profile.DismissType}</li>
- * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.profile.DismissReason}</li>
+ * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link DismissType}</li>
+ * <li>dismissReason: 离职原因 参考{@link DismissReason}</li>
  * <li>dismissTime: 离职日期</li>
  * <li>dismissRemark: 离职备注</li>
  * </ul>
  */
-public class DismissProfileEmployeesCommand {
+public class DismissArchivesEmployeesCommand {
 
     @ItemType(Long.class)
     private List<Long> detailIds;
@@ -28,7 +28,7 @@ public class DismissProfileEmployeesCommand {
 
     private String dismissRemark;
 
-    public DismissProfileEmployeesCommand() {
+    public DismissArchivesEmployeesCommand() {
     }
 
     public List<Long> getDetailIds() {

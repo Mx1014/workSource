@@ -1,14 +1,13 @@
 package com.everhomes.profile;
 
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.profile.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
 public interface ProfileService {
 
-    ProfileContactDTO addProfileContact(AddProfileContactCommand cmd);
+    ProfileContactDTO addProfileContact(AddArchivesContactCommand cmd);
 
     void transferProfileContacts(TransferProfileContactsCommand cmd);
 

@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -17,7 +17,7 @@ import java.util.List;
  * <li>transferReason: 调整原因</li>
  * </ul>
  */
-public class TransferProfileEmployeesCommand {
+public class TransferArchivesEmployeesCommand {
 
     @ItemType(Long.class)
     private List<Long> detailIds;
@@ -34,7 +34,7 @@ public class TransferProfileEmployeesCommand {
 
     private String transferReason;
 
-    public TransferProfileEmployeesCommand() {
+    public TransferArchivesEmployeesCommand() {
     }
 
     public List<Long> getDetailIds() {

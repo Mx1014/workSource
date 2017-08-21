@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
@@ -11,14 +11,14 @@ import java.sql.Date;
  * <li>dismissTimeEnd: 离职结束日期</li>
  * <li>checkInTimeStart: 入职起始日期</li>
  * <li>checkInTimeEnd: 入职结束日期</li>
- * <li>dismissType: 离职类型： 1-辞职 2-解雇 3-其他 参考{@link com.everhomes.rest.profile.DismissType}</li>
+ * <li>dismissType: 离职类型： 1-辞职 2-解雇 3-其他 参考{@link DismissType}</li>
  * <li>dismissReason: 离职原因</li>
  * <li>contactName: 姓名</li>
  * <li>pageOffset: 页码(不能为null)</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
-public class ListProfileDismissEmployeesCommand {
+public class ListArchivesDismissEmployeesCommand {
 
     private Long organizationId;
 
@@ -40,7 +40,7 @@ public class ListProfileDismissEmployeesCommand {
 
     private Integer pageSize;
 
-    public ListProfileDismissEmployeesCommand() {
+    public ListArchivesDismissEmployeesCommand() {
     }
 
     public Long getOrganizationId() {
@@ -56,7 +56,7 @@ public class ListProfileDismissEmployeesCommand {
     }
 
     public void setDismissTimeStart(String dismissTimeStart) {
-        this.dismissTimeStart = ProfileDateUtil.parseDate(dismissTimeStart);
+        this.dismissTimeStart = ArchivesDateUtil.parseDate(dismissTimeStart);
     }
 
     public Date getDismissTimeEnd() {
@@ -64,7 +64,7 @@ public class ListProfileDismissEmployeesCommand {
     }
 
     public void setDismissTimeEnd(String dismissTimeEnd) {
-        this.dismissTimeEnd = ProfileDateUtil.parseDate(dismissTimeEnd);
+        this.dismissTimeEnd = ArchivesDateUtil.parseDate(dismissTimeEnd);
     }
 
     public Date getCheckInTimeStart() {
@@ -72,7 +72,7 @@ public class ListProfileDismissEmployeesCommand {
     }
 
     public void setCheckInTimeStart(String checkInTimeStart) {
-        this.checkInTimeStart = ProfileDateUtil.parseDate(checkInTimeStart);
+        this.checkInTimeStart = ArchivesDateUtil.parseDate(checkInTimeStart);
     }
 
     public Date getCheckInTimeEnd() {
@@ -80,7 +80,7 @@ public class ListProfileDismissEmployeesCommand {
     }
 
     public void setCheckInTimeEnd(String checkInTimeEnd) {
-        this.checkInTimeEnd = ProfileDateUtil.parseDate(checkInTimeEnd);
+        this.checkInTimeEnd = ArchivesDateUtil.parseDate(checkInTimeEnd);
     }
 
     public Byte getDismissType() {

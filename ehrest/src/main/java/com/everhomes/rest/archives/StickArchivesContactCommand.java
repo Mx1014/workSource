@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 /**
  * <ul>
@@ -7,7 +7,7 @@ package com.everhomes.rest.profile;
  * <li>stick: 置顶状态: 0-取消置顶 1-置顶</li>
  * </ul>
  */
-public class StickProfileContactCommand {
+public class StickArchivesContactCommand {
 
     private Long organizationId;
 
@@ -15,7 +15,7 @@ public class StickProfileContactCommand {
 
     private String stick;
 
-    public StickProfileContactCommand() {
+    public StickArchivesContactCommand() {
     }
 
     public Long getOrganizationId() {

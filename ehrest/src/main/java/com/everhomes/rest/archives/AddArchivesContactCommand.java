@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -20,7 +20,7 @@ import java.util.List;
  * <li>visibleFlag: 隐私设置: 0-显示, 1-隐藏</li>
  * </ul>
  */
-public class AddProfileContactCommand {
+public class AddArchivesContactCommand {
 
     private Long organizationId;
 
@@ -46,7 +46,7 @@ public class AddProfileContactCommand {
 
     private Byte visibleFlag;
 
-    public AddProfileContactCommand() {
+    public AddArchivesContactCommand() {
     }
 
     public Long getOrganizationId() {

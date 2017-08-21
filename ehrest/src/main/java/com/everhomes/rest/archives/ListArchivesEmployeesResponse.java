@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -8,17 +8,17 @@ import java.util.List;
 /**
  * <ul>
  * <li>nextPageAnchor: 下一页起始锚点</li>
- * <li>profilePersonnels: 成员信息，参考{@link ProfileEmployeeDTO}</li>
+ * <li>profilePersonnels: 成员信息，参考{@link ArchivesEmployeeDTO}</li>
  * </ul>
  */
-public class ListProfileEmployeesResponse {
+public class ListArchivesEmployeesResponse {
 
     private Long nextPageAnchor;
 
-    @ItemType(ProfileEmployeeDTO.class)
-    private List<ProfileEmployeeDTO> profilePersonnels;
+    @ItemType(ArchivesEmployeeDTO.class)
+    private List<ArchivesEmployeeDTO> profilePersonnels;
 
-    public ListProfileEmployeesResponse() {
+    public ListArchivesEmployeesResponse() {
     }
 
     public Long getNextPageAnchor() {
@@ -29,11 +29,11 @@ public class ListProfileEmployeesResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<ProfileEmployeeDTO> getProfilePersonnels() {
+    public List<ArchivesEmployeeDTO> getProfilePersonnels() {
         return profilePersonnels;
     }
 
-    public void setProfilePersonnels(List<ProfileEmployeeDTO> profilePersonnels) {
+    public void setProfilePersonnels(List<ArchivesEmployeeDTO> profilePersonnels) {
         this.profilePersonnels = profilePersonnels;
     }
 

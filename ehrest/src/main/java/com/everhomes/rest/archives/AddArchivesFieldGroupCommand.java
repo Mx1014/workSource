@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
@@ -7,11 +7,11 @@ import com.everhomes.util.StringHelper;
  * <li>fieldGroupName: 字段组名称</li>
  * </ul>
  */
-public class AddProfileFieldGroupCommand {
+public class AddArchivesFieldGroupCommand {
 
     private String fieldGroupName;
 
-    public AddProfileFieldGroupCommand() {
+    public AddArchivesFieldGroupCommand() {
     }
 
     public String getFieldGroupName() {

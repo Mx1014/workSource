@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -8,17 +8,17 @@ import java.util.List;
 /**
  * <ul>
  * <li>nextPageOffset: 下一页页码</li>
- * <li>dismissEmployees: 离职员工信息，参考{@link com.everhomes.rest.profile.ProfileDismissEmployeeDTO}</li>
+ * <li>dismissEmployees: 离职员工信息，参考{@link ArchivesDismissEmployeeDTO}</li>
  * </ul>
  */
-public class ListProfileDismissEmployeesResponse {
+public class ListArchivesDismissEmployeesResponse {
 
     private Integer nextPageOffset;
 
-    @ItemType(ProfileDismissEmployeeDTO.class)
-    private List<ProfileDismissEmployeeDTO> dismissEmployees;
+    @ItemType(ArchivesDismissEmployeeDTO.class)
+    private List<ArchivesDismissEmployeeDTO> dismissEmployees;
 
-    public ListProfileDismissEmployeesResponse() {
+    public ListArchivesDismissEmployeesResponse() {
     }
 
     public Integer getNextPageOffset() {
@@ -29,11 +29,11 @@ public class ListProfileDismissEmployeesResponse {
         this.nextPageOffset = nextPageOffset;
     }
 
-    public List<ProfileDismissEmployeeDTO> getDismissEmployees() {
+    public List<ArchivesDismissEmployeeDTO> getDismissEmployees() {
         return dismissEmployees;
     }
 
-    public void setDismissEmployees(List<ProfileDismissEmployeeDTO> dismissEmployees) {
+    public void setDismissEmployees(List<ArchivesDismissEmployeeDTO> dismissEmployees) {
         this.dismissEmployees = dismissEmployees;
     }
 

@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
@@ -7,11 +7,11 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 公司 id</li>
  * </ul>
  */
-public class GetProfileFieldCommand {
+public class GetArchivesFieldCommand {
 
     private Long organizationId;
 
-    public GetProfileFieldCommand() {
+    public GetArchivesFieldCommand() {
     }
 
     public Long getOrganizationId() {

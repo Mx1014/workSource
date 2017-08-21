@@ -1,10 +1,10 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
 import java.sql.Date;
 
-public class AddProfileEmployeeCommand {
+public class AddArchivesEmployeeCommand {
 
     private Long organizationId;
 
@@ -36,7 +36,7 @@ public class AddProfileEmployeeCommand {
 
     private String contactToken;
 
-    public AddProfileEmployeeCommand() {
+    public AddArchivesEmployeeCommand() {
     }
 
     public String getContactName() {

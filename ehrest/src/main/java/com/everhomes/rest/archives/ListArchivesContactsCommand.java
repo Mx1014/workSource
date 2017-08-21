@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
@@ -8,13 +8,13 @@ import com.everhomes.util.StringHelper;
  * <li>keywords: 搜索关键词</li>
  * </ul>
  */
-public class ListProfileContactsCommand {
+public class ListArchivesContactsCommand {
 
     private Long organizationId;
 
     private String keywords;
 
-    public ListProfileContactsCommand() {
+    public ListArchivesContactsCommand() {
     }
 
     public Long getOrganizationId() {

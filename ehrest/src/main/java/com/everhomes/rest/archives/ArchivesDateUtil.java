@@ -1,8 +1,8 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import java.text.SimpleDateFormat;
 
-public class ProfileDateUtil {
+public class ArchivesDateUtil {
 
     public static java.sql.Date parseDate(String strDate) {
         String str = strDate;

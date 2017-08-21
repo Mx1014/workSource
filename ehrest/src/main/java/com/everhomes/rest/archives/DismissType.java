@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.rest.servicehotline.LayoutType;
 import com.everhomes.util.StringHelper;

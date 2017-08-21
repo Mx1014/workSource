@@ -1,7 +1,6 @@
 package com.everhomes;
 
-import com.everhomes.rest.profile.DismissReason;
-import com.everhomes.rest.profile.DismissType;
+import com.everhomes.rest.archives.DismissReason;
 import org.junit.Test;
 
 public class ProfileTest {

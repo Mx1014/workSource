@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 public enum DismissReason {
     SALARY("薪资"), CULTURE("文化"), BALANCE("生活平衡"), PERSONALREASON("个人原因"), CAREERDEVELOPMENT("职业发展"),

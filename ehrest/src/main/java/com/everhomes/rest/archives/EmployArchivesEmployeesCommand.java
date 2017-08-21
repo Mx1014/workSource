@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -13,7 +13,7 @@ import java.util.List;
  * <li>employmentEvaluation: 转正评价</li>
  * </ul>
  */
-public class EmployProfileEmployeesCommand {
+public class EmployArchivesEmployeesCommand {
 
     @ItemType(Long.class)
     private List<Long> detailIds;
@@ -22,7 +22,7 @@ public class EmployProfileEmployeesCommand {
 
     private String employmentEvaluation;
 
-    public EmployProfileEmployeesCommand() {
+    public EmployArchivesEmployeesCommand() {
     }
 
     public List<Long> getDetailIds() {

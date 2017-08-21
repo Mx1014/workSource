@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>fieldValue: 字段附加值</li>
  * </ul>
  */
-public class AddProfileFieldCommand {
+public class AddArchivesFieldCommand {
 
     private Long fieldGroupId;
 
@@ -23,7 +23,7 @@ public class AddProfileFieldCommand {
 
     private String fieldValue;
 
-    public AddProfileFieldCommand() {
+    public AddArchivesFieldCommand() {
     }
 
     public Long getFieldGroupId() {

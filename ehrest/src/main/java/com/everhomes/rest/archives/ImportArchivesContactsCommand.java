@@ -1,8 +1,8 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
-public class ImportProfileContactsCommand {
+public class ImportArchivesContactsCommand {
 
     @Override
     public String toString() {

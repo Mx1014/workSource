@@ -3,15 +3,12 @@ package com.everhomes.profile;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.archives.*;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.profile.*;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
 import org.jooq.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,7 +16,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,9 +32,9 @@ public class ProfileServiceImpl implements ProfileService {
     OrganizationProvider organizationProvider;
 
     @Override
-    public ProfileContactDTO addProfileContact(AddProfileContactCommand cmd) {
+    public ArchivesContactDTO addProfileContact(AddArchivesContactCommand cmd) {
 
-        ProfileContactDTO dto = new ProfileContactDTO();
+        ArchivesContactDTO dto = new ArchivesContactDTO();
         //  TODO: visibleFlag 的判断
 
         //  组织架构添加人员
@@ -73,7 +69,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void transferProfileContacts(TransferProfileContactsCommand cmd) {
+    public void transferProfileContacts(TransferArchivesContactsCommand cmd) {
         if(cmd.getDetailIds() != null){
             //  TODO: 根据提供的方法获取部门名称
             for(Long detailId : cmd.getDetailIds()){
@@ -83,7 +79,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void deleteProfileContacts(DeleteProfileContactsCommand cmd) {
+    public void deleteProfileContacts(DeleteArchivesContactsCommand cmd) {
         if(cmd.getDetailIds() != null){
             for(Long detailId : cmd.getDetailIds()){
                 //  组织架构删除
@@ -100,7 +96,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     //  通讯录成员置顶接口
     @Override
-    public void stickProfileContact(StickProfileContactCommand cmd) {
+    public void stickProfileContact(StickArchivesContactCommand cmd) {
         User user = UserContext.current().getUser();
 
         //  状态码为 0 时删除
@@ -128,7 +124,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ListProfileContactsResponse listProfileContacts(ListProfileContactsCommand cmd) {
+    public ListArchivesContactsResponse listProfileContacts(ListArchivesContactsCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         //  没有查询时显示主体
@@ -146,12 +142,12 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ImportFileTaskDTO importProfileContacts(MultipartFile mfile, Long userId, Integer namespaceId, ImportProfileContactsCommand cmd) {
+    public ImportFileTaskDTO importProfileContacts(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd) {
         return null;
     }
 
     @Override
-    public void exportProfileContacts(ExportProfileContactsCommand cmd, HttpServletResponse httpResponse) {
+    public void exportProfileContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
 
     }
 
@@ -166,13 +162,13 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ListProfileEmployeesResponse listProfileEmployees(ListProfileEmployeesCommand cmd) {
+    public ListArchivesEmployeesResponse listProfileEmployees(ListArchivesEmployeesCommand cmd) {
 
         return null;
     }
 
     @Override
-    public ProfileEmployeeDTO addProfileEmployee(AddProfileEmployeeCommand cmd) {
+    public ArchivesEmployeeDTO addProfileEmployee(AddArchivesEmployeeCommand cmd) {
 
         //  1.组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
@@ -197,9 +193,9 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ListProfileDismissEmployeesResponse listProfileDismissEmployees(ListProfileDismissEmployeesCommand cmd) {
+    public ListArchivesDismissEmployeesResponse listProfileDismissEmployees(ListArchivesDismissEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        ListProfileDismissEmployeesResponse response = new ListProfileDismissEmployeesResponse();
+        ListArchivesDismissEmployeesResponse response = new ListArchivesDismissEmployeesResponse();
 
         Condition condition = listDismissEmployeesCondition(cmd);
 
@@ -207,7 +203,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         if (results != null) {
             response.setDismissEmployees(results.stream().map(r -> {
-                ProfileDismissEmployeeDTO dto = ConvertHelper.convert(r, ProfileDismissEmployeeDTO.class);
+                ArchivesDismissEmployeeDTO dto = ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class);
                 return dto;
             }).collect(Collectors.toList()));
             Integer nextPageOffset = null;
@@ -221,7 +217,7 @@ public class ProfileServiceImpl implements ProfileService {
         return null;
     }
 
-    private Condition listDismissEmployeesCondition(ListProfileDismissEmployeesCommand cmd){
+    private Condition listDismissEmployeesCondition(ListArchivesDismissEmployeesCommand cmd){
         Condition condition = Tables.EH_PROFILE_DISMISS_EMPLOYEES.ORGANIZATION_ID.eq(cmd.getOrganizationId());
 
         //   离职日期判断
@@ -254,37 +250,37 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void employProfileEmployees(EmployProfileEmployeesCommand cmd) {
+    public void employProfileEmployees(EmployArchivesEmployeesCommand cmd) {
 
     }
 
     @Override
-    public void transferProfileEmployees(TransferProfileEmployeesCommand cmd) {
+    public void transferProfileEmployees(TransferArchivesEmployeesCommand cmd) {
 
     }
 
     @Override
-    public void dismissProfileEmployees(DismissProfileEmployeesCommand cmd) {
+    public void dismissProfileEmployees(DismissArchivesEmployeesCommand cmd) {
 
     }
 
     @Override
-    public void addProfileField(AddProfileFieldCommand cmd) {
+    public void addProfileField(AddArchivesFieldCommand cmd) {
 
     }
 
     @Override
-    public void addProfileFieldGroup(AddProfileFieldGroupCommand cmd) {
+    public void addProfileFieldGroup(AddArchivesFieldGroupCommand cmd) {
 
     }
 
     @Override
-    public void updateProfileFieldOrder(UpdateProfileFieldOrderCommand cmd) {
+    public void updateProfileFieldOrder(UpdateArchivesFieldOrderCommand cmd) {
 
     }
 
     @Override
-    public GetProfileFieldResponse getProfileField(GetProfileFieldCommand cmd) {
+    public GetArchivesFieldResponse getProfileField(GetArchivesFieldCommand cmd) {
         return null;
     }
 

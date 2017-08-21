@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.discover.ItemType;
 
@@ -10,7 +10,7 @@ import java.util.List;
  * <li>fields: (List)所有字段对象</li>
  * </ul>
  */
-public class GetProfileFieldResponse {
+public class GetArchivesFieldResponse {
 
     @ItemType(String.class)
     private List<String> fieldGroups;
@@ -18,7 +18,7 @@ public class GetProfileFieldResponse {
     @ItemType(String.class)
     private List<String> fields;
 
-    public GetProfileFieldResponse() {
+    public GetArchivesFieldResponse() {
     }
 
     public List<String> getFieldGroups() {

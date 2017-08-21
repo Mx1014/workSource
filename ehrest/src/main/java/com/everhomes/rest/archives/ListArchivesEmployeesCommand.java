@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
@@ -19,7 +19,7 @@ import java.sql.Date;
  * <li>workingPlace: 工作地点</li>
  * </ul>
  */
-public class ListProfileEmployeesCommand {
+public class ListArchivesEmployeesCommand {
 
     private Date checkInTimeStart;
 
@@ -43,7 +43,7 @@ public class ListProfileEmployeesCommand {
 
     private String workingPlace;
 
-    public ListProfileEmployeesCommand() {
+    public ListArchivesEmployeesCommand() {
     }
 
     public Date getCheckInTimeStart() {

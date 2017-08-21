@@ -1,4 +1,4 @@
-package com.everhomes.rest.profile;
+package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
@@ -12,13 +12,13 @@ import java.sql.Date;
  * <li>department: 部门</li>
  * <li>checkInTime: 入职日期</li>
  * <li>dimissTime: 离职日期</li>
- * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link com.everhomes.rest.profile.DismissType}</li>
- * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.profile.DismissReason}</li>
+ * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link DismissType}</li>
+ * <li>dismissReason: 离职原因 参考{@link DismissReason}</li>
  * <li>dimissRemarks: 备注</li>
  * <li>detailId: 成员detailId</li>
  * </ul>
  */
-public class ProfileDismissEmployeeDTO {
+public class ArchivesDismissEmployeeDTO {
 
     private Long organizationId;
     private String contactName;
@@ -31,7 +31,7 @@ public class ProfileDismissEmployeeDTO {
     private String dismissRemarks;
     private Long detailId;
 
-    public ProfileDismissEmployeeDTO() {
+    public ArchivesDismissEmployeeDTO() {
     }
 
     public Long getOrganizationId() {
