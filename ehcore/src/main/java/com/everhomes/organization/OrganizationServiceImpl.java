@@ -11541,6 +11541,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member contactName is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTNAME_ISNULL);
             return log;
+        }else{
+            if(data.getContactName().length() > 32){
+                LOGGER.warn("Organization member contactName format wrong. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member contactName format wrong");
+                log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTNAME_FORMAT_WRONG);
+                return log;
+            }
         }
 
         if (StringUtils.isEmpty(data.getGender())) {
@@ -11549,6 +11557,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member gender is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_GENDER_ISNULL);
             return log;
+        }else{
+            if(!data.getGender().equals("男") && !data.getGender().equals("女")){
+                LOGGER.warn("Organization member gender format wrong. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member gender format wrong");
+                log.setCode(OrganizationServiceErrorCode.ERROR_GENDER_FORMAT_WRONG);
+                return log;
+            }
         }
 
         if (StringUtils.isEmpty(data.getContactToken())) {
