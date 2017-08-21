@@ -40,7 +40,7 @@ public class HotTagServiceImpl implements HotTagService{
 	@Override
 	public List<TagDTO> listHotTag(ListHotTagCommand cmd) {
 		
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		//int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		cmd.setNamespaceId(namespaceId);
@@ -49,7 +49,7 @@ public class HotTagServiceImpl implements HotTagService{
 		if(cmd.getNamespaceId() == 0){
 			tags = hotTagProvider.listDistinctAllHotTag(cmd.getServiceType());
 		}else {
-			tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getServiceType(), pageSize);
+			tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getPageSize());
 		}
 
 		return tags;

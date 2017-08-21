@@ -54,7 +54,10 @@ public class HotTagProviderImpl implements HotTagProvider {
 		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(nameSpaceId));
 		query.addConditions(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_HOT_TAGS.DEFAULT_ORDER.desc());
-		query.addLimit(pageSize);
+
+		if(pageSize != null){
+			query.addLimit(pageSize);
+		}
 
 		List<TagDTO> result = new ArrayList<TagDTO>();
 		query.fetch().map((r) -> {
