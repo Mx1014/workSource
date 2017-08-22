@@ -8,6 +8,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.quality.QualityInspectionSampleCommunityMap;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
@@ -26,9 +27,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -87,6 +91,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_CUSTOMER_TYPE.eq(namespaceType));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<EnterpriseCustomer> result = new ArrayList<>();
         query.fetch().map((r) -> {
@@ -103,6 +108,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAME.eq(name));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<EnterpriseCustomer> result = new ArrayList<>();
         query.fetch().map((r) -> {
@@ -118,6 +124,26 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), EnterpriseCustomer.class);
+    }
+
+    @Override
+    public EnterpriseCustomer findByOrganizationId(Long organizationId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        if(result.size() == 0) {
+            return null;
+        }
+        return result.get(0);
     }
 
     @Override
@@ -161,6 +187,73 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ID.in(ids));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listEnterpriseCustomerSourceByCommunityId, sql=" + query.getSQL());
+            LOGGER.debug("listEnterpriseCustomerSourceByCommunityId, bindValues=" + query.getBindValues());
+        }
+
+        Map<Long, Long> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            if(result.get(r.getSourceItemId()) == null) {
+                result.put(r.getSourceItemId(), 1L);
+            } else {
+                result.put(r.getSourceItemId(), result.get(r.getSourceItemId()) + 1);
+            }
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listEnterpriseCustomerIndustryByCommunityId, sql=" + query.getSQL());
+            LOGGER.debug("listEnterpriseCustomerIndustryByCommunityId, bindValues=" + query.getBindValues());
+        }
+
+        Map<Long, Long> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            if(result.get(r.getCorpIndustryItemId()) == null) {
+                result.put(r.getCorpIndustryItemId(), 1L);
+            } else {
+                result.put(r.getCorpIndustryItemId(), result.get(r.getCorpIndustryItemId()) + 1);
+            }
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<EnterpriseCustomer> result = new ArrayList<>();
         query.fetch().map((r) -> {
@@ -225,6 +318,31 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         List<CustomerTalent> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerTalent.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public Map<Long, Long> listCustomerTalentCountByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTalentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TALENTS);
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.CUSTOMER_ID.in(customerIds));
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listGroupCustomerTalentsByCustomerIds, sql=" + query.getSQL());
+            LOGGER.debug("listGroupCustomerTalentsByCustomerIds, bindValues=" + query.getBindValues());
+        }
+
+        Map<Long, Long> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            if(result.get(r.getIndividualEvaluationItemId()) == null) {
+                result.put(r.getIndividualEvaluationItemId(), 1L);
+            } else {
+                result.put(r.getIndividualEvaluationItemId(), result.get(r.getIndividualEvaluationItemId()) + 1);
+            }
             return null;
         });
 
@@ -458,6 +576,38 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public Map<Long, CustomerProjectStatisticsDTO> listCustomerApplyProjectsByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerApplyProjectsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_APPLY_PROJECTS);
+        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.CUSTOMER_ID.in(customerIds));
+        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        Map<Long, CustomerProjectStatisticsDTO> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            String[] ids = r.getProjectSource().split(",");
+            for(String id : ids) {
+                BigDecimal projectAmount = r.getProjectAmount() == null ? BigDecimal.ZERO : r.getProjectAmount();
+                if(result.get(Long.valueOf(id)) == null) {
+                    CustomerProjectStatisticsDTO dto = new CustomerProjectStatisticsDTO();
+                    dto.setProjectAmount(projectAmount);
+                    dto.setProjectCount(1L);
+                    dto.setProjectSourceItemId(Long.valueOf(id));
+                    result.put(Long.valueOf(id), dto);
+                } else {
+                    CustomerProjectStatisticsDTO dto = result.get(Long.valueOf(id));
+                    BigDecimal oldAmount = dto.getProjectAmount() == null ? BigDecimal.ZERO : dto.getProjectAmount();
+                    dto.setProjectAmount(oldAmount.add(projectAmount));
+                    dto.setProjectCount(dto.getProjectCount() + 1);
+                    result.put(Long.valueOf(id), dto);
+                }
+            }
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
     public List<CustomerCommercial> listCustomerCommercialsByCustomerId(Long customerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerCommercialsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_COMMERCIALS);
@@ -478,6 +628,22 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);
         query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerEconomicIndicator> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEconomicIndicator.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEconomicIndicatorsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS);
+        query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.CUSTOMER_ID.in(customerIds));
         query.addConditions(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<CustomerEconomicIndicator> result = new ArrayList<>();

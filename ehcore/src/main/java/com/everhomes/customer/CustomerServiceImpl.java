@@ -32,9 +32,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -681,5 +683,140 @@ public class CustomerServiceImpl implements CustomerService {
         trademark.setCreateTime(exist.getCreateTime());
         trademark.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerTrademark(trademark);
+    }
+
+    @Override
+    public CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        CustomerIndustryStatisticsResponse response = new CustomerIndustryStatisticsResponse();
+        List<CustomerIndustryStatisticsDTO> dtos = new ArrayList<>();
+        Map<Long, Long> industries = enterpriseCustomerProvider.listEnterpriseCustomerIndustryByCommunityId(cmd.getCommunityId());
+        response.setCustomerTotalCount(0L);
+        industries.forEach((categoryId, count) -> {
+            CustomerIndustryStatisticsDTO dto = new CustomerIndustryStatisticsDTO();
+            dto.setCorpIndustryItemId(categoryId);
+            dto.setCustomerCount(count);
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+            if(item != null) {
+                dto.setItemName(item.getItemDisplayName());
+            }
+            dtos.add(dto);
+            response.setCustomerTotalCount(response.getCustomerTotalCount() + count);
+        });
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public CustomerIntellectualPropertyStatisticsResponse listCustomerIntellectualPropertyStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
+        List<Long> customerIds = new ArrayList<>();
+        customers.forEach(customer -> {
+            customerIds.add(customer.getId());
+        });
+        CustomerIntellectualPropertyStatisticsResponse response = new CustomerIntellectualPropertyStatisticsResponse();
+
+        return null;
+    }
+
+    @Override
+    public CustomerProjectStatisticsResponse listCustomerProjectStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
+        List<Long> customerIds = new ArrayList<>();
+        customers.forEach(customer -> {
+            customerIds.add(customer.getId());
+        });
+
+        CustomerProjectStatisticsResponse response = new CustomerProjectStatisticsResponse();
+        List<CustomerProjectStatisticsDTO> dtos = new ArrayList<>();
+        response.setProjectTotalAmount(BigDecimal.ZERO);
+        response.setProjectTotalCount(0L);
+
+        Map<Long, CustomerProjectStatisticsDTO> statistics = enterpriseCustomerProvider.listCustomerApplyProjectsByCustomerIds(customerIds);
+        statistics.forEach((itemId, statistic) -> {
+            CustomerProjectStatisticsDTO dto = statistic;
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), itemId);
+            if(item != null) {
+                dto.setItemName(item.getItemDisplayName());
+            }
+            dtos.add(dto);
+            response.setProjectTotalAmount(response.getProjectTotalAmount().add(dto.getProjectAmount()));
+            response.setProjectTotalCount(response.getProjectTotalCount() + dto.getProjectCount());
+        });
+        return response;
+    }
+
+    @Override
+    public CustomerSourceStatisticsResponse listCustomerSourceStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        CustomerSourceStatisticsResponse response = new CustomerSourceStatisticsResponse();
+        List<CustomerSourceStatisticsDTO> dtos = new ArrayList<>();
+        Map<Long, Long> sources = enterpriseCustomerProvider.listEnterpriseCustomerSourceByCommunityId(cmd.getCommunityId());
+        response.setCustomerTotalCount(0L);
+        sources.forEach((categoryId, count) -> {
+            CustomerSourceStatisticsDTO dto = new CustomerSourceStatisticsDTO();
+            dto.setSourceItemId(categoryId);
+            dto.setCustomerCount(count);
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+            if(item != null) {
+                dto.setItemName(item.getItemDisplayName());
+            }
+            dtos.add(dto);
+            response.setCustomerTotalCount(response.getCustomerTotalCount() + count);
+        });
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public CustomerTalentStatisticsResponse listCustomerTalentStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
+        List<Long> customerIds = new ArrayList<>();
+        customers.forEach(customer -> {
+            customerIds.add(customer.getId());
+        });
+
+        CustomerTalentStatisticsResponse response = new CustomerTalentStatisticsResponse();
+        Map<Long, Long> talents = enterpriseCustomerProvider.listCustomerTalentCountByCustomerIds(customerIds);
+        List<CustomerTalentStatisticsDTO> dtos = new ArrayList<>();
+        response.setMemberTotalCount(0L);
+        talents.forEach((categoryId, count) -> {
+            CustomerTalentStatisticsDTO dto = new CustomerTalentStatisticsDTO();
+            dto.setTalentCategoryId(categoryId);
+            dto.setCustomerMemberCount(count);
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+            if(item != null) {
+                dto.setCategoryName(item.getItemDisplayName());
+            }
+            dtos.add(dto);
+            response.setMemberTotalCount(response.getMemberTotalCount() + count);
+        });
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public EnterpriseCustomerStatisticsDTO listEnterpriseCustomerStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        EnterpriseCustomerStatisticsDTO dto = new EnterpriseCustomerStatisticsDTO();
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByCommunity(cmd.getCommunityId());
+        dto.setCustomerCount(customers.size() & 0xFFFFFFFFL);
+        dto.setCustomerMemberCount(0L);
+
+        List<Long> customerIds = new ArrayList<>();
+        customers.forEach(customer -> {
+            customerIds.add(customer.getId());
+            int members = customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount();
+            dto.setCustomerMemberCount(dto.getCustomerMemberCount() + members);
+        });
+
+        List<CustomerEconomicIndicator> indicators =enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerIds(customerIds);
+        dto.setTotalTurnover(BigDecimal.ZERO);
+        dto.setTotalTaxAmount(BigDecimal.ZERO);
+        indicators.forEach(indicator -> {
+            BigDecimal turnover = indicator.getTurnover() == null ? BigDecimal.ZERO : indicator.getTurnover();
+            BigDecimal taxAmount = indicator.getTotalTaxAmount() == null ? BigDecimal.ZERO : indicator.getTotalTaxAmount();
+            dto.setTotalTurnover(dto.getTotalTurnover().add(turnover));
+            dto.setTotalTaxAmount(dto.getTotalTaxAmount().add(taxAmount));
+        });
+
+        return dto;
     }
 }
