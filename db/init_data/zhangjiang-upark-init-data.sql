@@ -1747,7 +1747,13 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),@eh_namespace_id,0,1,@community_id+1, '/home', 'EnterpriseServices', '费用查缴', '费用查缴', 'cs://1/image/aW1hZ2UvTVRwalpEY3pNelppTlRCbE1qRTNaVFJoTTJVek1EUmhNelkyT1RKa05qRTFaQQ',1,1,13,'{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}',3,0,1,1, '', '0', NULL, NULL, NULL, 1, 'default', 1, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),@eh_namespace_id,0,1,@community_id+1, '/home', 'EnterpriseServices', '园区服务', '园区服务', 'cs://1/image/aW1hZ2UvTVRvNVpHUmxNalExWkdSaU16Y3hNelV3T1RjME5ERmhORGRtWm1aak16TTBNdw',1,1,33,CONCAT('{"type":',@category_id+2,',"parentId":',@category_id + 2,',"displayType": "tab"}'),4,0,1,1, '', '0', NULL, NULL, NULL, 1, 'default', 1, NULL);
                           
-                          
+   
+SET @eh_namespace_id = 999971;
+SET @community_id = 240111044331050388; 
+UPDATE  eh_launch_pad_items SET delete_flag = 1 WHERE item_label = '招商信息'  AND  namespace_id = @eh_namespace_id AND scope_id = @community_id;
+UPDATE  eh_launch_pad_items SET delete_flag = 1 WHERE item_label = '集中登记地'  AND  namespace_id = @eh_namespace_id AND scope_id = @community_id;
+UPDATE  eh_launch_pad_items SET delete_flag = 1 WHERE item_label = '园区商业'  AND  namespace_id = @eh_namespace_id AND scope_id = @community_id;
+UPDATE  eh_launch_pad_items SET delete_flag = 1 WHERE item_label = '我的任务'  AND  namespace_id = @eh_namespace_id AND scope_id = @community_id;                         
 -- 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`); 
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10000,'', 'EhNamespaces', @eh_namespace_id,2);
