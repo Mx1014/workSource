@@ -1718,10 +1718,10 @@ public class PortalServiceImpl implements PortalService {
 								config.setTitle(padLayoutGroup.getTitle());
 								config.setTitleUri(padLayoutGroup.getIconUrl());
 							}
-							config.setColumnCount(padLayoutGroup.getColumnCount());
 							config.setPadding(instanceConfig.getPaddingTop());
 							config.setMargin(instanceConfig.getLineSpacing());
 						}
+						config.setColumnCount(padLayoutGroup.getColumnCount());
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 
