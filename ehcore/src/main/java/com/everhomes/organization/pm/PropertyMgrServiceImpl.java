@@ -2373,7 +2373,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		//取得门牌列表
 		List<ApartmentAbstractDTO> aptList = addressProvider.listAddressByBuildingApartmentName(cmd.getNamespaceId(),
-				cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartment(), locator, pageSize + 1);
+				cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartment(), cmd.getLivingStatus(), locator, pageSize + 1);
 		ListApartmentsResponse response = new ListApartmentsResponse();
 		List<ApartmentAbstractDTO> apartments = new ArrayList<>();
 		LOGGER.info("listApartments aptList: {}", aptList);

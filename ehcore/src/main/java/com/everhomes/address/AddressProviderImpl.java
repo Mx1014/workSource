@@ -374,7 +374,7 @@ public class AddressProviderImpl implements AddressProvider {
 
     @Override
     public List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId,
-                String buildingName, String apartmentName, CrossShardListingLocator locator, int count) {
+                String buildingName, String apartmentName, Byte livingStatus, CrossShardListingLocator locator, int count) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<ApartmentAbstractDTO> addresses = new ArrayList<>();
         SelectQuery<EhAddressesRecord> query = context.selectQuery(Tables.EH_ADDRESSES);
@@ -392,7 +392,12 @@ public class AddressProviderImpl implements AddressProvider {
         if(StringUtils.isNotBlank(apartmentName)) {
             query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + apartmentName + "%"));
         }
-
+        //按状态筛选
+        if(livingStatus != null) {
+            query.addJoin(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS
+                    , Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
+        }
 
         query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
         query.addLimit(count - addresses.size());

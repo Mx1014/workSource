@@ -57,7 +57,7 @@ public interface AddressProvider {
 
     Address findAddressByNamespaceTypeAndName(String namespaceType, String namespaceToken);
 
-    List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName, CrossShardListingLocator locator, int count);
+    List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName, Byte livingStatus, CrossShardListingLocator locator, int count);
 
 
     List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName);
