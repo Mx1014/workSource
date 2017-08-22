@@ -424,11 +424,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("testimportPunchScheduling")
     @RestReturn(value = PunchSchedulingDTO.class)
     public RestResponse testimportPunchScheduling( @RequestParam(value = "_attachment_file") MultipartFile[] files) {
-		PunchSchedulingDTO result = punchService.importPunchScheduling(files);
-        RestResponse response = new RestResponse(result);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        return importPunchScheduling(files);
     }
     /**
      * <b>URL: /punch/testimportPunchLogs</b>
