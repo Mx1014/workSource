@@ -10,7 +10,7 @@ import java.util.List;
  * </ul>
  *
  */
-public class ListUserRelatedScenesByTypeCommand {
+public class ListUserRelatedScenesByCurrentTypeCommand {
     private String sceneType;
 
     @Override
