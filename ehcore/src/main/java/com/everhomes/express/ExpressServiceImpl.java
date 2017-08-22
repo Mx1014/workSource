@@ -497,7 +497,7 @@ public class ExpressServiceImpl implements ExpressService {
 			orderCmd.setBody(body);
 			orderCmd.setOrderNo(expressOrder.getId().toString());
 			orderCmd.setOrderType(OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode());
-			orderCmd.setSubject("快递订单简要描述");
+			orderCmd.setSubject("快递订单");
 			orderCmd.setTotalFee(expressOrder.getPaySummary());
 			CommonOrderDTO dto = null;
 			try {
