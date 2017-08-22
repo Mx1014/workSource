@@ -172,7 +172,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-		//userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
+		userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getCurrentOrgId(), PrivilegeConstants.PMTASK_LIST);
 
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
@@ -653,8 +653,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		//Todo:为科兴与一碑对接
+		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
+				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			handle = PmTaskHandle.EBEI;
+		}
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.createTask(cmd, null, requestorName, requestorPhone);
@@ -772,7 +777,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
-		
+
+		//为科兴与一碑对接
+		if(namespaceId == 999983 ) {
+			handle = PmTaskHandle.EBEI;
+		}
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.listAllTaskCategories(cmd);

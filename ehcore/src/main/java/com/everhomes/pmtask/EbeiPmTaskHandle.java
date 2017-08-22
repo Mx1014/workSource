@@ -17,12 +17,11 @@ import javax.annotation.PreDestroy;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowNodeProvider;
-import com.everhomes.flow.FlowService;
+import com.everhomes.flow.*;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -111,7 +110,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private CommunityProvider communityProvider;
 	@Autowired
 	private FlowService flowService;
-
+	@Autowired
+	private CategoryProvider categoryProvider;
 
 	@PostConstruct
 	public void init() {
@@ -306,7 +306,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		}
 		
 		param.put("buildingId", "");
-		param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
+		//param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
+		param.put("serviceId", task.getCategoryId());
 		param.put("type", "1");
 		param.put("remarks", task.getContent());
 		param.put("projectId", projectId);
@@ -487,24 +488,26 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private void createFlowCase(PmTask task) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		GeneralModuleInfo gm = new GeneralModuleInfo();
+		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+				FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+		if(null == flow) {
+			LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+					"Enable pmtask flow not found.");
+		}
 
-		gm.setNamespaceId(namespaceId);
-		gm.setOwnerType(FlowOwnerType.PMTASK.getCode());
-		gm.setOwnerId(task.getOwnerId());
-		gm.setModuleType(FlowModuleType.NO_MODULE.getCode());
-		gm.setModuleId(FlowConstants.PM_TASK_MODULE);
-		gm.setProjectId(task.getOwnerId());
-		gm.setProjectType(EntityType.COMMUNITY.getCode());
 
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+		Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+		createFlowCaseCommand.setTitle(taskCategory.getName());
 		createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
-//		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
-//		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 		createFlowCaseCommand.setReferId(task.getId());
 		createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
 		//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
 		createFlowCaseCommand.setContent(task.getContent());
+		createFlowCaseCommand.setCurrentOrganizationId(task.getOrganizationId());
 
 		createFlowCaseCommand.setProjectId(task.getOwnerId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
@@ -521,7 +524,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			}
 		}
 
-		FlowCase flowCase = flowService.createDumpFlowCase(gm, createFlowCaseCommand);
+		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 		task.setFlowCaseId(flowCase.getId());
 		pmTaskProvider.updateTask(task);
 	}

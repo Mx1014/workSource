@@ -35,6 +35,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.ResultHolder;
+import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.promotion.PromotionService;
 import com.everhomes.pushmessage.*;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -796,7 +797,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public Tuple<Integer, List<BuildingDTO>> listPropBuildingsByKeyword(ListBuildingByKeywordCommand cmd) {
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		this.checkCommunity(cmd.getCommunityId());
-		return addressService.listBuildingsByKeyword(cmd);
+		Tuple<Integer, List<BuildingDTO>> tuple = addressService.listBuildingsByKeyword(cmd);
+		//增加公共区域
+		List list = tuple.second();
+		BuildingDTO buildingDTO = new BuildingDTO();
+		buildingDTO.setBuildingName(EbeiBuildingType.publicArea);
+		buildingDTO.setCommunityId(cmd.getCommunityId());
+		list.add(buildingDTO);
+		return tuple;
 	}
 
 	@Override
