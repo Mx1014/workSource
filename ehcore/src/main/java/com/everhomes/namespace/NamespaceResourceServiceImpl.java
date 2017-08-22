@@ -4,6 +4,7 @@ package com.everhomes.namespace;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.community.GetCommunityAuthPopupConfigCommand;
 import com.everhomes.rest.namespace.*;
 import org.elasticsearch.common.jackson.dataformat.yaml.snakeyaml.events.Event;
 import com.everhomes.community.CommunityProvider;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Component
 public class NamespaceResourceServiceImpl implements NamespaceResourceService {
