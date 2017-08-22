@@ -863,11 +863,7 @@ public class ParkingServiceImpl implements ParkingService {
     	if(size > 0){
     		response.setRequests(list.stream().map(r -> {
     			ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
-    			
-    			FlowCaseDetailDTO flowCaseDetailDTO = flowService.getFlowCaseDetail(r.getFlowCaseId(),
-						userId, FlowUserType.PROCESSOR, false);
-    			
-    			dto.setButtons(flowCaseDetailDTO.getButtons());
+
     			return dto;
     		}).collect(Collectors.toList()));
     		
@@ -1646,7 +1642,7 @@ public class ParkingServiceImpl implements ParkingService {
 			LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
 					cmd, refundCmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 					"bill refund error");
 		}
 	}

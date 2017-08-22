@@ -43,7 +43,7 @@ public interface CustomRequestHandler {
 	
 	String CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX = "CustomRequest-";
 
-	void addCustomRequest(AddRequestCommand cmd);
+	Long addCustomRequest(AddRequestCommand cmd);
 	
 	GetRequestInfoResponse getCustomRequestInfo(Long id);
 	

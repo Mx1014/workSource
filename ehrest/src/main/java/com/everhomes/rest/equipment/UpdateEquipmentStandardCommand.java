@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  *  <li>id: 标准id</li>
  *  <li>ownerId: 标准所属的主体id</li>
  *  <li>ownerType: 标准所属的主体，参考{@link com.everhomes.rest.quality.OwnerType}</li>
+ *  <li>targetId: 标准所属项目id</li>
+ *  <li>targetType: 标准所属项目类型</li>
  *  <li>name: 标准名称</li>
  *  <li>standardNumber: 标准编号</li>
  *  <li>standardSource: 标准来源</li>
@@ -34,6 +36,12 @@ public class UpdateEquipmentStandardCommand {
 	
 	@NotNull
 	private String ownerType;
+
+	@NotNull
+	private Long targetId;
+
+	@NotNull
+	private String targetType;
 
 	private String name;
 	
@@ -57,7 +65,23 @@ public class UpdateEquipmentStandardCommand {
 	
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> group;
-	
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
 	public List<StandardGroupDTO> getGroup() {
 		return group;
 	}

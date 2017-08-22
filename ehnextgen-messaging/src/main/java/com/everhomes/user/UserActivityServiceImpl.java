@@ -16,12 +16,15 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.NamespacesService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.promotion.BizHttpRestCallProvider;
@@ -31,6 +34,9 @@ import com.everhomes.rest.activity.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
 import com.everhomes.rest.common.ActivityListStyleFlag;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
@@ -43,11 +49,15 @@ import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.statistics.terminal.AppVersion;
 import com.everhomes.statistics.terminal.StatTerminalProvider;
 import com.everhomes.util.*;
 import com.everhomes.version.VersionService;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
+import com.everhomes.yellowPage.ServiceAlliances;
+import com.everhomes.yellowPage.YellowPageProvider;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections.CollectionUtils;
@@ -144,6 +154,14 @@ public class UserActivityServiceImpl implements UserActivityService {
     @Autowired
     private ScheduleProvider scheduleProvider;
 
+    @Autowired
+    protected ServiceModuleProvider serviceModuleProvider;
+
+    @Autowired
+    private FlowService flowService;
+
+    @Autowired
+    private YellowPageProvider yellowPageProvider;
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
         User user = UserContext.current().getUser();
@@ -212,8 +230,10 @@ public class UserActivityServiceImpl implements UserActivityService {
         activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
         activity.setNamespaceId(UserContext.getCurrentNamespaceId());
         activity.setVersionRealm(UserContext.current().getVersionRealm());
-        if (user != null)
-        	userActivityProvider.addActivity(activity, user.getId());
+
+        // @see com.everhomes.statistics.terminal.BorderRegisterListener comment by xq.tian 2017/07/14
+        // if (user != null)
+        // 	userActivityProvider.addActivity(activity, user.getId());
 
         // 增加版本号 用于运营统计 by sfyan 20170117
         String type = OSType.fromCode(activity.getOsType().toString()).name().toLowerCase();
@@ -616,7 +636,14 @@ public class UserActivityServiceImpl implements UserActivityService {
         locator.setAnchor(cmd.getPageAnchor());
         
         List<UserPost> result = userActivityProvider.listPostedTopics(uid, UserFavoriteTargetType.TOPIC.getCode(), locator, pageSize + 1);
-        
+
+        Long nextPageAnchor = locator.getAnchor();
+
+        // 去除最后一条数据返回pageSize  add by yanjun 20170802
+        if(result != null && result.size() > pageSize) {
+            result.remove(pageSize);
+        }
+
         if (CollectionUtils.isEmpty(result)) {
         	ListPostResponse response = new ListPostResponse();
             response.setPostDtos(new ArrayList<PostDTO>());
@@ -639,7 +666,6 @@ public class UserActivityServiceImpl implements UserActivityService {
 //        Collections.reverse(ids);
         List<PostDTO> posts = forumService.getTopicById(ids, cmd.getCommunityId(), false, true);
         
-        Long nextPageAnchor = locator.getAnchor();
         ListPostResponse response = new ListPostResponse();
         response.setPostDtos(posts);
         response.setNextPageAnchor(nextPageAnchor);
@@ -1117,6 +1143,12 @@ public class UserActivityServiceImpl implements UserActivityService {
 //        }
         
         Long nextPageAnchor = locator.getAnchor();
+
+        // 去除最后一条数据返回pageSize  add by yanjun 20170802
+        if(result != null && result.size() > pageSize) {
+            result.remove(pageSize);
+        }
+
         List<Long> ids = result.stream().map(r -> r.getTargetId()).collect(Collectors.toList());
         // 由于每次都是从前往后取，取完之后再倒排，导致回去的anchor一直都是最小值，
         // 也就是下一页和第一页取得的结果是一样的，需要倒排着查，修改后不需要再额外排序 by lqs 20160928   
@@ -1334,8 +1366,49 @@ public class UserActivityServiceImpl implements UserActivityService {
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
 
-		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
-		handler.addCustomRequest(cmd);
+        //与工作流对接
+        CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
+        Long userId = UserContext.current().getUser().getId();
+        cmd21.setApplyUserId(userId);
+        cmd21.setReferType(cmd.getTemplateType());
+        cmd21.setProjectId(cmd.getOwnerId());
+        cmd21.setProjectType(EhCommunities.class.getName());
+        String content= "";
+        User user = UserContext.current().getUser();
+
+        ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(cmd.getServiceAllianceId(), null, null);
+        if(serviceOrg != null) {
+            content += CustomRequestConstants.APPROVAL_TYPE + ":" + serviceOrg.getName() + "\n";
+            ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
+            cmd21.setTitle(category.getName());
+        }
+        if (user.getNickName()!=null)
+            content += CustomRequestConstants.USER_NAME+":"+user.getNickName()+"\n";
+
+
+        cmd21.setContent(content);
+        cmd21.setCurrentOrganizationId(cmd.getCreatorOrganizationId());
+        RequestTemplates template = this.userActivityProvider.getCustomRequestTemplate(cmd.getTemplateType());
+
+
+
+        //创建一个空的flow
+        GeneralModuleInfo gm = new GeneralModuleInfo();
+        gm.setNamespaceId(UserContext.getCurrentNamespaceId());
+        gm.setOrganizationId(cmd.getCreatorOrganizationId());
+        gm.setProjectId(cmd.getOwnerId());
+        gm.setProjectType(EhCommunities.class.getName());
+        gm.setOwnerType(FlowOwnerType.CUSTOM_REQUEST.getCode());
+        gm.setOwnerId(template.getId());
+        gm.setModuleId(40500l);//服务联盟id
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(40500l);
+        gm.setModuleType(module.getName());
+
+
+        CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
+		Long id = handler.addCustomRequest(cmd);
+		cmd21.setReferId(id);
+        flowService.createDumpFlowCase(gm, cmd21);
 	}
 
 	@Override

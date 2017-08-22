@@ -76,7 +76,8 @@ public class SmsServiceImpl implements SmsService {
                     .write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<response>\n<retcode>0</retcode>\n</response>"
                             .getBytes("utf-8"));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("YZX sms report error", e);
+            // e.printStackTrace();
         }
     }
 
@@ -84,7 +85,8 @@ public class SmsServiceImpl implements SmsService {
     public YzxListSmsReportLogResponse yzxListReportLogs(YzxListReportLogCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<YzxSmsLog> logList = yzxSmsLogProvider.listReportLogs(cmd.getNamespaceId(), cmd.getMobile(), cmd.getStatus(), cmd.getFailure(), locator, cmd.getPageSize());
+        int pageSize = cmd.getPageSize() != null ? cmd.getPageSize() : 20;
+        List<YzxSmsLog> logList = yzxSmsLogProvider.listReportLogs(cmd.getNamespaceId(), cmd.getMobile(), cmd.getStatus(), cmd.getFailure(), locator, pageSize);
         List<YzxSmsLogDTO> dtoList = new ArrayList<>();
         if (logList != null) {
             dtoList = logList.stream().map(this::toYzxReportLogDTO).collect(Collectors.toList());

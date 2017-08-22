@@ -54,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1970,7 +1971,7 @@ public class SalaryServiceImpl implements SalaryService {
                         String evalString = "result = " + FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, valueMap);
                         if(!evalString.contains("${")){
                             //如果没有${ 说明全部参数都替换成了数字 则进行计算
-                            String result = engine.eval(evalString).toString();
+                            String result =  new BigDecimal(engine.eval(evalString).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).toString();
                             val.setSalaryValue(result);
                             valueMap.put(val.getGroupEntityName(), val.getSalaryValue());
                         }
@@ -2141,6 +2142,12 @@ public class SalaryServiceImpl implements SalaryService {
 	public void batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd) {
 		if(null == cmd.getCheckFlag())
 			cmd.setCheckFlag(NormalFlag.YES.getCode());
+        if(cmd.getCheckFlag().equals(NormalFlag.YES.getCode())){
+            int count = salaryEmployeePeriodValProvider.countNumberEntityIsNull(cmd.getSalaryEmployeeIds());
+            if (count >=1)
+                throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,
+                        SalaryConstants.ERROR_SALARY_SHIFA_ISNULL,"数值类值为空无法核算");
+        }
 		salaryEmployeeProvider.updateSalaryEmployeeCheckFlag(cmd.getSalaryEmployeeIds(), cmd.getCheckFlag());
 	}
 

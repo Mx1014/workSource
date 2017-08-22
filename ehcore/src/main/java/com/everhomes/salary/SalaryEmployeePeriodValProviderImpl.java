@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.salary.SalaryEntityType;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
@@ -133,5 +134,26 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 		for (SalaryEmployeePeriodVal r : salaryEmployeePeriodVals) {
 			createSalaryEmployeePeriodVal(r);
 		}
+	}
+
+	@Override
+	public int countEntityIsNull(List<Long> salaryEmployeeIds, Long entityIdShifa) {
+		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().
+				from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.in(salaryEmployeeIds))
+				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ORIGIN_ENTITY_ID.eq(entityIdShifa))
+				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull());
+		return	step.fetchOne().value1();
+	}
+
+	@Override
+	public int countNumberEntityIsNull(List<Long> salaryEmployeeIds) {
+		SelectConditionStep<Record1<Integer>> step = getReadOnlyContext().selectCount().
+				from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).join(Tables.EH_SALARY_DEFAULT_ENTITIES)
+				.on(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ORIGIN_ENTITY_ID.eq(Tables.EH_SALARY_DEFAULT_ENTITIES.ID))
+				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.in(salaryEmployeeIds))
+				.and(Tables.EH_SALARY_DEFAULT_ENTITIES.TYPE.eq(SalaryEntityType.NUMBER.getCode()))
+				.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE.isNull());
+		return	step.fetchOne().value1();
 	}
 }

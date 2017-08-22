@@ -53,39 +53,47 @@ package com.everhomes.rest.version;
  * <li>IOS_TEEC("iOS_TEEC"): 嘉定新城 iOS版APP</li>
  * <li>ANDROID_UPARK("Android_UPark"): 张江高科 Android版APP</li>
  * <li>IOS_UPARK("iOS_UPark"): 张江高科iOS版APP</li>
+ * <li>ANDROID_GDWY("Android_GDWY"): 东莞互联网产业园 Android版APP</li>
+ * <li>IOS_GDWY("iOS_GDWY"): 东莞互联网产业园 iOS版APP</li>
+ * <li>ANDROID_GUOMAO("Android_Guomao"): 国贸</li>
+ * <li>IOS_GUOMAO("iOS_Guomao"): 国贸</li>
+ * <li>ANDROID_CHANGFAZHAN("Android_Changfazhan"): 昌发展</li>
+ * <li>IOS_CHANGFAZHAN("iOS_Changfazhan"): 昌发展</li>
+ * <li>ANDROID_MYBAY("Android_MyBay"): 深圳湾</li>
+ * <li>IOS_MYBAY("iOS_MyBay"): 深圳湾</li>
  * </ul>
  */
 public enum VersionRealmType {
-    ANDROID("Android"), 
-    IOS("iOS"), 
-    ANDROID_TECHPARK("Android_Techpark"), 
-    IOS_TECHPARK("iOS_Techpark"), 
-    ANDROID_XUNMEI("Android_Xunmei"), 
-    IOS_XUNMEI("iOS_Xunmei"), 
-    ANDROID_HWPARK("Android_Hwpark"), 
-    IOS_HWPARK("iOS_Hwpark"), 
-    ANDROID_ISERVICE("Android_IService"), 
-    IOS_ISERVICE("iOS_IService"), 
-    ANDROID_SHUNICOM("Android_ShUnicom"), 
-    IOS_SHUNICOM("iOS_ShUnicom"), 
-    ANDROID_JYJY("Android_JYJY"), 
+    ANDROID("Android"),
+    IOS("iOS"),
+    ANDROID_TECHPARK("Android_Techpark"),
+    IOS_TECHPARK("iOS_Techpark"),
+    ANDROID_XUNMEI("Android_Xunmei"),
+    IOS_XUNMEI("iOS_Xunmei"),
+    ANDROID_HWPARK("Android_Hwpark"),
+    IOS_HWPARK("iOS_Hwpark"),
+    ANDROID_ISERVICE("Android_IService"),
+    IOS_ISERVICE("iOS_IService"),
+    ANDROID_SHUNICOM("Android_ShUnicom"),
+    IOS_SHUNICOM("iOS_ShUnicom"),
+    ANDROID_JYJY("Android_JYJY"),
     IOS_JYJY("iOS_JYJY"),
-    ANDROID_VIDEOCONF("Android_Videoconf"), 
+    ANDROID_VIDEOCONF("Android_Videoconf"),
     IOS_VIDEOCONF("iOS_Videoconf"),
-    ANDROID_LONGGANG("Android_Longgang"), 
+    ANDROID_LONGGANG("Android_Longgang"),
     IOS_LONGGANG("iOS_Longgang"),
-    ANDROID_HAIAN("Android_Haian"), 
+    ANDROID_HAIAN("Android_Haian"),
     IOS_HAIAN("iOS_Haian"),
     H5_QUALITY("quality"),
-    ANDROID_SHENYE("Android_Shenye"), 
+    ANDROID_SHENYE("Android_Shenye"),
     IOS_SHENYE("iOS_Shenye"),
-    ANDROID_JINDI("Android_Jindi"), 
+    ANDROID_JINDI("Android_Jindi"),
     IOS_JINDI("iOS_Jindi"),
-    ANDROID_CHUNENG("Android_Chuneng"), 
+    ANDROID_CHUNENG("Android_Chuneng"),
     IOS_CHUNENG("iOS_Chuneng"),
-    ANDROID_WEIXINLINK("Android_WeixinLink"), 
+    ANDROID_WEIXINLINK("Android_WeixinLink"),
     IOS_WEIXINLINK("iOS_WeixinLink"),
-    ANDROID_IBASE("Android_Ibase"), 
+    ANDROID_IBASE("Android_Ibase"),
     IOS_IBASE("iOS_Ibase"),
     BIZ("biz"),
     ANDROID_ATMINI("Android_AtMini"),
@@ -118,18 +126,35 @@ public enum VersionRealmType {
     IOS_RONGCHAO("iOS_Rongchao"),
     ANDROID_TEEC("Android_TEEC"),
     IOS_TEEC("iOS_TEEC"),
+    ANDROID_JUNMINRONGHE("Android_JunMinRongHe"),
+    IOS_JUNMINRONGHE("iOS_JunMinRongHe"),
+    ANDROID_BAOJIEZHIGU("Android_BaoJiEZhiGu"),
+    IOS_BAOJIEZHIGU("iOS_BaoJiEZhiGu"),
     ANDROID_UPARK("Android_UPark"),
-    IOS_UPARK("iOS_UPark");
-    
+    IOS_UPARK("iOS_UPark"),
+    ANDROID_GDWY("Android_GDWY"),
+    IOS_GDWY("iOS_GDWY"),
+    ANDROID_GUOMAO("Android_Guomao"),
+    IOS_GUOMAO("iOS_Guomao"),
+    ANDROID_CHANGZHIHUI("Android_ChangZhiHui"),
+    IOS_CHANGZHIHUI("iOS_ChangZhiHui"),
+
+    ANDROID_VANKE_XSH("Android_Vanke_XSH"),
+    IOS_VANKE_XSH("iOS_Vanke_XSH"),
+    ANDROID_OA("Android_OA"),
+    IOS_OA("iOS_OA"),
+    ANDROID_MYBAY("Android_MyBay"),
+    IOS_MYBAY("iOS_MyBay");
+
     private String code;
     private VersionRealmType(String code) {
         this.code = code;
     }
-    
+
     public String getCode() {
         return this.code;
     }
-    
+
     public static VersionRealmType fromCode(String code) {
         if(code != null) {
             for(VersionRealmType value : VersionRealmType.values()) {
@@ -138,7 +163,7 @@ public enum VersionRealmType {
                 }
             }
         }
-        
+
         return null;
     }
 }

@@ -169,4 +169,6 @@ public interface QualityProvider {
 	List<QualityInspectionSampleCommunitySpecificationStat> listSampleCommunitySpecifitionStat(Long sampleId);
 	QualityInspectionSampleCommunitySpecificationStat findBySampleCommunitySpecification(Long sampleId, Long communityId, Long specificationId);
 
+	Map<Long, QualityInspectionSpecifications> listSpecificationByIds(List<Long> ids);
+	Map<Long, QualityInspectionTaskRecords> listLastRecordByTaskIds(Set<Long> taskIds);
 }

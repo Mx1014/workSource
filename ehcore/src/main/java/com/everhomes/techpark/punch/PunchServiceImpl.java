@@ -662,13 +662,10 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	/***
-<<<<<<< HEAD
-=======
 	 * @param userId
 	 *            ： 打卡用户;
 	 * @param companyId
 	 *            :打卡规则
->>>>>>> master
 	 * @param logDay
 	 *            : 计算的打卡日期
 	 * @return PunchLogsDayList：计算好的当日打卡状态

@@ -308,7 +308,8 @@ public class YZXSmsHandler implements SmsHandler {
                     yzxSmsLogProvider.createYzxSmsLog(log);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("YZX sms create log error", e);
+                // e.printStackTrace();
             }
         }
     }

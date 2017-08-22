@@ -406,4 +406,5 @@ public interface RolePrivilegeService {
 
 	List<ServiceModuleDTO> listServiceModulesByTarget(ListServiceModulesByTargetCommand cmd);
 
+	void assignmentAclRole(String ownerType, Long ownerId, String targetType, Long targetId, Integer namespaceId, Long creatorUid, Long roleId);
 }

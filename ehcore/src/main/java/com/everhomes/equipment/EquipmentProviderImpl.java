@@ -157,16 +157,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //			});
 		}
 
-		//五分钟后启动通知
-		Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
-		if(notifyFlag) {
-			Long notifyTime = System.currentTimeMillis() + 300000;
-			String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-			String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
-			String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
-					notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
-		}
+		Long notifyTime = System.currentTimeMillis() + 300000;
+		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
+		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
+				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
 
 
 	}
@@ -1429,6 +1425,26 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
+	public List<EquipmentStandardMap> findEquipmentStandardMap(Long standardId, Long targetId, String targetType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STANDARD_ID.eq(standardId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_ID.eq(targetId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_TYPE.eq(targetType));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
+
+		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+
+		return result;
+	}
+
+	@Override
 	public void createEquipmentInspectionItemResults(
 			EquipmentInspectionItemResults result) {
 
@@ -2002,16 +2018,22 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime) {
+	public List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime, Byte groupType) {
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
 //		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(createTime)));
 
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(new Timestamp(startTime)));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.le(new Timestamp(endTime)));
+		if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(groupType))) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(new Timestamp(startTime)));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.le(new Timestamp(endTime)));
+		}
 
+		if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(groupType))) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(startTime)));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(new Timestamp(endTime)));
+		}
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listTodayEquipmentInspectionTasks, sql=" + query.getSQL());
 			LOGGER.debug("listTodayEquipmentInspectionTasks, bindValues=" + query.getBindValues());

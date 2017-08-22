@@ -21,9 +21,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
-import com.bosigao.cxf.Service1;
-import com.bosigao.cxf.Service1Soap;
-import com.bosigao.cxf.rest.BosigaoCardInfo;
+import com.everhomes.parking.bosigao.cxf.Service1;
+import com.everhomes.parking.bosigao.cxf.Service1Soap;
+import com.everhomes.parking.bosigao.cxf.rest.BosigaoCardInfo;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -36,6 +36,7 @@ import com.everhomes.util.RuntimeErrorException;
 
 // "BOSIGAO"需与ParkingLotVendor.BOSIGAO的枚举值保持一致
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO")
+@Deprecated
 public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BosigaoParkingVendorHandler.class);
 

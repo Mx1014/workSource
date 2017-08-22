@@ -187,6 +187,11 @@ public class SiyinJobValidateServiceImpl {
 	public SiyinPrintRecord convertMapToRecordObject(Map<?,?> job) {
 		if(job == null)
 			return null;
+		Object finalResult = job.get("final_result");
+		//final_result字段1是成功，0是失败，-1是进行中
+		if(finalResult == null || !finalResult.toString().equals("1")){
+			return null;
+		}
 		SiyinPrintRecord record = new SiyinPrintRecord();
 		record.setJobId(job.get("job_id").toString());
 		record.setJobStatus(job.get("job_status").toString());
@@ -361,7 +366,7 @@ public class SiyinJobValidateServiceImpl {
 		Integer blackWhiteSurfaceCount = 0; //
 		for (SiyinPrintRecord record : list) {
 			if(jobType == PrintJobTypeType.SCAN){
-				colorSurfaceCount+=record.getSurfaceCount();
+				colorSurfaceCount+=record.getColorSurfaceCount();
 				blackWhiteSurfaceCount+=record.getMonoSurfaceCount();
 			}else{
 				PrintPaperSizeType paperSizeType = PrintPaperSizeType.fromCode(record.getPaperSize());

@@ -11,6 +11,9 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
+
+import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
@@ -24,6 +27,7 @@ import java.util.Set;
 public interface OrganizationProvider {
 	void createOrganization(Organization organization);
     void updateOrganization(Organization organization);
+	void updateOrganization(List<Long> ids, Byte status, Long uid, Timestamp now);
     void deleteOrganization(Organization organization);
     void deleteOrganizationById(Long id);
     Organization findOrganizationById(Long id);
@@ -39,6 +43,7 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize);
     void createOrganizationMember(OrganizationMember organizationMember);
     void updateOrganizationMember(OrganizationMember organizationMember);
+	void updateOrganizationMemberByOrgPaths(String path, Byte status, Long uid, Timestamp now);
     void deleteOrganizationMemberById(Long id);
     OrganizationMember findOrganizationMemberById(Long id);
     List<OrganizationMember> listOrganizationMembers(Long organizationId, Long memberUid, Long offset,Integer pageSize);
@@ -49,6 +54,7 @@ public interface OrganizationProvider {
     void updateOrganizationCommunity(OrganizationCommunity organizationCommunity);
     void deleteOrganizationCommunity(OrganizationCommunity organizationCommunity);
     void deleteOrganizationCommunityById(Long id);
+	void deleteOrganizationCommunityByOrgIds(List<Long> organizationIds);
     OrganizationCommunity findOrganizationCommunityById(Long id);
     OrganizationCommunity findOrganizationCommunityByOrgIdAndCmmtyId(Long orgId,Long cmmtyId);
     
@@ -128,6 +134,8 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyworks);
 	
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
+
+	Integer countOrganizationPersonnels(Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag);
 	
 	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
 	
@@ -152,6 +160,7 @@ public interface OrganizationProvider {
 	
 	void createOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest);
 	void updateOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest);
+	void updateOrganizationCommunityRequestByOrgIds(List<Long> orgIds,Byte status, Long uid, Timestamp now);
 	void deleteOrganizationCommunityRequestById(OrganizationCommunityRequest organizationCommunityRequest);
 	OrganizationCommunityRequest getOrganizationCommunityRequestById(Long id);
 	List<OrganizationCommunityRequest> queryOrganizationCommunityRequestByCommunityId(ListingLocator locator, Long comunityId
@@ -297,8 +306,10 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
 
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
+	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
+	Integer countOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, Byte contactSignedupStatus, VisibleFlag visibleFlag);
 
-	List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize);
 	List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 	List<CommunityAddressMapping> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
@@ -418,15 +429,11 @@ public interface OrganizationProvider {
 
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
+	
+	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
 	
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
-
-	void updatePressTest();
-
-	void deletePressTest();
-
-	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 
 	//	根据 group_type 查找薪酬组 added by R 20170630
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId);
@@ -437,8 +444,6 @@ public interface OrganizationProvider {
 	//查询所有总公司
 	List<Organization> listHeadEnterprises();
 
-	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
-
 	List<OrganizationMember> listOrganizationMemberByPathHavingDetailId(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
 
 	/**
@@ -448,4 +453,11 @@ public interface OrganizationProvider {
 	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId); 
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
 			CrossShardListingLocator locator, Integer pageSize);
+
+
+	List listOrganizationMembersGroupByToken();
+
+	List listOrganizationMemberByToken(String token);
+
+	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
 }

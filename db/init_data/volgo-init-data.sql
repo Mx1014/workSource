@@ -3197,3 +3197,11 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 VALUES((@eh_launch_pad_items_id:= @eh_launch_pad_items_id +1),'1','0','0','0','/home','Bizs','云打印','云打印','cs://1/image/aW1hZ2UvTVRwa01qRTNNV1k0TW1KaE9XVmlNakF4WldSa1l6TTVOamc1T0dSaE9UQTVOdw','1','1','14','{\"url\":\"http://core.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}','3','0','1','1','','0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'0',NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
 VALUES((@eh_launch_pad_items_id:= @eh_launch_pad_items_id +1),'1','0','0','0','/home','Bizs','云打印','云打印','cs://1/image/aW1hZ2UvTVRwa01qRTNNV1k0TW1KaE9XVmlNakF4WldSa1l6TTVOamc1T0dSaE9UQTVOdw','1','1','14','{\"url\":\"http://core.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}','3','0','1','1','','0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'0',NULL);
+
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(1, 'sms.default.yzx', 8, 'zh_CN', '门禁授权-Volgo', '109552');
+
+
+
+-- volgo要加一个云打印到企业服务 13708 2017-8-9 by xiongying 
+UPDATE eh_launch_pad_items SET service_categry_id = 88 WHERE namespace_id = 1 AND item_label = '云打印' AND scene_type = 'pm_admin';
+UPDATE eh_launch_pad_items SET service_categry_id = 90 WHERE namespace_id = 1 AND item_label = '云打印' AND scene_type = 'park_tourist';

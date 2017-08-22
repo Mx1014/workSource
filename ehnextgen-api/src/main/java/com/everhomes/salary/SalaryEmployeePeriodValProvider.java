@@ -23,4 +23,8 @@ public interface SalaryEmployeePeriodValProvider {
 	void deletePeriodVals(Long employeeId);
 
 	void createSalaryEmployeePeriodVals(List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals);
+
+	int countEntityIsNull(List<Long> salaryEmployeeIds, Long entityIdShifa);
+
+	int countNumberEntityIsNull(List<Long> salaryEmployeeIds);
 }

@@ -95,6 +95,7 @@ public interface EquipmentProvider {
 	void updateEquipmentStandardMap(EquipmentStandardMap map);
 	EquipmentStandardMap findEquipmentStandardMapById(Long id);
 	EquipmentStandardMap findEquipmentStandardMap(Long id, Long standardId, Long targetId, String targetType);
+	List<EquipmentStandardMap> findEquipmentStandardMap( Long standardId, Long targetId, String targetType);
 
 	void createEquipmentInspectionItemResults(EquipmentInspectionItemResults result);
 	List<EquipmentInspectionItemResults> findEquipmentInspectionItemResultsByLogId(Long logId);
@@ -126,7 +127,7 @@ public interface EquipmentProvider {
 	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
 	void populateStandardGroups(EquipmentInspectionStandards standard);
 
-	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime);
+	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime, Byte groupType);
 	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
 
 

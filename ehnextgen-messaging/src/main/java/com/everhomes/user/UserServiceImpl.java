@@ -7,6 +7,7 @@ import com.everhomes.acl.Role;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -23,6 +24,7 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -43,6 +45,7 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -62,7 +65,6 @@ import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
 import com.everhomes.organization.*;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
@@ -79,6 +81,8 @@ import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupLocalStringCode;
+import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
@@ -280,6 +284,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private GroupProvider groupProvider;
+    
+    @Autowired
+    private AuthorizationThirdPartyFormProvider authorizationThirdPartyFormProvider;
+    
+    @Autowired
+    private AuthorizationThirdPartyButtonProvider authorizationThirdPartyButtonProvider;
 
     @Autowired
     private UserIdentifierLogProvider userIdentifierLogProvider;
@@ -292,6 +302,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
+
+	@Autowired
+	private GroupService groupService;
+
+    @Autowired
+    private CommunityService communityService;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -1181,9 +1197,10 @@ public class UserServiceImpl implements UserService {
 			foundLoginByLoginType(user, deviceIdentifier, LoginType.USER, ref);
 		}
 
-		UserLogin foundLogin = ref.getFoundLogin();
-		if(foundLogin == null) {
-			foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify);
+        String appVersion = UserContext.current().getVersion();
+        UserLogin foundLogin = ref.getFoundLogin();
+        if(foundLogin == null) {
+            foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify, appVersion);
 			accessor.putMapValueObject(hkeyIndex, ref.getNextLoginId());
 
 			isNew = true;
@@ -1193,8 +1210,10 @@ public class UserServiceImpl implements UserService {
 		foundLogin.setStatus(UserLoginStatus.LOGGED_IN);
 		foundLogin.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 		foundLogin.setPusherIdentify(pusherIdentify);
+		foundLogin.setAppVersion(appVersion);
 		String hkeyLogin = String.valueOf(ref.getNextLoginId());
 		Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		LOGGER.debug("createLogin|hId = "+hkeyLogin);
 		accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
 
 		if(isNew && deviceIdentifier != null && (!deviceIdentifier.equals(DeviceIdentifierType.INNER_LOGIN.name()))) {
@@ -1238,6 +1257,7 @@ public class UserServiceImpl implements UserService {
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 
 			LOGGER.debug("Unregister login connection for login: {}", login.toString());
+			LOGGER.debug("unregisterLoginConnection|hId = "+hkeyLogin);
 			accessor.putMapValueObject(hkeyLogin, login);
 		} 
 	}
@@ -1301,6 +1321,9 @@ public class UserServiceImpl implements UserService {
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
 			accessor.putMapValueObject(hkeyLogin, login);
 
+			// 发布用户切换App到前台事件   add by xq.tian 2017/07/13
+            applicationEventPublisher.publishEvent(new BorderRegisterEvent(login));
+
 			registerBorderTracker(borderId, loginToken.getUserId(), loginToken.getLoginId());
 			return login;
 		} else {
@@ -1357,6 +1380,7 @@ public class UserServiceImpl implements UserService {
 		if(login != null) {
 			login.setLoginBorderId(null);
 			login.setLastAccessTick(DateHelper.currentGMTTime().getTime());
+			LOGGER.debug("unregisterLoginConnection|hId = "+hkeyLogin);
 			accessor.putMapValueObject(hkeyLogin, login);
 
 			if(userLogin.getLoginBorderId() != null) {
@@ -1372,11 +1396,16 @@ public class UserServiceImpl implements UserService {
 		String userKey = NameMapper.getCacheKey("user", login.getUserId(), null);
 		String hkeyLogin = String.valueOf(login.getLoginId());
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
+		LOGGER.debug("saveLogin|hId = "+hkeyLogin);
 		accessor.putMapValueObject(hkeyLogin, login);
 	}
 
 	@Override
 	public List<UserLogin> listUserLogins(long uid) {
+	    if(uid == 0) {
+	        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "uid=0 not found");
+	    }
+	    
 		List<UserLogin> logins = new ArrayList<>();
 		String userKey = NameMapper.getCacheKey("user", uid, null);
 
@@ -1385,6 +1414,8 @@ public class UserServiceImpl implements UserService {
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
 		Object maxLoginId = accessor.getMapValueObject(hkeyIndex);
 		if(maxLoginId != null) {
+			LOGGER.debug("maxLoginId: "+maxLoginId);
+			LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
 			for(int i = 1; i <= Integer.parseInt(maxLoginId.toString()); i++) {
 				String hkeyLogin = String.valueOf(i);
 				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
@@ -3302,68 +3333,54 @@ public class UserServiceImpl implements UserService {
 			response.setLaunchPadItemDtos(itemDtos);
 			response.setShopDTOs(shopDtos);
 
-			SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.ACTIVITY.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.ACTIVITY.getCode());
-			}
+			//活动
+			SearchTypes searchType  = getSearchTypes(namespaceId, SearchContentType.ACTIVITY.getCode());
 			if(searchType != null) {
-				if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
-						&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
-					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
+				SearchContentsBySceneReponse res = forumService.searchContents(cmd, SearchContentType.ACTIVITY);
+				if(res != null && res.getDtos() != null) {
+					response.getDtos().addAll(res.getDtos());
 				}
 			}
 
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.POLL.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.POLL.getCode());
-			}
+			//投票
+			searchType  = getSearchTypes(namespaceId, SearchContentType.POLL.getCode());
 			if(searchType != null) {
-				if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
-						&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
-					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.POLL).getDtos());	
-				}
-			}
-			
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.TOPIC.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.TOPIC.getCode());
-			}
-			if(searchType != null) {
-				if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
-						&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
-					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
+				SearchContentsBySceneReponse res = forumService.searchContents(cmd, SearchContentType.POLL);
+				if(res != null && res != null) {
+					response.getDtos().addAll(res.getDtos());
 				}
 			}
 
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.NEWS.getCode());
-			}
+			//话题
+			searchType  = getSearchTypes(namespaceId, SearchContentType.TOPIC.getCode());
 			if(searchType != null) {
-				if(newsService.searchNewsByScene(cmd) != null 
-						&& newsService.searchNewsByScene(cmd).getDtos() != null) {
-					response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+				SearchContentsBySceneReponse res = forumService.searchContents(cmd, SearchContentType.TOPIC);
+				if(res != null
+						&& res.getDtos() != null) {
+					response.getDtos().addAll(res.getDtos());
+				}
+			}
+
+			//新闻
+			searchType  = getSearchTypes(namespaceId, SearchContentType.NEWS.getCode());
+			if(searchType != null) {
+				SearchContentsBySceneReponse res = newsService.searchNewsByScene(cmd);
+				if(res != null && res.getDtos() != null) {
+					response.getDtos().addAll(res.getDtos());
 				}
 			}
 			
 			//查询应用 add by yanjun 20170419
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.LAUNCHPADITEM.getCode());
-			}
+			searchType  = getSearchTypes(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
 			if(searchType != null) {
 				 SearchContentsBySceneReponse tempResp = launchPadService.searchLaunchPadItemByScene(cmd);
-				if( tempResp != null 
-						&& tempResp.getLaunchPadItemDtos() != null) {
+				if( tempResp != null  && tempResp.getLaunchPadItemDtos() != null) {
 					response.getLaunchPadItemDtos().addAll(tempResp.getLaunchPadItemDtos());
 				}
 			}
 			
 			//查询电商店铺 add by yanjun 20170419
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.SHOP.getCode());
-			}
+			searchType  = getSearchTypes(namespaceId, SearchContentType.SHOP.getCode());
 			if(searchType != null) {
 				SearchContentsBySceneReponse tempResp = businessService.searchShops(cmd);
 				if(tempResp != null 
@@ -3372,7 +3389,6 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			
-
 			break;
 
 		default:
@@ -3386,6 +3402,16 @@ public class UserServiceImpl implements UserService {
 					userId, namespaceId, (endTime - startTime), cmd);
 		}
 		return response;
+	}
+
+	private SearchTypes getSearchTypes(Integer namespaceId, String searchContentType){
+		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, searchContentType);
+		//找不到就找0域空间的
+		if(searchType == null){
+			searchType = userActivityProvider.findByContentAndNamespaceId(0, searchContentType);
+		}
+
+		return searchType;
 	}
 
 	@Override
@@ -3826,6 +3852,16 @@ public class UserServiceImpl implements UserService {
                         name = organization.getName();
                     }
                     dto.setName(name);
+
+					//群聊名称为空时填充群聊别名  edit by yanjun 20170724
+					if(name == null || "".equals(name)){
+						String alias = groupService.getGroupAlias(group.getId());
+						dto.setAlias(alias);
+						String defaultName = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_DEFAULT_NAME), UserContext.current().getUser().getLocale(), "");
+						dto.setName(defaultName);
+						dto.setIsNameEmptyBefore(GroupNameEmptyFlag.EMPTY.getCode());
+					}
+
                     dto.setMessageType(UserMessageType.MESSAGE.getCode());
                     String avatar = parseUri(group.getAvatar(), com.everhomes.rest.common.EntityType.GROUP.getCode(), group.getId());
                     dto.setAvatar(avatar);
@@ -4177,6 +4213,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public ListAuthFormsResponse listAuthForms() {
+		int namespaceId = UserContext.getCurrentNamespaceId();
+		List<AuthorizationThirdPartyForm> list = authorizationThirdPartyFormProvider.listFormSourceByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
+		ListAuthFormsResponse response = new ListAuthFormsResponse();
+		response.setSourceDto(list.stream().map(r->ConvertHelper.convert(r, FormSourceDTO.class)).collect(Collectors.toList()));
+		return response;
+	}
+	@Override
 	public SearchUsersResponse searchUsers(SearchUsersCommand cmd) {
 		SearchUsersResponse resp = new SearchUsersResponse();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
@@ -4197,7 +4241,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return resp;
 	}
-
+ 
     // 参数校验方法
     // 可以校验带bean validation 注解的对象
     // 校验失败, 抛出异常, 异常信息附带参数值信息
@@ -4241,6 +4285,7 @@ public class UserServiceImpl implements UserService {
 			else {
 				SceneContactV2DTO dto = new SceneContactV2DTO();
 				dto.setUserId(detail.getTargetId());
+				dto.setTargetType(detail.getTargetType());
 				dto.setDetailId(detail.getId());
 				if (!StringUtils.isEmpty(detail.getAvatar()))
 					dto.setContactAvatar(detail.getAvatar());
@@ -4251,7 +4296,7 @@ public class UserServiceImpl implements UserService {
 				dto.setContactToken(detail.getContactToken());
 				if (!StringUtils.isEmpty(detail.getEmail()))
 					dto.setEmail(detail.getEmail());
-				getRelevantContactEnterprise(dto, detail.getOrganizationId());
+				getRelevantContactEnterpriseWithAvatar(dto, detail.getOrganizationId());
 				return dto;
 			}
 		}
@@ -4262,7 +4307,7 @@ public class UserServiceImpl implements UserService {
         List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(user.getId(), organizationId);
 //		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), organizationId);
 
-		if (members == null)
+		if (members == null || members.size() == 0)
 			return null;
 		else {
 		    OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(members.get(0).getDetailId());
@@ -4274,9 +4319,9 @@ public class UserServiceImpl implements UserService {
 			dto.setContactToken(detail.getContactToken());
 			return dto;
 		}
-	}
+	} 
 
-    private void getRelevantContactEnterprise(SceneContactV2DTO dto, Long organizationId) {
+    private void getRelevantContactEnterpriseWithAvatar(SceneContactV2DTO dto, Long organizationId) {
 
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
@@ -4306,5 +4351,42 @@ public class UserServiceImpl implements UserService {
         //  设置岗位
         dto.setJobPosition(this.organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
 
+
+        //  设置头像(由于迁移数据detail表中可能没有头像信息，故由原始的组织架构接口获得)
+        if (OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())) {
+            User user = userProvider.findUserById(dto.getUserId());
+            if (null != user) {
+                dto.setContactAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+            }
+        }
     }
+
+    @Override
+    public SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
+        // 1.通过 userId 与 organizationId 去找到 detailId
+        // 2.根据 detailId 调用之前的获取信息接口
+        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+        GetRelevantContactInfoCommand command = new GetRelevantContactInfoCommand();
+        command.setDetailId(members.get(0).getDetailId());
+        command.setOrganizationId(cmd.getOrganizationId());
+        SceneContactV2DTO dto = this.getRelevantContactInfo(command);
+        if (dto != null)
+            return dto;
+        else
+            return null;
+    }
+
+    @Override
+	public GetFamilyButtonStatusResponse getFamilyButtonStatus(){
+		int namespaceId = UserContext.getCurrentNamespaceId();
+		AuthorizationThirdPartyButton buttonstatus = authorizationThirdPartyButtonProvider.getButtonStatusByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));
+		GetFamilyButtonStatusResponse response = ConvertHelper.convert(buttonstatus, GetFamilyButtonStatusResponse.class);
+		if(response == null){
+			String document = localeStringService.getLocalizedString(AuthorizationErrorCode.SCOPE, 
+					AuthorizationErrorCode.FAMILY_DETAIL, UserContext.current().getUser().getLocale(), AuthorizationErrorCode.FAMILY_DETAIL_S);
+			String[] documents = document.split("\\|");
+			response = new GetFamilyButtonStatusResponse(documents[0],FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),documents[1],documents[2]);
+		}
+		return response;
+	}
 }
