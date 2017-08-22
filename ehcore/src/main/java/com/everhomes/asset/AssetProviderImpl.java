@@ -489,6 +489,8 @@ public class AssetProviderImpl implements AssetProvider {
         query.addLimit(pageOffSet,pageSize+1);
 
         List<Object[]> billAddresses = new ArrayList<>();
+        final String[] buildingNameSelected = {""};
+        final String[] apartmentSelected = {""};
         query.fetch().map(r -> {
             ListBillsDTO dto = new ListBillsDTO();
             if(buildingName!=null && apartmentName!=null){
@@ -499,6 +501,9 @@ public class AssetProviderImpl implements AssetProvider {
                 billAddress[0] = r.getValue(t.TARGET_TYPE);
                 billAddress[1] = r.getValue(t.TARGET_ID);
                 billAddresses.add(billAddress);
+                buildingNameSelected[0] = r.getValue(t.BUILDING_NAME);
+                apartmentSelected[0] = r.getValue(t.APARTMENT_NAME);
+
             }
             dto.setAmountOwed(r.getAmountOwed());
             dto.setAmountReceivable(r.getAmountReceivable());
@@ -548,8 +553,16 @@ public class AssetProviderImpl implements AssetProvider {
             } catch (Exception e) {
 
             }
-            dto.setBuildingName(buildingNameFound[0]);
-            dto.setApartmentName(apartmentNameFound[0]);
+            if(buildingNameSelected[0]!=null && !buildingNameSelected[0].equals("")){
+                dto.setBuildingName(buildingNameSelected[0]);
+            }else{
+                dto.setBuildingName(buildingNameFound[0]);
+            }
+            if(apartmentSelected[0]!=null && !apartmentSelected[0].equals("")){
+                dto.setApartmentName(apartmentSelected[0]);
+            }else{
+                dto.setApartmentName(apartmentNameFound[0]);
+            }
         }
         return list;
     }
@@ -853,6 +866,9 @@ public class AssetProviderImpl implements AssetProvider {
             amountReceivable = amountReceivable.add(amountExemption);
             amountReceivable = amountReceivable.add(amountSupplement);
             newBill.setAmountExemption(amountExemption);
+            newBill.setAddressId(addressId);
+            newBill.setBuildingName(buildingName);
+            newBill.setApartmentName(apartmentName);
             newBill.setAmountOwed(amountReceivable);
             newBill.setAmountReceivable(amountReceivable);
             newBill.setAmountReceived(zero);
@@ -892,7 +908,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
-        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGETNAME,r.TARGET_TYPE,r.BILL_GROUP_ID)
+        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGETNAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.BUILDING_NAME,r.APARTMENT_NAME)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -904,6 +920,8 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setDateStr(f.getValue(r.DATE_STR));
                     vo.setTargetName(f.getValue(r.TARGETNAME));
                     vo.setTargetType(f.getValue(r.TARGET_TYPE));
+                    vo.setBuildingName(f.getValue(r.BUILDING_NAME));
+                    vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE)

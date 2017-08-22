@@ -747,14 +747,17 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 导出所有账单       2
+    // this is for 导出所有账单       4
     /**
      * <p>导出筛选过的所有账单</p>
      * <b>URL: /asset/exportPaymentBills</b>
      */
     @RequestMapping("exportPaymentBills")
     public HttpServletResponse exportPaymentBills(ListBillsCommand cmd,HttpServletResponse response) {
-        HttpServletResponse commandResponse = assetService.exportPaymentBills(cmd,response);
+        assetService.exportPaymentBills(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
         return null;
     }
 

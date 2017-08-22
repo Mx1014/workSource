@@ -383,12 +383,11 @@ public class AssetServiceImpl implements AssetService {
             ExemptionItemDTO dto = dtos.get(i);
             if(dto.getAmount().compareTo(new BigDecimal("0"))==-1) {
                 dto.setIsPlus((byte)0);
+                dto.setAmount(dto.getAmount().divide(new BigDecimal("-1")));
             }else{
                 dto.setIsPlus((byte)1);
             }
         }
-        response.setBuildingName(cmd.getBuildingName());
-        response.setApartmentName(cmd.getApartmentName());
         return response;
     }
 
@@ -412,7 +411,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public HttpServletResponse exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
+    public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
         ListBillsResponse bills = listBills(cmd);
         Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
@@ -423,13 +422,34 @@ public class AssetServiceImpl implements AssetService {
         int second = c.get(Calendar.SECOND);
         String fileName = "bill"+"/"+year + "/" + month + "/" + date + " " +hour + ":" +minute + ":" + second;
         List<ListBillsDTO> dtos = bills.getListBillsDTOS();
-        String[] propertyNames = new String[10];
-        String[] titleName = new String[10];
-        int[] titleSize = new int[10];
-        List<?> dataList = new ArrayList<>();
+
+        List<exportPaymentBillsDetail> dataList = new ArrayList<>();
+        //组装datalist来确定propertyNames的值
+
+        for(int i = 0; i < dtos.size(); i++) {
+            ListBillsDTO dto = dtos.get(i);
+            exportPaymentBillsDetail detail = new exportPaymentBillsDetail();
+            detail.setAmountOwed(dto.getAmountOwed().toString());
+            detail.setAmountReceivable(dto.getAmountReceivable().toString());
+            detail.setAmountReceived(dto.getAmountReceived().toString());
+            detail.setApartmentName(dto.getApartmentName());
+            detail.setBillGroupName(dto.getBillGroupName());
+            detail.setBuildingName(dto.getBuildingName());
+            detail.setNoticeTel(dto.getNoticeTel());
+            detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
+            detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
+            detail.setTargetName(dto.getTargetName());
+            dataList.add(detail);
+        }
+        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
+        String[] propertyNames = new String[declaredFields.length];
+        String[] titleName ={"账期","账单组","客户","楼栋","门牌","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20};
+        for(int i = 0; i < declaredFields.length; i++){
+            propertyNames[i] = declaredFields[i].getName();
+        }
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
-        return null;
     }
 
     @Override

@@ -57,7 +57,7 @@ public interface AssetService {
 
     void modifyBillStatus(BillIdCommand cmd);
 
-    HttpServletResponse exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
+    void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
 
     List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
 

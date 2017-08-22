@@ -228,3 +228,24 @@ CREATE TABLE `eh_payment_variables` (
   `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='变量表';
+-- ----------------------------
+-- Table structure for eh_payment_contract_receiver
+-- ----------------------------
+DROP TABLE IF EXISTS `eh_payment_contract_receiver`;
+CREATE TABLE `eh_payment_contract_receiver` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` bigint(20) DEFAULT NULL,
+  `owner_id` bigint(20) DEFAULT NULL,
+  `owner_type` varchar(255) DEFAULT NULL,
+  `target_id` bigint(20) DEFAULT NULL,
+  `target_type` varchar(255) DEFAULT NULL,
+  `variables_json_string` varchar(2048) DEFAULT NULL,
+  `eh_payment_charging_standard_id` bigint(20) DEFAULT NULL,
+  `eh_payment_charging_item_id` bigint(20) DEFAULT NULL,
+  `contract_num` varchar(255) DEFAULT NULL,
+  `target_name` varchar(255) DEFAULT NULL,
+  `notice_tel` varchar(255) DEFAULT NULL,
+  `building_name` varchar(255) DEFAULT NULL,
+  `apartment_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

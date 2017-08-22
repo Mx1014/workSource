@@ -13,6 +13,7 @@ import java.util.List;
  * <li>billGroupId:账单组id</li>
  * <li>targetId:客户id</li>
  * <li>targetType:客户type</li>
+ * <li>targetName:客户名称</li>
  * <li>billGroupDTO:账单组，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
  *</ul>
  */
