@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.express.guomao.GuoMaoChinaPostResponse;
 import com.everhomes.express.guomao.GuoMaoChinaPostResponseEntity;
@@ -66,6 +67,9 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	
 	@Autowired
 	private ExpressService expressService;
+	
+    @Autowired
+    private ConfigurationProvider configProvider;
 	
 	@Override
 	public String getBillNo(ExpressOrder expressOrder) {
@@ -149,6 +153,10 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		if(expressOrder.getSendType().byteValue() == ExpressSendType.CITY_EMPTIES.getCode().byteValue()){
 			ExpressPackageType packageType = ExpressPackageType.fromCode(expressOrder.getPackageType());
 			expressOrder.setPaySummary(new BigDecimal(packageType.getPrice()));
+			boolean isdebug = configProvider.getBooleanValue("debug.flag",false);
+			if(isdebug){
+				expressOrder.setPaySummary(new BigDecimal(0.01));
+			}
 			return ;
 		}
 		transferOrderToChinaPost(expressOrder, expressCompany);
@@ -338,8 +346,12 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		 //待支付状态，才获取订单的支付金额
 		 if(orderStatus == ExpressOrderStatus.WAITING_FOR_PAY){
 			 if(entity.getResponse().getPaySummary() != null){
-				 isUpdateOrder = true;
-				 expressOrder.setPaySummary(new BigDecimal(entity.getResponse().getPaySummary()));
+				isUpdateOrder = true;
+				expressOrder.setPaySummary(new BigDecimal(entity.getResponse().getPaySummary()));
+				boolean isdebug = configProvider.getBooleanValue("debug.flag",false);
+				if(isdebug){
+					expressOrder.setPaySummary(new BigDecimal(0.01));
+				}
 			 }
 		 }
 		 Byte byteStatus = Byte.valueOf(entity.getResponse().getStatus());
