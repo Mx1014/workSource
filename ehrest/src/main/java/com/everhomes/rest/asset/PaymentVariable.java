@@ -11,13 +11,13 @@ import java.math.BigDecimal;
 
 /**
  *<ul>
- * <li>variableId:变量id</li>
+ * <li>variableIdentifier:变量标识，有id标识的作用</li>
  * <li>variableName:变量名称</li>
  * <li>variableValue:变量值</li>
  *</ul>
  */
 public class PaymentVariable {
-    private Long variableId;
+    private String variableIdentifier;
     private String variableName;
     private BigDecimal variableValue;
 
@@ -26,12 +26,12 @@ public class PaymentVariable {
         return StringHelper.toJsonString(this);
     }
 
-    public Long getVariableId() {
-        return variableId;
+    public String getVariableIdentifier() {
+        return variableIdentifier;
     }
 
-    public void setVariableId(Long variableId) {
-        this.variableId = variableId;
+    public void setVariableIdentifier(String variableIdentifier) {
+        this.variableIdentifier = variableIdentifier;
     }
 
     public String getVariableName() {

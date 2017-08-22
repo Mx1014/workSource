@@ -224,7 +224,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
-        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillItemId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
             response.setNextPageAnchor(null);
         }else{
@@ -525,10 +525,10 @@ public class AssetServiceImpl implements AssetService {
         for(int i = 0; i < feesRules.size(); i++) {
             FeeRules rule = feesRules.get(i);
             List<String> var1 = rule.getPropertyName();
-            List<VariableIdAndValue> variableIdAndValueList = rule.getVariableIdAndValueList();
-            List<VariableIdAndValue> var2 = rule.getVariableIdAndValues();
+            List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId());
+            List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
             List<PaymentExpectancyDTO> dtos = new ArrayList<>();
-            coverVariables(variableIdAndValueList,var2);
+            coverVariables(var2,variableIdAndValueList);
             String formula = assetProvider.findFormulaByChargingStandardId(rule.getChargingStandardId());
             String chargingItemName = assetProvider.findChargingItemNameById(rule.getChargingItemId());
             for(int j = 0; j < var1.size(); j ++){
@@ -570,8 +570,8 @@ public class AssetServiceImpl implements AssetService {
             }
             Gson gson = new Gson();
             Map<String,String> map = new HashMap<>();
-            for(int k = 0; k< var2.size(); k++){
-                VariableIdAndValue variableIdAndValue = var2.get(k);
+            for(int k = 0; k< variableIdAndValueList.size(); k++){
+                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
                 map.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
             }
             json = gson.toJson(map, Map.class);
@@ -620,85 +620,16 @@ public class AssetServiceImpl implements AssetService {
 
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula, float duration) {
         Gson gson = new Gson();
-        HashMap<Long,BigDecimal> map = new HashMap();
+        HashMap<String,String> map = new HashMap();
         for(int i = 0; i < variableIdAndValueList.size(); i++){
             VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-            map.put((long)variableIdAndValue.getVariableId(),new BigDecimal((float)variableIdAndValue.getVariableValue()));
+            map.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
         }
-        char[] chars = formula.toCharArray();
-        List<Character> ch = new ArrayList<>();
-        for(int i = 0; i < chars.length; i++){
-            ch.add(chars[i]);
+        for(Map.Entry<String,String> entry : map.entrySet()){
+            formula = formula.replace(entry.getKey(),entry.getValue());
+            formula += "*"+duration;
         }
-        List<Character> operators = new ArrayList<>();
-        operators.add('*');
-        operators.add('/');
-        operators.add('+');
-        operators.add('-');
-        int begin = 0;
-        int end = 0;
-        while(true){
-            if(end == ch.size()-1){
-                //最后的置换
-                List<Character> characters = ch.subList(begin, end + 1);
-                String variableId = "";
-                for(int i = 0; i< characters.size();i++){
-                    variableId += characters.get(i);
-                }
-                if(!map.containsKey(variableId)){
-                    throw new RuntimeException("公式解析失败");
-                }
-                BigDecimal varibleValue = map.get(variableId);
-                int value = varibleValue.intValue();
-                String replaced = String.valueOf(value);
-                char[] replacedChars = replaced.toCharArray();
-                List<Character> target = new ArrayList<>();
-                int len = replaced.length();
-                for(int i = 0; i< replacedChars.length; i++){
-                    target.add(replacedChars[i]);
-                }
-                int originaLen = end -begin;
-                ch.addAll(begin,target);
-                for(int i = begin+len; i < ch.size(); i++){
-                    ch.remove(i);
-                }
-                break;
-            }
-            char c = ch.get(end);
-            if(operators.contains(c)){
-                //替换 begin和end之间的数值，置begin为 begin+len(new)+1，end = begin--》continue来跳过这个运算符
-                List<Character> characters = ch.subList(begin, end + 1);
-                String variableId = "";
-                for(int i = 0; i< characters.size();i++){
-                    variableId += characters.get(i);
-                }
-                if(!map.containsKey(variableId)){
-                    throw new RuntimeException("公式解析失败");
-                }
-                BigDecimal varibleValue = map.get(variableId);
-                int value = varibleValue.intValue();
-                String replaced = String.valueOf(value);
-                char[] replacedChars = replaced.toCharArray();
-                List<Character> target = new ArrayList<>();
-                int len = replaced.length();
-                for(int i = 0; i< replacedChars.length; i++){
-                    target.add(replacedChars[i]);
-                }
-                int originaLen = end -begin;
-                ch.addAll(begin,target);
-                int deleteBegin = begin+target.size();
-                int deleteEnd = deleteBegin+originaLen;
-                for(int i = deleteBegin; i <= deleteEnd; i++){
-                    ch.remove(i);
-                }
-                begin = begin+len+1;
-                end = begin;
-                continue;
-            }
-            end++;
-        }
-        String target = ch.toString();
-        BigDecimal response = CalculatorUtil.arithmetic(target);
+        BigDecimal response = CalculatorUtil.arithmetic(formula);
         response.setScale(2);
         return response;
     }

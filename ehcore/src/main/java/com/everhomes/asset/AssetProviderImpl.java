@@ -501,9 +501,8 @@ public class AssetProviderImpl implements AssetProvider {
                 billAddress[0] = r.getValue(t.TARGET_TYPE);
                 billAddress[1] = r.getValue(t.TARGET_ID);
                 billAddresses.add(billAddress);
-                buildingNameSelected[0] = r.getValue(t.BUILDING_NAME);
-                apartmentSelected[0] = r.getValue(t.APARTMENT_NAME);
-
+                dto.setApartmentName(r.getApartmentName());
+                dto.setBuildingName(r.getBuildingName());
             }
             dto.setAmountOwed(r.getAmountOwed());
             dto.setAmountReceivable(r.getAmountReceivable());
@@ -526,44 +525,44 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setOwnerType(r.getOwnerType());
             list.add(dto);
             return null;});
-        for(int i = 0; i < billAddresses.size(); i++) {
-            ListBillsDTO dto = list.get(i);
-            Object[] objs = billAddresses.get(i);
-            final String[] buildingNameFound = {""};
-            final String[] apartmentNameFound = {""};
-            try {
-                String targetType = (String) objs[0];
-                Long targetId = (Long) objs[1];
-                if(targetType.equals("eh_user")){
-                    context.select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME).from(Tables.EH_USERS,Tables.EH_ADDRESSES)
-                            .where(Tables.EH_USERS.ID.eq(targetId)).and(Tables.EH_USERS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
-                            .fetch().map(r -> {
-                                buildingNameFound[0] = r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME);
-                                apartmentNameFound[0] = r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME);
-                                return null;
-                            });
-            } else if(targetType.equals("eh_organization")){
-                    context.select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME).from(Tables.EH_ORGANIZATIONS,Tables.EH_ADDRESSES)
-                            .where(Tables.EH_ORGANIZATIONS.ID.eq(targetId)).and(Tables.EH_ORGANIZATIONS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
-                            .fetch().map(r -> {
-                                buildingNameFound[0] = r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME);
-                                apartmentNameFound[0] = r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME);
-                                return null;});
-                }
-            } catch (Exception e) {
-
-            }
-            if(buildingNameSelected[0]!=null && !buildingNameSelected[0].equals("")){
-                dto.setBuildingName(buildingNameSelected[0]);
-            }else{
-                dto.setBuildingName(buildingNameFound[0]);
-            }
-            if(apartmentSelected[0]!=null && !apartmentSelected[0].equals("")){
-                dto.setApartmentName(apartmentSelected[0]);
-            }else{
-                dto.setApartmentName(apartmentNameFound[0]);
-            }
-        }
+//        for(int i = 0; i < billAddresses.size(); i++) {
+//            ListBillsDTO dto = list.get(i);
+//            Object[] objs = billAddresses.get(i);
+//            final String[] buildingNameFound = {""};
+//            final String[] apartmentNameFound = {""};
+//            try {
+//                String targetType = (String) objs[0];
+//                Long targetId = (Long) objs[1];
+//                if(targetType.equals("eh_user")){
+//                    context.select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME).from(Tables.EH_USERS,Tables.EH_ADDRESSES)
+//                            .where(Tables.EH_USERS.ID.eq(targetId)).and(Tables.EH_USERS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
+//                            .fetch().map(r -> {
+//                                buildingNameFound[0] = r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME);
+//                                apartmentNameFound[0] = r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME);
+//                                return null;
+//                            });
+//            } else if(targetType.equals("eh_organization")){
+//                    context.select(Tables.EH_ADDRESSES.BUILDING_NAME,Tables.EH_ADDRESSES.APARTMENT_NAME).from(Tables.EH_ORGANIZATIONS,Tables.EH_ADDRESSES)
+//                            .where(Tables.EH_ORGANIZATIONS.ID.eq(targetId)).and(Tables.EH_ORGANIZATIONS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
+//                            .fetch().map(r -> {
+//                                buildingNameFound[0] = r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME);
+//                                apartmentNameFound[0] = r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME);
+//                                return null;});
+//                }
+//            } catch (Exception e) {
+//
+//            }
+//            if(buildingNameSelected[0]!=null && !buildingNameSelected[0].equals("")){
+//                dto.setBuildingName(buildingNameSelected[0]);
+//            }else{
+//                dto.setBuildingName(buildingNameFound[0]);
+//            }
+//            if(apartmentSelected[0]!=null && !apartmentSelected[0].equals("")){
+//                dto.setApartmentName(apartmentSelected[0]);
+//            }else{
+//                dto.setApartmentName(apartmentNameFound[0]);
+//            }
+//        }
         return list;
     }
 
@@ -1130,15 +1129,15 @@ public class AssetProviderImpl implements AssetProvider {
             for(int j = 0; j < idAndValues.size(); j++) {
                 PaymentVariable variable = new PaymentVariable();
                 VariableIdAndValue idAndValue = idAndValues.get(j);
-                long variableId = Long.parseLong((String)idAndValue.getVariableId());
+                String variableIdentifier = ((String)idAndValue.getVariableId());
                 double variableValueDouble = Double.parseDouble((String)idAndValue.getVariableValue());
                 BigDecimal variableValue = new BigDecimal(variableValueDouble);
                 variableValue = variableValue.setScale(2);
                 String variableName = context.select(t2.NAME)
                         .from(t2)
-                        .where(t2.ID.eq(variableId))
+                        .where(t2.IDENTIFIER.eq(variableIdentifier))
                         .fetchOne(0, String.class);
-                variable.setVariableId(variableId);
+                variable.setVariableIdentifier(variableIdentifier);
                 variable.setVariableName(variableName);
                 variable.setVariableValue(variableValue);
                 variables.add(variable);
@@ -1289,7 +1288,7 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public String findFormulaByChargingStandardId(Long chargingStandardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.FORMULA)
+        return context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.FORMULA_JSON)
                 .from(Tables.EH_PAYMENT_CHARGING_STANDARDS)
                 .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
                 .fetchOne(0,String.class);
@@ -1307,6 +1306,21 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void saveContractVariables(String apartmentName, String buldingName, String contractNum, Long namesapceId, String noticeTel, Long ownerId, String ownerType, Long targetId, String targetType, String json) {
 
+    }
+
+    @Override
+    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<VariableIdAndValue> list = new ArrayList<>();
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        String variableJson = context.select(t.VARIABLES_JSON_STRING)
+                .from(t)
+                .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .fetchOne(0, String.class);
+        Gson gson = new Gson();
+        list = gson.fromJson(variableJson, new TypeToken<List<VariableIdAndValue>>() {
+        }.getType());
+        return list;
     }
 
 

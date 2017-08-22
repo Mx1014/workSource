@@ -55,7 +55,7 @@ public class ListSettledBillTest extends CoreServerTestCase {
 //        cmd.setDateStrEnd(null);
 //        cmd.setBillGroupName("物业");
 //        cmd.setTargetName("lisi");
-        cmd.setBillId(1l);
+//        cmd.setBillId(1l);
 
         ClientIdentityCommand c = new ClientIdentityCommand();
         c.setOwnerType("community");

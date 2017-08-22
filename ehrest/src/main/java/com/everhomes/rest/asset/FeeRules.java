@@ -10,7 +10,7 @@ import java.util.List;
  */
 
 public class FeeRules {
-    private List<VariableIdAndValue> variableIdAndValues;
+
     private Long chargingItemId;
     private Long chargingStandardId;
     private Date dateStrBegin;
@@ -18,13 +18,6 @@ public class FeeRules {
     private List<String> propertyName;
     private List<VariableIdAndValue> variableIdAndValueList;
 
-    public List<VariableIdAndValue> getVariableIdAndValues() {
-        return variableIdAndValues;
-    }
-
-    public void setVariableIdAndValues(List<VariableIdAndValue> variableIdAndValues) {
-        this.variableIdAndValues = variableIdAndValues;
-    }
 
     public Long getChargingItemId() {
         return chargingItemId;
