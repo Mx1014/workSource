@@ -397,6 +397,11 @@ public class AddressProviderImpl implements AddressProvider {
         query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
         query.addLimit(count - addresses.size());
 
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listAddressByBuildingApartmentName, sql=" + query.getSQL());
+            LOGGER.debug("listAddressByBuildingApartmentName, bindValues=" + query.getBindValues());
+        }
+
         query.fetch().map((r) -> {
             ApartmentAbstractDTO dto = new ApartmentAbstractDTO();
             dto.setId(r.getId());
