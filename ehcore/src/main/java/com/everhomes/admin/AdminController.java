@@ -62,6 +62,7 @@ import com.everhomes.rest.admin.AppCreateCommand;
 import com.everhomes.rest.admin.DecodeContentPathCommand;
 import com.everhomes.rest.admin.EncodeWebTokenCommand;
 import com.everhomes.rest.admin.GetSequenceCommand;
+import com.everhomes.rest.admin.GetSequenceDTO;
 import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.admin.SampleCommand;
 import com.everhomes.rest.admin.SampleEmbedded;
