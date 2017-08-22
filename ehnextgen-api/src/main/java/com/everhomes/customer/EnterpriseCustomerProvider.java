@@ -1,8 +1,10 @@
 package com.everhomes.customer;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -17,12 +19,15 @@ public interface EnterpriseCustomerProvider {
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, String name);
     List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize);
     List<EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids);
+    Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId);
+    Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId);
 
     void createCustomerTalent(CustomerTalent talent);
     void updateCustomerTalent(CustomerTalent talent);
     void deleteCustomerTalent(CustomerTalent talent);
     CustomerTalent findCustomerTalentById(Long id);
     List<CustomerTalent> listCustomerTalentsByCustomerId(Long customerId);
+    Map<Long, Long> listCustomerTalentCountByCustomerIds(List<Long> customerIds);
 
     void createCustomerTrademark(CustomerTrademark trademark);
     void updateCustomerTrademark(CustomerTrademark trademark);
@@ -41,6 +46,7 @@ public interface EnterpriseCustomerProvider {
     void deleteCustomerApplyProject(CustomerApplyProject project);
     CustomerApplyProject findCustomerApplyProjectById(Long id);
     List<CustomerApplyProject> listCustomerApplyProjectsByCustomerId(Long customerId);
+    Map<Long, CustomerProjectStatisticsDTO> listCustomerApplyProjectsByCustomerIds(List<Long> customerIds);
 
     void createCustomerCommercial(CustomerCommercial commercial);
     void updateCustomerCommercial(CustomerCommercial commercial);
@@ -59,4 +65,7 @@ public interface EnterpriseCustomerProvider {
     void deleteCustomerEconomicIndicator(CustomerEconomicIndicator economicIndicator);
     CustomerEconomicIndicator findCustomerEconomicIndicatorById(Long id);
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerId(Long customerId);
+    List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds);
+
+    List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId);
 }
