@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.namespace;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -17,7 +18,10 @@ public class NamespaceDetailDTO {
     private Long id;
     private Integer namespaceId;
     private String resourceType;
+
+    @ItemType(MaskDTO.class)
     private List<MaskDTO> pmMasks;
+    @ItemType(MaskDTO.class)
     private List<MaskDTO> parkMasks;
 
 
