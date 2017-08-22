@@ -409,12 +409,12 @@ public class AddressProviderImpl implements AddressProvider {
 
         query.fetch().map((r) -> {
             ApartmentAbstractDTO dto = new ApartmentAbstractDTO();
-            dto.setId(r.getId());
-            dto.setBuildingName(r.getBuildingName());
-            dto.setChargeArea(r.getChargeArea());
-            dto.setLivingStatus(r.getLivingStatus());
-            dto.setName(r.getApartmentName());
-            dto.setOrientation(r.getOrientation());
+            dto.setId(r.getValue(Tables.EH_ADDRESSES.ID));
+            dto.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+            dto.setChargeArea(r.getValue(Tables.EH_ADDRESSES.CHARGE_AREA));
+            dto.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
+            dto.setName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+            dto.setOrientation(r.getValue(Tables.EH_ADDRESSES.ORIENTATION));
             addresses.add(dto);
             return null;
         });
