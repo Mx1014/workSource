@@ -194,19 +194,20 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillsResponse response = new ListBillsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            cmd.setPageAnchor(1l);
+            cmd.setPageAnchor(0l);
         }
         if(cmd.getPageSize() == null || cmd.getPageSize() < 1 || cmd.getPageSize() > Integer.MAX_VALUE/10){
             cmd.setPageSize(20);
         }
-        int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
+        int pageOffSet = cmd.getPageAnchor().intValue();
         List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus());
-        response.setListBillsDTOS(list);
         if(list.size() <= cmd.getPageSize()){
-            response.setNextPageAnchor(cmd.getPageAnchor());
+            response.setNextPageAnchor(null);
         }else{
-            response.setNextPageAnchor(cmd.getPageAnchor()+1);
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            list.remove(list.size()-1);
         }
+        response.setListBillsDTOS(list);
         return response;
     }
 
@@ -217,19 +218,20 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            cmd.setPageAnchor(1l);
+            cmd.setPageAnchor(0l);
         }
         if(cmd.getPageSize() == null){
             cmd.setPageSize(20);
         }
-        int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
+        int pageOffSet = cmd.getPageAnchor().intValue();
         List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
-        response.setBillDTOS(billDTOS);
         if(billDTOS.size() <= cmd.getPageSize()) {
-            response.setNextPageAnchor(cmd.getPageAnchor());
+            response.setNextPageAnchor(null);
         }else{
-            response.setNextPageAnchor(cmd.getPageAnchor()+1);
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            billDTOS.remove(billDTOS.size()-1);
         }
+        response.setBillDTOS(billDTOS);
         return response;
     }
 
@@ -473,12 +475,12 @@ public class AssetServiceImpl implements AssetService {
         ListSettledBillExemptionItemsResponse response = new ListSettledBillExemptionItemsResponse();
 
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            cmd.setPageAnchor(1l);
+            cmd.setPageAnchor(0l);
         }
         if(cmd.getPageSize() == null){
             cmd.setPageSize(20);
         }
-        int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
+        int pageOffSet = cmd.getPageAnchor().intValue();
         List<ListBillExemptionItemsDTO> list = assetProvider.listBillExemptionItems(cmd.getBillId(),pageOffSet,cmd.getPageSize(),cmd.getDateStr(),cmd.getTargetName());
         for(int i = 0; i < list.size(); i++){
             ListBillExemptionItemsDTO dto = list.get(i);
@@ -488,12 +490,13 @@ public class AssetServiceImpl implements AssetService {
                 dto.setIsPlus((byte)1);
             }
         }
-        response.setListNotSettledBillDTOs(list);
         if(list.size() <= cmd.getPageSize()) {
-            response.setNextPageAnchor(cmd.getPageAnchor());
+            response.setNextPageAnchor(0l);
         }else{
-            response.setNextPageAnchor(cmd.getPageAnchor()+1);
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            list.remove(list.size()-1);
         }
+        response.setListNotSettledBillDTOs(list);
         return response;
     }
 

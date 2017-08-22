@@ -573,7 +573,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
-        context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS)
+        context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID)
                 .from(t)
                 .leftOuterJoin(t1)
                 .on(t.CHARGING_ITEMS_ID.eq(t1.ID))
@@ -591,6 +591,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
             dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
             dto.setBillStatus(r.getValue(t.STATUS));
+            dto.setBillItemId(r.getValue(t.ID));
             dtos.add(dto);
             return null;});
         return dtos;
@@ -1238,14 +1239,20 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListBillExemptionItemsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentExemptionItems t = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t");
-        context.select()
+        EhPaymentBills t1 = Tables.EH_PAYMENT_BILLS.as("t1");
+        dateStr = context.select(t1.DATE_STR)
+                        .from(t1)
+                        .where(t1.ID.eq(billId))
+                        .fetchOne(0,String.class);
+        String finalDateStr = dateStr;
+        context.select(t.AMOUNT,t.ID,t.REMARKS)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
                 .map(r -> {
                     ListBillExemptionItemsDTO dto = new ListBillExemptionItemsDTO();
                     dto.setAmount(r.getValue(t.AMOUNT));
-                    dto.setDateStr(dateStr);
+                    dto.setDateStr(finalDateStr);
                     dto.setExemptionId(r.getValue(t.ID));
                     dto.setRemark(r.getValue(t.REMARKS));
                     list.add(dto);

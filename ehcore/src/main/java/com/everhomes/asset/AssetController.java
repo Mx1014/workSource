@@ -582,7 +582,7 @@ public class AssetController extends ControllerBase {
 
     // this is for 删除一个账单         2
     /**
-     * <p>删除一个未出账单</p>
+     * <p>删除一个账单</p>
      * <b>URL: /asset/deletBill</b>
      */
     @RequestMapping("deletBill")
@@ -597,7 +597,7 @@ public class AssetController extends ControllerBase {
 
     // this is for 删除一个账单的收费项     1
     /**
-     * <p>删除一个未出账单的收费项</p>
+     * <p>删除一个账单的收费项</p>
      * <b>URL: /asset/deletBillItem</b>
      */
     @RequestMapping("deletBillItem")

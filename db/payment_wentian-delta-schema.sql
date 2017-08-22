@@ -167,6 +167,7 @@ CREATE TABLE `eh_payment_charging_standards` (
   `name` varchar(10) DEFAULT NULL,
   `charging_items_id` bigint(20) NOT NULL DEFAULT '0',
   `formula` varchar(1024) DEFAULT NULL,
+  `formula_json` varchar(2048) DEFAULT NULL,
   `formula_type` tinyint(4) DEFAULT NULL COMMENT '1: fixed fee; 2: normal formula; 3: gradient varied on variable price; 4: gradients varied functions on each variable section',
   `billing_cycle` tinyint(4) DEFAULT NULL,
   `price_unit_type` tinyint(4) DEFAULT NULL COMMENT '1:日单价; 2:月单价; 3:季单价; 4:年单价',
@@ -226,6 +227,7 @@ CREATE TABLE `eh_payment_variables` (
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
+  `identifier` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='变量表';
 -- ----------------------------
@@ -247,5 +249,6 @@ CREATE TABLE `eh_payment_contract_receiver` (
   `notice_tel` varchar(255) DEFAULT NULL,
   `building_name` varchar(255) DEFAULT NULL,
   `apartment_name` varchar(255) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '0' COMMENT '1:有效；0：无效',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
