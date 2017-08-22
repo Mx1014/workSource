@@ -116,6 +116,16 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>查看客户合同</p>
+	 * <b>URL: /contract/listCustomerContracts</b>
+	 */
+	@RequestMapping("listCustomerContracts")
+	@RestReturn(ListContractsResponse.class)
+	public RestResponse listCustomerContracts(ListCustomerContractsCommand cmd){
+		return new RestResponse(contractService.listCustomerContracts(cmd));
+	}
+
+	/**
 	 * <p>设置合同参数</p>
 	 * <b>URL: /contract/setContractParam</b>
 	 */

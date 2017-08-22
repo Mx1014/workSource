@@ -106,6 +106,8 @@ public class ContractDetailDTO {
     private Timestamp denunciationTime;
     private String denunciationReason;
     private String remark;
+    private Long createUid;
+    private String creatorName;
 
     private Byte status;
 
@@ -125,6 +127,22 @@ public class ContractDetailDTO {
 
     @ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
+
+    public Long getCreateUid() {
+        return createUid;
+    }
+
+    public void setCreateUid(Long createUid) {
+        this.createUid = createUid;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
+    }
 
     public String getParentContractNumber() {
         return parentContractNumber;

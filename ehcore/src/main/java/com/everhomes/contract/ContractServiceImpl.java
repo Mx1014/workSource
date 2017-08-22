@@ -32,6 +32,7 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -129,6 +130,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private LocaleStringService localeStringService;
+
+	@Autowired
+	private UserProvider userProvider;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -670,6 +674,11 @@ public class ContractServiceImpl implements ContractService {
 	public ContractDetailDTO findContract(FindContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
+		User creator = userProvider.findUserById(dto.getCreateUid());
+		if(creator != null) {
+			dto.setCreatorName(creator.getNickName());
+		}
+
 		EnterpriseCustomer customer = enterpriseCustomerProvider.findById(dto.getCustomerId());
 		if(customer != null) {
 			dto.setCustomerName(customer.getName());
@@ -690,6 +699,12 @@ public class ContractServiceImpl implements ContractService {
 		processContractChargingItems(dto);
 		processContractAttachments(dto);
 		return dto;
+	}
+
+	@Override
+	public ListContractsResponse listCustomerContracts(ListCustomerContractsCommand cmd) {
+		//姑且认为同一个域空间 同一个园区的客户和企业如果同名则是同一个 by xiongying20170822
+		return null;
 	}
 
 	private Contract checkContract(Long id) {
