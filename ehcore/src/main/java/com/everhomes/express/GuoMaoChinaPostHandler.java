@@ -281,21 +281,49 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	    }
 	    //同城信筒，不传寄件地址
 	    if(expressOrder.getSendType().byteValue() != ExpressSendType.CITY_EMPTIES.getCode().byteValue()){
-		    params.put("sendName",expressOrder.getSendName());
-		    params.put("sendPhone",expressOrder.getSendPhone());
-		    params.put("sendOrganization",expressOrder.getSendOrganization());
-		    params.put("sendProvince",expressOrder.getSendProvince());
-		    params.put("sendCity",expressOrder.getSendCity());
-		    params.put("sendCounty",expressOrder.getSendCounty());
-		    params.put("sendDetailAddress",expressOrder.getSendDetailAddress());
+	    	if(expressOrder.getSendName()!=null && expressOrder.getSendName().length()>0){
+	    		params.put("sendName",expressOrder.getSendName());
+	    	 }
+		    if(expressOrder.getSendPhone()!=null && expressOrder.getSendPhone().length()>0){
+		    	params.put("sendPhone",expressOrder.getSendPhone());
+		    }
+		    if(expressOrder.getSendOrganization()!=null && expressOrder.getSendOrganization().length()>0){
+		    	params.put("sendOrganization",expressOrder.getSendOrganization());
+		    }
+		    if(expressOrder.getSendProvince()!=null && expressOrder.getSendProvince().length()>0){
+		    	params.put("sendProvince",expressOrder.getSendProvince());
+		    }
+		    if(expressOrder.getSendCity()!=null && expressOrder.getSendCity().length()>0){
+		    	params.put("sendCity",expressOrder.getSendCity());
+		    }
+		    if(expressOrder.getSendCounty()!=null && expressOrder.getSendCounty().length()>0){
+		    	params.put("sendCounty",expressOrder.getSendCounty());
+		    }
+		    if(expressOrder.getSendDetailAddress()!=null && expressOrder.getSendDetailAddress().length()>0){
+		    	params.put("sendDetailAddress",expressOrder.getSendDetailAddress());
+		    }
 	    }
-	    params.put("receiveName",expressOrder.getReceiveName());
-	    params.put("receivePhone",expressOrder.getReceivePhone());
-	    params.put("receiveOrganization",expressOrder.getReceiveOrganization());
-	    params.put("receiveProvince",expressOrder.getReceiveProvince());
-	    params.put("receiveCity",expressOrder.getReceiveCity());
-	    params.put("receiveCounty",expressOrder.getReceiveCounty());
-	    params.put("receiveDetailAddress",expressOrder.getReceiveDetailAddress());
+	    if(expressOrder.getReceiveName()!=null && expressOrder.getReceiveName().length()>0){
+	    	params.put("receiveName",expressOrder.getReceiveName());
+	    }
+	    if(expressOrder.getReceivePhone()!=null && expressOrder.getReceivePhone().length()>0){
+	    	params.put("receivePhone",expressOrder.getReceivePhone());
+	    }
+	    if(expressOrder.getReceiveOrganization()!=null && expressOrder.getReceiveOrganization().length()>0){
+	    	params.put("receiveOrganization",expressOrder.getReceiveOrganization());
+	    }
+	    if(expressOrder.getReceiveProvince()!=null && expressOrder.getReceiveProvince().length()>0){
+	    	params.put("receiveProvince",expressOrder.getReceiveProvince());
+	    }
+	    if(expressOrder.getReceiveCity()!=null && expressOrder.getReceiveCity().length()>0){
+	    	params.put("receiveCity",expressOrder.getReceiveCity());
+	    }
+	    if(expressOrder.getReceiveCounty()!=null && expressOrder.getReceiveCounty().length()>0){
+	    	params.put("receiveCounty",expressOrder.getReceiveCounty());
+	    }
+	    if(expressOrder.getReceiveDetailAddress()!=null && expressOrder.getReceiveDetailAddress().length()>0){
+	    	params.put("receiveDetailAddress",expressOrder.getReceiveDetailAddress());
+	    }
 	    if(expressOrder.getInternal() != null){
 	    	params.put("internal",expressOrder.getInternal());
 	    }
