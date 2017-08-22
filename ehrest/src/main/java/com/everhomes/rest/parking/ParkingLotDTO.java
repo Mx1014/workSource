@@ -39,8 +39,38 @@ public class ParkingLotDTO {
     private Integer flowMode;
     //是否支持锁车
     private Byte lockCarFlag;
+    //是否支持寻车
+    private Byte searchCarFlag;
+    //是否显示当前在场车
+    private Byte displayCarFlag;
+    //是否显示当前剩余车位
+    private Byte displayFreePlaceFlag;
     //停车场客服联系方式
     private String contact;
+
+    public Byte getDisplayCarFlag() {
+        return displayCarFlag;
+    }
+
+    public void setDisplayCarFlag(Byte displayCarFlag) {
+        this.displayCarFlag = displayCarFlag;
+    }
+
+    public Byte getDisplayFreePlaceFlag() {
+        return displayFreePlaceFlag;
+    }
+
+    public void setDisplayFreePlaceFlag(Byte displayFreePlaceFlag) {
+        this.displayFreePlaceFlag = displayFreePlaceFlag;
+    }
+
+    public Byte getSearchCarFlag() {
+        return searchCarFlag;
+    }
+
+    public void setSearchCarFlag(Byte searchCarFlag) {
+        this.searchCarFlag = searchCarFlag;
+    }
 
     public String getContact() {
         return contact;

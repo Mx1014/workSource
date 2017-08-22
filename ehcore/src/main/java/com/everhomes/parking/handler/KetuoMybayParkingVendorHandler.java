@@ -4,6 +4,7 @@ package com.everhomes.parking.handler;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.dashi.DashiCarLocation;
@@ -12,16 +13,25 @@ import com.everhomes.parking.dashi.DashiEmptyPlaceInfo;
 import com.everhomes.parking.dashi.DashiJsonEntity;
 import com.everhomes.parking.ketuo.KetuoCard;
 import com.everhomes.parking.ketuo.KetuoRequestConfig;
+import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.parking.GetCarLocationCommand;
 import com.everhomes.rest.parking.GetFreeSpaceNumCommand;
 import com.everhomes.rest.parking.ParkingCarLocationDTO;
 import com.everhomes.rest.parking.ParkingFreeSpaceNumDTO;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.WebTokenGenerator;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import sun.misc.BASE64Decoder;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -43,6 +53,8 @@ public class KetuoMybayParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+	private ContentServerService contentServerService;
 
 	static String url = "http://szdas.iok.la:17508";
 
@@ -103,6 +115,30 @@ public class KetuoMybayParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 			if (null != carLocations && !carLocations.isEmpty()) {
 				DashiCarLocation temp = carLocations.get(0);
 				DashiCarLocation result = getDashiParkingInfo(temp.getSpaceCode());
+
+				if (null != result && StringUtils.isNotBlank(result.getParkingPhoto())) {
+					String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+					String fileName = "parking-" + System.currentTimeMillis();
+
+					BASE64Decoder decoder = new BASE64Decoder();
+					try {
+						// Base64解码
+						byte[] bytes = decoder.decodeBuffer(result.getParkingPhoto());
+//						for (int i = 0; i < bytes.length; ++i) {
+//							if (bytes[i] < 0) {// 调整异常数据
+//								bytes[i] += 256;
+//							}
+//						}
+						InputStream is = new ByteArrayInputStream(bytes);
+						UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, fileName, token);
+
+						if(fileResp.getErrorCode() == 0) {
+							result.setParkingPhoto(fileResp.getResponse().getUrl());
+						}
+					} catch (Exception e) {
+						LOGGER.error("Parking parse image error");
+					}
+				}
 				return result;
 			}
 		}
