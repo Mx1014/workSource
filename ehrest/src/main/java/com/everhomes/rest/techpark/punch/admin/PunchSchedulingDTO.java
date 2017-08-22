@@ -2,9 +2,10 @@ package com.everhomes.rest.techpark.punch.admin;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * 
@@ -12,7 +13,7 @@ import com.everhomes.discover.ItemType;
  * <li>ownerId：id</li> 
  * <li>month：月份时间戳</li>
  * <li>punchOriganizationId：考勤组id</li> 
- * <li>employees：每一个人的排班{@link PunchSchedulingEmployeeDTO}</li> 
+ * <li>employees：每一个人的排班{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO}</li>
  * 
  * 
  * </ul>
@@ -25,6 +26,13 @@ public class PunchSchedulingDTO {
 	private Long punchOriganizationId; 
 	@ItemType(PunchSchedulingEmployeeDTO.class)
 	private List<PunchSchedulingEmployeeDTO> employees;
+
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -55,6 +63,6 @@ public class PunchSchedulingDTO {
 	public void setEmployees(List<PunchSchedulingEmployeeDTO> employees) {
 		this.employees = employees;
 	}
-	 
+
 	
 }

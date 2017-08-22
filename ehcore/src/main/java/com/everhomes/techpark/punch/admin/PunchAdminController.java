@@ -408,9 +408,9 @@ public class PunchAdminController extends ControllerBase {
      * <p>导入排班表</p>
      */
     @RequestMapping("importPunchScheduling")
-    @RestReturn(value = PunchSchedulingEmployeeDTO.class,collection = true)
+    @RestReturn(value = PunchSchedulingDTO.class)
     public RestResponse importPunchScheduling(@RequestParam(value = "attachment") MultipartFile[] files) {
-    	List<PunchSchedulingEmployeeDTO> result = punchService.importPunchScheduling( files);
+		PunchSchedulingDTO result = punchService.importPunchScheduling( files);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -422,13 +422,9 @@ public class PunchAdminController extends ControllerBase {
      * <p>导入某个月的班次</p>
      */
     @RequestMapping("testimportPunchScheduling")
-    @RestReturn(value = PunchSchedulingEmployeeDTO.class,collection = true)
+    @RestReturn(value = PunchSchedulingDTO.class)
     public RestResponse testimportPunchScheduling( @RequestParam(value = "_attachment_file") MultipartFile[] files) {
-    	List<PunchSchedulingEmployeeDTO> result = punchService.importPunchScheduling( files);
-        RestResponse response = new RestResponse(result);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        return importPunchScheduling(files);
     }
     /**
      * <b>URL: /punch/testimportPunchLogs</b>

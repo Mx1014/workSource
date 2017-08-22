@@ -1,5 +1,6 @@
 package com.everhomes.techpark.punch;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -14,32 +15,46 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rest.print.PrintErrorCode;
+import com.everhomes.util.*;
+import com.google.zxing.WriterException;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -214,11 +229,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -300,8 +310,16 @@ public class PunchServiceImpl implements PunchService {
     
     @Autowired
     private CoordinationProvider coordinationProvider;
-    
-    
+
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
+
+	@Autowired
+	private BigCollectionProvider bigCollectionProvider;
+
+    @Autowired
+    private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (null == companyId || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
@@ -6117,11 +6135,33 @@ public class PunchServiceImpl implements PunchService {
 	 private Workbook createPunchSchedulingsBook(Long queryTime,
 			List<PunchSchedulingEmployeeDTO> employees) { 
 		// TODO Auto-generated method stub
-			if (null == employees ||  employees.size() == 0)
-				return null;
-			Workbook wb = new XSSFWorkbook();
-			Sheet sheet = wb.createSheet("sheet1"); 
-			this.createPunchSchedulingsBookSheetHead(sheet,queryTime);
+		if (null == employees ||  employees.size() == 0)
+			return null;
+		 XSSFWorkbook wb = new XSSFWorkbook();
+		 XSSFSheet sheet = wb.createSheet("sheet1");
+
+		 String sheetName ="sheet1";
+		 sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 31));
+		 XSSFCellStyle style = wb.createCellStyle();
+		 Font font = wb.createFont();
+		 font.setFontHeightInPoints((short) 20);
+		 font.setFontName("Courier New");
+
+		 style.setFont(font);
+
+		 XSSFCellStyle titleStyle = wb.createCellStyle();
+		 titleStyle.setFont(font);
+		 titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+		 int rowNum = 0;
+
+		 //  创建标题
+		 XSSFRow rowTitle = sheet.createRow(rowNum++);
+		 rowTitle.createCell(0).setCellValue(monthSF.get().format(new Date(queryTime)));
+		 rowTitle.setRowStyle(titleStyle);
+
+
+		 this.createPunchSchedulingsBookSheetHead(sheet,queryTime);
 //			ArrayList<String> textlist = new ArrayList<String>();
 //			for(PunchTimeRule rule : targetTimeRules.get()){
 //				textlist.add(rule.getName());
@@ -6138,7 +6178,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet, Long queryTime) { 
 		Row row = sheet.createRow(sheet.getLastRowNum());
-		int i =0 ; 
+		int cellNum =0 ;
 		SimpleDateFormat sf= new SimpleDateFormat("dd日 EEE");
 		Calendar startCalendar = Calendar.getInstance();
 		Calendar endCalendar = Calendar.getInstance();
@@ -6150,7 +6190,7 @@ public class PunchServiceImpl implements PunchService {
 		endCalendar.setTime(startCalendar.getTime());
 		endCalendar.add(Calendar.MONTH, 1);
 		for(;startCalendar.before(endCalendar);startCalendar.add(Calendar.DAY_OF_MONTH, 1)){
-			row.createCell(++i).setCellValue(sf.format(startCalendar.getTime()));
+			row.createCell(++cellNum).setCellValue(sf.format(startCalendar.getTime()));
 		}
 	}
 	private void setNewPunchSchedulingsBookRow(Sheet sheet, PunchSchedulingEmployeeDTO employee ) { 
@@ -6239,7 +6279,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	
 	@Override
-	public List<PunchSchedulingEmployeeDTO>  importPunchScheduling(  MultipartFile[] files) {
+	public PunchSchedulingDTO  importPunchScheduling(  MultipartFile[] files) {
 		// TODO Auto-generated method stub
 		 
 		ArrayList resultList = new ArrayList();
@@ -6264,9 +6304,9 @@ public class PunchServiceImpl implements PunchService {
 			File file = new File(filePath);
 			if(file.exists())
 				file.delete();
-		}*/ 
-		List<PunchSchedulingEmployeeDTO> list =  convertToPunchSchedulings(resultList);
-		return list;
+		}*/
+		PunchSchedulingDTO result = convertToPunchSchedulings(resultList);
+		return result;
 	}
 	@Override
 	public void importPunchLogs( MultipartFile[] files) {
@@ -6314,18 +6354,36 @@ public class PunchServiceImpl implements PunchService {
 			  
 		}
 	}
-	private List<PunchSchedulingEmployeeDTO> convertToPunchSchedulings(ArrayList list ) {
-		List<PunchSchedulingEmployeeDTO> result = new ArrayList<PunchSchedulingEmployeeDTO>();
-		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
-			RowResult r = (RowResult)list.get(rowIndex); 
-			PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
-			dto.setContactName(r.getCells().get("A"));
-			dto.setDaySchedulings(new ArrayList<>());
-			for(int i = 1 ; i<=31;i++){
-				String val = r.getCells().get(GetExcelLetter(i + 1));
-				dto.getDaySchedulings().add(val);
+	private PunchSchedulingDTO convertToPunchSchedulings(ArrayList list ) {
+		PunchSchedulingDTO result = new PunchSchedulingDTO();
+		result.setEmployees(new  ArrayList<PunchSchedulingEmployeeDTO>());
+		RowResult title = (RowResult) list.get(0);
+		String monthString = title.getCells().get("A");
+		Calendar calendar = Calendar.getInstance();
+		try {
+
+			Date month = monthSF.get().parse(monthString);
+			result.setMonth(month.getTime());
+
+			calendar.setTime(month);
+			calendar.set(Calendar.DAY_OF_MONTH,1);
+			calendar.add(Calendar.MONTH,1);
+			calendar.add(Calendar.DAY_OF_MONTH,-1);
+			int days = calendar.get(Calendar.DAY_OF_MONTH);
+
+			for(int rowIndex=1;rowIndex<list.size();rowIndex++){
+				RowResult r = (RowResult)list.get(rowIndex+1);
+				PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
+				dto.setContactName(r.getCells().get("A"));
+				dto.setDaySchedulings(new ArrayList<>());
+				for(int i = 1 ; i<=days;i++){
+					String val = r.getCells().get(GetExcelLetter(i + 1));
+					dto.getDaySchedulings().add(val);
+				}
+				result.getEmployees().add(dto);
 			}
-			result.add(dto);
+		} catch (ParseException e) {
+			e.printStackTrace();
 		}
 		return result;
 	}
@@ -7387,9 +7445,49 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public HttpServletResponse getPunchQRCode(GetPunchQRCodeCommand cmd,
 			HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("qrtype", String.valueOf(cmd.getCodeType()));
+		map.put("token", cmd.getQrToken().trim());
+		String result = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_TOOL_URI_SCOPE,
+				PunchConstants.PUNCH_TOOL_URI_CODE, RentalNotificationTemplateCode.locale, map, "");
+        String key = cmd.getQrToken().trim();
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
+        int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
+        TimeUnit unit = TimeUnit.MINUTES;;
+        // 先放一个和key一样的值,表示这个人key有效
+        valueOperations.set(key, key, timeout, unit);
+		try{
+			ByteArrayOutputStream out = QRCodeEncoder.createSimpleQrCode(Base64.getEncoder().encodeToString(result.getBytes()));
+			return downloadPng(out,response);
+		} catch (WriterException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return response;
 	}
+	public HttpServletResponse downloadPng(ByteArrayOutputStream out, HttpServletResponse response) {
+		try {
+			response.reset();
+			// 设置response的Header
+//			response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes()));
+			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+			response.setContentType("image/x-png");
+			toClient.write(out.toByteArray());
+			toClient.flush();
+			toClient.close();
+
+		} catch (IOException ex) {
+			LOGGER.error(ex.getMessage());
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+					ex.getLocalizedMessage());
+
+		}
+		return response;
+	}
+
 	@Override
 	public void addPunchPoints(AddPunchPointsCommand cmd) {
 		// TODO Auto-generated method stub
@@ -7403,6 +7501,65 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd) {
 		// TODO Auto-generated method stub
-		return null;
+        DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
+        RestResponse response =  new RestResponse();
+        String key = cmd.getQrToken().trim();
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
+        String value = valueOperations.get(key);
+
+        //如果value 和key 不一样,说明value被放入了前端给的数据,直接返回结果
+        if(null!=value && value != key){
+            deferredResult.setResult(JSONObject.parseObject(value,RestResponse.class));
+            int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
+            TimeUnit unit = TimeUnit.MINUTES;;
+            // 先放一个和key一样的值,表示这个key有效
+            valueOperations.set(key, key, timeout, unit);
+            return deferredResult;
+        }
+
+        String subject = PunchConstants.PUNCH_QRCODE_SUBJECT;
+        int scanTimeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_LOGON_SCAN_TIMOUT, 10000);
+        localBusSubscriberBuilder.build(subject + "." + key, new LocalBusOneshotSubscriber() {
+            @Override
+            public Action onLocalBusMessage(Object sender, String subject,
+                                            Object restResponse, String path) {
+                //这里要不要重新把timeou的时间刷一刷?
+                deferredResult.setResult((RestResponse)restResponse);
+                return null;
+            }
+            @Override
+            public void onLocalBusListeningTimeout() {
+                response.setResponseObject("print logon timed out");
+                response.setErrorCode(408);
+                deferredResult.setResult(response);
+            }
+
+        }).setTimeout(scanTimeout).create();
+
+        return deferredResult;
 	}
+
+	/**
+	 * 获取key在redis操作的valueOperations
+	 */
+	private ValueOperations<String, String> getValueOperations(String key) {
+		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+		Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
+		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+
+		return valueOperations;
+	}
+
+
+	/**
+	 * 清除redis中key的缓存
+	 */
+	private void deleteValueOperations(String key) {
+		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+		Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
+		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+		redisTemplate.delete(key);
+	}
+
 }

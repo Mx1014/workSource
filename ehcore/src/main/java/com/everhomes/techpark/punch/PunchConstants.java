@@ -17,6 +17,12 @@ public class PunchConstants {
 	public static final String PUNCH_PUSH_SCOPE ="punch.push";
 	/** PUNCH_EXCEL_SCOPE ="punch.excel"  */
 	public static final String PUNCH_EXCEL_SCOPE ="punch.excel";
+	/** PUNCH_TOOL_URI_SCOPE ="punch.tool.uri"  */
+	public static final String PUNCH_TOOL_URI_SCOPE ="punch.tool.uri";
+	public static final String PUNCH_QRCODE_SUBJECT ="punch.qrcode";
+
+	public static final String PUNCH_QRCODE_TIMEOUT = "punch.qrcode.timeout";
+	public static final int PUNCH_TOOL_URI_CODE = 1;
 	/** EXCEL_SCHEDULE = "schedule"  */
 	public static final String EXCEL_SCHEDULE = "schedule";
 	/** EXCEL_RULE = "rule"  */
@@ -28,7 +34,7 @@ public class PunchConstants {
 
 	public static final String locale = "zh_CN";
 	 /**'请假申请的时间','${beginTime}至${endTime}'*/
-	public static final int PUNCH_FLOW_REQUEST_TIME = 1; 
+	public static final int PUNCH_FLOW_REQUEST_TIME = 1;
 
 	public static final int SUNDAY_INT =    0b1000000;
 	public static final int MONDAY_INT =    0b0100000;
