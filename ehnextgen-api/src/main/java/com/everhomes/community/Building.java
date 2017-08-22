@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
+import com.everhomes.util.StringHelper;
 
 public class Building extends EhBuildings{
 
@@ -118,6 +119,9 @@ public class Building extends EhBuildings{
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
     }
-	
-
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

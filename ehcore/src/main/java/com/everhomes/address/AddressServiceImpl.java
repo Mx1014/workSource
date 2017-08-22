@@ -397,21 +397,42 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 (DSLContext context, Object reducingContext) -> {
 
                     String likeVal = "%" + cmd.getKeyword() + "%";
-                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
+//                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
+//                            .from(Tables.EH_ADDRESSES)
+//                            .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+//                                    .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+//                                    .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
+//                                            .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))
+//                                    ))
+//                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+//                            .fetch().map((r) -> {
+//                        BuildingDTO building = new BuildingDTO();
+//                        building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+//                        building.setBuildingAliasName(r.getValue(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME));
+//                        results.add(building);
+//                        return null;
+//                    });
+                    // 添加日志方便调试，在深圳湾环境，当导入门牌数据时，若楼栋“创投大厦”已经存在，则会自动创建出
+                    // 一个“创投大厦chuang xintou”新楼栋，需要打日志来确认为什么会这样 by lqs 20170822
+                    SelectConditionStep query = context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
                             .from(Tables.EH_ADDRESSES)
                             .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                                     .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                                     .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
-                                            .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))
-                                    ))
-                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
-                            .fetch().map((r) -> {
-                        BuildingDTO building = new BuildingDTO();
-                        building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
-                        building.setBuildingAliasName(r.getValue(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME));
-                        results.add(building);
-                        return null;
-                    });
+                                            .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))))
+                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()));
+                    query.fetch().map((r) -> {
+                                BuildingDTO building = new BuildingDTO();
+                                building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+                                building.setBuildingAliasName(r.getValue(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME));
+                                results.add(building);
+                                return null;
+                            });
+                    
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Query buildings by keyword, sql=" + query.getSQL());
+                        LOGGER.debug("Query buildings by keyword, bindValues=" + query.getBindValues());
+                    }
 
                     return true;
                 });
@@ -1879,6 +1900,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 building.setName(arr[0]);
                 building.setOperatorUid(UserContext.current().getUser().getId());
                 building = communityProvider.createBuilding(building.getOperatorUid(), building);
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), arr[0], building);
+                }
             }
 
             double areaSize = 0;
