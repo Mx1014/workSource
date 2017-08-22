@@ -25,8 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.bus.LocalBusOneshotSubscriber;
-import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.bus.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.print.PrintErrorCode;
@@ -319,6 +318,13 @@ public class PunchServiceImpl implements PunchService {
 
     @Autowired
     private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+
+    @Autowired
+    private LocalBus localBus;
+
+    @Autowired
+    private BusBridgeProvider busBridgeProvider;
+
 
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (null == companyId || companyId.equals(0L)) {
@@ -7487,13 +7493,27 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public void addPunchPoints(AddPunchPointsCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
+        RestResponse restResponse = new RestResponse(cmd.getPunchGeoPoints());
+        busMessage(restResponse, cmd.getToken().trim());
+    }
+
+    private void busMessage(RestResponse restResponse, String key) {
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
+        String value = valueOperations.get(key);
+        if(null == value){
+            //找不到key,说明过期了 报错
+            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                    PunchServiceErrorCode.ERROR_PUNCH_TOKEN_TIMEOUT,
+                    "token time out ");
+        }else{
+            submitLocalBus(PunchConstants.PUNCH_QRCODE_SUBJECT + key, restResponse);
+        }
+    }
+
+    @Override
 	public void addPunchWifis(AddPunchWifisCommand cmd) {
-		// TODO Auto-generated method stub
-		
+        RestResponse restResponse = new RestResponse(cmd.getWifis());
+        busMessage(restResponse, cmd.getToken().trim());
 	}
 	@Override
 	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd) {
@@ -7503,7 +7523,12 @@ public class PunchServiceImpl implements PunchService {
         String key = cmd.getQrToken().trim();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         String value = valueOperations.get(key);
-
+        if(null == value){
+            //找不到key,说明过期了 报错
+            throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+                    PunchServiceErrorCode.ERROR_PUNCH_TOKEN_TIMEOUT,
+                    "token time out ");
+        }
         //如果value 和key 不一样,说明value被放入了前端给的数据,直接返回结果
         if(null!=value && value != key){
             deferredResult.setResult(JSONObject.parseObject(value,RestResponse.class));
@@ -7526,7 +7551,7 @@ public class PunchServiceImpl implements PunchService {
             }
             @Override
             public void onLocalBusListeningTimeout() {
-                response.setResponseObject("print logon timed out");
+                response.setResponseObject("timed out");
                 response.setErrorCode(408);
                 deferredResult.setResult(response);
             }
@@ -7535,7 +7560,21 @@ public class PunchServiceImpl implements PunchService {
 
         return deferredResult;
 	}
-
+    //给每台机器发通知
+    private void submitLocalBus(String localKey,RestResponse restResponse){
+        ExecutorUtil.submit(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+                    localBusSubscriber.onLocalBusMessage(null, localKey, JSONObject.toJSONString(restResponse), null);
+                } catch (Exception e) {
+                    LOGGER.error("submit LocalBusSubscriber {} got excetion", localKey , e);
+                }
+                localBus.publish(null, localKey, JSONObject.toJSONString(restResponse));
+            }
+        },"subscriberPrint"));
+    }
 	/**
 	 * 获取key在redis操作的valueOperations
 	 */
