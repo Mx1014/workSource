@@ -5,16 +5,12 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>parentId: 父亲区域的ID</li>
- * <li>scope: 范围，参考{@link RegionScope}</li>
- * <li>status: 状态，参考{@link RegionAdminStatus}</li>
+ * <li>parentId: 父亲区域的ID, 不传则是最高层</li>
  * <li>namespaceId: 域空间id 没有默认取用户的</li>
  * </ul>
  */
 public class RegionTreeCommand {
     private Long parentId;
-    private Byte scope;
-    private Byte status;
     private Integer namespaceId;
 
     public RegionTreeCommand() {
@@ -28,21 +24,6 @@ public class RegionTreeCommand {
         this.parentId = parentId;
     }
 
-    public Byte getScope() {
-        return scope;
-    }
-
-    public void setScope(Byte scope) {
-        this.scope = scope;
-    }
-
-    public Byte getStatus() {
-        return status;
-    }
-
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
 
     @Override
     public String toString() {

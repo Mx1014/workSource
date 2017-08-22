@@ -115,9 +115,7 @@ public class RegionServiceImpl implements RegionService{
     private List<RegionTreeDTO> getRegionTree(RegionTreeCommand cmd) {
         List<RegionTreeDTO> listDto = new ArrayList<RegionTreeDTO>();
 
-        List<Region> regions = this.regionProvider.listChildRegions( cmd.getNamespaceId(), cmd.getParentId(),
-                RegionScope.fromCode(cmd.getScope()),
-                RegionAdminStatus.fromCode(cmd.getStatus()));
+        List<Region> regions = this.regionProvider.listChildRegions( cmd.getNamespaceId(), cmd.getParentId(),null, RegionAdminStatus.ACTIVE);
 
         if(regions == null || regions.size() == 0){
             return null;
@@ -129,10 +127,8 @@ public class RegionServiceImpl implements RegionService{
             RegionTreeCommand chiCmd = new RegionTreeCommand();
             chiCmd.setParentId(regions.get(i).getId());
             chiCmd.setNamespaceId(cmd.getNamespaceId());
-            chiCmd.setScope(cmd.getScope());
-            chiCmd.setStatus(cmd.getStatus());
             List<RegionTreeDTO> chilChils = getRegionTree(chiCmd);
-            if(chilChils != null || chilChils.size() > 0){
+            if(chilChils != null && chilChils.size() > 0){
                 chilDto.setChildren(chilChils);
             }
             listDto.add(chilDto);
