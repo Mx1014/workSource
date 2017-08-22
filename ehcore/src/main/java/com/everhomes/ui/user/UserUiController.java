@@ -353,7 +353,7 @@ public class UserUiController extends ControllerBase {
 	 * <p>列出用户当前域空间下的相关场景。</p>
 	 * <p>必须在请求的Header中提供域空间。</p>
 	 */
-	@RequestMapping("listUserRelatedScenesByType")
+	@RequestMapping("listUserRelatedScenesByCurrentType")
 	@RestReturn(value=SceneDTO.class, collection=true)
 	public RestResponse listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd) {
 		List<SceneDTO> sceneDtoList = userService.listUserRelatedScenesByCurrentType(cmd);
