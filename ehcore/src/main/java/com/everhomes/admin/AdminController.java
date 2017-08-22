@@ -62,6 +62,7 @@ import com.everhomes.rest.admin.AppCreateCommand;
 import com.everhomes.rest.admin.DecodeContentPathCommand;
 import com.everhomes.rest.admin.EncodeWebTokenCommand;
 import com.everhomes.rest.admin.GetSequenceCommand;
+import com.everhomes.rest.admin.GetSequenceDTO;
 import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.admin.SampleCommand;
 import com.everhomes.rest.admin.SampleEmbedded;
@@ -367,7 +368,7 @@ public class AdminController extends ControllerBase {
     }
     
     @RequestMapping("getSequence")
-    @RestReturn(String.class)
+    @RestReturn(GetSequenceDTO.class)
     public RestResponse getSequence(GetSequenceCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -375,8 +376,8 @@ public class AdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
         }
 
-         sequenceService.syncSequence();
-        return new RestResponse("OK");
+        GetSequenceDTO dto = sequenceService.getSequence(cmd);
+        return new RestResponse(dto);
     }
     
     @RequestMapping("addBorder")
