@@ -142,9 +142,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.everhomes.rest.ui.user.SceneType.DEFAULT;
-import static com.everhomes.rest.ui.user.SceneType.FAMILY;
-import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
+import static com.everhomes.rest.ui.user.SceneType.*;
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
@@ -4382,19 +4380,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<SceneDTO> listUserRelatedScenesByType(ListUserRelatedScenesByTypeCommand cmd) {
+	public List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = UserContext.current().getUser().getId();
 
 		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
 
-		if (DEFAULT == SceneType.fromCode(cmd.getSceneType())) {
-			// 处于家庭对应的场景
-			// 列出用户有效家庭 mod by xiongying 20160523
-			addFamilySceneToList(userId, namespaceId, sceneList);
-		} else if (PARK_TOURIST == SceneType.fromCode(cmd.getSceneType())) {
-			// 处于某个公司对应的场景
+		if (DEFAULT == SceneType.fromCode(cmd.getSceneType()) || FAMILY == SceneType.fromCode(cmd.getSceneType())) {
+			// 当前是家庭场景，列出有效园区场景
 			addOrganizationSceneToList(userId, namespaceId, sceneList);
+		} else if (PARK_TOURIST == SceneType.fromCode(cmd.getSceneType()) || ENTERPRISE == SceneType.fromCode(cmd.getSceneType()) || ENTERPRISE_NOAUTH == SceneType.fromCode(cmd.getSceneType())) {
+			// 当前是园区场景，列出有效家庭场景
+			addFamilySceneToList(userId, namespaceId, sceneList);
 		}
 		/** 从配置项中查询是否开启 **/
 
@@ -4404,10 +4401,13 @@ public class UserServiceImpl implements UserService {
 		if (sceneList.size() == 0) {
 			switch (SceneType.fromCode(cmd.getSceneType())) {
 				case DEFAULT:
-					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.RESIDENTIAL.getCode());
+				case FAMILY:
+					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.COMMERCIAL.getCode());
 					break;
 				case PARK_TOURIST:
-					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.COMMERCIAL.getCode());
+				case ENTERPRISE:
+				case ENTERPRISE_NOAUTH:
+					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.RESIDENTIAL.getCode());
 					break;
 			}
 

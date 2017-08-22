@@ -227,5 +227,5 @@ public interface UserService {
 
 	GetFamilyButtonStatusResponse getFamilyButtonStatus();
 
-    List<SceneDTO> listUserRelatedScenesByType(ListUserRelatedScenesByTypeCommand cmd);
+    List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
 }
