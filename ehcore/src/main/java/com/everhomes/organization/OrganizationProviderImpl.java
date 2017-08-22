@@ -5204,4 +5204,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				});
 		return list;
 	}
+
+	@Override
+	public void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.EMAIL_CONTENT, emailContent)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(UniongroupType.SALARYGROUP.getCode()))
+				.and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(ownerId)).execute();
+	}
 }

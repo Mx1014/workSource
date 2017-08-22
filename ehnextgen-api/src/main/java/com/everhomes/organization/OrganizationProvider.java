@@ -460,4 +460,6 @@ public interface OrganizationProvider {
 	List listOrganizationMemberByToken(String token);
 
 	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
+
+	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
 }
