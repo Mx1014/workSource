@@ -283,4 +283,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         return null;
     }
 
+    @Override
+    public ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse) {
+
+    }
+
+    @Override
+    public void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd) {
+
+    }
+
 }

@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.archives.*;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +104,7 @@ public class ArchivesController extends ControllerBase{
      * <p>5-1.导入通讯录成员</p>
      */
     @RequestMapping("importArchivesContacts")
-    @RestReturn(value = String.class)
+    @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importArchivesContacts(ImportArchivesContactsCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
         User user = UserContext.current().getUser();
         RestResponse response = new RestResponse(archivesService.importArchivesContacts(files[0], user.getId(),user.getNamespaceId(),cmd));
@@ -277,5 +278,42 @@ public class ArchivesController extends ControllerBase{
         return response;
     }
 
+    /**
+     * <b>URL: /archives/importArchivesEmployees</b>
+     * <p>12-1.导入人事档案成员</p>
+     */
+    @RequestMapping("importArchivesEmployees")
+    @RestReturn(value = ImportFileTaskDTO.class)
+    public RestResponse importArchivesEmployees(ImportArchivesEmployeesCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+        User user = UserContext.current().getUser();
+        RestResponse response = new RestResponse(archivesService.importArchivesEmployees(files[0], user.getId(),user.getNamespaceId(),cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+    /**
+     * <b>URL: /archives/exportArchivesEmployees</b>
+     * <p>12-2.导出人事档案成员</p>
+     */
+    @RequestMapping("exportArchivesEmployees")
+    @RestReturn(value = String.class)
+    public RestResponse exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse){
+        archivesService.exportArchivesEmployees(cmd,httpResponse);
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /archives/remindArchivesEmployee</b>
+     * <p>13.添加成员至员工档案</p>
+     */
+    @RequestMapping("remindArchivesEmployee")
+    @RestReturn(value = String.class)
+    public RestResponse remindArchivesEmployee(RemindArchivesEmployeeCommand cmd){
+        archivesService.remindArchivesEmployee(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

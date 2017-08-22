@@ -44,4 +44,10 @@ public interface ArchivesService {
     void updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd);
 
     GetArchivesFieldResponse getArchivesField(GetArchivesFieldCommand cmd);
+
+    ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
+
+    void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse);
+
+    void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
 }
