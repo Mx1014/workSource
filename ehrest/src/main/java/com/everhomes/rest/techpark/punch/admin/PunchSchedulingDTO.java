@@ -32,7 +32,7 @@ public class PunchSchedulingDTO {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
+
 	public String getOwnerType() {
 		return ownerType;
 	}
