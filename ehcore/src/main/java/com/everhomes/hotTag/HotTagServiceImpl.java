@@ -45,8 +45,10 @@ public class HotTagServiceImpl implements HotTagService{
 	@Override
 	public List<TagDTO> listHotTag(ListHotTagCommand cmd) {
 		
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		cmd.setNamespaceId(namespaceId);
+		if(cmd.getNamespaceId() == null){
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 
 		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getPageSize());
 
@@ -81,8 +83,9 @@ public class HotTagServiceImpl implements HotTagService{
 	public TagDTO setHotTag(SetHotTagCommand cmd) {
 		User user = UserContext.current().getUser();
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		cmd.setNamespaceId(namespaceId);
+		if(cmd.getNamespaceId() == null){
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getName());
 		if(tag != null) {
@@ -128,6 +131,11 @@ public class HotTagServiceImpl implements HotTagService{
 
 	@Override
 	public void resetHotTag(resetHotTagCommand cmd) {
+
+		if(cmd.getNamespaceId() == null){
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		ListHotTagCommand listCmd = new ListHotTagCommand();
 		listCmd.setNamespaceId(cmd.getNamespaceId());
 		listCmd.setServiceType(cmd.getServiceType());
@@ -137,6 +145,11 @@ public class HotTagServiceImpl implements HotTagService{
 			List<TagDTO> oldHotTag = listHotTag(listCmd);
 			if (oldHotTag != null) {
 				oldHotTag.forEach(r -> {
+					//list接口，如果找不到标签，会传默认域空间的标签。这种标签不用删除
+					if(r.getNamespaceId() == null || r.getNamespaceId() == 0){
+						return;
+					}
+
 					DeleteHotTagByNameCommand deleteCmd = new DeleteHotTagByNameCommand();
 					deleteCmd.setNamespaceId(cmd.getNamespaceId());
 					deleteCmd.setServiceType(cmd.getServiceType());
@@ -177,10 +190,15 @@ public class HotTagServiceImpl implements HotTagService{
 	public void deleteHotTagByName(DeleteHotTagByNameCommand cmd) {
 		User user = UserContext.current().getUser();
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		cmd.setNamespaceId(namespaceId);
+		if(cmd.getNamespaceId() == null){
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getName());
+		if(tag == null){
+			LOGGER.error("the tag which name = "+cmd.getName()+" and serviceType = "+cmd.getServiceType()+" not found!");
+			return;
+		}
 		tag.setStatus(HotTagStatus.INACTIVE.getCode());
 		tag.setDeleteUid(user.getId());
 		tag.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
