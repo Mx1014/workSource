@@ -93,7 +93,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	private ContentServerService contentServerService;
 			
 	@Override
-	public void addCustomRequest(AddRequestCommand cmd) {
+	public Long addCustomRequest(AddRequestCommand cmd) {
 		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest cmd:" + cmd);
 		
 		ServiceAllianceRequests request = GsonUtil.fromJson(cmd.getRequestJson(), ServiceAllianceRequests.class);
@@ -115,7 +115,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			request.setCreatorMobile(identifier.getIdentifierToken());
 		  
 		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest request:" + request);
-		yellowPageProvider.createServiceAllianceRequests(request);
+		Long id = yellowPageProvider.createServiceAllianceRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
 		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
@@ -220,6 +220,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		}
 		//删除生成的pdf文件，附件
 		attementList.stream().forEach(file->{file.delete();});
+		return id;
 	}
 		
 
