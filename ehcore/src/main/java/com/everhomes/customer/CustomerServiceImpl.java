@@ -153,7 +153,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     private List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> importEnterpriseCustomerData(ImportEnterpriseCustomerDataCommand cmd, List<ImportEnterpriseCustomerDataDTO> list, Long userId){
         List<ImportFileResultLog<ImportEnterpriseCustomerDataDTO>> errorDataLogs = new ArrayList<>();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         for (ImportEnterpriseCustomerDataDTO str : list) {
             ImportFileResultLog<ImportEnterpriseCustomerDataDTO> log = new ImportFileResultLog<>(CustomerErrorCode.SCOPE);
@@ -200,8 +199,8 @@ public class CustomerServiceImpl implements CustomerService {
                 customer.setLevelItemId(scopeLevelFieldItem.getItemId());
             }
 
-
-            customer.setNamespaceId(namespaceId);
+            customer.setCommunityId(cmd.getCommunityId());
+            customer.setNamespaceId(cmd.getNamespaceId());
             customer.setCreatorUid(userId);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);

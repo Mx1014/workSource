@@ -21,5 +21,6 @@ public interface ContractService {
 	ContractDetailDTO findContract(FindContractCommand cmd);
 	void deleteContract(DeleteContractCommand cmd);
 	List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd);
+	List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd);
 
 }
