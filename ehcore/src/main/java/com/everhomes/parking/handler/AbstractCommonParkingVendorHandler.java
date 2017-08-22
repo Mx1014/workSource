@@ -2,10 +2,7 @@ package com.everhomes.parking.handler;
 
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingVendorHandler;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
+import com.everhomes.rest.parking.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -41,4 +38,13 @@ public abstract class AbstractCommonParkingVendorHandler implements ParkingVendo
         return parkingCardDTO;
     }
 
+    @Override
+    public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ParkingCarLocationDTO getCarLocation(ParkingLot parkingLot, GetCarLocationCommand cmd) {
+        return null;
+    }
 }

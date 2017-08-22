@@ -36,7 +36,7 @@ import java.util.*;
  * 清华信息港 停车
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "JIN_YI")
-public class JinyiParkingVendorHandler implements ParkingVendorHandler {
+public class JinyiParkingVendorHandler extends AbstractCommonParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JinyiParkingVendorHandler.class);
 
 	private static final String GET_CARD = "parkingjet.open.s2s.parkingfee.month.calcfee.plateno";
@@ -158,21 +158,10 @@ public class JinyiParkingVendorHandler implements ParkingVendorHandler {
 		});
 		String p = sb.substring(0,sb.length() - 1);
 
-		String md5Sign = stringMD5(p + appkey);
+		String md5Sign = Utils.md5(p + appkey);
 		params.put("sign", md5Sign);
 
 		return params;
-	}
-
-	private String stringMD5(String pw) {
-		try {
-			MessageDigest messageDigest =MessageDigest.getInstance("MD5");
-			messageDigest.update(pw.getBytes());
-			return new BigInteger(1, messageDigest.digest()).toString(16);
-		} catch (NoSuchAlgorithmException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Convert md5 failed");
-		}
 	}
 
 	private JSONObject createGetCardParam(String plateNo) {

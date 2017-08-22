@@ -538,4 +538,32 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /parking/getFreeSpaceNum</b>
+     * <p>获取空闲车位数量</p>
+     */
+    @RequestMapping("getFreeSpaceNum")
+    @RestReturn(value=ParkingFreeSpaceNumDTO.class)
+    public RestResponse getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.getFreeSpaceNum(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getCarLocation</b>
+     * <p>获取车位置</p>
+     */
+    @RequestMapping("getCarLocation")
+    @RestReturn(value=ParkingCarLocationDTO.class)
+    public RestResponse getCarLocation(GetCarLocationCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.getCarLocation(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

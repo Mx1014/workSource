@@ -34,4 +34,8 @@ public interface ParkingVendorHandler {
 	GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd);
 
     boolean recharge(ParkingRechargeOrder order);
+
+    ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd);
+
+    ParkingCarLocationDTO getCarLocation(ParkingLot parkingLot, GetCarLocationCommand cmd);
 }

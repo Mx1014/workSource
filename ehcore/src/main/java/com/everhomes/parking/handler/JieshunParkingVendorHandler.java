@@ -43,7 +43,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "JIESHUN")
-public class JieshunParkingVendorHandler implements ParkingVendorHandler {
+public class JieshunParkingVendorHandler extends AbstractCommonParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JieshunParkingVendorHandler.class);
 	
 	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

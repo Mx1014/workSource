@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * 深业 停车
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO2")
-public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
+public class Bosigao2ParkingVendorHandler extends AbstractCommonParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao2ParkingVendorHandler.class);
 	
 	private ThreadLocal<SimpleDateFormat> timeFormat = new ThreadLocal<SimpleDateFormat>(){

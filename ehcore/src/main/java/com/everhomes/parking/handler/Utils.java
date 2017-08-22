@@ -14,12 +14,16 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +32,12 @@ import java.util.*;
 
 public class Utils {
 
+    public static class MimeType {
+        public static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
+        public static final String APPLICATION_JSON = "application/json";
+        public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+        public static final String MULTIPART_FORM_DATA = "multipart/form-data";
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
@@ -88,7 +98,7 @@ public class Utils {
             int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
             calendar.set(Calendar.DAY_OF_MONTH, d);
         }else{
-            calendar.add(Calendar.MONTH, month-1);
+            calendar.add(Calendar.MONTH, month - 1);
             int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
             calendar.set(Calendar.DAY_OF_MONTH, d);
         }
@@ -115,17 +125,28 @@ public class Utils {
         return ts;
     }
 
+    public static String md5(String pw) {
+        try {
+            MessageDigest messageDigest =MessageDigest.getInstance("MD5");
+            messageDigest.update(pw.getBytes());
+            return new BigInteger(1, messageDigest.digest()).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Convert md5 failed");
+        }
+    }
+
     /**
      *
      * @param url
-     * @param params json格式 content-type : application/json
+     * @param params json格式 content-type : application/json HTTP
      * @return
      */
     public static String post(String url, JSONObject params) {
         //设置body json格式
         Map<String, String> headers = new HashMap<>();
         headers.put("content-type", "application/json");
-        return post(url, params, null);
+        return post(url, params, headers);
     }
 
     /**
@@ -190,7 +211,7 @@ public class Utils {
     /**
      *
      * @param url
-     * @param params 表单提交 content-type : application/x-www-form-urlencoded
+     * @param params 普通表单提交
      * @return
      */
     public static String post(String url, Map<String, String> params) {
@@ -200,7 +221,7 @@ public class Utils {
     /**
      *
      * @param url
-     * @param params 表单提交 content-type : application/x-www-form-urlencoded
+     * @param params 普通表单提交
      * @param headers
      * @return
      */
@@ -223,7 +244,6 @@ public class Utils {
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(nvps, StandardCharsets.UTF_8));
 
-//            httpPost.addHeader("content-type", "application/x-www-form-urlencoded");
             if (null != headers) {
                 Set<Map.Entry<String, String>> headersEntry = headers.entrySet();
                 for (Map.Entry<String, String> e: headersEntry) {

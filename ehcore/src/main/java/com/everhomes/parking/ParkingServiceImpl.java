@@ -1649,4 +1649,27 @@ public class ParkingServiceImpl implements ParkingService {
 		return deferredResult;
 	}
 
+	@Override
+	public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+
+		ParkingFreeSpaceNumDTO dto = handler.getFreeSpaceNum(cmd);
+
+		return dto;
+	}
+
+	@Override
+	public ParkingCarLocationDTO getCarLocation(GetCarLocationCommand cmd) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+
+		ParkingCarLocationDTO dto = handler.getCarLocation(parkingLot, cmd);
+
+		return dto;
+	}
 }

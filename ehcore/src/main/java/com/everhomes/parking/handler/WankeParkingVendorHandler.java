@@ -36,7 +36,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "WANKE")
-public class WankeParkingVendorHandler implements ParkingVendorHandler {
+public class WankeParkingVendorHandler extends AbstractCommonParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WankeParkingVendorHandler.class);
 	
 	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");

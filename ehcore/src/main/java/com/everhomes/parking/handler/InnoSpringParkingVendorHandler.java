@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * 创源 停车
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "INNOSPRING")
-public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
+public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(InnoSpringParkingVendorHandler.class);
 
 	private static final String RECHARGE = "70111002";

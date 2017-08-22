@@ -1,17 +1,31 @@
 package com.everhomes.parking.xiaomao;
 
+import com.everhomes.util.StringHelper;
+
+import java.util.Date;
+
 /**
  * Created by zhengsiting on 2017/8/16.
  */
 public class XiaomaoCard {
-    private String parkName;
-    private String createTime;
-    private String licenseNumber;
-    private String memberType;
-    private String beginTime;
-    private String endTime;
+
+    private Integer flag;
     private String message;
     private String parkId;
+    private String parkName;
+    private String licenseNumber;
+    private String memberType;
+    private Date createTime;
+    private Date beginTime;
+    private Date endTime;
+
+    public Integer getFlag() {
+        return flag;
+    }
+
+    public void setFlag(Integer flag) {
+        this.flag = flag;
+    }
 
     public String getParkName() {
         return parkName;
@@ -19,14 +33,6 @@ public class XiaomaoCard {
 
     public void setParkName(String parkName) {
         this.parkName = parkName;
-    }
-
-    public String getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(String createTime) {
-        this.createTime = createTime;
     }
 
     public String getLicenseNumber() {
@@ -45,19 +51,27 @@ public class XiaomaoCard {
         this.memberType = memberType;
     }
 
-    public String getBeginTime() {
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getBeginTime() {
         return beginTime;
     }
 
-    public void setBeginTime(String beginTime) {
+    public void setBeginTime(Date beginTime) {
         this.beginTime = beginTime;
     }
 
-    public String getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 
@@ -75,5 +89,10 @@ public class XiaomaoCard {
 
     public void setParkId(String parkId) {
         this.parkId = parkId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

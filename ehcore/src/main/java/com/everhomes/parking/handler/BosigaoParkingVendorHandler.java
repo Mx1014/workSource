@@ -37,7 +37,7 @@ import com.everhomes.util.RuntimeErrorException;
 // "BOSIGAO"需与ParkingLotVendor.BOSIGAO的枚举值保持一致
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO")
 @Deprecated
-public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
+public class BosigaoParkingVendorHandler extends AbstractCommonParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BosigaoParkingVendorHandler.class);
 
 	@Autowired

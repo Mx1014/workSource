@@ -81,4 +81,7 @@ public interface ParkingService {
 
     DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd);
 
+    ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd);
+
+    ParkingCarLocationDTO getCarLocation(GetCarLocationCommand cmd);
 }
