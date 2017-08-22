@@ -748,7 +748,7 @@ public class ContractServiceImpl implements ContractService {
 	private void processContractChargingItemAddresses(ContractChargingItemDTO dto) {
 		List<ContractChargingItemAddress> itemAddresses = contractChargingItemAddressProvider.findByItemId(dto.getId());
 		if(itemAddresses != null && itemAddresses.size() > 0) {
-			List<BuildingApartmentDTO> addressDtos = null;
+			List<BuildingApartmentDTO> addressDtos = new ArrayList<>();
 			List<Long> addressIds = new ArrayList<>();
 			itemAddresses.forEach(address -> {
 				addressIds.add(address.getAddressId());
