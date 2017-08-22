@@ -165,6 +165,13 @@ public class HotTagServiceImpl implements HotTagService{
 					setCmd.setServiceType(cmd.getServiceType());
 					setCmd.setName(r);
 					this.setHotTag(setCmd);
+
+					//如果0域空间没有加一条数据
+					HotTags tag = hotTagProvider.findByName(0, cmd.getServiceType(), r);
+					if(tag == null){
+						setCmd.setNamespaceId(0);
+						this.setHotTag(setCmd);
+					}
 				});
 			}
 			return null;
