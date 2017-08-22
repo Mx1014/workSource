@@ -52,4 +52,11 @@ public interface CustomerService {
 //    void deleteCustomerTalent(DeleteCustomerTalentCommand cmd);
 //    CustomerTalentDTO getCustomerTalent(GetCustomerTalentCommand cmd);
 //    List<CustomerTalentDTO> listCustomerTalents(ListCustomerTalentsCommand cmd);
+
+    EnterpriseCustomerStatisticsDTO listEnterpriseCustomerStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
+    CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
+    CustomerIntellectualPropertyStatisticsResponse listCustomerIntellectualPropertyStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
+    CustomerTalentStatisticsResponse listCustomerTalentStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
+    CustomerProjectStatisticsResponse listCustomerProjectStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
+    CustomerSourceStatisticsResponse listCustomerSourceStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
 }

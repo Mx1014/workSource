@@ -21,10 +21,18 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowService;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -116,6 +124,15 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private EnterpriseCustomerProvider enterpriseCustomerProvider;
+
+	@Autowired
+	private FlowService flowService;
+
+	@Autowired
+	private LocaleStringService localeStringService;
+
+	@Autowired
+	private UserProvider userProvider;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -440,11 +457,41 @@ public class ContractServiceImpl implements ContractService {
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
 		contractSearcher.feedDoc(contract);
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			addToFlowCase(contract);
+		}
+
 		FindContractCommand command = new FindContractCommand();
 		command.setId(contract.getId());
 		command.setPartyAId(contract.getPartyAId());
 		ContractDetailDTO contractDetailDTO = findContract(command);
 		return contractDetailDTO;
+	}
+
+	private void addToFlowCase(Contract contract) {
+		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
+				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+		if(null == flow) {
+			LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ENABLE_FLOW,
+					localeStringService.getLocalizedString(String.valueOf(ContractErrorCode.SCOPE),
+							String.valueOf(ContractErrorCode.ERROR_ENABLE_FLOW),
+							UserContext.current().getUser().getLocale(),"Enable request flow not found."));
+		}
+		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+		createFlowCaseCommand.setCurrentOrganizationId(contract.getPartyAId());
+		createFlowCaseCommand.setTitle("合同申请");
+		createFlowCaseCommand.setApplyUserId(contract.getCreateUid());
+		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+		createFlowCaseCommand.setReferId(contract.getId());
+		createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
+		createFlowCaseCommand.setContent(contract.getContractNumber());
+
+		createFlowCaseCommand.setProjectId(contract.getCommunityId());
+		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+
+		flowService.createFlowCase(createFlowCaseCommand);
 	}
 
 	private void dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
@@ -603,6 +650,9 @@ public class ContractServiceImpl implements ContractService {
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
 		contractSearcher.feedDoc(contract);
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			addToFlowCase(contract);
+		}
 		return ConvertHelper.convert(contract, ContractDTO.class);
 	}
 
@@ -624,14 +674,37 @@ public class ContractServiceImpl implements ContractService {
 	public ContractDetailDTO findContract(FindContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
+		User creator = userProvider.findUserById(dto.getCreateUid());
+		if(creator != null) {
+			dto.setCreatorName(creator.getNickName());
+		}
+
 		EnterpriseCustomer customer = enterpriseCustomerProvider.findById(dto.getCustomerId());
 		if(customer != null) {
 			dto.setCustomerName(customer.getName());
+		}
+		if(contract.getParentId() != null) {
+			Contract parentContract = contractProvider.findContractById(contract.getParentId());
+			if(parentContract != null) {
+				dto.setParentContractNumber(parentContract.getContractNumber());
+			}
+		}
+		if(contract.getRootParentId() != null) {
+			Contract rootContract = contractProvider.findContractById(contract.getRootParentId());
+			if(rootContract != null) {
+				dto.setRootContractNumber(rootContract.getContractNumber());
+			}
 		}
 		processContractApartments(dto);
 		processContractChargingItems(dto);
 		processContractAttachments(dto);
 		return dto;
+	}
+
+	@Override
+	public ListContractsResponse listCustomerContracts(ListCustomerContractsCommand cmd) {
+		//姑且认为同一个域空间 同一个园区的客户和企业如果同名则是同一个 by xiongying20170822
+		return null;
 	}
 
 	private Contract checkContract(Long id) {
