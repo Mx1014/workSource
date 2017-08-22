@@ -246,7 +246,6 @@ update `eh_launch_pad_items` elpi set categry_name = (select name from eh_item_s
 
 
 
-
 -- 【嘉定新城】公司内部门禁移到大堂门禁 add by sfyan 20170821
 update `eh_door_access` set owner_type = 0 and owner_id = 240111044332059749 where owner_type = 1 and owner_id = 1023967;
 
@@ -686,4 +685,17 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),'999978','0','0','0','/home/enterprise','EhPortalItemGroups431','VIDEO_CONF','视频会议','cs://1/image/aW1hZ2UvTVRvek1UVTFaVEUzT1RRM1lqZGxNR1EwWXpBeE5ERTNNemMxWldVek1USmtNdw','1','1','27','','7','0','1','1',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'18',NULL);
 
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),'999978','0','0','0','/home/ResApply','Bizs','VIP_APPLY','VIP车位','cs://1/image/aW1hZ2UvTVRwbFl6azBNVFEwTWpnelpUQmhZakkzWldRMU9UZGxNVGhoWkRkalpESTBNUQ','1','1','49','{\"resourceTypeId\":10718,\"pageType\":0}','6','0','1','1',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'0',NULL);
+
+
+-- merge from profile-1.2 started by R
+SET @id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'organization', '900024', 'zh_CN', '性别仅支持"男""女"');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'organization', '900025', 'zh_CN', '姓名长度需小于20个字');
+-- merge from profile-1.2 ended by R
+
+-- merge from barcode-2.0 start  yanjun
+-- 电商一维码查询uri add by yanjun 20170816
+SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'biz.zuolin.checkBarcode','/zl-ec/rest/openapi/commodity/barcodeByCommodityUrl','电商一维码查询uri','0',NULL);
+-- merge from barcode-1.2 end  yanjun
 

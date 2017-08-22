@@ -1022,5 +1022,18 @@ VALUES ((@organization_details_id := @organization_details_id + 1), 1035719, NUL
 # INSERT INTO `eh_enterprise_community_map` (`id`, `community_id`, `member_type`, `member_id`, `member_status`, `creator_uid`, `create_time`, `update_time`)
 # VALUES ((@enterprise_community_map_id := @enterprise_community_map_id + 1), 240111044331050362, 'enterprise', 1035719, 3, NULL, NOW(), NOW());
 -- NEW END--- 08/04 17:59
+DELETE FROM eh_version_realm WHERE namespace_id = 999969;
+
+SELECT max(id) FROM `eh_version_realm` INTO @ver_rea_id;
+SELECT max(id) FROM `eh_version_upgrade_rules` INTO @ver_upg_id;
+
+INSERT INTO `eh_version_realm` VALUES ((@ver_rea_id := @ver_rea_id + 1), 'Android_ChangZhiHui', null, UTC_TIMESTAMP(), 999969);
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`)
+VALUES ((@ver_upg_id := @ver_upg_id + 1), @ver_rea_id, '-0.1','1048576','0','1.0.0', 0, NOW(), 999969);
+
+INSERT INTO `eh_version_realm` VALUES ((@ver_rea_id := @ver_rea_id + 1), 'IOS_ChangZhiHui', null, UTC_TIMESTAMP(), 999969);
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`)
+VALUES ((@ver_upg_id := @ver_upg_id + 1), @ver_rea_id, '-0.1','1048576','0','1.0.0', 0, NOW(), 999969);
+
 
 SET FOREIGN_KEY_CHECKS = 1;

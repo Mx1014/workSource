@@ -10,3 +10,9 @@ VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'text_b
 
 
 -- 以上是4.8.1的脚本
+
+-- merge from profile-1.2 started by R
+SET @id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'organization', '900024', 'zh_CN', '性别仅支持"男""女"');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'organization', '900025', 'zh_CN', '姓名长度需小于20个字');
+-- merge from profile-1.2 ended by R

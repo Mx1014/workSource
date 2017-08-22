@@ -5,6 +5,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.admin.GetSequenceCommand;
+import com.everhomes.rest.admin.GetSequenceDTO;
 import com.everhomes.schema.tables.pojos.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -1622,5 +1624,25 @@ public class SequenceServiceImpl implements SequenceService {
                     + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
             }
         }
+    }
+
+    @Override
+    public GetSequenceDTO getSequence(GetSequenceCommand cmd) {
+        long startSequence = 0L;
+        
+        long blockSize = (cmd.getBlockSize() == null ? 0L : cmd.getBlockSize());
+        if(blockSize <= 1) {
+            startSequence = sequenceProvider.getNextSequence(cmd.getSequenceDomain());
+            blockSize = 1;
+        } else {
+            sequenceProvider.getNextSequenceBlock(cmd.getSequenceDomain(), blockSize);
+        }
+        
+        GetSequenceDTO dto = new GetSequenceDTO();
+        dto.setSequenceDomain(cmd.getSequenceDomain());
+        dto.setStartSequence(startSequence);
+        dto.setBlockSize(blockSize);
+        
+        return dto;
     }
 }
