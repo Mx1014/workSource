@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.customer.EnterpriseCustomer;
@@ -133,6 +134,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private UserProvider userProvider;
+
+	@Autowired
+	private AssetProvider assetProvider;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -733,6 +737,7 @@ public class ContractServiceImpl implements ContractService {
 		if(contractChargingItems != null && contractChargingItems.size() > 0) {
 			List<ContractChargingItemDTO> chargingItemsDto = contractChargingItems.stream().map(item -> {
 				ContractChargingItemDTO itemDto = ConvertHelper.convert(item, ContractChargingItemDTO.class);
+//				assetProvider.findChargingItemById(itemDto.getChargingItemId());
 				processContractChargingItemAddresses(itemDto);
 				return itemDto;
 			}).collect(Collectors.toList());
