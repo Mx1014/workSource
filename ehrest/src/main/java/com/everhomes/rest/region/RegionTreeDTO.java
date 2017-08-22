@@ -34,7 +34,7 @@ public class RegionTreeDTO {
     private Byte    status;
     private String  pinyinName;
     private String  pinyinPrefix;
-    
+
     @ItemType(RegionTreeDTO.class)
     private List<RegionTreeDTO> children;
 

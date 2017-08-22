@@ -50,6 +50,7 @@ public class HotTagServiceImpl implements HotTagService{
 
 		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getPageSize());
 
+		//查询没有标签，则使用0域空间的数据
 		if(tags == null || tags.size() == 0){
 			tags = hotTagProvider.listHotTag(0, cmd.getServiceType(), cmd.getPageSize());
 		}

@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  *<ul>
  *<li>pageSize:列热门标签的数量</li>
  *<li>serviceType:标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
- *<li>namespaceId: 域空间Id，不传则取当前域空间的。0为默认域空间即总列表</li>
+ *<li>namespaceId: 域空间Id，不传则取当前域空间的</li>
  *</ul>
  */
 public class ListHotTagCommand {

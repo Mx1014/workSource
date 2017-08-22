@@ -224,11 +224,11 @@ public class RegionController extends ControllerBase {
 
 
     /**
-     * <b>URL: /region/listTree</b>
+     * <b>URL: /region/regionTree</b>
      * 列出指定范围和状态的区域列表（不用填父亲区域ID）
      */
     @RequireAuthentication(false)
-    @RequestMapping("listTree")
+    @RequestMapping("regionTree")
     @RestReturn(value=RegionTreeResponse.class, collection=true)
     public RestResponse regionTree(@Valid RegionTreeCommand cmd) {
         RegionTreeResponse regionTreeResponse = regionService.regionTree(cmd);
