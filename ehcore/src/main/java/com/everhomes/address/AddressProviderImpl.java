@@ -377,8 +377,8 @@ public class AddressProviderImpl implements AddressProvider {
                 String buildingName, String apartmentName, Byte livingStatus, CrossShardListingLocator locator, int count) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<ApartmentAbstractDTO> addresses = new ArrayList<>();
-        SelectQuery<EhAddressesRecord> query = context.selectQuery(Tables.EH_ADDRESSES);
-
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ADDRESSES);
         if(locator.getAnchor() != null)
             query.addConditions(Tables.EH_ADDRESSES.ID.gt(locator.getAnchor()));
 
