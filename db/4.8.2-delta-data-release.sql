@@ -699,3 +699,8 @@ SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'biz.zuolin.checkBarcode','/zl-ec/rest/openapi/commodity/barcodeByCommodityUrl','电商一维码查询uri','0',NULL);
 -- merge from barcode-1.2 end  yanjun
 
+-- 打印接口调用减少 dengs.2017.08.22
+-- # 二维码扫描增加到20秒
+update eh_configurations SET `value` = '20000' WHERE `name` = 'print.logon.scan.timout' AND namespace_id = '0';
+-- # 二维码有效时间改成六分钟
+update eh_configurations SET `value` = '6' WHERE `name` = 'print.siyin.timeout' AND namespace_id = '0';
