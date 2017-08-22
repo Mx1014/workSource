@@ -9245,6 +9245,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setGroupPath(org.getPath());
         organizationMember.setGroupType(org.getGroupType());
         organizationMember.setOperatorUid(user.getId());
+        organizationMember.setVisibleFlag(cmd.getVisibleFlag());
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
 /*        java.util.Date nDate = DateHelper.currentGMTTime();

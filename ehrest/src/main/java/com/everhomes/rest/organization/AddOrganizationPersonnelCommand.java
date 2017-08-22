@@ -25,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>checkInTime: 入职时间</li>
  * <li>departmentIds：添加到多部门</li>
  * <li>jobPositionIds：添加到多群组</li>
+ * <li>visibleFlag:可见性标识</li>
  * </ul>
  */
 public class AddOrganizationPersonnelCommand {
@@ -51,6 +52,8 @@ public class AddOrganizationPersonnelCommand {
 	private String employmentTime;
 
 	private String checkInTime;
+
+	private Byte visibleFlag;
 	
 	@ItemType(Long.class)
 	private List<Long> departmentIds;
@@ -205,4 +208,11 @@ public class AddOrganizationPersonnelCommand {
     }
 
 
+	public Byte getVisibleFlag() {
+		return visibleFlag;
+	}
+
+	public void setVisibleFlag(Byte visibleFlag) {
+		this.visibleFlag = visibleFlag;
+	}
 }
