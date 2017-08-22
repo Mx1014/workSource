@@ -48,16 +48,14 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -69,6 +67,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+import scala.Char;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -439,15 +438,17 @@ public class AssetServiceImpl implements AssetService {
             detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
             detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
             detail.setTargetName(dto.getTargetName());
+            detail.setDateStr(dto.getDateStr());
             dataList.add(detail);
         }
-        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
-        String[] propertyNames = new String[declaredFields.length];
+        String[] propertyNames = {"dateStr","billGroupName","targetName","buildingName","apartmentName","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
+//        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
+//        String[] propertyNames = new String[declaredFields.length];
         String[] titleName ={"账期","账单组","客户","楼栋","门牌","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"};
         int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20};
-        for(int i = 0; i < declaredFields.length; i++){
-            propertyNames[i] = declaredFields[i].getName();
-        }
+//        for(int i = 0; i < declaredFields.length; i++){
+//            propertyNames[i] = declaredFields[i].getName();
+//        }
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
@@ -464,7 +465,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
-        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTOList(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName());
+        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTO(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName());
     }
 
     @Override
@@ -509,6 +510,194 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void deletExemptionItem(ExemptionItemIdCommand cmd) {
         assetProvider.deletExemptionItem(cmd.getExemptionItemId());
+    }
+
+    @Override
+    public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
+        //calculate the details of payment expectancies
+        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
+        List<PaymentExpectancyDTO> list = new ArrayList<>();
+        List<FeeRules> feesRules = cmd.getFeesRules();
+        String json = "";
+        for(int i = 0; i < feesRules.size(); i++) {
+            FeeRules rule = feesRules.get(i);
+            List<String> var1 = rule.getPropertyName();
+            List<VariableIdAndValue> variableIdAndValueList = rule.getVariableIdAndValueList();
+            List<VariableIdAndValue> var2 = rule.getVariableIdAndValues();
+            List<PaymentExpectancyDTO> dtos = new ArrayList<>();
+            coverVariables(variableIdAndValueList,var2);
+            String formula = assetProvider.findFormulaByChargingStandardId(rule.getChargingStandardId());
+            String chargingItemName = assetProvider.findChargingItemNameById(rule.getChargingItemId());
+            for(int j = 0; j < var1.size(); j ++){
+                String propertyName = var1.get(j);
+                Date dateStrBegin = rule.getDateStrBegin();
+                Date dateStrEnd = rule.getDateStrEnd();
+                Calendar c1 = Calendar.getInstance();
+                Calendar c2 = Calendar.getInstance();
+                c1.setTime(dateStrBegin);
+                c2.setTime(dateStrEnd);
+                Calendar c3 = Calendar.getInstance();
+                c3.setTime(dateStrBegin);
+
+                c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)-1);
+                Calendar c4 = Calendar.getInstance();
+                c4.setTime(c3.getTime());
+                c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);
+
+                if(c4.compareTo(c2) == 0){
+                    // one month
+                    // get dto and add to dtos
+                    float duration = 1;
+                    c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)-1);
+                    addFeeDTO(dtos, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration);
+                }else{
+                    while(c4.compareTo(c2) != 1) {
+                        //each month
+                        float duration = 1;
+                        addFeeDTO(dtos, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration);
+                        c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
+                        c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);
+                    }
+                    if(c4.compareTo(c2) != 0){
+                        //less than one month
+                        float duration = c2.getActualMinimum(Calendar.DAY_OF_MONTH)-c3.get(Calendar.DAY_OF_MONTH)/c3.getActualMaximum(Calendar.DAY_OF_MONTH);
+                        addFeeDTO(dtos, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration);
+                    }
+                }
+            }
+            Gson gson = new Gson();
+            Map<String,String> map = new HashMap<>();
+            for(int k = 0; k< var2.size(); k++){
+                VariableIdAndValue variableIdAndValue = var2.get(k);
+                map.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
+            }
+            json = gson.toJson(map, Map.class);
+
+        }
+        response.setList(list);
+        //save the data but with a state of being suspend
+        assetProvider.saveContractVariables(cmd.getApartmentName(),cmd.getBuldingName(),cmd.getContractNum(),cmd.getNamesapceId(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetId(),cmd.getTargetType(),json);
+        return response;
+    }
+
+    private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {
+        for(int i = 0 ; i < var1.size(); i++){
+            VariableIdAndValue v1 = var1.get(i);
+            String id1 = (String)v1.getVariableId();
+            for(int j = 0; j< var2.size(); j++){
+                VariableIdAndValue v2 = var2.get(j);
+                String id2 = (String)v2.getVariableId();
+                if(id1.equals(id2)){
+                    v2.setVariableValue(v1.getVariableValue());
+                }
+
+            }
+        }
+    }
+
+    private void addFeeDTO(List<PaymentExpectancyDTO> dtos, String formula, String chargingItemName, String propertyName, List<VariableIdAndValue> variableIdAndValueList, Calendar c2, Calendar c3, float duration) {
+        PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+        BigDecimal amountReceivable = calculateFee(variableIdAndValueList,formula,duration);
+        dto.setAmountReceivable(amountReceivable);
+        dto.setChargingItemName(chargingItemName);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        dto.setDateStrBegin(sdf.format(c3));
+        dto.setDateStrEnd(sdf.format(c2));
+        Calendar c5 = Calendar.getInstance();
+        if(duration == 1){
+            c5.setTime(c3.getTime());
+            c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }else{
+            c5.setTime(c2.getTime());
+        }
+        dto.setDueDateStr(sdf.format(c5));
+        dto.setPropertyIdentifier(propertyName);
+        dtos.add(dto);
+    }
+
+    private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula, float duration) {
+        Gson gson = new Gson();
+        HashMap<Long,BigDecimal> map = new HashMap();
+        for(int i = 0; i < variableIdAndValueList.size(); i++){
+            VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
+            map.put((long)variableIdAndValue.getVariableId(),new BigDecimal((float)variableIdAndValue.getVariableValue()));
+        }
+        char[] chars = formula.toCharArray();
+        List<Character> ch = new ArrayList<>();
+        for(int i = 0; i < chars.length; i++){
+            ch.add(chars[i]);
+        }
+        List<Character> operators = new ArrayList<>();
+        operators.add('*');
+        operators.add('/');
+        operators.add('+');
+        operators.add('-');
+        int begin = 0;
+        int end = 0;
+        while(true){
+            if(end == ch.size()-1){
+                //最后的置换
+                List<Character> characters = ch.subList(begin, end + 1);
+                String variableId = "";
+                for(int i = 0; i< characters.size();i++){
+                    variableId += characters.get(i);
+                }
+                if(!map.containsKey(variableId)){
+                    throw new RuntimeException("公式解析失败");
+                }
+                BigDecimal varibleValue = map.get(variableId);
+                int value = varibleValue.intValue();
+                String replaced = String.valueOf(value);
+                char[] replacedChars = replaced.toCharArray();
+                List<Character> target = new ArrayList<>();
+                int len = replaced.length();
+                for(int i = 0; i< replacedChars.length; i++){
+                    target.add(replacedChars[i]);
+                }
+                int originaLen = end -begin;
+                ch.addAll(begin,target);
+                for(int i = begin+len; i < ch.size(); i++){
+                    ch.remove(i);
+                }
+                break;
+            }
+            char c = ch.get(end);
+            if(operators.contains(c)){
+                //替换 begin和end之间的数值，置begin为 begin+len(new)+1，end = begin--》continue来跳过这个运算符
+                List<Character> characters = ch.subList(begin, end + 1);
+                String variableId = "";
+                for(int i = 0; i< characters.size();i++){
+                    variableId += characters.get(i);
+                }
+                if(!map.containsKey(variableId)){
+                    throw new RuntimeException("公式解析失败");
+                }
+                BigDecimal varibleValue = map.get(variableId);
+                int value = varibleValue.intValue();
+                String replaced = String.valueOf(value);
+                char[] replacedChars = replaced.toCharArray();
+                List<Character> target = new ArrayList<>();
+                int len = replaced.length();
+                for(int i = 0; i< replacedChars.length; i++){
+                    target.add(replacedChars[i]);
+                }
+                int originaLen = end -begin;
+                ch.addAll(begin,target);
+                int deleteBegin = begin+target.size();
+                int deleteEnd = deleteBegin+originaLen;
+                for(int i = deleteBegin; i <= deleteEnd; i++){
+                    ch.remove(i);
+                }
+                begin = begin+len+1;
+                end = begin;
+                continue;
+            }
+            end++;
+        }
+        String target = ch.toString();
+        BigDecimal response = CalculatorUtil.arithmetic(target);
+        response.setScale(2);
+        return response;
     }
 //    @Scheduled(cron = "0 0 23 * * ?")
 //    @Override

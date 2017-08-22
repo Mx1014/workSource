@@ -552,19 +552,19 @@ public class AssetController extends ControllerBase {
     }
 
     // this is for 展示一个未出账单的收费项详情       4
-    /**
-     * <p>展示一个未出账单的收费项详情</p>
-     * <b>URL: /asset/listNotSettledBillItems</b>
-     */
-    @RequestMapping("listNotSettledBillItems")
-    @RestReturn(value = ListBillItemsResponse.class)
-    public RestResponse listNotSettledBillItems(ListBillItemsCommand cmd) {
-        ListBillItemsResponse res = assetService.listBillItems(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorDescription("OK");
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        return response;
-    }
+//    /**
+//     * <p>展示一个未出账单的收费项详情</p>
+//     * <b>URL: /asset/listNotSettledBillItems</b>
+//     */
+//    @RequestMapping("listNotSettledBillItems")
+//    @RestReturn(value = ListBillItemsResponse.class)
+//    public RestResponse listNotSettledBillItems(ListBillItemsCommand cmd) {
+//        ListBillItemsResponse res = assetService.listBillItems(cmd);
+//        RestResponse response = new RestResponse();
+//        response.setErrorDescription("OK");
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        return response;
+//    }
 
 //    // this is for 展示一个未出账单的减免项列表           2
 //    /**
@@ -689,14 +689,13 @@ public class AssetController extends ControllerBase {
     // this is for 展示已出账单的收费项       4
     /**
      * <p>展示已出账单的收费项</p>
-     * <b>URL: /asset/listSettledBillItems</b>
+     * <b>URL: /asset/listBillItems</b>
      */
-    @RequestMapping("listSettledBillItems")
+    @RequestMapping("listBillItems")
     @RestReturn(value = ListBillItemsResponse.class)
-    public RestResponse listSettledBillItems(ListBillItemsCommand cmd) {
+    public RestResponse listBillItems(ListBillItemsCommand cmd) {
         ListBillItemsResponse res = assetService.listBillItems(cmd);
         RestResponse response = new RestResponse(res);
-        System.out.println(3434);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -766,7 +765,7 @@ public class AssetController extends ControllerBase {
      * <p>展示账单的减免项</p>
      * <b>URL: /asset/listBillExemptionItems</b>
      */
-    @RequestMapping("listSettledBillExemptionItems")
+    @RequestMapping("listBillExemptionItems")
     @RestReturn(value = ListSettledBillExemptionItemsResponse.class)
     public RestResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
         ListSettledBillExemptionItemsResponse res = assetService.listBillExemptionItems(cmd);

@@ -73,5 +73,7 @@ public interface AssetService {
 
     void deletExemptionItem(ExemptionItemIdCommand cmd);
 
+    PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd);
+
 //    void synchronizeZJGKBill();
 }

@@ -81,4 +81,10 @@ public interface AssetProvider {
     void deleteBillItem(Long billItemId);
 
     void deletExemptionItem(Long exemptionItemId);
+
+    String findFormulaByChargingStandardId(Long chargingStandardId);
+
+    String findChargingItemNameById(Long chargingItemId);
+
+    void saveContractVariables(String apartmentName, String buldingName, String contractNum, Long namesapceId, String noticeTel, Long ownerId, String ownerType, Long targetId, String targetType, String json);
 }

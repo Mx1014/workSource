@@ -1227,7 +1227,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .set(t.AMOUNT_EXEMPTION,amountExemption)
                     .set(t.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
                     .set(t.OPERATOR_UID,UserContext.currentUserId())
-                    .where(t1.ID.eq(billId))
+                    .where(t.ID.eq(billId))
                     .execute();
             return null;
         });
@@ -1259,6 +1259,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)0))
                 .execute();
     }
 
@@ -1276,6 +1277,29 @@ public class AssetProviderImpl implements AssetProvider {
         context.delete(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
                 .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.ID.eq(exemptionItemId))
                 .execute();
+    }
+
+    @Override
+    public String findFormulaByChargingStandardId(Long chargingStandardId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.FORMULA)
+                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
+                .fetchOne(0,String.class);
+    }
+
+    @Override
+    public String findChargingItemNameById(Long chargingItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
+                .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(chargingItemId))
+                .fetchOne(0,String.class);
+    }
+
+    @Override
+    public void saveContractVariables(String apartmentName, String buldingName, String contractNum, Long namesapceId, String noticeTel, Long ownerId, String ownerType, Long targetId, String targetType, String json) {
+
     }
 
 

@@ -24,7 +24,7 @@ public class ModifyNotSettledBillCommand {
     private String targetType;
     private String targetName;
     @ItemType(BillGroupDTO.class)
-    private BillGroupDTO billGroupDTOList;
+    private BillGroupDTO billGroupDTO;
 
     @Override
     public String toString() {
@@ -64,12 +64,12 @@ public class ModifyNotSettledBillCommand {
         this.billGroupId = billGroupId;
     }
 
-    public BillGroupDTO getBillGroupDTOList() {
-        return billGroupDTOList;
+    public BillGroupDTO getBillGroupDTO() {
+        return billGroupDTO;
     }
 
-    public void setBillGroupDTOList(BillGroupDTO billGroupDTOList) {
-        this.billGroupDTOList = billGroupDTOList;
+    public void setBillGroupDTO(BillGroupDTO billGroupDTO) {
+        this.billGroupDTO = billGroupDTO;
     }
 
     public Long getTargetId() {
