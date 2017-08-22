@@ -9,6 +9,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.jooq.Condition;
 import org.slf4j.Logger;
@@ -206,13 +207,43 @@ public class ArchivesServiceImpl implements ArchivesService {
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
     }
 
-    private List<ImportArchivesContactsDTO> handleImportArchivesContacts(List resultLists){
+    private List<ImportArchivesContactsDTO> handleImportArchivesContacts(List resultLists) {
         List<ImportArchivesContactsDTO> datas = new ArrayList<>();
-
-        return null;
+        for (int i = 1; i < resultLists.size(); i++) {
+            RowResult r = (RowResult) resultLists.get(i);
+            ImportArchivesContactsDTO data = new ImportArchivesContactsDTO();
+            if (null != r.getCells().get("A"))
+                data.setContactName(r.getCells().get("A"));
+            if (null != r.getCells().get("B"))
+                data.setContactEnName(r.getCells().get("B"));
+            if(null != r.getCells().get("C"))
+                data.setGender(r.getCells().get("C"));
+            if(null != r.getCells().get("D"))
+                data.setContactToken(r.getCells().get("D"));
+            if(null != r.getCells().get("E"))
+                data.setContactShortToken(r.getCells().get("E"));
+            if(null != r.getCells().get("F"))
+                data.setEmail(r.getCells().get("F"));
+            if(null != r.getCells().get("G"))
+                data.setDepartment(r.getCells().get("G"));
+            if(null != r.getCells().get("H"))
+                data.setJobPosition(r.getCells().get("H"));
+            datas.add(data);
+        }
+        return datas;
     }
 
     private List<ImportFileResultLog<ImportArchivesContactsDTO>> importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas, int coverCount){
+        ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
+        List<ImportFileResultLog<ImportArchivesContactsDTO>> errorDataLogs = new ArrayList<>();
+
+        //  先校验模板
+        ImportArchivesContactsDTO title = datas.get(0);
+        log = this.checkArchivesContactsTitle(title);
+        return null;
+    }
+
+    private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsTitle(ImportArchivesContactsDTO title){
         return null;
     }
 
