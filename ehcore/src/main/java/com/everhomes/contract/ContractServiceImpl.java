@@ -474,7 +474,7 @@ public class ContractServiceImpl implements ContractService {
 
 	private void addToFlowCase(Contract contract) {
 		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
-				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.CONTRACT.getCode());
 		if(null == flow) {
 			LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ENABLE_FLOW,
