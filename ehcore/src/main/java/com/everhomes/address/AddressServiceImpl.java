@@ -1759,6 +1759,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             building.setName(data.getBuildingName());
             building.setOperatorUid(UserContext.current().getUser().getId());
             building = communityProvider.createBuilding(building.getOperatorUid(), building);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), data.getBuildingName(), building);
+            }
         }
 
         double areaSize = 0;
