@@ -380,9 +380,11 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderDTO.setExpressCompanyName(getExpressCompany(expressOrder.getExpressCompanyId()));
 		expressOrderDTO.setBillNo(expressOrder.getBillNo());
 		expressOrderDTO.setSendType(expressOrder.getSendType());
-		expressOrderDTO.setPayType(expressOrder.getPayType());
+//		expressOrderDTO.setPayType(expressOrder.getPayType());
 		expressOrderDTO.setStatus(expressOrder.getStatus());
 		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
+		expressOrderDTO.setReceiveName(expressOrder.getReceiveName());
+		expressOrderDTO.setReceivePhone(expressOrder.getReceivePhone());
 		return expressOrderDTO;
 	}
 	
@@ -975,6 +977,7 @@ public class ExpressServiceImpl implements ExpressService {
 				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying and express user has not confirmed money");
 			}
 			expressOrder.setStatus(ExpressOrderStatus.CANCELLED.getCode());
+			expressOrder.setStatusDesc(cmd.getStatusDesc());
 			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			dbProvider.execute(status->{
