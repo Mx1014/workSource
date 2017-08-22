@@ -682,4 +682,34 @@ public class CustomerServiceImpl implements CustomerService {
         trademark.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerTrademark(trademark);
     }
+
+    @Override
+    public CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public CustomerIntellectualPropertyStatisticsResponse listCustomerIntellectualPropertyStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public CustomerProjectStatisticsResponse listCustomerProjectStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public CustomerSourceStatisticsResponse listCustomerSourceStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public CustomerTalentStatisticsResponse listCustomerTalentStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public EnterpriseCustomerStatisticsDTO listEnterpriseCustomerStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
+        return null;
+    }
 }

@@ -27,6 +27,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -702,8 +703,17 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public ListContractsResponse listCustomerContracts(ListCustomerContractsCommand cmd) {
-		//姑且认为同一个域空间 同一个园区的客户和企业如果同名则是同一个 by xiongying20170822
+	public List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd) {
+		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
+			EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getTargetId());
+			List<Contract> contracts = contractProvider.listContractByOrganizationId(cmd.getNamespaceId(), customer.getId());
+			if(contracts != null && contracts.size() > 0) {
+				return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+			}
+		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
+			//暂无个人合同
+		}
+
 		return null;
 	}
 

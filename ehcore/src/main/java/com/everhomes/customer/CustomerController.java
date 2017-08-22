@@ -777,7 +777,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listEnterpriseCustomerStatistics")
     @RestReturn(value = EnterpriseCustomerStatisticsDTO.class)
     public RestResponse listEnterpriseCustomerStatistics(@Valid ListEnterpriseCustomerStatisticsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listEnterpriseCustomerStatistics(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -790,7 +790,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCustomerIndustryStatistics")
     @RestReturn(value = CustomerIndustryStatisticsResponse.class)
     public RestResponse listCustomerIndustryStatistics(@Valid ListEnterpriseCustomerStatisticsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listCustomerIndustryStatistics(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -803,7 +803,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCustomerIntellectualPropertyStatistics")
     @RestReturn(value = CustomerIntellectualPropertyStatisticsResponse.class)
     public RestResponse listCustomerIntellectualPropertyStatistics(@Valid ListEnterpriseCustomerStatisticsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listCustomerIntellectualPropertyStatistics(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -816,7 +816,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCustomerTalentStatistics")
     @RestReturn(value = CustomerTalentStatisticsResponse.class)
     public RestResponse listCustomerTalentStatistics(@Valid ListEnterpriseCustomerStatisticsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listCustomerTalentStatistics(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -829,7 +829,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCustomerProjectStatistics")
     @RestReturn(value = CustomerProjectStatisticsResponse.class)
     public RestResponse listCustomerProjectStatistics(@Valid ListEnterpriseCustomerStatisticsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listCustomerProjectStatistics(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -842,7 +842,7 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("listCustomerSourceStatistics")
     @RestReturn(value = CustomerSourceStatisticsResponse.class)
     public RestResponse listCustomerSourceStatistics(@Valid ListEnterpriseCustomerStatisticsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.listCustomerSourceStatistics(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

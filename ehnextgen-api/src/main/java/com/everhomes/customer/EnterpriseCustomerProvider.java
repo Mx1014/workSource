@@ -12,6 +12,7 @@ public interface EnterpriseCustomerProvider {
     void updateEnterpriseCustomer(EnterpriseCustomer customer);
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
+    EnterpriseCustomer findByOrganizationId(Long organizationId);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, String name);
     List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize);

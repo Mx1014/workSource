@@ -3,6 +3,8 @@ package com.everhomes.contract;
 
 import com.everhomes.rest.contract.*;
 
+import java.util.List;
+
 public interface ContractService {
 
 
@@ -18,6 +20,6 @@ public interface ContractService {
 	void denunciationContract(DenunciationContractCommand cmd);
 	ContractDetailDTO findContract(FindContractCommand cmd);
 	void deleteContract(DeleteContractCommand cmd);
-	ListContractsResponse listCustomerContracts(ListCustomerContractsCommand cmd);
+	List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd);
 
 }

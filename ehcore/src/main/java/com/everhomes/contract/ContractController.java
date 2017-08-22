@@ -120,7 +120,7 @@ public class ContractController extends ControllerBase {
 	 * <b>URL: /contract/listCustomerContracts</b>
 	 */
 	@RequestMapping("listCustomerContracts")
-	@RestReturn(ListContractsResponse.class)
+	@RestReturn(value = ContractDTO.class, collection = true)
 	public RestResponse listCustomerContracts(ListCustomerContractsCommand cmd){
 		return new RestResponse(contractService.listCustomerContracts(cmd));
 	}
