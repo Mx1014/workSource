@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -149,6 +150,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         return null;
     }
 
+    //  数字转换(1-A,2-B...)
+    private static String GetExcelLetter(int n) {
+        String s = "";
+        while (n > 0) {
+            int m = n % 26;
+            if (m == 0)
+                m = 26;
+            s = (char) (m + 64) + s;
+            n = (n - m) / 26;
+        }
+        return s;
+    }
+
     @Override
     public ImportFileTaskDTO importArchivesContacts(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd) {
 
@@ -166,17 +180,39 @@ public class ArchivesServiceImpl implements ArchivesService {
             task.setType(ImportFileTaskType.PERSONNEL_ARCHIVES.getCode());
             task.setCreatorUid(userId);
 
+            int coverCount = 0;
+
             importFileService.executeTask(new ExecuteImportTaskCallback() {
                 @Override
                 public ImportFileResponse importFile() {
                     ImportFileResponse response = new ImportFileResponse();
-//                    List<ImportArchivesContactsDTO> datas = handleImportArchivesContacts(resultList,)
-                    return null;
+                    List<ImportArchivesContactsDTO> datas = handleImportArchivesContacts(resultList);
+                    if(datas.size() > 0){
+                        //  将标题先保存下来
+                        response.setTitle(datas.get(0));
+                        datas.remove(0);
+                    }
+                    List<ImportFileResultLog<ImportArchivesContactsDTO>> results = importArchivesContactsFiles(datas,coverCount);
+                    response.setTotalCount((long) datas.size());
+                    response.setFailCount((long) results.size());
+                    //  覆盖数与文件错误的设置
+                    return response;
                 }
             },task);
         }catch (Exception e){
-
+            LOGGER.error("File can not be resolved...");
+            e.printStackTrace();
         }
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+    }
+
+    private List<ImportArchivesContactsDTO> handleImportArchivesContacts(List resultLists){
+        List<ImportArchivesContactsDTO> datas = new ArrayList<>();
+
+        return null;
+    }
+
+    private List<ImportFileResultLog<ImportArchivesContactsDTO>> importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas, int coverCount){
         return null;
     }
 
