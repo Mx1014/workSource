@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.IterationMapReduceCallback;
@@ -159,6 +160,23 @@ public class ContractProviderImpl implements ContractProvider {
 		
 		return new ArrayList<Contract>();
 	}
+
+	@Override
+	public List<Contract> listContractByEnterpriseCustomerId(Long customerId) {
+		Result<Record> result = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId))
+				.and(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(CustomerType.ENTERPRISE.getCode()))
+				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.fetch();
+
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, Contract.class));
+		}
+
+		return new ArrayList<Contract>();
+	}
+
 	@Override
 	public List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue) {
 		Result<Record> result = getReadOnlyContext().select()

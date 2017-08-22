@@ -26,6 +26,7 @@ import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
@@ -501,6 +502,7 @@ public class ContractServiceImpl implements ContractService {
 
 	private void dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+//		CommunityAddressMapping
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
 		if(existApartments != null && existApartments.size() > 0) {
 			existApartments.forEach(apartment -> {
@@ -542,6 +544,12 @@ public class ContractServiceImpl implements ContractService {
 		if(chargingItems != null && chargingItems.size() > 0) {
 			chargingItems.forEach(item -> {
 				ContractChargingItem contractChargingItem = ConvertHelper.convert(item, ContractChargingItem.class);
+				if(item.getChargingStartTime() != null) {
+					contractChargingItem.setChargingStartTime(new Timestamp(item.getChargingStartTime()));
+				}
+				if(item.getChargingExpiredTime() != null) {
+					contractChargingItem.setChargingExpiredTime(new Timestamp(item.getChargingExpiredTime()));
+				}
 				if(item.getId() == null) {
 					contractChargingItem.setContractId(contract.getId());
 					contractChargingItem.setNamespaceId(contract.getNamespaceId());
@@ -718,6 +726,15 @@ public class ContractServiceImpl implements ContractService {
 			//暂无个人合同
 		}
 
+		return null;
+	}
+
+	@Override
+	public List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd) {
+		List<Contract> contracts = contractProvider.listContractByEnterpriseCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId());
+		if(contracts != null && contracts.size() > 0) {
+			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+		}
 		return null;
 	}
 
