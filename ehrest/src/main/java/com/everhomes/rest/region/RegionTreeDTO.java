@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.region;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -33,6 +34,8 @@ public class RegionTreeDTO {
     private Byte    status;
     private String  pinyinName;
     private String  pinyinPrefix;
+    
+    @ItemType(RegionTreeDTO.class)
     private List<RegionTreeDTO> children;
 
     public RegionTreeDTO() {
