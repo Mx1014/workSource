@@ -11,18 +11,25 @@ import java.util.List;
  * <li>importStatus: 导入状态{@link com.everhomes.rest.organization.ImportFileTaskStatus}</li>
  * <li>totalCount: 导入数据的总记录数</li>
  * <li>failCount: 导入失败记录数</li>
- * <li>logs: 导入失败日志</li>
+ * <li>coverCount: 导入覆盖记录数</li>
+ * <li>fileLog: 导入的文件状态</li>
+ * <li>logs: 导入失败日志 {@link com.everhomes.rest.organization.ImportFileResultLog}</li>
+ * <li>title: title</li>
  * </ul>
  */
-
 public class ImportFileResponse<T> {
 
 	private Byte importStatus;
 
 	private Long totalCount;
-		
+
 	private Long failCount;
-	
+
+	//	added by R
+	private Long coverCount;
+
+	private Byte fileLog;
+
 	@ItemType(ImportFileResultLog.class)
 	private List<ImportFileResultLog<T>> logs;
 
@@ -66,5 +73,21 @@ public class ImportFileResponse<T> {
 
 	public void setTitle(T title) {
 		this.title = title;
+	}
+
+	public Long getCoverCount() {
+		return coverCount;
+	}
+
+	public void setCoverCount(Long coverCount) {
+		this.coverCount = coverCount;
+	}
+
+	public Byte getFileLog() {
+		return fileLog;
+	}
+
+	public void setFileLog(Byte fileLog) {
+		this.fileLog = fileLog;
 	}
 }

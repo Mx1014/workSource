@@ -11306,7 +11306,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
             task.setOwnerId(cmd.getOrganizationId());
-            task.setType(ImportFileTaskType.PERSONNEL_FILE.getCode());
+            task.setType(ImportFileTaskType.PERSONNEL_ARCHIVES.getCode());
             task.setCreatorUid(userId);
             task = importFileService.executeTask(new ExecuteImportTaskCallback() {
                 @Override

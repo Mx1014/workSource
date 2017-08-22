@@ -1,15 +1,18 @@
 package com.everhomes.archives;
 
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.jooq.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -22,6 +25,8 @@ import java.util.stream.Collectors;
 @Component
 public class ArchivesServiceImpl implements ArchivesService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchivesServiceImpl.class);
+
     @Autowired
     ArchivesProvider archivesProvider;
 
@@ -30,6 +35,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     OrganizationProvider organizationProvider;
+
+    @Autowired
+    ImportFileService importFileService;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -143,6 +151,32 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public ImportFileTaskDTO importArchivesContacts(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd) {
+
+        ImportFileTask task = new ImportFileTask();
+        try{
+            //  解析excel
+            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+            if(resultList.isEmpty()){
+                LOGGER.error("File content is empty");
+                throw RuntimeErrorException.errorWith(ArchivesServiceErrorCode.SCOPE,ArchivesServiceErrorCode.ERROR_FILE_IS_EMPTY,
+                        "File content is empty");
+            }
+            task.setOwnerType("organization");
+            task.setOwnerId(cmd.getOrganizationId());
+            task.setType(ImportFileTaskType.PERSONNEL_ARCHIVES.getCode());
+            task.setCreatorUid(userId);
+
+            importFileService.executeTask(new ExecuteImportTaskCallback() {
+                @Override
+                public ImportFileResponse importFile() {
+                    ImportFileResponse response = new ImportFileResponse();
+//                    List<ImportArchivesContactsDTO> datas = handleImportArchivesContacts(resultList,)
+                    return null;
+                }
+            },task);
+        }catch (Exception e){
+
+        }
         return null;
     }
 

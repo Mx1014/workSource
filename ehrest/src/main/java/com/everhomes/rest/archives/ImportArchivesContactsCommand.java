@@ -4,6 +4,29 @@ import com.everhomes.util.StringHelper;
 
 public class ImportArchivesContactsCommand {
 
+    private Long organizationId;
+
+    private Long departmentId;
+
+    public ImportArchivesContactsCommand() {
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
