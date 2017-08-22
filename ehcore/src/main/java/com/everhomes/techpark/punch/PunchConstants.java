@@ -20,6 +20,7 @@ public class PunchConstants {
 	/** PUNCH_TOOL_URI_SCOPE ="punch.tool.uri"  */
 	public static final String PUNCH_TOOL_URI_SCOPE ="punch.tool.uri";
 
+	public static final String PUNCH_QRCODE_TIMEOUT = "punch.qrcode.timeout";
 	public static final int PUNCH_TOOL_URI_CODE = 1;
 	/** EXCEL_SCHEDULE = "schedule"  */
 	public static final String EXCEL_SCHEDULE = "schedule";

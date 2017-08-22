@@ -15,14 +15,8 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -32,6 +26,7 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.util.*;
 import com.google.zxing.WriterException;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -7448,8 +7443,14 @@ public class PunchServiceImpl implements PunchService {
 		map.put("token", cmd.getQrToken());
 		String result = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_TOOL_URI_SCOPE,
 				PunchConstants.PUNCH_TOOL_URI_CODE, RentalNotificationTemplateCode.locale, map, "");
+        String key = cmd.getQrToken();
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
+        int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
+        TimeUnit unit = TimeUnit.MINUTES;;
+        // 先放一个和key一样的值,表示这个人key有效
+        valueOperations.set(key, key, timeout, unit);
 		try{
-			ByteArrayOutputStream out = QRCodeEncoder.createSimpleQrCode(result);
+			ByteArrayOutputStream out = QRCodeEncoder.createSimpleQrCode(String.valueOf(Base64.getDecoder().decode(result)));
 			return downloadPng(out,response);
 		} catch (WriterException e) {
 			e.printStackTrace();
@@ -7502,9 +7503,9 @@ public class PunchServiceImpl implements PunchService {
 	private ValueOperations<String, String> getValueOperations(String key) {
 		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 		Accessor acc = bigCollectionProvider.getMapAccessor(key, "");
-		//如果acc为空说明没有key
 		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
 		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+
 		return valueOperations;
 	}
 
