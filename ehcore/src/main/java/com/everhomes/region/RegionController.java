@@ -75,7 +75,7 @@ public class RegionController extends ControllerBase {
         
         return new RestResponse();
     }
-    
+
     /**
      * <b>URL: /region/listChildren</b>
      * 列出指定范围和状态的第一层孩子区域列表（需填父亲区域ID）
@@ -217,6 +217,23 @@ public class RegionController extends ControllerBase {
     public RestResponse updateRegionCode(@Valid CreateRegionCodeCommand cmd) {
         regionService.updateRegionCode(ConvertHelper.convert(cmd, RegionCodeDTO.class));
         RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+
+    /**
+     * <b>URL: /region/listTree</b>
+     * 列出指定范围和状态的区域列表（不用填父亲区域ID）
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listTree")
+    @RestReturn(value=RegionTreeResponse.class, collection=true)
+    public RestResponse regionTree(@Valid RegionTreeCommand cmd) {
+        RegionTreeResponse regionTreeResponse = regionService.regionTree(cmd);
+
+        RestResponse res = new RestResponse(regionTreeResponse);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;

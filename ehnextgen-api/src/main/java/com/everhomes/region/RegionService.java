@@ -1,6 +1,6 @@
 package com.everhomes.region;
 
-import com.everhomes.rest.region.RegionCodeDTO;
+import com.everhomes.rest.region.*;
 
 import java.util.List;
 
@@ -26,4 +26,7 @@ public interface RegionService {
      * @param dto
      */
     void updateRegionCode(RegionCodeDTO dto);
+
+
+    RegionTreeResponse regionTree(RegionTreeCommand cmd);
 }

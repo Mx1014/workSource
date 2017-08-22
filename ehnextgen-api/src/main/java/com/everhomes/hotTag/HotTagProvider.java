@@ -7,7 +7,7 @@ import com.everhomes.rest.hotTag.TagDTO;
 public interface HotTagProvider {
 	
 	List<TagDTO> listHotTag(Integer nameSpaceId, String serviceType, Integer pageSize);
-	List<TagDTO> listDistinctAllHotTag(String serviceType);
+	List<TagDTO> listDistinctAllHotTag(String serviceType, Integer pageSize, Integer pageOffset);
 	void updateHotTag(HotTags tag);
 	void createHotTag(HotTags tag);
 	

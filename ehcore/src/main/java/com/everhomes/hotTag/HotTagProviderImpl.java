@@ -69,14 +69,20 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public List<TagDTO> listDistinctAllHotTag(String serviceType) {
+	public List<TagDTO> listDistinctAllHotTag(String serviceType, Integer pageSize, Integer pageOffset) {
 		List<TagDTO> result = new ArrayList<TagDTO>();
+
+		if(pageOffset == null){
+			pageOffset = 1;
+		}
+		Integer offset =  (int) ((pageOffset - 1 ) * (pageSize-1));
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		context.selectDistinct(Tables.EH_HOT_TAGS.NAME)
 				.from(Tables.EH_HOT_TAGS)
 				.where(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType)
 						.and(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode())))
+				.limit(offset, pageSize)
 				.fetch().map(r ->{
 					result.add(RecordHelper.convert(r, TagDTO.class));
 					return null;

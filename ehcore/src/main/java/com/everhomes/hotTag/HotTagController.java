@@ -40,7 +40,23 @@ public class HotTagController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /hotTag/listAllHotTag</b>
+     * <p>列出所有热门标签</p>
+     */
+    @RequestMapping("listAllHotTag")
+    @RestReturn(value=TagDTO.class, collection = true)
+    public RestResponse listAllHotTag(ListAllHotTagCommand cmd) {
+
+        ListAllHotTagResponse tags = hotTagService.listAllHotTag(cmd);
+
+        RestResponse response = new RestResponse(tags);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /hotTag/setHotTag</b>
      * <p>设置热门标签</p>
@@ -52,6 +68,22 @@ public class HotTagController extends ControllerBase {
     	TagDTO tag = hotTagService.setHotTag(cmd);
         
         RestResponse response = new RestResponse(tag);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /hotTag/resetHotTag</b>
+     * <p>重置一个与空间的热门标签</p>
+     */
+    @RequestMapping("resetHotTag")
+    @RestReturn(value=String.class)
+    public RestResponse resetHotTag(resetHotTagCommand cmd) {
+
+        hotTagService.resetHotTag(cmd);
+
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
