@@ -22,8 +22,11 @@ import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.print.PrintErrorCode;
@@ -51,6 +54,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -312,6 +316,9 @@ public class PunchServiceImpl implements PunchService {
 
 	@Autowired
 	private BigCollectionProvider bigCollectionProvider;
+
+    @Autowired
+    private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
 
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (null == companyId || companyId.equals(0L)) {
@@ -7440,17 +7447,17 @@ public class PunchServiceImpl implements PunchService {
 			HttpServletResponse response) {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("qrtype", String.valueOf(cmd.getCodeType()));
-		map.put("token", cmd.getQrToken());
+		map.put("token", cmd.getQrToken().trim());
 		String result = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_TOOL_URI_SCOPE,
 				PunchConstants.PUNCH_TOOL_URI_CODE, RentalNotificationTemplateCode.locale, map, "");
-        String key = cmd.getQrToken();
+        String key = cmd.getQrToken().trim();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
         TimeUnit unit = TimeUnit.MINUTES;;
         // 先放一个和key一样的值,表示这个人key有效
         valueOperations.set(key, key, timeout, unit);
 		try{
-			ByteArrayOutputStream out = QRCodeEncoder.createSimpleQrCode(String.valueOf(Base64.getDecoder().decode(result)));
+			ByteArrayOutputStream out = QRCodeEncoder.createSimpleQrCode(Base64.getEncoder().encodeToString(result.getBytes()));
 			return downloadPng(out,response);
 		} catch (WriterException e) {
 			e.printStackTrace();
@@ -7494,7 +7501,42 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd) {
 		// TODO Auto-generated method stub
-		return null;
+        DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
+        RestResponse response =  new RestResponse();
+        String key = cmd.getQrToken().trim();
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
+        String value = valueOperations.get(key);
+
+        //如果value 和key 不一样,说明value被放入了前端给的数据,直接返回结果
+        if(null!=value && value != key){
+            deferredResult.setResult(JSONObject.parseObject(value,RestResponse.class));
+            int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
+            TimeUnit unit = TimeUnit.MINUTES;;
+            // 先放一个和key一样的值,表示这个key有效
+            valueOperations.set(key, key, timeout, unit);
+            return deferredResult;
+        }
+
+        String subject = PunchConstants.PUNCH_QRCODE_SUBJECT;
+        int scanTimeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_LOGON_SCAN_TIMOUT, 10000);
+        localBusSubscriberBuilder.build(subject + "." + key, new LocalBusOneshotSubscriber() {
+            @Override
+            public Action onLocalBusMessage(Object sender, String subject,
+                                            Object restResponse, String path) {
+                //这里要不要重新把timeou的时间刷一刷?
+                deferredResult.setResult((RestResponse)restResponse);
+                return null;
+            }
+            @Override
+            public void onLocalBusListeningTimeout() {
+                response.setResponseObject("print logon timed out");
+                response.setErrorCode(408);
+                deferredResult.setResult(response);
+            }
+
+        }).setTimeout(scanTimeout).create();
+
+        return deferredResult;
 	}
 
 	/**

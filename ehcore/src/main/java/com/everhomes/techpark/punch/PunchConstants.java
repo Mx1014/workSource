@@ -19,6 +19,7 @@ public class PunchConstants {
 	public static final String PUNCH_EXCEL_SCOPE ="punch.excel";
 	/** PUNCH_TOOL_URI_SCOPE ="punch.tool.uri"  */
 	public static final String PUNCH_TOOL_URI_SCOPE ="punch.tool.uri";
+	public static final String PUNCH_QRCODE_SUBJECT ="punch.qrcode";
 
 	public static final String PUNCH_QRCODE_TIMEOUT = "punch.qrcode.timeout";
 	public static final int PUNCH_TOOL_URI_CODE = 1;
