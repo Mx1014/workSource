@@ -3,12 +3,14 @@ package com.everhomes.rest.asset;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.everhomes.discover.ItemType;
 
 /**
  * Created by Wentian Wang on 2017/8/22.
  */
 
 public class PaymentExpectanciesResponse {
+    @ItemType(PaymentExpectancyDTO.class)
     List<PaymentExpectancyDTO> list = new ArrayList<>();
     private Integer nextPageOffset;
 
