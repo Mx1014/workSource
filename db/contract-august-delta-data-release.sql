@@ -39,6 +39,13 @@ VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, NOW()); 
 
+SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), '21100', '1', @privilege_id, NULL, '0', UTC_TIMESTAMP());
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 21100, '客户管理', 'EhNamespaces', 999985, NULL, 2);
+
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
 VALUES ((@privilege_id := @privilege_id + 1), 0, '客户列表', '客户列表', NULL);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
@@ -66,6 +73,12 @@ VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, NOW()); 
 
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), '21200', '1', @privilege_id, NULL, '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 21200, '合同管理', 'EhNamespaces', 999985, NULL, 2);
+
+
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
 VALUES ((@privilege_id := @privilege_id + 1), 0, '合同列表', '合同列表', NULL);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
@@ -88,17 +101,6 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 VALUES ('21100', '客户管理', '20000', '/20000/21100', '0', '2', '2', '0', UTC_TIMESTAMP()); 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) 
 VALUES ('21200', '合同管理', '20000', '/20000/21200', '0', '2', '2', '0', UTC_TIMESTAMP()); 
-
-SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), '21100', '1', @privilege_id, NULL, '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), '21200', '1', @privilege_id, NULL, '0', UTC_TIMESTAMP());
-SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
-VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 21100, '客户管理', 'EhNamespaces', 999985, NULL, 2);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
-VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 21200, '合同管理', 'EhNamespaces', 999985, NULL, 2);
 
 
 
