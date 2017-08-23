@@ -28,7 +28,7 @@ public class ImportFileResponse<T> {
 	//	added by R
 	private Long coverCount;
 
-	private Byte fileLog;
+	private String fileLog;
 
 	@ItemType(ImportFileResultLog.class)
 	private List<ImportFileResultLog<T>> logs;
@@ -83,11 +83,11 @@ public class ImportFileResponse<T> {
 		this.coverCount = coverCount;
 	}
 
-	public Byte getFileLog() {
+	public String getFileLog() {
 		return fileLog;
 	}
 
-	public void setFileLog(Byte fileLog) {
+	public void setFileLog(String fileLog) {
 		this.fileLog = fileLog;
 	}
 }

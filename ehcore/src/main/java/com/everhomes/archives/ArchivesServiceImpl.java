@@ -1,5 +1,6 @@
 package com.everhomes.archives;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -20,9 +21,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class ArchivesServiceImpl implements ArchivesService {
@@ -64,8 +69,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         if(memberDetail != null){
             memberDetail.setEnName(cmd.getContactEnName());
             memberDetail.setRegionCode(cmd.getRegionCode());
-            memberDetail.setContactToken();
-            //  TODO: areaCode 区号与 contactShortToken 短号,部门与职位的转化
+            memberDetail.setContactShortToken(cmd.getContactShortToken());
+            //  TODO: 部门与职位的转化
             memberDetail.setEmail(cmd.getEmail());
             organizationProvider.updateOrganizationMemberDetails(memberDetail,memberDetail.getId());
             dto.setDetailId(detailId);
@@ -169,43 +174,47 @@ public class ArchivesServiceImpl implements ArchivesService {
     public ImportFileTaskDTO importArchivesContacts(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd) {
 
         ImportFileTask task = new ImportFileTask();
-        try{
-            //  解析excel
-            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
-            if(resultList.isEmpty()){
-                LOGGER.error("File content is empty");
-                throw RuntimeErrorException.errorWith(ArchivesServiceErrorCode.SCOPE,ArchivesServiceErrorCode.ERROR_FILE_IS_EMPTY,
-                        "File content is empty");
-            }
-            task.setOwnerType("organization");
-            task.setOwnerId(cmd.getOrganizationId());
-            task.setType(ImportFileTaskType.PERSONNEL_ARCHIVES.getCode());
-            task.setCreatorUid(userId);
+        List resultList = processorExcel(mfile);
+        task.setOwnerType("organization");
+        task.setOwnerId(cmd.getOrganizationId());
+        task.setType(ImportFileTaskType.PERSONNEL_ARCHIVES.getCode());
+        task.setCreatorUid(userId);
 
-            int coverCount = 0;
-
-            importFileService.executeTask(new ExecuteImportTaskCallback() {
-                @Override
-                public ImportFileResponse importFile() {
-                    ImportFileResponse response = new ImportFileResponse();
-                    List<ImportArchivesContactsDTO> datas = handleImportArchivesContacts(resultList);
-                    if(datas.size() > 0){
-                        //  将标题先保存下来
-                        response.setTitle(datas.get(0));
-                        datas.remove(0);
+        //  调用导入方法
+        importFileService.executeTask(new ExecuteImportTaskCallback() {
+            @Override
+            public ImportFileResponse importFile() {
+                ImportFileResponse response = new ImportFileResponse();
+                List<ImportArchivesContactsDTO> datas = handleImportArchivesContacts(resultList);
+                String fileLog;
+                if(datas.size() > 0){
+                    //  校验标题，若合格则保存下来
+                    fileLog = checkArchivesContactsTitle(datas.get(0));
+                    if(!StringUtils.isEmpty(fileLog)){
+                        response.setFileLog(fileLog);
+                        return response;
                     }
-                    List<ImportFileResultLog<ImportArchivesContactsDTO>> results = importArchivesContactsFiles(datas,coverCount);
-                    response.setTotalCount((long) datas.size());
-                    response.setFailCount((long) results.size());
-                    //  覆盖数与文件错误的设置
-                    return response;
+                    response.setTitle(datas.get(0));
+                    datas.remove(0);
                 }
-            },task);
-        }catch (Exception e){
-            LOGGER.error("File can not be resolved...");
-            e.printStackTrace();
-        }
+                List<ImportFileResultLog<ImportArchivesContactsDTO>> results = importArchivesContactsFiles(datas,response);
+                response.setTotalCount((long) datas.size());
+                response.setFailCount((long) results.size());
+                //  覆盖数与文件错误的设置
+                return response;
+            }
+        },task);
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+    }
+
+    private ArrayList processorExcel(MultipartFile file) {
+        try {
+            return PropMrgOwnerHandler.processorExcel(file.getInputStream());
+        } catch (IOException e) {
+            LOGGER.error("Process excel error.", e);
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Process excel error.");
+        }
     }
 
     private List<ImportArchivesContactsDTO> handleImportArchivesContacts(List resultLists) {
@@ -234,17 +243,48 @@ public class ArchivesServiceImpl implements ArchivesService {
         return datas;
     }
 
-    private List<ImportFileResultLog<ImportArchivesContactsDTO>> importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas, int coverCount){
+    private List<ImportFileResultLog<ImportArchivesContactsDTO>> importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas, ImportFileResponse response){
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
         List<ImportFileResultLog<ImportArchivesContactsDTO>> errorDataLogs = new ArrayList<>();
 
-        //  先校验模板
-        ImportArchivesContactsDTO title = datas.get(0);
-        log = this.checkArchivesContactsTitle(title);
-        return null;
+        /*log = this.checkArchivesContactsTitle(module,title);
+        if(log !=null){
+            errorDataLogs.add(log);
+            response.setFileLog(ImportFileErrorType.TITLE_ERROE.getCode());
+            return errorDataLogs;
+        }*/
+        return errorDataLogs;
     }
 
-    private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsTitle(ImportArchivesContactsDTO title){
+    private String checkArchivesContactsTitle(ImportArchivesContactsDTO title){
+        List<String> module = new ArrayList<>(Arrays.asList("姓名","英文名","性别","手机","短号","工作邮箱","部门","职务"));
+        //  存储字段来进行校验
+        List<String> temp = new ArrayList<>();
+        temp.add(title.getContactName());
+        temp.add(title.getContactEnName());
+        temp.add(title.getGender());
+        temp.add(title.getContactToken());
+        temp.add(title.getContactShortToken());
+        temp.add(title.getEmail());
+        temp.add(title.getDepartment());
+        temp.add(title.getJobPosition());
+
+        for(int i=0; i<module.size(); i++){
+            if(module.get(i).equals(temp.get(i)))
+                continue;
+            else{
+                return ImportFileErrorType.TITLE_ERROE.getCode();
+            }
+        }
+        return "";
+    }
+
+    private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsTitle(List module, ImportArchivesContactsDTO title){
+
+        ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
+
+
+
         return null;
     }
 
