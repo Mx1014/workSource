@@ -45,8 +45,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
         ArchivesContactDTO dto = new ArchivesContactDTO();
-        //  TODO: visibleFlag 的判断
-
         //  组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
         addCommand.setOrganizationId(cmd.getOrganizationId());
@@ -55,6 +53,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setContactToken(cmd.getContactToken());
         addCommand.setDepartmentIds(cmd.getDepartmentIds());
         addCommand.setJobPositionIds(cmd.getJobPositionIds());
+        addCommand.setVisibleFlag(cmd.getVisibleFlag());
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
         //  获得 detailId 然后处理其它信息
@@ -64,6 +63,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         if(memberDetail != null){
             memberDetail.setEnName(cmd.getContactEnName());
+            memberDetail.setRegionCode(cmd.getRegionCode());
+            memberDetail.setContactToken();
             //  TODO: areaCode 区号与 contactShortToken 短号,部门与职位的转化
             memberDetail.setEmail(cmd.getEmail());
             organizationProvider.updateOrganizationMemberDetails(memberDetail,memberDetail.getId());

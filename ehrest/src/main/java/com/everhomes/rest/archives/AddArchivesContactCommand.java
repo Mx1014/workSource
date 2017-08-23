@@ -11,7 +11,7 @@ import java.util.List;
  * <li>contactName: 成员姓名</li>
  * <li>contactEnName: 成员英文名</li>
  * <li>gender: 成员性别</li>
- * <li>areaCode: 区号</li>
+ * <li>regionCode: 区号</li>
  * <li>contactToken: 联系号码</li>
  * <li>contactShortToken: 手机短号</li>
  * <li>email: 成员邮箱</li>
@@ -30,7 +30,7 @@ public class AddArchivesContactCommand {
 
     private Byte gender;
 
-    private String areaCode;
+    private String regionCode;
 
     private String contactToken;
 
@@ -81,12 +81,12 @@ public class AddArchivesContactCommand {
         this.gender = gender;
     }
 
-    public String getAreaCode() {
-        return areaCode;
+    public String getRegionCode() {
+        return regionCode;
     }
 
-    public void setAreaCode(String areaCode) {
-        this.areaCode = areaCode;
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
     }
 
     public String getContactToken() {
