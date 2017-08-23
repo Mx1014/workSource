@@ -145,7 +145,7 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('21000','仓库管理','20000','/20000/21000','1','2','2','0','2017-05-27 10:16:28',NULL,NULL,'0','0',NULL,NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('30500','资产管理','20000','/20000/30500','1','2','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0',NULL,NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('32500','合同管理','20000','/20000/32500','1','2','2','0','2016-12-06 11:43:19',NULL,NULL,'0','0',NULL,NULL,'0');
-insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('33000','企业管理','20000','/20000/33000','1','2','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0',NULL,NULL,'0');
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('33000','企业管理','20000','/20000/33000','1','2','2','0','2016-12-06 11:40:51','{"type":3}',NULL,'0','0',NULL,34,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('37000','客户资料','20000','/20000/37000','1','2','2','0','2017-05-11 20:08:38',NULL,NULL,'0','0',NULL,NULL,NULL);
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('49100','能耗管理','20000','/20000/49100','1','2','2','0','2016-12-06 11:46:41','{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}',NULL,'0','0',NULL,'13','0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('30600','黑名单管理','20000','/20000/30600','1','2','2','0','2016-12-06 11:46:41',NULL,NULL,'0','0',NULL,NULL,'0');
@@ -239,9 +239,6 @@ update `eh_item_service_categries` set `scope_code` = 5, `scope_id` = 0 where `s
 update `eh_item_service_categries` set `scope_code` = 1, `scope_id` = 0 where `scene_type` = 'park_tourist'; 
 update `eh_item_service_categries` set `scope_code` = 6, `scope_id` = 0 where `scene_type` = 'default'; 
 update `eh_launch_pad_items` elpi set categry_name = (select name from eh_item_service_categries where id = elpi.service_categry_id);
-
-
-
 
 
 
