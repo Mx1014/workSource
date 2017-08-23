@@ -307,7 +307,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		param.put("buildingId", "");
 		//param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
-		param.put("serviceId", task.getCategoryId());
+		param.put("serviceId", task.getTaskCategoryId());
 		param.put("type", "1");
 		param.put("remarks", task.getContent());
 		param.put("projectId", projectId);
