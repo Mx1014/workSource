@@ -325,7 +325,7 @@ public interface PunchProvider {
 			java.util.Date date);
 
 	public PunchHoliday findHolidayByDate(java.sql.Date punchDate);
- 
- 
- 
+
+
+	List<PunchTimeRule> listPunchTimeRulesBySplitTime(long beginTime, long endTime);
 }
