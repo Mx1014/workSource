@@ -4471,8 +4471,8 @@ public class UserServiceImpl implements UserService {
 		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
 		for(OrganizationDTO orgDto : organizationList) {
 			String orgType = orgDto.getOrganizationType();
-//			SceneType sceneType = SceneType.PM_ADMIN;
-			SceneType sceneType;
+			SceneType sceneType = SceneType.PM_ADMIN;
+//			SceneType sceneType;
 			if(!OrganizationType.isGovAgencyOrganization(orgType)) {
 				if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
 					sceneType = SceneType.ENTERPRISE;
