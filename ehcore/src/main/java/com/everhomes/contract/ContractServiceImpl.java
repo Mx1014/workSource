@@ -696,6 +696,15 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
+	public void reviewContract(ReviewContractCommand cmd) {
+		Contract contract = checkContract(cmd.getId());
+		contract.setStatus(ContractStatus.WAITING_FOR_APPROVAL.getCode());
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
+		addToFlowCase(contract);
+	}
+
+	@Override
 	public void entryContract(EntryContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
 		if(!ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))) {
