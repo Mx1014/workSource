@@ -114,4 +114,6 @@ public interface UserActivityProvider {
     List<UserActivity> listUserActivetys(Long userId, Integer pageSize);
 
     UserActivity findLastUserActivity(Long uid);
+
+    List<User> listNotInUserActivityUsers(Integer namespaceId);
 }

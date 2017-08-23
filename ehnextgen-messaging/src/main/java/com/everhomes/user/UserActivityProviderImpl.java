@@ -1027,4 +1027,21 @@ public class UserActivityProviderImpl implements UserActivityProvider {
                 .orderBy(Tables.EH_USER_ACTIVITIES.CREATE_TIME.desc())
                 .fetchAnyInto(UserActivity.class);
     }
+
+    @Override
+    public List<User> listNotInUserActivityUsers(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectConditionStep<Record1<Long>> uidCond = context
+                .selectDistinct(Tables.EH_USER_ACTIVITIES.UID)
+                .from(Tables.EH_USER_ACTIVITIES)
+                .where(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+
+        return context.select(Tables.EH_USERS.fields())
+                .from(Tables.EH_USERS)
+                .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull())
+                .and(Tables.EH_USERS.ID.notIn(uidCond))
+                .fetchInto(User.class);
+    }
 }
