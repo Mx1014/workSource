@@ -1,6 +1,5 @@
 package com.everhomes.techpark.punch;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -19,7 +18,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSONObject;
@@ -53,7 +51,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -4773,8 +4770,14 @@ public class PunchServiceImpl implements PunchService {
     private String convertTimeLongToString(Long timeLong){
     	if(null == timeLong)
     		return "";
-    	else 
+    	else{
+//            if(timeLong < 48*3600*1000L){
+//                Long time = dateSF.get().parse("2010-1-1").getTime();
+//                return timeSF.get().format(time+timeLong);
+//            }
+//
     		return timeSF.get().format(convertTime(timeLong));
+        }
     }
 	private void setNewPunchDetailsBookRow(Sheet sheet, PunchDayDetailDTO dto) {
 
@@ -6111,73 +6114,108 @@ public class PunchServiceImpl implements PunchService {
 //		return map;
 //	}
 
-	@Override
-	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
-			HttpServletResponse response) {
+    @Override
+    public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
+                                                     HttpServletResponse response) {
 //		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 //		targetTimeRules.set(punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(),  null));
 //		if(null == targetTimeRules.get())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"have no time rule"); 
+//					"have no time rule");
 //		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
 //			LOGGER.error("Invalid owner type or  Id parameter in the command");
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid owner type or  Id parameter in the command");
-//		} 
-		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
-				UserContext.current().getUser().getLocale());
-		String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"scheduling":scheduleLocaleString.getText())+".xlsx";
-		//新建了一个文件
+//		}
+        LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
+                UserContext.current().getUser().getLocale());
+        String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"scheduling":scheduleLocaleString.getText())+".xlsx";
+        //新建了一个文件
 
-		Workbook wb = createPunchSchedulingsBook(cmd.getQueryTime(),cmd.getEmployees());
+        Workbook wb = createPunchSchedulingsBook(cmd.getQueryTime(),cmd.getEmployees(),cmd.getTimeRules());
 
-		return download(wb, filePath, response);
-		 
-	}
-	
-	 private Workbook createPunchSchedulingsBook(Long queryTime,
-			List<PunchSchedulingEmployeeDTO> employees) { 
-		// TODO Auto-generated method stub
-		if (null == employees ||  employees.size() == 0)
-			return null;
-		 XSSFWorkbook wb = new XSSFWorkbook();
-		 XSSFSheet sheet = wb.createSheet("sheet1");
+        return download(wb, filePath, response);
 
-		 String sheetName ="sheet1";
-		 sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 31));
-		 XSSFCellStyle style = wb.createCellStyle();
-		 Font font = wb.createFont();
-		 font.setFontHeightInPoints((short) 20);
-		 font.setFontName("Courier New");
-
-		 style.setFont(font);
-
-		 XSSFCellStyle titleStyle = wb.createCellStyle();
-		 titleStyle.setFont(font);
-		 titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
-
-		 int rowNum = 0;
-
-		 //  创建标题
-		 XSSFRow rowTitle = sheet.createRow(rowNum++);
-		 rowTitle.createCell(0).setCellValue(monthSF.get().format(new Date(queryTime)));
-		 rowTitle.setRowStyle(titleStyle);
+    }
 
 
-		 this.createPunchSchedulingsBookSheetHead(sheet,queryTime);
-//			ArrayList<String> textlist = new ArrayList<String>();
-//			for(PunchTimeRule rule : targetTimeRules.get()){
-//				textlist.add(rule.getName());
-//			}
-//			textlist.add("");
-			//设置格式
-			String[] a = {};
-			
-			
-			for (PunchSchedulingEmployeeDTO employee : employees )
-				setNewPunchSchedulingsBookRow(sheet, employee );
-//			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
-		 	return wb;
+    @Override
+    public HttpServletResponse exportPunchSchedulingTemplate(ListPunchSchedulingMonthCommand cmd,
+                                                     HttpServletResponse response) {
+        LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
+                UserContext.current().getUser().getLocale());
+        String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"scheduling":scheduleLocaleString.getText())+".xlsx";
+        //新建了一个文件
+
+        Workbook wb = createPunchSchedulingTemplateBook(cmd.getQueryTime(),cmd.getTimeRules());
+
+        return download(wb, filePath, response);
+
+    }
+
+    private XSSFWorkbook createPunchSchedulingTemplateBook(Long queryTime, List<PunchTimeRuleDTO> timeRules) {
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("sheet1");
+        String sheetName ="sheet1";
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 31));
+        XSSFCellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short) 20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        //  创建标题
+        XSSFRow rowTitle = sheet.createRow(rowNum++);
+        rowTitle.createCell(0).setCellValue(monthSF.get().format(new Date(queryTime)));
+        rowTitle.setRowStyle(titleStyle);
+
+        XSSFRow rowReminder = sheet.createRow(rowNum++);
+
+        Map<String, String> map = new HashMap<String, String>();
+        StringBuilder ruleSB = new StringBuilder();
+        if(null!=timeRules){
+            for(PunchTimeRuleDTO rule : timeRules){
+                ruleSB.append(rule.getName());
+                ruleSB.append("(");
+                for (int i = 0; i < rule.getPunchTimeIntervals().size(); i++) {
+                    if(i>0)
+                        ruleSB.append(" ");
+                    ruleSB.append(convertTimeLongToString(rule.getPunchTimeIntervals().get(i).getArriveTime()));
+                    ruleSB.append("-");
+                    ruleSB.append(convertTimeLongToString(rule.getPunchTimeIntervals().get(i).getLeaveTime()));
+                }
+                ruleSB.append(");");
+            }
+        }
+        map.put("timeRules", ruleSB.toString());
+        String result = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_EXCEL_SCOPE,
+                PunchConstants.PUNCH_EXCEL_SCHEDULING_REMINDER, RentalNotificationTemplateCode.locale, map, "");
+
+        rowReminder.createCell(0).setCellValue(result);
+        rowReminder.setRowStyle(titleStyle);
+
+        this.createPunchSchedulingsBookSheetHead(sheet,queryTime);
+        return wb;
+    }
+
+    private Workbook createPunchSchedulingsBook(Long queryTime,
+			List<PunchSchedulingEmployeeDTO> employees,List<PunchTimeRuleDTO> timeRules) {
+
+        if (null == employees ||  employees.size() == 0)
+            return null;
+        XSSFWorkbook wb = createPunchSchedulingTemplateBook(queryTime,timeRules);
+        XSSFSheet sheet = wb.getSheetAt(0);
+        for (PunchSchedulingEmployeeDTO employee : employees )
+            setNewPunchSchedulingsBookRow(sheet, employee );
+        return wb;
 	}
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet, Long queryTime) { 
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
@@ -6374,7 +6412,7 @@ public class PunchServiceImpl implements PunchService {
 			calendar.add(Calendar.DAY_OF_MONTH,-1);
 			int days = calendar.get(Calendar.DAY_OF_MONTH);
 
-			for(int rowIndex=2;rowIndex<list.size();rowIndex++){
+			for(int rowIndex=3;rowIndex<list.size();rowIndex++){
 				RowResult r = (RowResult)list.get(rowIndex);
 				PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
 				dto.setContactName(r.getCells().get("A"));

@@ -34,7 +34,9 @@ public class PunchConstants {
 
 	public static final String locale = "zh_CN";
 	 /**'请假申请的时间','${beginTime}至${endTime}'*/
-	public static final int PUNCH_FLOW_REQUEST_TIME = 1;
+	 public static final int PUNCH_FLOW_REQUEST_TIME = 1;
+	/**${timeRules}休息（只能按现有班次排班，否则无法识别。班次信息可以在管理后台修改）*/
+	public static final int PUNCH_EXCEL_SCHEDULING_REMINDER= 1;
 
 	public static final int SUNDAY_INT =    0b1000000;
 	public static final int MONDAY_INT =    0b0100000;

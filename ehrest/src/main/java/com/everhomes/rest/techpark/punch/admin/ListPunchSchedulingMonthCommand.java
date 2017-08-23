@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -28,7 +29,10 @@ public class ListPunchSchedulingMonthCommand {
 	private String targetType;
 	private Long targetId; 
 	private Long punchOriganizationId;
-	private Long queryTime; 
+	private Long queryTime;
+
+	@ItemType(PunchTimeRuleDTO.class)
+	private  List<PunchTimeRuleDTO> timeRules;
 	@ItemType(PunchSchedulingEmployeeDTO.class)
 	private List<PunchSchedulingEmployeeDTO> employees;
 	@Override
@@ -92,4 +96,11 @@ public class ListPunchSchedulingMonthCommand {
 		this.employees = employees;
 	}
 
+	public List<PunchTimeRuleDTO> getTimeRules() {
+		return timeRules;
+	}
+
+	public void setTimeRules(List<PunchTimeRuleDTO> timeRules) {
+		this.timeRules = timeRules;
+	}
 }
