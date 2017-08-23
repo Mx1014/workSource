@@ -21,6 +21,9 @@ INSERT INTO `eh_communities` VALUES (@c_id + 1, '9c63e9e7-6d48-11e7-a008-0242ac1
 INSERT INTO `eh_communities` VALUES (@c_id + 2, '9c63e9e7-6d48-11e7-a008-0242ac110007', '14809', '上海市', '14810', '浦东新区', '天之骄子人才公寓', '人才公寓', '上海市浦东新区盛夏路58弄', null, '', null, null, null, null, null, null, null, '214', '1', null, '2', '2017-07-20 12:40:28', null, null, null, null, null, null, null, null, null, null, null, '0', '190570', '190571', '2017-07-20 12:40:28', '999971', null);
 
 -- 增加经纬度
-SET @ geo_id = (SELECT MAX(id) from eh_communities_geopoints);
-INSERT INTO `eh_communities_geopoints` VALUES (@geo_id + 1, 240111044332059790, '',0,0, 's00000000000');
+SET @ geo_id = (SELECT MAX(id) from eh_community_geopoints);
+INSERT INTO `eh_community_geopoints` VALUES (@geo_id + 1, 240111044332059790, '',0,0, 's00000000000');
+INSERT INTO `eh_community_geopoints` VALUES (@geo_id + 2, 240111044332059789, '',0,0, 's00000000000');
+
+
 

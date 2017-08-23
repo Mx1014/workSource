@@ -163,7 +163,7 @@ public class UserServiceImpl implements UserService {
 	private static final String VCODE_SEND_TYPE = "sms.handler.type";
 
 	private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
-	private static final Byte SCENE_EXAMPLE = '5';
+	private static final Byte SCENE_EXAMPLE = 5;
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
