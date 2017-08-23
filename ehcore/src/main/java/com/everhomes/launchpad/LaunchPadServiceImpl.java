@@ -785,7 +785,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		
 		if(allItems!=null&&!allItems.isEmpty()){
 			List<UserLaunchPadItem> userLaunchPadItems = this.launchPadProvider.findUserLaunchPadItemByUserId(userId, sceneType, EntityType.COMMUNITY.getCode(), community.getId());
-			
+
 			allItems = overrideUserItems(allItems, userLaunchPadItems);
 
 			if(null != itemDisplayFlag){
@@ -919,15 +919,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			List<UserLaunchPadItem> userLaunchPadItems = this.launchPadProvider.findUserLaunchPadItemByUserId(userId, sceneType, EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
 			allItems = overrideUserItems(allItems, userLaunchPadItems);
 
+			if(null != itemDisplayFlag){
+				allItems = allItems.stream().filter(r -> r.getDisplayFlag()==itemDisplayFlag.getCode()).collect(Collectors.toList());
+			}
 			// 根据类别过滤出item by sfyan 20161020
 //				if(null != cmd.getCategryId()){
 //					allItems = allItems.stream().filter(r -> null != r.getServiceCategryId() && r.getServiceCategryId().equals(cmd.getCategryId())).collect(Collectors.toList());
 //				}
 		}
 
-		if(null != itemDisplayFlag){
-			allItems = allItems.stream().filter(r -> r.getDisplayFlag()==itemDisplayFlag.getCode()).collect(Collectors.toList());
-		}
+
 
         return processLaunchPadItems(token, userId, communityId, allItems, request, itemDisplayFlag);
     }
