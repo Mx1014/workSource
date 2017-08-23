@@ -14,24 +14,43 @@ import java.util.Date;
  * <li>targetName:客户名称</li>
  * <li>amount:数额(元)</li>
  * <li>remark:备注</li>
+ * <li>isPlus:0:减项目;1:加项</li>
  *</ul>
  */
-public class ListSettledBillExemptionItemsDTO {
-    private Date dateStr;
+public class ListBillExemptionItemsDTO {
+    private String dateStr;
     private Long exemptionId;
     private BigDecimal amount;
     private String remark;
+    private Byte isPlus;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    public Date getDateStr() {
+
+    public Long getExemptionId() {
+        return exemptionId;
+    }
+
+    public Byte getIsPlus() {
+        return isPlus;
+    }
+
+    public void setIsPlus(Byte isPlus) {
+        this.isPlus = isPlus;
+    }
+
+    public void setExemptionId(Long exemptionId) {
+        this.exemptionId = exemptionId;
+    }
+
+    public String getDateStr() {
         return dateStr;
     }
 
-    public void setDateStr(Date dateStr) {
+    public void setDateStr(String dateStr) {
         this.dateStr = dateStr;
     }
 
@@ -51,7 +70,7 @@ public class ListSettledBillExemptionItemsDTO {
         this.remark = remark;
     }
 
-    public ListSettledBillExemptionItemsDTO() {
+    public ListBillExemptionItemsDTO() {
 
     }
 }

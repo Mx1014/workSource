@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
- * <li>billId:账单id</li>
+ * <li>billItemId:账单收费项id</li>
  * <li>ownerId:所属者id</li>
  * <li>ownerType:所属者类型</li>
  * <li>targetName:客户名称</li>
@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class ListBillItemsCommand {
-    private Long billId;
+    private Long billItemId;
     private Long ownerId;
     private String ownerType;
     private String targetName;
@@ -42,12 +42,12 @@ public class ListBillItemsCommand {
         this.ownerType = ownerType;
     }
 
-    public Long getBillId() {
-        return billId;
+    public Long getBillItemId() {
+        return billItemId;
     }
 
-    public void setBillId(Long billId) {
-        this.billId = billId;
+    public void setBillItemId(Long billItemId) {
+        this.billItemId = billItemId;
     }
 
     public String getTargetName() {

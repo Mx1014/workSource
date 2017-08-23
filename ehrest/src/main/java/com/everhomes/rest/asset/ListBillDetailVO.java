@@ -15,6 +15,8 @@ public class ListBillDetailVO {
     private String noticeTel;
     private String targetName;
     private String targetType;
+    private String buildingName;
+    private String apartmentName;
     private Long targetId;
     private BillGroupDTO billGroupDTO;
 
@@ -24,6 +26,22 @@ public class ListBillDetailVO {
 
     public void setDateStr(String dateStr) {
         this.dateStr = dateStr;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     public String getContractNO() {

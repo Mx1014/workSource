@@ -671,6 +671,7 @@ CREATE TABLE `eh_payment_bills` (
   `bill_group_id` bigint(20) DEFAULT NULL,
   `date_str` varchar(10) DEFAULT NULL,
   `contract_id` bigint(20) NOT NULL DEFAULT '0',
+  `address_id` bigint(20) DEFAULT NULL,
   `amount_receivable` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'amount should be received',
   `amount_received` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'amount actually received by far',
   `amount_owed` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'unpaid amount',
@@ -679,6 +680,8 @@ CREATE TABLE `eh_payment_bills` (
   `target_type` varchar(32) DEFAULT NULL COMMENT 'untrack, user',
   `target_id` bigint(20) DEFAULT '0' COMMENT 'target user id if target_type is a user',
   `targetName` varchar(32) DEFAULT '' COMMENT '客户名称',
+  `apartment_name` varchar(255) DEFAULT NULL,
+  `building_name` varchar(255) DEFAULT NULL,
   `noticeTel` varchar(32) DEFAULT '' COMMENT '催缴电话',
   `status` tinyint(4) DEFAULT '0' COMMENT '0: upfinished; 1: paid off',
   `notice_times` int(11) DEFAULT '0' COMMENT 'times bill owner has been called for dued payments',
@@ -727,6 +730,7 @@ CREATE TABLE `eh_payment_charging_standards` (
   `name` varchar(10) DEFAULT NULL,
   `charging_items_id` bigint(20) NOT NULL DEFAULT '0',
   `formula` varchar(1024) DEFAULT NULL,
+  `formula_json` varchar(2048) DEFAULT NULL,
   `formula_type` tinyint(4) DEFAULT NULL COMMENT '1: fixed fee; 2: normal formula; 3: gradient varied on variable price; 4: gradients varied functions on each variable section',
   `billing_cycle` tinyint(4) DEFAULT NULL,
   `price_unit_type` tinyint(4) DEFAULT NULL COMMENT '1:日单价; 2:月单价; 3:季单价; 4:年单价',
@@ -786,5 +790,28 @@ CREATE TABLE `eh_payment_variables` (
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
+  `identifier` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='变量表';
+-- ----------------------------
+-- Table structure for eh_payment_contract_receiver
+-- ----------------------------
+DROP TABLE IF EXISTS `eh_payment_contract_receiver`;
+CREATE TABLE `eh_payment_contract_receiver` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` bigint(20) DEFAULT NULL,
+  `owner_id` bigint(20) DEFAULT NULL,
+  `owner_type` varchar(255) DEFAULT NULL,
+  `target_id` bigint(20) DEFAULT NULL,
+  `target_type` varchar(255) DEFAULT NULL,
+  `variables_json_string` varchar(2048) DEFAULT NULL,
+  `eh_payment_charging_standard_id` bigint(20) DEFAULT NULL,
+  `eh_payment_charging_item_id` bigint(20) DEFAULT NULL,
+  `contract_num` varchar(255) DEFAULT NULL,
+  `target_name` varchar(255) DEFAULT NULL,
+  `notice_tel` varchar(255) DEFAULT NULL,
+  `building_name` varchar(255) DEFAULT NULL,
+  `apartment_name` varchar(255) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '0' COMMENT '1:有效；0：无效',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

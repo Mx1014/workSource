@@ -48,16 +48,14 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -69,6 +67,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+import scala.Char;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -195,19 +194,20 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillsResponse response = new ListBillsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            cmd.setPageAnchor(1l);
+            cmd.setPageAnchor(0l);
         }
         if(cmd.getPageSize() == null || cmd.getPageSize() < 1 || cmd.getPageSize() > Integer.MAX_VALUE/10){
             cmd.setPageSize(20);
         }
-        int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
+        int pageOffSet = cmd.getPageAnchor().intValue();
         List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus());
-        response.setListBillsDTOS(list);
         if(list.size() <= cmd.getPageSize()){
-            response.setNextPageAnchor(cmd.getPageAnchor());
+            response.setNextPageAnchor(null);
         }else{
-            response.setNextPageAnchor(cmd.getPageAnchor()+1);
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            list.remove(list.size()-1);
         }
+        response.setListBillsDTOS(list);
         return response;
     }
 
@@ -218,19 +218,20 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            cmd.setPageAnchor(1l);
+            cmd.setPageAnchor(0l);
         }
         if(cmd.getPageSize() == null){
             cmd.setPageSize(20);
         }
-        int pageOffSet = (cmd.getPageAnchor().intValue()-1)*cmd.getPageSize();
-        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
-        response.setBillDTOS(billDTOS);
+        int pageOffSet = cmd.getPageAnchor().intValue();
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillItemId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
-            response.setNextPageAnchor(cmd.getPageAnchor());
+            response.setNextPageAnchor(null);
         }else{
-            response.setNextPageAnchor(cmd.getPageAnchor()+1);
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            billDTOS.remove(billDTOS.size()-1);
         }
+        response.setBillDTOS(billDTOS);
         return response;
     }
 
@@ -295,7 +296,8 @@ public class AssetServiceImpl implements AssetService {
                         uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
             }
         }
-
+        //催缴次数加1
+        assetProvider.increaseNoticeTime(cmd.getBillIds());
 
     }
 
@@ -342,12 +344,14 @@ public class AssetServiceImpl implements AssetService {
             throw new RuntimeException("保存账单不在一个园区");
         }
         List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
-        assetProvider.creatPropertyBill(addressByPossibleName,cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType());
+        assetProvider.creatPropertyBill(addressByPossibleName,cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
     }
 
     @Override
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
+        convertedCmd.setPageAnchor(0l);
+        convertedCmd.setPageSize(999999);
         convertedCmd.setStatus((byte)1);
         ListBillsResponse convertedResponse = listBills(convertedCmd);
         List<ListBillsDTO> listBillsDTOS = convertedResponse.getListBillsDTOS();
@@ -383,12 +387,11 @@ public class AssetServiceImpl implements AssetService {
             ExemptionItemDTO dto = dtos.get(i);
             if(dto.getAmount().compareTo(new BigDecimal("0"))==-1) {
                 dto.setIsPlus((byte)0);
+                dto.setAmount(dto.getAmount().divide(new BigDecimal("-1")));
             }else{
                 dto.setIsPlus((byte)1);
             }
         }
-        response.setBuildingName(cmd.getBuildingName());
-        response.setApartmentName(cmd.getApartmentName());
         return response;
     }
 
@@ -412,7 +415,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public HttpServletResponse exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
+    public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
         ListBillsResponse bills = listBills(cmd);
         Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
@@ -423,13 +426,36 @@ public class AssetServiceImpl implements AssetService {
         int second = c.get(Calendar.SECOND);
         String fileName = "bill"+"/"+year + "/" + month + "/" + date + " " +hour + ":" +minute + ":" + second;
         List<ListBillsDTO> dtos = bills.getListBillsDTOS();
-        String[] propertyNames = new String[10];
-        String[] titleName = new String[10];
-        int[] titleSize = new int[10];
-        List<?> dataList = new ArrayList<>();
+
+        List<exportPaymentBillsDetail> dataList = new ArrayList<>();
+        //组装datalist来确定propertyNames的值
+
+        for(int i = 0; i < dtos.size(); i++) {
+            ListBillsDTO dto = dtos.get(i);
+            exportPaymentBillsDetail detail = new exportPaymentBillsDetail();
+            detail.setAmountOwed(dto.getAmountOwed().toString());
+            detail.setAmountReceivable(dto.getAmountReceivable().toString());
+            detail.setAmountReceived(dto.getAmountReceived().toString());
+            detail.setApartmentName(dto.getApartmentName());
+            detail.setBillGroupName(dto.getBillGroupName());
+            detail.setBuildingName(dto.getBuildingName());
+            detail.setNoticeTel(dto.getNoticeTel());
+            detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
+            detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
+            detail.setTargetName(dto.getTargetName());
+            detail.setDateStr(dto.getDateStr());
+            dataList.add(detail);
+        }
+        String[] propertyNames = {"dateStr","billGroupName","targetName","buildingName","apartmentName","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
+//        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
+//        String[] propertyNames = new String[declaredFields.length];
+        String[] titleName ={"账期","账单组","客户","楼栋","门牌","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20};
+//        for(int i = 0; i < declaredFields.length; i++){
+//            propertyNames[i] = declaredFields[i].getName();
+//        }
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
-        return null;
     }
 
     @Override
@@ -444,7 +470,170 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
-        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTOList(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName());
+        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTO(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName());
+    }
+
+    @Override
+    public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
+        ListSettledBillExemptionItemsResponse response = new ListSettledBillExemptionItemsResponse();
+
+        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
+            cmd.setPageAnchor(0l);
+        }
+        if(cmd.getPageSize() == null){
+            cmd.setPageSize(20);
+        }
+        int pageOffSet = cmd.getPageAnchor().intValue();
+        List<ListBillExemptionItemsDTO> list = assetProvider.listBillExemptionItems(cmd.getBillId(),pageOffSet,cmd.getPageSize(),cmd.getDateStr(),cmd.getTargetName());
+        for(int i = 0; i < list.size(); i++){
+            ListBillExemptionItemsDTO dto = list.get(i);
+            if(dto.getAmount().compareTo(new BigDecimal("0"))==-1){
+                dto.setIsPlus((byte)0);
+            }else if(dto.getAmount().compareTo(new BigDecimal("0"))==1 || dto.getAmount().compareTo(new BigDecimal("0"))==0){
+                dto.setIsPlus((byte)1);
+            }
+        }
+        if(list.size() <= cmd.getPageSize()) {
+            response.setNextPageAnchor(0l);
+        }else{
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            list.remove(list.size()-1);
+        }
+        response.setListNotSettledBillDTOs(list);
+        return response;
+    }
+
+    @Override
+    public void deleteBill(BillIdCommand cmd) {
+        assetProvider.deleteBill(cmd.getBillId());
+    }
+
+    @Override
+    public void deleteBillItem(BillItemIdCommand cmd) {
+        assetProvider.deleteBillItem(cmd.getBillItemId());
+    }
+
+    @Override
+    public void deletExemptionItem(ExemptionItemIdCommand cmd) {
+        assetProvider.deletExemptionItem(cmd.getExemptionItemId());
+    }
+
+    @Override
+    public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
+        //calculate the details of payment expectancies
+        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
+        List<PaymentExpectancyDTO> list = new ArrayList<>();
+        List<FeeRules> feesRules = cmd.getFeesRules();
+        String json = "";
+        for(int i = 0; i < feesRules.size(); i++) {
+            FeeRules rule = feesRules.get(i);
+            List<String> var1 = rule.getPropertyName();
+            List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId());
+            List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
+            List<PaymentExpectancyDTO> dtos = new ArrayList<>();
+            coverVariables(var2,variableIdAndValueList);
+            String formula = assetProvider.findFormulaByChargingStandardId(rule.getChargingStandardId());
+            String chargingItemName = assetProvider.findChargingItemNameById(rule.getChargingItemId());
+            for(int j = 0; j < var1.size(); j ++){
+                String propertyName = var1.get(j);
+                Date dateStrBegin = rule.getDateStrBegin();
+                Date dateStrEnd = rule.getDateStrEnd();
+                Calendar c1 = Calendar.getInstance();
+                Calendar c2 = Calendar.getInstance();
+                c1.setTime(dateStrBegin);
+                c2.setTime(dateStrEnd);
+                Calendar c3 = Calendar.getInstance();
+                c3.setTime(dateStrBegin);
+
+                c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)-1);
+                Calendar c4 = Calendar.getInstance();
+                c4.setTime(c3.getTime());
+                c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);
+
+                if(c4.compareTo(c2) == 0){
+                    // one month
+                    // get dto and add to dtos
+                    float duration = 1;
+                    c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)-1);
+                    addFeeDTO(dtos, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration);
+                }else{
+                    while(c4.compareTo(c2) != 1) {
+                        //each month
+                        float duration = 1;
+                        addFeeDTO(dtos, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration);
+                        c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
+                        c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);
+                    }
+                    if(c4.compareTo(c2) != 0){
+                        //less than one month
+                        float duration = c2.getActualMinimum(Calendar.DAY_OF_MONTH)-c3.get(Calendar.DAY_OF_MONTH)/c3.getActualMaximum(Calendar.DAY_OF_MONTH);
+                        addFeeDTO(dtos, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration);
+                    }
+                }
+            }
+            Gson gson = new Gson();
+            Map<String,String> map = new HashMap<>();
+            for(int k = 0; k< variableIdAndValueList.size(); k++){
+                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+                map.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
+            }
+            json = gson.toJson(map, Map.class);
+            assetProvider.saveContractVariables(cmd.getApartmentName(),cmd.getBuldingName(),cmd.getContractNum(),cmd.getNamesapceId(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetId(),cmd.getTargetType(),json,rule.getChargingStandardId(),cmd.getTargetName());
+        }
+        response.setList(list);
+        //save the data but with a state of being suspend
+        return response;
+    }
+
+    private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {
+        for(int i = 0 ; i < var1.size(); i++){
+            VariableIdAndValue v1 = var1.get(i);
+            String id1 = (String)v1.getVariableId();
+            for(int j = 0; j< var2.size(); j++){
+                VariableIdAndValue v2 = var2.get(j);
+                String id2 = (String)v2.getVariableId();
+                if(id1.equals(id2)){
+                    v2.setVariableValue(v1.getVariableValue());
+                }
+
+            }
+        }
+    }
+
+    private void addFeeDTO(List<PaymentExpectancyDTO> dtos, String formula, String chargingItemName, String propertyName, List<VariableIdAndValue> variableIdAndValueList, Calendar c2, Calendar c3, float duration) {
+        PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+        BigDecimal amountReceivable = calculateFee(variableIdAndValueList,formula,duration);
+        dto.setAmountReceivable(amountReceivable);
+        dto.setChargingItemName(chargingItemName);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        dto.setDateStrBegin(sdf.format(c3));
+        dto.setDateStrEnd(sdf.format(c2));
+        Calendar c5 = Calendar.getInstance();
+        if(duration == 1){
+            c5.setTime(c3.getTime());
+            c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }else{
+            c5.setTime(c2.getTime());
+        }
+        dto.setDueDateStr(sdf.format(c5));
+        dto.setPropertyIdentifier(propertyName);
+        dtos.add(dto);
+    }
+
+    private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula, float duration) {
+        Gson gson = new Gson();
+        HashMap<String,String> map = new HashMap();
+        for(int i = 0; i < variableIdAndValueList.size(); i++){
+            VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
+            map.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
+        }
+        for(Map.Entry<String,String> entry : map.entrySet()){
+            formula = formula.replace(entry.getKey(),entry.getValue());
+            formula += "*"+duration;
+        }
+        BigDecimal response = CalculatorUtil.arithmetic(formula);
+        response.setScale(2);
+        return response;
     }
 //    @Scheduled(cron = "0 0 23 * * ?")
 //    @Override

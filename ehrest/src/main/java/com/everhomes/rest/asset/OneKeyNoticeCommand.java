@@ -18,6 +18,12 @@ import java.util.Date;
  * <li>targetName: 客户名称</li>
  * <li>billGroupName: 账单名称</li>
  * <li>billStatus: 账单状态,0:未缴;1:已缴</li>
+ * <li>pageAnchor:锚点</li>
+ * <li>pageSize:每页数量</li>
+ * <li>billGroupId:账单组id</li>
+ * <li>buildingName:楼栋名称</li>
+ * <li>apartmentName:门牌名称</li>
+ * <li>status:账单属性，0:未出账单;1:已出账单</li>
  *</ul>
  */
 public class OneKeyNoticeCommand {
@@ -26,60 +32,56 @@ public class OneKeyNoticeCommand {
     private Long addressId;
     @NotNull
     private String ownerType;
-    private Date dateStrBegin;
-    private Date dateStrEnd;
+    private Integer pageSize;
+    private Long pageAnchor;
+    private String dateStrBegin;
+    private String dateStrEnd;
     private Byte billStatus;
     private String targetName;
     private String billGroupName;
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    private Long billGroupId;
+    private String buildingName;
+    private String apartmentName;
+    private Byte status;
+
+    public Long getBillGroupId() {
+        return billGroupId;
     }
 
-    public Long getOwnerId() {
-        return ownerId;
+    public String getBuildingName() {
+        return buildingName;
     }
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 
-    public Long getAddressId() {
-        return addressId;
+    public String getApartmentName() {
+        return apartmentName;
     }
 
-    public void setAddressId(Long addressId) {
-        this.addressId = addressId;
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
-    public String getOwnerType() {
-        return ownerType;
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
     }
 
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
+    public Byte getStatus() {
+        return status;
     }
 
-    public Date getDateStrBegin() {
-        return dateStrBegin;
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
-    public void setDateStrBegin(Date dateStrBegin) {
-        this.dateStrBegin = dateStrBegin;
-    }
-
-    public Date getDateStrEnd() {
-        return dateStrEnd;
-    }
-
-    public void setDateStrEnd(Date dateStrEnd) {
-        this.dateStrEnd = dateStrEnd;
-    }
 
     public Byte getBillStatus() {
         return billStatus;
     }
+
 
     public void setBillStatus(Byte billStatus) {
         this.billStatus = billStatus;
@@ -101,7 +103,65 @@ public class OneKeyNoticeCommand {
         this.billGroupName = billGroupName;
     }
 
-    public OneKeyNoticeCommand() {
-
+    public String getDateStrBegin() {
+        return dateStrBegin;
     }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
 }

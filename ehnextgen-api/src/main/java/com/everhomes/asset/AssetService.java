@@ -57,13 +57,23 @@ public interface AssetService {
 
     void modifyBillStatus(BillIdCommand cmd);
 
-    HttpServletResponse exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
+    void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
 
     List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
 
     List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
 
     void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
+
+    ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd);
+
+    void deleteBill(BillIdCommand cmd);
+
+    void deleteBillItem(BillItemIdCommand cmd);
+
+    void deletExemptionItem(ExemptionItemIdCommand cmd);
+
+    PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd);
 
 //    void synchronizeZJGKBill();
 }
