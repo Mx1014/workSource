@@ -9,7 +9,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.jooq.Condition;
@@ -57,7 +56,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setGender(cmd.getGender());
         addCommand.setContactToken(cmd.getContactToken());
         addCommand.setDepartmentIds(cmd.getDepartmentIds());
-        addCommand.setJobPositionIds(cmd.getJobPositionIds());
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
@@ -70,18 +68,31 @@ public class ArchivesServiceImpl implements ArchivesService {
             memberDetail.setEnName(cmd.getContactEnName());
             memberDetail.setRegionCode(cmd.getRegionCode());
             memberDetail.setContactShortToken(cmd.getContactShortToken());
-            //  TODO: 部门与职位的转化
+            memberDetail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
+            memberDetail.setJobPosition(cmd.getJobPosition());
             memberDetail.setEmail(cmd.getEmail());
             organizationProvider.updateOrganizationMemberDetails(memberDetail,memberDetail.getId());
             dto.setDetailId(detailId);
             dto.setContactName(memberDetail.getContactName());
             dto.setContactToken(memberDetail.getContactToken());
-            dto.setEmail(memberDetail.getEmail());
         }
 
         //  TODO: 添加档案记录
 
         return dto;
+    }
+
+    //  获取部门名称
+    private String getDepartmentName(List<Long> ids){
+        String departmentName = "";
+        for(Long id:ids){
+            Organization org = organizationProvider.findOrganizationById(id);
+            if(org !=null){
+                departmentName += org.getName() + ",";
+            }
+        }
+        departmentName = departmentName.substring(0,departmentName.length()-1);
+        return departmentName;
     }
 
     @Override
@@ -185,10 +196,11 @@ public class ArchivesServiceImpl implements ArchivesService {
             @Override
             public ImportFileResponse importFile() {
                 ImportFileResponse response = new ImportFileResponse();
+                //  将 excel 的中的数据读取
                 List<ImportArchivesContactsDTO> datas = handleImportArchivesContacts(resultList);
                 String fileLog;
                 if(datas.size() > 0){
-                    //  校验标题，若合格则保存下来
+                    //  校验标题，若不合格直接返回错误
                     fileLog = checkArchivesContactsTitle(datas.get(0));
                     if(!StringUtils.isEmpty(fileLog)){
                         response.setFileLog(fileLog);
@@ -197,9 +209,14 @@ public class ArchivesServiceImpl implements ArchivesService {
                     response.setTitle(datas.get(0));
                     datas.remove(0);
                 }
-                List<ImportFileResultLog<ImportArchivesContactsDTO>> results = importArchivesContactsFiles(datas,response);
+
+                //  开始导入
+                ImportArchivesContactsFilesResponse result = importArchivesContactsFiles(datas);
+
+                //  设置导入结果
+                response.setCoverCount(result.getCoverCount());
                 response.setTotalCount((long) datas.size());
-                response.setFailCount((long) results.size());
+                response.setFailCount((long) result.getResults().size());
                 //  覆盖数与文件错误的设置
                 return response;
             }
@@ -243,20 +260,27 @@ public class ArchivesServiceImpl implements ArchivesService {
         return datas;
     }
 
-    private List<ImportFileResultLog<ImportArchivesContactsDTO>> importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas, ImportFileResponse response){
+    private ImportArchivesContactsFilesResponse importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas){
+
+        ImportArchivesContactsFilesResponse response = new ImportArchivesContactsFilesResponse();
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
         List<ImportFileResultLog<ImportArchivesContactsDTO>> errorDataLogs = new ArrayList<>();
 
-        /*log = this.checkArchivesContactsTitle(module,title);
-        if(log !=null){
-            errorDataLogs.add(log);
-            response.setFileLog(ImportFileErrorType.TITLE_ERROE.getCode());
-            return errorDataLogs;
-        }*/
-        return errorDataLogs;
+        //  1.校验数据
+        log = checkArchivesContactsdatas(datas);
+        //  2.导入数据库
+        Long coverCount = saveArchivesContactsdatas(datas);
+        //  3.存储覆盖数目
+        response.setCoverCount(coverCount);
+        //  4.存储错误数据
+        response.setResults(errorDataLogs);
+        return response;
     }
 
+    //  模板校验
     private String checkArchivesContactsTitle(ImportArchivesContactsDTO title){
+
+        //  TODO:是否从数据库读取模板
         List<String> module = new ArrayList<>(Arrays.asList("姓名","英文名","性别","手机","短号","工作邮箱","部门","职务"));
         //  存储字段来进行校验
         List<String> temp = new ArrayList<>();
@@ -276,16 +300,48 @@ public class ArchivesServiceImpl implements ArchivesService {
                 return ImportFileErrorType.TITLE_ERROE.getCode();
             }
         }
-        return "";
+        return null;
     }
 
-    private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsTitle(List module, ImportArchivesContactsDTO title){
+    private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsdatas(List<ImportArchivesContactsDTO> datas) {
 
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
 
+        for (ImportArchivesContactsDTO data : datas) {
+            //  姓名
+            if (!StringUtils.isEmpty(data.getContactName())) {
+                LOGGER.warn("Contact name is empty. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Contact name is empty.");
+                log.setCode(ArchivesServiceErrorCode.ERROR_NAME_ISEMPTY);
+                return log;
+            } else if (data.getContactEnName().length() > 20) {
+                LOGGER.warn("Contact name is too long. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Contact name too long.");
+                log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOOLONG);
+                return log;
+            }
+
+            //  TODO:英文名校验
 
 
+            if (StringUtils.isEmpty(data.getContactToken())) {
+                LOGGER.warn("Contact token is empty. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Contact token is empty");
+                log.setCode(ArchivesServiceErrorCode.ERROR_CONTACTTOKEN_ISEMPTY);
+                return log;
+            }
+
+
+        }
         return null;
+    }
+
+    private Long saveArchivesContactsdatas(List<ImportArchivesContactsDTO> datas){
+        //  TODO:手机号存在的话则累积数目+1
+        return 2L;
     }
 
     @Override
