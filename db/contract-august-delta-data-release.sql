@@ -114,7 +114,7 @@ INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `ti
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
     VALUES ('4', 'enterprise_customer', '0', '/4', '人才团队信息', 'talentInfo', '0', NULL, '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
-    VALUES ('5', 'enterprise_customer', '0', '/5', '知识产权信息', 'intellectualPropertyInfo', '0', NULL, '2', '1', UTC_TIMESTAMP());
+    VALUES ('5', 'enterprise_customer', '0', '/5', '商标知识产权信息', 'intellectualPropertyInfo', '0', NULL, '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
     VALUES ('6', 'enterprise_customer', '0', '/6', '申报项目', 'project', '0', NULL, '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
@@ -135,6 +135,8 @@ INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `ti
     VALUES ('14', 'contract', '0', '/13/14', '基本信息', 'basicinfo', '0', NULL, '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
     VALUES ('15', 'contract', '0', '/13/15', '合同概览', 'overview', '0', NULL, '2', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
+    VALUES ('16', 'contract', '0', '/16', '合同概览', 'overview', '0', NULL, '2', '1', UTC_TIMESTAMP());
  
 INSERT INTO `eh_var_field_group_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ('1', '999992', 'enterprise_customer', '1', '基本信息', '1', '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_group_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ('2', '999992', 'enterprise_customer', '2', '税务信息', '2', '2', '1', UTC_TIMESTAMP());
@@ -513,16 +515,16 @@ INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `fi
 -- '9', '经济指标',
 -- payment_wentian
 SET @eh_locale_templates_id = (SELECT max(id) FROM `eh_locale_templates`);
-INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'user.notification', '3', 'zh_CN', '物业账单通知用户', '尊敬的${targetName}先生/女士,您的账单已出，请在app内查询', '999985');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'user.notification', '3', 'zh_CN', '物业账单通知用户', '尊敬的${targetName}先生/女士,您的账单已出，请在app内查询', '999985');
 SET @eh_locale_templates_id = (SELECT max(id) FROM `eh_locale_templates`);
-INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '119704', '999971');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '119704', '999971');
 SET @eh_locale_templates_id = (SELECT max(id) FROM `eh_locale_templates`);
-INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '119706', '999974');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '119706', '999974');
 SET @eh_locale_templates_id = (SELECT max(id) FROM `eh_locale_templates`);
-INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '117613', '999973');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '117613', '999973');
 SET @eh_asset_vendor_id = (SELECT max(id) FROM `eh_asset_vendor`);
-INSERT INTO `ehcore`.`eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES ((@eh_asset_vendor_id := @eh_asset_vendor_id + 1), 'community', '240111044331050388', '张江高科缴费', 'ZJGK', '2', '999971');
-INSERT INTO `ehcore`.`eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES ((@eh_asset_vendor_id := @eh_asset_vendor_id + 1), 'community', '240111044331050389', '张江高科人才公寓缴费', 'ZJGK', '2', '999971');
+INSERT INTO `eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES ((@eh_asset_vendor_id := @eh_asset_vendor_id + 1), 'community', '240111044331050388', '张江高科缴费', 'ZJGK', '2', '999971');
+INSERT INTO `eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES ((@eh_asset_vendor_id := @eh_asset_vendor_id + 1), 'community', '240111044331050389', '张江高科人才公寓缴费', 'ZJGK', '2', '999971');
 
   -- web menu and priviledge configuration
 SET @eh_web_menus_id_paym = (SELECT MAX(id) FROM `eh_web_menus`);

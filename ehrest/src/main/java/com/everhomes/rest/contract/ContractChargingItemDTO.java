@@ -8,6 +8,7 @@ import java.util.List;
  * <ul>
  *     <li>id: id</li>
  *     <li>chargingItemId: 收费项id</li>
+ *     <li>chargingItemName: 收费项名称</li>
  *     <li>chargingStandardId: 收费标准id</li>
  *     <li>billingCycle: 计费周期</li>
  *     <li>formula: 公式</li>
@@ -24,6 +25,7 @@ public class ContractChargingItemDTO {
     private Long id;
     private Integer namespaceId;
     private Long chargingItemId;
+    private String chargingItemName;
     private Long chargingStandardId;
     private Long lateFeeStandardId;
     private String formula;
@@ -105,6 +107,14 @@ public class ContractChargingItemDTO {
 
     public void setChargingItemId(Long chargingItemId) {
         this.chargingItemId = chargingItemId;
+    }
+
+    public String getChargingItemName() {
+        return chargingItemName;
+    }
+
+    public void setChargingItemName(String chargingItemName) {
+        this.chargingItemName = chargingItemName;
     }
 
     public Long getChargingStandardId() {

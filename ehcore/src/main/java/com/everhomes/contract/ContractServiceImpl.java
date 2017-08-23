@@ -805,7 +805,8 @@ public class ContractServiceImpl implements ContractService {
 				if(item.getChargingExpiredTime() != null) {
 					itemDto.setChargingExpiredTime(item.getChargingExpiredTime().getTime());
 				}
-//				assetProvider.findChargingItemById(itemDto.getChargingItemId());
+				String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
+				itemDto.setChargingItemName(itemName);
 				processContractChargingItemAddresses(itemDto);
 				return itemDto;
 			}).collect(Collectors.toList());

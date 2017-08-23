@@ -49,3 +49,10 @@ INSERT INTO `eh_payment_exemption_items` VALUES ('102', '20', '2', null, null, '
 INSERT INTO `eh_payment_exemption_items` VALUES ('103', '20', '2', null, null, '闫杨', '减免项的描述444', '-444.00', '238716', '2017-08-18 18:10:25', null, '2017-08-18 18:10:25');
 INSERT INTO `eh_payment_variables` VALUES ('1', '1', '1', '月单价', null, null, null, null);
 INSERT INTO `eh_payment_variables` VALUES ('2', '1', '1', '计费面积', null, null, null, null);
+
+-- 给华润配任务管理
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 70000, '', 'EhNamespaces', 999985, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 70100, '', 'EhNamespaces', 999985, 2);
