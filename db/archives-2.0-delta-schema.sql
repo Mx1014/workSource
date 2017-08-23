@@ -37,6 +37,7 @@ ALTER TABLE eh_organization_member_details ADD COLUMN id_expirt_date DATE COMMEN
 ALTER TABLE eh_organization_member_details ADD COLUMN education VARCHAR(64) COMMENT '学历';
 ALTER TABLE eh_organization_member_details ADD COLUMN graduation_school VARCHAR(256) COMMENT '毕业学校';
 ALTER TABLE eh_organization_member_details ADD COLUMN graduation_time DATE COMMENT '毕业时间';
+ALTER TABLE eh_organization_member_details ADD COLUMN region_code VARCHAR(64) COMMENT '手机区号';
 ALTER TABLE eh_organization_member_details ADD COLUMN emergency_relationship VARCHAR(128) COMMENT '紧急联系人关系';
 ALTER TABLE eh_organization_member_details ADD COLUMN department VARCHAR(256) COMMENT '部门';
 ALTER TABLE eh_organization_member_details ADD COLUMN job_position VARCHAR(256) COMMENT '职务/岗位';
