@@ -224,7 +224,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
-        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillItemId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
             response.setNextPageAnchor(null);
         }else{
