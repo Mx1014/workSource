@@ -117,10 +117,10 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
         }
         
 		//需要蒙版的信息
-		String sceneType_pm_admin = "pm_admin";
+		String sceneType_detault = "default";
 		String itemLocation = "/home";
-		List<LaunchPadItem> items_pm_admin = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType_pm_admin, itemLocation, null, null, 0L, null);
-		List masks_pm = getMasksFromItemInfo(items_pm_admin);
+		List<LaunchPadItem> items_default = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType_detault, itemLocation, null, null, 0L, null);
+		List masks_pm = getMasksFromItemInfo(items_default);
 		if(masks_pm != null){
 			detailDto.setPmMasks(masks_pm);
 		}
