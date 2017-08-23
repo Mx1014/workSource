@@ -127,7 +127,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 				att.setOwnerType(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM);
 				att.setOwnerId(request.getId());
 				att.setCreatorUid(user.getId());
-				
+				att.setFilename(attachment.getFileName());
 				userActivityProvider.createRequestAttachments(att);
 				return att;
 			}).collect(Collectors.toList());
@@ -322,6 +322,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 										dto.setFieldContentType(attachment.getContentType());
 										dto.setFieldName(attachment.getTargetFieldName());
 										dto.setFieldValue(attachment.getContentUri());
+										dto.setFileName(attachment.getFilename());
 									}
 								}
 							}
