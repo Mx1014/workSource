@@ -114,7 +114,7 @@ INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `ti
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
     VALUES ('4', 'enterprise_customer', '0', '/4', '人才团队信息', 'talentInfo', '0', NULL, '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
-    VALUES ('5', 'enterprise_customer', '0', '/5', '商标知识产权信息', 'intellectualPropertyInfo', '0', NULL, '2', '1', UTC_TIMESTAMP());
+    VALUES ('5', 'enterprise_customer', '0', '/5', '商标信息', 'trademarkInfo', '0', NULL, '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
     VALUES ('6', 'enterprise_customer', '0', '/6', '申报项目', 'project', '0', NULL, '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
@@ -136,7 +136,7 @@ INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `ti
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
     VALUES ('15', 'contract', '0', '/13/15', '合同概览', 'overview', '0', NULL, '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) 
-    VALUES ('16', 'contract', '0', '/16', '合同概览', 'overview', '0', NULL, '2', '1', UTC_TIMESTAMP());
+    VALUES ('16', 'contract', '0', '/16', '专利信息', 'patentInfo', '0', NULL, '2', '1', UTC_TIMESTAMP());
  
 INSERT INTO `eh_var_field_group_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ('1', '999992', 'enterprise_customer', '1', '基本信息', '1', '2', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_var_field_group_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ('2', '999992', 'enterprise_customer', '2', '税务信息', '2', '2', '1', UTC_TIMESTAMP());

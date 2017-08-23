@@ -762,10 +762,13 @@ public class ContractServiceImpl implements ContractService {
 	public List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd) {
 		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
 			EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getTargetId());
-			List<Contract> contracts = contractProvider.listContractByOrganizationId(cmd.getNamespaceId(), customer.getId());
-			if(contracts != null && contracts.size() > 0) {
-				return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+			if(customer != null) {
+				List<Contract> contracts = contractProvider.listContractByOrganizationId(cmd.getNamespaceId(), customer.getId());
+				if(contracts != null && contracts.size() > 0) {
+					return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+				}
 			}
+
 		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
 			//暂无个人合同
 		}
