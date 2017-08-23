@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 
@@ -15,7 +17,8 @@ public class PaymentExpectanciesCommand {
     private Long targetId;
     private String targetType;
     private String targetName;
-    List<FeeRules> feesRules;
+    @ItemType(FeeRules.class)
+    private List<FeeRules> feesRules;
     private String contractNum;
     private String noticeTel;
     private String buldingName;

@@ -23,7 +23,7 @@ public class ListChargingStandardsDTO {
     private String formula;
     private Byte formulaType;
     private Byte BillingCycle;
-    @ItemType(String.class)
+    @ItemType(PaymentVariable.class)
     private List<PaymentVariable> variables;
 
     @Override

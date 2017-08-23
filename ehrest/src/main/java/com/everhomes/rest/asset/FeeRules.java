@@ -2,6 +2,8 @@
 package com.everhomes.rest.asset;
 
 
+import com.everhomes.discover.ItemType;
+
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +17,9 @@ public class FeeRules {
     private Long chargingStandardId;
     private Date dateStrBegin;
     private Date dateStrEnd;
+    @ItemType(String.class)
     private List<String> propertyName;
+    @ItemType(VariableIdAndValue.class)
     private List<VariableIdAndValue> variableIdAndValueList;
 
 
