@@ -111,8 +111,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 		parkingLot.setRateFlag(temp.getRateFlag());
 		parkingLot.setLockCarFlag(temp.getLockCarFlag());
 		parkingLot.setSearchCarFlag(temp.getSearchCarFlag());
-		parkingLot.setDisplayCarFlag(temp.getDisplayCarFlag());
-		parkingLot.setDisplayFreePlaceFlag(temp.getDisplayFreePlaceFlag());
+		parkingLot.setCurrentInfoType(temp.getCurrentInfoType());
 		parkingLot.setContact(temp.getContact());
 
 		String expiredRechargeJson = parkingLot.getExpiredRechargeJson();

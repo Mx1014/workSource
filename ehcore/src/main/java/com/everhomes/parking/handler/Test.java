@@ -21,8 +21,12 @@ public class Test {
     static String GET_EMPTY_PLACE = "/ParkingApi/QueryEmptyPlace";
 
     public static void main(String[] args) {
-        String json =  Utils.post(url + GET_EMPTY_PLACE, createGeneralParam());
-        System.out.println(json);
+//        String json =  Utils.post(url + GET_EMPTY_PLACE, createGeneralParam());
+//        System.out.println(json);
+
+        Date date = new Date();
+        date.setTime(1503483940813L);
+        System.out.println(date.getTime());
     }
 
     private static Map<String, String> createGeneralParam() {

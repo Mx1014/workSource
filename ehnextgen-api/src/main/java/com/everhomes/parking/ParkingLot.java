@@ -27,10 +27,8 @@ public class ParkingLot extends EhParkingLots {
     private Byte lockCarFlag;
     //是否支持寻车
     private Byte searchCarFlag;
-    //是否显示当前在场车
-    private Byte displayCarFlag;
-    //是否显示当前剩余车位
-    private Byte displayFreePlaceFlag;
+    //显示当前在场车/当前剩余车位
+    private Byte currentInfoType;
     //停车场客服联系方式
     private String contact;
 
@@ -102,20 +100,12 @@ public class ParkingLot extends EhParkingLots {
         this.searchCarFlag = searchCarFlag;
     }
 
-    public Byte getDisplayCarFlag() {
-        return displayCarFlag;
+    public Byte getCurrentInfoType() {
+        return currentInfoType;
     }
 
-    public void setDisplayCarFlag(Byte displayCarFlag) {
-        this.displayCarFlag = displayCarFlag;
-    }
-
-    public Byte getDisplayFreePlaceFlag() {
-        return displayFreePlaceFlag;
-    }
-
-    public void setDisplayFreePlaceFlag(Byte displayFreePlaceFlag) {
-        this.displayFreePlaceFlag = displayFreePlaceFlag;
+    public void setCurrentInfoType(Byte currentInfoType) {
+        this.currentInfoType = currentInfoType;
     }
 
     public String getContact() {

@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
  * 创源 停车
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "INNOSPRING")
-public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorHandler {
+public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(InnoSpringParkingVendorHandler.class);
 
 	private static final String RECHARGE = "70111002";
@@ -42,8 +41,6 @@ public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorH
 	private static final String GET_TEMP_FEE = "70111005";
 	private static final String PAY_TEMP_FEE = "70111004";
 
-	@Autowired
-	private ParkingProvider parkingProvider;
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
@@ -161,17 +158,7 @@ public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorH
 	}
 
     private long strToLong(String str) {
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
-
-		long ts;
-		try {
-			ts = sdf1.parse(str).getTime();
-		} catch (ParseException e) {
-			LOGGER.error("data format is not yyyyMMdd, str={}", str);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"data format is not yyyyMMdd.");
-		}
-		return ts;
+    	return Utils.strToLong(str, Utils.DateStyle.DATE_TIME_STR);
 	}
 
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
@@ -297,7 +284,7 @@ public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorH
 	}
 
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
 		JSONObject param = new JSONObject();
 
@@ -306,8 +293,8 @@ public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorH
 		InnoSpringCardInfo card = getCard(plateNumber);
 		String oldValidEnd = card.getEnd_time();
 		Long time = strToLong(oldValidEnd + "235959");
-		Timestamp newTime = addSecond(time, 1);
-		String validStart = sdf1.format(newTime);
+		Timestamp newTime = Utils.addSecond(time, 1);
+		String validStart = sdf.format(newTime);
 
 		String version = configProvider.getValue("parking.innospring.version", "");
 		String licensekey = configProvider.getValue("parking.innospring.licensekey", "");
@@ -334,21 +321,12 @@ public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorH
 			JSONArray arr = JSONArray.parseArray(entityJson);
 			JSONObject obj = arr.getJSONObject(0);
 			String ret = obj.getString("ret");
-			if ("1".equals(ret))
+			if ("1".equals(ret)) {
 				return true;
+			}
 		}
 		return false;
     }
-
-	//月卡充值开始时间 只加一秒
-	private Timestamp addSecond(Long oldTime, int seconds) {
-		Calendar calendar = Calendar.getInstance();
-
-		calendar.setTimeInMillis(oldTime);
-		calendar.add(Calendar.SECOND, seconds);
-
-		return new Timestamp(calendar.getTimeInMillis());
-	}
 
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 		String version = configProvider.getValue("parking.innospring.version", "");
@@ -368,8 +346,9 @@ public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorH
 			JSONArray arr = JSONArray.parseArray(entityJson);
 			JSONObject obj = arr.getJSONObject(0);
 			String ret = obj.getString("ret");
-			if ("1".equals(ret))
+			if ("1".equals(ret)) {
 				return true;
+			}
 		}
 		return false;
     }
@@ -387,13 +366,6 @@ public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorH
 
 		String serverUrl = configProvider.getValue("parking.innospring.serverUrl", "");
 		return Utils.post(serverUrl, param);
-	}
-
-	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		//创源月卡费率没有id，名称
-		order.setRateName("");
-
 	}
 
 	private InnoSpringTempFee getTempFee(String plateNumber) {
@@ -434,25 +406,4 @@ public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorH
 		return dto;
 	}
 
-	@Override
-	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
-		return null;
-	}
-
-	@Override
-	public void lockParkingCar(LockParkingCarCommand cmd) {
-
-	}
-
-	@Override
-	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

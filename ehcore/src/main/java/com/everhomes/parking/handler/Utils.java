@@ -39,18 +39,24 @@ public class Utils {
         public static final String MULTIPART_FORM_DATA = "multipart/form-data";
     }
 
+    public static class DateStyle {
+        public static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
+        public static final String DATE = "yyyy-MM-dd";
+        public static final String DATE_TIME_STR = "yyyyMMddHHmmss";
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
     /**
      * 原有时间加n秒
-     * @param oldPeriod
-     * @param seconds
+     * @param source
+     * @param second
      * @return
      */
-    static Timestamp addSeconds(Long oldPeriod, int seconds) {
+    static Timestamp addSecond(Long source, int second) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(oldPeriod);
-        calendar.add(Calendar.SECOND, seconds);
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.SECOND, second);
         Timestamp time = new Timestamp(calendar.getTimeInMillis());
 
         return time;
@@ -58,14 +64,14 @@ public class Utils {
 
     /**
      * 原有时间计算月
-     * @param oldPeriod
+     * @param source
      * @param month
      * @return
      */
-    static Timestamp getTimestampByAddMonth(Long oldPeriod, int month) {
+    static Timestamp getTimestampByAddMonth(Long source, int month) {
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(oldPeriod);
+        calendar.setTimeInMillis(source);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
@@ -84,10 +90,10 @@ public class Utils {
         return new Timestamp(calendar.getTimeInMillis());
     }
 
-    static Long getLongByAddNatureMonth(Long oldPeriod, int month) {
+    static Long getLongByAddNatureMonth(Long source, int month) {
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(oldPeriod);
+        calendar.setTimeInMillis(source);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
@@ -106,23 +112,28 @@ public class Utils {
         return calendar.getTimeInMillis();
     }
 
-    static Timestamp getTimestampByAddNatureMonth(Long oldPeriod, int month) {
+    static Timestamp getTimestampByAddNatureMonth(Long source, int month) {
 
-        return new Timestamp(getLongByAddNatureMonth(oldPeriod, month));
+        return new Timestamp(getLongByAddNatureMonth(source, month));
     }
 
-    static long strToDate(String str) {
+    static Long strToLong(String str, String style) {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat(style);
         long ts;
         try {
             ts = sdf.parse(str).getTime();
         } catch (ParseException e) {
-            LOGGER.error("Str format is not yyyy-MM-dd HH:mm:ss, str={}", str);
+            LOGGER.error("Str={} format is not style={}", str, style);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Str format is not yyyy-MM-dd HH:mm:ss.");
+                    "Invalid str format");
         }
         return ts;
+    }
+
+    static String dateToStr(Date date, String style) {
+        SimpleDateFormat sdf = new SimpleDateFormat(style);
+        return sdf.format(date);
     }
 
     public static String md5(String pw) {
@@ -139,24 +150,24 @@ public class Utils {
     /**
      *
      * @param url
-     * @param params json格式 content-type : application/json HTTP
+     * @param param json格式
      * @return
      */
-    public static String post(String url, JSONObject params) {
+    public static String post(String url, JSONObject param) {
         //设置body json格式
         Map<String, String> headers = new HashMap<>();
-        headers.put("content-type", "application/json");
-        return post(url, params, headers);
+        headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_JSON);
+        return post(url, param, headers);
     }
 
     /**
      *
      * @param url
-     * @param params
+     * @param param
      * @param headers
      * @return
      */
-    public static String post(String url, JSONObject params, Map<String, String> headers) {
+    public static String post(String url, JSONObject param, Map<String, String> headers) {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
 
@@ -164,14 +175,14 @@ public class Utils {
         String result = null;
         CloseableHttpResponse response = null;
 
-        LOGGER.info("The request info, url={}, param={}", url, params);
+        LOGGER.info("The request info, url={}, param={}", url, param);
 
-        if (null == params) {
-            params = new JSONObject();
+        if (null == param) {
+            param = new JSONObject();
         }
 
         try {
-            StringEntity stringEntity = new StringEntity(params.toString(), StandardCharsets.UTF_8);
+            StringEntity stringEntity = new StringEntity(param.toString(), StandardCharsets.UTF_8);
             httpPost.setEntity(stringEntity);
 
             if (null != headers) {
@@ -196,7 +207,7 @@ public class Utils {
             }
 
         } catch (IOException e) {
-            LOGGER.error("The request error, params={}", params, e);
+            LOGGER.error("The request error, param={}", param, e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "The request error.");
         }finally {
@@ -211,23 +222,23 @@ public class Utils {
     /**
      *
      * @param url
-     * @param params 普通表单提交
+     * @param param 普通表单提交
      * @return
      */
-    public static String post(String url, Map<String, String> params) {
-        return post(url, params, null);
+    public static String post(String url, Map<String, String> param) {
+        return post(url, param, null);
     }
 
     /**
      *
      * @param url
-     * @param params 普通表单提交
+     * @param param 普通表单提交
      * @param headers
      * @return
      */
-    public static String post(String url, Map<String, String> params, Map<String, String> headers) {
+    public static String post(String url, Map<String, String> param, Map<String, String> headers) {
 
-        LOGGER.info("The request info, url={}, param={}", url, JSONObject.toJSONString(params));
+        LOGGER.info("The request info, url={}, param={}", url, JSONObject.toJSONString(param));
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
@@ -236,7 +247,7 @@ public class Utils {
         HttpPost httpPost = new HttpPost(url);
 
         List<NameValuePair> nvps = new ArrayList<>();
-        Set<Map.Entry<String, String>> paramsEntry = params.entrySet();
+        Set<Map.Entry<String, String>> paramsEntry = param.entrySet();
         for (Map.Entry<String, String> e: paramsEntry) {
             nvps.add(new BasicNameValuePair(e.getKey(), e.getValue()));
         }
@@ -264,7 +275,7 @@ public class Utils {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("The request error, params={}", params, e);
+            LOGGER.error("The request error, param={}", param, e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "The request error.");
         }finally {

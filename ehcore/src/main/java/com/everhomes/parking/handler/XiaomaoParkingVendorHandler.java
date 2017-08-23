@@ -7,7 +7,6 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.parking.ParkingVendorHandler;
-import com.everhomes.parking.ketuo.EncryptUtil;
 import com.everhomes.parking.xiaomao.XiaomaoCard;
 import com.everhomes.parking.xiaomao.XiaomaoJsonEntity;
 import com.everhomes.rest.parking.*;
@@ -26,7 +25,7 @@ import java.util.*;
  * Created by zhengsiting on 2017/8/16.
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "XIAOMAO")
-public class XiaomaoParkingVendorHandler extends AbstractCommonParkingVendorHandler {
+public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(XiaomaoParkingVendorHandler.class);
 
     private static final String GET_CARD = "/park/getMonthCard";
@@ -94,7 +93,7 @@ public class XiaomaoParkingVendorHandler extends AbstractCommonParkingVendorHand
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Long expireTime = card.getEndTime().getTime();
 
-            String validStart = sdf.format(Utils.addSeconds(expireTime, 1));
+            String validStart = sdf.format(Utils.addSecond(expireTime, 1));
             String validEnd = sdf.format(Utils.getLongByAddNatureMonth(expireTime, originalOrder.getMonthCount().intValue()));
 
             JSONObject param = new JSONObject();

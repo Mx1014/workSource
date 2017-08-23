@@ -46,6 +46,8 @@ public class KetuoKexingParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 	@Autowired
 	private LocaleStringService localeStringService;
 
+	private static final boolean isSupportOpenCard = true;
+
 	private static final String GET_PARKINGS = "/api/find/GetParkingLotList";
 	private static final String GET_FREE_SPACE_NUM = "/api/find/GetFreeSpaceNum";
 	private static final String GET_CAR_LOCATION = "/api/find/GetCarLocInfo";
@@ -55,7 +57,12 @@ public class KetuoKexingParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 	String url = "http://220.160.111.114:8099";
 	Integer parkingId = 1;
 
-	protected KetuoRequestConfig getKetuoRequestConfig() {
+	//支持开卡，返回true
+	public boolean getOpenCardFlag() {
+		return true;
+	}
+
+	public KetuoRequestConfig getKetuoRequestConfig() {
 
 		String url = configProvider.getValue("parking.kexing.url", "");
 		String key = configProvider.getValue("parking.kexing.key", "");

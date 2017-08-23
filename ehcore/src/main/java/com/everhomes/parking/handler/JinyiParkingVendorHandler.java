@@ -4,7 +4,6 @@ package com.everhomes.parking.handler;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.clearance.ParkingClearanceLog;
@@ -15,7 +14,6 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 
 import java.time.LocalDateTime;
@@ -36,7 +31,7 @@ import java.util.*;
  * 清华信息港 停车
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "JIN_YI")
-public class JinyiParkingVendorHandler extends AbstractCommonParkingVendorHandler {
+public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JinyiParkingVendorHandler.class);
 
 	private static final String GET_CARD = "parkingjet.open.s2s.parkingfee.month.calcfee.plateno";
@@ -53,13 +48,6 @@ public class JinyiParkingVendorHandler extends AbstractCommonParkingVendorHandle
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-//	static String url = "HTTP://TGD.POAPI.PARKINGJET.CN:8082/COMMONOPENAPI/DEFAULT.ASHX";
-//	STATIC STRING APPID = "201706221000";
-//	STATIC STRING APPKEY = "QYRUIRXN20145601739";
-//	STATIC STRING PARKINGID = "0755000120170301000000000003";
-
-	@Autowired
-	private ParkingProvider parkingProvider;
 	@Autowired
     private ConfigurationProvider configProvider;
 	@Autowired
@@ -84,7 +72,7 @@ public class JinyiParkingVendorHandler extends AbstractCommonParkingVendorHandle
 			
 			String plateOwnerName = card.getOwnername();
 
-			String cardNumber = null;
+
 			ParkingCardType parkingCardType = createDefaultCardType();
 			String cardType = parkingCardType.getTypeName();
 			
@@ -96,7 +84,8 @@ public class JinyiParkingVendorHandler extends AbstractCommonParkingVendorHandle
 			parkingCardDTO.setPlateNumber(card.getPlateno());
 			parkingCardDTO.setEndTime(endTime);
 			parkingCardDTO.setCardType(cardType);
-			parkingCardDTO.setCardNumber(cardNumber);
+			//金溢 没有返回卡号
+//			parkingCardDTO.setCardNumber();
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
@@ -202,8 +191,9 @@ public class JinyiParkingVendorHandler extends AbstractCommonParkingVendorHandle
 
     @Override
 	public boolean recharge(ParkingRechargeOrder order){
-		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
+		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
 			return rechargeMonthlyCard(order);
+		}
 		return false;
 	}
 
@@ -286,9 +276,7 @@ public class JinyiParkingVendorHandler extends AbstractCommonParkingVendorHandle
     	
     	List<ParkingRechargeRateDTO> parkingRechargeRateList = new ArrayList<>();
 
-    	if(StringUtils.isBlank(plateNumber)) {
-//    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, null);
-    	}else{
+    	if(!StringUtils.isBlank(plateNumber)) {
     		JinyiCard card = getCardInfo(plateNumber);
 
     		if (null != card) {
@@ -324,57 +312,6 @@ public class JinyiParkingVendorHandler extends AbstractCommonParkingVendorHandle
 			return user.getLocale();
 
 		return Locale.SIMPLIFIED_CHINESE.toString();
-	}
-
-    @Override
-    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-    	return recharge(order);
-    }
-
-    @Override
-    public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
-
-		return null;
-    }
-    
-    @Override
-    public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
-
-    }
-
-	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-
-		
-	}
-
-	@Override
-	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
-
-		return null;
-	}
-
-	@Override
-	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
-
-		return null;
-	}
-
-	@Override
-	public void lockParkingCar(LockParkingCarCommand cmd) {
-
-	}
-
-	@Override
-	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
-
-		return null;
 	}
 
 	public String applyTempCard(ParkingClearanceLog log) {

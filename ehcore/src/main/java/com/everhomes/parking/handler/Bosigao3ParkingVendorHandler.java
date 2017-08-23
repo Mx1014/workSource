@@ -3,8 +3,6 @@ package com.everhomes.parking.handler;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,10 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -33,18 +27,11 @@ import com.everhomes.util.RuntimeErrorException;
  */
 // "BOSIGAO"需与ParkingLotVendor.BOSIGAO的枚举值保持一致
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO3")
-public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHandler {
+public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao3ParkingVendorHandler.class);
-
-//	private String ParkingID = "6e517beb-c295-4837-99ed-a73201157e2e";
-//	private String CompanyID = "175c8e26-ea36-4993-b113-a7320114e370";
 
 	@Autowired
 	private ParkingProvider parkingProvider;
-	
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
-	
 	@Autowired
     private ConfigurationProvider configProvider;
 	
@@ -59,7 +46,7 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 		if(null != card){
 			//格式yyyyMMddHHmmss
 			String validEnd = card.getLimitEnd();
-			Long endTime = strToLong2(validEnd);
+			Long endTime = strToLong(validEnd);
 			if (checkExpireTime(parkingLot, endTime)) {
 				return resultList;
 			}
@@ -144,7 +131,7 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 
 		BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
 
-		Long startPeriod = strToLong2(card.getLimitEnd());
+		Long startPeriod = strToLong(card.getLimitEnd());
 
 		//将充值信息存入订单
 		order.setErrorDescriptionJson(json);
@@ -260,7 +247,7 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	
-    	List<ParkingRechargeRate> parkingRechargeRateList = new ArrayList<>();
+    	List<ParkingRechargeRate> parkingRechargeRateList;
     	
     	if(StringUtils.isBlank(plateNumber)) {
     		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
@@ -273,8 +260,7 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
     	}
     	
     	List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
-			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
-			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
 			return dto;
@@ -287,84 +273,15 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
     	return recharge(order);
     }
-
-    @Override
-    public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
-    	User user = UserContext.current().getUser();
-    	
-    	ParkingRechargeRate parkingRechargeRate = new ParkingRechargeRate();
-    	parkingRechargeRate.setOwnerType(cmd.getOwnerType());
-    	parkingRechargeRate.setOwnerId(cmd.getOwnerId());
-    	parkingRechargeRate.setParkingLotId(cmd.getParkingLotId());
-    	parkingRechargeRate.setCardType(cmd.getCardType());
-    	/*费率 名称默认设置 by sw*/
-    	Map<String, Object> map = new HashMap<String, Object>();
-	    map.put("count", cmd.getMonthCount().intValue());
-		String scope = ParkingNotificationTemplateCode.SCOPE;
-		int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
-		String locale = "zh_CN";
-		String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-    	parkingRechargeRate.setRateName(rateName);
-    	parkingRechargeRate.setMonthCount(cmd.getMonthCount());
-    	parkingRechargeRate.setPrice(cmd.getPrice());
-    	parkingRechargeRate.setCreatorUid(user.getId());
-    	parkingRechargeRate.setCreateTime(new Timestamp(System.currentTimeMillis()));
-    	parkingRechargeRate.setStatus(ParkingRechargeRateStatus.ACTIVE.getCode());
-    	parkingProvider.createParkingRechargeRate(parkingRechargeRate);
-    	return ConvertHelper.convert(parkingRechargeRate, ParkingRechargeRateDTO.class);
-    }
     
-    @Override
-    public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
-    	try {
-    		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(cmd.getRateToken()));
-    		if(rate == null){
-    			LOGGER.error("remote search pay order return null.rateId="+cmd.getRateToken());
-    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    					"remote search pay order return null.");
-    		}else{
-    			parkingProvider.deleteParkingRechargeRate(rate);
-    		}
-    	} catch (Exception e) {
-			LOGGER.error("delete parkingRechargeRate fail."+cmd.getRateToken());
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
-    				"delete parkingRechargeRate fail."+cmd.getRateToken());
-		}
-    }
-    
-    private Long strToLong2(String str) {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		
-		Long ts = null;
-		try {
-			ts = sdf.parse(str).getTime();
-		} catch (ParseException e) {
-			LOGGER.error("validityPeriod data format is not yyyymmdd.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validityPeriod data format is not yyyymmdd.");
-		}
-		
-		return ts;
+    private Long strToLong(String str) {
+		return Utils.strToLong(str, Utils.DateStyle.DATE_TIME_STR);
 	}
 
 	private String timestampToStr2(Long time) {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		String str = sdf.format(time);
-		return str;
-	}
-
-	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
-		if(null == rate) {
-			LOGGER.error("Rate not found, cmd={}", order);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Rate not found.");
-		}
-		order.setRateName(rate.getRateName());
-		
+		Date date = new Date();
+		date.setTime(time);
+		return Utils.dateToStr(date, Utils.DateStyle.DATE_TIME_STR);
 	}
 
 	@Override
@@ -383,10 +300,10 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 				return dto;
 			}
 			dto.setPlateNumber(plateNumber);
-			long entranceDate = strToLong2(tempFee.getEntranceDate());
+			long entranceDate = strToLong(tempFee.getEntranceDate());
 			dto.setEntryTime(entranceDate);
 	//		dto.setPayTime(tempFee.getPayTime());
-			long payTime = strToLong2(tempFee.getPayDate());
+			long payTime = strToLong(tempFee.getPayDate());
 
 			dto.setPayTime(payTime);
 			dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
@@ -395,10 +312,10 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 			dto.setOrderToken(pkorder.getOrderID());
 		}else if (tempFee.getResult() == 2 || tempFee.getResult() == 10) {
 			dto.setPlateNumber(plateNumber);
-			long entranceDate = strToLong2(tempFee.getEntranceDate());
+			long entranceDate = strToLong(tempFee.getEntranceDate());
 			dto.setEntryTime(entranceDate);
 			//		dto.setPayTime(tempFee.getPayTime());
-			long payTime = strToLong2(tempFee.getPayDate());
+			long payTime = strToLong(tempFee.getPayDate());
 
 			dto.setPayTime(payTime);
 			dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
@@ -418,12 +335,6 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 	}
 
 	@Override
-	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
 
 		BosigaoCarLockInfo bosigaoCarLockInfo = getCarLockInfo(cmd.getPlateNumber());
@@ -432,8 +343,8 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 			return null;
 		}
 		ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
-		dto.setEntryTime(strToLong2(bosigaoCarLockInfo.getEntranceDate()));
-		long lockTime = strToLong2(bosigaoCarLockInfo.getLockDate());
+		dto.setEntryTime(strToLong(bosigaoCarLockInfo.getEntranceDate()));
+		long lockTime = strToLong(bosigaoCarLockInfo.getLockDate());
 		if (lockTime > 0) {
 			dto.setLockCarTime(lockTime);
 		}
@@ -495,8 +406,6 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 
 		BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
 
-		BosigaoCardInfo card = null;
-
 		return entity.isSuccess();
 	}
 
@@ -512,8 +421,6 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 		String json = Utils.post(url + "OISYKTUnLockCar", params);
 
 		BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
-
-		BosigaoCardInfo card = null;
 
 		return entity.isSuccess();
 	}
@@ -563,8 +470,9 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 					}
 				}
 			}
-		}else
-			LOGGER.info("request {}OISGetPKCarNum failed! param = {}",url,params);
+		}else {
+			LOGGER.info("request {} OISGetPKCarNum failed! param = {}",url,params);
+		}
 		return null;
 	}
 }

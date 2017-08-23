@@ -6,12 +6,7 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.everhomes.parking.*;
@@ -48,7 +43,7 @@ import com.everhomes.util.RuntimeErrorException;
  * 科兴 正中会 停车对接
  */
 @Component
-public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandler implements ParkingVendorHandler {
+public class Ketuo2ParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ketuo2ParkingVendorHandler.class);
 
 	private static final String RECHARGE = "/api/pay/CardRecharge";
@@ -83,7 +78,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
-    	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
+    	List<ParkingCardDTO> resultList = new ArrayList<>();
 
     	KetuoCard card = getCard(plateNumber);
 
@@ -107,7 +102,6 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone("");
 
-			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(expireTime);
 			List<KetuoCardType> types = getCardType();
 			for(KetuoCardType kt: types) {
@@ -141,7 +135,6 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
     	if(StringUtils.isBlank(plateNumber)) {
     		for(KetuoCardType k: types) {
 				populateRateInfo(k.getCarType(), k.getTypeName(), list);
-
     		}
     	}else{
     		KetuoCard cardInfo = getCard(plateNumber);
@@ -170,9 +163,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
     		}
     	}
 
-		List<ParkingRechargeRateDTO> result = list.stream().map(r -> convertParkingRechargeRateDTO(parkingLot, r)).collect(Collectors.toList());
-		
-		return result;
+		return list.stream().map(r -> convertParkingRechargeRateDTO(parkingLot, r)).collect(Collectors.toList());
     }
 
 	private KetuoCardRate getExpiredRate(KetuoCard cardInfo, ParkingLot parkingLot, long now) {
@@ -242,11 +233,11 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 		dto.setOwnerType(parkingLot.getOwnerType());
 		dto.setParkingLotId(parkingLot.getId());
 		dto.setRateToken(rate.getRuleId());
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("count", rate.getRuleAmount());
 		String scope = ParkingNotificationTemplateCode.SCOPE;
 		int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
-		String locale = "zh_CN";
+		String locale = Locale.SIMPLIFIED_CHINESE.toString();
 		String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 		dto.setRateName(rateName);
 		dto.setCardType(rate.getTypeName());
@@ -261,20 +252,6 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
     	return recharge(order);
     }
     
-    @Override
-    public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
-    	LOGGER.error("Not support create parkingRechargeRate.");
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-				"Not support create parkingRechargeRate.");
-    }
-    
-    @Override
-    public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
-    	LOGGER.error("Not support delete parkingRechargeRate.");
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-				"Not support delete parkingRechargeRate.");
-    }
-    
     private void checkExpireDateIsNull(String expireDate,String plateNo) {
 		if(StringUtils.isBlank(expireDate)){
 			LOGGER.error("ExpireDate is null, plateNo={}", plateNo);
@@ -284,17 +261,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 	}
     
     private long strToLong(String str) {
-
-		long ts;
-		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			ts = sdf.parse(str).getTime();
-		} catch (ParseException e) {
-			LOGGER.error("data format is not yyyy-MM-dd HH:mm:ss, str={}", str);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"data format is not yyyy-MM-dd HH:mm:ss.");
-		}
-		return ts;
+		return Utils.strToLong(str, Utils.DateStyle.DATE_TIME);
 	}
 	
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
@@ -370,7 +337,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 
 		KetuoCard card = getCard(plateNumber);
 
-		if(null == card) {
+		if(getOpenCardFlag() && null == card) {
 
 			Calendar calendar = Calendar.getInstance();
 			calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -440,7 +407,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 			}
 		}
 
-		Timestamp tempStart = Utils.addSeconds(expireTime, 1);
+		Timestamp tempStart = Utils.addSecond(expireTime, 1);
 		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, tempOrder.getMonthCount().intValue());
 		String validStart = sdf1.format(tempStart);
 		String validEnd = sdf1.format(tempEnd);
@@ -505,7 +472,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
         			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
         					"Flow tag is null.");
         		}
-        		if(ParkingRequestFlowType.INTELLIGENT.getCode() == Integer.valueOf(tag1)) {
+        		if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
         			parkingCardRequest = p;
         			break;
         		}
@@ -513,7 +480,6 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
         	if(null != parkingCardRequest) {
     			FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
 
-        		
             		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
             		stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
             		stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
@@ -754,28 +720,15 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 								.divide(new BigDecimal(DAY_COUNT), RoundingMode.HALF_EVEN));
 				dto.setPayMoney(price);
 			}
+
+			dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
 		}
 
 		return dto;
 	}
 
-	@Override
-	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
-		return null;
-	}
-
-	@Override
-	public void lockParkingCar(LockParkingCarCommand cmd) {
-
-	}
-
-	@Override
-	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	protected KetuoRequestConfig getKetuoRequestConfig() {
 		return null;
 	}
+
 }

@@ -484,7 +484,7 @@ public class ParkingServiceImpl implements ParkingService {
 					"Invalid MonthCount.");
 		}
 		
-		return createParkingOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
+		return createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
 	}
 	
 	@Override
@@ -498,11 +498,11 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
 		
-		return createParkingOrder(param, ParkingRechargeType.TEMPORARY.getCode());
+		return createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode());
 
 	}
 	
-	private CommonOrderDTO createParkingOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
+	private CommonOrderDTO createGeneralOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
 		checkPlateNumber(cmd.getPlateNumber());
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
@@ -519,7 +519,8 @@ public class ParkingServiceImpl implements ParkingService {
 			if(null == cmd.getPlateOwnerName())
 				cmd.setPlateOwnerName(organizationMember.getContactName());
 		}
-		
+
+		parkingRechargeOrder.setOrderType(null != cmd.getOrderType() ? cmd.getOrderType() : ParkingOrderType.RECHARGE.getCode());
 		parkingRechargeOrder.setRechargeType(rechargeType);
 		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
 		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());

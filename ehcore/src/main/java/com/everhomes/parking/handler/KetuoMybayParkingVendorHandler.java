@@ -26,16 +26,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import sun.misc.BASE64Decoder;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -57,6 +55,11 @@ public class KetuoMybayParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 	private ContentServerService contentServerService;
 
 	static String url = "http://szdas.iok.la:17508";
+
+	//支持开卡，返回true
+	public boolean getOpenCardFlag() {
+		return true;
+	}
 
 	@Override
 	public KetuoCard getCard(String plateNumber) {
@@ -118,17 +121,12 @@ public class KetuoMybayParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 
 				if (null != result && StringUtils.isNotBlank(result.getParkingPhoto())) {
 					String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-					String fileName = "parking-" + System.currentTimeMillis();
+					String fileName = "parking-" + System.currentTimeMillis() + ".jpg";
 
-					BASE64Decoder decoder = new BASE64Decoder();
+					final Base64.Decoder decoder = Base64.getDecoder();
 					try {
 						// Base64解码
-						byte[] bytes = decoder.decodeBuffer(result.getParkingPhoto());
-//						for (int i = 0; i < bytes.length; ++i) {
-//							if (bytes[i] < 0) {// 调整异常数据
-//								bytes[i] += 256;
-//							}
-//						}
+						byte[] bytes = decoder.decode(result.getParkingPhoto().split(",")[1]);
 						InputStream is = new ByteArrayInputStream(bytes);
 						UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, fileName, token);
 
