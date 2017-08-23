@@ -2693,7 +2693,7 @@ public class UserServiceImpl implements UserService {
 
 		/** 查询默认场景 **/
 		Community default_community = new Community();
-		if(residential_sceneList.size() != 0 && (commercial_sceneList.size() == 0)){
+		if((commercial_sceneList.size() == 0)){
 			//如果园区场景为0，通过小区查询默认园区
 			default_community = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
 			LOGGER.debug("如果园区场景为0，通过小区查询默认园区");
@@ -2705,7 +2705,7 @@ public class UserServiceImpl implements UserService {
 
 		sceneList.add(convertCommunityToScene(namespaceId,userId,default_community));
 
-		if(residential_sceneList.size() == 0 && commercial_sceneList.size() != 0){
+		if(commercial_sceneList.size() != 0){
 			//如果小区场景为0，通过园区查询默认小区
 			default_community = findDefaultCommunity(namespaceId,userId,commercial_sceneList,CommunityType.RESIDENTIAL.getCode());
 			LOGGER.debug("如果小区场景为0，通过园区查询默认小区");
@@ -4474,17 +4474,17 @@ public class UserServiceImpl implements UserService {
 		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
 		for(OrganizationDTO orgDto : organizationList) {
 			String orgType = orgDto.getOrganizationType();
-			SceneType sceneType = SceneType.PM_ADMIN;
+			SceneType sceneType;
 			if(!OrganizationType.isGovAgencyOrganization(orgType)) {
 				if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
 					sceneType = SceneType.ENTERPRISE;
 				} else {
 					sceneType = SceneType.ENTERPRISE_NOAUTH;
 				}
-			}
-			SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
-			if(sceneDto != null) {
-				sceneList.add(sceneDto);
+				SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
+				if(sceneDto != null) {
+					sceneList.add(sceneDto);
+				}
 			}
 		}
 		return sceneList;
