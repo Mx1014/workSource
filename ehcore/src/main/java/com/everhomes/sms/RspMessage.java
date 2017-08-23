@@ -3,13 +3,15 @@ package com.everhomes.sms;
 import org.apache.commons.collections.MultiMap;
 
 public class RspMessage {
-    private String message;
 
+    private String message;
+    private Integer code;
     private MultiMap headers;
 
-    public RspMessage(String message, MultiMap headers) {
+    public RspMessage(String message, Integer code, MultiMap headers) {
         super();
         this.message = message;
+        this.code = code;
         this.headers = headers;
     }
 
@@ -29,4 +31,11 @@ public class RspMessage {
         this.headers = headers;
     }
 
+    public Integer getCode() {
+        return code;
+    }
+
+    public void setCode(Integer code) {
+        this.code = code;
+    }
 }

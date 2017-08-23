@@ -1,13 +1,12 @@
 package com.everhomes.rest.sms;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-
 import java.sql.Timestamp;
 
 /**
  * Created by Administrator on 2017/3/27.
  */
 public class SmsLogDTO {
+
     private Long id;
     private Integer namespaceId;
     private String scope;
@@ -15,10 +14,15 @@ public class SmsLogDTO {
     private String locale;
     private String mobile;
     private String text;
-    private Long templateId;
     private String variables;
     private String result;
     private Timestamp createTime;
+    private String handler;
+    private String smsId;
+    private Byte status;
+    private Integer httpStatusCode;
+    private String reportText;
+    private Timestamp reportTime;
 
     public Long getId() {
         return id;
@@ -76,14 +80,6 @@ public class SmsLogDTO {
         this.text = text;
     }
 
-    public Long getTemplateId() {
-        return templateId;
-    }
-
-    public void setTemplateId(Long templateId) {
-        this.templateId = templateId;
-    }
-
     public String getVariables() {
         return variables;
     }
@@ -108,20 +104,51 @@ public class SmsLogDTO {
         this.createTime = createTime;
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("id", id)
-                .append("namespaceId", namespaceId)
-                .append("scope", scope)
-                .append("code", code)
-                .append("locale", locale)
-                .append("mobile", mobile)
-                .append("text", text)
-                .append("templateId", templateId)
-                .append("variables", variables)
-                .append("result", result)
-                .append("createTime", createTime)
-                .toString();
+    public String getHandler() {
+        return handler;
+    }
+
+    public void setHandler(String handler) {
+        this.handler = handler;
+    }
+
+    public String getSmsId() {
+        return smsId;
+    }
+
+    public void setSmsId(String smsId) {
+        this.smsId = smsId;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    public Integer getHttpStatusCode() {
+        return httpStatusCode;
+    }
+
+    public void setHttpStatusCode(Integer httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
+    }
+
+    public String getReportText() {
+        return reportText;
+    }
+
+    public void setReportText(String reportText) {
+        this.reportText = reportText;
+    }
+
+    public Timestamp getReportTime() {
+        return reportTime;
+    }
+
+    public void setReportTime(Timestamp reportTime) {
+        this.reportTime = reportTime;
     }
 }

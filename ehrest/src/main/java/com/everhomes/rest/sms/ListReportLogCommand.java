@@ -4,19 +4,19 @@ package com.everhomes.rest.sms;
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
+ *     <li>handler: handler</li>
  *     <li>mobile: mobile</li>
  *     <li>status: status</li>
- *     <li>failure: failure</li>
  *     <li>pageAnchor: pageAnchor</li>
  *     <li>pageSize: pageSize</li>
  * </ul>
  */
-public class YzxListReportLogCommand {
+public class ListReportLogCommand {
 
     private Integer namespaceId;
+    private String handler;
     private String mobile;
     private Byte status;
-    private Byte failure;
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -60,11 +60,11 @@ public class YzxListReportLogCommand {
         this.status = status;
     }
 
-    public Byte getFailure() {
-        return failure;
+    public String getHandler() {
+        return handler;
     }
 
-    public void setFailure(Byte failure) {
-        this.failure = failure;
+    public void setHandler(String handler) {
+        this.handler = handler;
     }
 }

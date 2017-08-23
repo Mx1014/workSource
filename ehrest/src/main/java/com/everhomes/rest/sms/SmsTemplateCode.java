@@ -5,6 +5,9 @@ public interface SmsTemplateCode {
     String SCOPE = "sms.default";
 
     String YZX_SUFFIX = "yzx";
+    String YOU_XUN_TONG_SUFFIX = "YouXunTong";
+    String LIAN_XIN_TONG_SUFFIX = "LianXinTong";
+
     String SCOPE_YZX = SCOPE + "." + YZX_SUFFIX;
 
     String KEY_VCODE = "vcode";
@@ -28,6 +31,8 @@ public interface SmsTemplateCode {
     String KEY_PHONE = "phone";
     String KEY_TOPICTYPE = "topicType";
     String KEY_MSG = "msg";
+
+    int SIGN_CODE = 0; // 签名code
 
     int VERIFICATION_CODE = 1; // 验证码
     int WY_BILL_CODE = 3; //物业账单信息

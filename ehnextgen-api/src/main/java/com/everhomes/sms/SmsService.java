@@ -1,7 +1,8 @@
 package com.everhomes.sms;
 
-import com.everhomes.rest.sms.YzxListReportLogCommand;
-import com.everhomes.rest.sms.YzxListSmsReportLogResponse;
+import com.everhomes.rest.sms.ListReportLogCommand;
+import com.everhomes.rest.sms.ListSmsLogsResponse;
+import com.everhomes.rest.sms.SendTestSmsCommand;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,16 +13,11 @@ import javax.servlet.http.HttpServletResponse;
 public interface SmsService {
 
     /**
-     * 云之讯短信报告
-     * @param httpServletRequest
-     * @param httpServletResponse
+     * 短信报告
      */
-    void yzxSmsReport(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
+    void smsReport(String handlerName, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
 
-    /**
-     * 获取云之讯的短信报告记录
-     * @param cmd
-     * @return
-     */
-    YzxListSmsReportLogResponse yzxListReportLogs(YzxListReportLogCommand cmd);
+    ListSmsLogsResponse listReportLogs(ListReportLogCommand cmd);
+
+    void sendTestSms(SendTestSmsCommand cmd);
 }

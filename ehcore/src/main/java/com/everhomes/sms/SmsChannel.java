@@ -100,14 +100,14 @@ public class SmsChannel {
 
             if (rsp.getStatusLine().getStatusCode() >= 300) {
                 logger.error("send sms message error.error reason is {}", result);
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                        "send sms message error.httpCode=" + rsp.getStatusLine().getStatusCode());
+                // throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                //         "send sms message error.httpCode=" + rsp.getStatusLine().getStatusCode());
             }
             MultiValueMap mut = new MultiValueMap();
             for (Header header : rsp.getAllHeaders()) {
                 mut.put(header.getName(), header.getValue());
             }
-            return new RspMessage(result, mut);
+            return new RspMessage(result, rsp.getStatusLine().getStatusCode(), mut);
         } catch (IOException e) {
             logger.error("send sms message error", e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

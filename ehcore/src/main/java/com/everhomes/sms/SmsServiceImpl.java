@@ -1,28 +1,23 @@
 package com.everhomes.sms;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.sms.YzxListReportLogCommand;
-import com.everhomes.rest.sms.YzxListSmsReportLogResponse;
-import com.everhomes.rest.sms.YzxSmsLogDTO;
+import com.everhomes.rest.sms.*;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -33,83 +28,90 @@ public class SmsServiceImpl implements SmsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmsServiceImpl.class);
 
+    private Map<String, SmsHandler> handlers = new HashMap<>();
+
     @Autowired
-    private YzxSmsLogProvider yzxSmsLogProvider;
+    private SmsLogProvider smsLogProvider;
+
+    @Autowired
+    private SmsProvider smsProvider;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    public void setHandlers(Map<String, SmsHandler> prop) {
+        prop.forEach((name, handler) -> handlers.put(name.toLowerCase(), handler));
+    }
 
     @Override
-    public void yzxSmsReport(HttpServletRequest request, HttpServletResponse response) {
-        try (
-                ServletOutputStream outputStream = response.getOutputStream();
-                BufferedReader reader = request.getReader()
-        ) {
+    public void smsReport(String handlerName, HttpServletRequest request, HttpServletResponse response) {
+        SmsHandler handler = handlers.get(handlerName);
+        try (BufferedReader reader = request.getReader()) {
             String line;
             String body = "";
             while ((line = reader.readLine()) != null) {
                 body = body + line;
             }
-
-            // LOGGER.debug("--------------> YZX sms report body: {} <--------------", body);
-
-            YzxSmsReport report = xmlToBean(body, YzxSmsReport.class);
-            String smsId = report.getSmsId();
-            if (smsId == null) {
-                LOGGER.error("YZX sms report smsId is null, report = {}", reader);
-                return;
-            }
-            YzxSmsLog log = yzxSmsLogProvider.findBySmsId(smsId);
-            if (log != null) {
-                log.setType(report.getType());
-                log.setDesc(report.getDesc());
-                log.setStatus(Byte.valueOf(report.getStatus()));
-                log.setReportTime(Timestamp.from(Instant.now()));
-                yzxSmsLogProvider.updateYzxSmsLog(log);
-
-                if (!Objects.equals(log.getStatus(), 0)) {
-                    // sendEmail();
+            List<SmsReportDTO> dtoList = handler.report(body);
+            if (dtoList != null) {
+                for (SmsReportDTO dto : dtoList) {
+                    if (dto.getSmsId() == null) {
+                        LOGGER.warn("sms report smsId are empty, handlerName = {}, reportBody = {}", handlerName, body);
+                        continue;
+                    }
+                    List<SmsLog> smsLogs = smsLogProvider.findSmsLog(handlerName, dto.getMobile(), dto.getSmsId());
+                    if (smsLogs != null && smsLogs.size() > 0) {
+                        for (SmsLog smsLog : smsLogs) {
+                            smsLog.setStatus(dto.getStatus());
+                            smsLog.setReportTime(DateUtils.currentTimestamp());
+                            smsLog.setReportText(body);
+                            smsLogProvider.updateSmsLog(smsLog);
+                        }
+                    } else {
+                        LOGGER.warn("sms report not found, smsLog by handlerName = {}, smsId = {}, reportBody = {}", handlerName, dto.getSmsId(), body);
+                    }
                 }
             } else {
-                LOGGER.warn("YZX sms report not found, smsId = \"{}\", maybe a test server send.", smsId);
+                LOGGER.warn("sms report parse error handlerName = {}, reportBody = {}", handlerName, body);
             }
-
-            response.setHeader("Content-Type", "text/xml;charset=utf-8 ");
-            outputStream
-                    .write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<response>\n<retcode>0</retcode>\n</response>"
-                            .getBytes("utf-8"));
-        } catch (IOException e) {
-            LOGGER.error("YZX sms report error", e);
-            // e.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.error("sms report error handlerName = {}", handlerName);
+            LOGGER.error("sms report error", e);
         }
     }
 
     @Override
-    public YzxListSmsReportLogResponse yzxListReportLogs(YzxListReportLogCommand cmd) {
+    public ListSmsLogsResponse listReportLogs(ListReportLogCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int pageSize = cmd.getPageSize() != null ? cmd.getPageSize() : 20;
-        List<YzxSmsLog> logList = yzxSmsLogProvider.listReportLogs(cmd.getNamespaceId(), cmd.getMobile(), cmd.getStatus(), cmd.getFailure(), locator, pageSize);
-        List<YzxSmsLogDTO> dtoList = new ArrayList<>();
-        if (logList != null) {
-            dtoList = logList.stream().map(this::toYzxReportLogDTO).collect(Collectors.toList());
-        }
-        YzxListSmsReportLogResponse response = new YzxListSmsReportLogResponse();
-        response.setLogs(dtoList);
-        response.setNextPageAnchor(locator.getAnchor());
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+        List<SmsLog> smsLogs = smsLogProvider.listSmsLogs(cmd.getNamespaceId(), cmd.getHandler(), cmd.getMobile(), cmd.getStatus(), pageSize, locator);
+
+        ListSmsLogsResponse response = new ListSmsLogsResponse();
+        response.setLogs(smsLogs.stream().map(this::toSmsLogDTO).collect(Collectors.toList()));
         return response;
     }
 
-    private YzxSmsLogDTO toYzxReportLogDTO(YzxSmsLog log) {
-        return ConvertHelper.convert(log, YzxSmsLogDTO.class);
+    @Override
+    public void sendTestSms(SendTestSmsCommand cmd) {
+        String[] mobiles = cmd.getMobile().split(",");
+        String locale = Locale.CHINESE.toString();
+
+        smsProvider.sendSms(
+                cmd.getHandler(),
+                cmd.getNamespaceId(),
+                mobiles,
+                SmsTemplateCode.SCOPE,
+                cmd.getTemplateCode() != null ? cmd.getTemplateCode() : -1,
+                locale,
+                null
+        );
     }
 
-    private static <T> T xmlToBean(String xml, Class<T> c) {
-        T t = null;
-        try {
-            JAXBContext context = JAXBContext.newInstance(c);
-            Unmarshaller unmarshaller = context.createUnmarshaller();
-            t = (T) unmarshaller.unmarshal(new StringReader(xml));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return t;
+    private SmsLogDTO toSmsLogDTO(SmsLog smsLog) {
+        return ConvertHelper.convert(smsLog, SmsLogDTO.class);
     }
 }
