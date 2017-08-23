@@ -2696,9 +2696,11 @@ public class UserServiceImpl implements UserService {
 		if(residential_sceneList.size() != 0 && (commercial_sceneList.size() == 0)){
 			//如果园区场景为0，通过小区查询默认园区
 			default_community = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
-		} else if(commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
+			LOGGER.debug("如果园区场景为0，通过小区查询默认园区");
+		} else if (commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
 			//如果园区场景有且只有一个，通过小区查询默认园区
 			default_community = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
+			LOGGER.debug("如果园区场景有且只有一个，通过小区查询默认园区");
 		}
 
 		sceneList.add(convertCommunityToScene(namespaceId,userId,default_community));
@@ -2706,6 +2708,7 @@ public class UserServiceImpl implements UserService {
 		if(residential_sceneList.size() == 0 && commercial_sceneList.size() != 0){
 			//如果小区场景为0，通过园区查询默认小区
 			default_community = findDefaultCommunity(namespaceId,userId,commercial_sceneList,CommunityType.RESIDENTIAL.getCode());
+			LOGGER.debug("如果小区场景为0，通过园区查询默认小区");
 		}
 
 		sceneList.add(convertCommunityToScene(namespaceId,userId,default_community));
@@ -4472,17 +4475,16 @@ public class UserServiceImpl implements UserService {
 		for(OrganizationDTO orgDto : organizationList) {
 			String orgType = orgDto.getOrganizationType();
 			SceneType sceneType = SceneType.PM_ADMIN;
-//			SceneType sceneType;
 			if(!OrganizationType.isGovAgencyOrganization(orgType)) {
 				if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
 					sceneType = SceneType.ENTERPRISE;
 				} else {
 					sceneType = SceneType.ENTERPRISE_NOAUTH;
 				}
-				SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
-				if(sceneDto != null) {
-					sceneList.add(sceneDto);
-				}
+			}
+			SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
+			if(sceneDto != null) {
+				sceneList.add(sceneDto);
 			}
 		}
 		return sceneList;
