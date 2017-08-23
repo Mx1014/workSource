@@ -4389,7 +4389,7 @@ public class UserServiceImpl implements UserService {
 
 		if (DEFAULT == SceneType.fromCode(cmd.getSceneType()) || FAMILY == SceneType.fromCode(cmd.getSceneType())) {
 			// 当前是家庭场景，列出有效园区场景
-			addOrganizationSceneToList(userId, namespaceId, sceneList);
+			addTouristSceneToList(userId, namespaceId, sceneList);
 		} else if (PARK_TOURIST == SceneType.fromCode(cmd.getSceneType()) || ENTERPRISE == SceneType.fromCode(cmd.getSceneType()) || ENTERPRISE_NOAUTH == SceneType.fromCode(cmd.getSceneType())) {
 			// 当前是园区场景，列出有效家庭场景
 			addFamilySceneToList(userId, namespaceId, sceneList);
@@ -4475,8 +4475,31 @@ public class UserServiceImpl implements UserService {
 		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
 		for(OrganizationDTO orgDto : organizationList) {
 			String orgType = orgDto.getOrganizationType();
-			SceneType sceneType;
+			SceneType sceneType = SceneType.PM_ADMIN;
 			if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+				if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
+					sceneType = SceneType.ENTERPRISE;
+				} else {
+					sceneType = SceneType.ENTERPRISE_NOAUTH;
+				}
+			}
+			SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
+			if(sceneDto != null) {
+				sceneList.add(sceneDto);
+			}
+		}
+		return sceneList;
+	}
+
+	//添加非pm_admin場景的园区场景
+	private List<SceneDTO> addTouristSceneToList(Long userId, Integer namespaceId, List<SceneDTO> sceneList){
+		// 处于某个公司对应的场景
+		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+		for(OrganizationDTO orgDto : organizationList) {
+			String orgType = orgDto.getOrganizationType();
+			if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+				SceneType sceneType;
 				if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
 					sceneType = SceneType.ENTERPRISE;
 				} else {
