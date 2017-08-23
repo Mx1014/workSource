@@ -57,12 +57,12 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 
 -- 广东网游科技是物业管理公司
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES(1041934, UUID(), '广东网游科技公司圈', '广东网游科技公司圈', 1, 1, 1024527, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 190687, 1, 999970);
+	VALUES(1055934, UUID(), '广东网游科技公司圈', '广东网游科技公司圈', 1, 1, 1024527, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 190687, 1, 999970);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(190687, UUID(), 999970, 2, 'EhGroups', 1041934,'广东网游科技公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(190687, UUID(), 999970, 2, 'EhGroups', 1055934,'广东网游科技公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`)
-	VALUES(1024527, 0, 'PM', '广东网游科技发展有限公司', '广东网游网络科技有限公司是互联网产业园开发商，拥有成熟的产业园运营体系，以及专业的运营团队。也是东莞网络文化协会会长，群聚东莞地区乃至全国影响力最大的知名网站、论坛、新媒体渠道的行业协会。', '/1024527', 1, 2, 'ENTERPRISE', 999970, 1041934);
+	VALUES(1024527, 0, 'PM', '广东网游科技发展有限公司', '广东网游网络科技有限公司是互联网产业园开发商，拥有成熟的产业园运营体系，以及专业的运营团队。也是东莞网络文化协会会长，群聚东莞地区乃至全国影响力最大的知名网站、论坛、新媒体渠道的行业协会。', '/1024527', 1, 2, 'ENTERPRISE', 999970, 1055934);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
 	VALUES(1152615, 240111044331050367, 'organization', 1024527, 3, 0, UTC_TIMESTAMP());
 	
