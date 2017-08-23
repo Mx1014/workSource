@@ -396,7 +396,9 @@ public class AddressProviderImpl implements AddressProvider {
         if(livingStatus != null) {
             query.addJoin(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS
                     , Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
-            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
+            query.addConditions(Tables.EH_ADDRESSES.LIVING_STATUS.eq(livingStatus)
+                    .or(Tables.EH_ADDRESSES.LIVING_STATUS.isNull()
+                            .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus))));
         }
 
         query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());

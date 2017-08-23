@@ -27,6 +27,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
@@ -34,6 +35,7 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -139,6 +141,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private AssetProvider assetProvider;
+
+	@Autowired
+	private PropertyMgrProvider propertyMgrProvider;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -502,7 +507,6 @@ public class ContractServiceImpl implements ContractService {
 
 	private void dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
-//		CommunityAddressMapping
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
 		if(existApartments != null && existApartments.size() > 0) {
 			existApartments.forEach(apartment -> {
@@ -520,6 +524,10 @@ public class ContractServiceImpl implements ContractService {
 					mapping.setStatus(CommonStatus.ACTIVE.getCode());
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractBuildingMappingProvider.createContractBuildingMapping(mapping);
+
+					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
+					addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
 				} else {
 					map.remove(buildingApartment.getId());
 				}
@@ -528,6 +536,10 @@ public class ContractServiceImpl implements ContractService {
 		if(map.size() > 0) {
 			map.forEach((id, apartment) -> {
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
+
+				CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
+				addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+				propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
 			});
 		}
 	}
@@ -671,7 +683,30 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public void denunciationContract(DenunciationContractCommand cmd) {
+		Contract contract = checkContract(cmd.getId());
+		contract.setStatus(ContractStatus.DENUNCIATION.getCode());
+		contract.setDenunciationReason(cmd.getDenunciationReason());
+		contract.setDenunciationUid(cmd.getDenunciationUid());
+		contract.setDenunciationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
 
+		addToFlowCase(contract);
+
+	}
+
+	@Override
+	public void entryContract(EntryContractCommand cmd) {
+		Contract contract = checkContract(cmd.getId());
+		if(!ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			LOGGER.error("contract is not approve qualitied! id: {}", cmd.getId());
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_NOT_APPROVE_QUALITIED,
+					"contract is not approve qualitied!");
+		}
+		contract.setStatus(ContractStatus.ACTIVE.getCode());
+
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
 	}
 
 	@Override

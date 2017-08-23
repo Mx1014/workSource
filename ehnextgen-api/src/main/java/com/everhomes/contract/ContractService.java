@@ -23,4 +23,6 @@ public interface ContractService {
 	List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd);
 	List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd);
 
+	void entryContract(EntryContractCommand cmd);
+
 }

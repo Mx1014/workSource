@@ -172,6 +172,7 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("entryContract")
 	@RestReturn(String.class)
 	public RestResponse entryContract(EntryContractCommand cmd){
+		contractService.entryContract(cmd);
 		return new RestResponse();
 	}
 }

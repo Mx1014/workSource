@@ -14,13 +14,14 @@ import com.everhomes.util.StringHelper;
  *     <li>EXPIRED: 7 已过期</li>
  *     <li>HISTORY: 8 历史合同</li>
  *     <li>INVALID: 9 作废合同</li>
+ *     <li>DENUNCIATION: 10 退约合同</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
 public enum ContractStatus {
     INACTIVE((byte)0), WAITING_FOR_LAUNCH((byte)1), ACTIVE((byte)2), WAITING_FOR_APPROVAL((byte)3),
     APPROVE_QUALITIED((byte)4), APPROVE_NOT_QUALITIED((byte)5),
-    EXPIRING((byte)6), EXPIRED((byte)7), HISTORY((byte)8), INVALID((byte)9);
+    EXPIRING((byte)6), EXPIRED((byte)7), HISTORY((byte)8), INVALID((byte)9), DENUNCIATION((byte)10);
 
     private byte code;
 

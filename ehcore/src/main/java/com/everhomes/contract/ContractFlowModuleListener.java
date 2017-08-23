@@ -2,12 +2,17 @@ package com.everhomes.contract;
 
 import com.everhomes.flow.*;
 import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
@@ -39,6 +44,12 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 
     @Autowired
     private ContractSearcher contractSearcher;
+
+    @Autowired
+    private ContractBuildingMappingProvider contractBuildingMappingProvider;
+
+    @Autowired
+    private PropertyMgrProvider propertyMgrProvider;
 
     @Override
     public FlowModuleInfo initModule() {
@@ -77,16 +88,34 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         FlowCase flowCase = ctx.getFlowCase();
         Contract contract = contractProvider.findContractById(flowCase.getReferId());
         if(FlowCaseStatus.ABSORTED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
-            contract.setStatus(ContractStatus.APPROVE_NOT_QUALITIED.getCode());
-            contractProvider.updateContract(contract);
-            contractSearcher.feedDoc(contract);
+            if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                contract.setStatus(ContractStatus.APPROVE_NOT_QUALITIED.getCode());
+                contractProvider.updateContract(contract);
+                contractSearcher.feedDoc(contract);
+                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+            }else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+            }
         }
 
         else if(FlowCaseStatus.FINISHED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
-            contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
-            contractProvider.updateContract(contract);
-            contractSearcher.feedDoc(contract);
+            if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
+                contractProvider.updateContract(contract);
+                contractSearcher.feedDoc(contract);
+                dealAddressLivingStatus(contract, AddressMappingStatus.RENT.getCode());
+            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+            }
         }
+    }
+
+    private void dealAddressLivingStatus(Contract contract, byte livingStatus) {
+        List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
+        mappings.forEach(mapping -> {
+            CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(mapping.getAddressId());
+            addressMapping.setLivingStatus(livingStatus);
+            propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+        });
     }
 
     @Override
