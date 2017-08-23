@@ -245,3 +245,53 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','InterCommu','国际交流','cs://1/image/aW1hZ2UvTVRveFpHRXhNelV4T0Rka01XWTVNV1ZpTlRNek9HWTVZamN6T1dRME1XUTJZZw','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'10','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'31',NULL);
 
+
+-- 【光大we谷】 服务联盟配置 add by sfyan 20170823
+SET @namespace_id = 999979;
+SET @parent_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
+SET @community_id = 240111044331056800;
+SET @skip_rule_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_skip_rule`), 1);
+
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', @community_id, '0', '人才公寓', '人才公寓', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '人才公寓', '人才公寓', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), @namespace_id, @parent_id);
+UPDATE `eh_launch_pad_items` SET action_type = 33, action_data = CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}') WHERE item_name = '人才公寓' AND `namespace_id` = @namespace_id;
+
+
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', @community_id, '0', '周边租房', '周边租房', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '周边租房', '周边租房', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), @namespace_id, @parent_id);
+UPDATE `eh_launch_pad_items` SET action_type = 33, action_data = CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}') WHERE item_name = '周边租房' AND `namespace_id` = @namespace_id;
+
+
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', @community_id, '0', '松山湖酒店', '松山湖酒店', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '松山湖酒店', '松山湖酒店', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), @namespace_id, @parent_id);
+UPDATE `eh_launch_pad_items` SET action_type = 33, action_data = CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}') WHERE item_name = '松山湖酒店' AND `namespace_id` = @namespace_id;
+
+
+
+
+
+
+
+
+
+
+
+
