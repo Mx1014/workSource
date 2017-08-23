@@ -764,6 +764,12 @@ public class ContractServiceImpl implements ContractService {
 		if(contractChargingItems != null && contractChargingItems.size() > 0) {
 			List<ContractChargingItemDTO> chargingItemsDto = contractChargingItems.stream().map(item -> {
 				ContractChargingItemDTO itemDto = ConvertHelper.convert(item, ContractChargingItemDTO.class);
+				if(item.getChargingStartTime() != null) {
+					itemDto.setChargingStartTime(item.getChargingStartTime().getTime());
+				}
+				if(item.getChargingExpiredTime() != null) {
+					itemDto.setChargingExpiredTime(item.getChargingExpiredTime().getTime());
+				}
 //				assetProvider.findChargingItemById(itemDto.getChargingItemId());
 				processContractChargingItemAddresses(itemDto);
 				return itemDto;
