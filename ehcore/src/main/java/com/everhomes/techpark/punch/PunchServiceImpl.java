@@ -6126,7 +6126,7 @@ public class PunchServiceImpl implements PunchService {
 //		} 
 		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
-		String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"排班表":scheduleLocaleString.getText())+".xlsx";
+		String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"scheduling":scheduleLocaleString.getText())+".xlsx";
 		//新建了一个文件
 
 		Workbook wb = createPunchSchedulingsBook(cmd.getQueryTime(),cmd.getEmployees());
@@ -6180,7 +6180,7 @@ public class PunchServiceImpl implements PunchService {
 		 	return wb;
 	}
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet, Long queryTime) { 
-		Row row = sheet.createRow(sheet.getLastRowNum());
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int cellNum =0 ;
 		SimpleDateFormat sf= new SimpleDateFormat("dd日 EEE");
 		Calendar startCalendar = Calendar.getInstance();
