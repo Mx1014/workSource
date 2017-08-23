@@ -2,6 +2,8 @@
 package com.everhomes.rest.asset;
 
 
+import com.everhomes.discover.ItemType;
+
 import java.util.Date;
 import java.util.List;
 import com.everhomes.discover.ItemType;
