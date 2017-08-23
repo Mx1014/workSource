@@ -2693,12 +2693,15 @@ public class UserServiceImpl implements UserService {
 
 		/** 查询默认场景 **/
 		Community default_community = new Community();
-		if(residential_sceneList.size() != 0 && commercial_sceneList.size() == 0){
-			//通过小区查询默认园区
-			default_community = findDefaultCommunity(namespaceId,userId,commercial_sceneList,CommunityType.COMMERCIAL.getCode());
-		}else if(residential_sceneList.size() == 0 && commercial_sceneList.size() != 0){
-			//通过园区查询默认小区
-			default_community = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.RESIDENTIAL.getCode());
+		if(residential_sceneList.size() != 0 && (commercial_sceneList.size() == 0)){
+			//如果园区场景为0，通过小区查询默认园区
+			default_community = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
+		}else if(commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
+			//如果园区场景有且只有一个，通过小区查询默认园区
+			default_community = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
+		} else if(residential_sceneList.size() == 0 && commercial_sceneList.size() != 0){
+			//如果小区场景为0，通过园区查询默认小区
+			default_community = findDefaultCommunity(namespaceId,userId,commercial_sceneList,CommunityType.RESIDENTIAL.getCode());
 		}
 
 		//把community转换成场景
@@ -4497,7 +4500,6 @@ public class UserServiceImpl implements UserService {
 		Long defalut_communityId = null;
 		Community defalut_community = null;
 		for(SceneDTO scene : sceneList){
-			//轮询是否有默认的小区
 			SceneTokenDTO sceneToken = this.checkSceneToken(userId, scene.getSceneToken());
 			defalut_communityId = this.communityProvider.findDefaultCommunityByCommunityId(namespaceId, sceneToken.getEntityId());
 			if(defalut_communityId != null){
