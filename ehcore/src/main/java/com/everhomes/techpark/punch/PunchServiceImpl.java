@@ -6374,8 +6374,8 @@ public class PunchServiceImpl implements PunchService {
 			calendar.add(Calendar.DAY_OF_MONTH,-1);
 			int days = calendar.get(Calendar.DAY_OF_MONTH);
 
-			for(int rowIndex=1;rowIndex<list.size();rowIndex++){
-				RowResult r = (RowResult)list.get(rowIndex+1);
+			for(int rowIndex=2;rowIndex<list.size();rowIndex++){
+				RowResult r = (RowResult)list.get(rowIndex);
 				PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
 				dto.setContactName(r.getCells().get("A"));
 				dto.setDaySchedulings(new ArrayList<>());
