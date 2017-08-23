@@ -43,16 +43,16 @@ public class ParkingLotDTO {
     //是否支持寻车
     private Byte searchCarFlag;
     //显示当前在场车/当前剩余车位
-    private Byte displayCurrentInfoType;
+    private Byte currentInfoType;
     //停车场客服联系方式
     private String contact;
 
-    public Byte getDisplayCurrentInfoType() {
-        return displayCurrentInfoType;
+    public Byte getCurrentInfoType() {
+        return currentInfoType;
     }
 
-    public void setDisplayCurrentInfoType(Byte displayCurrentInfoType) {
-        this.displayCurrentInfoType = displayCurrentInfoType;
+    public void setCurrentInfoType(Byte currentInfoType) {
+        this.currentInfoType = currentInfoType;
     }
 
     public Byte getSearchCarFlag() {
