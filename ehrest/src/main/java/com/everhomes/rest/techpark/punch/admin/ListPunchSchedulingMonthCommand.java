@@ -17,7 +17,8 @@ import com.everhomes.util.StringHelper;
  * <li>targetId：对应设置目标的id比如机构比如人的id</li>
  * <li>punchOriganizationId：打卡考勤组id</li>
  * <li>queryTime: 查询时间 数字时间戳</li>
- * <li>employees：每一个人的排班{@link PunchSchedulingEmployeeDTO}</li> 
+ * <li>employees：每一个人的排班{@link PunchSchedulingEmployeeDTO}</li>
+ * <li>timeRules: 上班时间 列表{@link com.everhomes.rest.techpark.punch.PunchTimeRuleDTO}</li>
  * </ul>
  */
 public class ListPunchSchedulingMonthCommand {
