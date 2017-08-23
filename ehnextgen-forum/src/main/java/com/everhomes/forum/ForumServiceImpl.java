@@ -233,6 +233,7 @@ public class ForumServiceImpl implements ForumService {
 
         //发送到一个特定对象的帖子或者全部范围的帖子
         if(cmd.getVisibleRegionId() != null || cmd.getVisibleRegionType() == VisibleRegionType.ALL.getCode()){
+            cmd.setCloneFlag(PostCloneFlag.NORMAL.getCode());
             dto = createTopic(cmd, UserContext.current().getUser().getId());
         }else if(cmd.getVisibleRegionIds() != null && cmd.getVisibleRegionIds().size() > 1){
 

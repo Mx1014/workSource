@@ -23,6 +23,7 @@ import java.util.List;
  * <li>contentCategoryId: 活动主题分类id</li>
  * <li>needTemporary: 0-不需要， 1-需要， 是否需要查询暂存的活动，用于后台查询时把暂存的贴子也查出来。 不填默认0</li>
  * <li>tag: 标签</li>
+ * <li>namespaceId: 域空间id</li>
  * </ul>
  */
 public class QueryOrganizationTopicCommand {
