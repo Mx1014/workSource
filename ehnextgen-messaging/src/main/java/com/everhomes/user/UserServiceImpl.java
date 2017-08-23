@@ -2696,25 +2696,19 @@ public class UserServiceImpl implements UserService {
 		if(residential_sceneList.size() != 0 && (commercial_sceneList.size() == 0)){
 			//如果园区场景为0，通过小区查询默认园区
 			default_community = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
-		}else if(commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
+		} else if(commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
 			//如果园区场景有且只有一个，通过小区查询默认园区
 			default_community = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
-		} else if(residential_sceneList.size() == 0 && commercial_sceneList.size() != 0){
+		}
+
+		sceneList.add(convertCommunityToScene(namespaceId,userId,default_community));
+
+		if(residential_sceneList.size() == 0 && commercial_sceneList.size() != 0){
 			//如果小区场景为0，通过园区查询默认小区
 			default_community = findDefaultCommunity(namespaceId,userId,commercial_sceneList,CommunityType.RESIDENTIAL.getCode());
 		}
 
-		//把community转换成场景
-		SceneType sceneType = DEFAULT;
-		CommunityType communityType = CommunityType.fromCode(default_community.getCommunityType());
-		if(communityType == CommunityType.COMMERCIAL) {
-			sceneType = PARK_TOURIST;
-		}
-
-		CommunityDTO default_communityDTO = ConvertHelper.convert(default_community, CommunityDTO.class);
-		SceneDTO default_communityScene = toCommunitySceneDTO(namespaceId, userId, default_communityDTO, sceneType);
-		default_communityScene.setStatus(SCENE_EXAMPLE);
-		sceneList.add(default_communityScene);
+		sceneList.add(convertCommunityToScene(namespaceId,userId,default_community));
 
 		return sceneList;
 	}
@@ -4515,5 +4509,20 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return defalut_community;
+	}
+
+	//把默认community转换成DTO
+	private SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community){
+		//把community转换成场景
+		SceneType sceneType = DEFAULT;
+		CommunityType communityType = CommunityType.fromCode(default_community.getCommunityType());
+		if(communityType == CommunityType.COMMERCIAL) {
+			sceneType = PARK_TOURIST;
+		}
+
+		CommunityDTO default_communityDTO = ConvertHelper.convert(default_community, CommunityDTO.class);
+		SceneDTO default_communityScene = toCommunitySceneDTO(namespaceId, userId, default_communityDTO, sceneType);
+		default_communityScene.setStatus(SCENE_EXAMPLE);
+		return default_communityScene;
 	}
 }
