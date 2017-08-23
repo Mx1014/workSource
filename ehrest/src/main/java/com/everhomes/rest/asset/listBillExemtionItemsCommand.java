@@ -10,10 +10,10 @@ import com.everhomes.util.StringHelper;
  * <li>targetName:客户名称</li>
  * <li>dateStr:账期</li>
  * <li>pageSize: 显示数量</li>
- * <li>pageAnchor: 下页锚点</li>
+ * <li>pageAnchor: 锚点</li>
  *</ul>
  */
-public class BillGroupAndTargetCommand {
+public class listBillExemtionItemsCommand {
     private Long billId;
     private String targetName;
     private String dateStr;
@@ -27,6 +27,14 @@ public class BillGroupAndTargetCommand {
 
     public String getTargetName() {
         return targetName;
+    }
+
+    public Long getBillId() {
+        return billId;
+    }
+
+    public void setBillId(Long billId) {
+        this.billId = billId;
     }
 
     public void setTargetName(String targetName) {
@@ -57,7 +65,7 @@ public class BillGroupAndTargetCommand {
         this.dateStr = dateStr;
     }
 
-    public BillGroupAndTargetCommand() {
+    public listBillExemtionItemsCommand() {
 
     }
 }

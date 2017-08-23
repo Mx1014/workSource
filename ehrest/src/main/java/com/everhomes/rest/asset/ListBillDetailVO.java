@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -15,7 +17,10 @@ public class ListBillDetailVO {
     private String noticeTel;
     private String targetName;
     private String targetType;
+    private String buildingName;
+    private String apartmentName;
     private Long targetId;
+    @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
 
     public String getDateStr() {
@@ -24,6 +29,22 @@ public class ListBillDetailVO {
 
     public void setDateStr(String dateStr) {
         this.dateStr = dateStr;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     public String getContractNO() {

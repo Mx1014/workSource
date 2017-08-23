@@ -20,6 +20,7 @@ import org.jooq.Record2;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -514,11 +515,12 @@ public class AddressProviderImpl implements AddressProvider {
     }
 
     public List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName) {
+        List<AddressIdAndName> list = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhAddresses r = Tables.EH_ADDRESSES.as("r");
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(r);
-        query.addSelect(r.ID,r.ADDRESS);
+        query.addSelect(r.ID,r.BUILDING_NAME,r.APARTMENT_NAME);
         if (buildingName != null && buildingName.trim().length()>0){
             query.addConditions(r.BUILDING_NAME.eq(buildingName));
         }
@@ -527,18 +529,21 @@ public class AddressProviderImpl implements AddressProvider {
         }
         query.addConditions(r.NAMESPACE_ID.eq(currentNamespaceId));
         query.addConditions(r.COMMUNITY_ID.eq(ownerId));
-        Object[] objects = query.fetchAnyArray();
-        List<AddressIdAndName> list = new ArrayList<>();
+
         try {
-            for (int i = 1; i < objects.length; i++) {
-                AddressIdAndName ian = new AddressIdAndName();
-                ian.setAddressName((String)objects[i]);
-                ian.setAddressId((Long)objects[i-1]);
-                list.add(ian);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            query.fetch()
+                    .map(f -> {
+                        AddressIdAndName ian = new AddressIdAndName();
+                        ian.setApartmentName(f.getValue(r.APARTMENT_NAME));
+                        ian.setAddressId(f.getValue(r.ID));
+                        ian.setBuildingName(f.getValue(r.BUILDING_NAME));
+                        list.add(ian);
+                        return null;
+                    });
+        } catch (DataAccessException e) {
+
         }
+
         return list;
     }
 }

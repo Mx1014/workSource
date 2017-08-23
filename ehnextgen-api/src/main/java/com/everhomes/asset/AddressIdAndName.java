@@ -7,7 +7,8 @@ package com.everhomes.asset;
 
 public class AddressIdAndName {
     private Long addressId;
-    private String addressName;
+    private String buildingName;
+    private String apartmentName;
 
     public Long getAddressId() {
         return addressId;
@@ -17,11 +18,19 @@ public class AddressIdAndName {
         this.addressId = addressId;
     }
 
-    public String getAddressName() {
-        return addressName;
+    public String getBuildingName() {
+        return buildingName;
     }
 
-    public void setAddressName(String addressName) {
-        this.addressName = addressName;
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 }

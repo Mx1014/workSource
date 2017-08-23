@@ -56,7 +56,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr);
 
-    void creatPropertyBill(List<AddressIdAndName> addressIdAndNames, BillGroupDTO billGroupDTO, String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType);
+    void creatPropertyBill(List<AddressIdAndName> addressIdAndNames, BillGroupDTO billGroupDTO, String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName);
 
     ListBillDetailVO listBillDetail(Long billId);
 
@@ -73,4 +73,22 @@ public interface AssetProvider {
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId);
 
     void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId,String targetName);
+
+    List<ListBillExemptionItemsDTO> listBillExemptionItems(Long billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
+
+    void deleteBill(Long billId);
+
+    void deleteBillItem(Long billItemId);
+
+    void deletExemptionItem(Long exemptionItemId);
+
+    String findFormulaByChargingStandardId(Long chargingStandardId);
+
+    String findChargingItemNameById(Long chargingItemId);
+
+    void saveContractVariables(String apartmentName, String buldingName, String contractNum, Long namesapceId, String noticeTel, Long ownerId, String ownerType, Long targetId, String targetType, String json,Long chargingStandardId,String targetName);
+
+    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
+
+    void increaseNoticeTime(List<Long> billIds);
 }

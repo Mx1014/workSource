@@ -12,7 +12,7 @@ import java.util.List;
  * <li>nextPageAnchor:下一页的锚点</li>
  *</ul>
  */
-public class ListNotSettledBillExemptionItemsResponse {
+public class ListBillExemptionItemsResponse {
     @ItemType(UnsettledBillExemptionItem.class)
     private List<UnsettledBillExemptionItem> unsettledBillExemptionItemList;
     private Long nextPageAnchor;
@@ -38,7 +38,7 @@ public class ListNotSettledBillExemptionItemsResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public ListNotSettledBillExemptionItemsResponse() {
+    public ListBillExemptionItemsResponse() {
 
     }
 }
