@@ -14,6 +14,7 @@ public class PaymentExpectanciesCommand {
     private String ownerType;
     private Long targetId;
     private String targetType;
+    private String targetName;
     List<FeeRules> feesRules;
     private String contractNum;
     private String noticeTel;
@@ -28,6 +29,14 @@ public class PaymentExpectanciesCommand {
 
     public Integer getPageOffset() {
         return pageOffset;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
     }
 
     public void setPageOffset(Integer pageOffset) {

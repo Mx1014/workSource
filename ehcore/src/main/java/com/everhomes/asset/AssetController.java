@@ -734,11 +734,11 @@ public class AssetController extends ControllerBase {
     // this is for 一键全部催缴       4
     /**
      * <p>一键全部催缴</p>
-     * <b>URL: /asset/OneKeyNotice</b>
+     * <b>URL: /asset/oneKeyNotice</b>
      */
-    @RequestMapping("OneKeyNotice")
+    @RequestMapping("oneKeyNotice")
     @RestReturn(value = String.class)
-    public RestResponse OneKeyNotice(OneKeyNoticeCommand cmd) {
+    public RestResponse oneKeyNotice(OneKeyNoticeCommand cmd) {
         assetService.OneKeyNotice(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");

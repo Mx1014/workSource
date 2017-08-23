@@ -296,7 +296,8 @@ public class AssetServiceImpl implements AssetService {
                         uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
             }
         }
-
+        //催缴次数加1
+        assetProvider.increaseNoticeTime(cmd.getBillIds());
 
     }
 
@@ -349,6 +350,8 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
+        convertedCmd.setPageAnchor(0l);
+        convertedCmd.setPageSize(999999);
         convertedCmd.setStatus((byte)1);
         ListBillsResponse convertedResponse = listBills(convertedCmd);
         List<ListBillsDTO> listBillsDTOS = convertedResponse.getListBillsDTOS();
@@ -575,11 +578,10 @@ public class AssetServiceImpl implements AssetService {
                 map.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
             }
             json = gson.toJson(map, Map.class);
-
+            assetProvider.saveContractVariables(cmd.getApartmentName(),cmd.getBuldingName(),cmd.getContractNum(),cmd.getNamesapceId(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetId(),cmd.getTargetType(),json,rule.getChargingStandardId(),cmd.getTargetName());
         }
         response.setList(list);
         //save the data but with a state of being suspend
-        assetProvider.saveContractVariables(cmd.getApartmentName(),cmd.getBuldingName(),cmd.getContractNum(),cmd.getNamesapceId(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetId(),cmd.getTargetType(),json);
         return response;
     }
 

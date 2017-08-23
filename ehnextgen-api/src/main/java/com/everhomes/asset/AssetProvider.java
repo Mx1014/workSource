@@ -86,7 +86,9 @@ public interface AssetProvider {
 
     String findChargingItemNameById(Long chargingItemId);
 
-    void saveContractVariables(String apartmentName, String buldingName, String contractNum, Long namesapceId, String noticeTel, Long ownerId, String ownerType, Long targetId, String targetType, String json);
+    void saveContractVariables(String apartmentName, String buldingName, String contractNum, Long namesapceId, String noticeTel, Long ownerId, String ownerType, Long targetId, String targetType, String json,Long chargingStandardId,String targetName);
 
     List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
+
+    void increaseNoticeTime(List<Long> billIds);
 }

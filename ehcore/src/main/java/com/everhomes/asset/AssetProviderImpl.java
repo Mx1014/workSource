@@ -19,6 +19,7 @@ import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
 import com.everhomes.server.schema.tables.EhPaymentChargingItems;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -972,6 +973,8 @@ public class AssetProviderImpl implements AssetProvider {
         if(endLimit!=null) {
             query.addConditions(r.DATE_STR.lessOrEqual(endLimit));
         }
+        query.addConditions(r.OWNER_ID.eq(ownerId));
+        query.addConditions(r.OWNER_TYPE.eq(ownerType));
         query.addGroupBy(r.DATE_STR);
         query.addOrderBy(r.DATE_STR);
         query.fetch()
@@ -1020,10 +1023,11 @@ public class AssetProviderImpl implements AssetProvider {
         EhCommunities o = Tables.EH_COMMUNITIES.as("o");
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         context.select(DSL.sum(r.AMOUNT_RECEIVABLE),DSL.sum(r.AMOUNT_RECEIVED),DSL.sum(r.AMOUNT_OWED),o.NAME)
-                .from(r,o)
-                .where(r.NAMESPACE_ID.eq(currentNamespaceId))
-                .and(r.TARGET_ID.eq(o.ID))
-                .groupBy(r.TARGET_TYPE,r.TARGET_ID)
+                .from(r)
+                .leftOuterJoin(o)
+                .on(r.NAMESPACE_ID.eq(currentNamespaceId))
+                .and(r.OWNER_ID.eq(o.ID))
+                .groupBy(r.OWNER_ID,r.OWNER_TYPE)
                 .fetch()
                 .map(f -> {
                     BillStaticsDTO dto = new BillStaticsDTO();
@@ -1304,8 +1308,26 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void saveContractVariables(String apartmentName, String buldingName, String contractNum, Long namesapceId, String noticeTel, Long ownerId, String ownerType, Long targetId, String targetType, String json) {
-
+    public void saveContractVariables(String apartmentName, String buildingName, String contractNum, Long namesapceId, String noticeTel, Long ownerId, String ownerType, Long targetId, String targetType, String json,Long chargingStandardId,String targetName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        PaymentContractReceiver entity = new PaymentContractReceiver();
+        entity.setApartmentName(apartmentName);
+        entity.setBuildingName(buildingName);
+        entity.setContractNum(contractNum);
+        entity.setEhPaymentChargingItemId(chargingStandardId);
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
+        entity.setId(nextSequence);
+        entity.setNamespaceId(namesapceId);
+        entity.setNoticeTel(noticeTel);
+        entity.setOwnerId(ownerId);
+        entity.setOwnerType(ownerType);
+        entity.setStatus((byte)0);
+        entity.setTargetId(targetId);
+        entity.setTargetType(targetType);
+        entity.setTargetName(targetName);
+        entity.setVariablesJsonString(json);
+        EhPaymentContractReceiverDao dao = new EhPaymentContractReceiverDao(context.configuration());
+        dao.insert(entity);
     }
 
     @Override
@@ -1321,6 +1343,15 @@ public class AssetProviderImpl implements AssetProvider {
         list = gson.fromJson(variableJson, new TypeToken<List<VariableIdAndValue>>() {
         }.getType());
         return list;
+    }
+
+    @Override
+    public void increaseNoticeTime(List<Long> billIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.NOTICE_TIMES,Tables.EH_PAYMENT_BILLS.NOTICE_TIMES.add(1))
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
+                .execute();
     }
 
 
