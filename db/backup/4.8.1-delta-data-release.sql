@@ -156,6 +156,7 @@ SET @namespace_id = 999969;
 SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`); 
 SET @parent_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
 SET @community_id = 240111044331050362;
+SET @skip_rule_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_skip_rule`), 1);
 UPDATE `eh_launch_pad_items` SET item_label = '服务体系' WHERE item_name = 'SERVICE_ALLIANCE' AND `namespace_id` = @namespace_id;
 UPDATE `eh_launch_pad_items` SET item_label = '回+青创汇' WHERE item_name = 'MAKER_SPACE' AND `namespace_id` = @namespace_id;
 UPDATE `eh_service_alliance_categories` SET `name` = '服务体系' WHERE `parent_id` = 0 AND `namespace_id` = @namespace_id AND `name` = '服务联盟';
