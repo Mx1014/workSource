@@ -148,6 +148,7 @@ public class CustomerServiceImpl implements CustomerService {
             LOGGER.error("File can not be resolved...");
             e.printStackTrace();
         }
+        LOGGER.info("task: {}",  task);
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
     }
 
