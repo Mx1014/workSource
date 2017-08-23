@@ -2103,3 +2103,17 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- 默认活动子分类，
 INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`)
     VALUES (1001050, '', '0', '1001050', '1', 'all', '/1/1001050', '0', '2', '1', '2017-08-22 18:29:50', '0', NULL, '999970', '0', '1', 'cs://1/image/aW1hZ2UvTVRvM09HWmxNRFptWldNM1lqQm1aakEyWVdRMVpEZ3dNelEzTVRrMk1XRmpPUQ', 'cs://1/image/aW1hZ2UvTVRvd016YzVZVE5tT1dFeU9XUTRPRGcxTkdNME5HUTFabVE1T0RBd00yWmpZdw', NULL, '1');
+
+-- 更新更多-全部的关系  edit by  yanjun 20170823
+update eh_item_service_categries set item_location = '/home', item_group = 'Bizs' where id in(211, 212, 213, 221, 222, 223) and namespace_id = 999970;
+
+update eh_item_service_categries set name = id, label = '园区服务', scope_code = 5, scope_id = 0 where id = 211 and namespace_id = 999970;
+update eh_item_service_categries set name = id, label = '物业服务', scope_code = 5, scope_id = 0 where id = 212 and namespace_id = 999970;
+update eh_item_service_categries set name = id, label = '企业服务', scope_code = 5, scope_id = 0 where id = 213 and namespace_id = 999970;
+update eh_item_service_categries set name = 211, label = '园区服务', scope_code = 1, scope_id = 0 where id = 221 and namespace_id = 999970;
+update eh_item_service_categries set name = 212, label = '物业服务', scope_code = 1, scope_id = 0 where id = 222 and namespace_id = 999970;
+update eh_item_service_categries set name = 213, label = '企业服务', scope_code = 1, scope_id = 0 where id = 223 and namespace_id = 999970;
+
+UPDATE eh_launch_pad_items set categry_name = 211 where id in (117853, 117854, 117855,117952, 117883, 117884, 117885, 117953 ) and namespace_id = 999970;
+UPDATE eh_launch_pad_items set categry_name = 212 where id in (117856, 117857, 117858, 117859, 117860, 117861, 117862, 117863, 117864, 117886, 117887, 117888, 117889, 117890, 117891, 117892, 117893, 117894) and namespace_id = 999970;
+UPDATE eh_launch_pad_items set categry_name = 213 where id in (117865, 117866, 117867, 117950, 117895, 117896, 117897, 117950) and namespace_id = 999970;
