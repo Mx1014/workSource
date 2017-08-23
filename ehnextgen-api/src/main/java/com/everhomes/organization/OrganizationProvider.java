@@ -131,7 +131,9 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyworks);
 	
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
-	
+
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
+
 	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
 	
 	/**

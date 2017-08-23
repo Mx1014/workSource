@@ -1864,12 +1864,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+	@Override
+	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+		return listOrganizationPersonnels(keywords, orgCommoand, contactSignedupStatus, visibleFlag, locator, pageSize, null);
+	}
 
     /**
      * modify cause member_detail by lei lv
      **/
     @Override
-    public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+    public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
         List<OrganizationMember> result = new ArrayList<>();
@@ -1915,47 +1919,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             locator.setAnchor(result.get(result.size() - 1).getId());
         }
         return result;
-// SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-//        Condition cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgCommoand.getId());
-//        cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(orgCommoand.getStatus()));
-//
-//        if (!StringUtils.isEmpty(keywords)) {
-//            Condition cond1 = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords);
-//            cond1 = cond1.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + keywords + "%"));
-//            cond = cond.and(cond1);
-//        }
-
-//        if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
-//            cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
-//            cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
-//        }
-
-//        if (null != visibleFlag) {
-//            cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.VISIBLE_FLAG.eq(visibleFlag.getCode()));
-//        }
-
-//        query.addConditions(cond);
-//        if (null != locator && null != locator.getAnchor())
-//            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
-//        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-//        query.addLimit(pageSize);
-//        query.fetch().map((r) -> {
-//            result.add(ConvertHelper.convert(r, OrganizationMember.class));
-//            return null;
-//        });
-//        if (null != locator)
-//            locator.setAnchor(null);
-//
-//        if (result.size() >= pageSize) {
-//            result.remove(result.size() - 1);
-//            locator.setAnchor(result.get(result.size() - 1).getId());
-//        }
-//        return result;
     }
 
     /**
      * modify cause member_detail by lei lv
      **/
+	@Deprecated
     @Override
     public List<OrganizationMember> listOrganizationPersonnels(String keywords, Long organizationId, OrganizationMemberStatus memberStatus, OrganizationMemberTargetType targetType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2012,6 +1981,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     /**
      * modify cause member_detail by lei lv
      **/
+	@Deprecated
     @Override
     public List<OrganizationMember> listOrganizationPersonnels(String keywords, List<Long> orgIds, Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
