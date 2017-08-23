@@ -12,3 +12,4 @@ ALTER TABLE eh_parking_lots DROP COLUMN `is_support_recharge`;
 ALTER TABLE eh_parking_lots ADD COLUMN `expired_recharge_json` VARCHAR(1024) DEFAULT NULL;
 ALTER TABLE eh_parking_lots ADD COLUMN `config_json` VARCHAR(1024) DEFAULT NULL;
 
+ALTER TABLE eh_parking_recharge_orders ADD COLUMN `order_type` tinyint(4) DEFAULT 1;
