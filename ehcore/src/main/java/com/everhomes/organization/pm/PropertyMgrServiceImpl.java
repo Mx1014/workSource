@@ -1936,7 +1936,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setSaledCount(saledCount);
 		int unsaleCount = (temp = result.get(AddressMappingStatus.UNSALE.getCode())) == null ? 0 : temp;
 		dto.setUnsaleCount(unsaleCount);
-		sum = defaultCount + livingCount + rentCount + freeCount + saledCount + unsaleCount;
+		int occupiedCount = (temp = result.get(AddressMappingStatus.OCCUPIED.getCode())) == null ? 0 : temp;
+		dto.setOccupiedCount(occupiedCount);
+		sum = defaultCount + livingCount + rentCount + freeCount + saledCount + unsaleCount + occupiedCount;
 		
 		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
 		if (sum == 0) {
@@ -2451,7 +2453,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		map.put(AddressMappingStatus.FREE.getCode(), 0);
 		map.put(AddressMappingStatus.SALED.getCode(), 0);
 		map.put(AddressMappingStatus.UNSALE.getCode(), 0);
-		
+		map.put(AddressMappingStatus.OCCUPIED.getCode(), 0);
+
 		for (PropFamilyDTO propFamilyDTO : resultList) {
 			map.put(propFamilyDTO.getLivingStatus(), map.get(propFamilyDTO.getLivingStatus()) + 1);
 			userCount += propFamilyDTO.getMemberCount();
@@ -2463,6 +2466,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		statistics.setFreeCount(map.get(AddressMappingStatus.FREE.getCode()));
 		statistics.setSaledCount(map.get(AddressMappingStatus.SALED.getCode()));
 		statistics.setUnsaleCount(map.get(AddressMappingStatus.UNSALE.getCode()));
+		statistics.setOccupiedCount(map.get(AddressMappingStatus.OCCUPIED.getCode()));
 		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount());
 		statistics.setUserCount(userCount);
 		statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
