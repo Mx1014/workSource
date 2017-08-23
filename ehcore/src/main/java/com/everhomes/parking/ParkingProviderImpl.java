@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.rest.parking.ParkingExpiredRechargeConfig;
+import com.everhomes.rest.parking.*;
 import com.everhomes.server.schema.tables.daos.*;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
@@ -21,9 +21,6 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.parking.ParkingOrderDeleteFlag;
-import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
@@ -119,11 +116,15 @@ public class ParkingProviderImpl implements ParkingProvider {
 		parkingLot.setContact(temp.getContact());
 
 		String expiredRechargeJson = parkingLot.getExpiredRechargeJson();
-		ParkingExpiredRechargeConfig config = JSONObject.parseObject(expiredRechargeJson, ParkingExpiredRechargeConfig.class);
-		parkingLot.setExpiredRechargeFlag(config.getExpiredRechargeFlag());
-		parkingLot.setExpiredRechargeMonthCount(config.getExpiredRechargeMonthCount());
-		parkingLot.setExpiredRechargeType(config.getExpiredRechargeType());
-		parkingLot.setMaxExpiredDay(config.getMaxExpiredDay());
+		if (null != expiredRechargeJson) {
+			ParkingExpiredRechargeConfig config = JSONObject.parseObject(expiredRechargeJson, ParkingExpiredRechargeConfig.class);
+			parkingLot.setExpiredRechargeFlag(config.getExpiredRechargeFlag());
+			parkingLot.setExpiredRechargeMonthCount(config.getExpiredRechargeMonthCount());
+			parkingLot.setExpiredRechargeType(config.getExpiredRechargeType());
+			parkingLot.setMaxExpiredDay(config.getMaxExpiredDay());
+		}else{
+			parkingLot.setExpiredRechargeFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+		}
 	}
 
     @Override

@@ -42,7 +42,7 @@ public class ParkingLotDTO {
     private Byte lockCarFlag;
     //是否支持寻车
     private Byte searchCarFlag;
-    //是否显示当前在场车/当前剩余车位
+    //显示当前在场车/当前剩余车位
     private Byte displayCurrentInfoType;
     //停车场客服联系方式
     private String contact;
