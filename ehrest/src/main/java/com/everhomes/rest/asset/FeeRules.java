@@ -15,7 +15,9 @@ public class FeeRules {
     private Long chargingStandardId;
     private Date dateStrBegin;
     private Date dateStrEnd;
+    @ItemType(String.class)
     private List<String> propertyName;
+    @ItemType(VariableIdAndValue.class)
     private List<VariableIdAndValue> variableIdAndValueList;
 
 
