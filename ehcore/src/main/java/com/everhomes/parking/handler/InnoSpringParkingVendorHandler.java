@@ -62,18 +62,7 @@ public class InnoSpringParkingVendorHandler extends AbstractCommonParkingVendorH
 			this.checkExpireDateIsNull(expireDate,plateNumber);
 			//有效期到当天23点59分59秒
 			long expireTime = strToLong(expireDate + "235959");
-			long now = System.currentTimeMillis();
-			long cardReserveTime = 0;
-
-			//是否支持过期充值
-	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
-	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
-				//过期充值天数
-	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
-	    	}
-
-			if(expireTime + cardReserveTime < now){
+			if (checkExpireTime(parkingLot, expireTime)) {
 				return resultList;
 			}
 			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());

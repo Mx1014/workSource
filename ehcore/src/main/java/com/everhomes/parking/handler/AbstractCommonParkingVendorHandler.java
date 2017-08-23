@@ -17,9 +17,9 @@ public abstract class AbstractCommonParkingVendorHandler implements ParkingVendo
         long now = System.currentTimeMillis();
         long cardReserveTime = 0;
 
-        Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
-        if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
-            Integer cardReserveDay = parkingLot.getCardReserveDays();
+        Byte isSupportRecharge = parkingLot.getExpiredRechargeFlag();
+        if(ParkingConfigFlag.SUPPORT.getCode() == isSupportRecharge)	{
+            Integer cardReserveDay = parkingLot.getMaxExpiredDay();
             cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
 
         }

@@ -89,17 +89,8 @@ public class JieshunParkingVendorHandler extends AbstractCommonParkingVendorHand
 			this.checkExpireDateIsNull(expireDate,plateNumber);
 
 			long expireTime = strToLong(expireDate);
-			long now = System.currentTimeMillis();
-			long cardReserveTime = 0;
-			
-	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
-	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
-	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
 
-	    	}
-			
-			if(expireTime + cardReserveTime < now){
+			if (checkExpireTime(parkingLot, expireTime)) {
 				return resultList;
 			}
 			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());

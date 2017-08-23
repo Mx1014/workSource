@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
@@ -282,7 +283,7 @@ public class ParkingServiceImpl implements ParkingService {
         			ParkingCardRequestStatus.INACTIVE.getCode(), flowId, null, null);
         	
         	int requestListSize = requestList.size();
-        	if(null != parkingFlow && parkingFlow.getMaxRequestNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()
+        	if(null != parkingFlow && parkingFlow.getMaxRequestNumFlag() == ParkingConfigFlag.SUPPORT.getCode()
         			&& requestListSize >= parkingFlow.getMaxRequestNum()){
         		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
@@ -757,15 +758,24 @@ public class ParkingServiceImpl implements ParkingService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"IsSupportRecharge cannot be null.");
         }
-		if(ParkingSupportRechargeStatus.SUPPORT.getCode() == cmd.getIsSupportRecharge()) {
-			
-			parkingLot.setCardReserveDays(cmd.getReserveDay());
-	        parkingLot.setRechargeMonthCount(cmd.getRechargeMonthCount());
-	        parkingLot.setRechargeType(cmd.getRechargeType());
+
+		ParkingExpiredRechargeConfig config = new ParkingExpiredRechargeConfig();
+		config.setExpiredRechargeFlag(cmd.getIsSupportRecharge());
+
+		if(ParkingConfigFlag.SUPPORT.getCode() == cmd.getIsSupportRecharge()) {
+
+			config.setMaxExpiredDay(cmd.getReserveDay());
+			config.setExpiredRechargeMonthCount(cmd.getRechargeMonthCount());
+			config.setExpiredRechargeType(cmd.getRechargeType());
+		}else {
+			config.setMaxExpiredDay(0);
+			config.setExpiredRechargeMonthCount(1);
+			config.setExpiredRechargeType(ParkingCardExpiredRechargeType.ALL.getCode());
 		}
-		
-		parkingLot.setIsSupportRecharge(cmd.getIsSupportRecharge());
-        parkingProvider.setParkingLotConfig(parkingLot);
+
+		parkingLot.setExpiredRechargeJson(JSONObject.toJSONString(config));
+
+        parkingProvider.updateParkingLot(parkingLot);
 	}
 
 	@Override
@@ -798,7 +808,7 @@ public class ParkingServiceImpl implements ParkingService {
 			totalCount = parkingFlow.getMaxIssueNum();
 		Integer surplusCount = totalCount - issuedCount;
 		
-		if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()) {
+		if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
 			if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
 				if(count > surplusCount) {
 					LOGGER.error("Count is rather than surplusCount.");
@@ -877,7 +887,7 @@ public class ParkingServiceImpl implements ParkingService {
 	    	}
 	    	Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    	Map<String, Object> map = new HashMap<String, Object>();
-			String deadline = deadline(parkingLot.getCardReserveDays());
+			String deadline = deadline(parkingLot.getMaxExpiredDay());
 		    map.put("deadline", deadline);
 			String scope = ParkingNotificationTemplateCode.SCOPE;
 			int code = ParkingNotificationTemplateCode.USER_APPLY_CARD;

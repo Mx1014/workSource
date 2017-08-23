@@ -78,17 +78,7 @@ public class JinyiParkingVendorHandler extends AbstractCommonParkingVendorHandle
 			LocalDateTime time = LocalDateTime.parse(expiredate, dtf2);
 			Long endTime = Timestamp.valueOf(time).getTime();
 
-			long now = System.currentTimeMillis();
-			long cardReserveTime = 0;
-			
-	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
-	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
-	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
-
-	    	}
-			
-			if(endTime + cardReserveTime < now){
+			if (checkExpireTime(parkingLot, endTime)) {
 				return resultList;
 			}
 			

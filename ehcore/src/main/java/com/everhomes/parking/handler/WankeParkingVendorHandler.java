@@ -72,20 +72,11 @@ public class WankeParkingVendorHandler extends AbstractCommonParkingVendorHandle
 			this.checkExpireDateIsNull(expireDate,plateNumber);
 
 			long expireTime = strToLong2(expireDate);
-			long now = System.currentTimeMillis();
-			long cardReserveTime = 0;
-			
-//	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
-	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
-	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
-	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
 
-	    	}
-			
-			if(expireTime + cardReserveTime < now){
+			if (checkExpireTime(parkingLot, expireTime)) {
 				return resultList;
 			}
+
 			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
 			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
 			parkingCardDTO.setParkingLotId(parkingLot.getId());

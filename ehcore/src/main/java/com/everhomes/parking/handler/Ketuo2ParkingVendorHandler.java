@@ -178,9 +178,9 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 	private KetuoCardRate getExpiredRate(KetuoCard cardInfo, ParkingLot parkingLot, long now) {
 		KetuoCardRate ketuoCardRate = null;
 
-		if(parkingLot.getIsSupportRecharge() == ParkingSupportRechargeStatus.SUPPORT.getCode()) {
+		if(parkingLot.getExpiredRechargeFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
 
-			Integer rechargeMonthCount = parkingLot.getRechargeMonthCount();
+			Integer rechargeMonthCount = parkingLot.getExpiredRechargeMonthCount();
 			Integer freeMoney = null != cardInfo.getFreeMoney() ? cardInfo.getFreeMoney() : 0;
 			if(rechargeMonthCount <= 0) {
 				LOGGER.error("ParkingLot rechargeMonthCount less than 0, parkingLot={}", parkingLot);
@@ -198,7 +198,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 					//默认查询一个月的费率，如果不存在，就返回null。
 					ketuoCardRate = new KetuoCardRate();
 
-					if(parkingLot.getRechargeType() == ParkingLotRechargeType.ALL.getCode()) {
+					if(parkingLot.getExpiredRechargeType() == ParkingCardExpiredRechargeType.ALL.getCode()) {
 						//实际价格减去优惠金额，因为是一个月的费率，直接减。
 						Integer actualPrice = Integer.valueOf(rate.getRuleMoney()) - freeMoney;
 						ketuoCardRate.setRuleMoney(String.valueOf(actualPrice * rechargeMonthCount));
@@ -216,7 +216,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 
 					ketuoCardRate.setRuleId(EXPIRE_CUSTOM_RATE_TOKEN);
 //    				rate.setCarType(carType);
-					ketuoCardRate.setRuleAmount(String.valueOf(parkingLot.getRechargeMonthCount()));
+					ketuoCardRate.setRuleAmount(String.valueOf(parkingLot.getExpiredRechargeMonthCount()));
 //    				rate.setRuleName(ruleName);
 //    				rate.setRuleType(ruleType);
 //    				rate.setTypeName(typeName);
@@ -455,7 +455,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(tempOrder.getRateToken())) {
 			ParkingLot parkingLot = parkingProvider.findParkingLotById(tempOrder.getParkingLotId());
-			if(parkingLot.getRechargeType() == ParkingLotRechargeType.ACTUAL.getCode()) {
+			if(parkingLot.getExpiredRechargeType() == ParkingCardExpiredRechargeType.ACTUAL.getCode()) {
 				Calendar calendar = Calendar.getInstance();
 				calendar.setTimeInMillis(now);
 				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -687,7 +687,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 				cmd.getParkingLotId(), parkingCardRequest.getFlowId());
 
 		Integer requestMonthCount = 2;
-		Byte requestRechargeType = ParkingLotRechargeType.ACTUAL.getCode();
+		Byte requestRechargeType = ParkingCardExpiredRechargeType.ACTUAL.getCode();
 		
 		if(null != parkingFlow) {
 			requestMonthCount = parkingFlow.getRequestMonthCount();
@@ -741,7 +741,7 @@ public class Ketuo2ParkingVendorHandler extends AbstractCommonParkingVendorHandl
 			long now = System.currentTimeMillis();
 			dto.setOpenDate(now);
 			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
-			if(requestRechargeType == ParkingLotRechargeType.ALL.getCode()) {
+			if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
 				dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
 			}else {
 				Calendar calendar = Calendar.getInstance();

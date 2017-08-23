@@ -1,10 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -23,45 +22,37 @@ public class ParkingLotDTO {
     private String name;
     private String vendorName;
     private Timestamp createTime;
+    //是否支持过期充值
+    private Byte expiredRechargeFlag;
+    //支持过期充值时，最多过期天数
+    private Integer maxExpiredDay;
+    //支持过期充值时，至少充值几个月
+    private Integer expiredRechargeMonthCount;
+    //支持过期充值时，按照什么模式充值 {@link ParkingCardExpiredRechargeType}
+    private Byte expiredRechargeType;
+
+    //申请月卡的模式
+    private Integer flowMode;
+
     //是否支持临时车缴费
     private Byte tempfeeFlag;
     //是否支持添加/删除费率
     private Byte rateFlag;
-    //是否支持过期充值
-    private Byte isSupportRecharge;
-    //支持过期充值时，最多过期天数
-    private Integer cardReserveDays;
-    //支持过期充值时，至少充值几个月
-    private Integer rechargeMonthCount;
-    //支持过期充值时，按照什么模式充值 {@link ParkingLotRechargeType}
-    private Byte rechargeType;
-    //申请月卡的模式
-    private Integer flowMode;
     //是否支持锁车
     private Byte lockCarFlag;
     //是否支持寻车
     private Byte searchCarFlag;
-    //是否显示当前在场车
-    private Byte displayCarFlag;
-    //是否显示当前剩余车位
-    private Byte displayFreePlaceFlag;
+    //是否显示当前在场车/当前剩余车位
+    private Byte displayCurrentInfoType;
     //停车场客服联系方式
     private String contact;
 
-    public Byte getDisplayCarFlag() {
-        return displayCarFlag;
+    public Byte getDisplayCurrentInfoType() {
+        return displayCurrentInfoType;
     }
 
-    public void setDisplayCarFlag(Byte displayCarFlag) {
-        this.displayCarFlag = displayCarFlag;
-    }
-
-    public Byte getDisplayFreePlaceFlag() {
-        return displayFreePlaceFlag;
-    }
-
-    public void setDisplayFreePlaceFlag(Byte displayFreePlaceFlag) {
-        this.displayFreePlaceFlag = displayFreePlaceFlag;
+    public void setDisplayCurrentInfoType(Byte displayCurrentInfoType) {
+        this.displayCurrentInfoType = displayCurrentInfoType;
     }
 
     public Byte getSearchCarFlag() {
@@ -123,12 +114,12 @@ public class ParkingLotDTO {
         this.vendorName = vendorName;
     }
 
-    public Integer getCardReserveDays() {
-        return cardReserveDays;
+    public Integer getMaxExpiredDay() {
+        return maxExpiredDay;
     }
 
-    public void setCardReserveDays(Integer cardReserveDays) {
-        this.cardReserveDays = cardReserveDays;
+    public void setMaxExpiredDay(Integer maxExpiredDay) {
+        this.maxExpiredDay = maxExpiredDay;
     }
 
     public Timestamp getCreateTime() {
@@ -154,37 +145,32 @@ public class ParkingLotDTO {
 	public void setRateFlag(Byte rateFlag) {
 		this.rateFlag = rateFlag;
 	}
-	
-	public Integer getRechargeMonthCount() {
-		return rechargeMonthCount;
-	}
 
-	public void setRechargeMonthCount(Integer rechargeMonthCount) {
-		this.rechargeMonthCount = rechargeMonthCount;
-	}
-
-	public Byte getRechargeType() {
-		return rechargeType;
-	}
-
-	public void setRechargeType(Byte rechargeType) {
-		this.rechargeType = rechargeType;
-	}
-
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public Byte getExpiredRechargeFlag() {
+        return expiredRechargeFlag;
     }
 
-	public Byte getIsSupportRecharge() {
-		return isSupportRecharge;
-	}
+    public void setExpiredRechargeFlag(Byte expiredRechargeFlag) {
+        this.expiredRechargeFlag = expiredRechargeFlag;
+    }
 
-	public void setIsSupportRecharge(Byte isSupportRecharge) {
-		this.isSupportRecharge = isSupportRecharge;
-	}
+    public Integer getExpiredRechargeMonthCount() {
+        return expiredRechargeMonthCount;
+    }
 
-	public Integer getFlowMode() {
+    public void setExpiredRechargeMonthCount(Integer expiredRechargeMonthCount) {
+        this.expiredRechargeMonthCount = expiredRechargeMonthCount;
+    }
+
+    public Byte getExpiredRechargeType() {
+        return expiredRechargeType;
+    }
+
+    public void setExpiredRechargeType(Byte expiredRechargeType) {
+        this.expiredRechargeType = expiredRechargeType;
+    }
+
+    public Integer getFlowMode() {
 		return flowMode;
 	}
 
@@ -198,5 +184,10 @@ public class ParkingLotDTO {
 
     public void setLockCarFlag(Byte lockCarFlag) {
         this.lockCarFlag = lockCarFlag;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

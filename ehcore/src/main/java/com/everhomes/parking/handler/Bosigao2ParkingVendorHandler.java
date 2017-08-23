@@ -77,17 +77,7 @@ public class Bosigao2ParkingVendorHandler extends AbstractCommonParkingVendorHan
 			this.checkExpireDateIsNull(expireDate,plateNumber);
 			//计算有效期从当天235959秒计算
 			long expireTime = strToLong2(expireDate+"235959");
-			long now = System.currentTimeMillis();
-			long cardReserveTime = 0;
-			
-	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
-	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
-	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
-
-	    	}
-			
-			if(expireTime + cardReserveTime < now){
+			if (checkExpireTime(parkingLot, expireTime)) {
 				return resultList;
 			}
 			

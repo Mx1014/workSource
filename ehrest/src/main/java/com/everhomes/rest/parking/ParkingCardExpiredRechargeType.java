@@ -3,16 +3,17 @@ package com.everhomes.rest.parking;
 
 /**
  * <ul>
+ *     月卡过期时充值，支持类型
  * <li>ALL((byte)1): 整月</li>
  * <li>ACTUAL((byte)2): 实际天数</li>
  * </ul>
  */
-public enum ParkingLotConfigRechargeType {
+public enum ParkingCardExpiredRechargeType {
     ALL((byte)1), ACTUAL((byte)2);
     
     private byte code;
     
-    private ParkingLotConfigRechargeType(byte code) {
+    private ParkingCardExpiredRechargeType(byte code) {
         this.code = code;
     }
     
@@ -20,10 +21,10 @@ public enum ParkingLotConfigRechargeType {
         return this.code;
     }
     
-    public static ParkingLotConfigRechargeType fromCode(Byte code) {
+    public static ParkingCardExpiredRechargeType fromCode(Byte code) {
         if(code != null) {
-            ParkingLotConfigRechargeType[] values = ParkingLotConfigRechargeType.values();
-            for(ParkingLotConfigRechargeType value : values) {
+            ParkingCardExpiredRechargeType[] values = ParkingCardExpiredRechargeType.values();
+            for(ParkingCardExpiredRechargeType value : values) {
                 if(value.code == code.byteValue()) {
                     return value;
                 }

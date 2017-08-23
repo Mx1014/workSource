@@ -60,17 +60,7 @@ public class Bosigao3ParkingVendorHandler extends AbstractCommonParkingVendorHan
 			//格式yyyyMMddHHmmss
 			String validEnd = card.getLimitEnd();
 			Long endTime = strToLong2(validEnd);
-			long now = System.currentTimeMillis();
-			long cardReserveTime = 0;
-			
-	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
-	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
-	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
-
-	    	}
-			
-			if(endTime + cardReserveTime < now){
+			if (checkExpireTime(parkingLot, endTime)) {
 				return resultList;
 			}
 			
