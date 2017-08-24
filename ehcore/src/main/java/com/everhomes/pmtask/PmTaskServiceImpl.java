@@ -28,6 +28,8 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.*;
+import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
+import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
@@ -2552,5 +2554,61 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		}
 		return response;
+	}
+
+	@Override
+	public void changeTasksStatus(UpdateTasksStatusCommand cmd) {
+		PmTask task = pmTaskProvider.findTaskByOrderId(cmd.getOrderId()).get(0);
+		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
+		Byte state = cmd.getStateId();
+		dbProvider.execute((TransactionStatus status) -> {
+
+			task.setStatus(state > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode() : state);
+			pmTaskProvider.updateTask(task);
+			dto.setStatus(task.getStatus());
+
+			//更新工作流case状态
+			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+
+			if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
+				Byte flowCaseStatus = state >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
+						(state == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
+								FlowCaseStatus.PROCESS.getCode());
+
+				if (flowCaseStatus == FlowCaseStatus.ABSORTED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
+					cancelTask(task.getId());
+				else if (flowCaseStatus == FlowCaseStatus.FINISHED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
+					finishTask(task.getId());
+			}
+			return null;
+		});
+		}
+	private void cancelTask(Long id){
+		PmTask task = checkPmTask(id);
+		//更新工作流case状态
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+		flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
+		flowCaseProvider.updateFlowCase(flowCase);
+		//节点状态流转
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+		stepDTO.setFlowCaseId(flowCase.getId());
+		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+		stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+		flowService.processAutoStep(stepDTO);
+
+	}
+
+	private void finishTask(Long id){
+		PmTask task = checkPmTask(id);
+		//更新工作流case状态
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+		flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
+		flowCaseProvider.updateFlowCase(flowCase);
+		//节点状态流转
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+		stepDTO.setFlowCaseId(flowCase.getId());
+		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+		flowService.processAutoStep(stepDTO);
 	}
 }

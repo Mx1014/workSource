@@ -353,9 +353,10 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				return true;
 			}
 		}
-		
+
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"Request of third failed.");
+
 	}
 	
 	private Boolean evaluateTask(PmTask task) {
@@ -600,6 +601,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			return null;
 		});
 	}
+
 	
 	@Override
 	public void evaluateTask(EvaluateTaskCommand cmd) {
@@ -664,9 +666,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				Byte flowCaseStatus = state.byteValue() >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
 						(state.byteValue() == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
 								FlowCaseStatus.PROCESS.getCode());
-
 				flowCase.setStatus(flowCaseStatus);
 				flowCaseProvider.updateFlowCase(flowCase);
+
 			}
 
 			CategoryDTO taskCategory = createCategoryDTO();

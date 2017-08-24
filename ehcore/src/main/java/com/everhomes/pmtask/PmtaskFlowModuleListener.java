@@ -161,6 +161,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
+				//TODO:为科兴与一碑对接
+				if(task.getNamespaceId() == 999983 &&
+						task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
+					sendMessageToUser(userIdentifier.getOwnerUid().toString(), "您的报修任务已完成，" +
+							"您可以对我们的服务进行评价，感谢您的使用");
+				}
 			}else if ("HANDOVER".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
@@ -360,9 +367,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				flowService.processAutoStep(stepDTO);
 				ctx.setContinueStep(false);
 
-                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
-				sendMessageToUser(userIdentifier.getOwnerUid().toString(),"您的报修任务已完成，" +
-						"您可以对我们的服务进行评价，感谢您的使用");
 			}else
 			if ("ASSIGNING".equals(nodeType)) {
 				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
