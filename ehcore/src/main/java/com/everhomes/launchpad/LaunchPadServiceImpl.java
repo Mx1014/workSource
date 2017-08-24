@@ -748,10 +748,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 sceneType = SceneType.DEFAULT.getCode();
             }
         }
+
+		ScopeType communityScopeType= ScopeType.COMMUNITY;
+		SceneType communitySceneType= SceneType.PARK_TOURIST;
+		if(SceneType.fromCode(sceneType) == SceneType.DEFAULT){
+			communityScopeType = ScopeType.RESIDENTIAL;
+			communitySceneType = SceneType.DEFAULT;
+		}
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 		
         //增加定制item流程 by sfyan 20160607
-		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null, cmd.getCategryName());
+		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, communitySceneType.getCode(), cmd.getItemLocation(),cmd.getItemGroup(),communityScopeType.getCode(),community.getId(),null, cmd.getCategryName());
 
 		List<LaunchPadItem> customizedItems = new ArrayList<LaunchPadItem>();
 		
@@ -863,11 +870,23 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         } else {
             LOGGER.error("Organization id not found, userId={}, cmd={}", userId, cmd);
         }
+		ScopeType communityScopeType= ScopeType.COMMUNITY;
+		SceneType communitySceneType= SceneType.PARK_TOURIST;
+		if(SceneType.fromCode(sceneType) == SceneType.DEFAULT){
+			communityScopeType = ScopeType.RESIDENTIAL;
+			communitySceneType = SceneType.DEFAULT;
+		}
+
+		ScopeType orgScopeType = ScopeType.ORGANIZATION;
+
+		if(SceneType.fromCode(sceneType) == SceneType.PM_ADMIN){
+			orgScopeType = ScopeType.PM;
+		}
 
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
         
         //增加定制item流程 by sfyan 20160607
-      	List<LaunchPadItem> orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ORGANIZATION.getCode(),cmd.getOrganizationId(),null, cmd.getCategryName());
+      	List<LaunchPadItem> orgItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),orgScopeType.getCode(),cmd.getOrganizationId(),null, cmd.getCategryName());
 
         // 如果只定制scope为公司的，则只有当前公司才能查到，其它公司就查不到，故补充也按园区查询 by lqs 20160729
       	int orgItemSize = orgItems.size();
@@ -875,7 +894,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		List<LaunchPadItem> communityItems = null;
       	if(communityId != null) {
-			communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, SceneType.PARK_TOURIST.getCode(), cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.COMMUNITY.getCode(), communityId, null, cmd.getCategryName());
+			communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, communitySceneType.getCode(), cmd.getItemLocation(), cmd.getItemGroup(), communityScopeType.getCode(), communityId, null, cmd.getCategryName());
 			if(0 == orgItemSize)
 				orgItems = communityItems;
 
