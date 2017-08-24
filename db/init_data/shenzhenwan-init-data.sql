@@ -909,4 +909,43 @@ UPDATE eh_launch_pad_items set item_label = '充电缴费' where namespace_id = 
 
 UPDATE eh_launch_pad_items set action_data = '{"url":"http://park.szbay.com/park-introduction/index.html?hideNavigationBar=1&rtToken=Dg7kvcXMUoST7pZPjlOJVVrsVlrHMF__Zg6RuDV-5_nldRIx0sYCQBBcejQ3UYgfUwqqx63yHhG--434BOq86wHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-fnWgm8OUppOWeNIotBuXgWA"}' where namespace_id = 999966 and item_label='园区介绍';
 
+delete from eh_web_menu_scopes where owner_id = 999966 and menu_id >= 20100 and menu_id <= 20192;
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20212', '物业报修', '20000', NULL, NULL, '1', '2', '/20000/20212', 'park', '201', '20212', '2', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20213', '任务列表', '20212', NULL, 'task_management_list/203042', '0', '2', '/20000/20212/20213', 'park', '220', '20212', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20214', '服务录入', '20212', NULL, 'task_management_service_entry', '0', '2', '/20000/20212/20214', 'park', '225', '20212', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20215', '设置', '20212', NULL, NULL, '0', '2', '/20000/20212/20215', 'park', '228', '20212', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20216', '工作流设置', '20215', NULL, 'react:/working-flow/flow-list/property-service/20100', '0', '2', '/20000/20212/20215/20216', 'park', '230', '20212', '4', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20217', '分类设置', '20215', NULL, 'classify_setting', '0', '2', '/20000/20212/20215/20217', 'park', '240', '20212', '4', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20218', '统计', '20212', NULL, NULL, '0', '2', '/20000/20212/20218', 'park', '245', '20212', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20219', '服务统计', '20218', NULL, 'task_statistics', '0', '2', '/20000/20212/20218/20219', 'park', '180', '20212', '4', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20220', '服务建议', '20000', NULL, NULL, '1', '2', '/20000/20220', 'park', '201', '20220', '2', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20221', '任务列表', '20220', NULL, 'task_management_list/203043', '0', '2', '/20000/20220/20221', 'park', '220', '20220', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20222', '服务录入', '20220', NULL, 'task_management_service_entry', '0', '2', '/20000/20220/20222', 'park', '225', '20220', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20223', '设置', '20220', NULL, NULL, '0', '2', '/20000/20220/20223', 'park', '228', '20220', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20224', '工作流设置', '20223', NULL, 'react:/working-flow/flow-list/property-service/20100', '0', '2', '/20000/20220/20223/20224', 'park', '230', '20220', '4', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20225', '分类设置', '20223', NULL, 'classify_setting', '0', '2', '/20000/20220/20223/20225', 'park', '240', '20220', '4', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20226', '统计', '20220', NULL, NULL, '0', '2', '/20000/20220/20226', 'park', '245', '20220', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('20227', '服务统计', '20226', NULL, 'task_statistics', '0', '2', '/20000/20220/20226/20227', 'park', '180', '20220', '4', NULL, 'module');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	SELECT (@menu_scope_id := @menu_scope_id + 1),id,'', 'EhNamespaces', 999966,2 from eh_web_menus where id >=20212 and id <= 20227;
+
 
