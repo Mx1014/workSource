@@ -5091,13 +5091,13 @@ public class ActivityServiceImpl implements ActivityService {
 
         ListActivityGoodsResponse response = new ListActivityGoodsResponse();
         List<ActivityGoods> goods = activityProvider.listActivityGoods(locator, cmd.getPageSize() + 1, cmd.getActivityId());
+
+		response.setNextPageAnchor(null);
         if(goods != null && goods.size() > 0) {
             if(goods.size() > cmd.getPageSize()) {
                 goods.remove(goods.size() - 1);
                 response.setNextPageAnchor(goods.get(goods.size() - 1).getId());
-            }else{
-				response.setNextPageAnchor(null);
-			}
+            }
 
             List<ActivityGoodsDTO> dtos = goods.stream().map((r) -> {
                 ActivityGoodsDTO dto = ConvertHelper.convert(r, ActivityGoodsDTO.class);
