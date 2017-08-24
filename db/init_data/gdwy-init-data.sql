@@ -2134,10 +2134,10 @@ UPDATE eh_launch_pad_items set item_name = item_label where id in (118978, 11897
 -- 增加“企业问卷调查” edit by  yanjun 20170824
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40150,'', 'EhNamespaces', 999970,2);
 
---物业缴费
+-- 物业缴费
 UPDATE eh_launch_pad_items set action_type = 13, action_data = '{"url":"https://core.zuolin.com/property-bill/index.html?hideNavigationBar=1&name=物业查费#/verify_account#sign_suffix"}' where id in (117890, 117860) and namespace_id = 999970;
 
---能耗管理、品质核查、设备巡检、任务管理（4个icon），配置成仅管理公司可见。
+-- 能耗管理、品质核查、设备巡检、任务管理（4个icon），配置成仅管理公司可见。
 DELETE from eh_launch_pad_items where id in (117889, 117891, 117892, 117894) and namespace_id = 999970;
 
 -- “发现”改成“论坛”
