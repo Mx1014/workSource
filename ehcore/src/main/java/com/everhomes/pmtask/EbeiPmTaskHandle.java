@@ -22,6 +22,9 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.ebei.*;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -30,6 +33,7 @@ import com.everhomes.docking.DockingMapping;
 import com.everhomes.docking.DockingMappingProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.docking.DockingMappingScope;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import org.apache.commons.lang.StringUtils;
@@ -54,12 +58,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
-import com.everhomes.pmtask.ebei.EbeiResult;
-import com.everhomes.pmtask.ebei.EbeiTaskResult;
-import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
-import com.everhomes.pmtask.ebei.EbeiJsonEntity;
-import com.everhomes.pmtask.ebei.EbeiServiceType;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -112,6 +110,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private FlowService flowService;
 	@Autowired
 	private CategoryProvider categoryProvider;
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
 	@PostConstruct
 	public void init() {
@@ -307,13 +307,21 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		param.put("buildingId", "");
 		//param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
+        if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(task.getOwnerType())){
+            List<Organization> list = organizationProvider.findOrganizationByCommunityId(task.getOwnerId());
+            param.put("companyName",list.get(0).getName());
+        }
+
 		param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
 		param.put("type", "1");
 		param.put("remarks", task.getContent());
 		param.put("projectId", projectId);
 		param.put("anonymous", "0");
 		param.put("fileAddrs", fileAddrs);
-		param.put("buildingType", "0");
+		if (EbeiBuildingType.publicArea.equals(task.getBuildingName()))
+		    param.put("buildingType", "1");
+		else
+            param.put("buildingType", "0");
 		
 		String json = postToEbei(param, CREATE_TASK, null);
 		
