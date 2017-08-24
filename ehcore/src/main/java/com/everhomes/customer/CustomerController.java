@@ -12,7 +12,6 @@ import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
-import org.apache.tools.ant.taskdefs.Get;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -208,7 +207,7 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("findCustomerTax")
     @RestReturn(value = CustomerTaxDTO.class)
-    public RestResponse findCustomerTax(@Valid FindCustomerTaxCommand cmd) {
+    public RestResponse findCustomerTax(@Valid GetCustomerTaxCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -274,7 +273,7 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("findCustomerAccount")
     @RestReturn(value = CustomerAccountDTO.class)
-    public RestResponse findCustomerAccount(@Valid FindCustomerAccountCommand cmd) {
+    public RestResponse findCustomerAccount(@Valid GetCustomerAccountCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -646,129 +645,135 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("createCustomerInvestment")
     @RestReturn(value = String.class)
     public RestResponse createCustomerInvestment(@Valid CreateCustomerInvestmentCommand cmd) {
+        customerService.createCustomerInvestment(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-//
-//    /**
-//     * <b>URL: /customer/updateCustomerInvestment</b>
-//     * <p>修改企业投融情况</p>
-//     */
-//    @RequestMapping("updateCustomerInvestment")
-//    @RestReturn(value = String.class)
-//    public RestResponse updateCustomerInvestment(@Valid UpdateCustomerInvestmentCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-//    /**
-//     * <b>URL: /customer/deleteCustomerInvestment</b>
-//     * <p>删除企业投融情况</p>
-//     */
-//    @RequestMapping("deleteCustomerInvestment")
-//    @RestReturn(value = String.class)
-//    public RestResponse deleteCustomerInvestment(@Valid DeleteCustomerInvestmentCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-//    /**
-//     * <b>URL: /customer/getCustomerInvestment</b>
-//     * <p>查看企业投融情况</p>
-//     */
-//    @RequestMapping("getCustomerInvestment")
-//    @RestReturn(value = CustomerInvestmentDTO.class)
-//    public RestResponse getCustomerInvestment(@Valid FindCustomerInvestmentCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-//    /**
-//     * <b>URL: /customer/listCustomerInvestments</b>
-//     * <p>列出企业投融情况</p>
-//     */
-//    @RequestMapping("listCustomerInvestments")
-//    @RestReturn(value = CustomerInvestmentDTO.class, collection = true)
-//    public RestResponse listCustomerInvestments(@Valid ListCustomerInvestmentsCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-////    经济指标 的增删改查
-//    /**
-//     * <b>URL: /customer/createCustomerEconomicIndicator</b>
-//     * <p>新建企业经济指标</p>
-//     */
-//    @RequestMapping("createCustomerEconomicIndicator")
-//    @RestReturn(value = String.class)
-//    public RestResponse createCustomerEconomicIndicator(@Valid CreateCustomerEconomicIndicatorCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-//    /**
-//     * <b>URL: /customer/updateCustomerEconomicIndicator</b>
-//     * <p>修改企业经济指标</p>
-//     */
-//    @RequestMapping("updateCustomerEconomicIndicator")
-//    @RestReturn(value = String.class)
-//    public RestResponse updateCustomerEconomicIndicator(@Valid UpdateCustomerEconomicIndicatorCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-//    /**
-//     * <b>URL: /customer/deleteCustomerEconomicIndicator</b>
-//     * <p>删除企业经济指标</p>
-//     */
-//    @RequestMapping("deleteCustomerEconomicIndicator")
-//    @RestReturn(value = String.class)
-//    public RestResponse deleteCustomerEconomicIndicator(@Valid DeleteCustomerEconomicIndicatorCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-//    /**
-//     * <b>URL: /customer/getCustomerEconomicIndicator</b>
-//     * <p>查看企业经济指标</p>
-//     */
-//    @RequestMapping("getCustomerEconomicIndicator")
-//    @RestReturn(value = CustomerEconomicIndicatorDTO.class)
-//    public RestResponse getCustomerEconomicIndicator(@Valid FindCustomerEconomicIndicatorCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-//    /**
-//     * <b>URL: /customer/listCustomerEconomicIndicators</b>
-//     * <p>列出企业经济指标</p>
-//     */
-//    @RequestMapping("listCustomerEconomicIndicators")
-//    @RestReturn(value = CustomerEconomicIndicatorDTO.class, collection = true)
-//    public RestResponse listCustomerEconomicIndicators(@Valid ListCustomerEconomicIndicatorsCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
+
+    /**
+     * <b>URL: /customer/updateCustomerInvestment</b>
+     * <p>修改企业投融情况</p>
+     */
+    @RequestMapping("updateCustomerInvestment")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerInvestment(@Valid UpdateCustomerInvestmentCommand cmd) {
+        customerService.updateCustomerInvestment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerInvestment</b>
+     * <p>删除企业投融情况</p>
+     */
+    @RequestMapping("deleteCustomerInvestment")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerInvestment(@Valid DeleteCustomerInvestmentCommand cmd) {
+        customerService.deleteCustomerInvestment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerInvestment</b>
+     * <p>查看企业投融情况</p>
+     */
+    @RequestMapping("getCustomerInvestment")
+    @RestReturn(value = CustomerInvestmentDTO.class)
+    public RestResponse getCustomerInvestment(@Valid GetCustomerInvestmentCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerInvestment(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerInvestments</b>
+     * <p>列出企业投融情况</p>
+     */
+    @RequestMapping("listCustomerInvestments")
+    @RestReturn(value = CustomerInvestmentDTO.class, collection = true)
+    public RestResponse listCustomerInvestments(@Valid ListCustomerInvestmentsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerInvestments(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+//    经济指标 的增删改查
+    /**
+     * <b>URL: /customer/createCustomerEconomicIndicator</b>
+     * <p>新建企业经济指标</p>
+     */
+    @RequestMapping("createCustomerEconomicIndicator")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerEconomicIndicator(@Valid CreateCustomerEconomicIndicatorCommand cmd) {
+        customerService.createCustomerEconomicIndicator(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updateCustomerEconomicIndicator</b>
+     * <p>修改企业经济指标</p>
+     */
+    @RequestMapping("updateCustomerEconomicIndicator")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerEconomicIndicator(@Valid UpdateCustomerEconomicIndicatorCommand cmd) {
+        customerService.updateCustomerEconomicIndicator(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerEconomicIndicator</b>
+     * <p>删除企业经济指标</p>
+     */
+    @RequestMapping("deleteCustomerEconomicIndicator")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerEconomicIndicator(@Valid DeleteCustomerEconomicIndicatorCommand cmd) {
+        customerService.deleteCustomerEconomicIndicator(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerEconomicIndicator</b>
+     * <p>查看企业经济指标</p>
+     */
+    @RequestMapping("getCustomerEconomicIndicator")
+    @RestReturn(value = CustomerEconomicIndicatorDTO.class)
+    public RestResponse getCustomerEconomicIndicator(@Valid GetCustomerEconomicIndicatorCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerEconomicIndicator(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerEconomicIndicators</b>
+     * <p>列出企业经济指标</p>
+     */
+    @RequestMapping("listCustomerEconomicIndicators")
+    @RestReturn(value = CustomerEconomicIndicatorDTO.class, collection = true)
+    public RestResponse listCustomerEconomicIndicators(@Valid ListCustomerEconomicIndicatorsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerEconomicIndicators(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /customer/listEnterpriseCustomerStatistics</b>

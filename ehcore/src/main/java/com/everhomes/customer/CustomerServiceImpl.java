@@ -760,6 +760,104 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public void createCustomerEconomicIndicator(CreateCustomerEconomicIndicatorCommand cmd) {
+        CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
+        enterpriseCustomerProvider.createCustomerEconomicIndicator(indicator);
+    }
+
+    @Override
+    public void createCustomerInvestment(CreateCustomerInvestmentCommand cmd) {
+        CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
+        enterpriseCustomerProvider.createCustomerInvestment(investment);
+    }
+
+    @Override
+    public void deleteCustomerEconomicIndicator(DeleteCustomerEconomicIndicatorCommand cmd) {
+        CustomerEconomicIndicator indicator = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerEconomicIndicator(indicator);
+    }
+
+    private CustomerEconomicIndicator checkCustomerEconomicIndicator(Long id, Long customerId) {
+        CustomerEconomicIndicator indicator = enterpriseCustomerProvider.findCustomerEconomicIndicatorById(id);
+        if(indicator == null || !indicator.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(indicator.getStatus()))) {
+            LOGGER.error("enterprise customer economic indicator is not exist or active. id: {}, indicator: {}", id, indicator);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ECONOMIC_INDICATOR_NOT_EXIST,
+                    "customer economic indicator is not exist or active");
+        }
+        return indicator;
+    }
+
+    @Override
+    public void deleteCustomerInvestment(DeleteCustomerInvestmentCommand cmd) {
+        CustomerInvestment investment = checkCustomerInvestment(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerInvestment(investment);
+    }
+
+    private CustomerInvestment checkCustomerInvestment(Long id, Long customerId) {
+        CustomerInvestment investment = enterpriseCustomerProvider.findCustomerInvestmentById(id);
+        if(investment == null || !investment.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(investment.getStatus()))) {
+            LOGGER.error("enterprise customer investment is not exist or active. id: {}, investment: {}", id, investment);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_INVESTMENT_NOT_EXIST,
+                    "customer investment is not exist or active");
+        }
+        return investment;
+    }
+
+    @Override
+    public CustomerEconomicIndicatorDTO getCustomerEconomicIndicator(GetCustomerEconomicIndicatorCommand cmd) {
+        CustomerEconomicIndicator indicator = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
+        return ConvertHelper.convert(indicator, CustomerEconomicIndicatorDTO.class);
+    }
+
+    @Override
+    public CustomerInvestmentDTO getCustomerInvestment(GetCustomerInvestmentCommand cmd) {
+        CustomerInvestment investment = checkCustomerInvestment(cmd.getId(), cmd.getCustomerId());
+        return ConvertHelper.convert(investment, CustomerInvestmentDTO.class);
+    }
+
+    @Override
+    public List<CustomerEconomicIndicatorDTO> listCustomerEconomicIndicators(ListCustomerEconomicIndicatorsCommand cmd) {
+        List<CustomerEconomicIndicator> indicators = enterpriseCustomerProvider.listCustomerEconomicIndicatorsByCustomerId(cmd.getCustomerId());
+        if(indicators != null && indicators.size() > 0) {
+            return indicators.stream().map(indicator -> {
+                return ConvertHelper.convert(indicator, CustomerEconomicIndicatorDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<CustomerInvestmentDTO> listCustomerInvestments(ListCustomerInvestmentsCommand cmd) {
+        List<CustomerInvestment> investments = enterpriseCustomerProvider.listCustomerInvestmentsByCustomerId(cmd.getCustomerId());
+        if(investments != null && investments.size() > 0) {
+            return investments.stream().map(investment -> {
+                return ConvertHelper.convert(investment, CustomerInvestmentDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public void updateCustomerEconomicIndicator(UpdateCustomerEconomicIndicatorCommand cmd) {
+        CustomerEconomicIndicator exist = checkCustomerEconomicIndicator(cmd.getId(), cmd.getCustomerId());
+        CustomerEconomicIndicator indicator = ConvertHelper.convert(cmd, CustomerEconomicIndicator.class);
+        indicator.setCreateTime(exist.getCreateTime());
+        indicator.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerEconomicIndicator(indicator);
+    }
+
+    @Override
+    public void updateCustomerInvestment(UpdateCustomerInvestmentCommand cmd) {
+        CustomerInvestment exist = checkCustomerInvestment(cmd.getId(), cmd.getCustomerId());
+        CustomerInvestment investment = ConvertHelper.convert(cmd, CustomerInvestment.class);
+        investment.setCreateTime(exist.getCreateTime());
+        investment.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerInvestment(investment);
+    }
+
+    @Override
     public CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
         CustomerIndustryStatisticsResponse response = new CustomerIndustryStatisticsResponse();
         List<CustomerIndustryStatisticsDTO> dtos = new ArrayList<>();

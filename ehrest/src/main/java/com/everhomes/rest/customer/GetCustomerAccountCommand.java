@@ -8,7 +8,7 @@ package com.everhomes.rest.customer;
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
-public class FindCustomerTaxCommand {
+public class GetCustomerAccountCommand {
 
     private Long id;
 

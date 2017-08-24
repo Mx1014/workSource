@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 /**
  * <ul>
+ *     <li>id: id</li>
  *     <li>customerType: 所属客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
  *     <li>customerId：所属客户id</li>
  *     <li>namespaceId：域空间id</li>
@@ -13,7 +14,8 @@ import java.math.BigDecimal;
  * </ul>
  * Created by ying.xiong on 2017/8/24.
  */
-public class CreateCustomerInvestmentCommand {
+public class CustomerInvestmentDTO {
+    private Long id;
     private Integer namespaceId;
     private Byte customerType;
     private Long customerId;
@@ -59,6 +61,14 @@ public class CreateCustomerInvestmentCommand {
 
     public void setGovernmentProject(String governmentProject) {
         this.governmentProject = governmentProject;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Integer getNamespaceId() {

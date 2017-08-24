@@ -47,11 +47,18 @@ public interface CustomerService {
     CustomerCommercialDTO getCustomerCommercial(GetCustomerCommercialCommand cmd);
     List<CustomerCommercialDTO> listCustomerCommercials(ListCustomerCommercialsCommand cmd);
 
-//    void createCustomerTalent(CreateCustomerTalentCommand cmd);
-//    void updateCustomerTalent(UpdateCustomerTalentCommand cmd);
-//    void deleteCustomerTalent(DeleteCustomerTalentCommand cmd);
-//    CustomerTalentDTO getCustomerTalent(GetCustomerTalentCommand cmd);
-//    List<CustomerTalentDTO> listCustomerTalents(ListCustomerTalentsCommand cmd);
+    void createCustomerInvestment(CreateCustomerInvestmentCommand cmd);
+    void updateCustomerInvestment(UpdateCustomerInvestmentCommand cmd);
+    void deleteCustomerInvestment(DeleteCustomerInvestmentCommand cmd);
+    CustomerInvestmentDTO getCustomerInvestment(GetCustomerInvestmentCommand cmd);
+    List<CustomerInvestmentDTO> listCustomerInvestments(ListCustomerInvestmentsCommand cmd);
+
+
+    void createCustomerEconomicIndicator(CreateCustomerEconomicIndicatorCommand cmd);
+    void updateCustomerEconomicIndicator(UpdateCustomerEconomicIndicatorCommand cmd);
+    void deleteCustomerEconomicIndicator(DeleteCustomerEconomicIndicatorCommand cmd);
+    CustomerEconomicIndicatorDTO getCustomerEconomicIndicator(GetCustomerEconomicIndicatorCommand cmd);
+    List<CustomerEconomicIndicatorDTO> listCustomerEconomicIndicators(ListCustomerEconomicIndicatorsCommand cmd);
 
     EnterpriseCustomerStatisticsDTO listEnterpriseCustomerStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
     CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd);
