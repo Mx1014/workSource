@@ -639,9 +639,6 @@ INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_i
 INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', @field_id, '个人', '1', '2', '1', UTC_TIMESTAMP());                  
 INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@item_scope_id := @item_scope_id + 1), '999985', 'enterprise_customer', @field_id, @item_id, '个人', '1', '2', '1', UTC_TIMESTAMP());
 
-
-
-
 -- '8', '投融情况', 
 -- '9', '经济指标',
 -- payment_wentian

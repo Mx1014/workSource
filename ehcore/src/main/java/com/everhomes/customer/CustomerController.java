@@ -638,19 +638,19 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
-////    投融情况
-//    /**
-//     * <b>URL: /customer/createCustomerInvestment</b>
-//     * <p>新建企业投融情况</p>
-//     */
-//    @RequestMapping("createCustomerInvestment")
-//    @RestReturn(value = String.class)
-//    public RestResponse createCustomerInvestment(@Valid CreateCustomerInvestmentCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
+//    投融情况
+    /**
+     * <b>URL: /customer/createCustomerInvestment</b>
+     * <p>新建企业投融情况</p>
+     */
+    @RequestMapping("createCustomerInvestment")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerInvestment(@Valid CreateCustomerInvestmentCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 //
 //    /**
 //     * <b>URL: /customer/updateCustomerInvestment</b>

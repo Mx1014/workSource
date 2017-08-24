@@ -30,7 +30,7 @@ import java.util.List;
  */
 @Component
 public class ContractFlowModuleListener implements FlowModuleListener {
-    private static final long MODULE_ID = 32500L;
+    private static final long MODULE_ID = 21200L;
     private static final Logger LOGGER = LoggerFactory.getLogger(ContractFlowModuleListener.class);
 
     @Autowired
