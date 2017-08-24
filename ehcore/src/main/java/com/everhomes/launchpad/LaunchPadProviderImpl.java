@@ -259,6 +259,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 					scopeConditionAll = scopeConditionAll.or(scopeCondition);
 				}
 			}
+			condition = condition.and(scopeConditionAll);
 		}
 
 //		Condition scopeCondition
@@ -270,12 +271,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 //			scopeConditionAll = scopeConditionAll.or(scopeCondition);
 //		}
 		
-		
-		condition = condition.and(scopeConditionAll);
-		
-        
-        
-		
+
 		if(keyword != null && !keyword.trim().equals("")){
 			Condition keyCondition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.like("%" + keyword + "%");
 			keyCondition = keyCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LABEL.like("%" + keyword + "%"));
