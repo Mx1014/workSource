@@ -79,7 +79,10 @@ public interface CustomRequestHandler {
 					}
 				}else if(fieldContentType == FieldContentType.TEXT){// FieldContentType.TEXT可以做此处理
 					sb.append(" : ");
-					sb.append(field.getFieldValue()==null?"":field.getFieldValue());
+					sb.append(field.getFieldValue()==null?"无":field.getFieldValue());
+					sb.append("</p>");
+				}else if(fieldContentType == FieldContentType.FILE){// FieldContentType.TEXT可以做此处理
+					sb.append(" : 见附件");
 					sb.append("</p>");
 				}else{
 					sb.append(" : ");
@@ -306,7 +309,7 @@ public interface CustomRequestHandler {
 			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
 	        MailHandler handler = PlatformContext.getComponent(handlerName);
 	        
-	        handler.sendMail(UserContext.getCurrentNamespaceId(), null,emailAddress, title, content,attachementList);
+	        handler.sendMail(0, null,emailAddress, title, content,attachementList);
 		}
 	}
     

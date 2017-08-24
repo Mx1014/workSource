@@ -340,9 +340,12 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		String stringTexts = getFieldValue(columname, values);
 		if(!"".equals(stringTexts)){
 			PostApprovalFormTextValue texts = JSONObject.parseObject(stringTexts, PostApprovalFormTextValue.class);
+			if(texts.getText()==null || texts.getText().length()==0){
+				return "无";
+			}
 			return texts.getText();
 		}
-		return "";
+		return "无";
 	}
 	
 	/**
@@ -517,7 +520,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
 	        MailHandler handler = PlatformContext.getComponent(handlerName);
 	        
-	        handler.sendMail(0, null, emailAddress, title, content,attachementList);
+	        handler.sendMail(UserContext.getCurrentNamespaceId(), null, emailAddress, title, content,attachementList);
 		}
 	}
 	
@@ -568,11 +571,13 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 						if(subFormValue == null ||subFormValue.getForms()==null){
 							continue;
 						}
+
 						for (int i = 0; i < subFormValue.getForms().size(); i++) {
 							PostApprovalFormSubformItemValue forms = subFormValue.getForms().get(i);
 							if(forms ==null ||forms.getValues() == null){
 								continue;
 							}
+							returnList.add(new Object[]{GeneralFormFieldType.FILE, "子表单"+(i+1)+""});
 							for (int j = 0; j <forms.getValues().size() ; j++) {
 								PostApprovalFormItem item = forms.getValues().get(j);
 								GeneralFormFieldType ftype = GeneralFormFieldType.fromCode(item.getFieldType());
