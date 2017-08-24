@@ -60,8 +60,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private OrganizationProvider organizationProvider;
-	@Autowired
 	private MessagingService messagingService;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
@@ -156,9 +154,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				//TODO:为科兴与一碑对接
 				if(task.getNamespaceId() == 999983 &&
 						task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-				OrganizationMember organizationMember =  organizationProvider.findOrganizationMemberByOrgIdAndToken(
-						task.getRequestorPhone(),task.getOrganizationId());
-				sendMessageToUser(organizationMember.getTargetId().toString(),"您的任务已分配至维修人员处理，请耐心等待");
+				    UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
+				    sendMessageToUser(userIdentifier.getOwnerUid().toString(),"您的任务已分配至维修人员处理，请耐心等待");
 
 				}
 			}else if ("COMPLETED".equals(nodeType)) {
@@ -363,9 +360,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				flowService.processAutoStep(stepDTO);
 				ctx.setContinueStep(false);
 
-				OrganizationMember organizationMember =  organizationProvider.findOrganizationMemberByOrgIdAndToken(
-						task.getRequestorPhone(),task.getOrganizationId());
-				sendMessageToUser(organizationMember.getTargetId().toString(),"您的报修任务已完成，" +
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
+				sendMessageToUser(userIdentifier.getOwnerUid().toString(),"您的报修任务已完成，" +
 						"您可以对我们的服务进行评价，感谢您的使用");
 			}else
 			if ("ASSIGNING".equals(nodeType)) {
