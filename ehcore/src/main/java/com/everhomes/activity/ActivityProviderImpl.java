@@ -844,7 +844,7 @@ public class ActivityProviderImpl implements ActivityProivider {
             SelectQuery<EhActivityGoodsRecord> query = context.selectQuery(Tables.EH_ACTIVITY_GOODS);
 
             if (locator.getAnchor() != null)
-                query.addConditions(Tables.EH_ACTIVITY_GOODS.ID.ge(locator.getAnchor()));
+                query.addConditions(Tables.EH_ACTIVITY_GOODS.ID.gt(locator.getAnchor()));
 
             query.addConditions(Tables.EH_ACTIVITY_GOODS.ACTIVITY_ID.eq(activityId));
 
