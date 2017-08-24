@@ -1,4 +1,4 @@
---清除
+-- 清除
 delete from eh_launch_pad_items WHERE id in (1112645,1112644,1112643,1112642) AND namespace_id = 999971;
 
 -- 配置服务广场图标
