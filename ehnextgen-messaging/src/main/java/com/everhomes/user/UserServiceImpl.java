@@ -29,6 +29,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -4504,6 +4505,20 @@ public class UserServiceImpl implements UserService {
 			String[] documents = document.split("\\|");
 			response = new GetFamilyButtonStatusResponse(documents[0],FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),FamilyButtonStatusType.SHOW.getCode(),documents[1],documents[2]);
 		}
+		return response;
+	}
+
+	@Override
+	public CheckContactAdminResponse checkContactAdmin(CheckContactAdminCommand cmd) {
+
+		CheckContactAdminResponse response = new CheckContactAdminResponse();
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+		if(resolver.checkSuperAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId())
+				|| resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
+			response.setIsAdmin(ContactAdminFlag.YES.getCode());
+		else
+			response.setIsAdmin(ContactAdminFlag.NO.getCode());
 		return response;
 	}
 }

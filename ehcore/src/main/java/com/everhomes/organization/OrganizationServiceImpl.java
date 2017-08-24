@@ -9744,6 +9744,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             dto.setJobPosition(position);
             if(!StringUtils.isEmpty(r.getDetailId()))
                 dto.setDetailId(r.getDetailId());
+            //  需要将隐藏性显示出来
+            dto.setVisibleFlag(r.getVisibleFlag());
+
 
             //获取用户头像 昵称
             if (OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())) {

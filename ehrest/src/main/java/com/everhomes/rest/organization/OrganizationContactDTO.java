@@ -16,6 +16,7 @@ import java.sql.Timestamp;
  * <li>createTime：创建时间</li>
  * <li>jobPosition: 岗位</li>
  * <li>detailId: 用户档案id</li>
+ * <li>visibleFlag: 隐藏性: 0-显示 1-隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
  * </ul>
  */
 public class OrganizationContactDTO {
@@ -41,6 +42,7 @@ public class OrganizationContactDTO {
     //added by R 20120713 增加岗位信息
     private String jobPosition;
     private Long detailId;
+    private Byte visibleFlag;
 
     public OrganizationContactDTO() {
     }
@@ -187,6 +189,14 @@ public class OrganizationContactDTO {
 
     public void setDetailId(Long detailId) {
         this.detailId = detailId;
+    }
+
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
     }
 
     @Override

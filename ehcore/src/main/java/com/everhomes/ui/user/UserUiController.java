@@ -121,6 +121,8 @@ public class UserUiController extends ControllerBase {
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(100000);
 			command.setIsSignedup(cmd.getIsSignedup());
+			if(cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
+			    command.setVisibleFlag(VisibleFlag.ALL.getCode());
 			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
 			List<OrganizationContactDTO> members = res.getMembers();
 			if(null != members){
@@ -357,6 +359,20 @@ public class UserUiController extends ControllerBase {
 	public RestResponse getFamilyButtonStatus() {
 		GetFamilyButtonStatusResponse getFamilyButtonStatusResponse = userService.getFamilyButtonStatus();
 		RestResponse response = new RestResponse(getFamilyButtonStatusResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /ui/user/checkContactAdmin </b>
+	 * <p>获取文案,和家庭下button的是否显示</p>
+	 */
+	@RequestMapping("checkContactAdmin")
+	@RestReturn(value=CheckContactAdminResponse.class)
+	public RestResponse checkContactAdmin(CheckContactAdminCommand cmd) {
+		CheckContactAdminResponse res = userService.checkContactAdmin(cmd);
+		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

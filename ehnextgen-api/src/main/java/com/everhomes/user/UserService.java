@@ -224,4 +224,7 @@ public interface UserService {
     ListAuthFormsResponse listAuthForms();
 
 	GetFamilyButtonStatusResponse getFamilyButtonStatus();
+
+	//added by R 20170824, 人事1.4,  判断管理员
+    CheckContactAdminResponse checkContactAdmin(CheckContactAdminCommand cmd);
 }
