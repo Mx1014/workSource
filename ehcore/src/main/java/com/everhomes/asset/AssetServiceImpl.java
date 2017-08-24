@@ -224,7 +224,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
-        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillItemId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
             response.setNextPageAnchor(null);
         }else{
@@ -583,6 +583,18 @@ public class AssetServiceImpl implements AssetService {
         response.setList(list);
         //save the data but with a state of being suspend
         return response;
+    }
+
+    @Override
+    public void generateBillsOnContractSigned(String contractNum) {
+//        List<PaymentContractReceiver> materials = assetProvider.findContractReceiverByContractNumAndTimeLimit(contractNum);
+//        for(int i = 0; i < materials.size(); i++) {
+//            PaymentContractReceiver p = materials.get(i);
+//
+//        }
+//        String variablesJsonString = m_1.getVariablesJsonString();
+//        String formula = assetProvider.findFormulaByChargingStandardId();
+//        calculateFee()
     }
 
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {

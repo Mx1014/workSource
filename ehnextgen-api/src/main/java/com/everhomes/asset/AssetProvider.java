@@ -91,4 +91,6 @@ public interface AssetProvider {
     List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
 
     void increaseNoticeTime(List<Long> billIds);
+
+    List<PaymentContractReceiver> findContractReceiverByContractNumAndTimeLimit(String contractNum);
 }

@@ -2,6 +2,7 @@
 package com.everhomes.rest.asset;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,5 +30,10 @@ public class PaymentExpectanciesResponse {
 
     public void setNextPageOffset(Integer nextPageOffset) {
         this.nextPageOffset = nextPageOffset;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

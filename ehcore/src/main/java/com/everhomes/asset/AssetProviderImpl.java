@@ -785,12 +785,17 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal zero = new BigDecimal("0");
 
             long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-            nextBillId = nextBillId+1;
+            if(nextBillId == 0){
+                nextBillId = nextBillId + 1;
+            }
             //billItems assemble
             List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
             long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), list1.size());
             long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
-            currentBillItemSeq = currentBillItemSeq + 1;
+            if(currentBillItemSeq == 0){
+                currentBillItemSeq = currentBillItemSeq+1;
+            }
+
             for(int i = 0; i < list1.size() ; i++) {
                 BillItemDTO dto = list1.get(i);
                 PaymentBillItems item = new PaymentBillItems();
@@ -830,11 +835,16 @@ public class AssetProviderImpl implements AssetProvider {
             List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
             long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), list2.size());
             long currentExemItemSeq = nextExemItemBlock - list2.size() + 1;
-            currentExemItemSeq = currentExemItemSeq+1;
+            if(currentExemItemSeq == 0){
+                currentBillItemSeq = currentExemItemSeq+1;
+            }
             for(int i = 0; i < list2.size(); i++){
                 ExemptionItemDTO exemptionItemDTO = list2.get(i);
                 PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
                 BigDecimal amount = exemptionItemDTO.getAmount();
+                if(amount == null){
+                    continue;
+                }
                 exemptionItem.setAmount(amount);
                 exemptionItem.setBillGroupId(billGroupId);
                 exemptionItem.setBillId(nextBillId);
@@ -1266,11 +1276,24 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void deleteBill(Long billId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        context.delete(Tables.EH_PAYMENT_BILLS)
-                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
-                .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)0))
-                .execute();
+        this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            int execute = context.delete(Tables.EH_PAYMENT_BILLS)
+                    .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 0))
+                    .execute();
+            if(execute == 0){
+                throw new RuntimeException("删除账单失败，账单已出或者无法找到此账单");
+            }
+            context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
+                    .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                    .execute();
+            context.delete(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
+                    .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.BILL_ID.eq(billId))
+                    .execute();
+            return null;
+        });
+
     }
 
     @Override
@@ -1354,5 +1377,12 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
     }
 
+    @Override
+    public List<PaymentContractReceiver> findContractReceiverByContractNumAndTimeLimit(String contractNum) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_PAYMENT_CONTRACT_RECEIVER)
+                .where(Tables.EH_PAYMENT_CONTRACT_RECEIVER.CONTRACT_NUM.eq(contractNum))
+                .fetch().map(r -> ConvertHelper.convert(r, PaymentContractReceiver.class));
+    }
 
 }
