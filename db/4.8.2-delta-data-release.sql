@@ -261,5 +261,7 @@ update eh_configurations SET `value` = '20000' WHERE `name` = 'print.logon.scan.
 -- # 二维码有效时间改成六分钟
 update eh_configurations SET `value` = '6' WHERE `name` = 'print.siyin.timeout' AND namespace_id = '0';
 
--- 将群成员里昵称为null的，设置成id。edit by yanjun 20170824
+-- 刷旧数据，将群成员里昵称为null的，设置成id。edit by yanjun 20170824
 UPDATE EH_GROUP_MEMBERS set member_nick_name = id where member_nick_name is NULL;
+-- 刷旧数据，用户的昵称为null，设置为手机号  edit by yanjun 20170824
+UPDATE eh_users a set nick_name = (SELECT identifier_token from eh_user_identifiers b where a.id = b.owner_uid) where nick_name is null;
