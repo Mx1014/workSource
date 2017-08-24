@@ -9504,6 +9504,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     desOrgMember.setGroupType(organizationMember.getGroupType());
                     desOrgMember.setGroupPath(organizationMember.getGroupPath());
                     desOrgMember.setContactName(organizationMember.getContactName());
+                    desOrgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
                     organizationProvider.updateOrganizationMember(desOrgMember);
                     //保存当前企业关联的detailId,用于多个返回值时进行比对
 //                    if (enterpriseId.equals(org.getId())) {
