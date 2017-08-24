@@ -477,7 +477,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 				//分配公司管理员角色
-				assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), org.getId(), EntityType.USER.getCode(), member.getTargetId(), namespaceId, UserContext.current().getUser().getId(), RoleConstants.ENTERPRISE_SUPER_ADMIN);
+				assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), org.getId(), EntityType.USER.getCode(), member.getTargetId(), namespaceId, UserContext.current().getUser().getId(), RoleConstants.PM_SUPER_ADMIN);
 
 			}
 
