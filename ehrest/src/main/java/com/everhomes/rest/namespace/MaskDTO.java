@@ -4,14 +4,17 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 蒙版信息
- * <li>namespaceId: 域空间ID</li>
- * <li>resourceType: 域空间下所管理的小区类型，参考{@link com.everhomes.rest.namespace.NamespaceCommunityType}</li>
+ * <li>id: ITEM的id</li>
+ * <li>tips:提示</li>
+ * <li>itemName: ITEM的名字</li>
+ * <li>imageType: ITEM图片的类型(实际上是箭头的类型)</li>
  * </ul>
  */
 public class MaskDTO {
     private Long id;
     private String tips;
-    private String iconName;
+    private String itemName;
+    private Integer imageType;
 
     @Override
     public String toString() {
@@ -34,11 +37,20 @@ public class MaskDTO {
         this.tips = tips;
     }
 
-    public String getIconName() {
-        return iconName;
+
+    public Integer getImageType() {
+        return imageType;
     }
 
-    public void setIconName(String iconName) {
-        this.iconName = iconName;
+    public void setImageType(Integer imageType) {
+        this.imageType = imageType;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
     }
 }

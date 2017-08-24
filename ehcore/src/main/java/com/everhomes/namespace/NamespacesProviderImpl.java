@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.namespace.MaskDTO;
 import org.hibernate.sql.Select;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -131,6 +132,11 @@ public class NamespacesProviderImpl implements NamespacesProvider {
 		.fetch()
 		.map(r->ConvertHelper.convert(r, NamespaceResource.class));
 	}
-	
-	
+
+	@Override
+	public List<MaskDTO> listNamespaceMasks(Integer namespaceId) {
+		return null;
+	}
+
+
 }
