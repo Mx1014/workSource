@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>customerId: 客户id</li>
  *     <li>name: 姓名</li>
  *     <li>gender: 性别</li>
+ *     <li>genderName: 性别</li>
  *     <li>phone: 电话</li>
  *     <li>nationalityItemId: 国籍id</li>
  *     <li>nationalityItemName: 国籍</li>
@@ -19,6 +20,7 @@ import com.everhomes.util.StringHelper;
  *     <li>major: 所属专业</li>
  *     <li>experience: 工作经验</li>
  *     <li>returneeFlag: 是否海归</li>
+ *     <li>returneeFlagName: 是否海归</li>
  *     <li>abroadItemId: 留学国家id</li>
  *     <li>abroadItemName: 留学国家</li>
  *     <li>jobPosition: 聘任职务</li>
@@ -37,7 +39,8 @@ public class CustomerTalentDTO {
     private Byte customerType;
     private Long customerId;
     private String name;
-    private Byte gender;
+    private Long gender;
+    private String genderName;
     private String phone;
     private Long nationalityItemId;
     private String nationalityItemName;
@@ -46,7 +49,8 @@ public class CustomerTalentDTO {
     private String graduateSchool;
     private String major;
     private Integer experience;
-    private Byte returneeFlag;
+    private Long returneeFlag;
+    private String returneeFlagName;
     private Long abroadItemId;
     private String abroadItemName;
     private String jobPosition;
@@ -57,6 +61,22 @@ public class CustomerTalentDTO {
     private String personalCertificate;
     private String careerExperience;
     private String remark;
+
+    public String getGenderName() {
+        return genderName;
+    }
+
+    public void setGenderName(String genderName) {
+        this.genderName = genderName;
+    }
+
+    public String getReturneeFlagName() {
+        return returneeFlagName;
+    }
+
+    public void setReturneeFlagName(String returneeFlagName) {
+        this.returneeFlagName = returneeFlagName;
+    }
 
     public Long getAbroadItemId() {
         return abroadItemId;
@@ -122,12 +142,16 @@ public class CustomerTalentDTO {
         this.experience = experience;
     }
 
-    public Byte getGender() {
+    public Long getGender() {
         return gender;
     }
 
-    public void setGender(Byte gender) {
+    public void setGender(Long gender) {
         this.gender = gender;
+    }
+
+    public void setReturneeFlag(Long returneeFlag) {
+        this.returneeFlag = returneeFlag;
     }
 
     public String getGraduateSchool() {
@@ -234,12 +258,8 @@ public class CustomerTalentDTO {
         this.remark = remark;
     }
 
-    public Byte getReturneeFlag() {
+    public Long getReturneeFlag() {
         return returneeFlag;
-    }
-
-    public void setReturneeFlag(Byte returneeFlag) {
-        this.returneeFlag = returneeFlag;
     }
 
     public Long getTechnicalTitleItemId() {

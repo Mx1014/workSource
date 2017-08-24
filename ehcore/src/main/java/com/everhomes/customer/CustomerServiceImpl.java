@@ -334,6 +334,18 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerTalentDTO convertCustomerTalentDTO(CustomerTalent talent) {
         CustomerTalentDTO dto = ConvertHelper.convert(talent, CustomerTalentDTO.class);
+        if(dto.getGender() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getGender());
+            if(scopeFieldItem != null) {
+                dto.setGenderName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getReturneeFlag() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getReturneeFlag());
+            if(scopeFieldItem != null) {
+                dto.setReturneeFlagName(scopeFieldItem.getItemDisplayName());
+            }
+        }
         if(dto.getAbroadItemId() != null) {
             ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getAbroadItemId());
             if(scopeFieldItem != null) {
@@ -413,18 +425,49 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void createCustomerCommercial(CreateCustomerCommercialCommand cmd) {
         CustomerCommercial commercial = ConvertHelper.convert(cmd, CustomerCommercial.class);
+        if(cmd.getCancelDate() != null) {
+            commercial.setCancelDate(new Timestamp(cmd.getCancelDate()));
+        }
+        if(cmd.getChangeDate() != null) {
+            commercial.setChangeDate(new Timestamp(cmd.getChangeDate()));
+        }
+        if(cmd.getFoundationDate() != null) {
+            commercial.setFoundationDate(new Timestamp(cmd.getFoundationDate()));
+        }
+        if(cmd.getBusinessLicenceDate() != null) {
+            commercial.setBusinessLicenceDate(new Timestamp(cmd.getBusinessLicenceDate()));
+        }
+        if(cmd.getTaxRegistrationDate() != null) {
+            commercial.setTaxRegistrationDate(new Timestamp(cmd.getTaxRegistrationDate()));
+        }
+        if(cmd.getValidityBeginDate() != null) {
+            commercial.setValidityBeginDate(new Timestamp(cmd.getValidityBeginDate()));
+        }
+        if(cmd.getValidityEndDate() != null) {
+            commercial.setValidityEndDate(new Timestamp(cmd.getValidityEndDate()));
+        }
+        if(cmd.getLiquidationCommitteeRecoredDate() != null) {
+            commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
+        }
+
         enterpriseCustomerProvider.createCustomerCommercial(commercial);
     }
 
     @Override
     public void createCustomerPatent(CreateCustomerPatentCommand cmd) {
         CustomerPatent patent = ConvertHelper.convert(cmd, CustomerPatent.class);
+        if(cmd.getRegisteDate() != null) {
+            patent.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
+        }
         enterpriseCustomerProvider.createCustomerPatent(patent);
     }
 
     @Override
     public void createCustomerTrademark(CreateCustomerTrademarkCommand cmd) {
         CustomerTrademark trademark = ConvertHelper.convert(cmd, CustomerTrademark.class);
+        if(cmd.getRegisteDate() != null) {
+            trademark.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
+        }
         enterpriseCustomerProvider.createCustomerTrademark(trademark);
     }
 
@@ -662,6 +705,31 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateCustomerCommercial(UpdateCustomerCommercialCommand cmd) {
         CustomerCommercial exist = checkCustomerCommercial(cmd.getId(), cmd.getCustomerId());
         CustomerCommercial commercial = ConvertHelper.convert(cmd, CustomerCommercial.class);
+
+        if(cmd.getCancelDate() != null) {
+            commercial.setCancelDate(new Timestamp(cmd.getCancelDate()));
+        }
+        if(cmd.getChangeDate() != null) {
+            commercial.setChangeDate(new Timestamp(cmd.getChangeDate()));
+        }
+        if(cmd.getFoundationDate() != null) {
+            commercial.setFoundationDate(new Timestamp(cmd.getFoundationDate()));
+        }
+        if(cmd.getBusinessLicenceDate() != null) {
+            commercial.setBusinessLicenceDate(new Timestamp(cmd.getBusinessLicenceDate()));
+        }
+        if(cmd.getTaxRegistrationDate() != null) {
+            commercial.setTaxRegistrationDate(new Timestamp(cmd.getTaxRegistrationDate()));
+        }
+        if(cmd.getValidityBeginDate() != null) {
+            commercial.setValidityBeginDate(new Timestamp(cmd.getValidityBeginDate()));
+        }
+        if(cmd.getValidityEndDate() != null) {
+            commercial.setValidityEndDate(new Timestamp(cmd.getValidityEndDate()));
+        }
+        if(cmd.getLiquidationCommitteeRecoredDate() != null) {
+            commercial.setLiquidationCommitteeRecoredDate(new Timestamp(cmd.getLiquidationCommitteeRecoredDate()));
+        }
         commercial.setCreateTime(exist.getCreateTime());
         commercial.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerCommercial(commercial);
@@ -671,6 +739,9 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateCustomerPatent(UpdateCustomerPatentCommand cmd) {
         CustomerPatent exist = checkCustomerPatent(cmd.getId(), cmd.getCustomerId());
         CustomerPatent patent = ConvertHelper.convert(cmd, CustomerPatent.class);
+        if(cmd.getRegisteDate() != null) {
+            patent.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
+        }
         patent.setCreateTime(exist.getCreateTime());
         patent.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerPatent(patent);
@@ -680,6 +751,9 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateCustomerTrademark(UpdateCustomerTrademarkCommand cmd) {
         CustomerTrademark exist = checkCustomerTrademark(cmd.getId(), cmd.getCustomerId());
         CustomerTrademark trademark = ConvertHelper.convert(cmd, CustomerTrademark.class);
+        if(cmd.getRegisteDate() != null) {
+            trademark.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
+        }
         trademark.setCreateTime(exist.getCreateTime());
         trademark.setCreateUid(exist.getCreateUid());
         enterpriseCustomerProvider.updateCustomerTrademark(trademark);

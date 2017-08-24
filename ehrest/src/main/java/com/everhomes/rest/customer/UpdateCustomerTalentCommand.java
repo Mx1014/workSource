@@ -33,14 +33,14 @@ public class UpdateCustomerTalentCommand {
     private Byte customerType;
     private Long customerId;
     private String name;
-    private Byte gender;
+    private Long gender;
     private String phone;
     private Long nationalityItemId;
     private Long degreeItemId;
     private String graduateSchool;
     private String major;
     private Integer experience;
-    private Byte returneeFlag;
+    private Long returneeFlag;
     private Long abroadItemId;
     private String jobPosition;
     private Long technicalTitleItemId;
@@ -97,13 +97,7 @@ public class UpdateCustomerTalentCommand {
         this.experience = experience;
     }
 
-    public Byte getGender() {
-        return gender;
-    }
 
-    public void setGender(Byte gender) {
-        this.gender = gender;
-    }
 
     public String getGraduateSchool() {
         return graduateSchool;
@@ -193,11 +187,19 @@ public class UpdateCustomerTalentCommand {
         this.remark = remark;
     }
 
-    public Byte getReturneeFlag() {
+    public Long getGender() {
+        return gender;
+    }
+
+    public void setGender(Long gender) {
+        this.gender = gender;
+    }
+
+    public Long getReturneeFlag() {
         return returneeFlag;
     }
 
-    public void setReturneeFlag(Byte returneeFlag) {
+    public void setReturneeFlag(Long returneeFlag) {
         this.returneeFlag = returneeFlag;
     }
 

@@ -168,7 +168,6 @@ public class ContractProviderImpl implements ContractProvider {
 				.where(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId))
 				.and(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
 				.and(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(CustomerType.ENTERPRISE.getCode()))
-				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.fetch();
 
 		if (result != null) {
