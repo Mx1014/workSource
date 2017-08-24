@@ -2117,3 +2117,42 @@ update eh_item_service_categries set name = 213, label = '企业服务', scope_c
 UPDATE eh_launch_pad_items set categry_name = 211 where id in (117853, 117854, 117855,117952, 117883, 117884, 117885, 117953 ) and namespace_id = 999970;
 UPDATE eh_launch_pad_items set categry_name = 212 where id in (117856, 117857, 117858, 117859, 117860, 117861, 117862, 117863, 117864, 117886, 117887, 117888, 117889, 117890, 117891, 117892, 117893, 117894) and namespace_id = 999970;
 UPDATE eh_launch_pad_items set categry_name = 213 where id in (117865, 117866, 117867, 117950, 117895, 117896, 117897, 117950) and namespace_id = 999970;
+
+-- 物业巡检类型  edit by  yanjun 20170824
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES (1101, 999970, 'PM', 1024527, '0', '设备', '/设备', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES (1102, 999970, 'PM', 1024527, '0', '装修', '/装修', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES (1103, 999970, 'PM', 1024527, '0', '空置房', '/空置房', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES (1104, 999970, 'PM', 1024527, '0', '安保', '/安保', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES (1105, 999970, 'PM', 1024527, '0', '日常工作检查', '/日常工作检查', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES (1106, 999970, 'PM', 1024527, '0', '公共设施检查', '/公共设施检查', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES (1107, 999970, 'PM', 1024527, '0', '周末值班', '/周末值班', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES (1108, 999970, 'PM', 1024527, '0', '安全检查', '/安全检查', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES (1109, 999970, 'PM', 1024527, '0', '其他', '/其他', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+
+UPDATE eh_launch_pad_items set item_name = item_label where id in (118978, 118979, 118980, 118981, 118982, 118983) and namespace_id = 999970;
+
+-- 增加“企业问卷调查” edit by  yanjun 20170824
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40150,'', 'EhNamespaces', 999970,2);
+
+--物业缴费
+UPDATE eh_launch_pad_items set action_type = 13, action_data = '{"url":"https://core.zuolin.com/property-bill/index.html?hideNavigationBar=1&name=物业查费#/verify_account#sign_suffix"}' where id in (117890, 117860) and namespace_id = 999970;
+
+--能耗管理、品质核查、设备巡检、任务管理（4个icon），配置成仅管理公司可见。
+DELETE from eh_launch_pad_items where id in (117889, 117891, 117892, 117894) and namespace_id = 999970;
+
+-- “发现”改成“论坛”
+UPDATE eh_launch_pad_items set item_name = '论坛', item_label = '论坛' where id in (118974, 118976) and namespace_id = 999970;
+
+
+-- 跟新 layouts
+DELETE from eh_launch_pad_layouts where id in (626, 636) and namespace_id = 999970;
+
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`)
+    VALUES (626, 999970, 'ServiceMarketLayout', '{"versionCode":"2017082401","versionName": "4.7.4","layoutName": "ServiceMarketLayout","displayName": "服务市场","groups": [{"groupName": "","widget": "Banners","instanceConfig": {"itemGroup": "Default"},"style": "Default","defaultOrder": 1,"separatorFlag": 0,"separatorHeight": 0}, {"groupName": "","widget": "Bulletins","instanceConfig": {"itemGroup": "Default","rowCount": 1},"style": "Default","defaultOrder": 3,"separatorFlag": 1,"separatorHeight": 1}, {"groupName": "商家服务","widget": "Navigator","instanceConfig": {"itemGroup": "Bizs"},"style": "Light","defaultOrder": 5,"separatorFlag": 1,"separatorHeight":1,"columnCount":4}, {"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Gallery"},"style":"Gallery","defaultOrder":7,"separatorFlag":1,"separatorHeight":0,"columnCount":1},{"groupName": "最新活动","widget": "OPPush","instanceConfig": {"itemGroup": "OPPushActivity","newsSize": 1,"entityCount": 1,"subjectHeight": 1,"descriptionHeight": 0},"style": "ListView","defaultOrder": 9,"separatorFlag": 1,"separatorHeight":0,"columnCount": 1},{"groupName":"园区快讯","widget":"NewsFlash","instanceConfig":{"timeWidgetStyle":"date","categoryId":0,"itemGroup":"Default","newsSize":2},"style":"Default","defaultOrder":11,"separatorFlag":0,"separatorHeight":0}]}', '2017082401', '2017082401', '2', '2017-08-04 16:09:30', 'pm_admin');
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`)
+    VALUES (636, 999970, 'ServiceMarketLayout', '{"versionCode":"2017082401","versionName": "4.7.4","layoutName": "ServiceMarketLayout","displayName": "服务市场","groups": [{"groupName": "","widget": "Banners","instanceConfig": {"itemGroup": "Default"},"style": "Default","defaultOrder": 1,"separatorFlag": 0,"separatorHeight": 0}, {"groupName": "","widget": "Bulletins","instanceConfig": {"itemGroup": "Default","rowCount": 1},"style": "Default","defaultOrder": 3,"separatorFlag": 1,"separatorHeight": 1}, {"groupName": "商家服务","widget": "Navigator","instanceConfig": {"itemGroup": "Bizs"},"style": "Light","defaultOrder": 5,"separatorFlag": 1,"separatorHeight":1,"columnCount":4}, {"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Gallery"},"style":"Gallery","defaultOrder":7,"separatorFlag":1,"separatorHeight":0,"columnCount":1},{"groupName": "最新活动","widget": "OPPush","instanceConfig": {"itemGroup": "OPPushActivity","newsSize": 1,"entityCount": 1,"subjectHeight": 1,"descriptionHeight": 0},"style": "ListView","defaultOrder": 9,"separatorFlag": 1,"separatorHeight":0,"columnCount": 1},{"groupName":"园区快讯","widget":"NewsFlash","instanceConfig":{"timeWidgetStyle":"date","categoryId":0,"itemGroup":"Default","newsSize":2},"style":"Default","defaultOrder":11,"separatorFlag":0,"separatorHeight":0}]}', '2017082401', '2017082401', '2', '2017-08-04 16:09:30', 'park_tourist');
+
+
+
+
+
