@@ -144,7 +144,7 @@ UPDATE `eh_launch_pad_items` SET action_data = CONCAT('{"url":"',@eh_biz_serverU
 
 -- 【星商汇园区】模块配置 add by sfyan 20170823
 SET @namespace_id = 999981;
-SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+SET @service_module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 35000, 2);   
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 40400, 2);   
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 40500, 2);   
@@ -153,7 +153,7 @@ insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `appl
 
 -- 【嘉定新城teec】模块配置 add by sfyan 20170824
 SET @namespace_id = 999974;
-SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+SET @service_module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 10100, 2);   
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 10400, 2);   
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 10600, 2);   
@@ -178,7 +178,7 @@ insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `appl
 
 -- 【保集e智谷】模块配置 add by sfyan 20170824
 SET @namespace_id = 999973;
-SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+SET @service_module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 10100, 2);   
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 10400, 2);   
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 10600, 2);   
