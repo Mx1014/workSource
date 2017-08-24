@@ -16,6 +16,7 @@ ALTER TABLE `eh_punch_logs` ADD COLUMN `rule_time` BIGINT COMMENT '规则设置�
 ALTER TABLE `eh_punch_logs` ADD COLUMN `status` TINYINT COMMENT '打卡状态 0-正常 1-迟到 2-早退 3-缺勤 14-缺卡';  
 
 ALTER TABLE `eh_punch_statistics` ADD COLUMN `punch_org_name` VARCHAR(64) COMMENT '所属规则-考勤组';
+ALTER TABLE `eh_punch_statistics` ADD COLUMN `detail_id` BIGINT COMMENT '用户detailId';
 
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `rule_type` TINYINT DEFAULT '0' COMMENT '0- 排班制 ; 1- 固定班次'; 
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `hommization_type` TINYINT DEFAULT '0' COMMENT '人性化设置:0-无 1-弹性 2晚到晚走'; 
