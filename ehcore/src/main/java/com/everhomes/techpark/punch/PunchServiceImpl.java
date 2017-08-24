@@ -42,6 +42,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -6587,8 +6588,12 @@ public class PunchServiceImpl implements PunchService {
 	        command.setGroupId(punchOrg.getId());
 	        command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
 	        command.setEnterpriseId(cmd.getOwnerId());
-	        command.setTargets(cmd.getTargets()); 
-	        this.uniongroupService.saveUniongroupConfigures(command);
+	        command.setTargets(cmd.getTargets());
+            try {
+                this.uniongroupService.saveUniongroupConfigures(command);
+            }catch(NoNodeAvailableException e){
+                LOGGER.error("NoNodeAvailableException",e);
+            }
 	        //打卡地点和wifi
 	        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
 	
@@ -6737,10 +6742,9 @@ public class PunchServiceImpl implements PunchService {
         //排班
         if(punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null){
         	for(PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()){
-        		monthScheduling.getEmployees().stream().map(r->{
-        			saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
-        			return null;
-        		});
+                for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
+                    saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
+        		}
         	}
         }
 	}
@@ -7054,8 +7058,12 @@ public class PunchServiceImpl implements PunchService {
         command.setGroupId(punchOrg.getId());
         command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
         command.setEnterpriseId(cmd.getOwnerId());
-        command.setTargets(cmd.getTargets()); 
-        this.uniongroupService.saveUniongroupConfigures(command);
+        command.setTargets(cmd.getTargets());
+        try {
+            this.uniongroupService.saveUniongroupConfigures(command);
+        }catch(NoNodeAvailableException e){
+            LOGGER.error("NoNodeAvailableException",e);
+        }
         //打卡地点和wifi
         saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
         
