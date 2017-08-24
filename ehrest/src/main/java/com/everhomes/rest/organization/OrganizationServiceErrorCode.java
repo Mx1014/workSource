@@ -88,5 +88,7 @@ public interface OrganizationServiceErrorCode {
     int ERROR_INSURANCENUMBER_ISNULL = 900021;  //  保险号为空
     int ERROR_CONTRACTNUMBER_ISNULL = 900022;   //  合同号为空
     int ERROR_DATE_FORMAT_WRONG = 900023;   //  日期格式错误
+    int ERROR_GENDER_FORMAT_WRONG = 900024;   //  性别仅支持"男""女"
+    int ERROR_CONTACTNAME_FORMAT_WRONG = 900025;    //  姓名长度需小于16
 
 }

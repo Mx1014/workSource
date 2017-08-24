@@ -1,12 +1,5 @@
 package com.everhomes.servicehotline;
 
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
@@ -21,6 +14,12 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 @Component
 public class ServiceConfigurationsProviderImpl implements ServiceConfigurationsProvider {
 	 @Autowired
@@ -64,7 +63,19 @@ public class ServiceConfigurationsProviderImpl implements ServiceConfigurationsP
 	        EhServiceConfigurationsDao dao = new EhServiceConfigurationsDao(context.configuration());
 	        dao.deleteById(id);
 	    }
-	    @Override
+
+    @Override
+    public ServiceConfiguration getServiceConfiguration(Integer namespaceId, String ownerType, Long ownerId, String confName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_SERVICE_CONFIGURATIONS)
+                .where(Tables.EH_SERVICE_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_SERVICE_CONFIGURATIONS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_SERVICE_CONFIGURATIONS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_SERVICE_CONFIGURATIONS.NAME.eq(confName))
+                .fetchAnyInto(ServiceConfiguration.class);
+    }
+
+    @Override
 	    public ServiceConfiguration getServiceConfigurationById(Long id) {
 	        try {
 	        ServiceConfiguration[] result = new ServiceConfiguration[1];

@@ -14,7 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.rest.common.EntityType;
+import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.yellowPage.*;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -60,14 +63,6 @@ import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.wifi.WifiOwnerType;
-import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
-import com.everhomes.rest.yellowPage.JumpType;
-import com.everhomes.rest.yellowPage.RequestInfoDTO;
-import com.everhomes.rest.yellowPage.SearchOneselfRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchOrgRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
-import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -351,8 +346,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             
         }
         
-        FilterBuilder fb = FilterBuilders.termFilter("ownerType", WifiOwnerType.fromCode(cmd.getOwnerType()).getCode());
+        FilterBuilder fb = FilterBuilders.termFilter("ownerType", cmd.getOwnerType());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("type", cmd.getCategoryId()));
         
@@ -818,8 +814,14 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("jumpType", request.getJumpType());
             b.field("templateType", request.getTemplateType());
             b.field("type", request.getType());
+            if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(request.getOwnerType())){
+                b.field("ownerType", EntityType.ORGANIZATIONS.getCode());
+                List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(request.getOwnerId());
+                b.field("ownerId", organizations.get(0).getId());
+            }else{
             b.field("ownerType", request.getOwnerType());
             b.field("ownerId", request.getOwnerId());
+            }
             b.field("creatorName", request.getCreatorName());
             b.field("creatorOrganizationId", request.getCreatorOrganizationId());
             b.field("creatorMobile", request.getCreatorMobile());

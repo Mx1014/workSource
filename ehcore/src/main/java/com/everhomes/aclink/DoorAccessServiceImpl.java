@@ -389,6 +389,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
         }else if(null != cmd.getOrganizationId()){
             users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize);
+        } else if(null != cmd.getCommunityId() && !StringUtils.isEmpty(cmd.getBuildingName())) {
+            users = doorAuthProvider.listDoorAuthByBuildingName(cmd.getCommunityId(), cmd.getBuildingName(), locator, pageSize);
         }else{
             users = doorAuthProvider.listDoorAuthByIsAuth(cmd.getIsAuth(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize, namespaceId);
         }

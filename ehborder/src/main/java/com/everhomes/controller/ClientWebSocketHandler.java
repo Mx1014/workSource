@@ -249,6 +249,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
             if(currentTick - stats.getLastSendTick() > heartbeatInterval) {
                 try {
                     synchronized(session) {
+                        LOGGER.info("Border server ping message to " + session.getId());
                         session.sendMessage(msg);
                     }
                     updateSessionSendTick(session);

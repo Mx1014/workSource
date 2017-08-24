@@ -220,6 +220,8 @@ public interface UserService {
  
     SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
 
+    //added by R 20170803, 消息2.1增加
+    SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd);
 
     ListAuthFormsResponse listAuthForms();
 

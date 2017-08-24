@@ -6,9 +6,14 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -18,6 +23,8 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -28,6 +35,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +77,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
 
     @Override
     public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
@@ -98,6 +110,45 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         // }
 
         return temp;
+    }
+
+    @Override
+    public ListServiceModulesResponse listAllServiceModules(ListServiceModulesCommand cmd){
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<ServiceModule> list = serviceModuleProvider.listServiceModule(locator, pageSize, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                String path = null;
+                if(null != cmd.getParentId()){
+                    ServiceModule serviceModule = checkServiceModule(cmd.getParentId());
+                    path = serviceModule.getPath() + "/%";
+                }
+                query.addConditions(Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode()));
+                if(!StringUtils.isEmpty(path)){
+                    query.addConditions(Tables.EH_SERVICE_MODULES.PATH.like(path));
+
+                }
+                return null;
+            }
+        });
+        ListServiceModulesResponse res = new ListServiceModulesResponse();
+        res.setNextPageAnchor(locator.getAnchor());
+        res.setDtos(list.stream().map(r -> {
+            return processServiceModuleDTO(r);
+        }).collect(Collectors.toList()));
+
+        return res;
+    }
+
+    private ServiceModuleDTO processServiceModuleDTO(ServiceModule module){
+        ServiceModuleDTO dto = ConvertHelper.convert(module, ServiceModuleDTO.class);
+        dto.setCreateTime(module.getCreateTime().getTime());
+        dto.setUpdateTime(module.getUpdateTime().getTime());
+        User operator = userProvider.findUserById(module.getOperatorUid());
+        if(null != operator) dto.setOperatorUName(operator.getNickName());
+        return dto;
     }
 
     @Override
@@ -538,6 +589,49 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return 0;
     }
 
+    @Override
+    public ServiceModuleDTO createServiceModule(CreateServiceModuleCommand cmd) {
+        User user = UserContext.current().getUser();
+        ServiceModule parentModule = checkServiceModule(cmd.getParentId());
+        ServiceModule module = ConvertHelper.convert(cmd, ServiceModule.class);
+        module.setLevel(2);
+        module.setPath(parentModule.getPath());
+        module.setLevel(parentModule.getLevel() + 1);
+        module.setStatus(ServiceModuleStatus.ACTIVE.getCode());
+        module.setCreatorUid(user.getId());
+        module.setOperatorUid(user.getId());
+        serviceModuleProvider.createServiceModule(module);
+        return processServiceModuleDTO(module);
+    }
+
+    @Override
+    public ServiceModuleDTO updateServiceModule(UpdateServiceModuleCommand cmd) {
+        User user = UserContext.current().getUser();
+        ServiceModule module = checkServiceModule(cmd.getId());
+        module.setDescription(cmd.getDescription());
+        module.setName(cmd.getName());
+        module.setInstanceConfig(cmd.getInstanceConfig());
+        module.setOperatorUid(user.getId());
+        serviceModuleProvider.updateServiceModule(module);
+        return processServiceModuleDTO(module);
+    }
+
+    @Override
+    public void deleteServiceModule(DeleteServiceModuleCommand cmd) {
+        ServiceModule module = checkServiceModule(cmd.getId());
+        serviceModuleProvider.deleteServiceModuleById(module.getId());
+    }
+
+    private ServiceModule checkServiceModule(Long id){
+        ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(id);
+        if(null == serviceModule){
+            LOGGER.error("Unable to find the serviceModule.moduleId = {}", id);
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "Unable to find the serviceModule.");
+        }
+        return serviceModule;
+    }
+
     private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
@@ -648,15 +742,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {
-        List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, ownerType, ownerId, ServiceModuleScopeApplyPolicy.REVERT.getCode());
-
-        if (null == scopes || scopes.size() == 0) {
-            scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
-        }
-
         List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
-        if (scopes.size() != 0)
-            list = filterList(list, scopes);
+
+        if(namespaceId != Namespace.DEFAULT_NAMESPACE){
+            List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, ownerType, ownerId, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+            if (null == scopes || scopes.size() == 0) {
+                scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+            }
+            if (scopes.size() != 0)
+                list = filterList(list, scopes);
+        }
 
         List<ServiceModuleDTO> temp = list.stream().map(r -> {
             ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);

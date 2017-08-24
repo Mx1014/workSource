@@ -527,4 +527,6 @@ public interface OrganizationService {
 	void leaveTheJob(LeaveTheJobCommand cmd);
 
 	ListOrganizationMemberCommandResponse syncOrganizationMemberStatus();
+
+	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
 }

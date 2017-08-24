@@ -43,7 +43,7 @@ public interface CustomRequestHandler {
 	
 	String CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX = "CustomRequest-";
 
-	void addCustomRequest(AddRequestCommand cmd);
+	Long addCustomRequest(AddRequestCommand cmd);
 	
 	GetRequestInfoResponse getCustomRequestInfo(Long id);
 	
@@ -117,11 +117,24 @@ public interface CustomRequestHandler {
 					if(field.getFieldValue()!=null){
 						String[] imagesrcs = field.getFieldValue().split(",");
 						for (int i = 0; i < imagesrcs.length; i++) {
-							Object[] objects = new Object[]{FieldContentType.IMAGE,imagesrcs[i]}; 
+							Object[] objects = new Object[]{FieldContentType.IMAGE,imagesrcs[i]};
 							returnList.add(objects);
 						}
 					}
-				}else if(fieldContentType == FieldContentType.TEXT){// FieldContentType.TEXT可以做此处理
+				}else if(fieldContentType == FieldContentType.FILE){
+					String value = field.getFieldValue();
+					returnList.add(new Object[]{FieldContentType.TEXT,field.getFieldName()+" : 见附件"});
+					if(value==null || value.length()==0){
+						continue;
+					}
+					String[] imagesrcs = value.split(",");
+					for (int i = 0; i < imagesrcs.length; i++) {
+						Object[] objects = new Object[]{FieldContentType.FILE,imagesrcs[i],field.getFileName()};
+						returnList.add(objects);
+					}
+				}
+
+				else if(fieldContentType == FieldContentType.TEXT){// FieldContentType.TEXT可以做此处理
 					returnList.add(new Object[]{FieldContentType.TEXT,field.getFieldName()+" : "+(field.getFieldValue()==null?"":field.getFieldValue())});
 				}else{
 					returnList.add(new Object[]{FieldContentType.TEXT,field.getFieldName()+" : "});
@@ -184,6 +197,10 @@ public interface CustomRequestHandler {
 				FieldContentType key = (FieldContentType)unCertainContent[0];
 				String value = unCertainContent[1]==null?"":unCertainContent[1].toString();
 				FileOutputStream outstream = null;
+				String filename = null;
+				if(unCertainContent.length==3){
+					filename = unCertainContent[2]==null?null:unCertainContent[2].toString();
+				}
 				if(key == FieldContentType.IMAGE){
 					try {
 						//图片附件即发送到pdf，也作为附件 by dengs 20170425,考虑到图片大小偶限制，不做边读边写。
@@ -204,6 +221,31 @@ public interface CustomRequestHandler {
 					} catch (BadElementException e) {
 						// TODO Auto-generated catch block
 						LOGGER.error("create pdf file error, e = {}", e);
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						LOGGER.error("create pdf file error, e = {}", e);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						LOGGER.error("create pdf file error, e = {}", e);
+					}finally{
+						if(outstream!=null)
+							outstream.close();
+					}
+				}else if(key == FieldContentType.FILE){
+					try {
+						byte[] bytes = getImageFromNetByUrl(value);
+						StringBuffer fileBuffer = new StringBuffer(tmpdir);
+						fileBuffer.append(File.separator);
+						if(filename!=null){
+							fileBuffer.append(filename);
+						}else {
+							fileBuffer.append(System.currentTimeMillis());
+							fileBuffer.append(".jpg");
+						}
+						File file = new File(fileBuffer.toString());
+						outstream = new FileOutputStream(file);
+						outstream.write(bytes);
+						list.add(file);
 					} catch (MalformedURLException e) {
 						// TODO Auto-generated catch block
 						LOGGER.error("create pdf file error, e = {}", e);
