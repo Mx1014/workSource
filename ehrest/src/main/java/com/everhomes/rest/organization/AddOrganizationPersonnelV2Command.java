@@ -25,7 +25,7 @@ import java.util.Map;
  * <li>jobPositionIds：添加到多群组</li>
  * <li>updateLogs: 修改记录 参考{@link OrganizationMemberUpdatePersonnelDataDTO}</li>
  * <li>detailId: 修改标志位(有传则为修改)</li>
- * <li>regionCode: 手机区号</li>、
+ * <li>regionCode: 手机区号</li>
  * <li>email: 邮箱</li>
  * </ul>
  */

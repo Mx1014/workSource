@@ -366,7 +366,7 @@ public class UserUiController extends ControllerBase {
 
 	/**
 	 * <b>URL: /ui/user/checkContactAdmin </b>
-	 * <p>获取文案,和家庭下button的是否显示</p>
+	 * <p>判断用户是否为管理员</p>
 	 */
 	@RequestMapping("checkContactAdmin")
 	@RestReturn(value=CheckContactAdminResponse.class)
