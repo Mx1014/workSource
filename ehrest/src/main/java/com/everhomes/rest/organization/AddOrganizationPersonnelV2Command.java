@@ -13,7 +13,7 @@ import java.util.Map;
  * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>contactName：成员名称</li>
  * <li>contactToken：联系信息</li>
- * <li>gender：性别</li>
+ * <li>gender：性别 ：1-男 2-女</li>
  * <li>employeeNo：工号</li>
  * <li>contactDescription：描述</li>
  * <li>employeeNo: 工号</li>
@@ -25,6 +25,8 @@ import java.util.Map;
  * <li>jobPositionIds：添加到多群组</li>
  * <li>updateLogs: 修改记录 参考{@link OrganizationMemberUpdatePersonnelDataDTO}</li>
  * <li>detailId: 修改标志位(有传则为修改)</li>
+ * <li>regionCode: 手机区号</li>、
+ * <li>email: 邮箱</li>
  * </ul>
  */
 public class AddOrganizationPersonnelV2Command extends AddOrganizationPersonnelCommand {
@@ -32,6 +34,10 @@ public class AddOrganizationPersonnelV2Command extends AddOrganizationPersonnelC
     private OrganizationMemberUpdatePersonnelDataDTO updateLogs;
 
     private Long detailId;
+
+    private String regionCode;
+
+    private String email;
 
     public AddOrganizationPersonnelV2Command() {
     }
@@ -50,6 +56,22 @@ public class AddOrganizationPersonnelV2Command extends AddOrganizationPersonnelC
 
     public void setDetailId(Long detailId) {
         this.detailId = detailId;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     @Override
