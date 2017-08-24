@@ -879,13 +879,25 @@ public class FlowServiceImpl implements FlowService {
 
         FlowNode flowNode = new FlowNode();
         flowNode.setId(cmd.getFlowNodeId());
-        flowNode.setNodeName(cmd.getFlowNodeName());
-        flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
-        flowNode.setAutoStepType(cmd.getAutoStepType());
-        // flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+        if (cmd.getFlowNodeName() != null) {
+            flowNode.setNodeName(cmd.getFlowNodeName());
+        }
+        if (cmd.getAllowApplierUpdate() != null) {
+            // flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+        }
         flowNode.setAllowApplierUpdate(TrueOrFalseFlag.FALSE.getCode());
-        flowNode.setAllowTimeoutAction(cmd.getAllowTimeoutAction());
-        flowNode.setParams(cmd.getParams());
+        if (cmd.getAllowTimeoutAction() != null) {
+            flowNode.setAllowTimeoutAction(cmd.getAllowTimeoutAction());
+        }
+        if (cmd.getParams() != null) {
+            flowNode.setParams(cmd.getParams());
+        }
+        if (cmd.getAutoStepMinute() != null) {
+            flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
+        }
+        if (cmd.getAutoStepType() != null) {
+            flowNode.setAutoStepType(cmd.getAutoStepType());
+        }
         flowNodeProvider.updateFlowNode(flowNode);
 
         return ConvertHelper.convert(flowNode, FlowNodeDTO.class);
