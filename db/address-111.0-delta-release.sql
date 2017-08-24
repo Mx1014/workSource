@@ -1,9 +1,12 @@
+--清除
+delete from eh_launch_pad_items WHERE id in (1112645,1112644,1112643,1112642) AND namespace_id = 999971;
+
 -- 配置服务广场图标
 SET @id = (SELECT MAX(id) from eh_launch_pad_items);
 INSERT INTO `eh_launch_pad_items` 
 (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 VALUES 
-(@id+1, 999971, '0', '0', '0', '/home', 'Bizs', 'Park Services', '园区服务', 'cs://1/image/aW1hZ2UvTVRvNVpHUmxNalExWkdSaU16Y3hNelV3T1RjME5ERmhORGRtWm1aak16TTBNdw', '1', '1', '66', '{"viewTitle": "选择人才公寓"}', 10, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'default');
+(@id+1, 999971, '0', '0', '0', '/home', 'Bizs', 'Park Services', '园区服务', 'cs://1/image/aW1hZ2UvTVRvNVpHUmxNalExWkdSaU16Y3hNelV3T1RjME5ERmhORGRtWm1aak16TTBNdw', '1', '1', '66', '{"viewTitle": "选择园区服务"}', 10, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'default');
 
 INSERT INTO `eh_launch_pad_items` 
 (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
@@ -25,5 +28,7 @@ SET @ geo_id = (SELECT MAX(id) from eh_community_geopoints);
 INSERT INTO `eh_community_geopoints` VALUES (@geo_id + 1, 240111044332059790, '',0,0, 's00000000000');
 INSERT INTO `eh_community_geopoints` VALUES (@geo_id + 2, 240111044332059789, '',0,0, 's00000000000');
 
-
+-- 增加蒙版表数据
+INSERT INTO `eh_namespace_masks` VALUES ('1', '999971', 'Talent Apartment', '4', '快速切换至人才市场', 'park_tourist');
+INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', 'Park Services', '4', '快速切换至园区主页', 'default');
 

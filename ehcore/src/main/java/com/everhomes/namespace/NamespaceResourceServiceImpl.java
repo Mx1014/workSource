@@ -1,21 +1,17 @@
 // @formatter:off
 package com.everhomes.namespace;
 
-import com.everhomes.launchpad.LaunchPadItem;
-import com.everhomes.launchpad.LaunchPadProvider;
-import com.everhomes.rest.common.ScopeType;
-import com.everhomes.rest.community.GetCommunityAuthPopupConfigCommand;
-import com.everhomes.rest.namespace.*;
-import org.elasticsearch.common.jackson.dataformat.yaml.snakeyaml.events.Event;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.launchpad.LaunchPadItem;
+import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
-import com.everhomes.rest.namespace.NamespaceDetailDTO;
+import com.everhomes.rest.community.GetCommunityAuthPopupConfigCommand;
+import com.everhomes.rest.namespace.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -51,6 +47,9 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 
     @Autowired
     private CommunityService communityService;
+
+	@Autowired
+	private NamespacesProvider namespacesProvider;
 
     @Override
     public ListCommunityByNamespaceCommandResponse listCommunityByNamespace(ListCommunityByNamespaceCommand cmd) {
@@ -118,29 +117,26 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
         
 		//需要蒙版的信息
 
-		//从配置中读取
-
-		List<LaunchPadItem> items_default = this.launchPadProvider.searchLaunchPadItemsByItemName(namespaceId,null,"Talent Apartment");
-		List masks_pm = getMasksFromItemInfo(items_default, "快速切换至园区主页");
-		if(masks_pm != null){
-			detailDto.setPmMasks(masks_pm);
+		//从配置中读取MaskDTO
+		List<MaskDTO> masks = this.namespacesProvider.listNamespaceMasks(namespaceId);
+		if(masks != null){
+			masks.forEach(r->{
+				//在圖標表中查找
+				LaunchPadItem item = this.launchPadProvider.searchLaunchPadItemsByItemName(namespaceId, r.getSceneType(), r.getItemName());
+				if(item != null){
+					//有效圖標
+					r.setId(item.getId());
+				}else{
+					//無效圖標
+					r.setId(0L);
+					r.setTips("cannot found item");
+				}
+			});
 		}
-
+		if(masks != null && masks.size()  > 0){
+			detailDto.setPmMasks(masks);
+		}
 		return detailDto;
 	}
 
-	//从item信息中获得蒙版信息
-	private List<MaskDTO> getMasksFromItemInfo(List<LaunchPadItem> items, String tips){
-		if(items.size() != 0){
-			List masks = items.stream().map(r->{
-				MaskDTO pmMask = new MaskDTO();
-				pmMask.setId(r.getId());
-				pmMask.setIconName(r.getItemName());
-				pmMask.setTips(tips);
-				return pmMask;
-			}).collect(Collectors.toList());
-			return masks;
-		}
-		return null;
-	}
 }

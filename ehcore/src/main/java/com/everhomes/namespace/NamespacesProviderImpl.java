@@ -1,24 +1,11 @@
 package com.everhomes.namespace;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.everhomes.rest.namespace.MaskDTO;
-import org.hibernate.sql.Select;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.namespace.MaskDTO;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.schema.tables.daos.EhNamespacesDao;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
@@ -29,6 +16,15 @@ import com.everhomes.server.schema.tables.pojos.EhNamespaceDetails;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class NamespacesProviderImpl implements NamespacesProvider {
@@ -135,7 +131,11 @@ public class NamespacesProviderImpl implements NamespacesProvider {
 
 	@Override
 	public List<MaskDTO> listNamespaceMasks(Integer namespaceId) {
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.select().from(Tables.EH_NAMESPACE_MASKS)
+				.where(Tables.EH_NAMESPACE_MASKS.NAMESPACE_ID.eq(namespaceId))
+				.fetch()
+				.map(r -> ConvertHelper.convert(r, MaskDTO.class));
 	}
 
 

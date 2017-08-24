@@ -521,9 +521,8 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 
 	@Override
-	public List<LaunchPadItem> searchLaunchPadItemsByItemName(Integer namespaceId, String sceneType, String itemName) {
+	public LaunchPadItem searchLaunchPadItemsByItemName(Integer namespaceId, String sceneType, String itemName) {
 
-		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
 
@@ -540,11 +539,12 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		if(condition != null)
 			step.where(condition);
 
-		step.fetch().map((r) ->{
-			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
-			return null;
-		});
+		Record record = step.fetchOne();
 
-		return items;
+		if(record != null){
+			return ConvertHelper.convert(record, LaunchPadItem.class);
+		}
+
+		return null;
 	}
 }

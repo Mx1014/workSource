@@ -15,6 +15,7 @@ public class MaskDTO {
     private String tips;
     private String itemName;
     private Integer imageType;
+    private String sceneType;
 
     @Override
     public String toString() {
@@ -52,5 +53,13 @@ public class MaskDTO {
 
     public void setItemName(String itemName) {
         this.itemName = itemName;
+    }
+
+    public String getSceneType() {
+        return sceneType;
+    }
+
+    public void setSceneType(String sceneType) {
+        this.sceneType = sceneType;
     }
 }
