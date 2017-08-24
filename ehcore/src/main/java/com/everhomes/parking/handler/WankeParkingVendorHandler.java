@@ -130,8 +130,9 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-
-    	return recharge(order);
+		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
+			return rechargeMonthlyCard(order);
+		return payTempCardFee(order);
     }
     
     private void checkExpireDateIsNull(String expireDate,String plateNo) {
@@ -235,12 +236,6 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
         WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
 		return entity.isSuccess();
 
-    }
-	@Override
-	public boolean recharge(ParkingRechargeOrder order){
-		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
-			return rechargeMonthlyCard(order);
-		return payTempCardFee(order);
     }
 
 	private WankeTempFee getTempFee(String plateNumber) {

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.parking.ParkingLot;
+import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.dashi.DashiCarLocation;
 import com.everhomes.parking.dashi.DashiEmptyPlaceFloorInfo;
@@ -14,10 +15,7 @@ import com.everhomes.parking.dashi.DashiJsonEntity;
 import com.everhomes.parking.ketuo.KetuoCard;
 import com.everhomes.parking.ketuo.KetuoRequestConfig;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
-import com.everhomes.rest.parking.GetCarLocationCommand;
-import com.everhomes.rest.parking.GetFreeSpaceNumCommand;
-import com.everhomes.rest.parking.ParkingCarLocationDTO;
-import com.everhomes.rest.parking.ParkingFreeSpaceNumDTO;
+import com.everhomes.rest.parking.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.WebTokenGenerator;
@@ -29,14 +27,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * 深圳湾 停车对接
@@ -48,6 +44,7 @@ public class KetuoMybayParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 	private static final String GET_EMPTY_PLACE = "/ParkingApi/QueryEmptyPlace";
 	private static final String GET_CAR_LOCATION = "/ParkingApi/ReverseForCar";
 	private static final String GET_PARKING_INFO = "/ParkingApi/GetParkingInfo";
+	private static final String ADD_MONTH_CARD = "/api/card/AddCarCard";
 
 	@Autowired
     private ConfigurationProvider configProvider;
@@ -61,15 +58,63 @@ public class KetuoMybayParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 		return true;
 	}
 
-	@Override
-	public KetuoCard getCard(String plateNumber) {
-		KetuoCard card = super.getCard(plateNumber);
+//	@Override
+//	public KetuoCard getCard(String plateNumber) {
+//		KetuoCard card = super.getCard(plateNumber);
+//
+//		//深圳湾月卡没有对接免费金额,设置成0
+//		if (null != card) {
+//			card.setFreeMoney(0);
+//		}
+//		return card;
+//	}
 
-		//深圳湾月卡没有对接免费金额,设置成0
-		if (null != card) {
-			card.setFreeMoney(0);
+	@Override
+	public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+		if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())) {
+			if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
+				return rechargeMonthlyCard(order);
+			return payTempCardFee(order);
+		}else {
+			return addMonthCard(order);
 		}
-		return card;
+	}
+
+	private boolean addMonthCard(ParkingRechargeOrder order){
+
+		JSONObject param = new JSONObject();
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		long tempTime = calendar.getTimeInMillis();
+		String startTime = Utils.dateToStr(new Date(tempTime), Utils.DateStyle.DATE_TIME);
+		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(tempTime, order.getMonthCount().intValue());
+		String endTime = Utils.dateToStr(tempEnd, Utils.DateStyle.DATE_TIME);
+
+		param.put("cardName", "");
+		param.put("name", order.getPlateOwnerName());
+		param.put("tel", order.getPayerPhone());
+		param.put("areaInfo", "");
+		param.put("carType", CAR_TYPE);
+		param.put("validFrom", startTime);
+		param.put("validTo", endTime);
+		param.put("addUser", "");
+		param.put("carNo", order.getPlateNumber());
+		param.put("carColor", "");
+
+		String json = post(param, ADD_MONTH_CARD);
+
+		JSONObject jsonObject = JSONObject.parseObject(json);
+		Object obj = jsonObject.get("resCode");
+		if(null != obj ) {
+			int resCode = (int) obj;
+			if(resCode == 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected KetuoRequestConfig getKetuoRequestConfig() {

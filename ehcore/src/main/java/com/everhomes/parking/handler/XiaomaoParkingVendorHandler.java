@@ -173,7 +173,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-        return recharge(order);
+        return rechargeMonthlyCard(order);
     }
 
     @Override
@@ -228,11 +228,6 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     @Override
     public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
         return null;
-    }
-
-    @Override
-    public boolean recharge(ParkingRechargeOrder order) {
-        return rechargeMonthlyCard(order);
     }
 
 }

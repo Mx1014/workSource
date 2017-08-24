@@ -1435,7 +1435,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (order.getStatus() == ParkingRechargeOrderStatus.FAILED.getCode()) {
 			//TODO:
-			if (handler.recharge(order)) {
+			if (handler.notifyParkingRechargeOrderPayment(order)) {
 				order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
 				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 				parkingProvider.updateParkingRechargeOrder(order);

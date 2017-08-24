@@ -101,13 +101,6 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     	return card;
     }
 
-    @Override
-	public boolean recharge(ParkingRechargeOrder order){
-		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
-			return rechargeMonthlyCard(order);
-		return payTempCardFee(order);
-	}
-
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
 		BosigaoCardInfo card = getCardInfo(order.getPlateNumber());
@@ -271,8 +264,9 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-    	return recharge(order);
-    }
+		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
+			return rechargeMonthlyCard(order);
+		return payTempCardFee(order);    }
     
     private Long strToLong(String str) {
 		return Utils.strToLong(str, Utils.DateStyle.DATE_TIME_STR);

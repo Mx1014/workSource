@@ -172,11 +172,12 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-    	return recharge(order);
+		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
+			return rechargeMonthlyCard(order);
+		return false;
     }
 
-	@Override
-    public boolean recharge(ParkingRechargeOrder order){
+    private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
     	Bosigao2RechargeCommand cmd = new Bosigao2RechargeCommand();
 		cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));
 		cmd.setCardCode("");

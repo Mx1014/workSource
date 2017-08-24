@@ -189,8 +189,8 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 		return json;
 	}
 
-    @Override
-	public boolean recharge(ParkingRechargeOrder order){
+	@Override
+	public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
 			return rechargeMonthlyCard(order);
 		}

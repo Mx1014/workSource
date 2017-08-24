@@ -132,7 +132,9 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-    	return recharge(order);
+		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
+			return rechargeMonthlyCard(order);
+		return payTempCardFee(order);
     }
 
     @Override
@@ -351,13 +353,6 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 			}
 		}
 		return false;
-    }
-
-	@Override
-	public boolean recharge(ParkingRechargeOrder order){
-		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
-			return rechargeMonthlyCard(order);
-		return payTempCardFee(order);
     }
 
 	public String post(JSONObject param) {
