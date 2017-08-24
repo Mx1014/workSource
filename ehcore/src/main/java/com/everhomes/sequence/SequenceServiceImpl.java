@@ -1635,7 +1635,7 @@ public class SequenceServiceImpl implements SequenceService {
             startSequence = sequenceProvider.getNextSequence(cmd.getSequenceDomain());
             blockSize = 1;
         } else {
-            sequenceProvider.getNextSequenceBlock(cmd.getSequenceDomain(), blockSize);
+            startSequence = sequenceProvider.getNextSequenceBlock(cmd.getSequenceDomain(), blockSize);
         }
         
         GetSequenceDTO dto = new GetSequenceDTO();
