@@ -896,3 +896,17 @@ SET @config_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@config_id := @config_id + 1), 'pmtask.handler-999966', 'flow', '', '0', NULL);
 
 UPDATE eh_launch_pad_layouts set layout_json = '{"versionCode":"2017081804","versionName":"4.8.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":16,"columnCount":5},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Gallery", "cssStyleFlag":1,"paddingTop":0,"paddingLeft":0,"paddingBottom":0,"paddingRight":0,"lineSpacing":0,"columnSpacing":0,"backgroundColor":"#EFEFF4"},"style":"Gallery","defaultOrder":5,"separatorFlag":1,"separatorHeight":16,"columnCount":2}]}', version_code= '2017081804' where namespace_id = 999966 and name = 'ServiceMarketLayout';
+
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Bizs', '全部', '全部', 'cs://1/image/aW1hZ2UvTVRvNVl6VmxNREF5WkRKbE56ZzVOemM1TjJFM01qSmtPREEwWXpoa016Z3pZZw', '1', '1', '53', '{"itemLocation": "/home", "itemGroup": "Bizs"}', 100, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+DELETE from `eh_web_menu_scopes` where namespace_id = 999966 and menu_id in (40200, 40210, 40220);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ('apply.entry.building.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s', '', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ('apply.entry.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/rent_detail/%s', '', '0', NULL);
+UPDATE eh_launch_pad_items set item_label = '充电缴费' where namespace_id = 999966 and item_label='充值缴费';
+
+UPDATE eh_launch_pad_items set action_data = '{"url":"http://park.szbay.com/park-introduction/index.html?hideNavigationBar=1&rtToken=Dg7kvcXMUoST7pZPjlOJVVrsVlrHMF__Zg6RuDV-5_nldRIx0sYCQBBcejQ3UYgfUwqqx63yHhG--434BOq86wHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-fnWgm8OUppOWeNIotBuXgWA"}' where namespace_id = 999966 and item_label='园区介绍';
+
+
