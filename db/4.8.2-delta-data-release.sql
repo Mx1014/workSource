@@ -145,7 +145,7 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('21000','仓库管理','20000','/20000/21000','1','2','2','0','2017-05-27 10:16:28',NULL,NULL,'0','0',NULL,NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('30500','资产管理','20000','/20000/30500','1','2','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0',NULL,NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('32500','合同管理','20000','/20000/32500','1','2','2','0','2016-12-06 11:43:19',NULL,NULL,'0','0',NULL,NULL,'0');
-insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('33000','企业管理','20000','/20000/33000','1','2','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0',NULL,NULL,'0');
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('33000','企业管理','20000','/20000/33000','1','2','2','0','2016-12-06 11:40:51','{"type":3}',NULL,'0','0',NULL,34,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('37000','客户资料','20000','/20000/37000','1','2','2','0','2017-05-11 20:08:38',NULL,NULL,'0','0',NULL,NULL,NULL);
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('49100','能耗管理','20000','/20000/49100','1','2','2','0','2016-12-06 11:46:41','{\"url\":\"http://janson.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}',NULL,'0','0',NULL,'13','0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('30600','黑名单管理','20000','/20000/30600','1','2','2','0','2016-12-06 11:46:41',NULL,NULL,'0','0',NULL,NULL,'0');
@@ -233,16 +233,12 @@ insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `dom
 
 update eh_user_launch_pad_items eulpi set item_name = (select item_name from `eh_launch_pad_items` where id = eulpi.item_id);
 update `eh_item_service_categries` set label = name;
-update `eh_item_service_categries` set name = id;
 update `eh_item_service_categries` set `item_location` = '/home';
 update `eh_item_service_categries` set `item_group` = 'Bizs';
 update `eh_item_service_categries` set `scope_code` = 5, `scope_id` = 0 where `scene_type` = 'pm_admin'; 
 update `eh_item_service_categries` set `scope_code` = 1, `scope_id` = 0 where `scene_type` = 'park_tourist'; 
 update `eh_item_service_categries` set `scope_code` = 6, `scope_id` = 0 where `scene_type` = 'default'; 
 update `eh_launch_pad_items` elpi set categry_name = (select name from eh_item_service_categries where id = elpi.service_categry_id);
-
-
-
 
 
 
@@ -264,3 +260,8 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 update eh_configurations SET `value` = '20000' WHERE `name` = 'print.logon.scan.timout' AND namespace_id = '0';
 -- # 二维码有效时间改成六分钟
 update eh_configurations SET `value` = '6' WHERE `name` = 'print.siyin.timeout' AND namespace_id = '0';
+
+-- 刷旧数据，将群成员里昵称为null的，设置成id。edit by yanjun 20170824
+UPDATE EH_GROUP_MEMBERS set member_nick_name = id where member_nick_name is NULL;
+-- 刷旧数据，用户的昵称为null，设置为手机号  edit by yanjun 20170824
+UPDATE eh_users a set nick_name = (SELECT identifier_token from eh_user_identifiers b where a.id = b.owner_uid) where nick_name is null;
