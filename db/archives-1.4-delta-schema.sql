@@ -1,0 +1,1 @@
+ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
