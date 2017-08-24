@@ -8,11 +8,11 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>id: id</li>
- *     <li>namespaceId: 域空间ID</li>
- *     <li>resourceType: 域空间下所管理的小区类型，参考{@link com.everhomes.rest.namespace.NamespaceCommunityType}</li>
- * <li>pmMask : pm_admin场景</li>
- * <li>parkMask ：park_tourist场景</li>
+ * <li>id: id</li>
+ * <li>namespaceId: 域空间ID</li>
+ * <li>resourceType: 域空间下所管理的小区类型，参考{@link com.everhomes.rest.namespace.NamespaceCommunityType}</li>
+ * <li>pmMask : 蒙版信息</li>
+
  * </ul>
  */
 public class NamespaceDetailDTO {
@@ -22,8 +22,6 @@ public class NamespaceDetailDTO {
     private Byte authPopupConfig;
     @ItemType(MaskDTO.class)
     private List<MaskDTO> pmMasks;
-    @ItemType(MaskDTO.class)
-    private List<MaskDTO> parkMasks;
 
 
     public Long getId() {
@@ -69,13 +67,5 @@ public class NamespaceDetailDTO {
 
     public void setPmMasks(List<MaskDTO> pmMasks) {
         this.pmMasks = pmMasks;
-    }
-
-    public List<MaskDTO> getParkMasks() {
-        return parkMasks;
-    }
-
-    public void setParkMasks(List<MaskDTO> parkMasks) {
-        this.parkMasks = parkMasks;
     }
 }

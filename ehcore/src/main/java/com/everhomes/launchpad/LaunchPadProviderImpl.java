@@ -518,4 +518,33 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		dao.insert(itemServiceCategry);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhItemServiceCategries.class, null);
 	}
+
+
+	@Override
+	public List<LaunchPadItem> searchLaunchPadItemsByItemName(Integer namespaceId, String sceneType, String itemName) {
+
+		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+
+		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId);
+		if(sceneType != null){
+			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+		}
+
+		if(itemName != null && !itemName.trim().equals("")){
+			Condition keyCondition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.eq(itemName);
+			keyCondition = keyCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LABEL.like(itemName));
+			condition = condition.and(keyCondition);
+		}
+		if(condition != null)
+			step.where(condition);
+
+		step.fetch().map((r) ->{
+			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+			return null;
+		});
+
+		return items;
+	}
 }

@@ -117,7 +117,10 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
         }
         
 		//需要蒙版的信息
-		List<LaunchPadItem> items_default = this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId,null,null,"Talent Apartment",0,1000);
+
+		//从配置中读取
+
+		List<LaunchPadItem> items_default = this.launchPadProvider.searchLaunchPadItemsByItemName(namespaceId,null,"Talent Apartment");
 		List masks_pm = getMasksFromItemInfo(items_default, "快速切换至园区主页");
 		if(masks_pm != null){
 			detailDto.setPmMasks(masks_pm);
