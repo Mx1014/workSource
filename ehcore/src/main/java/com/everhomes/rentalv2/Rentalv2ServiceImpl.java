@@ -5119,9 +5119,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 		}
 		RentalSiteDTO  dto = convertRentalSite2DTO(rentalSite, sceneTokenDTO);
-		if(dto.getIntroduction() != null){
-			dto.setIntroduction(dto.getIntroduction().replaceAll("<.*?>", "").replaceAll("&nbsp;",""));
-		}
+//		if(dto.getIntroduction() != null){
+//			dto.setIntroduction(dto.getIntroduction().replaceAll("<.*?>", "").replaceAll("&nbsp;",""));
+//		}
 		return dto;
 	}
 
