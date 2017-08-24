@@ -240,23 +240,27 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		
 //		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(ItemGroup.BIZS.getCode());
 		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId);
-        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+		if(sceneType != null){
+			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+		}
 //		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq("/home");
 		
 		Condition scopeConditionAll = null;
-		for(Map.Entry<Byte, Long> entry: scopeMap.entrySet()){
-			if(entry.getValue() == null){
-				continue;
-			}
-			Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(entry.getKey());
-			scopeCondition = scopeCondition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(entry.getValue()));
-			if(scopeConditionAll == null){
-				scopeConditionAll = scopeCondition;
-			}else{
-				scopeConditionAll = scopeConditionAll.or(scopeCondition);
+		if(scopeMap != null){
+			for(Map.Entry<Byte, Long> entry: scopeMap.entrySet()){
+				if(entry.getValue() == null){
+					continue;
+				}
+				Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(entry.getKey());
+				scopeCondition = scopeCondition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(entry.getValue()));
+				if(scopeConditionAll == null){
+					scopeConditionAll = scopeCondition;
+				}else{
+					scopeConditionAll = scopeConditionAll.or(scopeCondition);
+				}
 			}
 		}
-		
+
 //		Condition scopeCondition
 //		Condition scopeConditionAll = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(ScopeType.ALL.getCode());
 //		scopeConditionAll = scopeConditionAll.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(0L));

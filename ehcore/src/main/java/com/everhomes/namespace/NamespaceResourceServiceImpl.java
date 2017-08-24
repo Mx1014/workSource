@@ -117,32 +117,23 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
         }
         
 		//需要蒙版的信息
-		String sceneType_detault = "default";
-		String itemLocation = "/home";
-		List<LaunchPadItem> items_default = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType_detault, itemLocation, null, null, 0L, null);
-		List masks_pm = getMasksFromItemInfo(items_default);
+		List<LaunchPadItem> items_default = this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId,null,null,"Talent Apartment",0,1000);
+		List masks_pm = getMasksFromItemInfo(items_default, "快速切换至园区主页");
 		if(masks_pm != null){
 			detailDto.setPmMasks(masks_pm);
-		}
-
-		String sceneType_park_tourist = "park_tourist";
-		List<LaunchPadItem> items_park_tourist = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType_park_tourist, itemLocation, null, null, 0L, null);
-		List masks_park = getMasksFromItemInfo(items_park_tourist);
-		if(masks_park != null){
-			detailDto.setParkMasks(masks_park);
 		}
 
 		return detailDto;
 	}
 
 	//从item信息中获得蒙版信息
-	private List<MaskDTO> getMasksFromItemInfo(List<LaunchPadItem> items){
+	private List<MaskDTO> getMasksFromItemInfo(List<LaunchPadItem> items, String tips){
 		if(items.size() != 0){
 			List masks = items.stream().map(r->{
 				MaskDTO pmMask = new MaskDTO();
 				pmMask.setId(r.getId());
 				pmMask.setIconName(r.getItemName());
-				pmMask.setTips("快速切换至园区主页");
+				pmMask.setTips(tips);
 				return pmMask;
 			}).collect(Collectors.toList());
 			return masks;
