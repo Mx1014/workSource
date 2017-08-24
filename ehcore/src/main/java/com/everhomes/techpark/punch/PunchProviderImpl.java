@@ -2724,7 +2724,25 @@ long id = sequenceProvider.getNextSequence(key);
             //fetchAny() maybe return null
             return null;
         }
-	};
-	
+	}
+
+	@Override
+	public List<PunchTimeRule> listPunchTimeRulesBySplitTime(long beginTime, long endTime) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_TIME_RULES);
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.DAY_SPLIT_TIME_LONG.greaterOrEqual(beginTime)
+				.and(Tables.EH_PUNCH_TIME_RULES.DAY_SPLIT_TIME_LONG.lessOrEqual(endTime));
+		step.where(condition);
+		List<PunchTimeRule> result = step
+				.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchTimeRule.class);
+				});
+		return result;
+	}
+
+
 }
 

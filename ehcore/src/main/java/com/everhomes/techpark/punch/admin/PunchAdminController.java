@@ -403,7 +403,24 @@ public class PunchAdminController extends ControllerBase {
 		return commandResponse;
 	}
 
-    /**
+
+	/**
+	 * <b>URL: /punch/exportPunchSchedulingTemplate</b>
+	 * <p>
+	 * 导出排班表模板
+	 * </p>
+	 */
+	@RequestMapping("exportPunchSchedulingTemplate")
+	public  HttpServletResponse exportPunchSchedulingTemplate(@Valid ListPunchSchedulingMonthCommand cmd,HttpServletResponse response ) {
+		HttpServletResponse commandResponse = punchService.exportPunchSchedulingTemplate(cmd, response );
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+		return commandResponse;
+	}
+
+
+	/**
      * <b>URL: /punch/importPunchScheduling</b>
      * <p>导入排班表</p>
      */

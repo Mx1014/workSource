@@ -1,6 +1,5 @@
 package com.everhomes.techpark.punch;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -10,16 +9,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSONObject;
@@ -53,7 +51,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -1878,7 +1875,7 @@ public class PunchServiceImpl implements PunchService {
 						SelectQuery<? extends Record> query) { 
 	//				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime()));
 					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(new java.sql.Date(startCalendar.getTime().getTime())));
-					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date( endCalendar.getTime().getTime())));
+					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lessOrEqual(new java.sql.Date( endCalendar.getTime().getTime())));
 					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull()); 
 					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.ne(0L)); 
 					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.ne(statistic.getUserId()));  
@@ -1893,7 +1890,7 @@ public class PunchServiceImpl implements PunchService {
 			return punchSchedulings.size();
 		}else if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
 			int workday=0;
-			for(;anchorCalendar.before(endCalendar);anchorCalendar.add(Calendar.DAY_OF_MONTH, 1)){
+			for(;!anchorCalendar.after(endCalendar);anchorCalendar.add(Calendar.DAY_OF_MONTH, 1)){
 				PunchTimeRule timerule = getPunchTimeRuleByRuleIdAndDate(pr,anchorCalendar.getTime(), statistic.getUserId());
 				if(null != timerule)
 					workday++;
@@ -2536,19 +2533,9 @@ public class PunchServiceImpl implements PunchService {
 					return specialDay.getTimeRuleId();
 				}
 			}
-			//如果为节假日则返回null  如果是节假调休日,用调休日期代替
-			java.sql.Date punchDate = new java.sql.Date(date.getTime());
-			if(pr.getChinaHolidayFlag().equals(NormalFlag.YES.getCode())){
-				PunchHoliday holiday = punchProvider.findHolidayByDate(punchDate);
-				if(null != holiday){
-					if(holiday.getStatus().equals(NormalFlag.YES.getCode())){
-						return null;
-					}else {
-						punchDate = holiday.getExchangeFromDate();
-					}
-				}
-					
-			}
+            //如果为节假日则返回null  如果是节假调休日,用调休日期代替
+            java.sql.Date punchDate = new java.sql.Date(date.getTime());
+            punchDate = checkHoliday(pr,punchDate);
 			//看是循环timerule找当天的timeRule
 			List<PunchTimeRule> timeRules = punchProvider.listPunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
 			if(null != timeRules)
@@ -2568,7 +2555,24 @@ public class PunchServiceImpl implements PunchService {
 			return punchScheduling.getTimeRuleId();
 		}
 	}
-	private Integer getWeekDayInt(java.sql.Date punchDate) {
+
+    private java.sql.Date checkHoliday(PunchRule pr, java.sql.Date punchDate) {
+
+        if(pr.getChinaHolidayFlag().equals(NormalFlag.YES.getCode())){
+            PunchHoliday holiday = punchProvider.findHolidayByDate(punchDate);
+            if(null != holiday){
+                if(holiday.getStatus().equals(NormalFlag.YES.getCode())){
+                    return null;
+                }else {
+                    punchDate = holiday.getExchangeFromDate();
+                }
+            }
+
+        }
+        return punchDate;
+    }
+
+    private Integer getWeekDayInt(java.sql.Date punchDate) {
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(punchDate);
@@ -4773,8 +4777,14 @@ public class PunchServiceImpl implements PunchService {
     private String convertTimeLongToString(Long timeLong){
     	if(null == timeLong)
     		return "";
-    	else 
+    	else{
+//            if(timeLong < 48*3600*1000L){
+//                Long time = dateSF.get().parse("2010-1-1").getTime();
+//                return timeSF.get().format(time+timeLong);
+//            }
+//
     		return timeSF.get().format(convertTime(timeLong));
+        }
     }
 	private void setNewPunchDetailsBookRow(Sheet sheet, PunchDayDetailDTO dto) {
 
@@ -5388,6 +5398,7 @@ public class PunchServiceImpl implements PunchService {
 			return false;
 		return true;
 	}
+    private static int refreshGap = 15;
 	/**
 	 * 每15分轮询刷打卡记录
 	 * 1.刷punchdate为前一天的
@@ -5412,103 +5423,101 @@ public class PunchServiceImpl implements PunchService {
 		//刷新前一天的
 		Calendar punCalendar = Calendar.getInstance();
         punCalendar.setTime(runDate);
-		punCalendar.add(Calendar.DATE, -1);
-		//取所有设置了rule的公司 
+        Long timeLong = getTimeLong(punCalendar);
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DAY_OF_MONTH, -1);
+        //找今天刷新的(当前时间点前15分钟 到当前时间点之间split的
+        List<PunchTimeRule> timeRules = punchProvider.listPunchTimeRulesBySplitTime(timeLong - refreshGap * 60 * 1000,
+                timeLong);
+        if (null == timeRules) {
+            timeRules = new ArrayList<>();
+        }
+        List<PunchTimeRule> timeRules2 = punchProvider.listPunchTimeRulesBySplitTime(timeLong - refreshGap * 60 * 1000
+                + ONE_DAY_MS, timeLong + ONE_DAY_MS);
+        if (null != timeRules2) {
+            timeRules.addAll(timeRules2);
+        }
+        Set<PunchRule> punchRules = new HashSet<>();
+        for (PunchTimeRule ptr : timeRules) {
+            if(ptr.getPunchRuleId() ==null)
+                continue;
+            PunchRule pr = punchProvider.getPunchRuleById(ptr.getPunchRuleId());
+            if (null == pr) {
+                continue;
+            }
 
-		Calendar endCalendar = Calendar.getInstance();
-		endCalendar.setTime(runDate); 
-		endCalendar.set(Calendar.SECOND, 0);
-		endCalendar.set(Calendar.MILLISECOND, 0);
-		//取昨天和今天的排班
-		List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
-			@Override
-			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-					SelectQuery<? extends Record> query) { 
-//					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.between(new java.sql.Date(punCalendar.getTime().getTime()),
-						new java.sql.Date( endCalendar.getTime().getTime())));
-//					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.equal(new java.sql.Date( endCalendar.getTime().getTime())));
-				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
-				return null;
-			}
-		});
-		
-		//1.计算targetType 为organization的所有用户,并且userid不存在于map表的targetId内的
-//			List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
-		for(PunchScheduling punchScheduling : punchSchedulings){
-			//在15分钟+1分钟延迟内的进行计算, 不在此范围的continue
-			long endLong = runDate.getTime();
-			long beginLong = runDate.getTime() - 15*60*1000L;
-			if(null == punchScheduling.getTimeRuleId())
-				continue;
-			PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
-			if(null == ptr || null == punchScheduling.getRuleDate()){
-				LOGGER.error("punch time rule is null!! or  rule date is null!!   punchScheduling = "+punchScheduling.toString());
-				continue;
-			}
-			long punchDateLong = punchScheduling.getRuleDate().getTime()+ptr.getDaySplitTimeLong(); 
-			if(punchDateLong > endLong || punchDateLong < beginLong)
-				continue;
-			//设置起止时间分别是排班的月初和当天
-			punCalendar.setTime(runDate); 
-			punCalendar.set(Calendar.HOUR_OF_DAY, 0);
-			punCalendar.set(Calendar.SECOND, 0);
-			punCalendar.set(Calendar.MILLISECOND, 0);
-			Calendar startCalendar = Calendar.getInstance();
-			startCalendar.setTime(punchScheduling.getRuleDate());
-			startCalendar.set(Calendar.HOUR_OF_DAY, 0);
-			startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-			startCalendar.set(Calendar.MINUTE, 0);
-			startCalendar.set(Calendar.SECOND, 0);
-			startCalendar.set(Calendar.MILLISECOND, 0);
-			if(punchScheduling.getTargetType().equals(PunchOwnerType.ORGANIZATION.getCode())){
-				List<PunchRuleOwnerMap> ownerMaps = punchProvider.queryPunchRuleOwnerMaps(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
-					@Override
-					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-							SelectQuery<? extends Record> query) {  
-						query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_TYPE.equal(punchScheduling.getOwnerType()));
-						query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_ID.equal(punchScheduling.getOwnerId())); 
-						query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_TYPE.equal(PunchOwnerType.User.getCode())); 
-						return null;
-					}
-				});
-				List<Long> userIdList = new ArrayList<Long>();
-				if(null != ownerMaps)
-					for(PunchRuleOwnerMap ownerMap : ownerMaps){
-						userIdList.add(ownerMap.getTargetId());
-					}
-				Long orgId = punchScheduling.getTargetId();
-				//拿到
-				List<String> groupTypeList = new ArrayList<String>();
-				groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
-				groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-				List<OrganizationMemberDTO> organizationMembers = organizationService.listAllChildOrganizationPersonnel
-						(orgId, groupTypeList, null) ;
-				//循环刷所有员工
-				for(OrganizationMemberDTO member : organizationMembers){
-//					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId() && !userIdList.contains(member.getTargetId())){
-//						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
-//					}
-					//如果这个人通过ownerid 取出来的规则,和排班表规则一样可以判定他用的是排班表规则,于是进行刷新
-					try{
-						PunchRule punchRule = getPunchRule(punchScheduling.getOwnerType(), punchScheduling.getOwnerId(), member.getTargetId());
-						if(null != punchRule && punchRule.getId().equals(punchScheduling.getPunchRuleId()))
-							refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
-					}catch(Exception e ){
-						LOGGER.error("get punch rule failed ", e);
-					}
-				}
-			}
-			else{
-				//2.计算targetType 为user的
-				OrganizationDTO dept = findUserDepartment(punchScheduling.getTargetId(), punchScheduling.getOwnerId());
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(punchScheduling.getTargetId(), dept.getId());
-				refreshDayLogAndMonthStat(ConvertHelper.convert(member, OrganizationMemberDTO.class), dept.getId(), punCalendar, startCalendar);
-			}
-		
-		}
-//		});
-	}
+            if (PunchRuleType.GUDING.equals(PunchRuleType.fromCode(pr.getRuleType()))) {
+                //看昨天是否为特殊日期
+                PunchSpecialDay specialDay = punchProvider.findSpecialDayByDateAndOrgId(pr.getPunchOrganizationId(),yesterday.getTime());
+                if(null != specialDay){
+                    if(specialDay.getStatus().equals(NormalFlag.YES.getCode())){
+                        continue;
+                    }else {
+                        //特殊上班工作日,要处理它
+                        punchRules.add(pr);
+                    }
+                }
+                //如果为节假日则返回null  如果是节假调休日,用调休日期代替
+                java.sql.Date punchDate = new java.sql.Date(yesterday.getTime().getTime());
+                punchDate = checkHoliday(pr,punchDate);
+                //看是循环timerule找当天的timeRule
+                Integer openWeek = Integer.parseInt(ptr.getOpenWeekday(), 2);
+                Integer weekDayInt = getWeekDayInt(punchDate);
+                if(weekDayInt.equals(openWeek&weekDayInt)){
+                    //当天上班
+                    punchRules.add(pr);
+                }
+            }else{
+                Calendar schedulingCalendar = Calendar.getInstance();
+                schedulingCalendar = yesterday;
+                if (ptr.getDaySplitTimeLong() < ONE_DAY_MS) {
+                    schedulingCalendar = punCalendar;
+                }
+                final java.sql.Date queryDate = new java.sql.Date(schedulingCalendar.getTimeInMillis());
+                List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                        SelectQuery<? extends Record> query) {
+                        query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.eq(queryDate));
+                        query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.eq(ptr.getId()));
+                        query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
+                        return null;
+                    }
+                });
+                if (null != punchSchedulings) {
+                    for(PunchScheduling punchScheduling : punchSchedulings){
+                        refreshDayLogAndMonthStat(punchScheduling.getTargetId(), pr.getOwnerId(), schedulingCalendar);
+                    }
+                }
+            }
+        }
+        for (PunchRule pr : punchRules) {
+            refreshGroupDayLogAndMonthStat(pr, yesterday);
+        }
+    }
+    /**刷固定排班*/
+    private void refreshGroupDayLogAndMonthStat(PunchRule pr, Calendar yesterday) {
+        List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+        for(UniongroupMemberDetail member : members) {
+            if(member.getTargetType().equals("USER")){
+                refreshDayLogAndMonthStat(member.getTargetId(),pr.getOwnerId(),yesterday);
+            }
+        }
+    }
+
+    private void refreshDayLogAndMonthStat(Long userId,Long ownerId ,Calendar punCalendar){
+
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(punCalendar.getTime());
+        startCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+
+        OrganizationDTO dept = findUserDepartment(userId, ownerId);
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, dept.getId());
+        refreshDayLogAndMonthStat(ConvertHelper.convert(member, OrganizationMemberDTO.class), dept.getId(), punCalendar, startCalendar);
+
+    }
+    /**刷新punCalendar 当天日数据 和 start到pun 之间的月数据*/
 	private void refreshDayLogAndMonthStat(OrganizationMemberDTO member, Long orgId,
 			Calendar punCalendar, Calendar startCalendar) { 
 		try {
@@ -6111,73 +6120,108 @@ public class PunchServiceImpl implements PunchService {
 //		return map;
 //	}
 
-	@Override
-	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
-			HttpServletResponse response) {
+    @Override
+    public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
+                                                     HttpServletResponse response) {
 //		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 //		targetTimeRules.set(punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(),  null));
 //		if(null == targetTimeRules.get())
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"have no time rule"); 
+//					"have no time rule");
 //		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
 //			LOGGER.error("Invalid owner type or  Id parameter in the command");
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 //					"Invalid owner type or  Id parameter in the command");
-//		} 
-		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
-				UserContext.current().getUser().getLocale());
-		String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"scheduling":scheduleLocaleString.getText())+".xlsx";
-		//新建了一个文件
+//		}
+        LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
+                UserContext.current().getUser().getLocale());
+        String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"scheduling":scheduleLocaleString.getText())+".xlsx";
+        //新建了一个文件
 
-		Workbook wb = createPunchSchedulingsBook(cmd.getQueryTime(),cmd.getEmployees());
+        Workbook wb = createPunchSchedulingsBook(cmd.getQueryTime(),cmd.getEmployees(),cmd.getTimeRules());
 
-		return download(wb, filePath, response);
-		 
-	}
-	
-	 private Workbook createPunchSchedulingsBook(Long queryTime,
-			List<PunchSchedulingEmployeeDTO> employees) { 
-		// TODO Auto-generated method stub
-		if (null == employees ||  employees.size() == 0)
-			return null;
-		 XSSFWorkbook wb = new XSSFWorkbook();
-		 XSSFSheet sheet = wb.createSheet("sheet1");
+        return download(wb, filePath, response);
 
-		 String sheetName ="sheet1";
-		 sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 31));
-		 XSSFCellStyle style = wb.createCellStyle();
-		 Font font = wb.createFont();
-		 font.setFontHeightInPoints((short) 20);
-		 font.setFontName("Courier New");
-
-		 style.setFont(font);
-
-		 XSSFCellStyle titleStyle = wb.createCellStyle();
-		 titleStyle.setFont(font);
-		 titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
-
-		 int rowNum = 0;
-
-		 //  创建标题
-		 XSSFRow rowTitle = sheet.createRow(rowNum++);
-		 rowTitle.createCell(0).setCellValue(monthSF.get().format(new Date(queryTime)));
-		 rowTitle.setRowStyle(titleStyle);
+    }
 
 
-		 this.createPunchSchedulingsBookSheetHead(sheet,queryTime);
-//			ArrayList<String> textlist = new ArrayList<String>();
-//			for(PunchTimeRule rule : targetTimeRules.get()){
-//				textlist.add(rule.getName());
-//			}
-//			textlist.add("");
-			//设置格式
-			String[] a = {};
-			
-			
-			for (PunchSchedulingEmployeeDTO employee : employees )
-				setNewPunchSchedulingsBookRow(sheet, employee );
-//			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
-		 	return wb;
+    @Override
+    public HttpServletResponse exportPunchSchedulingTemplate(ListPunchSchedulingMonthCommand cmd,
+                                                     HttpServletResponse response) {
+        LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
+                UserContext.current().getUser().getLocale());
+        String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"scheduling":scheduleLocaleString.getText())+".xlsx";
+        //新建了一个文件
+
+        Workbook wb = createPunchSchedulingTemplateBook(cmd.getQueryTime(),cmd.getTimeRules());
+
+        return download(wb, filePath, response);
+
+    }
+
+    private XSSFWorkbook createPunchSchedulingTemplateBook(Long queryTime, List<PunchTimeRuleDTO> timeRules) {
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet("sheet1");
+        String sheetName ="sheet1";
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 31));
+        XSSFCellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short) 20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        //  创建标题
+        XSSFRow rowTitle = sheet.createRow(rowNum++);
+        rowTitle.createCell(0).setCellValue(monthSF.get().format(new Date(queryTime)));
+        rowTitle.setRowStyle(titleStyle);
+
+        XSSFRow rowReminder = sheet.createRow(rowNum++);
+
+        Map<String, String> map = new HashMap<String, String>();
+        StringBuilder ruleSB = new StringBuilder();
+        if(null!=timeRules){
+            for(PunchTimeRuleDTO rule : timeRules){
+                ruleSB.append(rule.getName());
+                ruleSB.append("(");
+                for (int i = 0; i < rule.getPunchTimeIntervals().size(); i++) {
+                    if(i>0)
+                        ruleSB.append(" ");
+                    ruleSB.append(convertTimeLongToString(rule.getPunchTimeIntervals().get(i).getArriveTime()));
+                    ruleSB.append("-");
+                    ruleSB.append(convertTimeLongToString(rule.getPunchTimeIntervals().get(i).getLeaveTime()));
+                }
+                ruleSB.append(");");
+            }
+        }
+        map.put("timeRules", ruleSB.toString());
+        String result = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_EXCEL_SCOPE,
+                PunchConstants.PUNCH_EXCEL_SCHEDULING_REMINDER, RentalNotificationTemplateCode.locale, map, "");
+
+        rowReminder.createCell(0).setCellValue(result);
+        rowReminder.setRowStyle(titleStyle);
+
+        this.createPunchSchedulingsBookSheetHead(sheet,queryTime);
+        return wb;
+    }
+
+    private Workbook createPunchSchedulingsBook(Long queryTime,
+			List<PunchSchedulingEmployeeDTO> employees,List<PunchTimeRuleDTO> timeRules) {
+
+        if (null == employees ||  employees.size() == 0)
+            return null;
+        XSSFWorkbook wb = createPunchSchedulingTemplateBook(queryTime,timeRules);
+        XSSFSheet sheet = wb.getSheetAt(0);
+        for (PunchSchedulingEmployeeDTO employee : employees )
+            setNewPunchSchedulingsBookRow(sheet, employee );
+        return wb;
 	}
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet, Long queryTime) { 
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
@@ -6374,7 +6418,7 @@ public class PunchServiceImpl implements PunchService {
 			calendar.add(Calendar.DAY_OF_MONTH,-1);
 			int days = calendar.get(Calendar.DAY_OF_MONTH);
 
-			for(int rowIndex=2;rowIndex<list.size();rowIndex++){
+			for(int rowIndex=3;rowIndex<list.size();rowIndex++){
 				RowResult r = (RowResult)list.get(rowIndex);
 				PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
 				dto.setContactName(r.getCells().get("A"));
@@ -6532,11 +6576,11 @@ public class PunchServiceImpl implements PunchService {
 		// 
 		this.dbProvider.execute((status) -> {
 			if(cmd.getRuleType() == null)
-
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-						ErrorCodes.ERROR_INVALID_PARAMETER,
-						"Invalid rule type parameter in the command");
-			//建立考勤组
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                        ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "Invalid rule type parameter in the command");
+            cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
+            //建立考勤组
 			Organization punchOrg = this.organizationService.createUniongroupOrganization(cmd.getOwnerId(),cmd.getGroupName(),UniongroupType.PUNCHGROUP.getCode());
 			//添加关联
 			SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
@@ -7139,9 +7183,7 @@ public class PunchServiceImpl implements PunchService {
 		Calendar punCalendar = Calendar.getInstance(); 
 		punCalendar.setTime(punchTime); 
 		//把当天的时分秒转换成Long型
-		Long punchTimeLong = punCalendar.get(Calendar.HOUR_OF_DAY)*3600*1000L; //hour
-		punchTimeLong += punCalendar.get(Calendar.MINUTE)*60*1000L; //min
-		punchTimeLong += punCalendar.get(Calendar.SECOND)*1000L;//second
+		Long punchTimeLong = getTimeLong(punCalendar);
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchTime),
 				ClockCode.SUCESS.getCode());
 		int punchIntevalNo = 1;
@@ -7157,7 +7199,15 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 
-	private PunchLogDTO calculateMoretimePunchStatus(PunchTimeRule ptr, Long punchTimeLong,
+    private Long getTimeLong(Calendar punCalendar) {
+
+        Long punchTimeLong = punCalendar.get(Calendar.HOUR_OF_DAY)*3600*1000L; //hour
+        punchTimeLong += punCalendar.get(Calendar.MINUTE)*60*1000L; //min
+        punchTimeLong += punCalendar.get(Calendar.SECOND)*1000L;//second
+        return punchTimeLong;
+    }
+
+    private PunchLogDTO calculateMoretimePunchStatus(PunchTimeRule ptr, Long punchTimeLong,
 												  List<PunchLog> punchLogs, PunchLogDTO result,Integer punchIntevalNo) {
 		List<PunchTimeInterval> intervals = punchProvider.listPunchTimeIntervalByTimeRuleId(ptr.getId());
 		if(null == intervals )
