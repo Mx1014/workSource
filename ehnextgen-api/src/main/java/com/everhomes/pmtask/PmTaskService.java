@@ -90,4 +90,6 @@ public interface PmTaskService {
 	void notifyTaskResult(NotifyTaskResultCommand cmd);
 
 	void exportTasksCard(ExportTasksCardCommand cmd, HttpServletResponse response);
+
+	void changeTasksStatus(UpdateTasksStatusCommand cmd);
 }
