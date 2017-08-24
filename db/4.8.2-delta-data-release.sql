@@ -260,3 +260,6 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 update eh_configurations SET `value` = '20000' WHERE `name` = 'print.logon.scan.timout' AND namespace_id = '0';
 -- # 二维码有效时间改成六分钟
 update eh_configurations SET `value` = '6' WHERE `name` = 'print.siyin.timeout' AND namespace_id = '0';
+
+-- 将群成员里昵称为null的，设置成id。edit by yanjun 20170824
+UPDATE EH_GROUP_MEMBERS set member_nick_name = id where member_nick_name is NULL;
