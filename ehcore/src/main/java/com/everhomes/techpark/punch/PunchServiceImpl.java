@@ -1500,6 +1500,7 @@ public class PunchServiceImpl implements PunchService {
 		punchLog.setPunchTime(Timestamp.valueOf(punchTime));
 		Calendar punCalendar = Calendar.getInstance();
 		PunchLogDTO punchType = getPunchType(userId,cmd.getEnterpriseId(),punchLog.getPunchTime());
+        response.setClockStatus(punchType.getClockStatus());
 		punchLog.setRuleTime(punchType.getRuleTime());
 		punchLog.setStatus(punchType.getClockStatus());
 		//如果是下班之后打卡当做下班打卡
