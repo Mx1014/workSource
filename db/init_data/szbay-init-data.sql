@@ -4614,3 +4614,13 @@ update eh_launch_pad_items set item_label = '会议室预约' where item_label =
 update eh_launch_pad_items set action_type = 49 where item_label = '会议室预约' and namespace_id = 999987;
 update eh_launch_pad_items set action_data = CONCAT('{"resourceTypeId":',@resource_id,',"pageType": 0}') where item_label = '会议室预约' and namespace_id = 999987;
 
+-- 【深圳湾】服务广场增加item add by sfyan 20170825
+SET @eh_biz_serverURL = "http://biz.zuolin.com"; -- 取具体环境连接core server的链接
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`); 
+SET @service_categry_id1 = (SELECT id FROM `eh_item_service_categries` where namespace_id = 999966 and name = '企业服务' and scene_type = 'pm_admin'); 
+SET @service_categry_id2 = (SELECT id FROM `eh_item_service_categries` where namespace_id = 999966 and name = '企业服务' and scene_type = 'park_tourist'); 
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),'999966','0','0','0','/home','Bizs','BizManager','店铺管理','cs://1/image/aW1hZ2UvTVRwaU56SXhOelJrTURFNFlqSmlOVEpqTldRNU5qSmtOV000TlRObVpXWTJZdw
+','1','1','13',CONCAT('{"url":"',@eh_biz_serverURL,'/zl-ec/rest/service/front/logon? hideNavigationBar=1&mallId=999966&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2F biz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}'),'30','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist',1,@service_categry_id2,NULL,'2',NULL);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),'999966','0','0','0','/home','Bizs','BizManager','店铺管理','cs://1/image/aW1hZ2UvTVRwaU56SXhOelJrTURFNFlqSmlOVEpqTldRNU5qSmtOV000TlRObVpXWTJZdw
+','1','1','13',CONCAT('{"url":"',@eh_biz_serverURL,'/zl-ec/rest/service/front/logon? hideNavigationBar=1&mallId=999966&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2F biz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}'),'30','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin',1,@service_categry_id1,NULL,'2',NULL);
