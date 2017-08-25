@@ -4877,8 +4877,8 @@ public class PunchServiceImpl implements PunchService {
 		else{
 			result = statusToString(Byte.valueOf(statuList));
 		}
-		return result
-	}
+        return result;
+    }
 	public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r ){
 		PunchDayDetailDTO dto =  ConvertHelper.convert(r,PunchDayDetailDTO.class);
 		dto.setStatuString(processStatus(r.getStatusList()));
