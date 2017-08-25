@@ -639,7 +639,14 @@ INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_i
 INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@item_id := @item_id + 1), 'enterprise_customer', @field_id, '个人', '1', '2', '1', UTC_TIMESTAMP());                  
 INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@item_scope_id := @item_scope_id + 1), '999985', 'enterprise_customer', @field_id, @item_id, '个人', '1', '2', '1', UTC_TIMESTAMP());
 
--- '8', '投融情况', 
+-- '8', '投融情况',
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'governmentProject', '获得政府扶持项目', 'String', '8', '/8', '0', NULL, '2', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_path`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@field_scope_id := @field_scope_id + 1), '999985', 'enterprise_customer', '8', '/8', @field_id, '{"fieldParamType": "text", "length": 32}', '获得政府扶持项目', '1', '2', '2', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'bankLoans', '银行贷款', 'BigDecimal', '8', '/8', '0', NULL, '2', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_path`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@field_scope_id := @field_scope_id + 1), '999985', 'enterprise_customer', '8', '/8', @field_id, '{"fieldParamType": "text", "length": 32}', '银行贷款', '1', '2', '2', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@field_id := @field_id + 1), 'enterprise_customer', 'equityFinancing', '股权融资', 'BigDecimal', '8', '/8', '0', NULL, '2', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_var_field_scopes` (`id`, `namespace_id`, `module_name`, `group_id`, `group_path`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`) VALUES ((@field_scope_id := @field_scope_id + 1), '999985', 'enterprise_customer', '8', '/8', @field_id, '{"fieldParamType": "text", "length": 32}', '股权融资', '1', '2', '2', '1', UTC_TIMESTAMP());
+
 -- '9', '经济指标',
 -- payment_wentian
 SET @eh_locale_templates_id = (SELECT max(id) FROM `eh_locale_templates`);
