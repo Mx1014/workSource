@@ -729,6 +729,11 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
+	public void setContractParam(SetContractParamCommand cmd) {
+
+	}
+
+	@Override
 	public void deleteContract(DeleteContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
 		contract.setStatus(ContractStatus.INACTIVE.getCode());

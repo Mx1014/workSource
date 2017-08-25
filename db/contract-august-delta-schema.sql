@@ -352,6 +352,8 @@ CREATE TABLE `eh_contract_params` (
   `notify_unit` TINYINT NOT NULL DEFAULT 0 COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
   `expired_period` INTEGER NOT NULL DEFAULT 0 COMMENT '审批通过合同转为过期的时间',
   `expired_unit` TINYINT NOT NULL DEFAULT 0 COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
+  `receivable_date` INTEGER NOT NULL DEFAULT 0 COMMENT '合同费用清单应收日期',
+  `receivable_unit` TINYINT NOT NULL DEFAULT 0 COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

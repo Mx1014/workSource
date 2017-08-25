@@ -10,6 +10,8 @@ package com.everhomes.rest.contract;
  *     <li>notifyUnit: 单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
  *     <li>expiredPeriod: 审批通过合同转为过期的时间</li>
  *     <li>expiredUnit: 单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
+ *     <li>receivableDate: 合同费用清单应收日期</li>
+ *     <li>receivableUnit: 合同费用清单应收日期单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
