@@ -518,7 +518,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setAmountOwed(r.getAmountOwed());
             dto.setAmountReceivable(r.getAmountReceivable());
             dto.setAmountReceived(r.getAmountReceived());
-            if(billGroupName!=null) {
+            if(!org.springframework.util.StringUtils.isEmpty(buildingName)) {
                 dto.setBillGroupName(billGroupName);
             }else{
                 String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS).where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
@@ -817,7 +817,8 @@ public class AssetProviderImpl implements AssetProvider {
                 exemptionItem.setBillId(nextBillId);
                 exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 exemptionItem.setCreatorUid(UserContext.currentUserId());
-                exemptionItem.setId(currentExemItemSeq++);
+                exemptionItem.setId(currentExemItemSeq);
+                currentExemItemSeq += 1;
                 exemptionItem.setRemarks(exemptionItemDTO.getRemark());
                 if(targetType!=null){
                     exemptionItem.setTargetType(targetType);
@@ -838,8 +839,7 @@ public class AssetProviderImpl implements AssetProvider {
             }
             amountOwed = amountReceivable.add(amountExemption);
             amountOwed = amountReceivable.add(amountSupplement);
-            EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
-            exemptionItemsDao.insert(exemptionItems);
+
 
 
             //billItems assemble
@@ -866,7 +866,8 @@ public class AssetProviderImpl implements AssetProvider {
                 item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 item.setCreatorUid(UserContext.currentUserId());
                 item.setDateStr(dateStr);
-                item.setId(currentBillItemSeq++);
+                item.setId(currentBillItemSeq);
+                currentBillItemSeq += 1;
                 item.setNamespaceId(UserContext.getCurrentNamespaceId());
                 item.setOwnerType(ownerType);
                 item.setOwnerId(ownerId);
@@ -890,8 +891,7 @@ public class AssetProviderImpl implements AssetProvider {
             for(int i = 0; i < billItemsList.size(); i++) {
                 billItemsList.get(i).setStatus(billStatus);
             }
-            EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
-            billItemsDao.insert(billItemsList);
+
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
@@ -922,9 +922,14 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setStatus(billStatus);
             newBill.setSwitch(isSettled);
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
+            EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
+            EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
             billsDao.insert(newBill);
+            exemptionItemsDao.insert(exemptionItems);
+            billItemsDao.insert(billItemsList);
             return null;
         });
+
     }
 
     @Override

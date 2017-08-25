@@ -343,7 +343,7 @@ public class AssetServiceImpl implements AssetService {
         if(!cmd.getOwnerType().equals("community")){
             throw new RuntimeException("保存账单不在一个园区");
         }
-        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
+//        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
         assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
     }
 
@@ -450,7 +450,7 @@ public class AssetServiceImpl implements AssetService {
         String[] propertyNames = {"dateStr","billGroupName","targetName","buildingName","apartmentName","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
 //        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
 //        String[] propertyNames = new String[declaredFields.length];
-        String[] titleName ={"账期","账单组","客户","楼栋","门牌","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"};
+        String[] titleName ={"账期","账单组","客户名称","楼栋","门牌","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"};
         int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20};
 //        for(int i = 0; i < declaredFields.length; i++){
 //            propertyNames[i] = declaredFields[i].getName();
@@ -500,7 +500,7 @@ public class AssetServiceImpl implements AssetService {
             response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
             list.remove(list.size()-1);
         }
-        response.setListNotSettledBillDTOs(list);
+        response.setBillDTOS(list);
         return response;
     }
 

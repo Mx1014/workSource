@@ -477,7 +477,7 @@ public class AddressProviderImpl implements AddressProvider {
                 .map(r -> {
                     GetApartmentNameByBuildingNameDTO dto = new GetApartmentNameByBuildingNameDTO();
                     dto.setAddressId(r.getValue(t.ID));
-                    dto.setBuildingName(r.getValue(t.APARTMENT_NAME));
+                    dto.setApartmentName(r.getValue(t.APARTMENT_NAME));
                     list.add(dto);
                     return null;
                 });
