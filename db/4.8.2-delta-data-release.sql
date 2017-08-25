@@ -788,6 +788,15 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 update eh_launch_pad_items set scope_code = 5 where namespace_id = 1 and scope_id = 1023080;
 
+
+-- 物业报修换模块了 需要改路径 by xiongying20170825
+delete from eh_service_modules where id in(20140, 20150, 20155, 20190);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(20140,'任务列表',20100,'/40000/20100/20140','1','3','2','0',NOW(), '1', '1');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(20150,'服务录入',20100,'/40000/20100/20150','1','3','2','0',NOW(), '1', '1');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(20155,'设置',20100,'/40000/20100/20155','1','3','0','0',NOW(), '1', '1');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(20190,'统计',20100,'/40000/20100/20190','1','3','2','0',NOW(), '1', '1');
+
+
 -- 【荣超】 物业巡检增加统计菜单 add by sfyan 20170825
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20850,'', 'EhNamespaces', 999975,2);

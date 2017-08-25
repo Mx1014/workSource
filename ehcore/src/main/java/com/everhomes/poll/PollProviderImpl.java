@@ -120,7 +120,7 @@ public class PollProviderImpl implements PollProvider {
         PollVote pollVote =null;
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, pollId));
         EhPollVotesRecord result = (EhPollVotesRecord)context.select().from(Tables.EH_POLL_VOTES).where(Tables.EH_POLL_VOTES.POLL_ID.eq(pollId))
-                .and(Tables.EH_POLL_VOTES.VOTER_UID.eq(uid)).fetchAny();
+                .and(Tables.EH_POLL_VOTES.VOTER_UID.eq(uid)).orderBy(Tables.EH_POLL_VOTES.CREATE_TIME.desc()).fetchAny();
         if(result!=null){
             pollVote=ConvertHelper.convert(result, PollVote.class);
         }
