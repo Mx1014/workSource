@@ -898,43 +898,6 @@ public class AssetProviderImpl implements AssetProvider {
             billItemsDao.insert(billItemsList);
 
 
-            //bill exemption
-            List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
-            long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), list2.size());
-            long currentExemItemSeq = nextExemItemBlock - list2.size() + 1;
-            if(currentExemItemSeq == 0) {
-                currentExemItemSeq = currentExemItemSeq+1;
-            }
-            for(int i = 0; i < list2.size(); i++){
-                ExemptionItemDTO exemptionItemDTO = list2.get(i);
-                PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
-                BigDecimal amount = exemptionItemDTO.getAmount();
-                exemptionItem.setAmount(amount);
-                exemptionItem.setBillGroupId(billGroupId);
-                exemptionItem.setBillId(nextBillId);
-                exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                exemptionItem.setCreatorUid(UserContext.currentUserId());
-                exemptionItem.setId(currentExemItemSeq++);
-                exemptionItem.setRemarks(exemptionItemDTO.getRemark());
-                if(targetType!=null){
-                    exemptionItem.setTargetType(targetType);
-                }
-                if(targetId != null) {
-                    exemptionItem.setTargetId(targetId);
-                }
-                exemptionItem.setTargetname(targetName);
-                exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-                exemptionItems.add(exemptionItem);
-
-                if(amount.compareTo(zero)==-1){
-                    amountExemption = amountExemption.add(amount);
-                }else if(amount.compareTo(zero)==1){
-                    amountSupplement = amountSupplement.add(amount);
-                }
-            }
-            EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
-            exemptionItemsDao.insert(exemptionItems);
 
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
@@ -1357,10 +1320,6 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             return null;
         });
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/payment_wentian
     }
 
     @Override

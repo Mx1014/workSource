@@ -141,7 +141,8 @@ public class ContractController extends ControllerBase {
 	 */
 	@RequestMapping("setContractParam")
 	@RestReturn(String.class)
-	public RestResponse setContractParam(SetContractParamCommand cmd){
+	public RestResponse setContractParam(SetContractParamCommand cmd) {
+		contractService.setContractParam(cmd);
 		return new RestResponse();
 	}
 
