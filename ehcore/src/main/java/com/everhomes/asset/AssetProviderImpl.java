@@ -793,7 +793,6 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal zero = new BigDecimal("0");
 
             long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-
             if(nextBillId == 0){
                 nextBillId = nextBillId + 1;
             }
@@ -843,16 +842,13 @@ public class AssetProviderImpl implements AssetProvider {
             exemptionItemsDao.insert(exemptionItems);
 
 
-
             //billItems assemble
             List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
             long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), list1.size());
             long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
-
             if(currentBillItemSeq == 0){
                 currentBillItemSeq = currentBillItemSeq+1;
             }
-
 
             for(int i = 0; i < list1.size() ; i++) {
                 BillItemDTO dto = list1.get(i);
@@ -896,9 +892,6 @@ public class AssetProviderImpl implements AssetProvider {
             }
             EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
             billItemsDao.insert(billItemsList);
-
-
-
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
@@ -977,18 +970,18 @@ public class AssetProviderImpl implements AssetProvider {
                     list1.add(itemDTO);
                     return null;
                 });
-         context.select()
-                 .from(t)
-                 .where(t.BILL_ID.eq(billId))
-                 .fetch()
-                 .map(f -> {
-                     ExemptionItemDTO exemDto = new ExemptionItemDTO();
-                     exemDto.setAmount(f.getValue(t.AMOUNT));
-                     exemDto.setExemptionId(f.getValue(t.ID));
-                     exemDto.setRemark(f.getValue(t.REMARKS));
-                     list2.add(exemDto);
-                     return null;
-                 });
+        context.select()
+                .from(t)
+                .where(t.BILL_ID.eq(billId))
+                .fetch()
+                .map(f -> {
+                    ExemptionItemDTO exemDto = new ExemptionItemDTO();
+                    exemDto.setAmount(f.getValue(t.AMOUNT));
+                    exemDto.setExemptionId(f.getValue(t.ID));
+                    exemDto.setRemark(f.getValue(t.REMARKS));
+                    list2.add(exemDto);
+                    return null;
+                });
 
         dto.setBillItemDTOList(list1);
         dto.setExemptionItemDTOList(list2);
@@ -1281,9 +1274,9 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentExemptionItems t = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t");
         EhPaymentBills t1 = Tables.EH_PAYMENT_BILLS.as("t1");
         dateStr = context.select(t1.DATE_STR)
-                        .from(t1)
-                        .where(t1.ID.eq(billId))
-                        .fetchOne(0,String.class);
+                .from(t1)
+                .where(t1.ID.eq(billId))
+                .fetchOne(0,String.class);
         String finalDateStr = dateStr;
         context.select(t.AMOUNT,t.ID,t.REMARKS)
                 .from(t)
@@ -1320,6 +1313,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             return null;
         });
+
     }
 
     @Override
@@ -1410,5 +1404,4 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_CONTRACT_RECEIVER.CONTRACT_NUM.eq(contractNum))
                 .fetch().map(r -> ConvertHelper.convert(r, PaymentContractReceiver.class));
     }
-
 }
