@@ -152,22 +152,22 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
 				pmTaskProvider.updateTask(task);
 				//TODO:为科兴与一碑对接
-				if(task.getNamespaceId() == 999983 &&
-						task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-				    //UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
-				    sendMessageToUser(flowCase.getApplyUserId().toString(),"您的任务已分配至维修人员处理，请耐心等待");
-
-				}
+//				if(task.getNamespaceId() == 999983 &&
+//						task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//				    //UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
+//				    sendMessageToUser(flowCase.getApplyUserId().toString(),"您的任务已分配至维修人员处理，请耐心等待");
+//
+//				}
 			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 				//TODO:为科兴与一碑对接
-				if(task.getNamespaceId() == 999983 &&
-						task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-					//UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
-					sendMessageToUser(flowCase.getApplyUserId().toString(), "您的报修任务已完成，" +
-							"您可以对我们的服务进行评价，感谢您的使用");
-				}
+//				if(task.getNamespaceId() == 999983 &&
+//						task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//					//UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
+//					sendMessageToUser(flowCase.getApplyUserId().toString(), "您的报修任务已完成，" +
+//							"您可以对我们的服务进行评价，感谢您的使用");
+//				}
 			}else if ("HANDOVER".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
