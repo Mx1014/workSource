@@ -26,15 +26,15 @@ SET @namespace_detail_id = (SELECT max(id) FROM `eh_namespace_details`);
 INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
 	VALUES((@namespace_detail_id := @namespace_detail_id + 1), @namespace_id, 'community_commercial', UTC_TIMESTAMP());
 
-SET @organization_id = 1035830;
+SET @organization_id = 1024528;
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES(1042074, UUID(), '深圳湾科技发展有限公司', '深圳湾科技发展有限公司', 1, 1, @organization_id, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 190617, 1, @namespace_id);
+	VALUES(1041981, UUID(), '深圳湾科技发展有限公司', '深圳湾科技发展有限公司', 1, 1, @organization_id, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 190617, 1, @namespace_id);
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(190617, UUID(), @namespace_id, 2, 'EhGroups', 1042074,'深圳湾科技发展有限公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(190617, UUID(), @namespace_id, 2, 'EhGroups', 1041981,'深圳湾科技发展有限公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
 
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
-	VALUES(@organization_id, 0, 'PM', '深圳湾科技发展有限公司', '', CONCAT('/', @organization_id), 1, 2, 'ENTERPRISE', @namespace_id, 1042074);
+	VALUES(@organization_id, 0, 'PM', '深圳湾科技发展有限公司', '', CONCAT('/', @organization_id), 1, 2, 'ENTERPRISE', @namespace_id, 1041981);
 
 SET @org_cmnty_request_id = (SELECT max(id) FROM `eh_organization_community_requests`);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
@@ -92,7 +92,7 @@ INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
 	VALUES(190686, UUID(), @namespace_id, 2, 'EhGroups', 0,'深圳湾创业投资大厦论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES(190687, UUID(), @namespace_id, 2, 'EhGroups', 0,'深圳湾创业投资大厦意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(190618, UUID(), @namespace_id, 2, 'EhGroups', 0,'深圳湾创业投资大厦意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
 SET @community_geopoint_id = 240111044331072760;
 SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
@@ -116,7 +116,7 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', 240111044331050370, UTC_TIMESTAMP());
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES(240111044331050371, UUID(), 13905, '深圳市',  13908, '南山区', '深圳湾创业投资大厦', '创投大厦', '学府路', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 98, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, 190686, 190687, UTC_TIMESTAMP(), @namespace_id);
+	VALUES(240111044331050371, UUID(), 13905, '深圳市',  13908, '南山区', '深圳湾创业投资大厦', '创投大厦', '学府路', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 98, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, 190686, 190618, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
 	VALUES((@community_geopoint_id := @community_geopoint_id + 1), 240111044331050371, '', 113.96029, 22.537713, 'ws101nz7enpn');
 INSERT INTO `eh_organization_communities`(organization_id, community_id)
@@ -124,7 +124,8 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`)
 	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', 240111044331050371, UTC_TIMESTAMP());
 
-SET @building_id = 1960673;
+SET @building_id = (SELECT MAX(id) FROM `eh_buildings`);
+SET @building_id = @building_id + 1;
 INSERT INTO `eh_buildings` (`id`, `community_id`, `default_order`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
 	VALUES(@building_id, 240111044331050369, @building_id, '1栋', '1栋', 0, '', '生态园', NULL, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id);
 SET @building_id = @building_id + 1;
@@ -915,7 +916,7 @@ delete from eh_web_menu_scopes where owner_id = 999966 and menu_id >= 20100 and 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20212', '物业报修', '20000', NULL, NULL, '1', '2', '/20000/20212', 'park', '201', '20212', '2', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-	VALUES ('20213', '任务列表', '20212', NULL, 'task_management_list/203042', '0', '2', '/20000/20212/20213', 'park', '220', '20212', '3', NULL, 'module');
+	VALUES ('20213', '任务列表', '20212', NULL, 'react:/repair-management/task-list/203042', '0', '2', '/20000/20212/20213', 'park', '220', '20212', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20214', '服务录入', '20212', NULL, 'task_management_service_entry', '0', '2', '/20000/20212/20214', 'park', '225', '20212', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
@@ -932,7 +933,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20201', '服务建议', '20000', NULL, NULL, '1', '2', '/20000/20201', 'park', '201', '20201', '2', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-	VALUES ('20221', '任务列表', '20201', NULL, 'task_management_list/203043', '0', '2', '/20000/20201/20221', 'park', '220', '20201', '3', NULL, 'module');
+	VALUES ('20221', '任务列表', '20201', NULL, 'react:/repair-management/task-list/203043', '0', '2', '/20000/20201/20221', 'park', '220', '20201', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20222', '服务录入', '20201', NULL, 'task_management_service_entry', '0', '2', '/20000/20201/20222', 'park', '225', '20201', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
