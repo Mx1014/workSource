@@ -6838,8 +6838,8 @@ public class PunchServiceImpl implements PunchService {
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"公司没有设置打卡规则");
 		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr, punchTime, userId);
-        PunchDayLog pdl  = punchProvider.findPunchDayLog(userId,cmd.getEnterpriseId(),new java.sql.Date(cmd.getQueryTime()))
-		if(null != pdl)
+        PunchDayLog pdl = punchProvider.findPunchDayLog(userId, cmd.getEnterpriseId(), new java.sql.Date(cmd.getQueryTime()));
+        if(null != pdl)
             response.setStatusList(pdl.getStatusList());
         List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,cmd.getEnterpriseId(), dateSF.get().format(punchTime),
 				ClockCode.SUCESS.getCode());
