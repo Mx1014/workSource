@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.everhomes.asset.AddressIdAndName;
 
+import com.everhomes.rest.address.*;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record2;
@@ -38,9 +39,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.address.AddressAdminStatus;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -546,4 +544,27 @@ public class AddressProviderImpl implements AddressProvider {
 
         return list;
     }
+
+
+    @Override
+    public List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(String buildingName, Long communityId, Integer currentNamespaceId) {
+        List<GetApartmentNameByBuildingNameDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAddresses t = Tables.EH_ADDRESSES.as("t");
+        context.select(t.ID,t.APARTMENT_NAME)
+                .from(t)
+                .where(t.NAMESPACE_ID.eq(currentNamespaceId))
+                .and(t.COMMUNITY_ID.eq(communityId))
+                .and(t.BUILDING_NAME.eq(buildingName))
+                .fetch()
+                .map(r -> {
+                    GetApartmentNameByBuildingNameDTO dto = new GetApartmentNameByBuildingNameDTO();
+                    dto.setAddressId(r.getValue(t.ID));
+                    dto.setBuildingName(r.getValue(t.APARTMENT_NAME));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
 }

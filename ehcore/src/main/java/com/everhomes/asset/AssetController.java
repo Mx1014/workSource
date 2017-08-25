@@ -640,7 +640,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 保存一个新增账单         4    id的策略还没改
+    // this is for 保存一个新增账单         4
     /**
      * <p>保存一个新增账单</p>
      * <b>URL: /asset/createBill</b>

@@ -11,20 +11,11 @@ import com.everhomes.util.StringHelper;
 public class BillItemIdCommand {
     private Long billItemId;
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public Long getBillItemId() {
         return billItemId;
     }
 
     public void setBillItemId(Long billItemId) {
-        billItemId = billItemId;
-    }
-
-    public BillItemIdCommand() {
-
+        this.billItemId = billItemId;
     }
 }

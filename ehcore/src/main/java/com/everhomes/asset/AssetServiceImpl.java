@@ -344,7 +344,7 @@ public class AssetServiceImpl implements AssetService {
             throw new RuntimeException("保存账单不在一个园区");
         }
         List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
-        assetProvider.creatPropertyBill(addressByPossibleName,cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
+        assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
     }
 
     @Override
@@ -416,6 +416,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
+        cmd.setPageSize(100000);
         ListBillsResponse bills = listBills(cmd);
         Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
@@ -583,6 +584,18 @@ public class AssetServiceImpl implements AssetService {
         response.setList(list);
         //save the data but with a state of being suspend
         return response;
+    }
+
+    @Override
+    public void generateBillsOnContractSigned(String contractNum) {
+//        List<PaymentContractReceiver> materials = assetProvider.findContractReceiverByContractNumAndTimeLimit(contractNum);
+//        for(int i = 0; i < materials.size(); i++) {
+//            PaymentContractReceiver p = materials.get(i);
+//
+//        }
+//        String variablesJsonString = m_1.getVariablesJsonString();
+//        String formula = assetProvider.findFormulaByChargingStandardId();
+//        calculateFee()
     }
 
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {

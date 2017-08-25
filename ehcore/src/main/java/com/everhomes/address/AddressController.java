@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.address.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,30 +19,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.GetApartmentByBuildingApartmentNameCommand;
-import com.everhomes.rest.address.ClaimAddressCommand;
-import com.everhomes.rest.address.ClaimedAddressInfo;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.CommunitySummaryDTO;
-import com.everhomes.rest.address.CreateServiceAddressCommand;
-import com.everhomes.rest.address.DeleteServiceAddressCommand;
-import com.everhomes.rest.address.DisclaimAddressCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommand;
-import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListCommunityByKeywordCommand;
-import com.everhomes.rest.address.ListNearbyCommunityCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
-import com.everhomes.rest.address.SearchCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityCommand;
-import com.everhomes.rest.address.SuggestCommunityDTO;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
@@ -352,6 +329,20 @@ public class AddressController extends ControllerBase {
             resp.setResponseObject(result);
         }
 
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /address/getApartmentNameByBuildingName</b>
+     * <p>根据域名，小区id，楼栋名查询门牌名和地址id的集合</p>
+     */
+    @RequestMapping("getApartmentNameByBuildingName")
+    @RestReturn(value = GetApartmentNameByBuildingNameDTO.class,collection = true)
+    public RestResponse getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd){
+        List<GetApartmentNameByBuildingNameDTO> result = this.addressService.getApartmentNameByBuildingName(cmd);
+        RestResponse resp = new RestResponse(result);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;

@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
 
 /**
@@ -14,6 +16,11 @@ public class PaymentExpectancyDTO {
     private String dateStrEnd;
     private BigDecimal amountReceivable;
     private String dueDateStr;
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
     public String getPropertyIdentifier() {
         return propertyIdentifier;

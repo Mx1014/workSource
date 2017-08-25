@@ -59,6 +59,7 @@ public class ListBillExemptionItemsDTO {
     }
 
     public void setAmount(BigDecimal amount) {
+        amount = amount.setScale(2,BigDecimal.ROUND_CEILING);
         this.amount = amount;
     }
 

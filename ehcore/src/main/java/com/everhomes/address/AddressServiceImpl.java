@@ -1688,6 +1688,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return addressProvider.findAddressByPossibleName( currentNamespaceId,  ownerId,  buildingName,  apartmentName);
     }
 
+    @Override
+    public List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd) {
+        return addressProvider.getApartmentNameByBuildingName(cmd.getBuildingName(),cmd.getCommunityId(),UserContext.getCurrentNamespaceId());
+    }
+
     private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,
 			Long userId, ImportAddressCommand cmd) {
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
