@@ -791,3 +791,7 @@ update eh_launch_pad_items set scope_code = 5 where namespace_id = 1 and scope_i
 -- 【荣超】 物业巡检增加统计菜单 add by sfyan 20170825
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20850,'', 'EhNamespaces', 999975,2);
+
+
+-- 【储能】更好item链接 add by sfyan 20170725
+update eh_launch_pad_items set item_label = '理财', action_data = '{"url":"https://action.juzilicai.com/event/2017053104/index/201706106692.html?_ctag=6D7C331-C262970"}',icon_uri='cs://1/image/aW1hZ2UvTVRvNU5EWTNNekUzWkdVME1UTmlaalZsWlRNd1kyTmxaakJpT0RRNU5qWTJaZw' where namespace_id = 999990 and item_label = '快递';
