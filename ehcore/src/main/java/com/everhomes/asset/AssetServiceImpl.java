@@ -500,7 +500,7 @@ public class AssetServiceImpl implements AssetService {
             response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
             list.remove(list.size()-1);
         }
-        response.setListNotSettledBillDTOs(list);
+        response.setBillDTOS(list);
         return response;
     }
 
