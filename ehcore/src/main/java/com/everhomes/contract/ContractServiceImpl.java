@@ -730,7 +730,27 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public void setContractParam(SetContractParamCommand cmd) {
+		ContractParam param = ConvertHelper.convert(cmd, ContractParam.class);
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getCommunityId());
+		if(cmd.getId() == null && communityExist == null) {
+			contractProvider.createContractParam(param);
+		} else if(cmd.getId() != null && communityExist != null && cmd.getId().equals(communityExist.getId())){
+			contractProvider.updateContractParam(param);
+		} else {
+			LOGGER.error("the community already have param: cmd: {}, exist: {}", cmd, communityExist);
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_PARAM_NOT_EXIST,
+					"community contract param is already exit");
+		}
 
+	}
+
+	@Override
+	public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getCommunityId());
+		if(communityExist != null) {
+			return ConvertHelper.convert(communityExist, ContractParamDTO.class);
+		}
+		return null;
 	}
 
 	@Override

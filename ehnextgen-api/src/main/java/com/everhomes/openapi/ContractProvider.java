@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import com.everhomes.contract.ContractParam;
 import com.everhomes.listing.CrossShardListingLocator;
 
 import java.sql.Timestamp;
@@ -39,4 +40,8 @@ public interface ContractProvider {
 	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);
 
 	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber);
+
+	void createContractParam(ContractParam param);
+	void updateContractParam(ContractParam param);
+	ContractParam findContractParamByCommunityId(Long communityId);
 }

@@ -148,12 +148,12 @@ public class ContractController extends ControllerBase {
 
 	/**
 	 * <p>查看合同参数</p>
-	 * <b>URL: /contract/findContractParam</b>
+	 * <b>URL: /contract/getContractParam</b>
 	 */
-	@RequestMapping("findContractParam")
+	@RequestMapping("getContractParam")
 	@RestReturn(ContractParamDTO.class)
-	public RestResponse findContractParam(FindContractParamCommand cmd){
-		return new RestResponse();
+	public RestResponse getContractParam(GetContractParamCommand cmd){
+		return new RestResponse(contractService.getContractParam(cmd));
 	}
 
 	/**

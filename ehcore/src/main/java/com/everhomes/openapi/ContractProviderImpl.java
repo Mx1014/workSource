@@ -5,8 +5,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.contract.ContractParam;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
+import com.everhomes.server.schema.tables.pojos.EhContractParams;
+import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.IterationMapReduceCallback;
@@ -268,6 +272,46 @@ public class ContractProviderImpl implements ContractProvider {
 		});
 
 		return result;
+	}
+
+	@Override
+	public void createContractParam(ContractParam param) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractParams.class));
+		param.setId(id);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractParams.class, id));
+		EhContractParamsDao dao = new EhContractParamsDao(context.configuration());
+		dao.insert(param);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractParams.class, null);
+	}
+
+	@Override
+	public ContractParam findContractParamByCommunityId(Long communityId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractParamsRecord> query = context.selectQuery(Tables.EH_CONTRACT_PARAMS);
+		query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(communityId));
+
+		List<ContractParam> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ContractParam.class));
+			return null;
+		});
+
+		if(result.size() == 0) {
+			return null;
+		}
+		return result.get(0);
+	}
+
+	@Override
+	public void updateContractParam(ContractParam param) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractParams.class, param.getId()));
+		EhContractParamsDao dao = new EhContractParamsDao(context.configuration());
+
+		dao.update(param);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractParams.class, param.getId());
+
 	}
 
 	private EhContractsDao getReadWriteDao() {

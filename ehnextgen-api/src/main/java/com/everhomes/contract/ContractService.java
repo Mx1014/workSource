@@ -27,5 +27,6 @@ public interface ContractService {
 	void reviewContract(ReviewContractCommand cmd);
 
 	void setContractParam(SetContractParamCommand cmd);
+	ContractParamDTO getContractParam(GetContractParamCommand cmd)
 
 }

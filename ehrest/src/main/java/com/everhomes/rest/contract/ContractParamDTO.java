@@ -11,6 +11,8 @@ package com.everhomes.rest.contract;
  *     <li>notifyUnit: 单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
  *     <li>expiredPeriod: 审批通过合同转为过期的时间</li>
  *     <li>expiredUnit: 单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
+ *     <li>receivableDate: 合同费用清单应收日期</li>
+ *     <li>receivableUnit: 合同费用清单应收日期单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
@@ -25,6 +27,8 @@ public class ContractParamDTO {
     private Byte notifyUnit;
     private Integer expiredPeriod;
     private Byte expiredUnit;
+    private Integer receivableDate;
+    private Byte receivableUnit;
 
     public Long getCommunityId() {
         return communityId;
@@ -96,5 +100,21 @@ public class ContractParamDTO {
 
     public void setNotifyUnit(Byte notifyUnit) {
         this.notifyUnit = notifyUnit;
+    }
+
+    public Integer getReceivableDate() {
+        return receivableDate;
+    }
+
+    public void setReceivableDate(Integer receivableDate) {
+        this.receivableDate = receivableDate;
+    }
+
+    public Byte getReceivableUnit() {
+        return receivableUnit;
+    }
+
+    public void setReceivableUnit(Byte receivableUnit) {
+        this.receivableUnit = receivableUnit;
     }
 }

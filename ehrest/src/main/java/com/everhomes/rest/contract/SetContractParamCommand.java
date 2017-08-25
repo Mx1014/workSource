@@ -2,6 +2,7 @@ package com.everhomes.rest.contract;
 
 /**
  * <ul>
+ *     <li>id: id</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 园区id</li>
  *     <li>expiringPeriod: 合同到期日前多久为即将到期合同</li>
@@ -16,6 +17,7 @@ package com.everhomes.rest.contract;
  * Created by ying.xiong on 2017/8/2.
  */
 public class SetContractParamCommand {
+    private Long id;
     private Integer namespaceId;
     private Long communityId;
     private Integer expiringPeriod;
@@ -26,6 +28,14 @@ public class SetContractParamCommand {
     private Byte expiredUnit;
     private Integer receivableDate;
     private Byte receivableUnit;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getCommunityId() {
         return communityId;

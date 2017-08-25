@@ -7,7 +7,7 @@ package com.everhomes.rest.contract;
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
-public class FindContractParamCommand {
+public class GetContractParamCommand {
 
     private Integer namespaceId;
     private Long communityId;
