@@ -915,7 +915,7 @@ delete from eh_web_menu_scopes where owner_id = 999966 and menu_id >= 20100 and 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20212', '物业报修', '20000', NULL, NULL, '1', '2', '/20000/20212', 'park', '201', '20212', '2', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-	VALUES ('20213', '任务列表', '20212', NULL, 'task_management_list/203042', '0', '2', '/20000/20212/20213', 'park', '220', '20212', '3', NULL, 'module');
+	VALUES ('20213', '任务列表', '20212', NULL, 'react:/repair-management/task-list/203042', '0', '2', '/20000/20212/20213', 'park', '220', '20212', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20214', '服务录入', '20212', NULL, 'task_management_service_entry', '0', '2', '/20000/20212/20214', 'park', '225', '20212', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
@@ -932,7 +932,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20201', '服务建议', '20000', NULL, NULL, '1', '2', '/20000/20201', 'park', '201', '20201', '2', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
-	VALUES ('20221', '任务列表', '20201', NULL, 'task_management_list/203043', '0', '2', '/20000/20201/20221', 'park', '220', '20201', '3', NULL, 'module');
+	VALUES ('20221', '任务列表', '20201', NULL, 'react:/repair-management/task-list/203043', '0', '2', '/20000/20201/20221', 'park', '220', '20201', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('20222', '服务录入', '20201', NULL, 'task_management_service_entry', '0', '2', '/20000/20201/20222', 'park', '225', '20201', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
