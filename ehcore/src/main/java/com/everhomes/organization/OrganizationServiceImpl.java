@@ -6140,6 +6140,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setContactName(contactName);
             member.setContactToken(contactToken);
             member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+            member.setOrganizationId(organizationId);
             if(null != userIdentifier){
                 member.setTargetType(OrganizationMemberTargetType.USER.getCode());
                 member.setTargetId(userIdentifier.getOwnerUid());
