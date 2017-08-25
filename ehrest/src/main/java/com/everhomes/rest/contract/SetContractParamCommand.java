@@ -22,6 +22,8 @@ public class SetContractParamCommand {
     private Byte notifyUnit;
     private Integer expiredPeriod;
     private Byte expiredUnit;
+    private Integer receivableDate;
+    private Byte receivableUnit;
 
     public Long getCommunityId() {
         return communityId;
@@ -85,5 +87,21 @@ public class SetContractParamCommand {
 
     public void setNotifyUnit(Byte notifyUnit) {
         this.notifyUnit = notifyUnit;
+    }
+
+    public Integer getReceivableDate() {
+        return receivableDate;
+    }
+
+    public void setReceivableDate(Integer receivableDate) {
+        this.receivableDate = receivableDate;
+    }
+
+    public Byte getReceivableUnit() {
+        return receivableUnit;
+    }
+
+    public void setReceivableUnit(Byte receivableUnit) {
+        this.receivableUnit = receivableUnit;
     }
 }

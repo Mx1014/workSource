@@ -156,7 +156,7 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
-	 * <p>合同发起审批</p>
+	 * <p>合同发起审批/合同报废</p>
 	 * <b>URL: /contract/reviewContract</b>
 	 */
 	@RequestMapping("reviewContract")
