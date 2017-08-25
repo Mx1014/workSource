@@ -418,6 +418,15 @@ public class BusinessOpenController extends ControllerBase {
 		return response;
 	}
 
+	@RequestMapping("getUserAddress")
+	@RestReturn(value=UserAddressDTO.class)
+	public RestResponse getUserAddress(@Valid GetUserDefaultAddressCommand cmd) {
+		RestResponse response =  new RestResponse(businessService.getUserAddress(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	@RequestMapping("listUser")
 	@RestReturn(value=UserDtoForBiz.class, collection=true)
 	public RestResponse listUser(@Valid ListUserCommand cmd) {
