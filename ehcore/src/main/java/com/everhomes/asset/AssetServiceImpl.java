@@ -344,7 +344,7 @@ public class AssetServiceImpl implements AssetService {
             throw new RuntimeException("保存账单不在一个园区");
         }
         List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
-        assetProvider.creatPropertyBill(addressByPossibleName,cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
+        assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
     }
 
     @Override
@@ -416,6 +416,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
+        cmd.setPageSize(100000);
         ListBillsResponse bills = listBills(cmd);
         Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);

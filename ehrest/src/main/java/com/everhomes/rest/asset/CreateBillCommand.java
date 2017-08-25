@@ -15,6 +15,7 @@ import java.util.List;
  * <li>dateStr:账期</li>
  * <li>buildingName:楼栋名称</li>
  * <li>apartmentName:门牌名称</li>
+ * <li>addressId:地址id</li>
  * <li>targetType:客户类别</li>
  * <li>targetId:客户id</li>
  * <li>noticeTel:催缴电话</li>
@@ -29,6 +30,7 @@ public class CreateBillCommand {
     private String dateStr;
     private String buildingName;
     private String apartmentName;
+    private Long addressId;
     private String noticeTel;
     private String targetName;
     private String targetType;
@@ -51,6 +53,14 @@ public class CreateBillCommand {
 
     public Byte getIsSettled() {
         return isSettled;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
     }
 
     public void setIsSettled(Byte isSettled) {
