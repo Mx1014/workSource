@@ -152,6 +152,7 @@ public class ListBillsDTO {
     }
 
     public void setAmountReceivable(BigDecimal amountReceivable) {
+        amountReceivable = amountReceivable.setScale(2,BigDecimal.ROUND_CEILING);
         this.amountReceivable = amountReceivable;
     }
 
@@ -160,6 +161,7 @@ public class ListBillsDTO {
     }
 
     public void setAmountReceived(BigDecimal amountReceived) {
+        amountReceived = amountReceived.setScale(2,BigDecimal.ROUND_CEILING);
         this.amountReceived = amountReceived;
     }
 
@@ -168,6 +170,7 @@ public class ListBillsDTO {
     }
 
     public void setAmountOwed(BigDecimal amountOwed) {
+        amountOwed = amountOwed.setScale(2,BigDecimal.ROUND_CEILING);
         this.amountOwed = amountOwed;
     }
 

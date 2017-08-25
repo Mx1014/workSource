@@ -46,6 +46,7 @@ public class BillItemDTO {
     }
 
     public void setAmountReceivable(BigDecimal amountReceivable) {
+        amountReceivable = amountReceivable.setScale(2,BigDecimal.ROUND_CEILING);
         this.amountReceivable = amountReceivable;
     }
 

@@ -75,5 +75,7 @@ public interface AssetService {
 
     PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd);
 
+    void generateBillsOnContractSigned(String contractNum);
+
 //    void synchronizeZJGKBill();
 }

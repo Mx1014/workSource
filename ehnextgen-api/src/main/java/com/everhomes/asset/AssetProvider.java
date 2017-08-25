@@ -56,7 +56,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr);
 
-    void creatPropertyBill(List<AddressIdAndName> addressIdAndNames, BillGroupDTO billGroupDTO, String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName);
+    void creatPropertyBill(Long addressId, BillGroupDTO billGroupDTO, String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName);
 
     ListBillDetailVO listBillDetail(Long billId);
 
@@ -91,4 +91,6 @@ public interface AssetProvider {
     List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
 
     void increaseNoticeTime(List<Long> billIds);
+
+    List<PaymentContractReceiver> findContractReceiverByContractNumAndTimeLimit(String contractNum);
 }
