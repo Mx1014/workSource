@@ -815,5 +815,12 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(21054,'参数配置',21000,'/20000/21000/21050/21054','1','4','2','0',NOW(),'1','1'); -- 定义模块下的权限分类，parentId代表分类的所属模块
 
 
+-- 物业报修换模块了 需要改路径 by xiongying20170825
+delete from eh_service_modules where id in(20140, 20150, 20155, 20190);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(20140,'任务列表',20100,'/40000/20100/20140','1','3','2','0',NOW(), '1', '1');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(20150,'服务录入',20100,'/40000/20100/20150','1','3','2','0',NOW(), '1', '1');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(20155,'设置',20100,'/40000/20100/20155','1','3','0','0',NOW(), '1', '1');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) VALUES(20190,'统计',20100,'/40000/20100/20190','1','3','2','0',NOW(), '1', '1');
+
 
 
