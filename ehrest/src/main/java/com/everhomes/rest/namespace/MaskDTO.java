@@ -14,7 +14,7 @@ public class MaskDTO {
     private Long id;
     private String tips;
     private String itemName;
-    private Integer imageType;
+    private Byte imageType;
     private String sceneType;
 
     @Override
@@ -38,15 +38,6 @@ public class MaskDTO {
         this.tips = tips;
     }
 
-
-    public Integer getImageType() {
-        return imageType;
-    }
-
-    public void setImageType(Integer imageType) {
-        this.imageType = imageType;
-    }
-
     public String getItemName() {
         return itemName;
     }
@@ -61,5 +52,13 @@ public class MaskDTO {
 
     public void setSceneType(String sceneType) {
         this.sceneType = sceneType;
+    }
+
+    public Byte getImageType() {
+        return imageType;
+    }
+
+    public void setImageType(Byte imageType) {
+        this.imageType = imageType;
     }
 }

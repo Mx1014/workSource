@@ -29,6 +29,11 @@ import java.util.concurrent.Executors;
 public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NamespaceResourceServiceImpl.class);
 	ExecutorService pool = Executors.newFixedThreadPool(3);
+
+	//蒙版启用参数
+	private final static Integer MASK_ENABLE = 0;
+	private final static Integer MASK_DISABLE = 1;
+
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -115,7 +120,7 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
         }
         
 		//读取蒙版的配置项
-		Integer maskFlag = this.configurationProvider.getIntValue(namespaceId, "mask.key", 0);
+		Integer maskFlag = this.configurationProvider.getIntValue(namespaceId, "mask.key", MASK_ENABLE);
 		detailDto.setMaskFlag(maskFlag);
 
 		if(maskFlag == 0){
@@ -138,6 +143,8 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 			if(masks != null && masks.size()  > 0){
 				detailDto.setPmMasks(masks);
 			}
+		}else{
+			detailDto.setMaskFlag(MASK_DISABLE);
 		}
 
 		return detailDto;
