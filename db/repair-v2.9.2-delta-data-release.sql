@@ -11,3 +11,5 @@ INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `
 
 set @menu_scope_id = (select max(id) from eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@menu_scope_id  + 1, '20225', '', 'EhNamespaces', '999983', '2');
+
+update eh_launch_pad_items set action_data='{"url":"zl://propertyrepair/create?type=user&taskCategoryId=1&displayName=报修"}',action_type=60 where namespace_id=999983 and item_label = '报修';

@@ -30,6 +30,7 @@ import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.*;
 import com.everhomes.organization.*;
+import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -643,8 +644,11 @@ public class CommunityServiceImpl implements CommunityService {
         	
         	return dto;
         }).collect(Collectors.toList());
-        
-        
+
+        //增加公共区域
+        BuildingDTO buildingDTO = new BuildingDTO();
+        buildingDTO.setName(EbeiBuildingType.publicArea);
+        dtoList.add(buildingDTO);
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
 
