@@ -646,9 +646,9 @@ public class CommunityServiceImpl implements CommunityService {
         }).collect(Collectors.toList());
 
         //增加公共区域
-        BuildingDTO buildingDTO = new BuildingDTO();
-        buildingDTO.setName(EbeiBuildingType.publicArea);
-        dtoList.add(buildingDTO);
+//        BuildingDTO buildingDTO = new BuildingDTO();
+//        buildingDTO.setName(EbeiBuildingType.publicArea);
+//        dtoList.add(buildingDTO);
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
 
