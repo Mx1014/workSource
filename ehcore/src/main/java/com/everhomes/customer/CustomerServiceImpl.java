@@ -886,8 +886,32 @@ public class CustomerServiceImpl implements CustomerService {
             customerIds.add(customer.getId());
         });
         CustomerIntellectualPropertyStatisticsResponse response = new CustomerIntellectualPropertyStatisticsResponse();
+        response.setPropertyTotalCount(0L);
+        List<CustomerIntellectualPropertyStatisticsDTO> dtos = new ArrayList<>();
+        Long trademarks = enterpriseCustomerProvider.countTrademarksByCustomerIds(customerIds);
+        if(trademarks != null) {
+            response.setPropertyTotalCount(response.getPropertyTotalCount() + trademarks);
 
-        return null;
+            CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
+            dto.setPropertyType("商标");
+            dto.setPropertyCount(trademarks);
+            dtos.add(dto);
+        }
+
+
+        Map<Long, Long> properties = enterpriseCustomerProvider.listCustomerPatentsByCustomerIds(customerIds);
+        properties.forEach((categoryId, count) -> {
+            CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
+            dto.setPropertyCount(count);
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+            if(item != null) {
+                dto.setPropertyType(item.getItemDisplayName());
+            }
+            dtos.add(dto);
+            response.setPropertyTotalCount(response.getPropertyTotalCount() + count);
+        });
+        response.setDtos(dtos);
+        return response;
     }
 
     @Override

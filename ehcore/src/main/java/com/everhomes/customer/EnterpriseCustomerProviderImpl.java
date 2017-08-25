@@ -688,6 +688,25 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public Map<Long, Long> listCustomerPatentsByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerPatentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_PATENTS);
+        query.addConditions(Tables.EH_CUSTOMER_PATENTS.CUSTOMER_ID.in(customerIds));
+        query.addConditions(Tables.EH_CUSTOMER_PATENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        Map<Long, Long> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            if(result.get(r.getPatentStatusItemId()) == null) {
+                result.put(r.getPatentStatusItemId(), 1L);
+            } else {
+                result.put(r.getPatentStatusItemId(), result.get(r.getPatentStatusItemId()) + 1);
+            }
+            return null;
+        });
+        return result;
+    }
+
+    @Override
     public List<CustomerTrademark> listCustomerTrademarksByCustomerId(Long customerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerTrademarksRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRADEMARKS);
@@ -701,6 +720,15 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
 
         return result;
+    }
+
+    @Override
+    public Long countTrademarksByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectCount().from(Tables.EH_CUSTOMER_TRADEMARKS)
+                .where(Tables.EH_CUSTOMER_TRADEMARKS.CUSTOMER_ID.in(customerIds))
+                .and(Tables.EH_CUSTOMER_TRADEMARKS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchAnyInto(Long.class);
     }
 
     @Override

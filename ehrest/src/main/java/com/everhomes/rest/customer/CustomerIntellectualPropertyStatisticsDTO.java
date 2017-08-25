@@ -9,15 +9,15 @@ package com.everhomes.rest.customer;
  */
 public class CustomerIntellectualPropertyStatisticsDTO {
 
-    private Byte propertyType;
+    private String propertyType;
 
     private Long propertyCount;
 
-    public Byte getPropertyType() {
+    public String getPropertyType() {
         return propertyType;
     }
 
-    public void setPropertyType(Byte propertyType) {
+    public void setPropertyType(String propertyType) {
         this.propertyType = propertyType;
     }
 

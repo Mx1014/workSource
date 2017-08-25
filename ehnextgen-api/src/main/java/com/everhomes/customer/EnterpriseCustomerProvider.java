@@ -34,12 +34,14 @@ public interface EnterpriseCustomerProvider {
     void deleteCustomerTrademark(CustomerTrademark trademark);
     CustomerTrademark findCustomerTrademarkById(Long id);
     List<CustomerTrademark> listCustomerTrademarksByCustomerId(Long customerId);
+    Long countTrademarksByCustomerIds(List<Long> customerIds);
 
     void createCustomerPatent(CustomerPatent patent);
     void updateCustomerPatent(CustomerPatent patent);
     void deleteCustomerPatent(CustomerPatent patent);
     CustomerPatent findCustomerPatentById(Long id);
     List<CustomerPatent> listCustomerPatentsByCustomerId(Long customerId);
+    Map<Long, Long> listCustomerPatentsByCustomerIds(List<Long> customerIds);
 
     void createCustomerApplyProject(CustomerApplyProject project);
     void updateCustomerApplyProject(CustomerApplyProject project);

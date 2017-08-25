@@ -463,7 +463,8 @@ public class ContractServiceImpl implements ContractService {
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.createContract(contract);
 
-		dealContractApartments(contract, cmd.getApartments());
+		//计算总的租赁面积
+		Double totalSize = dealContractApartments(contract, cmd.getApartments());
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
@@ -505,7 +506,7 @@ public class ContractServiceImpl implements ContractService {
 		flowService.createFlowCase(createFlowCaseCommand);
 	}
 
-	private void dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
+	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
 		if(existApartments != null && existApartments.size() > 0) {
@@ -513,8 +514,11 @@ public class ContractServiceImpl implements ContractService {
 				map.put(apartment.getId(), apartment);
 			});
 		}
+		Double totalSize = 0.0;
 		if(buildingApartments != null && buildingApartments.size() > 0) {
-			buildingApartments.forEach(buildingApartment -> {
+			for(BuildingApartmentDTO buildingApartment : buildingApartments) {
+				Double size = buildingApartment.getAreaSize() == null ? 0.0 : buildingApartment.getAreaSize();
+				totalSize = totalSize + size;
 				if(buildingApartment.getId() == null) {
 					ContractBuildingMapping mapping = ConvertHelper.convert(buildingApartment, ContractBuildingMapping.class);
 					mapping.setNamespaceId(contract.getNamespaceId());
@@ -531,7 +535,7 @@ public class ContractServiceImpl implements ContractService {
 				} else {
 					map.remove(buildingApartment.getId());
 				}
-			});
+			}
 		}
 		if(map.size() > 0) {
 			map.forEach((id, apartment) -> {
@@ -542,6 +546,8 @@ public class ContractServiceImpl implements ContractService {
 				propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
 			});
 		}
+
+		return totalSize;
 	}
 
 	private void dealContractChargingItems(Contract contract, List<ContractChargingItemDTO> chargingItems) {
