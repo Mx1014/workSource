@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属实体类型,</li>
  * <li>ownerId:  所属实体id</li>
  * <li>level: 业务模块级别</li>
+ * <li>type: 类型</li>
+ * <li>parentId: 父级id</li>
  * </ul>
  */
 public class ListServiceModulesCommand {
@@ -18,7 +20,23 @@ public class ListServiceModulesCommand {
 
     private Integer level;
 
-    public Integer getLevel() {
+	private Byte type;
+
+	private Long parentId;
+
+	private Integer pageSize;
+
+	private Long pageAnchor;
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	public Integer getLevel() {
         return level;
     }
 
@@ -47,4 +65,27 @@ public class ListServiceModulesCommand {
 		this.ownerId = ownerId;
 	}
 
+	public Byte getType() {
+		return type;
+	}
+
+	public void setType(Byte type) {
+		this.type = type;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
 }

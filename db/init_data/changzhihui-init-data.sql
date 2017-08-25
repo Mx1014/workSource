@@ -1022,12 +1022,120 @@ VALUES ((@organization_details_id := @organization_details_id + 1), 1035719, NUL
 # INSERT INTO `eh_enterprise_community_map` (`id`, `community_id`, `member_type`, `member_id`, `member_status`, `creator_uid`, `create_time`, `update_time`)
 # VALUES ((@enterprise_community_map_id := @enterprise_community_map_id + 1), 240111044331050362, 'enterprise', 1035719, 3, NULL, NOW(), NOW());
 -- NEW END--- 08/04 17:59
+DELETE FROM eh_version_realm WHERE namespace_id = 999969;
 
 SELECT MAX(id) FROM `eh_app_urls` INTO @app_urls_id;
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
   VALUES ((@app_urls_id := @app_urls_id + 1), 999969, '昌智慧', 1, '', 'cs://1/image/aW1hZ2UvTVRveFltSmlNV0ptT1dKaU1UQTFOekZrWldOa09XWmpOVEppT0RKaFpUVTJOQQ', '移动平台聚合服务，助力园区效能提升');
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
   VALUES ((@app_urls_id := @app_urls_id + 1), 999969, '昌智慧', 2, '', 'cs://1/image/aW1hZ2UvTVRveFltSmlNV0ptT1dKaU1UQTFOekZrWldOa09XWmpOVEppT0RKaFpUVTJOQQ', '移动平台聚合服务，助力园区效能提升');
+
+
+SELECT max(id) FROM `eh_version_realm` INTO @ver_rea_id;
+SELECT max(id) FROM `eh_version_upgrade_rules` INTO @ver_upg_id;
+
+INSERT INTO `eh_version_realm` VALUES ((@ver_rea_id := @ver_rea_id + 1), 'Android_ChangZhiHui', null, UTC_TIMESTAMP(), 999969);
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`)
+VALUES ((@ver_upg_id := @ver_upg_id + 1), @ver_rea_id, '-0.1','1048576','0','1.0.0', 0, NOW(), 999969);
+
+INSERT INTO `eh_version_realm` VALUES ((@ver_rea_id := @ver_rea_id + 1), 'IOS_ChangZhiHui', null, UTC_TIMESTAMP(), 999969);
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`)
+VALUES ((@ver_upg_id := @ver_upg_id + 1), @ver_rea_id, '-0.1','1048576','0','1.0.0', 0, NOW(), 999969);
+
+
+-- 【昌智汇】服务联盟配置 add by sfyan 20170822
+SET @namespace_id = 999969;
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`); 
+SET @parent_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
+SET @community_id = 240111044331050362;
+SET @skip_rule_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_skip_rule`), 1);
+UPDATE `eh_launch_pad_items` SET item_label = '服务体系' WHERE item_name = 'SERVICE_ALLIANCE' AND `namespace_id` = @namespace_id;
+UPDATE `eh_launch_pad_items` SET item_label = '回+青创汇' WHERE item_name = 'MAKER_SPACE' AND `namespace_id` = @namespace_id;
+UPDATE `eh_service_alliance_categories` SET `name` = '服务体系' WHERE `parent_id` = 0 AND `namespace_id` = @namespace_id AND `name` = '服务联盟';
+UPDATE `eh_service_alliances` SET `name` = '服务体系' WHERE `owner_type` = 'community' AND `owner_id` = @community_id AND `name` = '服务联盟';
+
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', @community_id, '0', '智慧政申', '智慧政申', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '智慧政申', '智慧政申', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), @namespace_id, @parent_id);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','SmartApplication','智慧政申','cs://1/image/aW1hZ2UvTVRveE5qZGpNakExTkRoaU9EUXdPRGcyTURWa01UTmtNemczTWpOaE9UUTFNUQ
+','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'5','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'31',NULL);
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','SmartApplication','智慧政申','cs://1/image/aW1hZ2UvTVRveE5qZGpNakExTkRoaU9EUXdPRGcyTURWa01UTmtNemczTWpOaE9UUTFNUQ
+','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'5','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'31',NULL);
+
+
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', @community_id, '0', '科技金融服务', '科技金融服务', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '科技金融服务', '科技金融服务', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), @namespace_id, @parent_id);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','TechnoFinance','科技金融服务','cs://1/image/aW1hZ2UvTVRveFpUSTFaVFF5TkRRME1XRTVNalUzWVRGalkyUmtaV00yWmpnMU5tVmhPUQ
+','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'6','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'31',NULL);
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','TechnoFinance','科技金融服务','cs://1/image/aW1hZ2UvTVRveFpUSTFaVFF5TkRRME1XRTVNalUzWVRGalkyUmtaV00yWmpnMU5tVmhPUQ
+','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'6','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'31',NULL);
+
+
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', @community_id, '0', '技术创新业务', '技术创新业务', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '技术创新业务', '技术创新业务', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), @namespace_id, @parent_id);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','TechnoInnocation','技术创新业务','cs://1/image/aW1hZ2UvTVRwa09UVXpPVGMxTURnMFlUYzNPRGt5TUdSbE5UVTJZVEprTkdRek1qUTNNUQ
+','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'7','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'31',NULL);
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','TechnoInnocation','技术创新业务','cs://1/image/aW1hZ2UvTVRwa09UVXpPVGMxTURnMFlUYzNPRGt5TUdSbE5UVTJZVEprTkdRek1qUTNNUQ
+','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'7','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'31',NULL);
+
+
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', @community_id, '0', '人才关爱', '人才关爱', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '人才关爱', '人才关爱', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), @namespace_id, @parent_id);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','CareForTalent','人才关爱','cs://1/image/aW1hZ2UvTVRwak5qQTROemRoTURFME9EWTRZVE5rWm1abFpEbG1NVEUyTldZMVpEZ3dOQQ','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'8','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'31',NULL);
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','CareForTalent','人才关爱','cs://1/image/aW1hZ2UvTVRwak5qQTROemRoTURFME9EWTRZVE5rWm1abFpEbG1NVEUyTldZMVpEZ3dOQQ','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'8','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'31',NULL);
+
+
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', @community_id, '0', '特色产业服务', '特色产业服务', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '特色产业服务', '特色产业服务', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), @namespace_id, @parent_id);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','InnovaMarkeService','特色产业服务','cs://1/image/aW1hZ2UvTVRwaFpHTTVOVEprT1RGbE5HWTRNREpsTm1WbE9USTJOV0ZpWVRBMllqa3pOQQ
+','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'9','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'31',NULL);
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','InnovaMarkeService','特色产业服务','cs://1/image/aW1hZ2UvTVRwaFpHTTVOVEprT1RGbE5HWTRNREpsTm1WbE9USTJOV0ZpWVRBMllqa3pOQQ','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'9','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'31',NULL);
+
+SET @parent_id = @parent_id + 1;
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@parent_id, 'community', @community_id, '0', '国际交流', '国际交流', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '国际交流', '国际交流', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@skip_rule_id := @skip_rule_id + 1), @namespace_id, @parent_id);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','InterCommu','国际交流','cs://1/image/aW1hZ2UvTVRveFpHRXhNelV4T0Rka01XWTVNV1ZpTlRNek9HWTVZamN6T1dRME1XUTJZZw','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'10','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'31',NULL);
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','InterCommu','国际交流','cs://1/image/aW1hZ2UvTVRveFpHRXhNelV4T0Rka01XWTVNV1ZpTlRNek9HWTVZamN6T1dRME1XUTJZZw','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'10','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'31',NULL);
 
 
 SET FOREIGN_KEY_CHECKS = 1;

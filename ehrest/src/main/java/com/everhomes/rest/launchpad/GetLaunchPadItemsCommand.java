@@ -33,6 +33,8 @@ public class GetLaunchPadItemsCommand {
 
     private Long categryId;
 
+    private String categryName;
+
     public GetLaunchPadItemsCommand() {
     }
 
@@ -86,6 +88,14 @@ public class GetLaunchPadItemsCommand {
 
     public void setCategryId(Long categryId) {
         this.categryId = categryId;
+    }
+
+    public String getCategryName() {
+        return categryName;
+    }
+
+    public void setCategryName(String categryName) {
+        this.categryName = categryName;
     }
 
     @Override

@@ -29,6 +29,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import com.everhomes.parking.jinyi.JinyiClearance;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.handler.JinyiParkingVendorHandler;
-import com.everhomes.parking.jinyi.JinyiClearance;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.parking.jinyi.JinyiJsonEntity;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;

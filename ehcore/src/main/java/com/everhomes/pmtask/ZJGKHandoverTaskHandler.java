@@ -79,7 +79,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
         String jsonStr = null;
         try {
             jsonStr = HttpUtils.post(url, params, 20, "UTF-8");
-            //向第张江认证。
+            //向张江认证。
             entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity>(){});
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,13 +139,13 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             params.put("manager", "");
         }
 
-        String appKey = configProvider.getValue("zjgk.appKey", "d923d02c-453d-4cd8-a948-a34ca312058e");
+        String appKey = configProvider.getValue(task.getNamespaceId(), "shenzhoushuma.app.key", "");
+        String secretKey = configProvider.getValue(task.getNamespaceId(), "shenzhoushuma.secret.key", "");
         params.put("appKey", appKey);
         params.put("timestamp", String.valueOf(System.currentTimeMillis()));
         Integer randomNum = (int) (Math.random()*1000);
         params.put("nonce",randomNum+"");
-        App app = appProvider.findAppByKey(appKey);
-        String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
+        String signature = SignatureHelper.computeSignature(params, secretKey);
 
         params.put("signature",signature);
         return params;

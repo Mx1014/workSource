@@ -139,4 +139,29 @@ public interface ActivityProivider {
 	List<ActivityRoster> findExpireRostersByActivityId(Long activityId);
 	
 	List<Long> listActivityIds();
+
+	/**
+	 * 新建ActivityCategories
+	 * @param activityCategory
+	 */
+	void createActivityCategories(ActivityCategories activityCategory);
+
+	/**
+	 * 更新ActivityCategories
+	 * @param activityCategory
+	 */
+	void updateActivityCategories(ActivityCategories activityCategory);
+
+	/**
+	 * 获取当前域空间最大的EntryId
+	 * @param namespaceId
+	 * @return
+	 */
+	Long findActivityCategoriesMaxEntryId(Integer namespaceId);
+
+	/**
+	 * 删除ActivityCategories
+	 * @param id
+	 */
+	void deleteActivityCategories(Long id);
 }
