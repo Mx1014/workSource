@@ -915,7 +915,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(request.getOwnerType())){
                 b.field("ownerType", EntityType.ORGANIZATIONS.getCode());
                 List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(request.getOwnerId());
-                b.field("ownerId", organizations.get(0).getId());
+                if(organizations!=null && organizations.size()>0) {
+                    b.field("ownerId", organizations.get(0).getId());
+                }
             }else{
                 b.field("ownerType", request.getOwnerType());
                 b.field("ownerId", request.getOwnerId());
