@@ -21,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>rateName: 费率名称</li>
  * <li>monthCount: 充值月数，不一定每个厂商都有</li>
  * <li>price: 价格</li>
- * <li>orderType: 价格</li>
+ * <li>orderType: 订单类型</li>
  * </ul>
  */
 public class CreateParkingRechargeOrderCommand {

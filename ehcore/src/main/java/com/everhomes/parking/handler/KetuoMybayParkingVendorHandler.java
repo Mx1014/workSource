@@ -3,7 +3,6 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingRechargeOrder;
@@ -12,7 +11,6 @@ import com.everhomes.parking.dashi.DashiCarLocation;
 import com.everhomes.parking.dashi.DashiEmptyPlaceFloorInfo;
 import com.everhomes.parking.dashi.DashiEmptyPlaceInfo;
 import com.everhomes.parking.dashi.DashiJsonEntity;
-import com.everhomes.parking.ketuo.KetuoCard;
 import com.everhomes.parking.ketuo.KetuoRequestConfig;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.parking.*;
@@ -38,7 +36,7 @@ import java.util.*;
  * 深圳湾 停车对接
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "Mybay")
-public class KetuoMybayParkingVendorHandler extends Ketuo2ParkingVendorHandler{
+public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoMybayParkingVendorHandler.class);
 
 	private static final String GET_EMPTY_PLACE = "/ParkingApi/QueryEmptyPlace";
@@ -46,8 +44,6 @@ public class KetuoMybayParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 	private static final String GET_PARKING_INFO = "/ParkingApi/GetParkingInfo";
 	private static final String ADD_MONTH_CARD = "/api/card/AddCarCard";
 
-	@Autowired
-    private ConfigurationProvider configProvider;
 	@Autowired
 	private ContentServerService contentServerService;
 
@@ -111,6 +107,7 @@ public class KetuoMybayParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 		if(null != obj ) {
 			int resCode = (int) obj;
 			if(resCode == 0) {
+				updateFlowStatus(order);
 				return true;
 			}
 		}

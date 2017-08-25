@@ -14,35 +14,21 @@ import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.ketuo.KetuoTempFee;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
  * 科兴 正中会 停车对接
  */
 @Component
-public class Ketuo2ParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
-	private static final Logger LOGGER = LoggerFactory.getLogger(Ketuo2ParkingVendorHandler.class);
+public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoParkingVendorHandler.class);
 
 	static final String RECHARGE = "/api/pay/CardRecharge";
 	private static final String GET_CARD = "/api/pay/GetCarCardInfo";
@@ -56,21 +42,6 @@ public class Ketuo2ParkingVendorHandler extends DefaultParkingVendorHandler impl
 	static final int DAY_COUNT = 30;
 	//月租车 : 2
 	static final String CAR_TYPE = "2";
-
-	@Autowired
-	ParkingProvider parkingProvider;
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
-	@Autowired
-    private ConfigurationProvider configProvider;
-	@Autowired
-	private FlowService flowService;
-    @Autowired
-	private FlowProvider flowProvider;
-    @Autowired
-    private FlowCaseProvider flowCaseProvider;
-	@Autowired
-    private DbProvider dbProvider;
     
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
@@ -176,7 +147,7 @@ public class Ketuo2ParkingVendorHandler extends DefaultParkingVendorHandler impl
 		dto.setRateName(rateName);
 		dto.setCardType(rate.getTypeName());
 		dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
-		dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), RoundingMode.HALF_UP));
+		dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 		dto.setVendorName(ParkingLotVendor.KETUO2.getCode());
 		return dto;
 	}
@@ -265,51 +236,6 @@ public class Ketuo2ParkingVendorHandler extends DefaultParkingVendorHandler impl
         
         return card;
     }
-
-	void updateFlowStatus(ParkingRechargeOrder order) {
-		User user = UserContext.current().getUser();
-    	LOGGER.debug("ParkingCardRequest pay callback user={}", user);
-
-    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(order.getCreatorUid(), order.getOwnerType(), 
-    			order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
-    			null, null, null, null);
-    	
-    	LOGGER.debug("ParkingCardRequest list size={}", list.size());
-    	dbProvider.execute((TransactionStatus transactionStatus) -> {
-    		ParkingCardRequest parkingCardRequest = null;
-        	for(ParkingCardRequest p: list) {
-        		Flow flow = flowProvider.findSnapshotFlow(p.getFlowId(), p.getFlowVersion());
-        		String tag1 = flow.getStringTag1();
-        		if(null == tag1) {
-        			LOGGER.error("Flow tag is null, flow={}", flow);
-        			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-        					"Flow tag is null.");
-        		}
-        		if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
-        			parkingCardRequest = p;
-        			break;
-        		}
-        	}
-        	if(null != parkingCardRequest) {
-    			FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
-
-            		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-            		stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
-            		stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
-            		stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
-            		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-            		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-            		stepDTO.setStepCount(flowCase.getStepCount());
-            		flowService.processAutoStep(stepDTO);
-            		
-            		parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
-        			parkingCardRequest.setOpenCardTime(new Timestamp(System.currentTimeMillis()));
-        			parkingProvider.updateParkingCardRequest(parkingCardRequest);
-
-        	}
-    		return null;
-		});
-	}
 	
     boolean payTempCardFee(ParkingRechargeOrder order){
 
@@ -361,9 +287,7 @@ public class Ketuo2ParkingVendorHandler extends DefaultParkingVendorHandler impl
 
 		//将充值信息存入订单
 		order.setErrorDescriptionJson(json);
-		if (null == order.getStartPeriod()) {
-			order.setStartPeriod(tempStart);
-		}
+        order.setStartPeriod(tempStart);
 		order.setEndPeriod(tempEnd);
 
 		JSONObject jsonObject = JSONObject.parseObject(json);
@@ -458,7 +382,7 @@ public class Ketuo2ParkingVendorHandler extends DefaultParkingVendorHandler impl
 		dto.setPayTime(strToLong(tempFee.getPayTime()));
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
-		dto.setPrice(new BigDecimal(tempFee.getPayable() / 100));
+		dto.setPrice(new BigDecimal(tempFee.getPayable()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 
 		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
@@ -537,7 +461,7 @@ public class Ketuo2ParkingVendorHandler extends DefaultParkingVendorHandler impl
 
 				BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
 						.add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
-								.divide(new BigDecimal(DAY_COUNT), RoundingMode.HALF_EVEN));
+								.divide(new BigDecimal(DAY_COUNT), 2, RoundingMode.HALF_UP));
 				dto.setPayMoney(price);
 			}
 

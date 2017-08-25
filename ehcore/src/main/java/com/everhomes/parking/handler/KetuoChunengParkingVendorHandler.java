@@ -3,7 +3,6 @@ package com.everhomes.parking.handler;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.parking.ParkingVendorHandler;
-import com.everhomes.parking.ketuo.KetuoCard;
 import com.everhomes.parking.ketuo.KetuoRequestConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Component;
  * 储能 正中会 停车对接
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO")
-public class KetuoChunengParkingVendorHandler extends Ketuo2ParkingVendorHandler{
+public class KetuoChunengParkingVendorHandler extends KetuoParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoChunengParkingVendorHandler.class);
 
 	@Autowired

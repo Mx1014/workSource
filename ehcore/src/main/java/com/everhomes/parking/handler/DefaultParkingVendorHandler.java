@@ -1,9 +1,15 @@
 package com.everhomes.parking.handler;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.parking.*;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -11,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -27,12 +34,21 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultParkingVendorHandler.class);
 
     @Autowired
-    private ParkingProvider parkingProvider;
-
+    ParkingProvider parkingProvider;
     @Autowired
-    private LocaleTemplateService localeTemplateService;
+    LocaleTemplateService localeTemplateService;
+    @Autowired
+    ConfigurationProvider configProvider;
+    @Autowired
+    private FlowService flowService;
+    @Autowired
+    private FlowProvider flowProvider;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-    protected boolean checkExpireTime(ParkingLot parkingLot, long expireTime) {
+    boolean checkExpireTime(ParkingLot parkingLot, long expireTime) {
         long now = System.currentTimeMillis();
         long cardReserveTime = 0;
 
@@ -46,7 +62,7 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
         return expireTime + cardReserveTime < now;
     }
 
-    protected ParkingCardDTO convertCardInfo(ParkingLot parkingLot) {
+    ParkingCardDTO convertCardInfo(ParkingLot parkingLot) {
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 
         parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
@@ -106,6 +122,51 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
         order.setRateName(rate.getRateName());
     }
 
+    void updateFlowStatus(ParkingRechargeOrder order) {
+        User user = UserContext.current().getUser();
+        LOGGER.debug("ParkingCardRequest pay callback user={}", user);
+
+        List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(order.getCreatorUid(), order.getOwnerType(),
+                order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
+                null, null, null, null);
+
+        LOGGER.debug("ParkingCardRequest list size={}", list.size());
+        dbProvider.execute((TransactionStatus transactionStatus) -> {
+            ParkingCardRequest parkingCardRequest = null;
+            for(ParkingCardRequest p: list) {
+                Flow flow = flowProvider.findSnapshotFlow(p.getFlowId(), p.getFlowVersion());
+                String tag1 = flow.getStringTag1();
+                if(null == tag1) {
+                    LOGGER.error("Flow tag is null, flow={}", flow);
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                            "Flow tag is null.");
+                }
+                if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
+                    parkingCardRequest = p;
+                    break;
+                }
+            }
+            if(null != parkingCardRequest) {
+                FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+
+                FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+                stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
+                stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
+                stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
+                stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+                stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+                stepDTO.setStepCount(flowCase.getStepCount());
+                flowService.processAutoStep(stepDTO);
+
+                parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
+                parkingCardRequest.setOpenCardTime(new Timestamp(System.currentTimeMillis()));
+                parkingProvider.updateParkingCardRequest(parkingCardRequest);
+
+            }
+            return null;
+        });
+    }
+
     @Override
     public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
         return null;
@@ -160,12 +221,12 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
         return null;
     }
 
-    //是否支持开卡，对接时由项目需求定义
-    protected boolean getOpenCardFlag() {
-        return false;
-    }
-    //是否支持过期缴费, 目前只支持科兴过期缴费，科兴的过期月卡缴费规则，比较复杂，而且依赖第三方停车系统，不建议这样做
-    protected boolean getExpiredRechargeFlag() {
-        return false;
-    }
+//    //是否支持开卡，对接时由项目需求定义
+//    protected boolean getOpenCardFlag() {
+//        return false;
+//    }
+//    //是否支持过期缴费, 目前只支持科兴过期缴费，科兴的过期月卡缴费规则，比较复杂，而且依赖第三方停车系统，不建议这样做
+//    protected boolean getExpiredRechargeFlag() {
+//        return false;
+//    }
 }

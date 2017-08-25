@@ -5,18 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.ketuo.*;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
@@ -24,10 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,7 +28,7 @@ import java.util.stream.Collectors;
  * 科兴 正中会 停车对接
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO2")
-public class KetuoKexingParkingVendorHandler extends Ketuo2ParkingVendorHandler{
+public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoKexingParkingVendorHandler.class);
 
 	@Autowired
@@ -58,15 +48,15 @@ public class KetuoKexingParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 	String url = "http://220.160.111.114:8099";
 	Integer parkingId = 1;
 
-	//支持开卡，返回true
-	public boolean getOpenCardFlag() {
-		return true;
-	}
-
-	//是否支持过期缴费, 目前只支持科兴过期缴费，科兴的过期月卡缴费规则，比较复杂，而且依赖第三方停车系统，不建议这样做
-	protected boolean getExpiredRechargeFlag() {
-		return true;
-	}
+//	//支持开卡，返回true
+//	public boolean getOpenCardFlag() {
+//		return true;
+//	}
+//
+//	//是否支持过期缴费, 目前只支持科兴过期缴费，科兴的过期月卡缴费规则，比较复杂，而且依赖第三方停车系统，不建议这样做
+//	protected boolean getExpiredRechargeFlag() {
+//		return true;
+//	}
 
 	public KetuoRequestConfig getKetuoRequestConfig() {
 
@@ -100,7 +90,7 @@ public class KetuoKexingParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 				long now = System.currentTimeMillis();
 				long expireTime = strToLong(cardInfo.getValidTo());
 
-				if(getExpiredRechargeFlag() && expireTime < now) {
+				if(expireTime < now) {
 					KetuoCardRate ketuoCardRate = getExpiredRate(cardInfo, parkingLot, now);
 
 					if (null != ketuoCardRate) {
@@ -122,6 +112,18 @@ public class KetuoKexingParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 		}
 
 		return list.stream().map(r -> convertParkingRechargeRateDTO(parkingLot, r)).collect(Collectors.toList());
+	}
+
+	@Override
+	public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+		if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())) {
+			if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
+				return rechargeMonthlyCard(order);
+			}
+			return payTempCardFee(order);
+		}else {
+			return addMonthCard(order);
+		}
 	}
 
 	private KetuoCardRate getExpiredRate(KetuoCard cardInfo, ParkingLot parkingLot, long now) {
@@ -208,64 +210,62 @@ public class KetuoKexingParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 
 	}
 
+	boolean addMonthCard(ParkingRechargeOrder order){
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		//充值记录的开始时间
+		Timestamp tempStart = new Timestamp(calendar.getTimeInMillis());
+		order.setStartPeriod(tempStart);
+
+		KetuoCardRate ketuoCardRate = null;
+		for(KetuoCardRate rate: getCardRule(CAR_TYPE)) {
+			if(rate.getRuleId().equals(order.getRateToken())) {
+				ketuoCardRate = rate;
+			}
+		}
+		if(null == ketuoCardRate) {
+			LOGGER.error("Rate not found, cmd={}", order);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Rate not found.");
+		}
+
+		Integer payMoney = order.getPrice().intValue() * 100 - Integer.parseInt(ketuoCardRate.getRuleMoney())
+				* (order.getMonthCount().intValue() - 1);
+
+		if(addMonthCard(order.getPlateNumber(), payMoney)) {
+			Integer count = order.getMonthCount().intValue();
+
+			LOGGER.debug("Parking addMonthCard,count={}", count);
+
+			if(count > 1) {
+				ParkingRechargeOrder tempOrder = ConvertHelper.convert(order, ParkingRechargeOrder.class);
+				tempOrder.setMonthCount(new BigDecimal(count -1) );
+				tempOrder.setPrice(new BigDecimal((tempOrder.getPrice().intValue() * 100 - payMoney) / 100));
+				if(rechargeMonthlyCard(order, tempOrder)) {
+					updateFlowStatus(order);
+					return true;
+				}
+			}else {
+				updateFlowStatus(order);
+			}
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	public boolean rechargeMonthlyCard(ParkingRechargeOrder originalOrder){
 
 		ParkingRechargeOrder tempOrder = ConvertHelper.convert(originalOrder, ParkingRechargeOrder.class);
-		String plateNumber = tempOrder.getPlateNumber();
 
-		KetuoCard card = getCard(plateNumber);
-
-		if(getOpenCardFlag() && null == card) {
-
-			Calendar calendar = Calendar.getInstance();
-			calendar.set(Calendar.HOUR_OF_DAY, 0);
-			calendar.set(Calendar.MINUTE, 0);
-			calendar.set(Calendar.SECOND, 0);
-			//充值记录的开始时间
-			Timestamp tempStart = new Timestamp(calendar.getTimeInMillis());
-			originalOrder.setStartPeriod(tempStart);
-
-			KetuoCardRate ketuoCardRate = null;
-			for(KetuoCardRate rate: getCardRule(CAR_TYPE)) {
-				if(rate.getRuleId().equals(tempOrder.getRateToken())) {
-					ketuoCardRate = rate;
-				}
-			}
-			if(null == ketuoCardRate) {
-				LOGGER.error("Rate not found, cmd={}", tempOrder);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"Rate not found.");
-			}
-
-			Integer payMoney = tempOrder.getPrice().intValue()*100 - Integer.parseInt(ketuoCardRate.getRuleMoney())
-					* (tempOrder.getMonthCount().intValue() - 1);
-
-			if(addMonthCard(tempOrder.getPlateNumber(), payMoney)) {
-				Integer count = tempOrder.getMonthCount().intValue();
-
-				LOGGER.debug("Parking addMonthCard,count={}", count);
-
-				if(count > 1) {
-					tempOrder.setMonthCount(new BigDecimal(count -1) );
-					tempOrder.setPrice(new BigDecimal((tempOrder.getPrice().intValue() * 100 - payMoney) / 100));
-					if(actualRechargeMonthlyCard(originalOrder, tempOrder)) {
-						updateFlowStatus(tempOrder);
-						return true;
-					}
-				}else {
-					updateFlowStatus(tempOrder);
-				}
-				return true;
-			}
-			return false;
-		}else {
-			return actualRechargeMonthlyCard(originalOrder, tempOrder);
-		}
+		return rechargeMonthlyCard(originalOrder, tempOrder);
 
 	}
 
-	private boolean actualRechargeMonthlyCard(ParkingRechargeOrder originalOrder, ParkingRechargeOrder tempOrder) {
+	private boolean rechargeMonthlyCard(ParkingRechargeOrder originalOrder, ParkingRechargeOrder tempOrder) {
 
 		JSONObject param = new JSONObject();
 		String plateNumber = tempOrder.getPlateNumber();
@@ -276,7 +276,7 @@ public class KetuoKexingParkingVendorHandler extends Ketuo2ParkingVendorHandler{
 		long now = System.currentTimeMillis();
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-		if(getExpiredRechargeFlag() && expireTime < now) {
+		if(expireTime < now) {
 			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
 			String date = sdf2.format(new Date(now)) + " 00:00:00";
 			try {
