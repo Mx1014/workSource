@@ -2582,6 +2582,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 			return null;
 		});
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 		}
 	private void cancelTask(Long id){
 		PmTask task = checkPmTask(id);
