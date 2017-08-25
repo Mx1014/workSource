@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class ListSettledBillExemptionItemsResponse {
     @ItemType(ListBillExemptionItemsDTO.class)
-    private List<ListBillExemptionItemsDTO> listNotSettledBillDTOs;
+    private List<ListBillExemptionItemsDTO> billDTOS;
     private Long nextPageAnchor;
 
     @Override
@@ -22,12 +22,12 @@ public class ListSettledBillExemptionItemsResponse {
         return StringHelper.toJsonString(this);
     }
 
-    public List<ListBillExemptionItemsDTO> getListNotSettledBillDTOs() {
-        return listNotSettledBillDTOs;
+    public List<ListBillExemptionItemsDTO> getBillDTOS() {
+        return billDTOS;
     }
 
-    public void setListNotSettledBillDTOs(List<ListBillExemptionItemsDTO> listNotSettledBillDTOs) {
-        this.listNotSettledBillDTOs = listNotSettledBillDTOs;
+    public void setBillDTOS(List<ListBillExemptionItemsDTO> billDTOS) {
+        this.billDTOS = billDTOS;
     }
 
     public Long getNextPageAnchor() {
