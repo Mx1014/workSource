@@ -22,6 +22,7 @@ public class NamespaceDetailDTO {
     private Byte authPopupConfig;
     @ItemType(MaskDTO.class)
     private List<MaskDTO> pmMasks;
+    private Integer maskFlag;
 
 
     public Long getId() {
@@ -67,5 +68,13 @@ public class NamespaceDetailDTO {
 
     public void setPmMasks(List<MaskDTO> pmMasks) {
         this.pmMasks = pmMasks;
+    }
+
+    public Integer getMaskFlag() {
+        return maskFlag;
+    }
+
+    public void setMaskFlag(Integer maskFlag) {
+        this.maskFlag = maskFlag;
     }
 }

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 @Component
 public class NamespaceResourceServiceImpl implements NamespaceResourceService {
@@ -115,27 +114,32 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
             detailDto.setAuthPopupConfig(communityAuthPopupConfig.getStatus());
         }
         
-		//需要蒙版的信息
+		//读取蒙版的配置项
+		Integer maskFlag = this.configurationProvider.getIntValue(namespaceId, "mask.key", 0);
+		detailDto.setMaskFlag(maskFlag);
 
-		//从配置中读取MaskDTO
-		List<MaskDTO> masks = this.namespacesProvider.listNamespaceMasks(namespaceId);
-		if(masks != null){
-			masks.forEach(r->{
-				//在圖標表中查找
-				LaunchPadItem item = this.launchPadProvider.searchLaunchPadItemsByItemName(namespaceId, r.getSceneType(), r.getItemName());
-				if(item != null){
-					//有效圖標
-					r.setId(item.getId());
-				}else{
-					//無效圖標
-					r.setId(0L);
-					r.setTips("cannot found item");
-				}
-			});
+		if(maskFlag == 0){
+			//从配置中读取MaskDTO
+			List<MaskDTO> masks = this.namespacesProvider.listNamespaceMasks(namespaceId);
+			if(masks != null){
+				masks.forEach(r->{
+					//在圖標表中查找
+					LaunchPadItem item = this.launchPadProvider.searchLaunchPadItemsByItemName(namespaceId, r.getSceneType(), r.getItemName());
+					if(item != null){
+						//有效圖標
+						r.setId(item.getId());
+					}else{
+						//無效圖標
+						r.setId(0L);
+						r.setTips("cannot found item");
+					}
+				});
+			}
+			if(masks != null && masks.size()  > 0){
+				detailDto.setPmMasks(masks);
+			}
 		}
-		if(masks != null && masks.size()  > 0){
-			detailDto.setPmMasks(masks);
-		}
+
 		return detailDto;
 	}
 
