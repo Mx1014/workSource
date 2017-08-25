@@ -1,7 +1,7 @@
 package com.everhomes.rest.techpark.punch.admin;
 
 public enum PunchTargetType {
-    PUNCHGROUP("PUNCHGROUP"),USER("user");
+    PUNCHGROUP("PUNCHGROUP"),USER("USER_DETAIL");
     private String code;
 
     private PunchTargetType(String code) {
