@@ -769,13 +769,6 @@ insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `appl
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 40000, 2);
 insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 20000, 2);
 
--- 【深圳湾】服务广场增加item add by sfyan 20170825
-SET @eh_biz_serverURL = "http://biz.zuolin.com"; -- 取具体环境连接core server的链接
-SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`); 
-insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`,`categry_name`) values((@item_id := @item_id + 1),'999966','0','0','0','/home','Bizs','BizManager','店铺管理','cs://1/image/aW1hZ2UvTVRwaU56SXhOelJrTURFNFlqSmlOVEpqTldRNU5qSmtOV000TlRObVpXWTJZdw
-','1','1','13',CONCAT('{"url":"',@eh_biz_serverURL,'/zl-ec/rest/service/front/logon? hideNavigationBar=1&mallId=999966&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2F biz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}'),'30','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'2',NULL,'企业服务');
-insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`,`categry_name`) values((@item_id := @item_id + 1),'999966','0','0','0','/home','Bizs','BizManager','店铺管理','cs://1/image/aW1hZ2UvTVRwaU56SXhOelJrTURFNFlqSmlOVEpqTldRNU5qSmtOV000TlRObVpXWTJZdw
-','1','1','13',CONCAT('{"url":"',@eh_biz_serverURL,'/zl-ec/rest/service/front/logon? hideNavigationBar=1&mallId=999966&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2F biz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}'),'30','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'2',NULL,'企业服务');
 
 -- 【volgo】服务广场配置 add by sfyan 20170825
 SET @eh_biz_serverURL = "http://biz.zuolin.com"; -- 取具体环境连接core server的链接
@@ -794,3 +787,7 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),'1','0','0','0','/home','Bizs1','GasStation','我的茶水间','cs://1/image/aW1hZ2UvTVRvM01tTTBaV1pqTURrMVl6QTVaV0poWlRnMU9USTNNVGc0T0RneE9EQTRaQQ','1','1','13',CONCAT('{"url":"',@eh_biz_serverURL,'/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%23%2fstore%2fdetails%2f14803348590903554653%3F_k%3Dzlbiz#sign_suffix"}'),'1','0','1','1',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'2',NULL);
 
 update eh_launch_pad_items set scope_code = 5 where namespace_id = 1 and scope_id = 1023080;
+
+-- 【荣超】 物业巡检增加统计菜单 add by sfyan 20170825
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20850,'', 'EhNamespaces', 999975,2);
