@@ -241,7 +241,7 @@ CREATE TABLE `eh_stat_event_task_logs` (
   `task_date` DATE NOT NULL,
   `step_name` VARCHAR(256) NOT NULL,
   `status` VARCHAR(32) NOT NULL,
-  `task_meta` TEXT,
+  `task_meta` MEDIUMTEXT,
   `exception_stacktrace` TEXT,
   `duration_seconds` INTEGER,
   `update_Time` DATETIME(3),

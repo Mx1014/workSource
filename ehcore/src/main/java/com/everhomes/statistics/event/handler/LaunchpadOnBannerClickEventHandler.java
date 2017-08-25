@@ -41,8 +41,8 @@ public class LaunchpadOnBannerClickEventHandler extends AbstractStatEventPortalI
     }
 
     @Override
-    protected StatEventStatistic getEventStat(String identifierParamsValue) {
-        Long bannerId = Long.valueOf(identifierParamsValue);
+    protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap) {
+        Long bannerId = Long.valueOf(paramsToValueMap.get("id"));
         Banner banner = bannerProvider.findBannerById(bannerId);
         if (banner == null) {
             return null;

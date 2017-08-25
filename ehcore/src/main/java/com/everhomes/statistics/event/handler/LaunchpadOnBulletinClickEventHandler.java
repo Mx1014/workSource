@@ -34,7 +34,7 @@ public class LaunchpadOnBulletinClickEventHandler extends AbstractStatEventPorta
     }
 
     @Override
-    protected StatEventStatistic getEventStat(String identifierParamsValue) {
+    protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap) {
         StatEventStatistic eventStat = new StatEventStatistic();
         eventStat.setOwnerType("EhBulletins");
         eventStat.setOwnerId(0L);

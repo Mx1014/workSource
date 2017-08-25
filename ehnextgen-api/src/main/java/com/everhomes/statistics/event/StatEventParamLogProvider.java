@@ -37,6 +37,23 @@ public interface StatEventParamLogProvider {
      */
     List<StatEventParamLog> listEventParamLog(Integer namespaceId, String eventName, String eventVersion, Timestamp minTime, Timestamp maxTime);
 
+    /*
+     SELECT
+	    subT.v1, subT.v2, COUNT(*)
+        FROM
+            (SELECT
+                 aa.id, aa.event_name, aa.param_key AS p1, aa.string_value AS v1, tt.param_key AS p2, tt.string_value AS v2
+             FROM eh_stat_event_param_logs aa
+                 JOIN (SELECT
+                           id, param_key, string_value, event_log_id
+                       FROM eh_stat_event_param_logs
+                       WHERE event_name = 'launchpad_on_news_flash_item_click' AND param_key = 'layoutId') AS tt
+                     ON tt.event_log_id = aa.event_log_id
+             WHERE aa.event_name = 'launchpad_on_news_flash_item_click' AND aa.param_key = 'newsToken') AS subT
+        GROUP BY subT.v1, subT.v2;
+    */
+    Map<Map<String, String>, Integer> countParamTotalCount(Integer namespaceId, String eventName, String eventVersion, List<String> paramKeys, Timestamp minTime, Timestamp maxTime);
+
     /**
      * 统计参数的独立session数
      * @param namespaceId

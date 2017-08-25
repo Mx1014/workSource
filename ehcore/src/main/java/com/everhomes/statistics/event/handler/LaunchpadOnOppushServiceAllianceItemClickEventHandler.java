@@ -41,10 +41,10 @@ public class LaunchpadOnOppushServiceAllianceItemClickEventHandler extends Abstr
     }
 
     @Override
-    protected StatEventStatistic getEventStat(String identifierParamsValue) {
+    protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap) {
         StatEventStatistic eventStat = new StatEventStatistic();
 
-        Long serviceAllianceId = Long.valueOf(identifierParamsValue);
+        Long serviceAllianceId = Long.valueOf(paramsToValueMap.get("id"));
 
         ServiceAlliances serviceAlliances = yellowPageProvider.findServiceAllianceById(serviceAllianceId, null, null);
         if (serviceAlliances == null) {

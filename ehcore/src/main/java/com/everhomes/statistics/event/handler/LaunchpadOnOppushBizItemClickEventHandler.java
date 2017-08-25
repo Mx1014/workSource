@@ -51,10 +51,10 @@ public class LaunchpadOnOppushBizItemClickEventHandler extends AbstractStatEvent
     }
 
     @Override
-    protected StatEventStatistic getEventStat(String identifierParamsValue) {
+    protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap) {
         StatEventStatistic eventStat = new StatEventStatistic();
 
-        String commodityId = identifierParamsValue;
+        String commodityId = paramsToValueMap.get("id");
 
         eventStat.setOwnerType("EhCommodities");
         CRC32 crc32 = new CRC32();

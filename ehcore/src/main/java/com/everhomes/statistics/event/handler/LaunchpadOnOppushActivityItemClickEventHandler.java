@@ -41,10 +41,10 @@ public class LaunchpadOnOppushActivityItemClickEventHandler extends AbstractStat
     }
 
     @Override
-    protected StatEventStatistic getEventStat(String identifierParamsValue) {
+    protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap) {
         StatEventStatistic eventStat = new StatEventStatistic();
 
-        Long topicId = Long.valueOf(identifierParamsValue);
+        Long topicId = Long.valueOf(paramsToValueMap.get("topicId"));
         Activity activity = activityProivider.findSnapshotByPostId(topicId);
         if (activity == null) {
             return null;

@@ -42,8 +42,8 @@ public class LaunchpadOnNewsFlashItemClickEventHandler extends AbstractStatEvent
     }
 
     @Override
-    protected StatEventStatistic getEventStat(String identifierParamsValue) {
-        Long newsId = WebTokenGenerator.getInstance().fromWebToken(identifierParamsValue, Long.class);
+    protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap) {
+        Long newsId = WebTokenGenerator.getInstance().fromWebToken(paramsToValueMap.get("newsToken"), Long.class);
         News news = newsProvider.findNewsById(newsId);
         if (news == null) {
             return null;
