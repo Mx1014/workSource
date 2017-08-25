@@ -287,8 +287,11 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 			expressOrder.setBillNo(mailNum);
 			expressOrderProvider.updateExpressOrder(expressOrder);
 		}else if(status.toUpperCase().contains("F")){
+			//如果订单已经是取消状态(用户主动取消),那么不记录原因
+			if(expressOrder.getStatus().byteValue() != ExpressOrderStatus.CANCELLED.getCode().byteValue()){
+				expressOrder.setStatusDesc(status+params.get("desc"));
+			}
 			expressOrder.setStatus(ExpressOrderStatus.CANCELLED.getCode());
-			expressOrder.setStatusDesc(status+params.get("desc"));
 			expressOrderProvider.updateExpressOrder(expressOrder);
 		}
 		

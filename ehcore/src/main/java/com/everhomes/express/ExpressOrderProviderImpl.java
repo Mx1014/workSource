@@ -86,6 +86,10 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 			step.and(Tables.EH_EXPRESS_ORDERS.EXPRESS_COMPANY_ID.eq(condition.getExpressCompanyId()));
 		}
 		
+		if (condition.getSendType() != null){
+			step.and(Tables.EH_EXPRESS_ORDERS.SEND_TYPE.eq(condition.getSendType()));
+		}
+		
 		String keyword = condition.getKeyword();
 		if (keyword != null && !keyword.isEmpty()) {
 			keyword = keyword + "%";
