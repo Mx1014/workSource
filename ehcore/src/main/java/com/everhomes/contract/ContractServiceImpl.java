@@ -704,7 +704,11 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public void reviewContract(ReviewContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
-		contract.setStatus(ContractStatus.WAITING_FOR_APPROVAL.getCode());
+		contract.setStatus(cmd.getResult());
+		if(ContractStatus.INVALID.equals(ContractStatus.fromStatus(cmd.getResult()))) {
+			contract.setInvalidTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			contract.setInvalidUid(UserContext.currentUserId());
+		}
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 		addToFlowCase(contract);
