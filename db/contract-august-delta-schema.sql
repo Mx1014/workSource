@@ -255,6 +255,8 @@ ALTER TABLE `eh_contracts` ADD COLUMN `record_number` VARCHAR(32) COMMENT '备�
 ALTER TABLE `eh_contracts` ADD COLUMN `invalid_uid` BIGINT COMMENT '作废人id';
 ALTER TABLE `eh_contracts` ADD COLUMN `invalid_time` DATETIME COMMENT '作废时间';
 ALTER TABLE `eh_contracts` ADD COLUMN `invalid_reason` VARCHAR(256) COMMENT '作废原因';
+ALTER TABLE `eh_contracts` ADD COLUMN `review_uid` BIGINT COMMENT '审阅人id';
+ALTER TABLE `eh_contracts` ADD COLUMN `review_time` DATETIME COMMENT '审阅时间';
 ALTER TABLE `eh_contracts` ADD COLUMN `delete_uid` BIGINT COMMENT '删除人id';
 ALTER TABLE `eh_contracts` ADD COLUMN `delete_time` DATETIME COMMENT '删除时间';
  
