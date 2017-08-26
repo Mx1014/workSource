@@ -166,12 +166,12 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByEnterpriseCustomerId(Long communityId, Long customerId) {
+	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId))
 				.and(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
-				.and(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(CustomerType.ENTERPRISE.getCode()))
+				.and(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(customerType))
 				.fetch();
 
 		if (result != null) {

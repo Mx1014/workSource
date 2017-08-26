@@ -42,6 +42,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -431,13 +432,19 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private String generateContractNumber() {
-		return null;
+		String num = "HT_" + DateHelper.currentGMTTime().getTime() + RandomUtils.nextInt(10);
+		return num;
 	}
 
 	@Override
 	public ContractDetailDTO createContract(CreateContractCommand cmd) {
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
-		checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
+		if(cmd.getContractNumber() != null) {
+			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
+		} else {
+			contract.setContractNumber(generateContractNumber());
+		}
+
 		if(cmd.getContractStartDate() != null) {
 			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
 		}
@@ -461,6 +468,7 @@ public class ContractServiceImpl implements ContractService {
 		}
 		contract.setCreateUid(UserContext.currentUserId());
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
 
 		//计算总的租赁面积
@@ -468,10 +476,12 @@ public class ContractServiceImpl implements ContractService {
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
+		contract.setRentSize(totalSize);
+		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
-		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-			addToFlowCase(contract);
-		}
+//		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+//			addToFlowCase(contract);
+//		}
 
 		FindContractCommand command = new FindContractCommand();
 		command.setId(contract.getId());
@@ -651,6 +661,7 @@ public class ContractServiceImpl implements ContractService {
 	public ContractDTO updateContract(UpdateContractCommand cmd) {
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
+		checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
 		if(cmd.getContractStartDate() != null) {
 			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
 		}
@@ -704,14 +715,26 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public void reviewContract(ReviewContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
-		contract.setStatus(cmd.getResult());
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(cmd.getResult())
+				&& !ContractStatus.WAITING_FOR_LAUNCH.equals(contract.getStatus())) {
+			LOGGER.error("only waiting for launch contract can launch!");
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_NOT_WAITING_FOR_LAUNCH,
+					"contract status is not waiting for launch!");
+		}
 		if(ContractStatus.INVALID.equals(ContractStatus.fromStatus(cmd.getResult()))) {
 			contract.setInvalidTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			contract.setInvalidUid(UserContext.currentUserId());
+			contract.setStatus(cmd.getResult());
+			contractProvider.updateContract(contract);
 		}
-		contractProvider.updateContract(contract);
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(cmd.getResult()) && ContractStatus.WAITING_FOR_LAUNCH.equals(contract.getStatus())) {
+			contract.setStatus(cmd.getResult());
+			contractProvider.updateContract(contract);
+			addToFlowCase(contract);
+		}
 		contractSearcher.feedDoc(contract);
-		addToFlowCase(contract);
+
+
 	}
 
 	@Override
@@ -813,7 +836,16 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd) {
-		List<Contract> contracts = contractProvider.listContractByEnterpriseCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId());
+		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId(), CustomerType.ENTERPRISE.getCode());
+		if(contracts != null && contracts.size() > 0) {
+			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+		}
+		return null;
+	}
+
+	@Override
+	public List<ContractDTO> listIndividualCustomerContracts(ListIndividualCustomerContractsCommand cmd) {
+		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode());
 		if(contracts != null && contracts.size() > 0) {
 			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
 		}

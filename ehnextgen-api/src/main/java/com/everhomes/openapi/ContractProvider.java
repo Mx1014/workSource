@@ -34,7 +34,7 @@ public interface ContractProvider {
 	List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId);
 
 	List<Contract> listContractByOrganizationId(Long organizationId);
-	List<Contract> listContractByEnterpriseCustomerId(Long communityId, Long customerId);
+	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType);
 
 	List<Contract> listContractsByIds(List<Long> ids);
 	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);
