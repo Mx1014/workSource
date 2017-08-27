@@ -1400,4 +1400,41 @@ public class CommunityProviderImpl implements CommunityProvider {
          return result;
     
 	}
+
+    @Override
+    public List<Community> listCommunitiesByOrgId(ListingLocator locator, int count, Long orgId, String keyword) {
+
+        int namespaceId =UserContext.getCurrentNamespaceId(null);
+        final List<Community> communities = new ArrayList<Community>();
+        Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
+        cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        if(null != locator.getAnchor()){
+            cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
+        }
+
+        if(StringUtils.isEmpty(keyword)){
+            cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
+        }
+
+        cond = cond.and(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId));
+        Condition condition = cond;
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null,
+                (DSLContext context, Object reducingContext) -> {
+
+                    context.select().from(Tables.EH_COMMUNITIES)
+                            .join(Tables.EH_ORGANIZATION_COMMUNITIES)
+                            .on(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID))
+                            .where(condition)
+                            .limit(count)
+                            .fetch().map((r) -> {
+                        communities.add(ConvertHelper.convert(r, Community.class));
+                        return null;
+                    });
+
+                    return true;
+                });
+
+        return communities;
+
+    }
 }

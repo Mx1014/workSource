@@ -991,12 +991,11 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public ImportSignupInfoResponse importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
-		List<ImportSignupErrorDTO> errorDTOS = new ArrayList<>();
-
+		ImportSignupInfoResponse result = new ImportSignupInfoResponse();
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ActivityRoster> rosters = getRostersFromExcel(files[0], errorDTOS, activity.getId());
+			List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId());
 			
 //			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 
@@ -1022,15 +1021,25 @@ public class ActivityServiceImpl implements ActivityService {
 			});
 			return null;
 		});
-		ImportSignupInfoResponse response = new ImportSignupInfoResponse();
-		response.setDtos(errorDTOS);
-		return response;
+
+		return result;
 	}
 
-	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, List<ImportSignupErrorDTO> errorDTOS, Long activityId) {
+	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId) {
 		@SuppressWarnings("rawtypes")
+		List<ImportSignupErrorDTO> errorDTOS = new ArrayList<>();
 		ArrayList rows = processorExcel(file);
 		List<ActivityRoster> rosters = new ArrayList<>();
+
+		//此处添加陈宫失败数，因为过着这个方法后就拿不到总数和失败数了。 add by yajun 20170827
+		if(rows == null){
+			result.setTotal(0);
+			result.setFail(0);
+			result.setSuccess(0);
+			return rosters;
+		}
+		result.setTotal(rows.size());
+
 		for(int i=1, len=rows.size(); i<len; i++) {
 			RowResult row = (RowResult) rows.get(i);
 
@@ -1064,6 +1073,11 @@ public class ActivityServiceImpl implements ActivityService {
 	        
 	        rosters.add(roster);
 		}
+
+		result.setSuccess(rosters.size());
+		result.setFail(rows.size() - rosters.size());
+		//TODO save errorData
+		result.setJobId(0L);
 		return rosters;
 	}
 
@@ -5579,5 +5593,22 @@ public class ActivityServiceImpl implements ActivityService {
 			}
 		}
 		
-	}  
+	}
+
+	@Override
+	public void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response) {
+		List<ImportSignupErrorDTO> dtos = new ArrayList<>();
+		ImportSignupErrorDTO dto = new ImportSignupErrorDTO();
+		dto.setRowNum(99);
+		dto.setDescription("test error description");
+		dtos.add(dto);
+		String fileName = String.format("异常信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+		ExcelUtils excelUtils = new ExcelUtils(response, fileName, "异常信息");
+		List<String> propertyNames = new ArrayList<String>(Arrays.asList("rowNum", "description"));
+		List<String> titleNames = new ArrayList<String>(Arrays.asList( "行号", "异常内容"));
+		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList( 20, 100));
+
+		excelUtils.setNeedSequenceColumn(false);
+		excelUtils.writeExcel(propertyNames, titleNames, titleSizes, dtos);
+	}
 }

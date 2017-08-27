@@ -197,5 +197,7 @@ public interface ActivityService {
 	 * 同步报名人数
 	 */
 	void syncActivitySignupAttendeeCount();
+
+	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
 

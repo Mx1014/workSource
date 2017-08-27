@@ -1,27 +1,53 @@
 //@formatter:off
 package com.everhomes.rest.activity;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
-import java.util.List;
 
 /**
  * <ul>
- *     <li>dtos: 异常信息dtos {@link com.everhomes.rest.activity.ImportSignupErrorDTO}</li>
+ *     <li>total: total</li>
+ *     <li>fail: fail</li>
+ *     <li>success: success</li>
+ *     <li>jobId: 任务id，用于导出错误信息到excel时使用</li>
  * </ul>
  */
 public class ImportSignupInfoResponse {
 
-	@ItemType(ImportSignupErrorDTO.class)
-	private List<ImportSignupErrorDTO> dtos;
+	private Integer total;
+	private Integer fail;
+	private Integer success;
+	private Long jobId;
 
-	public List<ImportSignupErrorDTO> getDtos() {
-		return dtos;
+	public Integer getTotal() {
+		return total;
 	}
 
-	public void setDtos(List<ImportSignupErrorDTO> dtos) {
-		this.dtos = dtos;
+	public void setTotal(Integer total) {
+		this.total = total;
+	}
+
+	public Integer getFail() {
+		return fail;
+	}
+
+	public void setFail(Integer fail) {
+		this.fail = fail;
+	}
+
+	public Integer getSuccess() {
+		return success;
+	}
+
+	public void setSuccess(Integer success) {
+		this.success = success;
+	}
+
+	public Long getJobId() {
+		return jobId;
+	}
+
+	public void setJobId(Long jobId) {
+		this.jobId = jobId;
 	}
 
 	@Override

@@ -159,4 +159,6 @@ public interface CommunityService {
 
 	void updateBuildingOrder(@Valid UpdateBuildingOrderCommand cmd);
 	ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file);
+
+	ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd);
 }
