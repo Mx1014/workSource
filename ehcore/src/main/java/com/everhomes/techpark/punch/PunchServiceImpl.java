@@ -7322,7 +7322,8 @@ public class PunchServiceImpl implements PunchService {
 			// 设置response的Header
 //			response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes()));
 			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
-			response.setContentType("image/x-png");
+			response.setContentType("image/apng");
+			response.setContentLength(out.size());
 			toClient.write(out.toByteArray());
 			toClient.flush();
 			toClient.close();
