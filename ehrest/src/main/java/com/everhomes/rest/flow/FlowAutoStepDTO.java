@@ -19,6 +19,7 @@ public class FlowAutoStepDTO {
 	private String autoStepType;
 	private Long flowTargetId;
 	private Long operatorId;
+	private Long subjectId;
 
 	public Long getFlowCaseId() {
 		return flowCaseId;
@@ -84,7 +85,15 @@ public class FlowAutoStepDTO {
 		this.operatorId = operatorId;
 	}
 
-	@Override
+    public Long getSubjectId() {
+        return subjectId;
+    }
+
+    public void setSubjectId(Long subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

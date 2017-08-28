@@ -2,16 +2,25 @@
 package com.everhomes.express;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -19,6 +28,9 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.express.guomao.pay.PayResponse;
+import com.everhomes.express.guomao.util.Utils;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
@@ -33,31 +45,60 @@ import com.everhomes.rest.express.CreateExpressOrderResponse;
 import com.everhomes.rest.express.CreateExpressUserDTO;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
+import com.everhomes.rest.express.CreateOrUpdateExpressHotlineCommand;
+import com.everhomes.rest.express.CreateOrUpdateExpressHotlineResponse;
 import com.everhomes.rest.express.DeleteExpressAddressCommand;
+import com.everhomes.rest.express.DeleteExpressHotlineCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
 import com.everhomes.rest.express.ExpressActionEnum;
 import com.everhomes.rest.express.ExpressAddressDTO;
 import com.everhomes.rest.express.ExpressCompanyDTO;
+import com.everhomes.rest.express.ExpressHotlineDTO;
+import com.everhomes.rest.express.ExpressInvoiceFlagType;
 import com.everhomes.rest.express.ExpressOrderDTO;
 import com.everhomes.rest.express.ExpressOrderStatus;
+import com.everhomes.rest.express.ExpressOrderStatusDTO;
 import com.everhomes.rest.express.ExpressOwner;
 import com.everhomes.rest.express.ExpressOwnerType;
+import com.everhomes.rest.express.ExpressPackageType;
+import com.everhomes.rest.express.ExpressPackageTypeDTO;
 import com.everhomes.rest.express.ExpressQueryHistoryDTO;
+import com.everhomes.rest.express.ExpressSendMode;
+import com.everhomes.rest.express.ExpressSendModeDTO;
+import com.everhomes.rest.express.ExpressSendType;
+import com.everhomes.rest.express.ExpressSendTypeDTO;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
 import com.everhomes.rest.express.ExpressServiceErrorCode;
+import com.everhomes.rest.express.ExpressShowType;
 import com.everhomes.rest.express.ExpressUserDTO;
+import com.everhomes.rest.express.GetExpressBusinessNoteCommand;
+import com.everhomes.rest.express.GetExpressBusinessNoteResponse;
+import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagCommand;
+import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagResponse;
+import com.everhomes.rest.express.GetExpressInsuredDocumentsCommand;
+import com.everhomes.rest.express.GetExpressInsuredDocumentsResponse;
 import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.rest.express.GetExpressOrderDetailCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailResponse;
+import com.everhomes.rest.express.GetExpressParamSettingResponse;
 import com.everhomes.rest.express.ListExpressAddressCommand;
 import com.everhomes.rest.express.ListExpressAddressResponse;
 import com.everhomes.rest.express.ListExpressCompanyCommand;
 import com.everhomes.rest.express.ListExpressCompanyResponse;
+import com.everhomes.rest.express.ListExpressHotlinesCommand;
+import com.everhomes.rest.express.ListExpressHotlinesResponse;
 import com.everhomes.rest.express.ListExpressOrderCommand;
 import com.everhomes.rest.express.ListExpressOrderCondition;
 import com.everhomes.rest.express.ListExpressOrderResponse;
+import com.everhomes.rest.express.ListExpressOrderStatusResponse;
+import com.everhomes.rest.express.ListExpressPackageTypesCommand;
+import com.everhomes.rest.express.ListExpressPackageTypesResponse;
 import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
+import com.everhomes.rest.express.ListExpressSendModesCommand;
+import com.everhomes.rest.express.ListExpressSendModesResponse;
+import com.everhomes.rest.express.ListExpressSendTypesCommand;
+import com.everhomes.rest.express.ListExpressSendTypesResponse;
 import com.everhomes.rest.express.ListExpressUserCommand;
 import com.everhomes.rest.express.ListExpressUserCondition;
 import com.everhomes.rest.express.ListExpressUserResponse;
@@ -66,7 +107,11 @@ import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
 import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
+import com.everhomes.rest.express.PrePayExpressOrderCommand;
+import com.everhomes.rest.express.PrePayExpressOrderResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
+import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
+import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
 import com.everhomes.rest.express.UpdatePaySummaryCommand;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -84,8 +129,18 @@ import com.everhomes.util.StringHelper;
 
 @Component
 public class ExpressServiceImpl implements ExpressService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressServiceImpl.class);
 	
 	private static final int ORDER_NO_LENGTH = 18;
+	
+	@Autowired
+	private ExpressParamSettingProvider expressParamSettingProvider;
+	
+	@Autowired
+	private ExpressHotlineProvider expressHotlineProvider;
+	
+	@Autowired
+	private ExpressCompanyBusinessProvider expressCompanyBusinessProvider;
 	
 	@Autowired
 	private ExpressServiceAddressProvider expressServiceAddressProvider;
@@ -129,6 +184,9 @@ public class ExpressServiceImpl implements ExpressService {
 	@Autowired
 	private LocaleStringService localeStringService;
 	
+	@Autowired
+    private ConfigurationProvider configProvider;
+	
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -155,7 +213,8 @@ public class ExpressServiceImpl implements ExpressService {
 	public ListExpressCompanyResponse listExpressCompany(ListExpressCompanyCommand cmd) {
 		//如果是查快递接口过来的，不需要传owner
 		//ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		ExpressOwner owner = null;
+		ExpressOwner owner = new ExpressOwner();
+		owner.setNamespaceId(UserContext.getCurrentNamespaceId());
 		if (!StringUtils.isEmpty(cmd.getOwnerType())) {
 			owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		}
@@ -321,9 +380,11 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderDTO.setExpressCompanyName(getExpressCompany(expressOrder.getExpressCompanyId()));
 		expressOrderDTO.setBillNo(expressOrder.getBillNo());
 		expressOrderDTO.setSendType(expressOrder.getSendType());
-		expressOrderDTO.setPayType(expressOrder.getPayType());
+//		expressOrderDTO.setPayType(expressOrder.getPayType());
 		expressOrderDTO.setStatus(expressOrder.getStatus());
 		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
+		expressOrderDTO.setReceiveName(expressOrder.getReceiveName());
+		expressOrderDTO.setReceivePhone(expressOrder.getReceivePhone());
 		return expressOrderDTO;
 	}
 	
@@ -339,6 +400,10 @@ public class ExpressServiceImpl implements ExpressService {
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(cmd.getId());
+		//by dengs,向中国邮政请求订单状态
+		ExpressCompany company = findTopExpressCompany(expressOrder.getExpressCompanyId());
+		ExpressHandler handler = getExpressHandler(company.getId());
+		handler.getOrderStatus(expressOrder, company);
 		if (expressOrder != null) {
 			if (expressOrder.getCreatorUid().longValue() == owner.getUserId().longValue() || checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId())) {
 				return new GetExpressOrderDetailResponse(convertToExpressOrderDTOForDetail(expressOrder));
@@ -411,14 +476,28 @@ public class ExpressServiceImpl implements ExpressService {
 				expressOrder.setPaidFlag(TrueOrFalseFlag.TRUE.getCode());
 				expressOrderProvider.updateExpressOrder(expressOrder);
 			}
+//			//TODO 这里是费代码 by dengs.-------------------正式环境需要注释掉-------------
+//			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
+//			ExpressHandler handler = getExpressHandler(expressCompany.getId());
+//			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
+//			handler.updateOrderStatus(expressOrder, expressCompany);
+//			expressOrderProvider.updateExpressOrder(expressOrder);
+			
 			createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
 			
 			//调用统一处理订单接口，返回统一订单格式
 			CommonOrderCommand orderCmd = new CommonOrderCommand();
-			orderCmd.setBody(expressOrder.getSendName());
+			String body = "";
+			if(expressOrder.getSendName()!=null){
+				body = expressOrder.getSendName();
+			}
+			else if(expressOrder.getReceiveName()!=null){
+				body = expressOrder.getReceiveName();
+			}
+			orderCmd.setBody(body);
 			orderCmd.setOrderNo(expressOrder.getId().toString());
 			orderCmd.setOrderType(OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode());
-			orderCmd.setSubject("快递订单简要描述");
+			orderCmd.setSubject("快递订单");
 			orderCmd.setTotalFee(expressOrder.getPaySummary());
 			CommonOrderDTO dto = null;
 			try {
@@ -444,8 +523,13 @@ public class ExpressServiceImpl implements ExpressService {
 			if (!expressOrder.getPaySummary().equals(new BigDecimal(cmd.getPayAmount()))) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
 			}
+			//modify by dengs,20170817,支付需要干什么，各个快递公司流程不一样
+			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
+			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
+			handler.updateOrderStatus(expressOrder, expressCompany);
 			expressOrderProvider.updateExpressOrder(expressOrder);
+			
 			ExpressOwner owner = new ExpressOwner(expressOrder.getNamespaceId(), ExpressOwnerType.fromCode(expressOrder.getOwnerType()), expressOrder.getOwnerId(), expressOrder.getCreatorUid());
 			createExpressOrderLog(owner, ExpressActionEnum.PAID, expressOrder, "pay success: " + StringHelper.toJsonString(cmd));
 			return null;
@@ -643,14 +727,86 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public CreateExpressOrderResponse createExpressOrder(CreateExpressOrderCommand cmd) {
-		if (cmd.getSendAddressId() == null || cmd.getReceiveAddressId() == null || cmd.getExpressCompanyId() == null || cmd.getSendType() == null 
-				|| cmd.getSendMode() == null || cmd.getServiceAddressId() == null || cmd.getPayType() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
-		}
+		checkCreateExpressOrderCommand(cmd);
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		ExpressOrder expressOrder = createExpressOrder(owner, cmd);
+		checkExpressParams(cmd, owner);
+		ExpressOrder expressOrder = generateExpressOrder(owner, cmd);
+		// by dengs, 创建订单，这里就直接丢给邮政和国贸EMS
+		dbProvider.execute(status -> {
+			ExpressCompany expressCompany = findTopExpressCompany(cmd.getExpressCompanyId());
+			ExpressHandler handler = getExpressHandler(expressCompany.getId());
+			handler.createOrder(expressOrder, expressCompany);//同城信筒并不在此给邮政创建订单，而是在支付之后创建订单
+			expressOrderProvider.createExpressOrder(expressOrder);
+			return null;
+		});
 		createExpressOrderLog(owner, ExpressActionEnum.CREATE, expressOrder, null);
 		return new CreateExpressOrderResponse(convertToExpressOrderDTOForDetail(expressOrder));
+	}
+
+	private void checkCreateExpressOrderCommand(CreateExpressOrderCommand cmd) {
+		ExpressSendType sendType = ExpressSendType.fromCode(cmd.getSendType());
+		if(sendType == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid sendType = " + cmd.getSendType());
+		}
+		//接受地址和寄送地址不校验，因为存在地址为临时使用的情况。
+		//通用参数校验
+		if (cmd.getExpressCompanyId() == null 
+				|| cmd.getSendMode() == null || cmd.getPayType() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters"
+					+ " receiveAddressId = null or expressCompanyId = null or sendMode = null or payType = null");
+		}
+		//华润ems快递，参数校验 
+		if (sendType == ExpressSendType.STANDARD){
+			if(cmd.getServiceAddressId() == null )
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters serviceAddressId = null");
+		}
+		//邮政快递包裹 信筒
+		if(sendType == ExpressSendType.CHINA_POST_PACKAGE || sendType == ExpressSendType.CITY_EMPTIES){
+			ExpressPackageType packageType = ExpressPackageType.fromCode(cmd.getPackageType());
+			if(packageType == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown package type = " + cmd.getPackageType());
+			}
+			ExpressInvoiceFlagType invoiceFlagType = ExpressInvoiceFlagType.fromCode(cmd.getInvoiceFlag());
+			if(invoiceFlagType == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown invoiceFlag Type = " + cmd.getInvoiceFlag());
+			}
+			if(invoiceFlagType == ExpressInvoiceFlagType.NEED_TAX_INVOIE && (cmd.getInvoiceHead() == null || cmd.getInvoiceHead().length() == 0)){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild parameters invoicehead = null");
+			}
+		}
+		//国贸ems校验 TODO
+	}
+
+	//快递公司对应的业务检查，业务对应的包装类型检查。
+	private void checkExpressParams(CreateExpressOrderCommand cmd, ExpressOwner owner) {
+		ExpressCompany company = findTopExpressCompany(cmd.getExpressCompanyId());
+		if(company == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown expresscompany id = "+cmd.getExpressCompanyId());
+		}
+		List<ExpressCompanyBusiness> list = expressCompanyBusinessProvider.listExpressSendTypesByOwner(owner.getNamespaceId(), EntityType.NAMESPACE.getCode(),
+				Long.valueOf(owner.getNamespaceId()), company.getId());
+		if(list == null || list.size() == 0){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "expressCompany = " + company.getName() + " mismatch sendType = "+cmd.getSendType());
+		}
+		boolean isInvaildSendType = true;
+		ExpressCompanyBusiness business = null;
+		for (ExpressCompanyBusiness r : list) {
+			if(r.getSendType().longValue() == cmd.getSendType().longValue()){
+				isInvaildSendType = false;
+				business = r;
+				break;
+			}
+		}
+		if(isInvaildSendType){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "expressCompany = " + company.getName() + " mismatch sendType = "+cmd.getSendType());
+		}
+		List<ExpressPackageTypeDTO> dtos = convertPackageTypesList(business.getPackageTypes());
+		if(dtos == null || dtos.size() == 0){
+			return ;
+		}
+		if(!dtos.stream().map(r-> r.getPackageType().longValue()).collect(Collectors.toList()).contains(cmd.getPackageType().longValue())){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "sendType = " + cmd.getSendType() + " mismatch packageType = "+cmd.getPackageType());
+		}
 	}
 
 	private void createExpressOrderLog(ExpressOwner owner, ExpressActionEnum action, ExpressOrder expressOrder, String remark) {
@@ -664,34 +820,70 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderLogProvider.createExpressOrderLog(expressOrderLog);
 	}
 	
-	private ExpressOrder createExpressOrder(ExpressOwner owner, CreateExpressOrderCommand cmd) {
+	private ExpressOrder generateExpressOrder(ExpressOwner owner, CreateExpressOrderCommand cmd) {
 		ExpressOrder expressOrder = new ExpressOrder();
 		expressOrder.setNamespaceId(owner.getNamespaceId());
 		expressOrder.setOwnerType(owner.getOwnerType().getCode());
 		expressOrder.setOwnerId(owner.getOwnerId());
 		expressOrder.setOrderNo(getOrderNo(owner.getUserId()));
-		ExpressAddress sendAddress = expressAddressProvider.findExpressAddressById(cmd.getSendAddressId());
-		if (sendAddress == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists send address: id="+cmd.getSendAddressId());
+		if(cmd.getSendAddressId() != null){
+			ExpressAddress sendAddress = expressAddressProvider.findExpressAddressById(cmd.getSendAddressId());
+			if (sendAddress == null  && cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists send address: id="+cmd.getSendAddressId());
+			}
+			//同城信筒没有寄件地址
+			if(cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()){
+				expressOrder.setSendName(sendAddress.getUserName());
+				expressOrder.setSendPhone(sendAddress.getPhone());
+				expressOrder.setSendOrganization(sendAddress.getOrganizationName());
+				expressOrder.setSendProvince(sendAddress.getProvince());
+				expressOrder.setSendCity(sendAddress.getCity());
+				expressOrder.setSendCounty(sendAddress.getCounty());
+				expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
+			}
+		}else{
+			//同城信筒没有寄件地址
+			if(cmd.getSendType().intValue() != ExpressSendType.CITY_EMPTIES.getCode().intValue()){
+				if(cmd.getSendName() == null || cmd.getSendPhone() == null ||
+						cmd.getSendProvince() == null || cmd.getSendCity() == null || 
+						cmd.getSendCounty() == null || cmd.getSendDetailAddress() == null){
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild send address params");
+				}
+				expressOrder.setSendName(cmd.getSendName());
+				expressOrder.setSendPhone(cmd.getSendPhone());
+				expressOrder.setSendOrganization(cmd.getSendOrganization());
+				expressOrder.setSendProvince(cmd.getSendProvince());
+				expressOrder.setSendCity(cmd.getSendCity());
+				expressOrder.setSendCounty(cmd.getSendCounty());
+				expressOrder.setSendDetailAddress(cmd.getSendDetailAddress());
+			}
 		}
-		expressOrder.setSendName(sendAddress.getUserName());
-		expressOrder.setSendPhone(sendAddress.getPhone());
-		expressOrder.setSendOrganization(sendAddress.getOrganizationName());
-		expressOrder.setSendProvince(sendAddress.getProvince());
-		expressOrder.setSendCity(sendAddress.getCity());
-		expressOrder.setSendCounty(sendAddress.getCounty());
-		expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
-		ExpressAddress receiveAddress = expressAddressProvider.findExpressAddressById(cmd.getReceiveAddressId());
-		if (receiveAddress == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists receive address: id="+cmd.getReceiveAddressId());
+		if(cmd.getReceiveAddressId() != null){
+			ExpressAddress receiveAddress = expressAddressProvider.findExpressAddressById(cmd.getReceiveAddressId());
+			if (receiveAddress == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists receive address: id="+cmd.getReceiveAddressId());
+			}
+			expressOrder.setReceiveName(receiveAddress.getUserName());
+			expressOrder.setReceivePhone(receiveAddress.getPhone());
+			expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
+			expressOrder.setReceiveProvince(receiveAddress.getProvince());
+			expressOrder.setReceiveCity(receiveAddress.getCity());
+			expressOrder.setReceiveCounty(receiveAddress.getCounty());
+			expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
+		}else{
+			if(cmd.getReceiveName() == null || cmd.getReceivePhone() == null ||
+					cmd.getReceiveProvince() == null || cmd.getReceiveCity() == null || 
+					cmd.getReceiveCounty() == null || cmd.getReceiveDetailAddress() == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invaild receive address params");
+			}
+			expressOrder.setReceiveName(cmd.getReceiveName());
+			expressOrder.setReceivePhone(cmd.getReceivePhone());
+			expressOrder.setReceiveOrganization(cmd.getReceiveOrganization());
+			expressOrder.setReceiveProvince(cmd.getReceiveProvince());
+			expressOrder.setReceiveCity(cmd.getReceiveCity());
+			expressOrder.setReceiveCounty(cmd.getReceiveCounty());
+			expressOrder.setReceiveDetailAddress(cmd.getReceiveDetailAddress());
 		}
-		expressOrder.setReceiveName(receiveAddress.getUserName());
-		expressOrder.setReceivePhone(receiveAddress.getPhone());
-		expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
-		expressOrder.setReceiveProvince(receiveAddress.getProvince());
-		expressOrder.setReceiveCity(receiveAddress.getCity());
-		expressOrder.setReceiveCounty(receiveAddress.getCounty());
-		expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
 		expressOrder.setServiceAddressId(cmd.getServiceAddressId());
 		expressOrder.setExpressCompanyId(cmd.getExpressCompanyId());
 		expressOrder.setSendType(cmd.getSendType());
@@ -701,7 +893,10 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrder.setInsuredPrice(cmd.getInsuredPrice());
 		expressOrder.setStatus(ExpressOrderStatus.WAITING_FOR_PAY.getCode());
 		expressOrder.setPaidFlag(TrueOrFalseFlag.FALSE.getCode());
-		expressOrderProvider.createExpressOrder(expressOrder);
+		// add by dengs,invoice add!
+		expressOrder.setInvoiceFlag(cmd.getInvoiceFlag());
+		expressOrder.setInvoiceHead(cmd.getInvoiceHead());
+		expressOrder.setPackageType(cmd.getPackageType());
 		return expressOrder;
 	}
 
@@ -747,6 +942,7 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderDTO.setReceiveName(expressOrder.getReceiveName());
 		expressOrderDTO.setCreateTime(expressOrder.getUpdateTime());
 		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
+		expressOrderDTO.setSendType(expressOrder.getSendType());//加上业务类别
 		expressOrderDTO.setExpressLogoUrl(getUrl(getExpressCompanyLogo(expressOrder.getExpressCompanyId())));
 		return expressOrderDTO;
 	}
@@ -777,11 +973,18 @@ public class ExpressServiceImpl implements ExpressService {
 					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 			}
-			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY || expressOrder.getPaySummary() != null) {
+			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
 				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying and express user has not confirmed money");
 			}
 			expressOrder.setStatus(ExpressOrderStatus.CANCELLED.getCode());
-			expressOrderProvider.updateExpressOrder(expressOrder);
+			expressOrder.setStatusDesc(cmd.getStatusDesc());
+			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
+			ExpressHandler handler = getExpressHandler(expressCompany.getId());
+			dbProvider.execute(status->{
+				handler.updateOrderStatus(expressOrder, expressCompany);
+				expressOrderProvider.updateExpressOrder(expressOrder);
+				return null;
+			});
 			createExpressOrderLog(owner, ExpressActionEnum.CANCEL, expressOrder, null);
 			return null;
 		});
@@ -852,6 +1055,257 @@ public class ExpressServiceImpl implements ExpressService {
 			Integer namespaecId = UserContext.getCurrentNamespaceId();
 			expressQueryHistoryProvider.clearExpressQueryHistory(namespaecId, user.getId());
 		}
+	}
+
+	@Override
+	public GetExpressParamSettingResponse getExpressParamSetting() {
+		int ownerId = UserContext.getCurrentNamespaceId();
+		int namespaceId = ownerId;
+		String ownerType = EntityType.NAMESPACE.getCode();
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(namespaceId,ownerType,ownerId);
+		return ConvertHelper.convert(setting, GetExpressParamSettingResponse.class);
+	}
+
+	@Override
+	public GetExpressBusinessNoteResponse getExpressBusinessNote(GetExpressBusinessNoteCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(owner.getNamespaceId(),owner.getOwnerType().getCode(),owner.getOwnerId());
+		return ConvertHelper.convert(setting, GetExpressBusinessNoteResponse.class);
+	}
+
+	@Override
+	public void updateExpressBusinessNote(UpdateExpressBusinessNoteCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		if(cmd.getBusinessNote() != null){
+			expressParamSettingProvider.updateExpressBusinessNoteByOwner(owner,cmd.getBusinessNote());
+		}
+		if(cmd.getBusinessNoteFlag() != null){
+			checkShowFlag(cmd.getBusinessNoteFlag());
+			expressParamSettingProvider.updateExpressBusinessNoteFlagByOwner(owner,cmd.getBusinessNoteFlag());
+		}
+	}
+
+	private void checkShowFlag(Byte showFlag) {
+		ExpressShowType showFlagType = ExpressShowType.fromCode(showFlag);
+		if(showFlagType == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unKnown showFlag = "+showFlag);
+		}
+	}
+
+	@Override
+	public ListExpressHotlinesResponse listExpressHotlines(ListExpressHotlinesCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<ExpressHotline> hotlineList = expressHotlineProvider.listHotLinesByOwner(owner,pageSize+1,cmd.getPageAnchor());
+		Long nextPageAnchor = null;
+		if (hotlineList.size() > pageSize) {
+			hotlineList.remove(hotlineList.size()-1);
+			nextPageAnchor = hotlineList.get(hotlineList.size()-1).getId();
+		}
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(owner.getNamespaceId(),owner.getOwnerType().getCode(),owner.getOwnerId());
+		return new ListExpressHotlinesResponse(setting.getHotlineFlag(), nextPageAnchor, hotlineList.stream().map(r -> ConvertHelper.convert(r, ExpressHotlineDTO.class)).collect(Collectors.toList()));
+	}
+
+	@Override
+	public void updateExpressHotlineFlag(UpdateExpressHotlineFlagCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		checkShowFlag(cmd.getHotlineFlag());
+		expressParamSettingProvider.updateExpressHotlineFlagByOwner(owner, cmd.getHotlineFlag());
+	}
+
+	@Override
+	public CreateOrUpdateExpressHotlineResponse createOrUpdateExpressHotline(CreateOrUpdateExpressHotlineCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressHotline hotline = generateHotline(owner,cmd);
+		if(cmd.getId() != null){
+			expressHotlineProvider.updateExpressHotline(hotline);
+		}
+		else{
+			expressHotlineProvider.createExpressHotline(hotline);
+		}
+		return ConvertHelper.convert(hotline, CreateOrUpdateExpressHotlineResponse.class);
+	}
+
+	private ExpressHotline generateHotline(ExpressOwner owner, CreateOrUpdateExpressHotlineCommand cmd) {
+		if(cmd.getId() != null){
+			ExpressHotline hotline = expressHotlineProvider.findExpressHotlineById(cmd.getId());
+			if(hotline == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unKnown hotline id = "+cmd.getId());
+			}
+			if(cmd.getOwnerId().longValue() != hotline.getOwnerId().longValue() || !cmd.getOwnerType().equals(hotline.getOwnerType())){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "mismatching hotline ownerType = "+cmd.getOwnerType()+","
+						+ " or ownerId = "+cmd.getOwnerId());
+			}
+			hotline.setServiceName(cmd.getServiceName());
+			hotline.setHotline(cmd.getHotline());
+			return hotline;
+		}
+		ExpressHotline hotline = ConvertHelper.convert(cmd, ExpressHotline.class);
+		hotline.setNamespaceId(owner.getNamespaceId());
+		hotline.setStatus(CommonStatus.ACTIVE.getCode());
+		return hotline;
+	}
+
+	@Override
+	public void deleteExpressHotline(DeleteExpressHotlineCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		expressHotlineProvider.updateExpressHotlineStatus(owner,cmd.getId());
+	}
+
+	@Override
+	public ListExpressSendTypesResponse listExpressSendTypes(ListExpressSendTypesCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		int namespaceId = UserContext.getCurrentNamespaceId(); // TODO
+		String ownerType = EntityType.NAMESPACE.getCode();
+		Long ownerId = Long.valueOf(namespaceId);
+		//这里需要找到顶层快递公司id
+		Long expressCompanyId = cmd.getExpressCompanyId();
+		if(expressCompanyId != null){
+			expressCompanyId = findTopExpressCompany(expressCompanyId).getId();
+		}
+//		owner.setNamespaceId(23456);
+		List<ExpressCompany> expressCompany = expressCompanyProvider.listExpressCompanyByOwner(owner);
+		List<ExpressCompanyBusiness> list = expressCompanyBusinessProvider.listExpressSendTypesByOwner(namespaceId,ownerType,ownerId,expressCompanyId);
+		return new ListExpressSendTypesResponse(list.stream().map(r->{
+			ExpressSendTypeDTO dto = ConvertHelper.convert(r, ExpressSendTypeDTO.class);
+			dto.setExpressCompanyId(cmd.getExpressCompanyId());
+			if(cmd.getExpressCompanyId() == null){
+				//如果没有传快递公司id，那么需要通过顶层r.getId()和园区所有快递公司的parentId做对比，查出快递公司在园区的id
+				ExpressCompany topcompany = getExpressCompany(expressCompany, r);
+				dto.setExpressCompanyId(topcompany.getId());
+				dto.setExpressCompany(topcompany.getName());
+			}
+			return dto;
+		}).collect(Collectors.toList()));
+	}
+	/**
+	 * expressCompanies:当前园区下的快递公司
+	 * business：配置顶层快递公司的业务对象
+	 */
+	public ExpressCompany getExpressCompany(List<ExpressCompany> expressCompanies,ExpressCompanyBusiness business){
+		for (ExpressCompany expressCompany : expressCompanies) {
+			ExpressCompany company = findTopExpressCompany(expressCompany.getId());
+			if(company.getId().longValue() == business.getExpressCompanyId().longValue()){
+				return expressCompany;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public GetExpressHotlineAndBusinessNoteFlagResponse getExpressHotlineAndBusinessNoteFlag(
+			GetExpressHotlineAndBusinessNoteFlagCommand cmd) {
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(owner.getNamespaceId(), owner.getOwnerType().getCode(), owner.getOwnerId());
+		return ConvertHelper.convert(setting, GetExpressHotlineAndBusinessNoteFlagResponse.class);
+	}
+
+	@Override
+	public ListExpressSendModesResponse listExpressSendModes(ListExpressSendModesCommand cmd) {
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ListExpressSendModesResponse response = new ListExpressSendModesResponse(new ArrayList<ExpressSendModeDTO>());
+		ExpressParamSetting setting = expressParamSettingProvider.getExpressParamSettingByOwner(UserContext.getCurrentNamespaceId(),
+				EntityType.NAMESPACE.getCode(), UserContext.getCurrentNamespaceId());
+		response.getExpressSendModeDTO().add(convertSendModeDTO(setting));
+		return response;
+	}
+	
+	private ExpressSendModeDTO convertSendModeDTO(ExpressParamSetting setting) {
+		ExpressSendModeDTO dto = ConvertHelper.convert(setting, ExpressSendModeDTO.class);
+		ExpressSendMode mode = ExpressSendMode.fromCode(dto.getSendMode());
+		if(mode != null){
+			dto.setSendModeName(mode.getDesc());
+		}
+		return dto;
+	}
+
+	@Override
+	public ListExpressPackageTypesResponse listExpressPackageTypes(ListExpressPackageTypesCommand cmd) {
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		int namespaceId = UserContext.getCurrentNamespaceId(); // TODO
+		String ownerType = EntityType.NAMESPACE.getCode();
+		Long ownerId = Long.valueOf(namespaceId);
+		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId,cmd.getSendType());
+		if(business == null || business.getPackageTypes() == null || business.getPackageTypes().length() == 0){
+			return new ListExpressPackageTypesResponse();
+		}
+		List<ExpressPackageTypeDTO> list = convertPackageTypesList(business.getPackageTypes());
+		return new ListExpressPackageTypesResponse(list);
+	}
+	
+	private List<ExpressPackageTypeDTO> convertPackageTypesList(String packageTypes){
+		return new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(packageTypes).toArray())).stream().map(r->{
+			ExpressPackageTypeDTO dto = JSONObject.parseObject(r.toString(), new TypeReference<ExpressPackageTypeDTO>(){});
+			ExpressPackageType packageType = ExpressPackageType.fromCode(dto.getPackageType());
+			dto.setPackageTypeName(packageType == null? "":packageType.getDescription());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public GetExpressInsuredDocumentsResponse getExpressInsuredDocuments(GetExpressInsuredDocumentsCommand cmd) {
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		int namespaceId = UserContext.getCurrentNamespaceId(); // TODO
+		String ownerType = EntityType.NAMESPACE.getCode();
+		Long ownerId = Long.valueOf(namespaceId);
+		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId,cmd.getSendType());
+		return new GetExpressInsuredDocumentsResponse(business == null?null:business.getInsuredDocuments());
+	}
+
+	@Override
+	public ListExpressOrderStatusResponse listExpressOrderStatus() {
+		int namespaceId = UserContext.getCurrentNamespaceId(); // TODO
+		String ownerType = EntityType.NAMESPACE.getCode();
+		Long ownerId = Long.valueOf(namespaceId);
+		ExpressCompanyBusiness business = expressCompanyBusinessProvider.getExpressCompanyBusinessByOwner(namespaceId,ownerType,ownerId);
+		
+		if(business == null || business.getOrderStatusCollections() == null || business.getOrderStatusCollections().length() == 0){
+			return new ListExpressOrderStatusResponse();
+		}
+		List<ExpressOrderStatusDTO> list = new ArrayList<Object>(Arrays.asList(JSONArray.parseArray(business.getOrderStatusCollections()).toArray())).stream().map(r->{
+			ExpressOrderStatusDTO dto = JSONObject.parseObject(r.toString(), new TypeReference<ExpressOrderStatusDTO>(){});
+			ExpressOrderStatus status = ExpressOrderStatus.fromCode(dto.getStatus());
+			dto.setStatusName(status == null? "":status.getDescription());
+			return dto;
+		}).collect(Collectors.toList());
+		return new ListExpressOrderStatusResponse(list);
+	}
+
+	@Override
+	public Map<String,String> prePayExpressOrder(PrePayExpressOrderCommand cmd) {
+		Map<String,Map<String,Object>> params = generatePrePayExpressOrderParams(cmd);
+		String url = configProvider.getValue(ExpressServiceErrorCode.PAYSERVER_URL, "http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record");
+		String result = Utils.post(url, JSONObject.parseObject(StringHelper.toJsonString(params)),null,StandardCharsets.UTF_8);
+		PayResponse<Map<String,String>> payresponse = JSONObject.parseObject(result, new TypeReference<PayResponse<Map<String,String>>>(){});
+		if(payresponse.getSuccess()){
+			return payresponse.getData();
+		}
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "prePayFailed, payresponse = "+result);
+	}
+
+	private Map<String,Map<String,Object>> generatePrePayExpressOrderParams(PrePayExpressOrderCommand cmd) {
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressOrder order = expressOrderProvider.findExpressOrderById(cmd.getId());
+		if(order == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown order id = "+cmd.getId());
+		}
+		CommonOrderDTO dto = payExpressOrder(ConvertHelper.convert(cmd, PayExpressOrderCommand.class));
+		Map<String,Map<String,Object>> bodyparams = new HashMap<String,Map<String,Object>>();
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("realm","Web_Guomao");
+		params.put("orderType",dto.getOrderType());
+		params.put("onlinePayStyleNo","wechat");
+		params.put("orderNo",dto.getOrderNo());
+		params.put("orderAmount",dto.getTotalFee().floatValue());
+		params.put("subject",dto.getSubject());
+		params.put("body",dto.getBody());
+		params.put("appKey",dto.getAppKey());
+		params.put("timestamp",dto.getTimestamp());
+		params.put("randomNum",dto.getRandomNum());
+		params.put("signature",dto.getSignature());
+		bodyparams.put("body", params);
+		LOGGER.info("request payserver params = {}",bodyparams);
+		return bodyparams;
 	}
 
 }

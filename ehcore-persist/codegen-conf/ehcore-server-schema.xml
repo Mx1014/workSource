@@ -163,6 +163,7 @@
         eh_energy_meter_price_config |
         eh_general_form_vals | eh_lease_configs2 | eh_lease_form_requests | eh_general_form_mappings |
         eh_warehouses | eh_warehouse_materials | eh_warehouse_material_categories | eh_warehouse_stocks | eh_warehouse_stock_logs | eh_warehouse_requests | eh_warehouse_request_materials | eh_warehouse_units | 
+        eh_service_module_apps | eh_portal_navigation_bars | eh_portal_layouts | eh_portal_item_groups | eh_portal_items | eh_portal_layout_templates | eh_portal_item_categories | eh_portal_content_scopes | eh_portal_publish_logs | eh_portal_launch_pad_mappings |
         eh_talents | eh_talent_categories | eh_talent_query_histories | eh_talent_requests | eh_talent_message_senders |
         eh_authorizations | eh_authorization_relations | eh_service_module_assignment_relations | eh_domains |
         eh_user_notification_settings | eh_group_member_logs | 
@@ -180,6 +181,8 @@
         eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve|
         eh_community_approve_requests |
 	eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |        eh_uniongroup_configures | eh_uniongroup_member_details |
+		eh_express_company_businesses | eh_express_hotlines | eh_express_param_settings |
+
         </includes>
 
             <!-- All elements that are excluded from your schema

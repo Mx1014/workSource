@@ -5122,38 +5122,40 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	public static void main(String[] args) {
-		String a = "{\n" +
-				"    \"module\": \"file\",\n" +
-				"    \"from\": \"record\",\n" +
-				"    \"appid\": \"K0MvwB2WmFJNrgg4\",\n" +
-				"    \"lid\": \"2kGogxABi86pHQkd\",\n" +
-				"    \"fid\": \"/video/4/5d/2kGogxABi86pHQkd.mp4\",\n" +
-				"    \"size\": \"1220641\",\n" +
-				"    \"dura\": \"14\",\n" +
-				"    \"state\": 1,\n" +
-				"    \"msg\": \"created\"\n" +
-				"}";
+		System.out.print(SignatureHelper.generateSecretKey());
 
-		VideoCallbackCommand cmd = JSONObject.parseObject(a, VideoCallbackCommand.class);
-		VideoState videoState = null;
-		if(cmd.getModule().trim().equals("live")){
-			if(cmd.getState() == 0){
-				videoState = VideoState.UN_READY;
-			}else{
-				videoState = VideoState.LIVE;
-			}
-		}else if(cmd.getModule().trim().equals("file") && !StringUtils.isEmpty(cmd.getFrom()) && cmd.getFrom().trim().equals("record")){
-			if(cmd.getState() == -1){
-				videoState = VideoState.EXCEPTION;
-			}else if(cmd.getState() == 1){
-				videoState = VideoState.RECORDING;
-			}else{
-				videoState = VideoState.LIVE;
-			}
-		}else{
-			System.out.print("aaaa...........");
-			return;
-		}
+//		String a = "{\n" +
+//				"    \"module\": \"file\",\n" +
+//				"    \"from\": \"record\",\n" +
+//				"    \"appid\": \"K0MvwB2WmFJNrgg4\",\n" +
+//				"    \"lid\": \"2kGogxABi86pHQkd\",\n" +
+//				"    \"fid\": \"/video/4/5d/2kGogxABi86pHQkd.mp4\",\n" +
+//				"    \"size\": \"1220641\",\n" +
+//				"    \"dura\": \"14\",\n" +
+//				"    \"state\": 1,\n" +
+//				"    \"msg\": \"created\"\n" +
+//				"}";
+//
+//		VideoCallbackCommand cmd = JSONObject.parseObject(a, VideoCallbackCommand.class);
+//		VideoState videoState = null;
+//		if(cmd.getModule().trim().equals("live")){
+//			if(cmd.getState() == 0){
+//				videoState = VideoState.UN_READY;
+//			}else{
+//				videoState = VideoState.LIVE;
+//			}
+//		}else if(cmd.getModule().trim().equals("file") && !StringUtils.isEmpty(cmd.getFrom()) && cmd.getFrom().trim().equals("record")){
+//			if(cmd.getState() == -1){
+//				videoState = VideoState.EXCEPTION;
+//			}else if(cmd.getState() == 1){
+//				videoState = VideoState.RECORDING;
+//			}else{
+//				videoState = VideoState.LIVE;
+//			}
+//		}else{
+//			System.out.print("aaaa...........");
+//			return;
+//		}
 	}
 	
 	private Map<String, String> createActivityRouterMeta(String url, String subject){

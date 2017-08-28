@@ -201,8 +201,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());
 		ctx.setOperator(userInfo);
 		FlowGraphNoStepEvent event = new FlowGraphNoStepEvent(stepDTO);
-		ctx.setCurrentEvent(event);
-		ctx.setStepType(FlowStepType.NO_STEP);	
+        ctx.setCurrentEvent(event);
+		ctx.setStepType(FlowStepType.NO_STEP);
 		
 		return ctx;	
 	}

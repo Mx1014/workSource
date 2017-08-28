@@ -37,6 +37,11 @@ import com.everhomes.util.StringHelper;
  * <li>operatorName: 操作人</li>
  * <li>joinTime: 加入时间</li>
  * <li>shareUrl: 分享链接</li>
+ * <li>scanJoinUrl:扫描入群页面链接</li>
+ * <li>scanDownloadUrl:扫描下载页面链接</li>
+ * <li>alias: group别名，获取群列表时如果name为空的时候会返回一个别名：用户1、用户2、用户3、用户4、用户5</li>
+ * <li>isNameEmptyBefore: 原来的name字段是否为空，0-非空，1-空, {@link com.everhomes.rest.group.GroupNameEmptyFlag}</li>
+ * <li>ogrId: orgId公司Id</li>
  * </ul>
  */
 public class GroupDTO {
@@ -67,6 +72,11 @@ public class GroupDTO {
     private String operatorName;
     private Timestamp joinTime;
     private String shareUrl;
+    private String scanJoinUrl;
+    private String scanDownloadUrl;
+    private String alias;
+    private Byte isNameEmptyBefore;
+    private Long orgId;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -337,6 +347,46 @@ public class GroupDTO {
 
     public void setDiscriminator(String discriminator) {
         this.discriminator = discriminator;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getScanJoinUrl() {
+        return scanJoinUrl;
+    }
+
+    public void setScanJoinUrl(String scanJoinUrl) {
+        this.scanJoinUrl = scanJoinUrl;
+    }
+
+    public String getScanDownloadUrl() {
+        return scanDownloadUrl;
+    }
+
+    public void setScanDownloadUrl(String scanDownloadUrl) {
+        this.scanDownloadUrl = scanDownloadUrl;
+    }
+
+    public Byte getIsNameEmptyBefore() {
+        return isNameEmptyBefore;
+    }
+
+    public void setIsNameEmptyBefore(Byte isNameEmptyBefore) {
+        this.isNameEmptyBefore = isNameEmptyBefore;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     @Override

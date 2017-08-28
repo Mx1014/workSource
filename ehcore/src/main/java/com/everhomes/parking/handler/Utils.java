@@ -1,8 +1,18 @@
 package com.everhomes.parking.handler;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.util.RuntimeErrorException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -19,16 +29,13 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
-
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.util.RuntimeErrorException;
 
 public class Utils {
 
@@ -161,13 +168,25 @@ public class Utils {
     }
 
     /**
+    *
+    * @param url
+    * @param params
+    * @param headers
+    * @return
+    */
+    public static String post(String url, JSONObject params, Map<String, String> headers) {
+    	return post(url, params, headers,null);
+    }
+    /**
      *
      * @param url
      * @param param
      * @param headers
+     * @param charset
      * @return
      */
-    public static String post(String url, JSONObject param, Map<String, String> headers) {
+
+    public static String post(String url, JSONObject param, Map<String, String> headers, Charset charset) {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
 
@@ -202,7 +221,11 @@ public class Utils {
                 HttpEntity entity = response.getEntity();
 
                 if (null != entity) {
-                    result = EntityUtils.toString(entity);
+                	if(charset==null){
+                		result = EntityUtils.toString(entity);
+                	}else{
+                		result = EntityUtils.toString(entity,charset);
+                	}
                 }
             }
 

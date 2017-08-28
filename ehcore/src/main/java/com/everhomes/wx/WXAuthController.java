@@ -87,6 +87,7 @@ public class WXAuthController {// extends ControllerBase
     private final static String KEY_NAMESPACE = "ns";
     private final static String KEY_CODE = "code";
     private final static String KEY_STATE = "state";
+    private final static String COMMUNITY = "community";
     
     /** 用于记录登录后要跳转的源链接 */
     private final static String KEY_SOURCE_URL = "src_url";
@@ -417,6 +418,18 @@ public class WXAuthController {// extends ControllerBase
         
         userService.signupByThirdparkUser(wxUser, request);
         userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
+        
+        //by dengs,加个communityid参数，加到用户的eh_profiles中,2017.08.28
+        String communityId = request.getParameter(COMMUNITY);
+        if(wxUser.getId()!=null && communityId!=null){
+        	try{
+        		Long.valueOf(communityId);
+        	}catch(Exception e){
+        		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+        				"unknown community = " + communityId);
+        	}
+        	userService.updateUserCurrentCommunityToProfile(wxUser.getId(), Long.valueOf(communityId), wxUser.getNamespaceId());
+        }
         
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
