@@ -35,7 +35,6 @@ public class LaunchPadLayoutGroupDTO {
     private String iconUrl;
     private String align;
 
-
     public String getGroupName() {
         return groupName;
     }

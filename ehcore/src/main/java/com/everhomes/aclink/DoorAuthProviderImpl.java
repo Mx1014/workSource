@@ -2,11 +2,15 @@ package com.everhomes.aclink;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.group.GroupCustomField;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -24,6 +28,7 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.User;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -800,6 +805,50 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.isNull());
         }
         return cond;
+    }
+
+    @Override
+    public List<User> listDoorAuthByBuildingName(Long communityId, String buildingName, CrossShardListingLocator locator, int pageSize) {
+        List<User> users = new ArrayList<>();
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, obj)->{
+            Condition cond = GroupCustomField.FAMILY_COMMUNITY_ID.getField().eq(communityId)
+                    .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+                    .and(Tables.EH_GROUPS.NAME.like(buildingName+"%"))
+                    .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
+                    .and(Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode()));
+            if(locator.getAnchor() != null) {
+                cond = cond.and(Tables.EH_USERS.ID.lt(locator.getAnchor()));
+            }
+            
+            SelectOffsetStep<Record> step = context.select().from(Tables.EH_GROUP_MEMBERS).join(Tables.EH_GROUPS).on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+            .join(Tables.EH_USERS).on(Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID))
+            .where(cond).orderBy(Tables.EH_USERS.ID.desc())
+            .limit(pageSize + 1);
+            ;
+            
+//            if(LOGGER.isInfoEnabled()) {
+//                LOGGER.info("query sql:" + step.getSQL());    
+//            }
+            
+            step.fetch().map(r ->{
+                User user = new User();
+                user.setId(r.getValue(Tables.EH_USERS.ID));
+                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+                user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+                user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+                users.add(user);
+                return null;
+            });
+            return true;
+        });
+        
+        locator.setAnchor(null);
+        if(users.size() > pageSize){
+            users.remove(users.size() - 1);
+            locator.setAnchor(users.get(users.size() - 1).getId());
+        }
+        
+        return users;
     }
 
 }

@@ -1,53 +1,17 @@
 // @formatter:off
 package com.everhomes.community;
 
-import java.util.List;
-
 import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.community.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
-import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
-import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
-import com.everhomes.rest.community.admin.CommunityImportBaseConfigCommand;
-import com.everhomes.rest.community.admin.CommunityImportOrganizationConfigCommand;
-import com.everhomes.rest.community.admin.CommunityManagerDTO;
-import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
-import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
-import com.everhomes.rest.community.admin.CommunityUserResponse;
-import com.everhomes.rest.community.admin.CountCommunityUserResponse;
-import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
-import com.everhomes.rest.community.admin.CreateCommunityCommand;
-import com.everhomes.rest.community.admin.CreateCommunityResponse;
-import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
-import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
-import com.everhomes.rest.community.admin.ImportCommunityCommand;
-import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
-import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsCommand;
-import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsResponse;
-import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
-import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
-import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
-import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
-import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
-import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
-import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
-import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
-import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
-import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
-import com.everhomes.rest.community.admin.UpdateResourceCategoryCommand;
-import com.everhomes.rest.community.admin.UserCommunityDTO;
-import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
-import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
-import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.community.*;
+import com.everhomes.rest.community.admin.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.List;
 
 
 public interface CommunityService {
@@ -160,5 +124,16 @@ public interface CommunityService {
 	void updateBuildingOrder(@Valid UpdateBuildingOrderCommand cmd);
 	ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file);
 
+    /**
+     * 用户认证的弹窗管理
+     */
+    CommunityAuthPopupConfigDTO getCommunityAuthPopupConfig(GetCommunityAuthPopupConfigCommand cmd);
+
+    /**
+     * 修改用户认证弹窗设置
+     */
+    CommunityAuthPopupConfigDTO updateCommunityAuthPopupConfig(UpdateCommunityAuthPopupConfigCommand cmd);
+	
 	ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd);
+
 }

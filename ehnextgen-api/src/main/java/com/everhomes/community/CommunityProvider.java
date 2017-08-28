@@ -109,6 +109,8 @@ public interface CommunityProvider {
 
     Map<Long, Community> listCommunitiesByIds(List<Long> ids);
     List<Community> listCommunityByNamespaceIdAndName(Integer namespaceId, String communityName);
-
-    List<Community> listCommunitiesByOrgId(ListingLocator locator, int i, Long orgId, String keyword);
+    List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
+                                    ListingQueryBuilderCallback queryBuilderCallback);
+									
+	 List<Community> listCommunitiesByOrgId(ListingLocator locator, int i, Long orgId, String keyword);
 }

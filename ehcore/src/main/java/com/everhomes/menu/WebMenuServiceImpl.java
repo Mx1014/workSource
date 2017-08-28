@@ -1,7 +1,6 @@
 package com.everhomes.menu;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,12 +15,10 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
-import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
 import com.everhomes.rest.menu.WebMenuCategory;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
@@ -78,14 +75,14 @@ public class WebMenuServiceImpl implements WebMenuService {
 		if(null == domain){
 			LOGGER.error("domain not configured, userId = {}", userId);
 			domain = new Domain();
-			domain.setPortalType(PortalType.PM.getCode());
+			domain.setPortalType(EntityType.ORGANIZATIONS.getCode());
 //			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.DOMAIN_NOT_CONFIGURED,
 //					"domain not configured");
 		}
 		if(null == cmd.getCurrentOrgId()){
 			currentOrgId = domain.getPortalId();
 		}
-		if(PortalType.fromCode(domain.getPortalType()) == PortalType.PM || PortalType.fromCode(domain.getPortalType()) == PortalType.ENTERPRISE){
+		if(EntityType.fromCode(domain.getPortalType()) == EntityType.ORGANIZATIONS){
 			Organization organization = organizationProvider.findOrganizationById(currentOrgId);
 			if(null != organization){
 				if(OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){

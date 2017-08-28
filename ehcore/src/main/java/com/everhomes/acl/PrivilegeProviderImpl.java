@@ -3,8 +3,12 @@ package com.everhomes.acl;
 
 import com.everhomes.db.*;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.schema.Tables;
 import com.everhomes.schema.tables.EhAclRoles;
+import com.everhomes.schema.tables.records.EhAclRolesRecord;
 import com.everhomes.util.ConvertHelper;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -12,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -59,6 +64,62 @@ public class PrivilegeProviderImpl implements PrivilegeProvider {
 			return roles;
 		}
 	}
+
+	@Override
+	public List<Role> listRolesByOwnerAndKeywords(CrossShardListingLocator locator, Integer pageSize, int namespaceId, long appId, String ownerType, Long ownerId, String keywords) {
+		return listRoles(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				Condition cond = null;
+				Condition c = null;
+				if(!org.springframework.util.StringUtils.isEmpty(keywords)){
+					cond = Tables.EH_ACL_ROLES.NAME.like("%" + keywords + "%");
+				}
+				if(ownerId == null) {
+					c = Tables.EH_ACL_ROLES.NAMESPACE_ID.eq(Integer.valueOf(namespaceId)).and(Tables.EH_ACL_ROLES.APP_ID.eq(Long.valueOf(appId))).and(Tables.EH_ACL_ROLES.OWNER_TYPE.eq(ownerType)).and(Tables.EH_ACL_ROLES.OWNER_ID.isNull());
+					if(null != cond){
+						c = c.and(cond);
+					}
+				} else {
+					c = Tables.EH_ACL_ROLES.NAMESPACE_ID.eq(Integer.valueOf(namespaceId)).and(Tables.EH_ACL_ROLES.APP_ID.eq(Long.valueOf(appId))).and(Tables.EH_ACL_ROLES.OWNER_TYPE.eq(ownerType)).and(Tables.EH_ACL_ROLES.OWNER_ID.eq(ownerId));
+					if(null != cond){
+						c = c.and(cond);
+					}
+				}
+				query.addConditions(c);
+				return null;
+			}
+		});
+	}
+
+	@Override
+	public List<Role> listRoles(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAclRoles.class));
+		List<Role> results = new ArrayList<>();
+		pageSize = pageSize + 1;
+		SelectQuery<EhAclRolesRecord> query = context.selectQuery(Tables.EH_ACL_ROLES);
+		if(null != queryBuilderCallback)
+			queryBuilderCallback.buildCondition(locator, query);
+		if(null != locator && null != locator.getAnchor())
+			query.addConditions(Tables.EH_ACL_ROLES.ID.lt(locator.getAnchor()));
+
+		query.addOrderBy(Tables.EH_ACL_ROLES.ID.desc());
+		query.addLimit(pageSize);
+		query.fetch().map((arg) -> {
+			results.add(ConvertHelper.convert(arg, Role.class));
+			return null;
+		});
+
+		if(null != locator)
+			locator.setAnchor(null);
+
+		if(results.size() >= pageSize){
+			results.remove(results.size() - 1);
+			locator.setAnchor(results.get(results.size() - 1).getId());
+		}
+		return results;
+	}
+
 
 	@Override
 	public List<Acl> listAcls(String ownerType, Long ownerId, String targetType, Long targetId){

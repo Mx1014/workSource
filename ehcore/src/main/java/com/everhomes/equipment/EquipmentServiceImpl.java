@@ -2804,7 +2804,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		List<EquipmentInspectionTasks> allTasks = null;
 
-		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+//		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //		List<Long> ownerIds = new ArrayList<>();
 //
 //		if(organization != null) {
@@ -3634,7 +3634,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		
-		
+
 		if(isAdmin) {
 			List<Byte> taskStatus = new ArrayList<Byte>();
 	        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
@@ -3643,10 +3643,31 @@ public class EquipmentServiceImpl implements EquipmentService {
 			tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, null, null, locator, pageSize+1, taskStatus);
 			
 		} else {
-				List<Byte> taskStatus = new ArrayList<Byte>();
-		        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
-		        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-				tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, null, null, locator, pageSize+1, taskStatus);
+			//扫码任务做权限控制 只能扫出设备下有执行权限的任务
+			List<StandardAndStatus> standards = new ArrayList<>();
+			List<Byte> executeTaskStatus = new ArrayList<Byte>();
+			executeTaskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+			executeTaskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+
+			List<Byte> reviewTaskStatus = new ArrayList<Byte>();
+			reviewTaskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+
+			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			if (maps != null && maps.size() > 0) {
+				for (EquipmentInspectionStandardGroupMap r : maps) {
+					StandardAndStatus standardAndStatus = new StandardAndStatus();
+					standardAndStatus.setStandardId(r.getStandardId());
+					if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+						standardAndStatus.setTaskStatus(reviewTaskStatus);
+					}
+					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+						standardAndStatus.setTaskStatus(executeTaskStatus);
+					}
+					standards.add(standardAndStatus);
+				}
+			}
+			tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
 		}
         
 		if(tasks.size() > pageSize) {

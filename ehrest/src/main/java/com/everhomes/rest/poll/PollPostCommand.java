@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
  *     <li>anonymousFlag: 匿名标记,1 为匿名,0为公开</li>
  *     <li>id: id</li>
  *     <li>tag: tag</li>
+ *     <li>repeatFlag: 是否支持重复投票 0-否，1-是 {@link com.everhomes.rest.poll.RepeatFlag}</li>
+ *     <li>repeatPeriod: 重复投票的时间间隔，单位是天。</li>
  *     <li>itemList: itemList {@link com.everhomes.rest.poll.PollItemDTO}</li>
  * </ul>
  */
@@ -26,6 +28,8 @@ public class PollPostCommand {
     private Integer anonymousFlag;
     private transient Long id;
     private String tag;
+    private Byte repeatFlag;
+    private Integer repeatPeriod;
 
     @ItemType(PollItemDTO.class)
     private List<PollItemDTO> itemList;
@@ -95,6 +99,22 @@ public class PollPostCommand {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Byte getRepeatFlag() {
+        return repeatFlag;
+    }
+
+    public void setRepeatFlag(Byte repeatFlag) {
+        this.repeatFlag = repeatFlag;
+    }
+
+    public Integer getRepeatPeriod() {
+        return repeatPeriod;
+    }
+
+    public void setRepeatPeriod(Integer repeatPeriod) {
+        this.repeatPeriod = repeatPeriod;
     }
 
     public String toString() {

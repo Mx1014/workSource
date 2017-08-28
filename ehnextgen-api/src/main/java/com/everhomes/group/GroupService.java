@@ -14,6 +14,7 @@ public interface GroupService {
     GroupDTO updateGroup(UpdateGroupCommand cmd);
     GroupDTO getGroup(GetGroupCommand cmd);
     List<GroupDTO> listUserRelatedGroups();
+    List<GroupDTO> listUserGroups();
     List<GroupDTO> listPublicGroups(ListPublicGroupCommand cmd);
     
     /** 更新组成员信息 */
@@ -54,7 +55,10 @@ public interface GroupService {
     
     /** 把指定group成员从group中踢出 */
     void revokeGroupMember(RevokeGroupMemberCommand cmd);
-    
+
+    /** 把指定group成员从group中踢出 */
+    void revokeGroupMemberList(RevokeGroupMemberListCommand cmd);
+
     /** 列出用户相关的被邀请加入group、等待接受/拒绝的处理列表 */
     List<GroupMemberDTO> listGroupWaitingAcceptances();
     
@@ -163,4 +167,6 @@ public interface GroupService {
      * 删除俱乐部的广播
      */
     void deleteBroadcastByToken(DeleteBroadcastByTokenCommand cmd);
+
+    public String getGroupAlias(Long groupId);
 }

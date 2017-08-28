@@ -40,6 +40,12 @@ public class AddressDTO {
     private Byte memberStatus;
     private Double areaSize;
 
+    private Long areaId;
+
+    private String areaName;
+
+    private String cityName;
+
     public Double getAreaSize() {
         return areaSize;
     }
@@ -203,6 +209,30 @@ public class AddressDTO {
 	public void setMemberStatus(Byte memberStatus) {
 		this.memberStatus = memberStatus;
 	}
+
+    public Long getAreaId() {
+        return areaId;
+    }
+
+    public void setAreaId(Long areaId) {
+        this.areaId = areaId;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
 
     @Override
     public String toString(){

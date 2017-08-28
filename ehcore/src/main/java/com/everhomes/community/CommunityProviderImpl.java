@@ -497,6 +497,38 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
     @Override
+    public List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
+                                                   ListingQueryBuilderCallback queryBuilderCallback) {
+        pageSize = pageSize +1;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        final List<Community> communities = new ArrayList<Community>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_COMMUNITIES.ID.lt(locator.getAnchor()));
+
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addOrderBy(Tables.EH_COMMUNITIES.ID.desc());
+        query.addLimit(pageSize);
+
+        query.fetch().map((r) -> {
+            communities.add(ConvertHelper.convert(r, Community.class));
+            return null;
+        });
+
+        locator.setAnchor(null);
+        if(communities.size() == pageSize) {
+            communities.remove(communities.size() - 1);
+            locator.setAnchor(communities.get(communities.size() -1).getId());
+        }
+        return communities;
+    }
+
+    @Override
     public List<Community> listCommunitiesByStatus(ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback) {
     	int namespaceId =UserContext.getCurrentNamespaceId(null);
@@ -1048,8 +1080,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 	            (DSLContext context, Object reducingContext)-> {
 	            	
 	            	//增加分页 by sfyan 20160524
-	            	Condition cond = Tables.EH_COMMUNITIES.ID.in(communityIds);
-	        		cond = cond.and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+	            	Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
+                    if(null != communityIds && communityIds.size() > 0)
+	        		    cond = cond.and(Tables.EH_COMMUNITIES.ID.in(communityIds));
 	        		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
 	        		if(null != communityType){
 	        			cond = cond.and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));

@@ -38,6 +38,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
@@ -62,6 +63,8 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeaseFormRequest;
+import com.everhomes.techpark.servicehotline.ServiceConfiguration;
+import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.user.*;
 import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.userOrganization.UserOrganizations;
@@ -182,6 +185,9 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
+
+    @Autowired
+    private ServiceConfigurationsProvider serviceConfigurationsProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -1518,7 +1524,7 @@ public class CommunityServiceImpl implements CommunityService {
             if (null != locator.getAnchor()) {
                 query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
             }
-            query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
+            query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.desc());
             return query;
         });
         memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
@@ -2052,7 +2058,7 @@ public class CommunityServiceImpl implements CommunityService {
 				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
 				for (OrganizationMember member : members) {
-					if (member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()) && member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
+					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 						dto.setOrganizationMemberName(member.getContactName());
 						ms.add(member);
 						dto.setIsAuth(AuthFlag.YES.getCode());
@@ -3467,7 +3473,54 @@ public class CommunityServiceImpl implements CommunityService {
 		});
 	}
 
-	@Override
+    @Override
+    public CommunityAuthPopupConfigDTO getCommunityAuthPopupConfig(GetCommunityAuthPopupConfigCommand cmd) {
+        Integer namespaceId = cmd.getNamespaceId();
+        if (namespaceId == null) {
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        ServiceConfiguration conf = serviceConfigurationsProvider.getServiceConfiguration(
+                namespaceId, EntityType.NAMESPACE.getCode(), namespaceId.longValue(), ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+
+        if (conf == null) {
+            conf = new ServiceConfiguration();
+            conf.setNamespaceId(namespaceId);
+            conf.setValue(String.valueOf(TrueOrFalseFlag.TRUE.getCode()));
+            conf.setOwnerType(EntityType.NAMESPACE.getCode());
+            conf.setOwnerId(namespaceId.longValue());
+            conf.setName(ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+            serviceConfigurationsProvider.createServiceConfiguration(conf);
+        }
+        return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
+    }
+
+    @Override
+    public CommunityAuthPopupConfigDTO updateCommunityAuthPopupConfig(UpdateCommunityAuthPopupConfigCommand cmd) {
+        Integer namespaceId = cmd.getNamespaceId();
+        if (namespaceId == null) {
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        ServiceConfiguration conf = serviceConfigurationsProvider.getServiceConfiguration(
+                namespaceId, EntityType.NAMESPACE.getCode(), namespaceId.longValue(), ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+
+        TrueOrFalseFlag status = TrueOrFalseFlag.fromCode(cmd.getStatus());
+        String value = String.valueOf(status != null ? status.getCode() : TrueOrFalseFlag.TRUE.getCode());
+        if (conf == null) {
+            conf = new ServiceConfiguration();
+            conf.setNamespaceId(namespaceId);
+            conf.setValue(value);
+            conf.setOwnerType(EntityType.NAMESPACE.getCode());
+            conf.setOwnerId(namespaceId.longValue());
+            conf.setName(ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+            serviceConfigurationsProvider.createServiceConfiguration(conf);
+        } else {
+            conf.setValue(value);
+            serviceConfigurationsProvider.updateServiceConfiguration(conf);
+        }
+        return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
+    }
+	
+		@Override
 	public ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd) {
 		if(cmd.getPageAnchor()==null)
 			cmd.setPageAnchor(0L);
@@ -3493,4 +3546,6 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 
 	}
+}
+
 }
