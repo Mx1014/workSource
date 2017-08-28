@@ -62,6 +62,7 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -5223,6 +5224,43 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         res.setMembers(members);
         return res;
+    }
+
+    @Override
+    public void transferOrganizationPersonels(TransferArchivesEmployeesCommand cmd) {
+        if(cmd.getDetailIds() == null || cmd.getDetailIds().size() == 0){
+            LOGGER.error("DetailIds is null");
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PARAMETER_NOT_EXIST, "DetailIds is null");
+        }
+        Organization enterprise = checkOrganization(cmd.getOrganizationId());
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        List<Long> detailIds= cmd.getDetailIds();
+
+        detailIds.forEach(detailId->{
+            //根据detailId获得contactToken
+            OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            String token = detail.getContactToken();
+            if (StringUtils.isEmpty(token)) {
+                LOGGER.error("contactToken is null");
+                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
+            }
+            //寻找有效的Enterprise记录
+            List<String> groupTypes = new ArrayList<String>();
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(enterprise.getPath(), groupTypes, token);
+            if (members == null || members.size() == 0) {
+                LOGGER.error("Enterprise_member is null");
+                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, "Enterprise_member is null");
+            }
+            members = members.stream().filter(r->{return r.getOrganizationId().equals(enterprise.getId());}).collect(Collectors.toList());
+            OrganizationMember enterprise_member = members.get(0);
+            repeatCreateOrganizationmembers(cmd.getDepartmentIds(),token,Collections.singletonList(enterprise.getId()),enterprise_member);
+        });
+
+
+
     }
 
     /**
