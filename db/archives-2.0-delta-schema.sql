@@ -41,7 +41,8 @@ CREATE TABLE `eh_general_form_groups`(
 	`group_name` VARCHAR(128) COMMENT '字段组名称',
 	`create_time` DATETIME COMMENT '创建时间',
 	`operator_uid` BIGINT COMMENT '操作人id',
-)
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
 
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
