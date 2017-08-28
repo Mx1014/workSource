@@ -1,0 +1,87 @@
+// @formatter:off
+package com.everhomes.statistics.event;
+
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhStatEventTaskLogsDao;
+import com.everhomes.server.schema.tables.pojos.EhStatEventTaskLogs;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateUtils;
+import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.sql.Date;
+import java.util.List;
+
+@Repository
+public class StatEventTaskLogProviderImpl implements StatEventTaskLogProvider {
+
+	@Autowired
+	private DbProvider dbProvider;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
+
+	@Override
+	public void createOrUpdateStatEventTaskLog(StatEventTaskLog statEventTaskLog) {
+        if (statEventTaskLog.getId() == null) {
+            Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhStatEventTaskLogs.class));
+            statEventTaskLog.setId(id);
+            statEventTaskLog.setCreateTime(DateUtils.currentTimestamp());
+            rwDao().insert(statEventTaskLog);
+            DaoHelper.publishDaoAction(DaoAction.CREATE, EhStatEventTaskLogs.class, id);
+        } else {
+            statEventTaskLog.setUpdateTime(DateUtils.currentTimestamp());
+            rwDao().update(statEventTaskLog);
+            DaoHelper.publishDaoAction(DaoAction.MODIFY, EhStatEventTaskLogs.class, statEventTaskLog.getId());
+        }
+	}
+
+	@Override
+	public void updateStatEventTaskLog(StatEventTaskLog statEventTaskLog) {
+		// statEventTaskLog.setUpdateTime(DateUtils.currentTimestamp());
+		// statEventTaskLog.setUpdateUid(UserContext.currentUserId());
+        rwDao().update(statEventTaskLog);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhStatEventTaskLogs.class, statEventTaskLog.getId());
+	}
+
+	@Override
+	public StatEventTaskLog findById(Long id) {
+		return ConvertHelper.convert(dao().findById(id), StatEventTaskLog.class);
+	}
+
+    @Override
+    public List<StatEventTaskLog> findByTaskDate(Date taskDate) {
+        return context().selectFrom(Tables.EH_STAT_EVENT_TASK_LOGS)
+                .where(Tables.EH_STAT_EVENT_TASK_LOGS.TASK_DATE.eq(taskDate))
+                .fetchInto(StatEventTaskLog.class);
+    }
+
+    @Override
+    public void deleteEventTaskLogByDate(Date date) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_STAT_EVENT_TASK_LOGS)
+                .where(Tables.EH_STAT_EVENT_TASK_LOGS.TASK_DATE.eq(date))
+                .execute();
+    }
+
+    private EhStatEventTaskLogsDao rwDao() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        return new EhStatEventTaskLogsDao(context.configuration());
+	}
+
+	private EhStatEventTaskLogsDao dao() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return new EhStatEventTaskLogsDao(context.configuration());
+	}
+
+    private DSLContext context() {
+        return dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+}

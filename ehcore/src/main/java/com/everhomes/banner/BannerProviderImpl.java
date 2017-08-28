@@ -382,4 +382,13 @@ public class BannerProviderImpl implements BannerProvider {
         return context.selectFrom(Tables.EH_BANNERS).where(condition).fetchAnyInto(Banner.class);
     }
 
+    @Override
+    public List<Banner> listBannersByNamespace(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_BANNERS)
+                .where(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_BANNERS.STATUS.eq(BannerStatus.ACTIVE.getCode()))
+                .fetchInto(Banner.class);
+    }
+
 }
