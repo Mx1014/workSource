@@ -1093,8 +1093,11 @@ public class ActivityServiceImpl implements ActivityService {
 		result.setSuccess(rosters.size());
 		result.setFail(rows.size() - 1 - rosters.size());
 		//保存错误信息
-		Long jobId = addActivityRosterErrorLog(errorLists);
-		result.setJobId(jobId);
+		if(errorLists != null && errorLists.size() > 0){
+			Long jobId = addActivityRosterErrorLog(errorLists);
+			result.setJobId(jobId);
+		}
+
 		return rosters;
 	}
 
