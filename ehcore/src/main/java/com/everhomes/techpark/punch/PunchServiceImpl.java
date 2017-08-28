@@ -4886,9 +4886,11 @@ public class PunchServiceImpl implements PunchService {
 	public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r ){
 		PunchDayDetailDTO dto =  ConvertHelper.convert(r,PunchDayDetailDTO.class);
 		dto.setStatuString(processStatus(r.getStatusList()));
-		Organization punchGroup = organizationProvider.findOrganizationById(r.getPunchOrganizationId());
-		dto.setPunchOrgName(punchGroup.getName());
-		
+		if(null != r.getPunchOrganizationId()) {
+			Organization punchGroup = organizationProvider.findOrganizationById(r.getPunchOrganizationId());
+			if (null != punchGroup)
+				dto.setPunchOrgName(punchGroup.getName());
+		}
 		
 		if(null!= r.getArriveTime())
 			dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
