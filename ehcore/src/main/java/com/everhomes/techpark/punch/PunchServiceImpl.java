@@ -7352,7 +7352,7 @@ public class PunchServiceImpl implements PunchService {
                     PunchServiceErrorCode.ERROR_PUNCH_TOKEN_TIMEOUT,
                     "token time out ");
         }else{
-            submitLocalBus(PunchConstants.PUNCH_QRCODE_SUBJECT + key, restResponse);
+            submitLocalBus(PunchConstants.PUNCH_QRCODE_SUBJECT  + "." +  key, restResponse);
         }
     }
 
