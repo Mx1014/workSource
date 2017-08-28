@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.everhomes.parking.handler.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ import com.everhomes.express.guomao.rit.model.ArrayOfMail;
 import com.everhomes.express.guomao.rit.model.Mail;
 import com.everhomes.express.guomao.rit.service.MailTtServiceGn;
 import com.everhomes.express.guomao.rit.service.MailTtServiceGnPortType;
-import com.everhomes.express.guomao.util.Utils;
 import com.everhomes.rest.express.ExpressLogisticsStatus;
 import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressPackageType;
