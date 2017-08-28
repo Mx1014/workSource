@@ -457,8 +457,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			task.setOrganizationId(cmd.getOrganizationId());
 			task.setRequestorName(requestorName);
 			task.setRequestorPhone(requestorPhone);
-
+			Long time  = System.currentTimeMillis();
 			EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments());
+			LOGGER.info("--------------------------------------timecost:"+(System.currentTimeMillis()-time));
 			if(null != createTaskResultDTO) {
 				task.setStringTag1(createTaskResultDTO.getOrderId());
 			}
