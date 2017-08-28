@@ -7386,9 +7386,8 @@ public class PunchServiceImpl implements PunchService {
             return deferredResult;
         }
 
-        String subject = PunchConstants.PUNCH_QRCODE_SUBJECT;
         int scanTimeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_LOGON_SCAN_TIMOUT, 10000);
-        localBusSubscriberBuilder.build(subject + "." + key, new LocalBusOneshotSubscriber() {
+        localBusSubscriberBuilder.build(PunchConstants.PUNCH_QRCODE_SUBJECT + "." + key, new LocalBusOneshotSubscriber() {
             @Override
             public Action onLocalBusMessage(Object sender, String subject,
                                             Object restResponse, String path) {
