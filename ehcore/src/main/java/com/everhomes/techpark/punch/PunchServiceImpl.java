@@ -7377,6 +7377,7 @@ public class PunchServiceImpl implements PunchService {
         }
         //如果value 和key 不一样,说明value被放入了前端给的数据,直接返回结果
         if(null!=value && value != key){
+			LOGGER.debug(String.format("key :{},value:{}", key,value));
             deferredResult.setResult(JSONObject.parseObject(value,RestResponse.class));
             int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
             TimeUnit unit = TimeUnit.MINUTES;;
