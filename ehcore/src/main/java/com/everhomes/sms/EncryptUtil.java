@@ -73,5 +73,6 @@ public class EncryptUtil {
             sb.append(s.toUpperCase());  
         }  
         return sb.toString();  
-    }  
+    }
+
 }  
