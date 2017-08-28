@@ -165,6 +165,10 @@ public class UserServiceImpl implements UserService {
 	private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
 	private static final Byte SCENE_EXAMPLE = 5;
 
+	//推荐场景转换启用参数
+	private final static Integer SCENE_SWITCH_ENABLE = 0;
+	private final static Integer SCENE_SWITCH_DISABLE = 1;
+
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Autowired
@@ -4395,70 +4399,37 @@ public class UserServiceImpl implements UserService {
 			addFamilySceneToList(userId, namespaceId, sceneList);
 		}
 		/** 从配置项中查询是否开启 **/
+		Integer switchFlag = this.configurationProvider.getIntValue(namespaceId, "scenes.switchKey", SCENE_SWITCH_ENABLE);
+		if(switchFlag == SCENE_SWITCH_ENABLE){
+			/** 查询默认场景 **/
+			// 如果没有有效场景
+			Community default_community = new Community();
+			if (sceneList.size() == 0) {
+				switch (SceneType.fromCode(cmd.getSceneType())) {
+					case DEFAULT:
+					case FAMILY:
+						default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.COMMERCIAL.getCode());
+						break;
+					case PARK_TOURIST:
+					case ENTERPRISE:
+					case ENTERPRISE_NOAUTH:
+						default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.RESIDENTIAL.getCode());
+						break;
+				}
 
-		/** 查询默认场景 **/
-		// 如果没有有效场景
-		Community default_community = new Community();
-		if (sceneList.size() == 0) {
-			switch (SceneType.fromCode(cmd.getSceneType())) {
-				case DEFAULT:
-				case FAMILY:
-					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.COMMERCIAL.getCode());
-					break;
-				case PARK_TOURIST:
-				case ENTERPRISE:
-				case ENTERPRISE_NOAUTH:
-					default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.RESIDENTIAL.getCode());
-					break;
+				//把community转换成场景
+				SceneType sceneType = DEFAULT;
+				CommunityType communityType = CommunityType.fromCode(default_community.getCommunityType());
+				if(communityType == CommunityType.COMMERCIAL) {
+					sceneType = PARK_TOURIST;
+				}
+
+				CommunityDTO default_communityDTO = ConvertHelper.convert(default_community, CommunityDTO.class);
+				SceneDTO default_communityScene = toCommunitySceneDTO(namespaceId, userId, default_communityDTO, sceneType);
+				default_communityScene.setStatus(SCENE_EXAMPLE);
+				sceneList.add(default_communityScene);
 			}
-
-			//把community转换成场景
-			SceneType sceneType = DEFAULT;
-			CommunityType communityType = CommunityType.fromCode(default_community.getCommunityType());
-			if(communityType == CommunityType.COMMERCIAL) {
-				sceneType = PARK_TOURIST;
-			}
-
-			CommunityDTO default_communityDTO = ConvertHelper.convert(default_community, CommunityDTO.class);
-			SceneDTO default_communityScene = toCommunitySceneDTO(namespaceId, userId, default_communityDTO, sceneType);
-			default_communityScene.setStatus(SCENE_EXAMPLE);
-			sceneList.add(default_communityScene);
 		}
-
-//		// 如果没有有效场景
-//		if (sceneList.size() == 0) {
-//			Community community = new Community();
-//			switch (SceneType.fromCode(cmd.getSceneType())) {
-//				case DEFAULT:
-//					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.RESIDENTIAL.getCode());
-//					break;
-//				case PARK_TOURIST:
-//					community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, CommunityType.COMMERCIAL.getCode());
-//					break;
-//			}
-//
-//			if (community != null) {
-//				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
-//				SceneType sceneType = DEFAULT;
-//				CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
-//				if (communityType == CommunityType.COMMERCIAL) {
-//					sceneType = PARK_TOURIST;
-//				}
-//				SceneDTO communityScene = toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
-//				if (communityScene != null) {
-//					sceneList.add(communityScene);
-//				}
-//			}
-//		}
-
-		//modify by lei.lv --2017.8.15
-//		// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
-//		if(sceneList.size() == 0) {
-//			SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
-//			if(communityScene != null) {
-//				sceneList.add(communityScene);
-//			}
-//		}
 
 		return sceneList;
 	}
