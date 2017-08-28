@@ -7388,6 +7388,7 @@ public class PunchServiceImpl implements PunchService {
         }
 
         int scanTimeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_LOGON_SCAN_TIMOUT, 10000);
+		LOGGER.debug("build key:"+PunchConstants.PUNCH_QRCODE_SUBJECT + "." + key);
         localBusSubscriberBuilder.build(PunchConstants.PUNCH_QRCODE_SUBJECT + "." + key, new LocalBusOneshotSubscriber() {
             @Override
             public Action onLocalBusMessage(Object sender, String subject,
@@ -7409,6 +7410,7 @@ public class PunchServiceImpl implements PunchService {
 	}
     //给每台机器发通知
     private void submitLocalBus(String localKey,RestResponse restResponse){
+		LOGGER.debug("submit bus message : key = "+localKey);
         ExecutorUtil.submit(new Thread(new Runnable() {
             @Override
             public void run() {
