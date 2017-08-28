@@ -31,7 +31,7 @@ import com.everhomes.express.guomao.rit.model.ArrayOfMail;
 import com.everhomes.express.guomao.rit.model.Mail;
 import com.everhomes.express.guomao.rit.service.MailTtServiceGn;
 import com.everhomes.express.guomao.rit.service.MailTtServiceGnPortType;
-import com.everhomes.parking.Utils;
+import com.everhomes.express.guomao.util.Utils;
 import com.everhomes.rest.express.ExpressLogisticsStatus;
 import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressPackageType;

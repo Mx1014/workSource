@@ -24,7 +24,7 @@ import com.everhomes.express.guomao.GuoMaoEMSLogisticsItem;
 import com.everhomes.express.guomao.GuoMaoEMSLogisticsResponse;
 import com.everhomes.express.guomao.GuoMaoEMSResponseEntity;
 import com.everhomes.express.guomao.util.GuoMaoEMSSignHelper;
-import com.everhomes.parking.Utils;
+import com.everhomes.express.guomao.util.Utils;
 import com.everhomes.rest.express.ExpressLogisticsStatus;
 import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressPayType;
