@@ -258,7 +258,8 @@ public class AssetServiceImpl implements AssetService {
             String templateLocale = UserContext.current().getUser().getLocale();
             smsProvider.sendSms(999971, phoneNums, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             //客户在系统内，把需要推送的uid放在list中
-            if(noticeInfo.getTargetId()!=0l){
+            Long targetId = noticeInfo.getTargetId();
+            if(targetId!=null && targetId!=0l){
                 if (noticeInfo.getTargetType().equals("eh_user")) {
                     uids.add(noticeInfo.getTargetId());
                 } else if(noticeInfo.getTargetType().equals("eh_organization")) {
@@ -274,6 +275,8 @@ public class AssetServiceImpl implements AssetService {
                 }
             }
         }
+        //测试闫杨的账号
+//        uids.add(238716l);
         //对所有的符合推送资格的用户推送账单已出信息
         for(int k = 0; k < uids.size() ; k++) {
             MessageDTO messageDto = new MessageDTO();
@@ -339,12 +342,12 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void createBill(CreateBillCommand cmd) {
+    public ListBillsDTO createBill(CreateBillCommand cmd) {
         if(!cmd.getOwnerType().equals("community")){
             throw new RuntimeException("保存账单不在一个园区");
         }
 //        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
-        assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
+        return assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
     }
 
     @Override

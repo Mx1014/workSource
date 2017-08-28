@@ -47,7 +47,7 @@ public interface AssetService {
 
     ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
 
-    void createBill(CreateBillCommand cmd);
+    ListBillsDTO createBill(CreateBillCommand cmd);
 
     void OneKeyNotice(OneKeyNoticeCommand cmd);
 

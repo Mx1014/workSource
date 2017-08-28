@@ -611,21 +611,27 @@ public class AssetProviderImpl implements AssetProvider {
     public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<NoticeInfo> list = new ArrayList<>();
-                dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_APP_URLS.NAME,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME)
-                .from(Tables.EH_PAYMENT_BILLS,Tables.EH_APP_URLS)
+                dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME)
+                .from(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
-                        .and(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
                 .fetch().map(r -> {
                     NoticeInfo info = new NoticeInfo();
                     info.setPhoneNum(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
                     info.setAmountRecevable(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE));
                     info.setAmountOwed(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED));
-                    info.setAppName(r.getValue(Tables.EH_APP_URLS.NAME));
                     info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));
                     info.setTargetType(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_TYPE));
                     info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_NAME));
                     list.add(info);
                     return null;});
+        List<String> fetch = dslContext.select(Tables.EH_APP_URLS.NAME)
+                .from(Tables.EH_APP_URLS)
+                .where(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+                .fetch(Tables.EH_APP_URLS.NAME);
+        String appName = fetch.get(0);
+        for(int i = 0; i < list.size(); i++){
+            list.get(i).setAppName(appName);
+        }
         return list;
     }
 
@@ -775,7 +781,8 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void creatPropertyBill(Long addressId, BillGroupDTO billGroupDTO, String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName) {
+    public ListBillsDTO creatPropertyBill(Long addressId, BillGroupDTO billGroupDTO, String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName) {
+        final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
@@ -931,9 +938,16 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setSwitch(isSettled);
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
             billsDao.insert(newBill);
+            response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
+            response[0].setBillGroupName(billGroupDTO.getBillGroupName());
+            response[0].setBillId(nextBillId);
+            response[0].setNoticeTel(noticeTel);
+            response[0].setBillStatus(billStatus);
+            response[0].setTargetType(targetType);
+            response[0].setTargetId(targetId);
             return null;
         });
-
+        return response[0];
     }
 
     @Override
