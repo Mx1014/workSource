@@ -81,3 +81,20 @@ ALTER TABLE `eh_express_orders`	ADD COLUMN `quantity_and_weight` VARCHAR(128) CO
 ALTER TABLE `eh_express_orders` ADD COLUMN `status_desc` TEXT COMMENT '状态描述信息，国贸ems使用' AFTER `status`;
 
 -- end by dengs,2017.08.28 快递
+
+-- 停车 add by sw 20170828
+ALTER TABLE eh_parking_lots DROP COLUMN `lock_car_flag`;
+ALTER TABLE eh_parking_lots DROP COLUMN `contact`;
+ALTER TABLE eh_parking_lots DROP COLUMN `tempfee_flag`;
+ALTER TABLE eh_parking_lots DROP COLUMN `rate_flag`;
+ALTER TABLE eh_parking_lots DROP COLUMN `max_request_num`;
+
+ALTER TABLE eh_parking_lots DROP COLUMN `card_reserve_days`;
+ALTER TABLE eh_parking_lots DROP COLUMN `recharge_month_count`;
+ALTER TABLE eh_parking_lots DROP COLUMN `recharge_type`;
+ALTER TABLE eh_parking_lots DROP COLUMN `is_support_recharge`;
+
+ALTER TABLE eh_parking_lots ADD COLUMN `expired_recharge_json` VARCHAR(1024) DEFAULT NULL;
+ALTER TABLE eh_parking_lots ADD COLUMN `config_json` VARCHAR(1024) DEFAULT NULL;
+
+ALTER TABLE eh_parking_recharge_orders ADD COLUMN `order_type` tinyint(4) DEFAULT 1;
