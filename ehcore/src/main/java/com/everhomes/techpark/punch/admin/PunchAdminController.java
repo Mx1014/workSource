@@ -979,9 +979,10 @@ public class PunchAdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getPunchQRCode")
+	@RestReturn(value=String.class)
 	public  RestResponse getPunchQRCode(@Valid GetPunchQRCodeCommand cmd,HttpServletResponse response ) {
-		HttpServletResponse commandResponse = punchService.getPunchQRCode(cmd, response ); 
-		return new RestResponse();
+		String resp = punchService.getPunchQRCode(cmd, response );
+		return new RestResponse(resp);
 	}
 	
 	 /**

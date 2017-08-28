@@ -7292,7 +7292,7 @@ public class PunchServiceImpl implements PunchService {
         return response;
     }
 	@Override
-	public HttpServletResponse getPunchQRCode(GetPunchQRCodeCommand cmd,
+	public String getPunchQRCode(GetPunchQRCodeCommand cmd,
 			HttpServletResponse response) {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("qrtype", String.valueOf(cmd.getCodeType()));
@@ -7305,16 +7305,16 @@ public class PunchServiceImpl implements PunchService {
         TimeUnit unit = TimeUnit.MINUTES;;
         // 先放一个和key一样的值,表示这个人key有效
         valueOperations.set(key, key, timeout, unit);
-		try{
-			ByteArrayOutputStream out = QRCodeEncoder.createSimpleQrCode(Base64.getEncoder().encodeToString(result.getBytes()));
-			return downloadPng(out,response);
-		} catch (WriterException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try{
+//			ByteArrayOutputStream out = QRCodeEncoder.createSimpleQrCode(Base64.getEncoder().encodeToString(result.getBytes()));
+//			return downloadPng(out,response);
+//		} catch (WriterException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 
-		return response;
+		return result;
 	}
 	public HttpServletResponse downloadPng(ByteArrayOutputStream out, HttpServletResponse response) {
 		try {
@@ -7329,7 +7329,7 @@ public class PunchServiceImpl implements PunchService {
 			toClient.close();
 
 		} catch (IOException ex) {
-			LOGGER.error(ex.getMessage());
+			LOGGER.error("down load pic error",ex);
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
 					ex.getLocalizedMessage());

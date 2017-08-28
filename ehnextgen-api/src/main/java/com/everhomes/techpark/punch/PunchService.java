@@ -210,7 +210,7 @@ public interface PunchService {
 
 	public ListPunchMonthStatusResponse listPunchMonthStatus(ListPunchMonthStatusCommand cmd);
 
-	public HttpServletResponse getPunchQRCode(GetPunchQRCodeCommand cmd,
+	public String getPunchQRCode(GetPunchQRCodeCommand cmd,
 			HttpServletResponse response);
 
 	public void addPunchPoints(AddPunchPointsCommand cmd);
