@@ -4869,7 +4869,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 		String result = "";
 		if(statuList.contains(PunchConstants.STATUS_SEPARATOR)){
-			String[] statulist = StringUtils.split(statuList, PunchConstants.STATUS_SEPARATOR);
+			String[] statulist = statuList.split(PunchConstants.STATUS_SEPARATOR);
 			for(int i = 0 ;i<statulist.length;i++ ){
 				if(i ==0){
 					result = statusToString( Byte.valueOf(statulist[i]));
