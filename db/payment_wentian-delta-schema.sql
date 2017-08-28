@@ -108,7 +108,6 @@ CREATE TABLE `eh_payment_bills` (
   `owner_type` varchar(64) NOT NULL,
   `bill_group_id` bigint(20) DEFAULT NULL,
   `date_str` varchar(10) DEFAULT NULL,
-  `contract_id` bigint(20) NOT NULL DEFAULT '0',
   `address_id` bigint(20) DEFAULT NULL,
   `amount_receivable` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'amount should be received',
   `amount_received` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'amount actually received by far',
