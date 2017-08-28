@@ -7054,6 +7054,7 @@ CREATE TABLE `eh_polls` (
   `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
   `tag` VARCHAR(32),
   `repeat_flag` TINYINT,
+  `repeat_period` INTEGER,
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
   KEY `i_eh_poll_start_time_ms`(`start_time_ms`),
