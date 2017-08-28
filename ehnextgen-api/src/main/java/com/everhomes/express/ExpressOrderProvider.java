@@ -17,4 +17,6 @@ public interface ExpressOrderProvider {
 
 	List<ExpressOrder> listExpressOrderByCondition(ListExpressOrderCondition condition);
 
+	ExpressOrder findExpressOrderByOrderNo(String txLogisticID);
+
 }
