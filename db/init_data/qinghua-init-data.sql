@@ -2996,3 +2996,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 SELECT MAX(id) FROM `eh_configurations` INTO @configurations_id;
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 VALUES ((@configurations_id := @configurations_id + 1), 'biz.queryCommodityDetail.api', 'zl-ec/rest/openapi/commodity/queryCommodityByCommoNos', 'biz commodity detail api', 0, '电商商品详情api');
+
+-- by dengs,20170828 清华信息港 更多中删除放行任务 清华信息港的线网执行。
+DELETE FROM eh_launch_pad_items WHERE namespace_id = 999984 AND item_label = '放行任务';
+-- 清华信息港 更多始终在其他icon之后的配置 清华信息港的线网执行
+update eh_launch_pad_items SET default_order = 10000 WHERE namespace_id = 999984 AND item_label = '更多';
