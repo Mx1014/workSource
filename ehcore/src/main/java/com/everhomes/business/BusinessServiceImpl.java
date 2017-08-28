@@ -1547,7 +1547,7 @@ public class BusinessServiceImpl implements BusinessService {
 				}
 				FamilyAddressDTO dto = new FamilyAddressDTO();
 				dto.setFamilyId(userGroup.getGroupId());
-				dto.setAdddress(ConvertHelper.convert(address, AddressDTO.class));
+				dto.setAdddress(processAddressDTO(address));
 				dtos.add(dto);
 			}
 		}
@@ -1577,7 +1577,7 @@ public class BusinessServiceImpl implements BusinessService {
 							LOGGER.error("listUserOrganizationAddresses-address=address is empty,addressId = {}", orgAddress.getAddressId());
 							continue;
 						}
-						adddresses.add(ConvertHelper.convert(address, AddressDTO.class));
+						adddresses.add(processAddressDTO(address));
 					}
 				}
 				dto.setAdddresses(adddresses);
@@ -1586,6 +1586,21 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 		return dtos;
 	}
+
+	private AddressDTO processAddressDTO(Address address){
+		AddressDTO dto = ConvertHelper.convert(address, AddressDTO.class);
+		Region city = regionProvider.findRegionById(address.getCityId());
+		if(null != city){
+			dto.setCityName(city.getName());
+		}
+
+		Region area = regionProvider.findRegionById(address.getAreaId());
+		if(null != area){
+			dto.setAreaName(area.getName());
+		}
+		return dto;
+	}
+
 
 	@Override
 	public UserServiceAddressDTO getUserDefaultAddress(GetUserDefaultAddressCommand cmd) {
