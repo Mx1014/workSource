@@ -102,3 +102,25 @@ ALTER TABLE eh_parking_recharge_orders ADD COLUMN `order_type` tinyint(4) DEFAUL
 -- 临时增加功能：可以投票增加"重复投票"选项和"投票间隔时间"   add by yanjun 20170825
 ALTER TABLE `eh_poll_votes` DROP INDEX `i_eh_poll_vote_voter` , ADD INDEX `i_eh_poll_vote_voter` (`poll_id`, `item_id`, `voter_uid`) USING BTREE ;
 ALTER TABLE `eh_polls` ADD COLUMN `repeat_flag`  tinyint(4) NULL COMMENT 'is support repeat poll. 0-no, 1-yes', ADD COLUMN `repeat_period`  int(11) NULL COMMENT 'repeat_period,  day';
+
+
+--
+-- 运营表添加域空间字段  add by xq.tian  2017/08/24
+--
+-- 第一步
+ALTER TABLE eh_terminal_statistics_tasks ADD COLUMN namespace_id INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE eh_terminal_statistics_tasks DROP INDEX `task_no`;
+ALTER TABLE eh_terminal_statistics_tasks ALGORITHM=inplace, LOCK=NONE, ADD UNIQUE INDEX `u_eh_task_no_namespace_id`(`task_no`, `namespace_id`);
+
+-- 第二步
+ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, DROP INDEX i_eh_imei_number;
+ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, DROP INDEX i_eh_create_time;
+
+-- 第三步
+ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, ADD INDEX `i_eh_namespace_id`(`namespace_id`) USING HASH;
+ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, ADD INDEX `i_eh_imei_number`(`imei_number`) USING HASH;
+ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, ADD INDEX `i_eh_app_version_name`(`app_version_name`);
+ALTER TABLE eh_user_activities ALGORITHM=inplace, LOCK=NONE, ADD INDEX `i_eh_create_time`(`create_time`);
+
+-- 第四步
+OPTIMIZE TABLE eh_user_activities;
