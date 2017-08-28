@@ -7340,7 +7340,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void addPunchPoints(AddPunchPointsCommand cmd) {
         RestResponse restResponse = new RestResponse(cmd.getPunchGeoPoints());
-        busMessage(restResponse, cmd.getToken().trim());
+        busMessage(restResponse, cmd.getQrToken().trim());
     }
 
     private void busMessage(RestResponse restResponse, String key) {
@@ -7359,7 +7359,7 @@ public class PunchServiceImpl implements PunchService {
     @Override
 	public void addPunchWifis(AddPunchWifisCommand cmd) {
         RestResponse restResponse = new RestResponse(cmd.getWifis());
-        busMessage(restResponse, cmd.getToken().trim());
+        busMessage(restResponse, cmd.getQrToken().trim());
 	}
 	@Override
 	public DeferredResult<RestResponse> getPunchQRCodeResult(GetPunchQRCodeCommand cmd) {
