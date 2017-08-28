@@ -808,3 +808,8 @@ update eh_launch_pad_items set item_label = '理财', action_data = '{"url":"htt
 -- 修改服务市场item name by sfyan 20170828
 update `eh_launch_pad_items` set item_name = 'RENTAL_SCREEN' where item_label = '电子屏预定' and namespace_id = 999973;
 update `eh_launch_pad_items` set item_name = 'PARKING_RECHARGE' where item_label = '停车充值' and namespace_id = 1000000;
+
+-- 增加服务广场item name by sfyan 20170828
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`); 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) SELECT (@item_id := @item_id + 1), `namespace_id`, `app_id`, 0, 0, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 'park_tourist' from eh_launch_pad_items where namespace_id = 999973 and item_name in ('EBOILL_TRZDJ', 'EBOILL_SITE_RESERVE');
+
