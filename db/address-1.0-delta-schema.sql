@@ -23,8 +23,8 @@ CREATE TABLE `eh_namespace_masks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- merge from pmtaskzj xiongying 20170810
-ALTER TABLE eh_pm_tasks ADD COLUMN `remark_source` VARCHAR(32);
-ALTER TABLE eh_pm_tasks ADD COLUMN `remark` VARCHAR(1024);
+-- ALTER TABLE eh_pm_tasks ADD COLUMN `remark_source` VARCHAR(32);
+-- ALTER TABLE eh_pm_tasks ADD COLUMN `remark` VARCHAR(1024);
 
 
 
