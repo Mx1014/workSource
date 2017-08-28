@@ -1,6 +1,8 @@
 package com.everhomes.rest.contract;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.asset.PaymentVariable;
+import com.everhomes.rest.asset.VariableIdAndValue;
 
 import java.util.List;
 
@@ -10,11 +12,12 @@ import java.util.List;
  *     <li>chargingItemId: 收费项id</li>
  *     <li>chargingItemName: 收费项名称</li>
  *     <li>chargingStandardId: 收费标准id</li>
+ *     <li>chargingStandardName: 收费标准名称</li>
  *     <li>billingCycle: 计费周期</li>
  *     <li>formula: 公式</li>
  *     <li>formulaType: 公式类型</li>
  *     <li>lateFeeStandardId: 滞纳金标准id</li>
- *     <li>chargingAmountValue: 收费金额参数</li>
+ *     <li>variables: PaymentVariable对象的json字符串</li>
  *     <li>chargingStartTime: 起记日期</li>
  *     <li>chargingExpiredTime: 截止日期</li>
  *     <li>apartments: 计价条款适用资产列表 参考{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
@@ -27,11 +30,12 @@ public class ContractChargingItemDTO {
     private Long chargingItemId;
     private String chargingItemName;
     private Long chargingStandardId;
+    private String chargingStandardName;
     private Long lateFeeStandardId;
     private String formula;
     private Byte formulaType;
     private Byte billingCycle;
-    private Long chargingAmountValue;
+    private String variables;
     private Long chargingStartTime;
     private Long chargingExpiredTime;
     @ItemType(BuildingApartmentDTO.class)
@@ -85,14 +89,6 @@ public class ContractChargingItemDTO {
         this.apartments = apartments;
     }
 
-    public Long getChargingAmountValue() {
-        return chargingAmountValue;
-    }
-
-    public void setChargingAmountValue(Long chargingAmountValue) {
-        this.chargingAmountValue = chargingAmountValue;
-    }
-
     public Long getChargingExpiredTime() {
         return chargingExpiredTime;
     }
@@ -125,6 +121,14 @@ public class ContractChargingItemDTO {
         this.chargingStandardId = chargingStandardId;
     }
 
+    public String getChargingStandardName() {
+        return chargingStandardName;
+    }
+
+    public void setChargingStandardName(String chargingStandardName) {
+        this.chargingStandardName = chargingStandardName;
+    }
+
     public Long getChargingStartTime() {
         return chargingStartTime;
     }
@@ -139,5 +143,13 @@ public class ContractChargingItemDTO {
 
     public void setLateFeeStandardId(Long lateFeeStandardId) {
         this.lateFeeStandardId = lateFeeStandardId;
+    }
+
+    public String getVariables() {
+        return variables;
+    }
+
+    public void setVariables(String variables) {
+        this.variables = variables;
     }
 }

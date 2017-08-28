@@ -61,29 +61,32 @@ public class ContractScheduleJob extends QuartzJobBean {
                             } else {
                                 if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))) {
                                     //正常合同转即将过期
-                                    compare(contract.getContractEndDate(), param.getExpiringUnit());
+                                    Timestamp time = addPeriod(now, param.getExpiringPeriod(), param.getExpiringUnit());
+                                    if(time.after(contract.getContractEndDate())) {
+                                        contract.setStatus(ContractStatus.EXPIRING.getCode());
+                                        contractProvider.updateContract(contract);
+                                        contractSearcher.feedDoc(contract);
+                                    }
+
                                 } else if(ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))) {
                                     //审批通过没有转为正常合同 过期
-                                    compare(contract.getContractEndDate(), param.getExpiredUnit());
+                                    if(contract.getReviewTime() != null) {
+                                        Timestamp time = addPeriod(contract.getReviewTime(), param.getExpiredPeriod(), param.getExpiredUnit());
+                                        if(time.before(now)) {
+                                            contract.setStatus(ContractStatus.EXPIRED.getCode());
+                                            contractProvider.updateContract(contract);
+                                            contractSearcher.feedDoc(contract);
+                                        }
+                                    }
+
                                 }
-
                             }
-
                         });
                     }
                 }
             });
         }
 
-    }
-
-    private int compare(Timestamp date, Byte compareUnit) {
-        return -1;
-    }
-
-    private int compareDate(Timestamp date, Timestamp compared) {
-
-        return -1;
     }
 
     private Timestamp addPeriod(Timestamp startTime, int period, Byte unit) {

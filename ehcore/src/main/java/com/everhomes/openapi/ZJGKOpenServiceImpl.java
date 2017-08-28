@@ -294,6 +294,47 @@ public class ZJGKOpenServiceImpl {
         }
     }
 
+    public void syncIndividuals(String pageOffset, String communityIdentifier) {
+        String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
+        String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
+
+        Map<String, String> params= new HashMap<String,String>();
+        params.put("appKey", appKey);
+        params.put("timestamp", ""+System.currentTimeMillis());
+        params.put("nonce", ""+(long)(Math.random()*100000));
+        if(communityIdentifier != null) {
+            params.put("communityIdentifier", communityIdentifier);
+        }
+        params.put("pageOffset", pageOffset);
+        params.put("pageSize", PAGE_SIZE);
+        String signature = SignatureHelper.computeSignature(params, secretKey);
+        params.put("signature", signature);
+        String individuals = postToShenzhou(params, SYNC_INDIVIDUALS, null);
+
+        ShenzhouJsonEntity<List<ZJIndividuals>> entity = JSONObject.parseObject(individuals, new TypeReference<ShenzhouJsonEntity<List<ZJIndividuals>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
+            List<ZJIndividuals> dtos = entity.getData();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(entity, DataType.INDIVIDUAL.getCode(), communityIdentifier);
+
+                //数据有下一页则继续请求
+                if(entity.getNextPageOffset() != null) {
+                    syncIndividuals(entity.getNextPageOffset().toString(), communityIdentifier);
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(entity.getNextPageOffset() == null) {
+                if(communityIdentifier == null) {
+                    syncDataToDb(DataType.INDIVIDUAL.getCode(), SyncFlag.ALL.getCode());
+                } else {
+                    syncDataToDb(DataType.INDIVIDUAL.getCode(), SyncFlag.PART.getCode());
+                }
+            }
+        }
+    }
+
 
     private Map<String, String> generateParams(String pageOffset) {
         String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
@@ -415,6 +456,9 @@ public class ZJGKOpenServiceImpl {
                 break;
             case APARTMENT_LIVING_STATUS:
                 syncApartmentLivingStatus(namespaceId, backupList);
+                break;
+            case INDIVIDUAL:
+                syncAllIndividuals(namespaceId, backupList, allFlag);
 
             default:
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

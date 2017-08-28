@@ -29,6 +29,7 @@ import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -36,11 +37,14 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.repeat.RangeDTO;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
@@ -902,7 +906,10 @@ public class ContractServiceImpl implements ContractService {
 				}
 				String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
 				itemDto.setChargingItemName(itemName);
+				String standardName = assetProvider.getStandardNameById(itemDto.getChargingStandardId());
+				itemDto.setChargingStandardName(standardName);
 				processContractChargingItemAddresses(itemDto);
+
 				return itemDto;
 			}).collect(Collectors.toList());
 			dto.setChargingItems(chargingItemsDto);
