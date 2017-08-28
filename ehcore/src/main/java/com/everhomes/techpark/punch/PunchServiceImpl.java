@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -7393,6 +7394,7 @@ public class PunchServiceImpl implements PunchService {
             @Override
             public Action onLocalBusMessage(Object sender, String subject,
                                             Object restResponse, String path) {
+				LOGGER.debug("进入了 bus message  restResponse:"+ JSON.toJSONString(restResponse));
                 //这里要不要重新把timeou的时间刷一刷?
                 deferredResult.setResult((RestResponse)restResponse);
                 return null;
