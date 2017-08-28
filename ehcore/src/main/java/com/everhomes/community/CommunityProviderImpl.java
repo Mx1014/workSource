@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -62,10 +63,6 @@ import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhResourceCategoryAssignmentsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.Tuple;
 
 import ch.hsr.geohash.GeoHash;
 
@@ -639,8 +636,10 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public List<Community> listCommunitiesByKeyWord(ListingLocator locator,
-			int count, String keyword) {
-		int namespaceId =UserContext.getCurrentNamespaceId(null);
+			int count, String keyword, Integer namespaceId) {
+        if(namespaceId == null){
+            namespaceId =UserContext.getCurrentNamespaceId(null);
+        }
 		final List<Community> communities = new ArrayList<Community>();
 		Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
 		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
@@ -648,7 +647,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 			cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
 		}
 		
-		if(StringUtils.isEmpty(keyword)){
+		if(!StringUtils.isEmpty(keyword)){
 			cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
 		}
 		Condition condition = cond;
@@ -1412,7 +1411,7 @@ public class CommunityProviderImpl implements CommunityProvider {
             cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
         }
 
-        if(StringUtils.isEmpty(keyword)){
+        if(!StringUtils.isEmpty(keyword)){
             cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
         }
 
@@ -1421,13 +1420,13 @@ public class CommunityProviderImpl implements CommunityProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null,
                 (DSLContext context, Object reducingContext) -> {
 
-                    context.select().from(Tables.EH_COMMUNITIES)
+                    context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES)
                             .join(Tables.EH_ORGANIZATION_COMMUNITIES)
                             .on(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID))
                             .where(condition)
                             .limit(count)
                             .fetch().map((r) -> {
-                        communities.add(ConvertHelper.convert(r, Community.class));
+                        communities.add(RecordHelper.convert(r, Community.class));
                         return null;
                     });
 

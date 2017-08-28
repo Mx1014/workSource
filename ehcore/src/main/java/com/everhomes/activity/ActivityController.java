@@ -178,7 +178,7 @@ public class ActivityController extends ControllerBase {
 
     /**
      *
-     * <p>导出活动报名信息</p>
+     * <p>导出活动错误信息</p>
      * <b>URL: /activity/exportErrorInfo</b>
      */
     @RequestMapping("exportErrorInfo")

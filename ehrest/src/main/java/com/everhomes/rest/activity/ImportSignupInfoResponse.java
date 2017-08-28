@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>total: total</li>
  *     <li>fail: fail</li>
  *     <li>success: success</li>
+ *     <li>update: update</li>
  *     <li>jobId: 任务id，用于导出错误信息到excel时使用</li>
  * </ul>
  */
@@ -16,6 +17,7 @@ public class ImportSignupInfoResponse {
 	private Integer total;
 	private Integer fail;
 	private Integer success;
+	private Integer update;
 	private Long jobId;
 
 	public Integer getTotal() {
@@ -40,6 +42,14 @@ public class ImportSignupInfoResponse {
 
 	public void setSuccess(Integer success) {
 		this.success = success;
+	}
+
+	public Integer getUpdate() {
+		return update;
+	}
+
+	public void setUpdate(Integer update) {
+		this.update = update;
 	}
 
 	public Long getJobId() {

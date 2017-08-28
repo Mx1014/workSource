@@ -40,7 +40,7 @@ public class QueryOrganizationTopicCommand {
     private Byte privateFlag;
     private Long categoryId;
     private Byte orderByCreateTime;
-    
+    private Integer namespaceId;
     
     @ItemType(Long.class)
     private List<Long> excludeCategories;
@@ -223,6 +223,14 @@ public class QueryOrganizationTopicCommand {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

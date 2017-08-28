@@ -1005,20 +1005,32 @@ public class ActivityServiceImpl implements ActivityService {
 	                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
 						"beyond contraint quantity!");
 			}
-			
+
+			Integer[] updateCount = new Integer[1];
+			updateCount[0] = 0;
 			dbProvider.execute(s->{
 				rosters.forEach(r -> {
-					r.setConfirmUid(user.getId());
-					r.setActivityId(cmd.getActivityId());
-					r.setStatus(ActivityRosterStatus.NORMAL.getCode());
-					activityProvider.createActivityRoster(r);
+
+					ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activity.getId(), r.getPhone(), ActivityRosterStatus.NORMAL.getCode());
+					if(oldRoster != null){
+						r.setId(oldRoster.getId());
+						r.setStatus(ActivityRosterStatus.NORMAL.getCode());
+						activityProvider.updateRoster(r);
+						updateCount[0]++;
+					}else {
+						r.setConfirmUid(user.getId());
+						r.setActivityId(cmd.getActivityId());
+						r.setStatus(ActivityRosterStatus.NORMAL.getCode());
+						activityProvider.createActivityRoster(r);
+					}
 				});
-				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size());
-	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + rosters.size());
+				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size() - updateCount[0]);
+	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + rosters.size() - updateCount[0]);
 	            activityProvider.updateActivity(activity);
 	            
 				return null;
 			});
+			result.setUpdate(updateCount[0]);
 			return null;
 		});
 
@@ -1036,6 +1048,7 @@ public class ActivityServiceImpl implements ActivityService {
 			result.setTotal(0);
 			result.setFail(0);
 			result.setSuccess(0);
+			result.setUpdate(0);
 			return rosters;
 		}
 		result.setTotal(rows.size());
@@ -1111,14 +1124,15 @@ public class ActivityServiceImpl implements ActivityService {
 			return errorDTO;
 		}
 
+		//此处不检查是否已经报名，已经报名的数据也需要保留到后面更新  edit by yanjun 20170828
 		//检查是否已经报过名
-		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, row.getA(), ActivityRosterStatus.NORMAL.getCode());
-		if(oldRoster != null){
-			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_ROSTER_ALREADY_EXISTS);
-			errorString = localeStringService.getLocalizedString(scope, code, locale, "The roster already exists, checked with phone");
-			errorDTO.setDescription(errorString);
-			return errorDTO;
-		}
+//		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, row.getA(), ActivityRosterStatus.NORMAL.getCode());
+//		if(oldRoster != null){
+//			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_ROSTER_ALREADY_EXISTS);
+//			errorString = localeStringService.getLocalizedString(scope, code, locale, "The roster already exists, checked with phone");
+//			errorDTO.setDescription(errorString);
+//			return errorDTO;
+//		}
 
 		//检查Excel内是否存在重复
 		for(int i=0; i< newRosters.size(); i++){
