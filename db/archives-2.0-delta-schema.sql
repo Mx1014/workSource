@@ -29,18 +29,18 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_general_form_groups`
-CREATE TABLE `eh_general_form_groups`(
+DROP TABLE IF EXISTS `eh_general_form_groups`;
+CREATE TABLE `eh_general_form_groups` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`organization_id` BIGINT NOT NULL COMMENT '节点id',
 	`owner_id` BIGINT NOT NULL,
 	`owner_type` VARCHAR(64) NOT NULL,
-	`form_origin_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the original form',
-	`form_version` BIGINT NOT NULL DEFAULT '0' COMMENT 'the current using version',
-	`group_name` VARCHAR(128) COMMENT '字段组名称',
-	`create_time` DATETIME COMMENT '创建时间',
-	`operator_uid` BIGINT COMMENT '操作人id',
+	`form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the original form',
+	`form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
+	`group_name` VARCHAR(128) COMMENT 'field group name',
+	`create_time` DATETIME COMMENT 'the time of data createing',
+	`operator_uid` BIGINT COMMENT 'the id of the operator',
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
