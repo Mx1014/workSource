@@ -1,6 +1,9 @@
 package com.everhomes.rest.community_map;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * @author sw on 2017/8/14.
@@ -19,16 +22,15 @@ public class CommunityMapShopDTO {
     private Double longitude;
     private Double latitude;
 
-    private String buildingName;
+    @ItemType(CommunityMapBuildingDTO.class)
+    private List<CommunityMapBuildingDTO> buildings;
 
-    private String apartmentName;
-
-    public String getBuildingName() {
-        return buildingName;
+    public List<CommunityMapBuildingDTO> getBuildings() {
+        return buildings;
     }
 
-    public void setBuildingName(String buildingName) {
-        this.buildingName = buildingName;
+    public void setBuildings(List<CommunityMapBuildingDTO> buildings) {
+        this.buildings = buildings;
     }
 
     public String getShopNo() {
@@ -101,14 +103,6 @@ public class CommunityMapShopDTO {
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
-    }
-
-    public String getApartmentName() {
-        return apartmentName;
-    }
-
-    public void setApartmentName(String apartmentName) {
-        this.apartmentName = apartmentName;
     }
 
     @Override
