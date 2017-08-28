@@ -645,15 +645,7 @@ public class CommunityServiceImpl implements CommunityService {
         	return dto;
         }).collect(Collectors.toList());
 
-        //增加公共区域
-		if (UserContext.getCurrentNamespaceId()==999983){
-		//if (cmd.getNamespaceId()==999983) {
-        BuildingDTO buildingDTO = new BuildingDTO();
-        buildingDTO.setName(EbeiBuildingType.publicArea);
-        buildingDTO.setBuildingName(EbeiBuildingType.publicArea);
-        buildingDTO.setId(0l);
-        dtoList.add(buildingDTO);
-		}
+
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
 
