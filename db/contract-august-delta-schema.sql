@@ -318,7 +318,7 @@ CREATE TABLE `eh_contract_charging_items` (
   `formula_type` tinyint(4) DEFAULT NULL COMMENT '1: fixed fee; 2: normal formula; 3: gradient varied on variable price; 4: gradients varied functions on each variable section',
   `billing_cycle` tinyint(4) DEFAULT NULL,
   `late_fee_standard_id` BIGINT COMMENT '滞纳金标准',
-  `charging_amount_value` DECIMAL(10,2) COMMENT '计费金额参数',
+  `charging_variables` varchar(1024) COMMENT '计费金额参数 json: {"variables":[{"variableIdentifier":"22","variableName":"面积","variableValue":"960.00"}]}',
   `charging_start_time` DATETIME,
   `charging_expired_time` DATETIME,
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active', 
