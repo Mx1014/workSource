@@ -23,6 +23,9 @@ public interface FlowCaseProvider {
 	List<FlowCaseDetail> findApplierFlowCases(ListingLocator locator,
 			int count, SearchFlowCaseCommand cmd);
 
+	List<FlowCaseDetail> listFlowCasesByModuleId(ListingLocator locator,
+											  int count, SearchFlowCaseCommand cmd);
+
 	boolean updateIfValid(Long flowCaseId, Timestamp last, Timestamp now);
 
 	List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count,

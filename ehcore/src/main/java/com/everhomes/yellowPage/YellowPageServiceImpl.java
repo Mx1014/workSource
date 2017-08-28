@@ -8,7 +8,10 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.server.schema.Tables;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.http.HttpEntity;
@@ -163,6 +166,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private GeneralApprovalProvider generalApprovalProvider;
 
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -811,6 +817,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 					dto.setTemplateName(dto.getTemplateType());
 					dto.setButtonTitle("我要申请");
 				}
+
+
 			} else {
 				//兼容以前只有模板跳转时jumptype字段为null的情况
 				if(dto.getTemplateType() != null) {
@@ -825,6 +833,27 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 			if (!StringUtils.isEmpty(sa.getButtonTitle())) {
 				dto.setButtonTitle(sa.getButtonTitle());
+			}
+
+			// 服务联盟跳转到审批，审批模块可控制在app端是否显示
+			if((ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null)
+					&& dto.getJumpType() == JumpType.MODULE.getCode() && dto.getModuleUrl()!=null){
+				int start = dto.getModuleUrl().indexOf('?');
+				String s[] = dto.getModuleUrl().substring(start).split("&");
+				s = s[0].split("=");
+				if(s.length>1){
+					try {
+						Long approveId = Long.valueOf(s[1]);
+						GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approveId);
+						if(CommonStatus.ACTIVE.getCode() != approval.getStatus().intValue()){
+							dto.setButtonTitle(null);
+							dto.setJumpType(JumpType.NONE.getCode());
+							dto.setModuleUrl(null);
+						}
+
+					}catch (Exception e){}
+				}
+
 			}
 
 			processServiceUrl(dto);

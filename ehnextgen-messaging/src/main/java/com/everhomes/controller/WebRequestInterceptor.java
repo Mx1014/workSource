@@ -12,10 +12,7 @@ import com.everhomes.domain.DomainService;
 import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
-
-import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.domain.DomainDTO;
-import com.everhomes.rest.oauth2.CommonRestResponse;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;

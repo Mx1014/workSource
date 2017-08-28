@@ -31,6 +31,10 @@ import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.oauth2.Clients;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -47,6 +51,10 @@ import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.openapi.*;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
@@ -133,6 +141,9 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Autowired
     private BizHttpRestCallProvider bizHttpRestCallProvider;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
@@ -1514,6 +1525,68 @@ public class BusinessServiceImpl implements BusinessService {
 
 	}
 
+	/**
+	 * 获取用户家庭地址
+	 * @param userId
+	 * @return
+     */
+	private List<FamilyAddressDTO> listUserFamilyAddresses(Long userId){
+		List<FamilyAddressDTO> dtos = new ArrayList<>();
+		List<UserGroup> userGroups = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
+		if(userGroups != null && !userGroups.isEmpty()){
+			for (UserGroup userGroup: userGroups) {
+				Group group = groupProvider.findGroupById(userGroup.getGroupId());
+				if(group == null){
+					LOGGER.error("listUserFamilyAddresses-group=group is empty,groupId=" +userGroup.getGroupId());
+					continue;
+				}
+				Address address = addressProvider.findAddressById(group.getIntegralTag1());
+				if(address == null){
+					LOGGER.error("listUserFamilyAddresses-address=address is empty,addressId=" +group.getIntegralTag1());
+					continue;
+				}
+				FamilyAddressDTO dto = new FamilyAddressDTO();
+				dto.setFamilyId(userGroup.getGroupId());
+				dto.setAdddress(ConvertHelper.convert(address, AddressDTO.class));
+				dtos.add(dto);
+			}
+		}
+		return dtos;
+	}
+
+	/**
+	 * 获取用户公司地址
+	 * @param userId
+	 * @return
+     */
+	private List<OrganizationAddressDTO> listUserOrganizationAddresses(Long userId){
+		List<OrganizationAddressDTO> dtos = new ArrayList<>();
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(userId);
+		for (OrganizationMember member: members) {
+			Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
+			if(null != org && OrganizationStatus.fromCode(org.getStatus()) == OrganizationStatus.ACTIVE && OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				OrganizationAddressDTO dto = new OrganizationAddressDTO();
+				dto.setOrganizastionId(org.getId());
+				dto.setOrganizationName(org.getName());
+				List<OrganizationAddress> orgAddresses = organizationProvider.findOrganizationAddressByOrganizationId(member.getOrganizationId());
+				List<AddressDTO> adddresses = new ArrayList<>();
+				if(null != orgAddresses && orgAddresses.size() > 0){
+					for (OrganizationAddress orgAddress: orgAddresses) {
+						Address address = addressProvider.findAddressById(orgAddress.getAddressId());
+						if(address == null){
+							LOGGER.error("listUserOrganizationAddresses-address=address is empty,addressId = {}", orgAddress.getAddressId());
+							continue;
+						}
+						adddresses.add(ConvertHelper.convert(address, AddressDTO.class));
+					}
+				}
+				dto.setAdddresses(adddresses);
+				dtos.add(dto);
+			}
+		}
+		return dtos;
+	}
+
 	@Override
 	public UserServiceAddressDTO getUserDefaultAddress(GetUserDefaultAddressCommand cmd) {
 		//List<UserServiceAddressDTO> dtos = new ArrayList<UserServiceAddressDTO>();
@@ -1528,7 +1601,7 @@ public class BusinessServiceImpl implements BusinessService {
 				for(int i=0;i<list.size();i++){
 					UserGroup uGroup = list.get(i);
 					Group group = groupProvider.findGroupById(uGroup.getGroupId());
-					if(group == null){	
+					if(group == null){
 						LOGGER.error("getUserDefaultAddress-group=group is empty,groupId=" +uGroup.getGroupId());
 						continue;
 					}
@@ -1599,6 +1672,24 @@ public class BusinessServiceImpl implements BusinessService {
 				break;
 			}
 		}
+		return dto;
+	}
+
+	@Override
+	public UserAddressDTO getUserAddress(GetUserDefaultAddressCommand cmd) {
+		UserAddressDTO dto = new UserAddressDTO();
+		Long userId = cmd.getUserId();
+		List<UserServiceAddress> serviceAddresses = userActivityProvider.findUserRelateServiceAddresses(userId);
+		dto.setServiceAddresses(serviceAddresses.stream().map(r ->{
+			return ConvertHelper.convert(r, UserServiceAddressDTO.class);
+		}).collect(Collectors.toList()));
+
+		List<FamilyAddressDTO> familyAddresses = listUserFamilyAddresses(userId);
+		dto.setFamilyAddresses(familyAddresses);
+
+		List<OrganizationAddressDTO> orgAddresses = listUserOrganizationAddresses(userId);
+		dto.setOrganizationAddresses(orgAddresses);
+
 		return dto;
 	}
 

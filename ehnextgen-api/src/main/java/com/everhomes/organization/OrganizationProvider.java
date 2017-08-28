@@ -184,6 +184,8 @@ public interface OrganizationProvider {
 	OrganizationCommunityRequest getOrganizationCommunityRequestByOrganizationId(Long organizationId);
 	List<OrganizationAddress> listOrganizationAddressByBuildingId(Long buildingId, Integer pageSize, CrossShardListingLocator locator);
 	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize);
+	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
+													Byte setAdminFlag, String keywords, CrossShardListingLocator locator, int pageSize);
 	List<OrganizationMember> listOrganizationMembersByPhone(String phone);
 	List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName);
 	Organization getOrganizationByGoupId(Long groupId);
@@ -410,6 +412,7 @@ public interface OrganizationProvider {
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(
 			Long organizationId, Long buildId);
 
+	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String keywords, String organizationType,CrossShardListingLocator locator,Integer pageSize);
 	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
 
     List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String keywords, CrossShardListingLocator locator, int pageSize);
