@@ -7388,7 +7388,7 @@ public class PunchServiceImpl implements PunchService {
             return deferredResult;
         }
 
-        int scanTimeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_LOGON_SCAN_TIMOUT, 10000);
+        int scanTimeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_LOGON_SCAN_TIMOUT, 100000);
 		LOGGER.debug("build key:"+PunchConstants.PUNCH_QRCODE_SUBJECT + "." + key);
         localBusSubscriberBuilder.build(PunchConstants.PUNCH_QRCODE_SUBJECT + "." + key, new LocalBusOneshotSubscriber() {
             @Override
@@ -7396,7 +7396,7 @@ public class PunchServiceImpl implements PunchService {
                                             Object restResponse, String path) {
 				LOGGER.debug("进入了 bus message  restResponse:"+ JSON.toJSONString(restResponse));
                 //这里要不要重新把timeou的时间刷一刷?
-                deferredResult.setResult((RestResponse)restResponse);
+                deferredResult.setResult(JSONObject.parseObject((String)restResponse, RestResponse.class));
                 return null;
             }
             @Override
