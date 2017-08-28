@@ -7,7 +7,7 @@ package com.everhomes.rest.statistics.terminal;
  *     <li>namespaceId: namespaceId</li>
  * </ul>
  */
-public class ExecuteTaskCommand {
+public class DeleteStatTaskLogCommand {
 
     private String startDate;
     private String endDate;
