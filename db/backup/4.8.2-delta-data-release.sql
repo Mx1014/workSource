@@ -804,3 +804,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 -- 【储能】更好item链接 add by sfyan 20170725
 update eh_launch_pad_items set item_label = '理财', action_data = '{"url":"https://action.juzilicai.com/event/2017053104/index/201706106692.html?_ctag=6D7C331-C262970"}',icon_uri='cs://1/image/aW1hZ2UvTVRvNU5EWTNNekUzWkdVME1UTmlaalZsWlRNd1kyTmxaakJpT0RRNU5qWTJaZw' where namespace_id = 999990 and item_label = '快递';
+
+-- 修改服务市场item name by sfyan 20170828
+update `eh_launch_pad_items` set item_name = 'RENTAL_SCREEN' where item_label = '电子屏预定' and namespace_id = 999973;
+update `eh_launch_pad_items` set item_name = 'PARKING_RECHARGE' where item_label = '停车充值' and namespace_id = 1000000;
