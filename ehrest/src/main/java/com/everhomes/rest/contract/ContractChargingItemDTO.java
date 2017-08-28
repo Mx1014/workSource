@@ -17,7 +17,7 @@ import java.util.List;
  *     <li>formula: 公式</li>
  *     <li>formulaType: 公式类型</li>
  *     <li>lateFeeStandardId: 滞纳金标准id</li>
- *     <li>variables: PaymentVariable对象的json字符串</li>
+ *     <li>chargingVariables: PaymentVariable对象的json字符串</li>
  *     <li>chargingStartTime: 起记日期</li>
  *     <li>chargingExpiredTime: 截止日期</li>
  *     <li>apartments: 计价条款适用资产列表 参考{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
@@ -35,7 +35,7 @@ public class ContractChargingItemDTO {
     private String formula;
     private Byte formulaType;
     private Byte billingCycle;
-    private String variables;
+    private String chargingVariables;
     private Long chargingStartTime;
     private Long chargingExpiredTime;
     @ItemType(BuildingApartmentDTO.class)
@@ -145,11 +145,11 @@ public class ContractChargingItemDTO {
         this.lateFeeStandardId = lateFeeStandardId;
     }
 
-    public String getVariables() {
-        return variables;
+    public String getChargingVariables() {
+        return chargingVariables;
     }
 
-    public void setVariables(String variables) {
-        this.variables = variables;
+    public void setChargingVariables(String chargingVariables) {
+        this.chargingVariables = chargingVariables;
     }
 }

@@ -458,7 +458,7 @@ public class ZJGKOpenServiceImpl {
                 syncApartmentLivingStatus(namespaceId, backupList);
                 break;
             case INDIVIDUAL:
-//                syncAllIndividuals(namespaceId, backupList, allFlag);
+                syncAllIndividuals(namespaceId, backupList, allFlag);
                 break;
 
             default:
@@ -1426,5 +1426,92 @@ public class ZJGKOpenServiceImpl {
         insertOrUpdateOrganizationDetail(organization, customer);
         insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
         insertOrUpdateOrganizationAddresses(zjEnterprise.getCommunityId(), zjEnterprise.getApartmentIdentifierList(), customer);
+    }
+
+    private void syncAllIndividuals(Integer namespaceId, List<ZjSyncdataBackup> backupList, Byte allFlag) {
+        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+        //allFlag为part时，仅更新单个特定的项目数据即可
+        Long specialCommunityId = null;
+        if(SyncFlag.PART.equals(SyncFlag.fromCode(allFlag))) {
+            String communityIdentifier = backupList.get(0).getUpdateCommunity();
+            Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifier);
+            if(community != null) {
+                specialCommunityId = community.getId();
+            }
+        }
+
+        List<OrganizationOwner> myIndividualCustomerList = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceType(namespaceId, NamespaceCustomerType.SHENZHOU.getCode(), specialCommunityId);
+
+        List<ZJEnterprise> mergeEnterpriseList = mergeBackupList(backupList, ZJEnterprise.class);
+        List<ZJEnterprise> theirEnterpriseList = new ArrayList<ZJEnterprise>();
+        if(mergeEnterpriseList != null && mergeEnterpriseList.size() > 0) {
+            if(SyncFlag.PART.equals(SyncFlag.fromCode(allFlag))) {
+                String communityIdentifier = backupList.get(0).getUpdateCommunity();
+                Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifier);
+                if(community != null) {
+                    mergeEnterpriseList.forEach(enterprise -> {
+                        enterprise.setCommunityId(community.getId());
+                        theirEnterpriseList.add(enterprise);
+                    });
+                }
+
+            } else {
+                Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(namespaceId, NamespaceCommunityType.SHENZHOU.getCode());
+                mergeEnterpriseList.forEach(enterprise -> {
+                    Long communityId = communities.get(enterprise.getCommunityIdentifier());
+                    if(communityId != null) {
+                        enterprise.setCommunityId(communityId);
+                    }
+                    theirEnterpriseList.add(enterprise);
+                });
+            }
+
+        }
+
+        dbProvider.execute(s->{
+            syncAllEnterprises(namespaceId, myEnterpriseCustomerList, theirEnterpriseList);
+            return true;
+        });
+    }
+
+    private void syncAllEnterprises(Integer namespaceId, List<EnterpriseCustomer> myEnterpriseCustomerList, List<ZJEnterprise> theirEnterpriseList) {
+        // 如果两边都有，更新；如果我们有，他们没有，删除；
+        for (EnterpriseCustomer myEnterpriseCustomer : myEnterpriseCustomerList) {
+            ZJEnterprise zjEnterprise = findFromTheirEnterpriseList(myEnterpriseCustomer, theirEnterpriseList);
+            if (zjEnterprise != null) {
+                updateEnterpriseCustomer(myEnterpriseCustomer, zjEnterprise);
+            }else {
+                deleteEnterpriseCustomer(myEnterpriseCustomer);
+            }
+        }
+        // 如果他们有，我们没有，插入
+        // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+        if (theirEnterpriseList != null) {
+            for (ZJEnterprise zjEnterprise : theirEnterpriseList) {
+                if ((zjEnterprise.getDealed() != null && zjEnterprise.getDealed().booleanValue() == true)) {
+                    continue;
+                }
+                // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+                List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, zjEnterprise.getName());
+                if (customers == null) {
+                    insertEnterpriseCustomer(NAMESPACE_ID, zjEnterprise);
+                }else {
+                    updateEnterpriseCustomer(customers.get(0), zjEnterprise);
+                }
+            }
+        }
+    }
+
+    private ZJEnterprise findFromTheirEnterpriseList(EnterpriseCustomer myOrganization, List<ZJEnterprise> theirEnterpriseList) {
+        if (theirEnterpriseList != null) {
+            for (ZJEnterprise zjEnterprise : theirEnterpriseList) {
+                if (NamespaceCustomerType.SHENZHOU.getCode().equals(myOrganization.getNamespaceCustomerType())
+                        && myOrganization.getNamespaceCustomerToken().equals(zjEnterprise.getEnterpriseIdentifier())) {
+                    zjEnterprise.setDealed(true);
+                    return zjEnterprise;
+                }
+            }
+        }
+        return null;
     }
 }
