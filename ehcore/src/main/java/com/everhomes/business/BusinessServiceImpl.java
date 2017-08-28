@@ -2257,7 +2257,7 @@ public class BusinessServiceImpl implements BusinessService {
             LOGGER.debug("list business promotion namespaceId={}", namespaceId);
 
         if ("biz".equals(source)) {// 从电商服务器获取数据
-            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize);
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize, cmd.getRecommendType());
         }
         // 从数据库获取数据
         else {
@@ -2303,7 +2303,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
 
-    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
+    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize, Byte recommendType) {
         String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "zl-ec/rest/openapi/commodity/listRecommend");
 
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
@@ -2317,6 +2317,9 @@ public class BusinessServiceImpl implements BusinessService {
         Map<String, String> param = new HashMap<>();
         param.put("namespaceId", String.valueOf(namespaceId));
         param.put("pageSize", String.valueOf(pageSize));
+        if (recommendType != null) {
+            param.put("recommendType", String.valueOf(recommendType));
+        }
 
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
         try {
