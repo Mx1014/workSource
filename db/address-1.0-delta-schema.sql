@@ -22,9 +22,6 @@ CREATE TABLE `eh_namespace_masks` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- merge from pmtaskzj xiongying 20170810
--- ALTER TABLE eh_pm_tasks ADD COLUMN `remark_source` VARCHAR(32);
--- ALTER TABLE eh_pm_tasks ADD COLUMN `remark` VARCHAR(1024);
 
 
 
@@ -33,30 +30,6 @@ CREATE TABLE `eh_namespace_masks` (
 
 
 
-
-
-
-
--- 添加字段默认值  add by xq.tian 2017/08/10
-ALTER TABLE `eh_group_member_logs` MODIFY COLUMN `community_id` BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE `eh_group_member_logs` MODIFY COLUMN `address_id` BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE `eh_group_member_logs` MODIFY COLUMN `group_id` BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE `eh_group_member_logs` MODIFY COLUMN `update_time` DATETIME;
-ALTER TABLE `eh_group_member_logs` MODIFY COLUMN `member_type` VARCHAR(32) NOT NULL DEFAULT '';
-
-
--- 增加可见范围字段 by st.zheng
--- ALTER TABLE`eh_service_alliances`  ADD COLUMN `range` VARCHAR(512) NULL DEFAULT NULL AFTER `owner_id`;
--- 增加标志位 by st.zheng
-ALTER TABLE `eh_service_alliance_jump_module`
-ADD COLUMN `signal` TINYINT(4) NULL DEFAULT '1' COMMENT '标志 0:删除 1:普通 2:审批' AFTER `parent_id`;
-
--- merge from msg-2.1
--- 更改群聊名称可为空  edit by yanjun 20170724
-ALTER TABLE eh_groups MODIFY `name` VARCHAR(128) DEFAULT NULL;
-
-
--- merge 4.8.1 迁移过来且还未上线的脚本  add by sfyan 20170821
 
 -- 增加可见范围字段 by st.zheng
 ALTER TABLE`eh_service_alliances`  ADD COLUMN `range` VARCHAR(512) NULL DEFAULT NULL AFTER `owner_id`;
@@ -282,3 +255,6 @@ CREATE TABLE `eh_portal_launch_pad_mappings` (
 -- 临时增加功能：可以投票增加"重复投票"选项和"投票间隔时间"   add by yanjun 20170825
 ALTER TABLE `eh_poll_votes` DROP INDEX `i_eh_poll_vote_voter` , ADD INDEX `i_eh_poll_vote_voter` (`poll_id`, `item_id`, `voter_uid`) USING BTREE ;
 ALTER TABLE `eh_polls` ADD COLUMN `repeat_flag`  tinyint(4) NULL COMMENT 'is support repeat poll. 0-no, 1-yes', ADD COLUMN `repeat_period`  int(11) NULL COMMENT 'repeat_period,  day';
+
+
+
