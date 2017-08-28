@@ -13,5 +13,6 @@ CREATE TABLE `eh_activity_roster_error` (
   `description` varchar(255) DEFAULT NULL COMMENT 'description',
   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `create_uid` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
   KEY `eh_activity_roster_error_jobId` (`job_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
