@@ -458,7 +458,8 @@ public class ZJGKOpenServiceImpl {
                 syncApartmentLivingStatus(namespaceId, backupList);
                 break;
             case INDIVIDUAL:
-                syncAllIndividuals(namespaceId, backupList, allFlag);
+//                syncAllIndividuals(namespaceId, backupList, allFlag);
+                break;
 
             default:
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
