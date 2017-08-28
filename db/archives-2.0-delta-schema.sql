@@ -29,8 +29,8 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_general_form_group`
-CREATE TABLE `eh_general_form_group`(
+DROP TABLE IF EXISTS `eh_general_form_groups`
+CREATE TABLE `eh_general_form_groups`(
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`organization_id` BIGINT NOT NULL COMMENT '节点id',
