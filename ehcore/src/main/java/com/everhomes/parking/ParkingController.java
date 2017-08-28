@@ -265,7 +265,7 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("getRequestParkingCardDetail")
     @RestReturn(value=ParkingCardRequestDTO.class)
     public RestResponse getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd) {
-        //TODO: 获取申请月卡详情
+
     	ParkingCardRequestDTO dto = parkingService.getRequestParkingCardDetail(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
