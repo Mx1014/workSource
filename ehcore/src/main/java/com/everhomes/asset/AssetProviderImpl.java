@@ -485,11 +485,11 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(t.STATUS.eq(billStatus));
         }
         if(!org.springframework.util.StringUtils.isEmpty(targetName)) {
-            query.addConditions(t.TARGETNAME.like("%"+targetName+"%"));
+            query.addConditions(t.TARGET_NAME.like("%"+targetName+"%"));
         }
         query.addOrderBy(t.STATUS);
         query.addOrderBy(t.DATE_STR.desc());
-        query.addGroupBy(t.TARGETNAME);
+        query.addGroupBy(t.TARGET_NAME);
         query.addLimit(pageOffSet,pageSize+1);
         if(!org.springframework.util.StringUtils.isEmpty(buildingName)){
             query.addConditions(t.BUILDING_NAME.eq(buildingName));
@@ -518,7 +518,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setAmountOwed(r.getAmountOwed());
             dto.setAmountReceivable(r.getAmountReceivable());
             dto.setAmountReceived(r.getAmountReceived());
-            if(billGroupName!=null) {
+            if(!org.springframework.util.StringUtils.isEmpty(buildingName)) {
                 dto.setBillGroupName(billGroupName);
             }else{
                 String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS).where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
@@ -529,7 +529,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setNoticeTel(r.getValue(t.NOTICETEL));
             dto.setNoticeTimes(r.getNoticeTimes());
             dto.setDateStr(r.getDateStr());
-            dto.setTargetName(r.getTargetname());
+            dto.setTargetName(r.getTargetName());
             dto.setTargetId(r.getTargetId());
             dto.setTargetType(r.getTargetType());
             dto.setOwnerId(r.getOwnerId());
@@ -611,7 +611,7 @@ public class AssetProviderImpl implements AssetProvider {
     public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<NoticeInfo> list = new ArrayList<>();
-                dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_APP_URLS.NAME,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGETNAME)
+                dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_APP_URLS.NAME,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME)
                 .from(Tables.EH_PAYMENT_BILLS,Tables.EH_APP_URLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
                         .and(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
@@ -623,7 +623,7 @@ public class AssetProviderImpl implements AssetProvider {
                     info.setAppName(r.getValue(Tables.EH_APP_URLS.NAME));
                     info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));
                     info.setTargetType(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_TYPE));
-                    info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGETNAME));
+                    info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_NAME));
                     list.add(info);
                     return null;});
         return list;
@@ -797,106 +797,114 @@ public class AssetProviderImpl implements AssetProvider {
                 nextBillId = nextBillId + 1;
             }
 
-
-            //bill exemption
-            List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
-            long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), list2.size());
-            long currentExemItemSeq = nextExemItemBlock - list2.size() + 1;
-            if(currentExemItemSeq == 0){
-                currentExemItemSeq = currentExemItemSeq+1;
-            }
-            for(int i = 0; i < list2.size(); i++){
-                ExemptionItemDTO exemptionItemDTO = list2.get(i);
-                PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
-                BigDecimal amount = exemptionItemDTO.getAmount();
-                if(amount == null){
-                    continue;
+            if(list2!=null) {
+                //bill exemption
+                List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
+                long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), list2.size());
+                long currentExemItemSeq = nextExemItemBlock - list2.size() + 1;
+                if(currentExemItemSeq == 0){
+                    currentExemItemSeq = currentExemItemSeq+1;
                 }
-                exemptionItem.setAmount(amount);
-                exemptionItem.setBillGroupId(billGroupId);
-                exemptionItem.setBillId(nextBillId);
-                exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                exemptionItem.setCreatorUid(UserContext.currentUserId());
-                exemptionItem.setId(currentExemItemSeq++);
-                exemptionItem.setRemarks(exemptionItemDTO.getRemark());
-                if(targetType!=null){
-                    exemptionItem.setTargetType(targetType);
+                for(int i = 0; i < list2.size(); i++){
+                    ExemptionItemDTO exemptionItemDTO = list2.get(i);
+                    PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
+                    BigDecimal amount = exemptionItemDTO.getAmount();
+                    if(amount == null){
+                        continue;
+                    }
+                    exemptionItem.setAmount(amount);
+                    exemptionItem.setBillGroupId(billGroupId);
+                    exemptionItem.setBillId(nextBillId);
+                    exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    exemptionItem.setCreatorUid(UserContext.currentUserId());
+                    exemptionItem.setId(currentExemItemSeq);
+                    currentExemItemSeq += 1;
+                    exemptionItem.setRemarks(exemptionItemDTO.getRemark());
+                    if(targetType!=null){
+                        exemptionItem.setTargetType(targetType);
+                    }
+                    if(targetId != null) {
+                        exemptionItem.setTargetId(targetId);
+                    }
+                    exemptionItem.setTargetname(targetName);
+                    exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+                    exemptionItems.add(exemptionItem);
+
+                    if(amount.compareTo(zero)==-1){
+                        amount = amount.multiply(new BigDecimal("-1"));
+                        amountExemption = amountExemption.add(amount);
+                    }else if(amount.compareTo(zero)==1){
+                        amountSupplement = amountSupplement.add(amount);
+                    }
                 }
-                if(targetId != null) {
-                    exemptionItem.setTargetId(targetId);
-                }
-                exemptionItem.setTargetname(targetName);
-                exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-                exemptionItems.add(exemptionItem);
-
-                if(amount.compareTo(zero)==-1){
-                    amountExemption = amountExemption.add(amount);
-                }else if(amount.compareTo(zero)==1){
-                    amountSupplement = amountSupplement.add(amount);
-                }
-            }
-            amountOwed = amountReceivable.add(amountExemption);
-            amountOwed = amountReceivable.add(amountSupplement);
-            EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
-            exemptionItemsDao.insert(exemptionItems);
-
-
-            //billItems assemble
-            List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-            long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), list1.size());
-            long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
-            if(currentBillItemSeq == 0){
-                currentBillItemSeq = currentBillItemSeq+1;
-            }
-
-            for(int i = 0; i < list1.size() ; i++) {
-                BillItemDTO dto = list1.get(i);
-                PaymentBillItems item = new PaymentBillItems();
-                item.setAddressid(addressId);
-                BigDecimal var1 = dto.getAmountReceivable();
-                //减免项不覆盖收费项目的收付，暂时
-                item.setAmountOwed(var1);
-                item.setAmountReceivable(dto.getAmountReceivable());
-                item.setAmountReceived(new BigDecimal("0"));
-                item.setBillGroupId(billGroupId);
-                item.setBillId(nextBillId);
-                item.setChargingItemName(dto.getBillItemName());
-                item.setChargingItemsId(dto.getBillItemId());
-                item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                item.setCreatorUid(UserContext.currentUserId());
-                item.setDateStr(dateStr);
-                item.setId(currentBillItemSeq++);
-                item.setNamespaceId(UserContext.getCurrentNamespaceId());
-                item.setOwnerType(ownerType);
-                item.setOwnerId(ownerId);
-                if(targetType!=null){
-                    item.setTargetType(targetType);
-                }
-                if(targetId != null) {
-                    item.setTargetId(targetId);
-                }
-                item.setTargetname(targetName);
-                item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                billItemsList.add(item);
-
-                amountReceivable = amountReceivable.add(var1);
-                amountOwed = amountOwed.add(var1);
+                //应收是否应该计算减免项
+//                amountReceivable = amountReceivable.subtract(amountExemption);
+//                amountReceivable = amountReceivable.add(amountSupplement);
+                amountOwed = amountOwed.subtract(amountExemption);
+                amountOwed = amountOwed.add(amountSupplement);
+                EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
+                exemptionItemsDao.insert(exemptionItems);
             }
             Byte billStatus = 0;
-            if(amountOwed.compareTo(new BigDecimal("0"))!=1){
-                billStatus = 1;
+            if(list1!=null){
+                //billItems assemble
+                List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
+                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), list1.size());
+                long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
+                if(currentBillItemSeq == 0){
+                    currentBillItemSeq = currentBillItemSeq+1;
+                }
+
+                for(int i = 0; i < list1.size() ; i++) {
+                    BillItemDTO dto = list1.get(i);
+                    PaymentBillItems item = new PaymentBillItems();
+                    item.setAddressId(addressId);
+                    BigDecimal var1 = dto.getAmountReceivable();
+                    //减免项不覆盖收费项目的收付，暂时
+                    item.setAmountOwed(var1);
+                    item.setAmountReceivable(dto.getAmountReceivable());
+                    item.setAmountReceived(new BigDecimal("0"));
+                    item.setBillGroupId(billGroupId);
+                    item.setBillId(nextBillId);
+                    item.setChargingItemName(dto.getBillItemName());
+                    item.setChargingItemsId(dto.getBillItemId());
+                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    item.setCreatorUid(UserContext.currentUserId());
+                    item.setDateStr(dateStr);
+                    item.setId(currentBillItemSeq);
+                    currentBillItemSeq += 1;
+                    item.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    item.setOwnerType(ownerType);
+                    item.setOwnerId(ownerId);
+                    if(targetType!=null){
+                        item.setTargetType(targetType);
+                    }
+                    if(targetId != null) {
+                        item.setTargetId(targetId);
+                    }
+                    item.setTargetName(targetName);
+                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    billItemsList.add(item);
+
+                    amountReceivable = amountReceivable.add(var1);
+                    amountOwed = amountOwed.add(var1);
+                }
+
+                if(amountOwed.compareTo(new BigDecimal("0"))!=1){
+                    billStatus = 1;
+                }
+                for(int i = 0; i < billItemsList.size(); i++) {
+                    billItemsList.get(i).setStatus(billStatus);
+                }
+                EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
+                billItemsDao.insert(billItemsList);
             }
-            for(int i = 0; i < billItemsList.size(); i++) {
-                billItemsList.get(i).setStatus(billStatus);
-            }
-            EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
-            billItemsDao.insert(billItemsList);
+
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
 
-            newBill.setAmountExemption(amountExemption);
             newBill.setAddressId(addressId);
             newBill.setBuildingName(buildingName);
             newBill.setApartmentName(apartmentName);
@@ -911,7 +919,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
             newBill.setNoticetel(noticeTel);
             newBill.setOwnerId(ownerId);
-            newBill.setTargetname(targetName);
+            newBill.setTargetName(targetName);
             newBill.setOwnerType(ownerType);
             newBill.setTargetType(targetType);
             newBill.setTargetId(targetId);
@@ -925,6 +933,7 @@ public class AssetProviderImpl implements AssetProvider {
             billsDao.insert(newBill);
             return null;
         });
+
     }
 
     @Override
@@ -939,7 +948,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
-        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGETNAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.BUILDING_NAME,r.APARTMENT_NAME)
+        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.BUILDING_NAME,r.APARTMENT_NAME)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -949,7 +958,7 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setTargetId(f.getValue(r.TARGET_ID));
                     vo.setNoticeTel(f.getValue(r.NOTICETEL));
                     vo.setDateStr(f.getValue(r.DATE_STR));
-                    vo.setTargetName(f.getValue(r.TARGETNAME));
+                    vo.setTargetName(f.getValue(r.TARGET_NAME));
                     vo.setTargetType(f.getValue(r.TARGET_TYPE));
                     vo.setBuildingName(f.getValue(r.BUILDING_NAME));
                     vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
@@ -1404,4 +1413,14 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_CONTRACT_RECEIVER.CONTRACT_NUM.eq(contractNum))
                 .fetch().map(r -> ConvertHelper.convert(r, PaymentContractReceiver.class));
     }
+
+    @Override
+    public String getStandardNameById(Long chargingStandardId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.NAME)
+                .from(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
+                .fetchOne(0,String.class);
+    }
+
 }

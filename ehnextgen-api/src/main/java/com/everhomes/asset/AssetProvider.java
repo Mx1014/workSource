@@ -93,4 +93,6 @@ public interface AssetProvider {
     void increaseNoticeTime(List<Long> billIds);
 
     List<PaymentContractReceiver> findContractReceiverByContractNumAndTimeLimit(String contractNum);
+
+    String getStandardNameById(Long chargingStandardId);
 }

@@ -7,20 +7,20 @@ package com.everhomes.rest.address;
 
 /**
  *<ul>
- * <li>buildingName:楼栋名称</li>
+ * <li>apartmentName:楼栋名称</li>
  * <li>addressId:地址id</li>
  *</ul>
  */
 public class GetApartmentNameByBuildingNameDTO {
-    private String buildingName;
+    private String apartmentName;
     private Long addressId;
 
-    public String getBuildingName() {
-        return buildingName;
+    public String getApartmentName() {
+        return apartmentName;
     }
 
-    public void setBuildingName(String buildingName) {
-        this.buildingName = buildingName;
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     public Long getAddressId() {
