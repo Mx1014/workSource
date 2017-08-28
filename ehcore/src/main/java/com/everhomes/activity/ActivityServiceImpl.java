@@ -1014,6 +1014,7 @@ public class ActivityServiceImpl implements ActivityService {
 					ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activity.getId(), r.getPhone(), ActivityRosterStatus.NORMAL.getCode());
 					if(oldRoster != null){
 						r.setId(oldRoster.getId());
+						r.setActivityId(cmd.getActivityId());
 						r.setStatus(ActivityRosterStatus.NORMAL.getCode());
 						activityProvider.updateRoster(r);
 						updateCount[0]++;
@@ -1051,7 +1052,7 @@ public class ActivityServiceImpl implements ActivityService {
 			result.setUpdate(0);
 			return rosters;
 		}
-		result.setTotal(rows.size());
+		result.setTotal(rows.size() - 1);
 
 		for(int i=1, len=rows.size(); i<len; i++) {
 			RowResult row = (RowResult) rows.get(i);
@@ -1090,9 +1091,10 @@ public class ActivityServiceImpl implements ActivityService {
 
 
 		result.setSuccess(rosters.size());
-		result.setFail(rows.size() - rosters.size());
-		//TODO save errorData
-		result.setJobId(0L);
+		result.setFail(rows.size() - 1 - rosters.size());
+		//保存错误信息
+		Long jobId = addActivityRosterErrorLog(errorLists);
+		result.setJobId(jobId);
 		return rosters;
 	}
 
