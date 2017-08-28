@@ -81,3 +81,8 @@ ALTER TABLE `eh_express_orders`	ADD COLUMN `quantity_and_weight` VARCHAR(128) CO
 ALTER TABLE `eh_express_orders` ADD COLUMN `status_desc` TEXT COMMENT '状态描述信息，国贸ems使用' AFTER `status`;
 
 -- end by dengs,2017.08.28 快递
+
+
+-- 临时增加功能：可以投票增加"重复投票"选项和"投票间隔时间"   add by yanjun 20170825
+ALTER TABLE `eh_poll_votes` DROP INDEX `i_eh_poll_vote_voter` , ADD INDEX `i_eh_poll_vote_voter` (`poll_id`, `item_id`, `voter_uid`) USING BTREE ;
+ALTER TABLE `eh_polls` ADD COLUMN `repeat_flag`  tinyint(4) NULL COMMENT 'is support repeat poll. 0-no, 1-yes', ADD COLUMN `repeat_period`  int(11) NULL COMMENT 'repeat_period,  day';
