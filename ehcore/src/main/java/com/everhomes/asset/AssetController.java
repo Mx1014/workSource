@@ -646,10 +646,10 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/createBill</b>
      */
     @RequestMapping("createBill")
-    @RestReturn(value = String.class)
+    @RestReturn(value = ListBillsDTO.class)
     public RestResponse createBill(CreateBillCommand cmd) {
-        assetService.createBill(cmd);
-        RestResponse response = new RestResponse();
+        ListBillsDTO dto = assetService.createBill(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
