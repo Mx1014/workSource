@@ -4,8 +4,8 @@ CREATE TABLE `eh_archives_contacts_sticky` (
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`organization_id` BIGINT NOT NULL COMMENT '节点id',
 	`detail_id` BIGINT NOT NULL COMMENT '成员detailId',
-  `create_time` datetime COMMENT '创建时间',
-  `update_time` datetime COMMENT '修改时间',
+  `create_time` DATETIME COMMENT '创建时间',
+  `update_time` DATETIME COMMENT '修改时间',
   `operator_uid` BIGINT COMMENT '操作人id',
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
@@ -14,8 +14,8 @@ DROP TABLE IF EXISTS `eh_archives_dismiss_employees`;
 CREATE TABLE `eh_archives_dismiss_employees` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`organization_id` BIGINT NOT NULL COMMENT '节点id',
-	`contact_name` VARCHAR (32) COMMENT '姓名',
+	`organization_id` BIGINT NOT NULL COMMENT 'organizationId',
+	`contact_name` VARCHAR (32) COMMENT 'the name of the employee',
 	`employee_status` TINYINT NOT NULL COMMENT '离职前状态',
 	`department` VARCHAR (32) COMMENT '部门',
 	`check_in_time` DATE COMMENT '入职日期',
@@ -24,10 +24,25 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 	`dismiss_reason` VARCHAR(64) COMMENT '离职原因',
 	`dismiss_remarks` VARCHAR (256) COMMENT '备注',
 	`detail_id` BIGINT NOT NULL COMMENT '成员detailId',
-	`create_time` datetime COMMENT '创建时间',
+	`create_time` DATETIME COMMENT '创建时间',
 	`operator_uid` BIGINT COMMENT '操作人id',
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
+DROP TABLE IF EXISTS `eh_general_form_group`
+CREATE TABLE `eh_general_form_group`(
+	`id` BIGINT NOT NULL COMMENT 'id',
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`organization_id` BIGINT NOT NULL COMMENT '节点id',
+	`owner_id` BIGINT NOT NULL,
+	`owner_type` VARCHAR(64) NOT NULL,
+	`form_origin_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the original form',
+	`form_version` BIGINT NOT NULL DEFAULT '0' COMMENT 'the current using version',
+	`group_name` VARCHAR(128) COMMENT '字段组名称',
+	`create_time` DATETIME COMMENT '创建时间',
+	`operator_uid` BIGINT COMMENT '操作人id',
+)
+
 
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
 ALTER TABLE eh_organization_member_details ADD COLUMN procreative DATE COMMENT '生育状况';
