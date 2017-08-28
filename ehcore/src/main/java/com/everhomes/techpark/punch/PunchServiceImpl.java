@@ -7376,7 +7376,7 @@ public class PunchServiceImpl implements PunchService {
                     "token time out ");
         }
         //如果value 和key 不一样,说明value被放入了前端给的数据,直接返回结果
-        if(null!=value && value != key){
+        if(null!=value && !value.equals(key)){
 			LOGGER.debug(String.format("key :{},value:{}", key,value));
             deferredResult.setResult(JSONObject.parseObject(value,RestResponse.class));
             int timeout = configurationProvider.getIntValue(PunchConstants.PUNCH_QRCODE_TIMEOUT, 15);
