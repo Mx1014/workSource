@@ -7247,7 +7247,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public ListPunchMonthStatusResponse listPunchMonthStatus(ListPunchMonthStatusCommand cmd) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method sub
         cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
         ListPunchMonthStatusResponse response = new ListPunchMonthStatusResponse();
         response.setDayStatus(new ArrayList<>());
