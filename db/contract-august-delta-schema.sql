@@ -231,6 +231,9 @@ CREATE TABLE `eh_enterprise_customers` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE `eh_organization_owners` ADD COLUMN `namespace_customer_type` VARCHAR(128);
+ALTER TABLE `eh_organization_owners` ADD COLUMN `namespace_customer_token` VARCHAR(128);
+
 ALTER TABLE `eh_contracts` CHANGE `contract_end_date` `contract_end_date` DATETIME COMMENT '合同结束日期';
 ALTER TABLE `eh_contracts` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 ALTER TABLE `eh_contracts` ADD COLUMN `contract_start_date` DATETIME COMMENT '合同开始日期';
