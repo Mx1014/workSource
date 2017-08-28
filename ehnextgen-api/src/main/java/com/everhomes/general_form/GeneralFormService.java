@@ -37,4 +37,8 @@ public interface GeneralFormService {
 			List<GeneralFormFieldDTO> fieldDTOs, boolean showDefaultFields);
 
 	List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd, boolean showDefaultFields);
+
+	void createGeneralFormGroup(CreateGeneralFormGroupCommand cmd);
+
+	List<GeneralFormGroupDTO> listGeneralFormGroups(ListGeneralFormGroupsCommand cmd);
 }

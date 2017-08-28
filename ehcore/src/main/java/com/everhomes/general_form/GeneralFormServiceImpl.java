@@ -8,7 +8,6 @@ import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.FlowCaseEntity;
@@ -18,6 +17,7 @@ import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -451,6 +451,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		form.setFormVersion(0L);
 		form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
 		this.generalFormProvider.createGeneralForm(form);
+		if (cmd.getFormGroups() != null) {
+			for(GeneralFormGroupDTO dto : cmd.getFormGroups()){
+				syncGeneralFormGroupFormOriginId(form.getFormOriginId(),form.getFormVersion(),dto.getFieldGroupId());
+			}
+		}
 		return processGeneralFormDTO(form);
 	}
 
@@ -459,6 +464,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 		dto.setFormFields(fieldDTOs);
 		return dto;
+	}
+
+	private void syncGeneralFormGroupFormOriginId(Long formOriginId, Long formVersion, Long fieldGroupId) {
+		GeneralFormGroups group = generalFormProvider.findGeneralFormGroupById(fieldGroupId);
+		if (group != null) {
+			group.setFormOriginId(formOriginId);
+			group.setFormVersion(formVersion);
+			generalFormProvider.updateGeneralFormGroup(group);
+		}
 	}
 
 	@Override
@@ -538,6 +552,39 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		return processGeneralFormDTO(form);
 	}
 
+	@Override
+	public void createGeneralFormGroup(CreateGeneralFormGroupCommand cmd){
+		User user = UserContext.current().getUser();
+		if(cmd.getGroupName()==null)
+			return;
+		GeneralFormGroups group = new GeneralFormGroups();
+		group.setGroupName(cmd.getGroupName());
+		group.setOrganizationId(cmd.getOrganizationId());
+		group.setOwnerId(cmd.getOwnerId());
+		group.setOwnerType(cmd.getOwnerType());
+		group.setNamespaceId(user.getNamespaceId());
+		group.setOperatorUid(user.getId());
+		generalFormProvider.createGeneralFormGroup(group);
+	}
+
+/*	@Override
+	public void updateGeneralFormGroup(CreateGeneralFormGroupCommand cmd){
 
 
+	}*/
+
+	@Override
+	public List<GeneralFormGroupDTO> listGeneralFormGroups(ListGeneralFormGroupsCommand cmd){
+		List<GeneralFormGroupDTO> results = new ArrayList<>();
+		List<GeneralFormGroups> groups = generalFormProvider.listGeneralFormGroups(UserContext.getCurrentNamespaceId(),cmd.getOrganizationId(),cmd.getFormOriginId());
+		if(groups !=null){
+			groups.forEach(r ->{
+				GeneralFormGroupDTO dto = new GeneralFormGroupDTO();
+				dto.setFieldGroupId(r.getId());
+				dto.setFieldGroupName(r.getGroupName());
+				results.add(dto);
+			});
+		}
+		return results;
+	}
 }

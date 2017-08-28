@@ -25,4 +25,12 @@ public interface GeneralFormProvider {
 
 	GeneralForm getActiveGeneralFormByOriginIdAndVersion(Long formOriginId, Long formVersion);
 
+	//	added by R 20170828
+	GeneralFormGroups createGeneralFormGroup(GeneralFormGroups group);
+
+	GeneralFormGroups findGeneralFormGroupById(Long id);
+
+	void updateGeneralFormGroup(GeneralFormGroups group);
+
+	List<GeneralFormGroups> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId);
 }

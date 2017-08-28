@@ -29,6 +29,9 @@ public class CreateApprovalFormCommand {
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
 
+    @ItemType(GeneralFormGroupDTO.class)
+    List<GeneralFormGroupDTO> formGroups;
+
 	public Long getOwnerId() {
 		return ownerId;
 	}
@@ -83,6 +86,14 @@ public class CreateApprovalFormCommand {
 
 	public void setFormFields(List<GeneralFormFieldDTO> formFields) {
 		this.formFields = formFields;
+	}
+
+	public List<GeneralFormGroupDTO> getFormGroups() {
+		return formGroups;
+	}
+
+	public void setFormGroups(List<GeneralFormGroupDTO> formGroups) {
+		this.formGroups = formGroups;
 	}
 
 	@Override

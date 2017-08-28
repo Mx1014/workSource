@@ -1,6 +1,8 @@
 package com.everhomes.general_form;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -8,10 +10,14 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhGeneralFormGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
+import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
+import com.everhomes.server.schema.tables.records.EhGeneralFormGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
@@ -20,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -162,4 +169,66 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			return null;
 		}
 	}
+
+	@Override
+	public GeneralFormGroups createGeneralFormGroup(GeneralFormGroups group){
+		Long id = this.sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhGeneralFormGroups.class));
+		group.setId(id);
+		group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
+		dao.insert(group);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhGeneralFormGroups.class, null);
+		return group;
+	}
+
+	@Override
+	public GeneralFormGroups findGeneralFormGroupById(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
+		EhGeneralFormGroups group = dao.findById(id);
+		return ConvertHelper.convert(group, GeneralFormGroups.class);
+	}
+
+	@Override
+	public void updateGeneralFormGroup(GeneralFormGroups group){
+		group.setOperatorUid(UserContext.currentUserId());
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
+		dao.update(group);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralFormGroups.class, group.getId());
+	}
+
+	@Override
+	public List<GeneralFormGroups> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
+		query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.ORGANIZATION_ID.eq(organizationId));
+		query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
+		List<GeneralFormGroups> results = new ArrayList<>();
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r,GeneralFormGroups.class));
+			return null;
+		});
+		if (null != results && 0 != results.size()) {
+			return results;
+		}
+		return null;
+	}
+	/*		        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesContactsSticky.class));
+        archivesContactsSticky.setId(id);
+        archivesContactsSticky.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        archivesContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
+        archivesContactsSticky.setUpdateTime(archivesContactsSticky.getCreateTime());
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesContactsStickyDao dao = new EhArchivesContactsStickyDao(context.configuration());
+        dao.insert(archivesContactsSticky);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesContactsSticky.class, null);
+    */
 }
