@@ -4863,6 +4863,9 @@ public class PunchServiceImpl implements PunchService {
 		return response;
 	}
 	String processStatus(String statuList ){
+		if (StringUtils.isEmpty(statuList)) {
+			return "";
+		}
 		String result = "";
 		if(statuList.contains(PunchConstants.STATUS_SEPARATOR)){
 			String[] statulist = StringUtils.split(statuList, PunchConstants.STATUS_SEPARATOR);
