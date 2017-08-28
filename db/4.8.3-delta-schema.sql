@@ -129,7 +129,7 @@ OPTIMIZE TABLE eh_user_activities;
 --
 -- 设备日志表  add by xq.tian  2017/08/28
 --
-DROP TABLE IF EXISTS `eh_stat_event_device_logs`;
+-- DROP TABLE IF EXISTS `eh_stat_event_device_logs`;
 CREATE TABLE `eh_stat_event_device_logs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -160,7 +160,7 @@ CREATE TABLE `eh_stat_event_device_logs` (
 --
 -- 日志上传策略表
 --
-DROP TABLE IF EXISTS `eh_stat_event_upload_strategies`;
+-- DROP TABLE IF EXISTS `eh_stat_event_upload_strategies`;
 CREATE TABLE `eh_stat_event_upload_strategies` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -182,7 +182,7 @@ CREATE TABLE `eh_stat_event_upload_strategies` (
 --
 -- 事件表
 --
-DROP TABLE IF EXISTS `eh_stat_events`;
+-- DROP TABLE IF EXISTS `eh_stat_events`;
 CREATE TABLE `eh_stat_events` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -202,7 +202,7 @@ CREATE TABLE `eh_stat_events` (
 --
 -- 事件参数表
 --
-DROP TABLE IF EXISTS `eh_stat_event_params`;
+-- DROP TABLE IF EXISTS `eh_stat_event_params`;
 CREATE TABLE `eh_stat_event_params` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -225,7 +225,7 @@ CREATE TABLE `eh_stat_event_params` (
 --
 -- 事件记录表
 --
-DROP TABLE IF EXISTS `eh_stat_event_content_logs`;
+-- DROP TABLE IF EXISTS `eh_stat_event_content_logs`;
 CREATE TABLE `eh_stat_event_content_logs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -238,7 +238,7 @@ CREATE TABLE `eh_stat_event_content_logs` (
 --
 -- 事件日志表
 --
-DROP TABLE IF EXISTS `eh_stat_event_logs`;
+-- DROP TABLE IF EXISTS `eh_stat_event_logs`;
 CREATE TABLE `eh_stat_event_logs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -259,7 +259,7 @@ CREATE TABLE `eh_stat_event_logs` (
 --
 -- 事件参数日志表
 --
-DROP TABLE IF EXISTS `eh_stat_event_param_logs`;
+-- DROP TABLE IF EXISTS `eh_stat_event_param_logs`;
 CREATE TABLE `eh_stat_event_param_logs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -281,7 +281,7 @@ CREATE TABLE `eh_stat_event_param_logs` (
 --
 -- App日志附件
 --
-DROP TABLE IF EXISTS `eh_stat_event_app_attachment_logs`;
+-- DROP TABLE IF EXISTS `eh_stat_event_app_attachment_logs`;
 CREATE TABLE `eh_stat_event_app_attachment_logs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -297,7 +297,7 @@ CREATE TABLE `eh_stat_event_app_attachment_logs` (
 --
 -- 配置表
 --
-DROP TABLE IF EXISTS `eh_stat_event_portal_configs`;
+-- DROP TABLE IF EXISTS `eh_stat_event_portal_configs`;
 CREATE TABLE `eh_stat_event_portal_configs` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -318,7 +318,7 @@ CREATE TABLE `eh_stat_event_portal_configs` (
 --
 -- 配置历史记录
 --
-DROP TABLE IF EXISTS `eh_stat_event_portal_statistics`;
+-- DROP TABLE IF EXISTS `eh_stat_event_portal_statistics`;
 CREATE TABLE `eh_stat_event_portal_statistics` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -340,7 +340,7 @@ CREATE TABLE `eh_stat_event_portal_statistics` (
 --
 -- 事件统计表
 --
-DROP TABLE IF EXISTS `eh_stat_event_statistics`;
+-- DROP TABLE IF EXISTS `eh_stat_event_statistics`;
 CREATE TABLE `eh_stat_event_statistics` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -363,7 +363,7 @@ CREATE TABLE `eh_stat_event_statistics` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- task log
-DROP TABLE IF EXISTS `eh_stat_event_task_logs`;
+-- DROP TABLE IF EXISTS `eh_stat_event_task_logs`;
 CREATE TABLE `eh_stat_event_task_logs` (
   `id` BIGINT NOT NULL,
   `task_date` DATE NOT NULL,
