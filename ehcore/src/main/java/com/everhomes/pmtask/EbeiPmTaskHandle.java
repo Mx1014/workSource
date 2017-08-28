@@ -17,12 +17,14 @@ import javax.annotation.PreDestroy;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowNodeProvider;
-import com.everhomes.flow.FlowService;
+import com.everhomes.flow.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.ebei.*;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -31,6 +33,7 @@ import com.everhomes.docking.DockingMapping;
 import com.everhomes.docking.DockingMappingProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.docking.DockingMappingScope;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import org.apache.commons.lang.StringUtils;
@@ -55,12 +58,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
-import com.everhomes.pmtask.ebei.EbeiResult;
-import com.everhomes.pmtask.ebei.EbeiTaskResult;
-import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
-import com.everhomes.pmtask.ebei.EbeiJsonEntity;
-import com.everhomes.pmtask.ebei.EbeiServiceType;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -111,7 +108,10 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private CommunityProvider communityProvider;
 	@Autowired
 	private FlowService flowService;
-
+	@Autowired
+	private CategoryProvider categoryProvider;
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
 	@PostConstruct
 	public void init() {
@@ -306,13 +306,22 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		}
 		
 		param.put("buildingId", "");
+		//param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
+        if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(task.getOwnerType())){
+            List<Organization> list = organizationProvider.findOrganizationByCommunityId(task.getOwnerId());
+            param.put("companyName",list.get(0).getName());
+        }
+
 		param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
 		param.put("type", "1");
 		param.put("remarks", task.getContent());
 		param.put("projectId", projectId);
 		param.put("anonymous", "0");
 		param.put("fileAddrs", fileAddrs);
-		param.put("buildingType", "0");
+		if (EbeiBuildingType.publicArea.equals(task.getBuildingName()))
+		    param.put("buildingType", "1");
+		else
+            param.put("buildingType", "0");
 		
 		String json = postToEbei(param, CREATE_TASK, null);
 		
@@ -344,9 +353,10 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				return true;
 			}
 		}
-		
+
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"Request of third failed.");
+
 	}
 	
 	private Boolean evaluateTask(PmTask task) {
@@ -447,8 +457,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			task.setOrganizationId(cmd.getOrganizationId());
 			task.setRequestorName(requestorName);
 			task.setRequestorPhone(requestorPhone);
-
+			Long time  = System.currentTimeMillis();
 			EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments());
+			LOGGER.info("--------------------------------------timecost:"+(System.currentTimeMillis()-time));
 			if(null != createTaskResultDTO) {
 				task.setStringTag1(createTaskResultDTO.getOrderId());
 			}
@@ -487,24 +498,26 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private void createFlowCase(PmTask task) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		GeneralModuleInfo gm = new GeneralModuleInfo();
+		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+				FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+		if(null == flow) {
+			LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+					"Enable pmtask flow not found.");
+		}
 
-		gm.setNamespaceId(namespaceId);
-		gm.setOwnerType(FlowOwnerType.PMTASK.getCode());
-		gm.setOwnerId(task.getOwnerId());
-		gm.setModuleType(FlowModuleType.NO_MODULE.getCode());
-		gm.setModuleId(FlowConstants.PM_TASK_MODULE);
-		gm.setProjectId(task.getOwnerId());
-		gm.setProjectType(EntityType.COMMUNITY.getCode());
 
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+		Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+		createFlowCaseCommand.setTitle("物业报修");
 		createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
-//		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
-//		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 		createFlowCaseCommand.setReferId(task.getId());
 		createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
 		//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
 		createFlowCaseCommand.setContent(task.getContent());
+		createFlowCaseCommand.setCurrentOrganizationId(task.getOrganizationId());
 
 		createFlowCaseCommand.setProjectId(task.getOwnerId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
@@ -521,7 +534,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			}
 		}
 
-		FlowCase flowCase = flowService.createDumpFlowCase(gm, createFlowCaseCommand);
+		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 		task.setFlowCaseId(flowCase.getId());
 		pmTaskProvider.updateTask(task);
 	}
@@ -589,6 +602,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			return null;
 		});
 	}
+
 	
 	@Override
 	public void evaluateTask(EvaluateTaskCommand cmd) {
@@ -643,7 +657,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			
 			Integer state = ebeiPmTask.getState();
 			task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
-			pmTaskProvider.updateTask(task);
+			//pmTaskProvider.updateTask(task);
 			dto.setStatus(task.getStatus());
 
 			//更新工作流case状态
@@ -653,9 +667,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				Byte flowCaseStatus = state.byteValue() >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
 						(state.byteValue() == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
 								FlowCaseStatus.PROCESS.getCode());
-
 				flowCase.setStatus(flowCaseStatus);
-				flowCaseProvider.updateFlowCase(flowCase);
+				//flowCaseProvider.updateFlowCase(flowCase);
+
 			}
 
 			CategoryDTO taskCategory = createCategoryDTO();
@@ -698,8 +712,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		});
 		
 		//elasticsearch更新
-		pmTaskSearch.deleteById(task.getId());
-		pmTaskSearch.feedDoc(task);
+		//pmTaskSearch.deleteById(task.getId());
+        //pmTaskSearch.feedDoc(task);
 		
 		return dto;
 	}
