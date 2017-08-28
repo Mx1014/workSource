@@ -1032,6 +1032,22 @@ public class ForumProviderImpl implements ForumProvider {
 		}
 		return new ArrayList<Post>();
 	}
-	
+
+	@Override
+    public Forum findForumByNamespaceId(Integer namespaceId){
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Result<Record> result = context.select(Tables.EH_FORUMS.fields()).from(Tables.EH_FORUMS)
+                .join(Tables.EH_COMMUNITIES)
+                .on(Tables.EH_FORUMS.ID.eq(Tables.EH_COMMUNITIES.DEFAULT_FORUM_ID))
+                .where(Tables.EH_FORUMS.NAMESPACE_ID.eq(namespaceId))
+                .limit(1)
+                .fetch();
+
+        if (result != null && result.isNotEmpty()) {
+            return RecordHelper.convert(result.get(0), Forum.class);
+        }
+	    return null;
+    }
 	
  }

@@ -102,4 +102,6 @@ public interface ForumService {
 	
 	//发布暂存的帖子
 	void publisTopic(PublishTopicCommand cmd);
+
+    Forum findFourmByNamespaceId(Integer namespaceId);
 }

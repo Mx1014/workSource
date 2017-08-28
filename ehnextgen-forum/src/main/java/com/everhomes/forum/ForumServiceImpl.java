@@ -5913,5 +5913,11 @@ public class ForumServiceImpl implements ForumService {
             }
         }
     }
+
+    @Override
+    public Forum findFourmByNamespaceId(Integer namespaceId){
+        Forum forum = forumProvider.findForumByNamespaceId(namespaceId);
+        return forum;
+    }
     
 }

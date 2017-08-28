@@ -1733,6 +1733,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        if(cmd.getForumId() == null){
+            Forum forum = forumService.findFourmByNamespaceId(cmd.getNamespaceId());
+            if(forum != null){
+                cmd.setForumId(forum.getId());
+            }
+
+        }
+
         if (cmd.getForumId() == null ||
                 cmd.getVisibleRegionType() == null ||
                 cmd.getContentCategory() == null ||
