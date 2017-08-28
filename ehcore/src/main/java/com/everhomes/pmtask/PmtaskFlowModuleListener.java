@@ -5,11 +5,20 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.flow.*;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -50,6 +59,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private CategoryProvider categoryProvider;
 	@Autowired
 	private UserProvider userProvider;
+	@Autowired
+	private MessagingService messagingService;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 	
@@ -140,9 +151,23 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
 				pmTaskProvider.updateTask(task);
+				//TODO:为科兴与一碑对接
+//				if(task.getNamespaceId() == 999983 &&
+//						task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//				    //UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
+//				    sendMessageToUser(flowCase.getApplyUserId().toString(),"您的任务已分配至维修人员处理，请耐心等待");
+//
+//				}
 			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
+				//TODO:为科兴与一碑对接
+//				if(task.getNamespaceId() == 999983 &&
+//						task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//					//UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(task.getNamespaceId(), task.getRequestorPhone());
+//					sendMessageToUser(flowCase.getApplyUserId().toString(), "您的报修任务已完成，" +
+//							"您可以对我们的服务进行评价，感谢您的使用");
+//				}
 			}else if ("HANDOVER".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
@@ -159,6 +184,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		pmTaskSearch.feedDoc(task);
 		
 	}
+
+	private void sendMessageToUser(String uid,String content){
+		MessageDTO messageDto = new MessageDTO();
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+				uid, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	}
+
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
@@ -311,6 +349,25 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
+			PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+			//TODO:为科兴与一碑对接
+			if(task.getNamespaceId() == 999983 &&
+					task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+				CancelTaskCommand command = new CancelTaskCommand();
+				command.setId(task.getId());
+				command.setOwnerId(task.getOwnerId());
+				command.setOwnerType(task.getOwnerType());
+				handler.cancelTask(command);
+
+				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+				stepDTO.setFlowCaseId(flowCase.getId());
+				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+				stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+				flowService.processAutoStep(stepDTO);
+				ctx.setContinueStep(false);
+
+			}else
 			if ("ASSIGNING".equals(nodeType)) {
 				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
 				stepDTO.setFlowCaseId(flowCase.getId());
@@ -319,7 +376,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				flowService.processAutoStep(stepDTO);
 				ctx.setContinueStep(false);
 
-				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+				 task = pmTaskProvider.findTaskById(flowCase.getReferId());
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 				pmTaskProvider.updateTask(task);
