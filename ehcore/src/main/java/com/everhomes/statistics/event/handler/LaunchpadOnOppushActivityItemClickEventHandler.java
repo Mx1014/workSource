@@ -31,13 +31,13 @@ public class LaunchpadOnOppushActivityItemClickEventHandler extends AbstractStat
     }
 
     @Override
-    protected String getItemGroup(String key, Long layoutId) {
-        return "OPPushActivity";
+    protected Widget getWidget() {
+        return Widget.OPPUSH;
     }
 
     @Override
-    protected Widget getWidget() {
-        return Widget.OPPUSH;
+    protected String getItemGroup(Map<String, String> paramsToValueMap) {
+        return "OPPushActivity";
     }
 
     @Override
@@ -61,12 +61,7 @@ public class LaunchpadOnOppushActivityItemClickEventHandler extends AbstractStat
     }
 
     @Override
-    protected StatEventParam getIdentifierParam(List<StatEventParam> params) {
-        for (StatEventParam param : params) {
-            if (param.getParamKey().equals("topicId")) {
-                return param;
-            }
-        }
-        return null;
+    protected List<StatEventParam> getParams(List<StatEventParam> params) {
+        return params;
     }
 }

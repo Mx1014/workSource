@@ -1,13 +1,11 @@
 // @formatter:off
 package com.everhomes.statistics.event.handler;
 
-import com.everhomes.business.CommodityRespDTO;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.oauth2client.HttpResponseEntity;
 import com.everhomes.oauth2client.handler.RestCallTemplate;
 import com.everhomes.rest.launchpad.Widget;
-import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.statistics.event.StatEventParam;
 import com.everhomes.statistics.event.StatEventStatistic;
 import com.everhomes.util.StringHelper;
@@ -41,7 +39,7 @@ public class LaunchpadOnOppushBizItemClickEventHandler extends AbstractStatEvent
     }
 
     @Override
-    protected String getItemGroup(String key, Long layoutId) {
+    protected String getItemGroup(Map<String, String> paramsToValueMap) {
         return "OPPushBiz";
     }
 
@@ -66,17 +64,28 @@ public class LaunchpadOnOppushBizItemClickEventHandler extends AbstractStatEvent
 
         String[] commodityName = {"unknown"};
 
-        if (bizServer.isEmpty()) {
+        if (bizServer.length() > 0) {
             List<String> idList = Collections.singletonList(commodityId);
+
+            Map<String, Object> commoNosMap = new HashMap<>();
+            commoNosMap.put("commoNos", idList);
+
+            Map<String, Object> bodyMap = new HashMap<>();
+            bodyMap.put("body", commoNosMap);
+
             RestCallTemplate
                     .url(bizServer + commodityDetailApi)
-                    .body(idList.toString())
-                    .respType(CommodityRespDTO.class)
+                    .body(StringHelper.toJsonString(bodyMap))
+                    .respType(Map.class)
                     .onError((r) -> LOGGER.error("biz server resp error, code = {}, body = {}", r.getStatusCode(), r.getBody()))
-                    .onSuccess((HttpResponseEntity<CommodityRespDTO> entity) -> {
-                        CommodityRespDTO dto = entity.getBody();
-                        List<ModulePromotionEntityDTO> response = dto.getResponse();
-                        commodityName[0] = response.get(0).getSubject();
+                    .onSuccess((HttpResponseEntity<Map<String, Object>> entity) -> {
+                        Map<String, Object> response = entity.getBody();
+                        if (response != null) {
+                            List<Map<String, Object>> dtoList = (List<Map<String, Object>>) response.get("body");
+                            if (dtoList.size() > 0) {
+                                commodityName[0] = dtoList.get(0).get("subject").toString();
+                            }
+                        }
                     })
                     .post();
         }
@@ -90,12 +99,7 @@ public class LaunchpadOnOppushBizItemClickEventHandler extends AbstractStatEvent
     }
 
     @Override
-    protected StatEventParam getIdentifierParam(List<StatEventParam> params) {
-        for (StatEventParam param : params) {
-            if (param.getParamKey().equals("id")) {
-                return param;
-            }
-        }
-        return null;
+    protected List<StatEventParam> getParams(List<StatEventParam> params) {
+        return params;
     }
 }

@@ -35,8 +35,8 @@ public class LaunchpadOnLauncPadItemClickEventHandler extends AbstractStatEventP
     }
 
     @Override
-    protected String getItemGroup(String identifierParamsValue, Long layoutId) {
-        Long launchPadItemId = Long.valueOf(identifierParamsValue);
+    protected String getItemGroup(Map<String, String> paramsToValueMap) {
+        Long launchPadItemId = Long.valueOf(paramsToValueMap.get("id"));
         PortalLaunchPadMapping mapping = portalLaunchPadMappingProvider.findPortalLaunchPadMapping(EhPortalItems.class.getSimpleName(), launchPadItemId);
         PortalItem portalItem = portalItemProvider.findPortalItemById(mapping.getPortalContentId());
         return portalItem.getGroupName();
@@ -65,12 +65,7 @@ public class LaunchpadOnLauncPadItemClickEventHandler extends AbstractStatEventP
     }
 
     @Override
-    protected StatEventParam getIdentifierParam(List<StatEventParam> params) {
-        for (StatEventParam p : params) {
-            if (p.getParamKey().equals("id")) {
-                return p;
-            }
-        }
-        return null;
+    protected List<StatEventParam> getParams(List<StatEventParam> params) {
+        return params;
     }
 }

@@ -156,8 +156,6 @@ abstract public class AbstractStatEventPortalItemGroupHandler extends AbstractSt
 
     protected abstract String getItemGroup(Map<String, String> paramsToValueMap);
 
-    abstract protected String getItemGroup(String identifierParamsValue, Long layoutId);
-
     abstract protected Widget getWidget();
 
     abstract protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap);

@@ -32,7 +32,7 @@ public class LaunchpadOnNewsFlashItemClickEventHandler extends AbstractStatEvent
     }
 
     @Override
-    protected String getItemGroup(String identifierParamsValue, Long layoutId) {
+    protected String getItemGroup(Map<String, String> paramsToValueMap) {
         return "Default";
     }
 
@@ -61,12 +61,7 @@ public class LaunchpadOnNewsFlashItemClickEventHandler extends AbstractStatEvent
     }
 
     @Override
-    protected StatEventParam getIdentifierParam(List<StatEventParam> params) {
-        for (StatEventParam p : params) {
-            if (p.getParamKey().equals("newsToken")) {
-                return p;
-            }
-        }
-        return null;
+    protected List<StatEventParam> getParams(List<StatEventParam> params) {
+        return params;
     }
 }

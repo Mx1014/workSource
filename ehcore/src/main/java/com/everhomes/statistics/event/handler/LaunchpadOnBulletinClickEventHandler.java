@@ -24,8 +24,19 @@ public class LaunchpadOnBulletinClickEventHandler extends AbstractStatEventPorta
     }
 
     @Override
-    protected String getItemGroup(String identifierParamsValue, Long layoutId) {
+    protected String getItemGroup(Map<String, String> paramsToValueMap) {
         return "Default";
+    }
+
+    @Override
+    protected List<StatEventParam> getParams(List<StatEventParam> params) {
+        // List<StatEventParam> list = new ArrayList<>();
+        // for (StatEventParam p : params) {
+        //     if (p.getParamKey().equals("layoutId")) {
+        //         list.add(p);
+        //     }
+        // }
+        return params;
     }
 
     @Override
@@ -44,15 +55,5 @@ public class LaunchpadOnBulletinClickEventHandler extends AbstractStatEventPorta
 
         eventStat.setParam(StringHelper.toJsonString(paramMap));
         return eventStat;
-    }
-
-    @Override
-    protected StatEventParam getIdentifierParam(List<StatEventParam> params) {
-        for (StatEventParam p : params) {
-            if (p.getParamKey().equals("layoutId")) {
-                return p;
-            }
-        }
-        return null;
     }
 }

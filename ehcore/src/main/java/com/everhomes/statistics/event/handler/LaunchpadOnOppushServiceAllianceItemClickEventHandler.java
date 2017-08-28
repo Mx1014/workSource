@@ -31,7 +31,7 @@ public class LaunchpadOnOppushServiceAllianceItemClickEventHandler extends Abstr
     }
 
     @Override
-    protected String getItemGroup(String key, Long layoutId) {
+    protected String getItemGroup(Map<String, String> paramsToValueMap) {
         return "Gallery";
     }
 
@@ -62,12 +62,7 @@ public class LaunchpadOnOppushServiceAllianceItemClickEventHandler extends Abstr
     }
 
     @Override
-    protected StatEventParam getIdentifierParam(List<StatEventParam> params) {
-        for (StatEventParam param : params) {
-            if (param.getParamKey().equals("id")) {
-                return param;
-            }
-        }
-        return null;
+    protected List<StatEventParam> getParams(List<StatEventParam> params) {
+        return params;
     }
 }

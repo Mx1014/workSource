@@ -26,13 +26,26 @@ public class LaunchpadOnBannerClickEventHandler extends AbstractStatEventPortalI
     private BannerProvider bannerProvider;
 
     @Override
-    public String getEventName() {
-        return LAUNCHPAD_ON_BANNER_CLICK;
+    protected String getItemGroup(Map<String, String> paramsToValueMap) {
+        return "Default";
     }
 
     @Override
-    protected String getItemGroup(String identifierParamsValue, Long layoutId) {
-        return "Default";
+    protected List<StatEventParam> getParams(List<StatEventParam> params) {
+        // List<StatEventParam> list = new ArrayList<>();
+        // for (StatEventParam p : params) {
+        //     if (p.getParamKey().equals("id")) {
+        //         list.add(p);
+        //     } else if (p.getParamKey().equals("layoutId")) {
+        //         list.add(p);
+        //     }
+        // }
+        return params;
+    }
+
+    @Override
+    public String getEventName() {
+        return LAUNCHPAD_ON_BANNER_CLICK;
     }
 
     @Override
@@ -57,15 +70,5 @@ public class LaunchpadOnBannerClickEventHandler extends AbstractStatEventPortalI
 
         eventStat.setParam(StringHelper.toJsonString(paramMap));
         return eventStat;
-    }
-
-    @Override
-    protected StatEventParam getIdentifierParam(List<StatEventParam> params) {
-        for (StatEventParam p : params) {
-            if (p.getParamKey().equals("id")) {
-                return p;
-            }
-        }
-        return null;
     }
 }
