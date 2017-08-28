@@ -24,6 +24,7 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.namespace.Namespace;
@@ -80,6 +81,9 @@ public class ExpressThirdCallController {// extends ControllerBase
 
 	@Autowired
 	private AppProvider appProvider;
+	
+	@Autowired
+    private ConfigurationProvider configProvider;
     
     
 	/**
@@ -303,7 +307,8 @@ public class ExpressThirdCallController {// extends ControllerBase
     
 	private void checkSign(String mobile, String timestamp, String checksum, String secretkey) {
 		Long currentTimestamp = System.currentTimeMillis()/1000;//国贸这里是秒
-		if(Math.abs(currentTimestamp-Long.parseLong(timestamp))>60*30L){
+		int delaymunites = configProvider.getIntValue("express.thirdCall.delay", 30);
+		if(Math.abs(currentTimestamp-Long.parseLong(timestamp))>delaymunites*60L){
 			// TODO 重定向到登录页面
 			LOGGER.info("paramtimestamp = {}, currentTimestamp= {}, abs = {}", timestamp,currentTimestamp,currentTimestamp-Long.parseLong(timestamp));
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "时间戳不匹配");
