@@ -1039,7 +1039,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId) {
 		@SuppressWarnings("rawtypes")
-		List<ImportSignupErrorDTO> errorDTOS = new ArrayList<>();
+		List<ActivityRosterError> errorLists = new ArrayList<>();
 		ArrayList rows = processorExcel(file);
 		List<ActivityRoster> rosters = new ArrayList<>();
 
@@ -1057,10 +1057,10 @@ public class ActivityServiceImpl implements ActivityService {
 			RowResult row = (RowResult) rows.get(i);
 
 			//检验Excel的数据   add by yanjun 20170815
-			ImportSignupErrorDTO errorDTO = checkExcelRoster(rosters, row, activityId);
-			if(errorDTO != null){
-				errorDTO.setRowNum(i);
-				errorDTOS.add(errorDTO);
+			ActivityRosterError rosterError = checkExcelRoster(rosters, row, activityId);
+			if(rosterError != null){
+				rosterError.setRowNum(i);
+				errorLists.add(rosterError);
 				continue;
 			}
 			
@@ -1087,6 +1087,8 @@ public class ActivityServiceImpl implements ActivityService {
 	        rosters.add(roster);
 		}
 
+
+
 		result.setSuccess(rosters.size());
 		result.setFail(rows.size() - rosters.size());
 		//TODO save errorData
@@ -1094,9 +1096,21 @@ public class ActivityServiceImpl implements ActivityService {
 		return rosters;
 	}
 
-	private ImportSignupErrorDTO checkExcelRoster(List<ActivityRoster> newRosters, RowResult row, Long activityId){
+	private Long addActivityRosterErrorLog(List<ActivityRosterError> list){
+    	Long jobId = System.currentTimeMillis();
+    	Long uid = UserContext.currentUserId();
+    	list.forEach(r -> {
+    		r.setJobId(jobId);
+    		r.setCreateUid(uid);
+			activityProvider.createActivityRosterError(r);
+		});
 
-		ImportSignupErrorDTO errorDTO = new ImportSignupErrorDTO();
+    	return jobId;
+	}
+
+	private ActivityRosterError checkExcelRoster(List<ActivityRoster> newRosters, RowResult row, Long activityId){
+
+		ActivityRosterError rosterError = new ActivityRosterError();
 		String  locale = UserContext.current().getUser().getLocale();
 		String scope = ActivityLocalStringCode.SCOPE;
 
@@ -1105,23 +1119,23 @@ public class ActivityServiceImpl implements ActivityService {
 		if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_PHONE_EMPTY);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "The phone number is empty");
-			errorDTO.setDescription(errorString);
-			return errorDTO;
+			rosterError.setDescription(errorString);
+			return rosterError;
 		}
 		//手机格式简单检验
 		if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_INVALID_PHONE);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "Invalid phone number");
-			errorDTO.setDescription(errorString);
-			return errorDTO;
+			rosterError.setDescription(errorString);
+			return rosterError;
 		}
 
 		//新增条件真实姓名必填  add by yanjun 20170628
 		if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REALNAME_EMPTY);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "The realName is empty");
-			errorDTO.setDescription(errorString);
-			return errorDTO;
+			rosterError.setDescription(errorString);
+			return rosterError;
 		}
 
 		//此处不检查是否已经报名，已经报名的数据也需要保留到后面更新  edit by yanjun 20170828
@@ -1139,8 +1153,8 @@ public class ActivityServiceImpl implements ActivityService {
 			if(newRosters.get(i).getPhone().equals(row.getA())){
 				String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REPEAT_ROSTER_IN_EXCEL);
 				errorString = localeStringService.getLocalizedString(scope, code, locale, "Repeat roster in this Excel, checked with phone");
-				errorDTO.setDescription(errorString);
-				return errorDTO;
+				rosterError.setDescription(errorString);
+				return rosterError;
 			}
 		}
 
@@ -5611,11 +5625,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response) {
-		List<ImportSignupErrorDTO> dtos = new ArrayList<>();
-		ImportSignupErrorDTO dto = new ImportSignupErrorDTO();
-		dto.setRowNum(99);
-		dto.setDescription("test error description");
-		dtos.add(dto);
+		List<ActivityRosterError> dtos = activityProvider.listActivityRosterErrorByJobId(cmd.getJobId());
 		String fileName = String.format("异常信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 		ExcelUtils excelUtils = new ExcelUtils(response, fileName, "异常信息");
 		List<String> propertyNames = new ArrayList<String>(Arrays.asList("rowNum", "description"));

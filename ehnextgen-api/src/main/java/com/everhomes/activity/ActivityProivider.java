@@ -139,4 +139,8 @@ public interface ActivityProivider {
 	List<ActivityRoster> findExpireRostersByActivityId(Long activityId);
 	
 	List<Long> listActivityIds();
+
+	void createActivityRosterError(ActivityRosterError rosterError);
+
+	List<ActivityRosterError> listActivityRosterErrorByJobId(Long jobId);
 }
