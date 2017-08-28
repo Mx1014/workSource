@@ -46,7 +46,7 @@ ALTER TABLE `eh_group_member_logs` MODIFY COLUMN `member_type` VARCHAR(32) NOT N
 
 
 -- 增加可见范围字段 by st.zheng
-ALTER TABLE`eh_service_alliances`  ADD COLUMN `range` VARCHAR(512) NULL DEFAULT NULL AFTER `owner_id`;
+-- ALTER TABLE`eh_service_alliances`  ADD COLUMN `range` VARCHAR(512) NULL DEFAULT NULL AFTER `owner_id`;
 -- 增加标志位 by st.zheng
 ALTER TABLE `eh_service_alliance_jump_module`
 ADD COLUMN `signal` TINYINT(4) NULL DEFAULT '1' COMMENT '标志 0:删除 1:普通 2:审批' AFTER `parent_id`;
