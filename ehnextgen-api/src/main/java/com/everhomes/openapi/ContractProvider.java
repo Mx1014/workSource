@@ -6,6 +6,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 public interface ContractProvider {
 
@@ -44,4 +45,5 @@ public interface ContractProvider {
 	void createContractParam(ContractParam param);
 	void updateContractParam(ContractParam param);
 	ContractParam findContractParamByCommunityId(Long communityId);
+	Map<Long, List<Contract>> listContractGroupByCommunity();
 }

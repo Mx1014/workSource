@@ -3,10 +3,13 @@ package com.everhomes.openapi;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.contract.ContractParam;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
@@ -179,6 +182,31 @@ public class ContractProviderImpl implements ContractProvider {
 		}
 
 		return new ArrayList<Contract>();
+	}
+
+	@Override
+	public Map<Long, List<Contract>> listContractGroupByCommunity() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+
+		query.addConditions(Tables.EH_CONTRACTS.STATUS.in(ContractStatus.WAITING_FOR_LAUNCH.getCode(),
+				ContractStatus.ACTIVE.getCode(), ContractStatus.EXPIRING.getCode(), ContractStatus.APPROVE_QUALITIED.getCode()));
+
+		Map<Long, List<Contract>> result = new HashMap<>();
+		query.fetch().map((r) -> {
+			List<Contract> contracts = result.get(r.getCommunityId());
+			if(contracts == null) {
+				contracts = new ArrayList<>();
+				contracts.add(ConvertHelper.convert(r, Contract.class));
+				result.put(r.getCommunityId(), contracts);
+			} else {
+				contracts.add(ConvertHelper.convert(r, Contract.class));
+				result.put(r.getCommunityId(), contracts);
+			}
+			return null;
+		});
+
+		return result;
 	}
 
 	@Override

@@ -75,6 +75,8 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 
+import javax.annotation.PostConstruct;
+
 @Component
 public class ContractServiceImpl implements ContractService {
 	
@@ -145,7 +147,16 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private PropertyMgrProvider propertyMgrProvider;
-	
+
+	@PostConstruct
+	public void setup(){
+		String triggerName = ContractScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
+		String jobName = triggerName;
+		String cronExpression = ContractScheduleJob.CRON_EXPRESSION;
+		//启动定时任务
+		scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ContractScheduleJob.class, null);
+	}
+
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
@@ -661,7 +672,12 @@ public class ContractServiceImpl implements ContractService {
 	public ContractDTO updateContract(UpdateContractCommand cmd) {
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
-		checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
+		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber());
+		if(existContract != null && !existContract.getId().equals(contract.getId())) {
+			LOGGER.error("contractNumber {} in namespace {} already exist!", cmd.getContractNumber(), cmd.getNamespaceId());
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
+					"contractNumber is already exist");
+		}
 		if(cmd.getContractStartDate() != null) {
 			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
 		}
@@ -727,7 +743,7 @@ public class ContractServiceImpl implements ContractService {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 		}
-		if(ContractStatus.WAITING_FOR_APPROVAL.equals(cmd.getResult()) && ContractStatus.WAITING_FOR_LAUNCH.equals(contract.getStatus())) {
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) && ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 			addToFlowCase(contract);
