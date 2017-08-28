@@ -797,99 +797,104 @@ public class AssetProviderImpl implements AssetProvider {
                 nextBillId = nextBillId + 1;
             }
 
-
-            //bill exemption
-            List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
-            long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), list2.size());
-            long currentExemItemSeq = nextExemItemBlock - list2.size() + 1;
-            if(currentExemItemSeq == 0){
-                currentExemItemSeq = currentExemItemSeq+1;
-            }
-            for(int i = 0; i < list2.size(); i++){
-                ExemptionItemDTO exemptionItemDTO = list2.get(i);
-                PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
-                BigDecimal amount = exemptionItemDTO.getAmount();
-                if(amount == null){
-                    continue;
+            if(list2!=null) {
+                //bill exemption
+                List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
+                long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), list2.size());
+                long currentExemItemSeq = nextExemItemBlock - list2.size() + 1;
+                if(currentExemItemSeq == 0){
+                    currentExemItemSeq = currentExemItemSeq+1;
                 }
-                exemptionItem.setAmount(amount);
-                exemptionItem.setBillGroupId(billGroupId);
-                exemptionItem.setBillId(nextBillId);
-                exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                exemptionItem.setCreatorUid(UserContext.currentUserId());
-                exemptionItem.setId(currentExemItemSeq);
-                currentExemItemSeq += 1;
-                exemptionItem.setRemarks(exemptionItemDTO.getRemark());
-                if(targetType!=null){
-                    exemptionItem.setTargetType(targetType);
+                for(int i = 0; i < list2.size(); i++){
+                    ExemptionItemDTO exemptionItemDTO = list2.get(i);
+                    PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
+                    BigDecimal amount = exemptionItemDTO.getAmount();
+                    if(amount == null){
+                        continue;
+                    }
+                    exemptionItem.setAmount(amount);
+                    exemptionItem.setBillGroupId(billGroupId);
+                    exemptionItem.setBillId(nextBillId);
+                    exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    exemptionItem.setCreatorUid(UserContext.currentUserId());
+                    exemptionItem.setId(currentExemItemSeq);
+                    currentExemItemSeq += 1;
+                    exemptionItem.setRemarks(exemptionItemDTO.getRemark());
+                    if(targetType!=null){
+                        exemptionItem.setTargetType(targetType);
+                    }
+                    if(targetId != null) {
+                        exemptionItem.setTargetId(targetId);
+                    }
+                    exemptionItem.setTargetname(targetName);
+                    exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+                    exemptionItems.add(exemptionItem);
+
+                    if(amount.compareTo(zero)==-1){
+                        amountExemption = amountExemption.add(amount);
+                    }else if(amount.compareTo(zero)==1){
+                        amountSupplement = amountSupplement.add(amount);
+                    }
                 }
-                if(targetId != null) {
-                    exemptionItem.setTargetId(targetId);
-                }
-                exemptionItem.setTargetname(targetName);
-                exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-                exemptionItems.add(exemptionItem);
-
-                if(amount.compareTo(zero)==-1){
-                    amountExemption = amountExemption.add(amount);
-                }else if(amount.compareTo(zero)==1){
-                    amountSupplement = amountSupplement.add(amount);
-                }
-            }
-            amountOwed = amountReceivable.add(amountExemption);
-            amountOwed = amountReceivable.add(amountSupplement);
-
-
-
-            //billItems assemble
-            List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-            long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), list1.size());
-            long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
-            if(currentBillItemSeq == 0){
-                currentBillItemSeq = currentBillItemSeq+1;
-            }
-
-            for(int i = 0; i < list1.size() ; i++) {
-                BillItemDTO dto = list1.get(i);
-                PaymentBillItems item = new PaymentBillItems();
-                item.setAddressid(addressId);
-                BigDecimal var1 = dto.getAmountReceivable();
-                //减免项不覆盖收费项目的收付，暂时
-                item.setAmountOwed(var1);
-                item.setAmountReceivable(dto.getAmountReceivable());
-                item.setAmountReceived(new BigDecimal("0"));
-                item.setBillGroupId(billGroupId);
-                item.setBillId(nextBillId);
-                item.setChargingItemName(dto.getBillItemName());
-                item.setChargingItemsId(dto.getBillItemId());
-                item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                item.setCreatorUid(UserContext.currentUserId());
-                item.setDateStr(dateStr);
-                item.setId(currentBillItemSeq);
-                currentBillItemSeq += 1;
-                item.setNamespaceId(UserContext.getCurrentNamespaceId());
-                item.setOwnerType(ownerType);
-                item.setOwnerId(ownerId);
-                if(targetType!=null){
-                    item.setTargetType(targetType);
-                }
-                if(targetId != null) {
-                    item.setTargetId(targetId);
-                }
-                item.setTargetname(targetName);
-                item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                billItemsList.add(item);
-
-                amountReceivable = amountReceivable.add(var1);
-                amountOwed = amountOwed.add(var1);
+                amountOwed = amountReceivable.add(amountExemption);
+                amountOwed = amountReceivable.add(amountSupplement);
+                EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
+                exemptionItemsDao.insert(exemptionItems);
             }
             Byte billStatus = 0;
-            if(amountOwed.compareTo(new BigDecimal("0"))!=1){
-                billStatus = 1;
-            }
-            for(int i = 0; i < billItemsList.size(); i++) {
-                billItemsList.get(i).setStatus(billStatus);
+            if(list1!=null){
+                //billItems assemble
+                List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
+                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), list1.size());
+                long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
+                if(currentBillItemSeq == 0){
+                    currentBillItemSeq = currentBillItemSeq+1;
+                }
+
+                for(int i = 0; i < list1.size() ; i++) {
+                    BillItemDTO dto = list1.get(i);
+                    PaymentBillItems item = new PaymentBillItems();
+                    item.setAddressid(addressId);
+                    BigDecimal var1 = dto.getAmountReceivable();
+                    //减免项不覆盖收费项目的收付，暂时
+                    item.setAmountOwed(var1);
+                    item.setAmountReceivable(dto.getAmountReceivable());
+                    item.setAmountReceived(new BigDecimal("0"));
+                    item.setBillGroupId(billGroupId);
+                    item.setBillId(nextBillId);
+                    item.setChargingItemName(dto.getBillItemName());
+                    item.setChargingItemsId(dto.getBillItemId());
+                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    item.setCreatorUid(UserContext.currentUserId());
+                    item.setDateStr(dateStr);
+                    item.setId(currentBillItemSeq);
+                    currentBillItemSeq += 1;
+                    item.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    item.setOwnerType(ownerType);
+                    item.setOwnerId(ownerId);
+                    if(targetType!=null){
+                        item.setTargetType(targetType);
+                    }
+                    if(targetId != null) {
+                        item.setTargetId(targetId);
+                    }
+                    item.setTargetname(targetName);
+                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    billItemsList.add(item);
+
+                    amountReceivable = amountReceivable.add(var1);
+                    amountOwed = amountOwed.add(var1);
+                }
+
+                if(amountOwed.compareTo(new BigDecimal("0"))!=1){
+                    billStatus = 1;
+                }
+                for(int i = 0; i < billItemsList.size(); i++) {
+                    billItemsList.get(i).setStatus(billStatus);
+                }
+                EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
+                billItemsDao.insert(billItemsList);
             }
 
 
@@ -922,11 +927,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setStatus(billStatus);
             newBill.setSwitch(isSettled);
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
-            EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
-            EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
             billsDao.insert(newBill);
-            exemptionItemsDao.insert(exemptionItems);
-            billItemsDao.insert(billItemsList);
             return null;
         });
 
