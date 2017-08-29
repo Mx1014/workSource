@@ -596,7 +596,7 @@ public class AssetServiceImpl implements AssetService {
                     // build a billItem
                     PaymentBillItems item = new PaymentBillItems();
                     item.setAddressId(property.getAddressId());
-                    item.setPropertyIdentifier(property.getPropertyName());
+                    item.setPropertyIdentifer(property.getPropertyName());
                     item.setAmountOwed(dto.getAmountReceivable());
                     item.setAmountReceivable(dto.getAmountReceivable());
                     item.setAmountReceived(new BigDecimal("0"));
@@ -676,7 +676,7 @@ public class AssetServiceImpl implements AssetService {
             }
 //            entity.setApartmentName(property.getApartmentName());
 //            entity.setBuildingName(property.getBuldingName());
-            entity.setAddressIdsJson(addressIds.toString());
+            entity.(addressIds.toString());
             entity.setContractNum(cmd.getContractNum());
             entity.setEhPaymentChargingItemId(rule.getChargingItemId());
             entity.setEhPaymentChargingStandardId(rule.getChargingStandardId());

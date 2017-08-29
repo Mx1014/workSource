@@ -250,5 +250,6 @@ CREATE TABLE `eh_payment_contract_receiver` (
   `target_name` varchar(255) DEFAULT NULL,
   `notice_tel` varchar(255) DEFAULT NULL,
   `status` tinyint(4) DEFAULT '0' COMMENT '1:有效；0：无效',
+  `address_ids_json` varchar(2048) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
