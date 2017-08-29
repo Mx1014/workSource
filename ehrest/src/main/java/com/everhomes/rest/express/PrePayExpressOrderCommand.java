@@ -6,9 +6,10 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
- * <li>ownerType: 所属者类型，参考{@link com.everhomes.rest.express.ExpressOwnerType}</li>
+ * <li>ownerType: 所属者类型，参考{@link com.everhomes.rest.express.ExpressOwner}</li>
  * <li>ownerId: 所属者id</li>
  * <li>id: 快递id</li>
+ * <li>clientPayType: 客户端支付方式, 参考 {@link com.everhomes.rest.express.ExpressClientPayType}</li>
  * </ul>
  */
 public class PrePayExpressOrderCommand {
@@ -18,17 +19,19 @@ public class PrePayExpressOrderCommand {
 	private Long ownerId;
 
 	private Long id;
-
+	
+	private String clientPayType;
 
 	public PrePayExpressOrderCommand() {
 
 	}
 
-	public PrePayExpressOrderCommand(String ownerType, Long ownerId, Long id) {
+	public PrePayExpressOrderCommand(String ownerType, Long ownerId, Long id, String clientPayType) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.id = id;
+		this.clientPayType = clientPayType;
 	}
 
 	public String getOwnerType() {
@@ -53,6 +56,14 @@ public class PrePayExpressOrderCommand {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getClientPayType() {
+		return clientPayType;
+	}
+
+	public void setClientPayType(String clientPayType) {
+		this.clientPayType = clientPayType;
 	}
 
 	@Override

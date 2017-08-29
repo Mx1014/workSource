@@ -52,6 +52,7 @@ import com.everhomes.rest.express.DeleteExpressHotlineCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
 import com.everhomes.rest.express.ExpressActionEnum;
 import com.everhomes.rest.express.ExpressAddressDTO;
+import com.everhomes.rest.express.ExpressClientPayType;
 import com.everhomes.rest.express.ExpressCompanyDTO;
 import com.everhomes.rest.express.ExpressHotlineDTO;
 import com.everhomes.rest.express.ExpressInvoiceFlagType;
@@ -1273,8 +1274,14 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public Map<String,String> prePayExpressOrder(PrePayExpressOrderCommand cmd) {
-		Map<String,Map<String,Object>> params = generatePrePayExpressOrderParams(cmd);
+		ExpressClientPayType clientPayType = ExpressClientPayType.fromCode(cmd.getClientPayType());
+		Map<String,Map<String,Object>> params = generatePrePayExpressOrderParams(cmd, clientPayType);
 		String url = configProvider.getValue(ExpressServiceErrorCode.PAYSERVER_URL, "http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record");
+		//公众号支付
+		if(clientPayType == ExpressClientPayType.OFFICIAL_ACCOUNTS){
+			url = configProvider.getValue(ExpressServiceErrorCode.OFFICIAL_ACCOUNTS_PAYSERVER_URL, "http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
+		}
+		LOGGER.info("payserver url = {}", url);
 		String result = Utils.post(url, JSONObject.parseObject(StringHelper.toJsonString(params)),null,StandardCharsets.UTF_8);
 		PayResponse<Map<String,String>> payresponse = JSONObject.parseObject(result, new TypeReference<PayResponse<Map<String,String>>>(){});
 		if(payresponse.getSuccess()){
@@ -1283,7 +1290,7 @@ public class ExpressServiceImpl implements ExpressService {
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "prePayFailed, payresponse = "+result);
 	}
 
-	private Map<String,Map<String,Object>> generatePrePayExpressOrderParams(PrePayExpressOrderCommand cmd) {
+	private Map<String,Map<String,Object>> generatePrePayExpressOrderParams(PrePayExpressOrderCommand cmd,ExpressClientPayType clientPayType) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder order = expressOrderProvider.findExpressOrderById(cmd.getId());
 		if(order == null){
@@ -1303,6 +1310,9 @@ public class ExpressServiceImpl implements ExpressService {
 		params.put("timestamp",dto.getTimestamp());
 		params.put("randomNum",dto.getRandomNum());
 		params.put("signature",dto.getSignature());
+		if(clientPayType == ExpressClientPayType.OFFICIAL_ACCOUNTS){
+			params.put("userId", "?");
+		}
 		bodyparams.put("body", params);
 		LOGGER.info("request payserver params = {}",bodyparams);
 		return bodyparams;
