@@ -94,8 +94,8 @@ ALTER TABLE eh_parking_lots DROP COLUMN `recharge_month_count`;
 ALTER TABLE eh_parking_lots DROP COLUMN `recharge_type`;
 ALTER TABLE eh_parking_lots DROP COLUMN `is_support_recharge`;
 
-ALTER TABLE eh_parking_lots DROP COLUMN `is_support_recharge`;
-ALTER TABLE eh_parking_lots DROP COLUMN `is_support_recharge`;
+ALTER TABLE eh_parking_card_requests DROP COLUMN `flow_id`;
+ALTER TABLE eh_parking_card_requests DROP COLUMN `flow_version`;
 
 ALTER TABLE eh_parking_lots ADD COLUMN `expired_recharge_json` VARCHAR(1024) DEFAULT NULL;
 ALTER TABLE eh_parking_lots ADD COLUMN `config_json` VARCHAR(1024) DEFAULT NULL;
