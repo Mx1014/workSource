@@ -491,7 +491,7 @@ public class AssetProviderImpl implements AssetProvider {
             query.addOrderBy(t.STATUS);
         }
         query.addOrderBy(t.DATE_STR.desc());
-        query.addGroupBy(t.CONTRACT_NUM);
+        query.addGroupBy(t.TARGET_NAME);
         query.addLimit(pageOffSet,pageSize+1);
         if(!org.springframework.util.StringUtils.isEmpty(buildingName)){
             query.addConditions(t.BUILDING_NAME.eq(buildingName));

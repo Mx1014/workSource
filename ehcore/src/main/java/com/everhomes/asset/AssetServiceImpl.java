@@ -314,6 +314,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
+        //app用户的权限还未判断，是否可以查看账单
         AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
@@ -676,7 +677,7 @@ public class AssetServiceImpl implements AssetService {
             }
 //            entity.setApartmentName(property.getApartmentName());
 //            entity.setBuildingName(property.getBuldingName());
-            entity.(addressIds.toString());
+            entity.setAddressIdsJson(addressIds.toString());
             entity.setContractNum(cmd.getContractNum());
             entity.setEhPaymentChargingItemId(rule.getChargingItemId());
             entity.setEhPaymentChargingStandardId(rule.getChargingStandardId());

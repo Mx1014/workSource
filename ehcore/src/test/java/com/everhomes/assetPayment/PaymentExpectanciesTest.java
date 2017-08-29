@@ -68,7 +68,7 @@ public class PaymentExpectanciesTest {
         List<String> props = new ArrayList<>();
         props.add("240102032121838343934");
         props.add("KG28483BX21");
-        feeRules.setPropertyName(props);
+//        feeRules.setPropertyName(props);
         List<VariableIdAndValue> v = new ArrayList<>();
         VariableIdAndValue g = new VariableIdAndValue();
         g.setVariableId("ydj");
@@ -84,8 +84,8 @@ public class PaymentExpectanciesTest {
 
         cmd.setFeesRules(list);
         cmd.setContractNum("KK2086");
-        cmd.setBuldingName("西太平洋03号standalone");
-        cmd.setApartmentName("旋翼载具研究所811");
+//        cmd.setBuldingName("西太平洋03号standalone");
+//        cmd.setApartmentName("旋翼载具研究所811");
 
         System.out.println(cmd);
 
