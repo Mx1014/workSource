@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * <li>keyword: 小区关键字</li>
  * <li>namespaceId: 域空间id</li>
- * <li>communityType: 园区类型，参考{@link com.everhomes.rest.community.CommunityType}</li>
+ * <li>communityType: 园区类型 0-小区、1-园区，参考{@link com.everhomes.rest.community.CommunityType}</li>
  * </ul>
  *
  */

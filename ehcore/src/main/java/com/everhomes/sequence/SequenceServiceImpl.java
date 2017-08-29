@@ -1553,10 +1553,6 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_USER_LAUNCH_PAD_ITEMS.ID.max()).from(Tables.EH_USER_LAUNCH_PAD_ITEMS).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhActivityRosterError.class, Tables.EH_ACTIVITY_ROSTER_ERROR.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ACTIVITY_ROSTER_ERROR.ID.max()).from(Tables.EH_ACTIVITY_ROSTER_ERROR).fetchOne().value1();
-        });
-
     }
 
     @SuppressWarnings("rawtypes")
