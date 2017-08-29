@@ -73,19 +73,19 @@ public class GetPunchDayStatusResponse {
 		this.punchNormalTime = punchNormalTime;
 	}
 
-	public List<PunchLogDTO> getPunchLogs() {
-		return punchLogs;
-	}
-
-	public void setPunchLogs(List<PunchLogDTO> punchLogs) {
-		this.punchLogs = punchLogs;
-	}
-
 	public String getStatusList() {
 		return statusList;
 	}
 
 	public void setStatusList(String statusList) {
 		this.statusList = statusList;
+	}
+
+	public List<PunchIntevalLogDTO> getIntervals() {
+		return intervals;
+	}
+
+	public void setIntervals(List<PunchIntevalLogDTO> intervals) {
+		this.intervals = intervals;
 	}
 }
