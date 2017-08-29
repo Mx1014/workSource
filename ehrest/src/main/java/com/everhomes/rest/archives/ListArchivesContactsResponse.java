@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>nextPageAnchor: 下一页起始锚点</li>
- * <li>contacts: 成员信息，参考{@link ArchivesContactDTO}</li>
+ * <li>contacts: 成员信息，参考{@link com.everhomes.rest.archives.ArchivesContactDTO}</li>
  * </ul>
  */
 public class ListArchivesContactsResponse {

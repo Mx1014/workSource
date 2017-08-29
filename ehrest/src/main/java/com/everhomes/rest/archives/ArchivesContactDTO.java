@@ -10,7 +10,7 @@ import java.util.List;
  * <ul>
  * <li>detailId: 成员 detailId</li>
  * <li>contactName: 姓名</li>
- * <li>jobPositions: 职务 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>jobPositions: 职务 </li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>contactToken: 手机号</li>
  * <li>email: 邮箱</li>
@@ -23,8 +23,7 @@ public class ArchivesContactDTO {
 
     private String contactName;
 
-    @ItemType(OrganizationDTO.class)
-    private List<OrganizationDTO> jobPositions;
+    private String jobPositions;
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
@@ -54,11 +53,11 @@ public class ArchivesContactDTO {
         this.contactName = contactName;
     }
 
-    public List<OrganizationDTO> getJobPositions() {
+    public String getJobPositions() {
         return jobPositions;
     }
 
-    public void setJobPositions(List<OrganizationDTO> jobPositions) {
+    public void setJobPositions(String jobPositions) {
         this.jobPositions = jobPositions;
     }
 
