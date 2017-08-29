@@ -2421,22 +2421,14 @@ long id = sequenceProvider.getNextSequence(key);
 	//用于查询是否有过异常申请
 	@Override
 	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
-														   Integer exceptionRequestType) {
+														   Integer intervalNo) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectConditionStep<Record> step = context.select().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 				.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(ownerId))
+				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_INTERVAL_NO.eq(intervalNo))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(new Date(punchDate)))
 				.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-				
-		if (exceptionRequestType.byteValue() == ExceptionRequestType.ALL_DAY.getCode()) {
-			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
-		}else if (exceptionRequestType.byteValue() == ExceptionRequestType.MORNING.getCode()) {
-			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.MORNING_APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
-		}else if (exceptionRequestType.byteValue() == ExceptionRequestType.AFTERNOON.getCode()) {
-			step.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.AFTERNOON_APPROVAL_STATUS.eq(PunchStatus.NORMAL.getCode()));
-		}
-		
 		Record record = step.limit(1).fetchOne();
 		
 		if (record != null) {

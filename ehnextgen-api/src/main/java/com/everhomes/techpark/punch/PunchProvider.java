@@ -267,7 +267,7 @@ public interface PunchProvider {
 			Time workTime, Byte exceptionStatus,Integer pageOffset,Integer pageSize);
 
 	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
-														   Integer exceptionRequestType);
+														   Integer intervalTimeNo);
 
 	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long ownerId, Long creatorUid, Long id);
 
