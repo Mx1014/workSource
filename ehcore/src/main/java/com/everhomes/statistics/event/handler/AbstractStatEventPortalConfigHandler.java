@@ -58,20 +58,14 @@ abstract public class AbstractStatEventPortalConfigHandler extends AbstractStatE
         }
 
         // map: {参数值:次数}
-        Map<String, Integer> identifierParamValueToCountMap = statEventParamLogProvider.countParamTotalCount(
-                namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), identifierParam.getParamKey(), minTime, maxTime);
-
-        // 独立session数map: {参数值:次数}
-        Map<String, Integer> countDistinctSessionMap = statEventParamLogProvider.countDistinctSession(
-                namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), identifierParam.getParamKey(), minTime, maxTime);
-
-        // 独立用户数 map: {参数值:次数}
-        Map<String, Integer> countDistinctUidMap = statEventParamLogProvider.countDistinctUid(
+        Map<String, StatEventCountDTO> identifierParamValueToCountMap = statEventParamLogProvider.countParamLogs(
                 namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), identifierParam.getParamKey(), minTime, maxTime);
 
         List<StatEventStatistic> statList = new ArrayList<>();
         // map: {参数值:次数}
-        for (Map.Entry<String, Integer> entry : identifierParamValueToCountMap.entrySet()) {
+        for (Map.Entry<String, StatEventCountDTO> entry : identifierParamValueToCountMap.entrySet()) {
+
+            StatEventCountDTO count = entry.getValue();
 
             // 拿到底部导航栏的配置config
             StatEventPortalConfig portalConfig = statEventPortalConfigProvider.findPortalConfig(
@@ -94,13 +88,10 @@ abstract public class AbstractStatEventPortalConfigHandler extends AbstractStatE
 
             eventStat.setStatDate(date);
             eventStat.setNamespaceId(namespace.getId());
-            eventStat.setTotalCount(entry.getValue().longValue());
 
-            Integer completedSessions = countDistinctSessionMap.get(entry.getKey());
-            eventStat.setCompletedSessions(completedSessions.longValue());
-
-            Integer uniqueUsers = countDistinctUidMap.get(entry.getKey());
-            eventStat.setUniqueUsers(uniqueUsers.longValue());
+            eventStat.setTotalCount(count.getTotalCount().longValue());
+            eventStat.setUniqueUsers(count.getUniqueUsers().longValue());
+            eventStat.setCompletedSessions(count.getCompletedSessions().longValue());
 
             eventStat.setEventName(statEvent.getEventName());
             eventStat.setEventPortalStatId(portalStat.getId());

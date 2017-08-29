@@ -2,13 +2,11 @@
 package com.everhomes.statistics.event.handler;
 
 import com.everhomes.rest.launchpad.Widget;
-import com.everhomes.statistics.event.StatEventParam;
 import com.everhomes.statistics.event.StatEventStatistic;
 import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,17 +24,6 @@ public class LaunchpadOnBulletinClickEventHandler extends AbstractStatEventPorta
     @Override
     protected String getItemGroup(Map<String, String> paramsToValueMap) {
         return "Default";
-    }
-
-    @Override
-    protected List<StatEventParam> getParams(List<StatEventParam> params) {
-        // List<StatEventParam> list = new ArrayList<>();
-        // for (StatEventParam p : params) {
-        //     if (p.getParamKey().equals("layoutId")) {
-        //         list.add(p);
-        //     }
-        // }
-        return params;
     }
 
     @Override

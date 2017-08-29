@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.everhomes.flow.FlowCase;
 import com.everhomes.parking.*;
 import com.everhomes.parking.ketuo.*;
 import com.everhomes.rest.parking.*;
@@ -393,8 +394,10 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
 		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
 
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
-				cmd.getParkingLotId(), parkingCardRequest.getFlowId());
+				cmd.getParkingLotId(), flowCase.getFlowMainId());
 
 		Integer requestMonthCount = 2;
 		Byte requestRechargeType = ParkingCardExpiredRechargeType.ACTUAL.getCode();
@@ -445,7 +448,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 			dto.setRateName(rateName);
 			dto.setCardType(typeName);
 			dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
-			dto.setPrice(new BigDecimal(Integer.parseInt(rate.getRuleMoney()) / 100));
+			dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 
 			dto.setPlateNumber(cmd.getPlateNumber());
 			long now = System.currentTimeMillis();

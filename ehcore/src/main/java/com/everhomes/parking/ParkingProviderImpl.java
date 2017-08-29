@@ -244,7 +244,6 @@ public class ParkingProviderImpl implements ParkingProvider {
         	
         	p.setFlowCaseId(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.FLOW_CASE_ID));
         	p.setFlowId(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.FLOW_ID));
-        	p.setFlowVersion(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.FLOW_VERSION));
         	return p;
         }).collect(Collectors.toList());
         

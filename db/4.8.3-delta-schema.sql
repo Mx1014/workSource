@@ -94,6 +94,8 @@ ALTER TABLE eh_parking_lots DROP COLUMN `recharge_month_count`;
 ALTER TABLE eh_parking_lots DROP COLUMN `recharge_type`;
 ALTER TABLE eh_parking_lots DROP COLUMN `is_support_recharge`;
 
+ALTER TABLE eh_parking_card_requests DROP COLUMN `flow_version`;
+
 ALTER TABLE eh_parking_lots ADD COLUMN `expired_recharge_json` VARCHAR(1024) DEFAULT NULL;
 ALTER TABLE eh_parking_lots ADD COLUMN `config_json` VARCHAR(1024) DEFAULT NULL;
 
@@ -379,7 +381,7 @@ CREATE TABLE `eh_stat_event_task_logs` (
 
 -- By lei.lv
 -- 关系表建表脚本
-DROP TABLE IF EXISTS `eh_community_default`;
+-- DROP TABLE IF EXISTS `eh_community_default`;
 CREATE TABLE `eh_community_default` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
@@ -391,7 +393,7 @@ CREATE TABLE `eh_community_default` (
 -- ----------------------------
 -- Table structure for eh_namespace_masks
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_namespace_masks`;
+-- DROP TABLE IF EXISTS `eh_namespace_masks`;
 CREATE TABLE `eh_namespace_masks` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,

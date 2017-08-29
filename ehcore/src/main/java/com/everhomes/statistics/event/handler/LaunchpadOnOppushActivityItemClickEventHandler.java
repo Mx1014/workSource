@@ -5,14 +5,12 @@ import com.everhomes.activity.Activity;
 import com.everhomes.activity.ActivityProivider;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.launchpad.Widget;
-import com.everhomes.statistics.event.StatEventParam;
 import com.everhomes.statistics.event.StatEventStatistic;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,10 +56,5 @@ public class LaunchpadOnOppushActivityItemClickEventHandler extends AbstractStat
 
         eventStat.setParam(StringHelper.toJsonString(paramMap));
         return eventStat;
-    }
-
-    @Override
-    protected List<StatEventParam> getParams(List<StatEventParam> params) {
-        return params;
     }
 }
