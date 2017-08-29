@@ -80,8 +80,8 @@ INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`
 -- By lei.lv
 -- 增加蒙版表数据
 delete from eh_namespace_masks;
-INSERT INTO `eh_namespace_masks` VALUES ('1', '999971', '人才公寓', '4', '快速切换至人才市场', 'park_tourist');
-INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', '园区服务', '4', '快速切换至园区主页', 'default');
+INSERT INTO `eh_namespace_masks` VALUES ('1', '999971', '人才公寓', '3', '快速切换至人才市场', 'park_tourist');
+INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', '园区服务', '3', '快速切换至园区主页', 'default');
 
 SET @con_id = (SELECT MAX(id) from eh_configurations);
 INSERT INTO `eh_configurations` VALUES (@con_id + 1, 'mask.key', 0, '默认启用蒙版', 999971, '');
