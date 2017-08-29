@@ -4846,7 +4846,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Integer namespaceId = currentNamespaceId();
 
 		CommunityPmOwner owner = new CommunityPmOwner();
-		owner.setCommunityId(cmd.getCommunityId());
+		owner.setCommunityId(cmd.getCommunityId() == null ? null : cmd.getCommunityId().toString());
 		owner.setContactName(cmd.getContactName());
 		owner.setContactToken(cmd.getContactToken());
 		owner.setContactType(cmd.getContactType());
