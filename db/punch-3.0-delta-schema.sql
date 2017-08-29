@@ -18,6 +18,7 @@ ALTER TABLE `eh_punch_logs` ADD COLUMN `status` TINYINT COMMENT '打卡状态 0-
 
 ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `punch_interval_no` INT DEFAULT '1' COMMENT '第几次排班的打卡'; 
 
+ALTER TABLE `eh_punch_exception_approvals` ADD COLUMN `approval_status_list` VARCHAR(20) COMMENT '0-审批正常';
 
 ALTER TABLE `eh_punch_statistics` ADD COLUMN `punch_org_name` VARCHAR(64) COMMENT '所属规则-考勤组';
 ALTER TABLE `eh_punch_statistics` ADD COLUMN `detail_id` BIGINT COMMENT '用户detailId';
