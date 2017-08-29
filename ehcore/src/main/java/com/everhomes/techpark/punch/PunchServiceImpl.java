@@ -557,6 +557,8 @@ public class PunchServiceImpl implements PunchService {
 			return null;
 		}
 		newPunchDayLog.setStatusList(pdl.getStatusList());
+		newPunchDayLog.setArriveTime(convertTime(pdl.getArriveTime()));
+		newPunchDayLog.setLeaveTime(convertTime(pdl.getLeaveTime()));
 		newPunchDayLog.setPunchCount(pdl.getPunchCount());
 		newPunchDayLog.setUserId(userId);
 		newPunchDayLog.setEnterpriseId(companyId);
@@ -826,7 +828,12 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setPunchCount(punchLogs.size());
 			for (PunchLog log : punchLogs){
 				pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
+				if(null == pdl.getArriveTime()||pdl.getArriveTime() > log.getPunchTime().getTime())
+					pdl.setArriveTime(log.getPunchTime().getTime());
+				if(null == pdl.getLeaveTime()||pdl.getLeaveTime() < log.getPunchTime().getTime())
+					pdl.setLeaveTime(log.getPunchTime().getTime());
 			}
+
 		}else{
 			pdl.setPunchCount(0);
 		}

@@ -216,12 +216,25 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		PunchExceptionApproval punchExceptionApproval = punchProvider.findPunchExceptionApproval(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId(),
 				new Date(approvalExceptionContent.getPunchDate()) );
 		if (punchExceptionApproval != null) {
-			// TODO: 2017/8/29 计算最终审批结果
+			String statusList = punchExceptionApproval.getApprovalStatusList();
+			if(null == statusList){
+				statusList = createStatusList(punchExceptionApproval.getPunchTimesPerDay(), approvalExceptionContent.getPunchIntevalNo());
+			}else{
+				String[] statusArray = statusList.split(PunchConstants.STATUS_SEPARATOR);
+				statusArray[approvalExceptionContent.getPunchIntevalNo()-1] = String.valueOf(ExceptionStatus.NORMAL.getCode());
+				statusList =statusArray[0];
+				for(int i =1;i<punchExceptionApproval.getPunchTimesPerDay()/2;i++) {
+					statusList = statusList + PunchConstants.STATUS_SEPARATOR + statusArray[i];
+				}
+			}
+			punchExceptionApproval.setApprovalStatusList(statusList);
 			punchExceptionApproval.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			punchExceptionApproval.setOperatorUid(UserContext.current().getUser().getId());
 			punchProvider.updatePunchExceptionApproval(punchExceptionApproval);
 		}else {
 			punchExceptionApproval = new PunchExceptionApproval();
+			String statusList = createStatusList(punchExceptionApproval.getPunchTimesPerDay(), approvalExceptionContent.getPunchIntevalNo());
+			punchExceptionApproval.setApprovalStatusList(statusList);
 			punchExceptionApproval.setUserId(approvalRequest.getCreatorUid());
 			punchExceptionApproval.setEnterpriseId(approvalRequest.getOwnerId());
 			punchExceptionApproval.setPunchDate(new Date(approvalExceptionContent.getPunchDate()));
@@ -230,25 +243,49 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			punchExceptionApproval.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			punchExceptionApproval.setOperatorUid(UserContext.current().getUser().getId());
 			punchExceptionApproval.setViewFlag(ViewFlags.NOTVIEW.getCode());
-			//TODO :
 			punchProvider.createPunchExceptionApproval(punchExceptionApproval);
 		}
 		
 		//更新eh_punch_day_logs中的exception_status字段
 		PunchDayLog punchDayLog = punchProvider.findPunchDayLog(approvalRequest.getCreatorUid(), approvalRequest.getOwnerId(), new Date(approvalExceptionContent.getPunchDate()));
 		if (punchDayLog != null) {
-			if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.TWICE.getCode().byteValue() && punchExceptionApproval.getApprovalStatus() != null && punchExceptionApproval.getApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
-				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-				punchProvider.updatePunchDayLog(punchDayLog);
-			}else if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.FORTH.getCode().byteValue() && 
-					punchExceptionApproval.getMorningApprovalStatus() != null && (punchExceptionApproval.getMorningApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode() 
-					||punchDayLog.getMorningStatus().byteValue() == PunchStatus.NORMAL.getCode())&&
-					punchExceptionApproval.getAfternoonApprovalStatus() != null && punchExceptionApproval.getAfternoonApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()
-					||punchDayLog.getAfternoonStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
-				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-				punchProvider.updatePunchDayLog(punchDayLog);
+//			if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.TWICE.getCode().byteValue() && punchExceptionApproval.getApprovalStatus() != null && punchExceptionApproval.getApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
+//				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//				punchProvider.updatePunchDayLog(punchDayLog);
+//			}else if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.FORTH.getCode().byteValue() &&
+//					punchExceptionApproval.getMorningApprovalStatus() != null && (punchExceptionApproval.getMorningApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()
+//					||punchDayLog.getMorningStatus().byteValue() == PunchStatus.NORMAL.getCode())&&
+//					punchExceptionApproval.getAfternoonApprovalStatus() != null && punchExceptionApproval.getAfternoonApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()
+//					||punchDayLog.getAfternoonStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
+//				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//				punchProvider.updatePunchDayLog(punchDayLog);
+//			}
+			punchDayLog.setApprovalStatusList(punchExceptionApproval.getApprovalStatusList());
+			String[] statusArray = punchDayLog.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+			punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			for(int i =0;i<punchExceptionApproval.getPunchTimesPerDay()/2;i++) {
+				if (statusArray[i].equals(String.valueOf(ExceptionStatus.EXCEPTION.getCode()))) {
+					punchDayLog.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+					break;
+				}
 			}
+			punchProvider.updatePunchDayLog(punchDayLog);
 		}
+	}
+
+	private String createStatusList(Byte punchTimesPerDay, Integer punchIntevalNo) {
+		String statusList = "";
+		for (int i = 0; i < punchIntevalNo / 2; i++) {
+			String status = String.valueOf(ExceptionStatus.EXCEPTION.getCode());
+			if (i == punchIntevalNo - 1)
+				status = String.valueOf(ExceptionStatus.NORMAL.getCode());
+
+			if (i == 0)
+				statusList = status;
+			else
+				statusList = statusList + PunchConstants.STATUS_SEPARATOR + status;
+		}
+		return statusList;
 	}
 
 	@Override
