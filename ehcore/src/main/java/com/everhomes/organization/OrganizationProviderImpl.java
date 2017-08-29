@@ -3069,7 +3069,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.setRecord(ConvertHelper.convert(owner, EhOrganizationOwnersRecord.class));
         query.setReturning(Tables.EH_ORGANIZATION_OWNERS.ID);
         query.execute();
-        owner.setId(query.getReturnedRecord().value1());
+        owner.setId(query.getReturnedRecord().getId());
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationTasks.class, null);
     }
