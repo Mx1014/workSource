@@ -3,6 +3,7 @@ package com.everhomes.rest.asset;
 
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.Date;
 import java.util.List;
@@ -18,7 +19,7 @@ public class FeeRules {
     private Date dateStrBegin;
     private Date dateStrEnd;
     @ItemType(String.class)
-    private List<String> propertyName;
+    private List<ContractProperty> properties;
     @ItemType(VariableIdAndValue.class)
     private List<VariableIdAndValue> variableIdAndValueList;
 
@@ -55,16 +56,21 @@ public class FeeRules {
         this.chargingStandardId = chargingStandardId;
     }
 
-    public List<String> getPropertyName() {
-        return propertyName;
+    public List<ContractProperty> getProperties() {
+        return properties;
     }
 
-    public void setPropertyName(List<String> propertyName) {
-        this.propertyName = propertyName;
+    public void setProperties(List<ContractProperty> properties) {
+        this.properties = properties;
     }
 
     public List<VariableIdAndValue> getVariableIdAndValueList() {
         return variableIdAndValueList;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 
     public void setVariableIdAndValueList(List<VariableIdAndValue> variableIdAndValueList) {

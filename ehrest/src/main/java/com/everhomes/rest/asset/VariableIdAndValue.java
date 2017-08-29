@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * Created by Wentian Wang on 2017/8/19.
  */
@@ -24,5 +26,10 @@ public class VariableIdAndValue {
 
     public void setVariableId(Object variableId) {
         this.variableId = variableId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

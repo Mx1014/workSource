@@ -2,6 +2,9 @@ package com.everhomes.asset;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.asset.*;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -56,7 +59,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr);
 
-    ListBillsDTO creatPropertyBill(Long addressId, BillGroupDTO billGroupDTO, String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName);
+    ListBillsDTO creatPropertyBill(Long addressId, BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName);
 
     ListBillDetailVO listBillDetail(Long billId);
 
@@ -86,7 +89,7 @@ public interface AssetProvider {
 
     String findChargingItemNameById(Long chargingItemId);
 
-    void saveContractVariables(String apartmentName, String buldingName, String contractNum, Long namesapceId, String noticeTel, Long ownerId, String ownerType, Long targetId, String targetType, String json,Long chargingStandardId,String targetName);
+    void saveContractVariables(List<EhPaymentContractReceiver> contractDateList);
 
     List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
 
@@ -95,4 +98,14 @@ public interface AssetProvider {
     List<PaymentContractReceiver> findContractReceiverByContractNumAndTimeLimit(String contractNum);
 
     String getStandardNameById(Long chargingStandardId);
+
+    List<Object> getBillDayAndCycleByChargingItemId(Long chargingStandardId, Long chargingItemId,String ownerType, Long ownerId);
+
+    PaymentBillGroupRule getBillGroupRule(Long chargingStandardId, Long chargingStandardId1, String ownerType, Long ownerId);
+
+    void saveBillItems(List<EhPaymentBillItems> billItemsList);
+
+    void saveBills(List<EhPaymentBills> billList);
+
+    Byte findBillyCycleById(Long chargingStandardId);
 }

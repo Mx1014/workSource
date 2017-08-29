@@ -12,10 +12,10 @@ import java.util.List;
  *<ul>
  * <li>ownerType:所属者type</li>
  * <li>ownerId:所属者id</li>
- * <li>dateStr:账期</li>
  * <li>buildingName:楼栋名称</li>
  * <li>apartmentName:门牌名称</li>
  * <li>addressId:地址id</li>
+ * <li>dateStr:账期</li>
  * <li>targetType:客户类别</li>
  * <li>targetId:客户id</li>
  * <li>noticeTel:催缴电话</li>
@@ -27,7 +27,6 @@ import java.util.List;
 public class CreateBillCommand {
     private String ownerType;
     private Long ownerId;
-    private String dateStr;
     private String buildingName;
     private String apartmentName;
     private Long addressId;
@@ -35,6 +34,7 @@ public class CreateBillCommand {
     private String targetName;
     private String targetType;
     private Long targetId;
+    private String dateStr;
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
     private Byte isSettled;
@@ -49,6 +49,14 @@ public class CreateBillCommand {
 
     public String getOwnerType() {
         return ownerType;
+    }
+
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(String dateStr) {
+        this.dateStr = dateStr;
     }
 
     public Byte getIsSettled() {
@@ -93,14 +101,6 @@ public class CreateBillCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
-    }
-
-    public String getDateStr() {
-        return dateStr;
-    }
-
-    public void setDateStr(String dateStr) {
-        this.dateStr = dateStr;
     }
 
     public String getBuildingName() {

@@ -71,6 +71,7 @@ CREATE TABLE `eh_payment_bill_items` (
   `target_id` bigint(20) DEFAULT NULL,
   `target_name` varchar(32) DEFAULT NULL COMMENT '客户名称，客户没有在系统中时填写',
   `contract_num` varchar(255) DEFAULT NULL,
+  `property_identifer` varchar(255) DEFAULT '' COMMENT '资产标识',
   `address_id` bigint(20) DEFAULT NULL,
   `date_str` varchar(10) DEFAULT NULL COMMENT '账期',
   `creator_uid` bigint(20) DEFAULT NULL,
@@ -248,8 +249,6 @@ CREATE TABLE `eh_payment_contract_receiver` (
   `contract_num` varchar(255) DEFAULT NULL,
   `target_name` varchar(255) DEFAULT NULL,
   `notice_tel` varchar(255) DEFAULT NULL,
-  `building_name` varchar(255) DEFAULT NULL,
-  `apartment_name` varchar(255) DEFAULT NULL,
   `status` tinyint(4) DEFAULT '0' COMMENT '1:有效；0：无效',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
