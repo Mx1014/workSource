@@ -584,21 +584,23 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
         Map<Long, CustomerProjectStatisticsDTO> result = new HashMap<>();
         query.fetch().map((r) -> {
-            String[] ids = r.getProjectSource().split(",");
-            for(String id : ids) {
-                BigDecimal projectAmount = r.getProjectAmount() == null ? BigDecimal.ZERO : r.getProjectAmount();
-                if(result.get(Long.valueOf(id)) == null) {
-                    CustomerProjectStatisticsDTO dto = new CustomerProjectStatisticsDTO();
-                    dto.setProjectAmount(projectAmount);
-                    dto.setProjectCount(1L);
-                    dto.setProjectSourceItemId(Long.valueOf(id));
-                    result.put(Long.valueOf(id), dto);
-                } else {
-                    CustomerProjectStatisticsDTO dto = result.get(Long.valueOf(id));
-                    BigDecimal oldAmount = dto.getProjectAmount() == null ? BigDecimal.ZERO : dto.getProjectAmount();
-                    dto.setProjectAmount(oldAmount.add(projectAmount));
-                    dto.setProjectCount(dto.getProjectCount() + 1);
-                    result.put(Long.valueOf(id), dto);
+            if(r.getProjectSource() != null) {
+                String[] ids = r.getProjectSource().split(",");
+                for(String id : ids) {
+                    BigDecimal projectAmount = r.getProjectAmount() == null ? BigDecimal.ZERO : r.getProjectAmount();
+                    if(result.get(Long.valueOf(id)) == null) {
+                        CustomerProjectStatisticsDTO dto = new CustomerProjectStatisticsDTO();
+                        dto.setProjectAmount(projectAmount);
+                        dto.setProjectCount(1L);
+                        dto.setProjectSourceItemId(Long.valueOf(id));
+                        result.put(Long.valueOf(id), dto);
+                    } else {
+                        CustomerProjectStatisticsDTO dto = result.get(Long.valueOf(id));
+                        BigDecimal oldAmount = dto.getProjectAmount() == null ? BigDecimal.ZERO : dto.getProjectAmount();
+                        dto.setProjectAmount(oldAmount.add(projectAmount));
+                        dto.setProjectCount(dto.getProjectCount() + 1);
+                        result.put(Long.valueOf(id), dto);
+                    }
                 }
             }
             return null;
