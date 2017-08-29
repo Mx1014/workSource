@@ -4507,17 +4507,41 @@ public class PunchServiceImpl implements PunchService {
 		String filePath = "PunchDetails" + System.currentTimeMillis() + ".xlsx";
 		//新建了一个文件
 
-		Workbook wb = createPunchDetailsBook(resp.getPunchDayDetails());
+		Workbook wb = createPunchDetailsBook(resp.getPunchDayDetails(),cmd);
 		
 		return download(wb,filePath,response);
 	}
 
-    private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos) {
+    private Workbook createPunchDetailsBook(List<PunchDayDetailDTO> dtos, ListPunchDetailsCommand cmd) {
     	if (null == dtos || dtos.size() == 0)
 			return new XSSFWorkbook();
-		Workbook wb = new XSSFWorkbook();
-		Sheet sheet = wb.createSheet("punchDetails");
-		
+		XSSFWorkbook wb = new XSSFWorkbook();
+		XSSFSheet sheet = wb.createSheet("punchDetails");
+
+		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 9));
+		XSSFCellStyle style = wb.createCellStyle();
+		Font font = wb.createFont();
+		font.setFontHeightInPoints((short) 20);
+		font.setFontName("Courier New");
+
+		style.setFont(font);
+
+		XSSFCellStyle titleStyle = wb.createCellStyle();
+		titleStyle.setFont(font);
+		titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+		int rowNum = 0;
+
+		//  创建标题
+		XSSFRow rowTitle = sheet.createRow(rowNum++);
+		rowTitle.createCell(0).setCellValue("按日统计");
+		rowTitle.setRowStyle(titleStyle);
+		//副标题
+		XSSFRow rowReminder = sheet.createRow(rowNum++);
+		rowReminder.createCell(0).setCellValue("统计时间:"+dateSF.get().format(new Date(cmd.getStartDay())) +"~"
+		+dateSF.get().format(new Date(cmd.getEndDay())));
+		rowReminder.setRowStyle(titleStyle);
+
 		this.createPunchDetailsBookSheetHead(sheet );
 		for (PunchDayDetailDTO dto : dtos )
 			this.setNewPunchDetailsBookRow(sheet, dto);
@@ -4538,64 +4562,30 @@ public class PunchServiceImpl implements PunchService {
 	private void setNewPunchDetailsBookRow(Sheet sheet, PunchDayDetailDTO dto) {
 
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
-		int i = -1; 
+		int i = -1;
+		row.createCell(++i).setCellValue(dateSF.get().format(new Date(dto.getPunchDate())));
 		row.createCell(++i).setCellValue(dto.getUserName());
 		row.createCell(++i).setCellValue(dto.getDeptName());
-		row.createCell(++i).setCellValue(dateSF.get().format(new Date(dto.getPunchDate()))); 
-		row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime())); 
-		PunchTimesPerDay timePerDay = PunchTimesPerDay.fromCode(dto.getPunchTimesPerDay());
-		switch(timePerDay){
-		case TWICE:
-			row.createCell(++i).setCellValue(convertTimeLongToString(dto.getArriveTime())+"/"+convertTimeLongToString(dto.getLeaveTime())); 
-			row.createCell(++i).setCellValue(statusToString(dto.getStatus())); 
-			row.createCell(++i).setCellValue(dto.getApprovalStatus()==null?statusToString(dto.getStatus()):statusToString(dto.getApprovalStatus())); 
-			break;
-		case FORTH:
-			row.createCell(++i).setCellValue(convertTimeLongToString(dto.getArriveTime())
-					+"/"+convertTimeLongToString(dto.getNoonLeaveTime())
-					+"/"+convertTimeLongToString(dto.getAfternoonArriveTime())
-					+"/"+convertTimeLongToString(dto.getLeaveTime())); 
-			row.createCell(++i).setCellValue(statusToString(dto.getMorningStatus())+"/"+statusToString(dto.getAfternoonStatus())); 
-			row.createCell(++i).setCellValue(
-					dto.getMorningApprovalStatus()==null?statusToString(dto.getMorningStatus()):statusToString(dto.getMorningApprovalStatus())
-					+"/"+
-					dto.getAfternoonApprovalStatus()==null?statusToString(dto.getAfternoonStatus()):statusToString(dto.getAfternoonApprovalStatus())); 
-			break;
-		default :
-			++i;
-			++i;
-			++i;
-			break;
-		}
-		ExceptionStatus exception = ExceptionStatus.fromCode(dto.getExceptionStatus());
-		if(null != exception){
-			switch(exception){
-				case NORMAL:
-					row.createCell(++i).setCellValue("正常");
-					break;
-				case EXCEPTION:
-					row.createCell(++i).setCellValue("异常");
-					break;
-				default :
-					++i;
-					break;
-			}
-		}else{
-			++i;
-		}
+		row.createCell(++i).setCellValue(dto.getPunchOrgName());
+		row.createCell(++i).setCellValue(datetimeSF.get().format(new Date(dto.getArriveTime())));
+		row.createCell(++i).setCellValue(datetimeSF.get().format(new Date(dto.getLeaveTime())));
+		row.createCell(++i).setCellValue(dto.getPunchCount());
+		row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
+		row.createCell(++i).setCellValue(dto.getStatuString());
 
 	}
 	
 	private void createPunchDetailsBookSheetHead(Sheet sheet) {
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i =-1 ;
-		row.createCell(++i).setCellValue("姓名"); 
+		row.createCell(++i).setCellValue("时间");
+		row.createCell(++i).setCellValue("姓名");
 		row.createCell(++i).setCellValue("部门");
-		row.createCell(++i).setCellValue("打卡日期");
+		row.createCell(++i).setCellValue("所属规则");
+		row.createCell(++i).setCellValue("最早打卡");
+		row.createCell(++i).setCellValue("最晚打卡");
+		row.createCell(++i).setCellValue("打卡次数");
 		row.createCell(++i).setCellValue("工作时长");
-		row.createCell(++i).setCellValue("打卡");
-		row.createCell(++i).setCellValue("打卡状态");
-		row.createCell(++i).setCellValue("考勤状态");
 		row.createCell(++i).setCellValue("状态"); 
 	}
 	private Organization checkOrganization(Long orgId) {
