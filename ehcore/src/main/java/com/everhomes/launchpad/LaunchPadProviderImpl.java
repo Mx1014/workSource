@@ -25,13 +25,31 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.launchpad.ItemServiceCategryStatus;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.launchpad.LaunchPadLayoutStatus;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadItemsDao;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadLayoutsDao;
 import com.everhomes.server.schema.tables.daos.EhUserLaunchPadItemsDao;
+import com.everhomes.server.schema.tables.pojos.EhItemServiceCategries;
+import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
+import com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts;
+import com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems;
+import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
+import com.everhomes.util.ConvertHelper;
+import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import com.everhomes.util.ConvertHelper;
 import org.springframework.util.StringUtils;
 
@@ -623,6 +641,14 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		dao.insert(itemServiceCategry);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhItemServiceCategries.class, null);
 	}
+
+    @Override
+    public List<LaunchPadItem> listLaunchPadItemsByNamespaceId(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_LAUNCH_PAD_ITEMS)
+                .where(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId))
+                .fetchInto(LaunchPadItem.class);
+    }
 
 	@Override
 	public void deleteItemServiceCategryById(Long id){

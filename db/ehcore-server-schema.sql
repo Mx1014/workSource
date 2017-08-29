@@ -4652,6 +4652,15 @@ CREATE TABLE `eh_item_service_categries` (
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
   `namespace_id` INTEGER,
   `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
+  `label` VARCHAR(64),
+  `item_location` VARCHAR(2048),
+  `item_group` VARCHAR(128) NOT NULL DEFAULT '',
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  `description` VARCHAR(1024),
+  `scope_code` TINYINT NOT NULL DEFAULT 0,
+  `scope_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -4750,7 +4759,7 @@ CREATE TABLE `eh_launch_pad_items` (
   `selected_icon_uri` VARCHAR(1024),
   `more_order` INTEGER NOT NULL DEFAULT 0,
   `alias_icon_uri` VARCHAR(1024) COMMENT '原有icon_uri有圆形、方形等，展现风格不一致。应对这样的场景增加alias_icon_uri，存储圆形默认图片。',
-  
+  `categry_name` VARCHAR(64),
   PRIMARY KEY (`id`),
   KEY `i_eh_scoped_cfg_combo` (`namespace_id`,`app_id`,`scope_code`,`scope_id`,`item_name`),
   KEY `i_eh_scoped_cfg_order` (`default_order`)
@@ -7054,11 +7063,186 @@ CREATE TABLE `eh_polls` (
   KEY `i_eh_poll_delete_time`(`delete_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_portal_content_scopes`;
 
---
---
--- Park activity rules parameter
---
+
+CREATE TABLE `eh_portal_content_scopes` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `scope_type` VARCHAR(64),
+  `scope_id` BIGINT NOT NULL,
+  `content_type` VARCHAR(64),
+  `content_id` BIGINT NOT NULL,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_portal_item_categories`;
+
+
+CREATE TABLE `eh_portal_item_categories` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER,
+  `item_group_id` BIGINT NOT NULL,
+  `name` VARCHAR(64) NOT NULL,
+  `label` VARCHAR(64) NOT NULL COMMENT 'item categry label',
+  `icon_uri` VARCHAR(1024) COMMENT 'service categry icon uri',
+  `default_order` INTEGER COMMENT 'order ',
+  `align` VARCHAR(64) COMMENT 'left, center',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_portal_item_groups`;
+
+
+CREATE TABLE `eh_portal_item_groups` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `layout_id` BIGINT NOT NULL,
+  `label` VARCHAR(64),
+  `name` VARCHAR(64) COMMENT 'item_group_${id}，对应eh_launch_pad_layouts里面的layout_json里面item_group的 groups[x].instanceConfig.itemGroup 和 eh_launch_pad_items里的item_group',
+  `separator_flag` TINYINT DEFAULT 0,
+  `separator_height` DECIMAL(10,2),
+  `widget` VARCHAR(64),
+  `content_type` VARCHAR(64),
+  `style` VARCHAR(64),
+  `instance_config` TEXT COMMENT '参数配置',
+  `default_order` INTEGER NOT NULL DEFAULT 0,
+  `status` TINYINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  `description` VARCHAR(1024),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_portal_items`;
+
+
+CREATE TABLE `eh_portal_items` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `item_group_id` BIGINT NOT NULL,
+  `label` VARCHAR(64),
+  `item_location` VARCHAR(2048) COMMENT 'eh_portal_layouts的item_location 对应eh_launch_pad_items里的item_location',
+  `group_name` VARCHAR(64) COMMENT 'eh_portal_item_groups  name 对应eh_launch_pad_layouts里面的layout_json里面item_group的 groups[x].instanceConfig.itemGroup 和 eh_launch_pad_items里的item_group',
+  `name` VARCHAR(64) COMMENT 'item_${id}',
+  `icon_uri` VARCHAR(1024),
+  `item_width` INTEGER NOT NULL DEFAULT 1,
+  `item_height` INTEGER NOT NULL DEFAULT 1,
+  `bgcolor` INTEGER NOT NULL DEFAULT 0,
+  `status` TINYINT NOT NULL DEFAULT 0,
+  `action_type` VARCHAR(64),
+  `action_data` TEXT,
+  `default_order` INTEGER NOT NULL DEFAULT 0,
+  `display_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'default display on the pad, 0: hide, 1:display',
+  `selected_icon_uri` VARCHAR(1024),
+  `more_order` INTEGER NOT NULL DEFAULT 0,
+  `target_type` VARCHAR(32),
+  `target_id` VARCHAR(64) COMMENT 'the entity id linked back to the orginal resource',
+  `item_category_id` BIGINT,
+  `description` VARCHAR(1024),
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_portal_launch_pad_mappings`;
+
+
+CREATE TABLE `eh_portal_launch_pad_mappings` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `content_type` VARCHAR(64),
+  `portal_content_id` BIGINT NOT NULL,
+  `launch_pad_content_id` BIGINT NOT NULL,
+  `create_time` DATETIME,
+  `creator_uid` BIGINT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_portal_layout_templates`;
+
+
+CREATE TABLE `eh_portal_layout_templates` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `label` VARCHAR(64),
+  `template_json` TEXT COMMENT '模板json',
+  `show_uri` VARCHAR(64),
+  `status` TINYINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  `description` VARCHAR(1024),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_portal_layouts`;
+
+
+CREATE TABLE `eh_portal_layouts` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `label` VARCHAR(64),
+  `location` VARCHAR(2048) COMMENT '用于item_location查询eh_launch_pad_items',
+  `name` VARCHAR(64) COMMENT 'layout_${id}，eh_launch_pad_layouts里面的name',
+  `status` TINYINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  `description` VARCHAR(1024),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_portal_navigation_bars`;
+
+
+CREATE TABLE `eh_portal_navigation_bars` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `label` VARCHAR(64),
+  `target_type` VARCHAR(64) NOT NULL,
+  `target_id` BIGINT NOT NULL,
+  `icon_uri` VARCHAR(1024),
+  `selected_icon_uri` VARCHAR(1024),
+  `status` TINYINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  `description` VARCHAR(1024),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_portal_publish_logs`;
+
+
+CREATE TABLE `eh_portal_publish_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `content_type` VARCHAR(64),
+  `content_data` TEXT,
+  `status` TINYINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_preferential_rules`;
 CREATE TABLE `eh_preferential_rules` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -7264,24 +7448,6 @@ CREATE TABLE `eh_punch_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET=utf8mb4 ;
 
-DROP TABLE IF EXISTS `eh_punch_rules_bak`;
-CREATE TABLE `eh_punch_rules_bak` (
-  `id` BIGINT NOT NULL COMMENT 'id',
-  `enterprise_id` BIGINT NOT NULL COMMENT 'rule company id',
-  `start_early_time` TIME COMMENT 'how early can i arrive',
-  `start_late_time` TIME COMMENT 'how late can i arrive ',
-  `work_time` TIME COMMENT 'how long do i must be work',
-  `noon_leave_time` TIME,
-  `afternoon_arrive_time` TIME,
-  `time_tag1` TIME,
-  `time_tag2` TIME,
-  `time_tag3` TIME,
-  `punch_times_per_day` TINYINT NOT NULL DEFAULT 2 COMMENT '2 or  4 times',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 DROP TABLE IF EXISTS `eh_punch_schedulings`;
 CREATE TABLE `eh_punch_schedulings` (
   `id` BIGINT NOT NULL COMMENT 'id',
@@ -9278,7 +9444,7 @@ CREATE TABLE `eh_service_alliance_jump_module` (
   `module_name` VARCHAR(128) NOT NULL DEFAULT '',
   `module_url` VARCHAR(512),
   `parent_id` BIGINT NOT NULL DEFAULT 0,
-  
+  `signal` TINYINT DEFAULT 1 COMMENT '标志 0:删除 1:普通 2:审批',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -9402,6 +9568,7 @@ CREATE TABLE `eh_service_alliances` (
   `parent_id` BIGINT NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(64) NOT NULL COMMENT 'community;group,organaization,exhibition,',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `range` VARCHAR(512),
   `name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'organization name',
   `display_name` VARCHAR(128) NOT NULL DEFAULT '',
   `type` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id reference to eh_service_alliance_categories',
@@ -9480,7 +9647,24 @@ CREATE TABLE `eh_service_hotlines` (
   `create_time` DATETIME,
   `creator_uid` BIGINT,
   `update_time` DATETIME,
-  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_service_module_apps`;
+
+
+CREATE TABLE `eh_service_module_apps` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `name` VARCHAR(64),
+  `module_id` BIGINT,
+  `instance_config` TEXT COMMENT '应用入口需要的配置参数',
+  `status` TINYINT NOT NULL DEFAULT 0,
+  `action_type` TINYINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -9563,6 +9747,13 @@ CREATE TABLE `eh_service_modules` (
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 2: active',
   `default_order` INTEGER COMMENT 'order number',
   `create_time` DATETIME,
+  `instance_config` TEXT,
+  `action_type` TINYINT,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT NOT NULL,
+  `creator_uid` BIGINT NOT NULL,
+  `description` VARCHAR(1024),
+  `multiple_flag` TINYINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10679,7 +10870,7 @@ CREATE TABLE `eh_user_launch_pad_items`(
   `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
   `update_time` DATETIME,
   `create_time` DATETIME,
-
+  `item_name` VARCHAR(32),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

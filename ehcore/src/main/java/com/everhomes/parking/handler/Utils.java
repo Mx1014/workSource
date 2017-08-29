@@ -1,8 +1,18 @@
 package com.everhomes.parking.handler;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.util.RuntimeErrorException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -14,33 +24,46 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
-
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.util.RuntimeErrorException;
 
 public class Utils {
 
+    public static class MimeType {
+        public static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
+        public static final String APPLICATION_JSON = "application/json";
+        public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+        public static final String MULTIPART_FORM_DATA = "multipart/form-data";
+    }
+
+    public static class DateStyle {
+        public static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
+        public static final String DATE = "yyyy-MM-dd";
+        public static final String DATE_TIME_STR = "yyyyMMddHHmmss";
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
     /**
      * 原有时间加n秒
-     * @param oldPeriod
-     * @param seconds
+     * @param source
+     * @param second
      * @return
      */
-    static Timestamp addSeconds(Long oldPeriod, int seconds) {
+    static Timestamp addSecond(Long source, int second) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(oldPeriod);
-        calendar.add(Calendar.SECOND, seconds);
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.SECOND, second);
         Timestamp time = new Timestamp(calendar.getTimeInMillis());
 
         return time;
@@ -48,14 +71,14 @@ public class Utils {
 
     /**
      * 原有时间计算月
-     * @param oldPeriod
+     * @param source
      * @param month
      * @return
      */
-    static Timestamp getTimestampByAddMonth(Long oldPeriod, int month) {
+    static Timestamp getTimestampByAddMonth(Long source, int month) {
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(oldPeriod);
+        calendar.setTimeInMillis(source);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
@@ -74,10 +97,10 @@ public class Utils {
         return new Timestamp(calendar.getTimeInMillis());
     }
 
-    static Long getLongByAddNatureMonth(Long oldPeriod, int month) {
+    static Long getLongByAddNatureMonth(Long source, int month) {
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(oldPeriod);
+        calendar.setTimeInMillis(source);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
@@ -88,7 +111,7 @@ public class Utils {
             int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
             calendar.set(Calendar.DAY_OF_MONTH, d);
         }else{
-            calendar.add(Calendar.MONTH, month-1);
+            calendar.add(Calendar.MONTH, month - 1);
             int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
             calendar.set(Calendar.DAY_OF_MONTH, d);
         }
@@ -96,46 +119,74 @@ public class Utils {
         return calendar.getTimeInMillis();
     }
 
-    static Timestamp getTimestampByAddNatureMonth(Long oldPeriod, int month) {
+    static Timestamp getTimestampByAddNatureMonth(Long source, int month) {
 
-        return new Timestamp(getLongByAddNatureMonth(oldPeriod, month));
+        return new Timestamp(getLongByAddNatureMonth(source, month));
     }
 
-    static long strToDate(String str) {
+    static Long strToLong(String str, String style) {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat(style);
         long ts;
         try {
             ts = sdf.parse(str).getTime();
         } catch (ParseException e) {
-            LOGGER.error("Str format is not yyyy-MM-dd HH:mm:ss, str={}", str);
+            LOGGER.error("Str={} format is not style={}", str, style);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Str format is not yyyy-MM-dd HH:mm:ss.");
+                    "Invalid str format");
         }
         return ts;
     }
 
-    /**
-     *
-     * @param url
-     * @param params json格式 content-type : application/json
-     * @return
-     */
-    public static String post(String url, JSONObject params) {
-        //设置body json格式
-        Map<String, String> headers = new HashMap<>();
-        headers.put("content-type", "application/json");
-        return post(url, params, null);
+    static String dateToStr(Date date, String style) {
+        SimpleDateFormat sdf = new SimpleDateFormat(style);
+        return sdf.format(date);
+    }
+
+    public static String md5(String pw) {
+        try {
+            MessageDigest messageDigest =MessageDigest.getInstance("MD5");
+            messageDigest.update(pw.getBytes());
+            return new BigInteger(1, messageDigest.digest()).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Convert md5 failed");
+        }
     }
 
     /**
      *
      * @param url
-     * @param params
-     * @param headers
+     * @param param json格式
      * @return
      */
+    public static String post(String url, JSONObject param) {
+        //设置body json格式
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_JSON);
+        return post(url, param, headers);
+    }
+
+    /**
+    *
+    * @param url
+    * @param params
+    * @param headers
+    * @return
+    */
     public static String post(String url, JSONObject params, Map<String, String> headers) {
+    	return post(url, params, headers,null);
+    }
+    /**
+     *
+     * @param url
+     * @param param
+     * @param headers
+     * @param charset
+     * @return
+     */
+
+    public static String post(String url, JSONObject param, Map<String, String> headers, Charset charset) {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
 
@@ -143,14 +194,14 @@ public class Utils {
         String result = null;
         CloseableHttpResponse response = null;
 
-        LOGGER.info("The request info, url={}, param={}", url, params);
+        LOGGER.info("The request info, url={}, param={}", url, param);
 
-        if (null == params) {
-            params = new JSONObject();
+        if (null == param) {
+            param = new JSONObject();
         }
 
         try {
-            StringEntity stringEntity = new StringEntity(params.toString(), StandardCharsets.UTF_8);
+            StringEntity stringEntity = new StringEntity(param.toString(), StandardCharsets.UTF_8);
             httpPost.setEntity(stringEntity);
 
             if (null != headers) {
@@ -170,12 +221,16 @@ public class Utils {
                 HttpEntity entity = response.getEntity();
 
                 if (null != entity) {
-                    result = EntityUtils.toString(entity);
+                	if(charset==null){
+                		result = EntityUtils.toString(entity);
+                	}else{
+                		result = EntityUtils.toString(entity,charset);
+                	}
                 }
             }
 
         } catch (IOException e) {
-            LOGGER.error("The request error, params={}", params, e);
+            LOGGER.error("The request error, param={}", param, e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "The request error.");
         }finally {
@@ -190,23 +245,23 @@ public class Utils {
     /**
      *
      * @param url
-     * @param params 表单提交 content-type : application/x-www-form-urlencoded
+     * @param param 普通表单提交
      * @return
      */
-    public static String post(String url, Map<String, String> params) {
-        return post(url, params, null);
+    public static String post(String url, Map<String, String> param) {
+        return post(url, param, null);
     }
 
     /**
      *
      * @param url
-     * @param params 表单提交 content-type : application/x-www-form-urlencoded
+     * @param param 普通表单提交
      * @param headers
      * @return
      */
-    public static String post(String url, Map<String, String> params, Map<String, String> headers) {
+    public static String post(String url, Map<String, String> param, Map<String, String> headers) {
 
-        LOGGER.info("The request info, url={}, param={}", url, JSONObject.toJSONString(params));
+        LOGGER.info("The request info, url={}, param={}", url, JSONObject.toJSONString(param));
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
@@ -215,7 +270,7 @@ public class Utils {
         HttpPost httpPost = new HttpPost(url);
 
         List<NameValuePair> nvps = new ArrayList<>();
-        Set<Map.Entry<String, String>> paramsEntry = params.entrySet();
+        Set<Map.Entry<String, String>> paramsEntry = param.entrySet();
         for (Map.Entry<String, String> e: paramsEntry) {
             nvps.add(new BasicNameValuePair(e.getKey(), e.getValue()));
         }
@@ -223,7 +278,6 @@ public class Utils {
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(nvps, StandardCharsets.UTF_8));
 
-//            httpPost.addHeader("content-type", "application/x-www-form-urlencoded");
             if (null != headers) {
                 Set<Map.Entry<String, String>> headersEntry = headers.entrySet();
                 for (Map.Entry<String, String> e: headersEntry) {
@@ -244,7 +298,7 @@ public class Utils {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("The request error, params={}", params, e);
+            LOGGER.error("The request error, param={}", param, e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "The request error.");
         }finally {

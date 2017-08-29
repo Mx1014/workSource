@@ -1,23 +1,11 @@
 package com.everhomes.sms;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.util.RuntimeErrorException;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.map.MultiValueMap;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -41,9 +29,17 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.util.RuntimeErrorException;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SmsChannel {
     private static final Logger logger = LoggerFactory.getLogger(SmsChannel.class);
@@ -68,9 +64,40 @@ public class SmsChannel {
             this.headers.putAll(headers);
 
         try {
-            CloseableHttpResponse rsp = client.execute(createRequest(uri, method, body,entityJsonStr), new HttpClientContext());
+            HttpUriRequest request = createRequest(uri, method, body, entityJsonStr);
+
+            if (logger.isDebugEnabled()) {
+                try {
+                    logger.debug("send sms request line = {}", request.getRequestLine());
+                    for (Header header : request.getAllHeaders()) {
+                        logger.debug("send sms request Header[ {} : {}]", header.getName(), header.getValue());
+                    }
+                    if (request instanceof HttpEntityEnclosingRequest) {
+                        HttpEntityEnclosingRequest req = (HttpEntityEnclosingRequest) request;
+                        logger.debug("send sms request entity = {} ", EntityUtils.toString(req.getEntity()));
+                    }
+                } catch (IOException | ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            CloseableHttpResponse rsp = client.execute(request, new HttpClientContext());
             assert (rsp != null);
+
             String result = EntityUtils.toString(rsp.getEntity());
+
+            if (logger.isDebugEnabled()) {
+                try {
+                    logger.debug("send sms resp status line = {}", rsp.getStatusLine());
+                    for (Header header : rsp.getAllHeaders()) {
+                        logger.debug("send sms resp header [ {} : {}]", header.getName(), header.getValue());
+                    }
+                    logger.debug("send sms resp body = {}", result);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
             if (rsp.getStatusLine().getStatusCode() >= 300) {
                 logger.error("send sms message error.error reason is {}", result);
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -80,8 +107,7 @@ public class SmsChannel {
             for (Header header : rsp.getAllHeaders()) {
                 mut.put(header.getName(), header.getValue());
             }
-            RspMessage rspMessage = new RspMessage(result, mut);
-            return rspMessage;
+            return new RspMessage(result, mut);
         } catch (IOException e) {
             logger.error("send sms message error", e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

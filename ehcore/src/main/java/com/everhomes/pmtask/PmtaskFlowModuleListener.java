@@ -30,8 +30,8 @@ import java.util.List;
 
 @Component
 public class PmtaskFlowModuleListener implements FlowModuleListener {
-	
-    private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskFlowModuleListener.class);
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskFlowModuleListener.class);
 	@Autowired
 	private FlowService flowService;
 	@Autowired
@@ -43,7 +43,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
-    private FlowUserSelectionProvider flowUserSelectionProvider;
+	private FlowUserSelectionProvider flowUserSelectionProvider;
 	@Autowired
 	private SmsProvider smsProvider;
 	@Autowired
@@ -52,7 +52,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private UserProvider userProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
-	
+
 	@Override
 	public FlowModuleInfo initModule() {
 		FlowModuleInfo module = new FlowModuleInfo();
@@ -65,12 +65,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStart(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-		
+
 	}
 
 	//状态改变之后
@@ -157,7 +157,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
-		
+
 	}
 
 	@Override
@@ -177,7 +177,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-		
+
 		GetTaskDetailCommand cmd = new GetTaskDetailCommand();
 		cmd.setId(flowCase.getReferId());
 		cmd.setOwnerId(flowCase.getProjectId());
@@ -197,10 +197,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		}
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
-		
+
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey("服务内容");
@@ -230,13 +230,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			e.setValue(dto.getCategoryName());
 			entities.add(e);
 		}
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("发起人");
 		e.setValue(dto.getRequestorName());
 		entities.add(e);
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("联系电话");
@@ -284,31 +284,31 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		LOGGER.debug("update pmtask request, stepType={}, nodeType={}", stepType, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if ("ASSIGNING".equals(nodeType)) {
-					FlowGraphEvent evt = ctx.getCurrentEvent();
-					if(evt != null) {
-						for(FlowEntitySel es : evt.getEntitySel()) {
-							//update by janson
-							if(!FlowEntityType.FLOW_SELECTION.getCode().equals(es.getFlowEntityType())) {
-								continue;
-							}
-							PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-							FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(es.getEntityId());
-							Long targetId = sel.getSourceIdA();
-
-							PmTaskLog pmTaskLog = new PmTaskLog();
-							pmTaskLog.setNamespaceId(task.getNamespaceId());
-							pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
-							pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
-							pmTaskLog.setOwnerId(task.getOwnerId());
-							pmTaskLog.setOwnerType(task.getOwnerType());
-							pmTaskLog.setStatus(task.getStatus());
-							pmTaskLog.setTargetId(targetId);
-							pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
-							pmTaskLog.setTaskId(task.getId());
-							pmTaskProvider.createTaskLog(pmTaskLog);							
+				FlowGraphEvent evt = ctx.getCurrentEvent();
+				if(evt != null) {
+					for(FlowEntitySel es : evt.getEntitySel()) {
+						//update by janson
+						if(!FlowEntityType.FLOW_SELECTION.getCode().equals(es.getFlowEntityType())) {
+							continue;
 						}
+						PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(es.getEntityId());
+						Long targetId = sel.getSourceIdA();
 
+						PmTaskLog pmTaskLog = new PmTaskLog();
+						pmTaskLog.setNamespaceId(task.getNamespaceId());
+						pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+						pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
+						pmTaskLog.setOwnerId(task.getOwnerId());
+						pmTaskLog.setOwnerType(task.getOwnerType());
+						pmTaskLog.setStatus(task.getStatus());
+						pmTaskLog.setTargetId(targetId);
+						pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
+						pmTaskLog.setTaskId(task.getId());
+						pmTaskProvider.createTaskLog(pmTaskLog);
 					}
+
+				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 			if ("ASSIGNING".equals(nodeType)) {
@@ -338,10 +338,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			handler.pushToQueque(task.getId() + "," + targetId + "," + organizationId);
 		}
 	}
-	
+
 	@Override
 	public void onFlowCreating(Flow flow) {
-		
+
 
 	}
 
@@ -357,7 +357,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
-			List<Tuple<String, Object>> variables) {
+										List<Tuple<String, Object>> variables) {
 		FlowCase flowCase = ctx.getFlowCase();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
 		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());

@@ -52,8 +52,6 @@ import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.openapi.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
@@ -67,7 +65,6 @@ import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import com.google.gson.annotations.SerializedName;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.DistanceUtils;
@@ -1547,7 +1544,7 @@ public class BusinessServiceImpl implements BusinessService {
 				}
 				FamilyAddressDTO dto = new FamilyAddressDTO();
 				dto.setFamilyId(userGroup.getGroupId());
-				dto.setAdddress(ConvertHelper.convert(address, AddressDTO.class));
+				dto.setAdddress(processAddressDTO(address));
 				dtos.add(dto);
 			}
 		}
@@ -1577,7 +1574,7 @@ public class BusinessServiceImpl implements BusinessService {
 							LOGGER.error("listUserOrganizationAddresses-address=address is empty,addressId = {}", orgAddress.getAddressId());
 							continue;
 						}
-						adddresses.add(ConvertHelper.convert(address, AddressDTO.class));
+						adddresses.add(processAddressDTO(address));
 					}
 				}
 				dto.setAdddresses(adddresses);
@@ -1586,6 +1583,21 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 		return dtos;
 	}
+
+	private AddressDTO processAddressDTO(Address address){
+		AddressDTO dto = ConvertHelper.convert(address, AddressDTO.class);
+		Region city = regionProvider.findRegionById(address.getCityId());
+		if(null != city){
+			dto.setCityName(city.getName());
+		}
+
+		Region area = regionProvider.findRegionById(address.getAreaId());
+		if(null != area){
+			dto.setAreaName(area.getName());
+		}
+		return dto;
+	}
+
 
 	@Override
 	public UserServiceAddressDTO getUserDefaultAddress(GetUserDefaultAddressCommand cmd) {
@@ -2242,7 +2254,7 @@ public class BusinessServiceImpl implements BusinessService {
             LOGGER.debug("list business promotion namespaceId={}", namespaceId);
 
         if ("biz".equals(source)) {// 从电商服务器获取数据
-            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize);
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize, cmd.getRecommendType());
         }
         // 从数据库获取数据
         else {
@@ -2259,36 +2271,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
 
-    /*// 商品对象
-    private static class Commodity {
-        private String id;// 商品id
-        private String commoNo;// 商品编号
-        private String commoName;// 商品名称
-        private String defaultPic;// 商品图片
-        private BigDecimal price;// 商品价格
-        private String shopNo;// 店铺编号
-        private String uri;// 商品详情链接
-
-        @Override
-        public String toString() {
-            return StringHelper.toJsonString(this);
-        }
-    }*/
-
-    // 电商服务器响应对象
-    private static class Resp {
-        private String version;
-        private Integer errorCode;
-        @SerializedName("response")
-        private List<ModulePromotionEntityDTO> response = new ArrayList<>();
-
-        @Override
-        public String toString() {
-            return StringHelper.toJsonString(this);
-        }
-    }
-
-    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
+    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize, Byte recommendType) {
         String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "zl-ec/rest/openapi/commodity/listRecommend");
 
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
@@ -2302,13 +2285,16 @@ public class BusinessServiceImpl implements BusinessService {
         Map<String, String> param = new HashMap<>();
         param.put("namespaceId", String.valueOf(namespaceId));
         param.put("pageSize", String.valueOf(pageSize));
+        if (recommendType != null) {
+            param.put("recommendType", String.valueOf(recommendType));
+        }
 
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
         try {
             String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 10, "UTF-8");
-            Resp resp = (Resp) StringHelper.fromJsonString(jsonStr, Resp.class);
+            CommodityRespDTO resp = (CommodityRespDTO) StringHelper.fromJsonString(jsonStr, CommodityRespDTO.class);
             if (resp != null) {
-                reponse.setEntities(resp.response);
+                reponse.setEntities(resp.getResponse());
             }
             return reponse;
         } catch (Exception e) {
