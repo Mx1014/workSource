@@ -1379,8 +1379,8 @@ public class ForumServiceImpl implements ForumService {
          //Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
          List<Long> communityIdList = new ArrayList<Long>();
 
-         //获取园区id和论坛Id edit by yanjun 20170830
-         populateCommunityIdAndForumId(communityId, organizationId, cmd.getNamespaceId(), communityIdList, forumIds);
+         //获取园区id和论坛Id,并返回orgId，因为当查询域空间时需要orgid来查发送到“全部”的帖子 edit by yanjun 20170830
+         organizationId = populateCommunityIdAndForumId(communityId, organizationId, cmd.getNamespaceId(), communityIdList, forumIds);
          
          if(null != cmd.getEmbeddedAppId() && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
         	 ListActivitiesReponse response = activityService.listOfficialActivities(cmd);
@@ -1490,7 +1490,7 @@ public class ForumServiceImpl implements ForumService {
 	    }
     }
     @Override
-    public void populateCommunityIdAndForumId(Long communityId, Long organizationId, Integer namespaceId, List<Long> communityIds, List<Long> forumIds){
+    public Long populateCommunityIdAndForumId(Long communityId, Long organizationId, Integer namespaceId, List<Long> communityIds, List<Long> forumIds){
         if(communityId != null){
             Community community = communityProvider.findCommunityById(communityId);
             communityIds.add(community.getId());
@@ -1519,9 +1519,25 @@ public class ForumServiceImpl implements ForumService {
                 for (Community community : communities) {
                     communityIds.add(community.getId());
                     forumIds.add(community.getDefaultForumId());
+
+                    // 如果发送范围选择的公司圈，需要加上管理公司的论坛
+                    GetOrgDetailCommand getOrgDetailCommand = new GetOrgDetailCommand();
+                    getOrgDetailCommand.setCommunityId(community.getId());
+                    getOrgDetailCommand.setOrganizationType(PostEntityTag.PM.getCode());
+                    OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(getOrgDetailCommand);
+                    if (organization != null && organization.getGroupId() != null) {
+                        //加上发送到全部的
+                        organizationId = organization.getId();
+
+                        Group group = groupProvider.findGroupById(organization.getGroupId());
+                        if (group != null) {
+                            forumIds.add(group.getOwningForumId());
+                        }
+                    }
                 }
             }
         }
+        return organizationId;
     }
 
     /**

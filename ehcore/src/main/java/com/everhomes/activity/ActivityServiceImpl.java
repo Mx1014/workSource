@@ -4098,8 +4098,8 @@ public class ActivityServiceImpl implements ActivityService {
         
         List<Long> communityIdList = new ArrayList<Long>();
 
-		//获取园区id和论坛Id edit by yanjun 20170830
-		forumService.populateCommunityIdAndForumId(communityId, organizationId, cmd.getNamespaceId(), communityIdList, forumIds);
+		//获取园区id和论坛Id,并返回orgId，因为当查询域空间时需要orgid来查发送到“全部”的帖子 edit by yanjun 20170830
+		organizationId = forumService.populateCommunityIdAndForumId(communityId, organizationId, cmd.getNamespaceId(), communityIdList, forumIds);
 
         // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
         if(forumIds.size() == 0) {

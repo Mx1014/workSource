@@ -49,7 +49,7 @@ public interface ForumService {
     ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd);
     CheckUserPostDTO checkUserPostStatus(CheckUserPostCommand cmd);
 
-    void populateCommunityIdAndForumId(Long communityId, Long organizationId, Integer namespaceId, List<Long> communityIds, List<Long> forumIds);
+    Long populateCommunityIdAndForumId(Long communityId, Long organizationId, Integer namespaceId, List<Long> communityIds, List<Long> forumIds);
 
     /**
      * 机构查询自己可看的帖子列表
