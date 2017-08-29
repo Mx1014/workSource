@@ -22,9 +22,10 @@ public class TransferArchivesEmployeesCommand {
     @ItemType(Long.class)
     private List<Long> detailIds;
 
+    @ItemType(Long.class)
     private List<Long> departmentIds;
 
-    private List<Long> jobPositionIds;
+    private String jobPosition;
 
     private Long organizationId;
 
@@ -45,6 +46,13 @@ public class TransferArchivesEmployeesCommand {
         this.detailIds = detailIds;
     }
 
+    public String getJobPosition() {
+        return jobPosition;
+    }
+
+    public void setJobPosition(String jobPosition) {
+        this.jobPosition = jobPosition;
+    }
 
     public Long getOrganizationId() {
         return organizationId;
@@ -81,14 +89,6 @@ public class TransferArchivesEmployeesCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }
-
-    public List<Long> getJobPositionIds() {
-        return jobPositionIds;
-    }
-
-    public void setJobPositionIds(List<Long> jobPositionIds) {
-        this.jobPositionIds = jobPositionIds;
     }
 
     public List<Long> getDepartmentIds() {

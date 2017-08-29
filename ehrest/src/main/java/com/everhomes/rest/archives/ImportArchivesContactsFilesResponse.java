@@ -1,5 +1,6 @@
 package com.everhomes.rest.archives;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.util.StringHelper;
 

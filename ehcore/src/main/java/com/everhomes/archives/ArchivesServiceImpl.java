@@ -211,12 +211,11 @@ public class ArchivesServiceImpl implements ArchivesService {
                 }
 
                 //  开始导入
-                ImportArchivesContactsFilesResponse result = importArchivesContactsFiles(datas);
-
+                importArchivesContactsFiles(datas, response);
+//List<ImportFileResultLog<ImportArchivesContactsDTO>> result =
                 //  设置导入结果
-                response.setCoverCount(result.getCoverCount());
-                response.setTotalCount((long) datas.size());
-                response.setFailCount((long) result.getResults().size());
+/*                response.setTotalCount((long) datas.size());
+                response.setFailCount((long) result.size());*/
                 //  覆盖数与文件错误的设置
                 return response;
             }
@@ -260,21 +259,31 @@ public class ArchivesServiceImpl implements ArchivesService {
         return datas;
     }
 
-    private ImportArchivesContactsFilesResponse importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas){
+    private void importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas, ImportFileResponse response) {
 
-        ImportArchivesContactsFilesResponse response = new ImportArchivesContactsFilesResponse();
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
         List<ImportFileResultLog<ImportArchivesContactsDTO>> errorDataLogs = new ArrayList<>();
-
-        //  1.校验数据
-        log = checkArchivesContactsdatas(datas);
-        //  2.导入数据库
-        Long coverCount = saveArchivesContactsdatas(datas);
-        //  3.存储覆盖数目
+        Long coverCount = 0L;
+        for (ImportArchivesContactsDTO data : datas) {
+            //  1.校验数据
+            log = checkArchivesContactsdatas(data);
+            if (log != null) {
+                errorDataLogs.add(log);
+                continue;
+            }
+            //  2.导入数据库
+            boolean flag = saveArchivesContactsdatas(data);
+            if (flag)
+                coverCount++;
+        }
+        //  3.存储所有数据行数
+        response.setTotalCount((long) datas.size());
+        //  4.存储覆盖数据行数
         response.setCoverCount(coverCount);
-        //  4.存储错误数据
-        response.setResults(errorDataLogs);
-        return response;
+        //  5.存储错误数据行数
+        response.setFailCount((long) errorDataLogs.size());
+        //  6.存储错误数据
+        response.setLogs(errorDataLogs);
     }
 
     //  模板校验
@@ -303,45 +312,42 @@ public class ArchivesServiceImpl implements ArchivesService {
         return null;
     }
 
-    private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsdatas(List<ImportArchivesContactsDTO> datas) {
+    private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsdatas(ImportArchivesContactsDTO data) {
 
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
 
-        for (ImportArchivesContactsDTO data : datas) {
-            //  姓名
-            if (!StringUtils.isEmpty(data.getContactName())) {
-                LOGGER.warn("Contact name is empty. data = {}", data);
-                log.setData(data);
-                log.setErrorLog("Contact name is empty.");
-                log.setCode(ArchivesServiceErrorCode.ERROR_NAME_ISEMPTY);
-                return log;
-            } else if (data.getContactEnName().length() > 20) {
-                LOGGER.warn("Contact name is too long. data = {}", data);
-                log.setData(data);
-                log.setErrorLog("Contact name too long.");
-                log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOOLONG);
-                return log;
-            }
+        //  姓名
+        if (!StringUtils.isEmpty(data.getContactName())) {
+            LOGGER.warn("Contact name is empty. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Contact name is empty.");
+            log.setCode(ArchivesServiceErrorCode.ERROR_NAME_ISEMPTY);
+            return log;
+        } else if (data.getContactEnName().length() > 20) {
+            LOGGER.warn("Contact name is too long. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Contact name too long.");
+            log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOOLONG);
+            return log;
+        }
 
-            //  TODO:英文名校验
-
-
-            if (StringUtils.isEmpty(data.getContactToken())) {
-                LOGGER.warn("Contact token is empty. data = {}", data);
-                log.setData(data);
-                log.setErrorLog("Contact token is empty");
-                log.setCode(ArchivesServiceErrorCode.ERROR_CONTACTTOKEN_ISEMPTY);
-                return log;
-            }
+        //  TODO:英文名校验
 
 
+        if (StringUtils.isEmpty(data.getContactToken())) {
+            LOGGER.warn("Contact token is empty. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Contact token is empty");
+            log.setCode(ArchivesServiceErrorCode.ERROR_CONTACTTOKEN_ISEMPTY);
+            return log;
         }
         return null;
     }
 
-    private Long saveArchivesContactsdatas(List<ImportArchivesContactsDTO> datas){
+    private boolean saveArchivesContactsdatas(ImportArchivesContactsDTO data){
         //  TODO:手机号存在的话则累积数目+1
-        return 2L;
+//        return 2L
+        return true;
     }
 
     @Override
