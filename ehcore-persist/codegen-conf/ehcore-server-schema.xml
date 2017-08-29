@@ -181,7 +181,6 @@
         eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |eh_community_approve|
         eh_community_approve_requests |
 	eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |        eh_uniongroup_configures | eh_uniongroup_member_details |
-        eh_activity_roster_error |
         </includes>
 
             <!-- All elements that are excluded from your schema

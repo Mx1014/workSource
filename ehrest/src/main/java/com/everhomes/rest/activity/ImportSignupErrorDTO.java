@@ -6,11 +6,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>rowNum: rowNum</li>
+ *     <li>handleType: handleType</li>
  *     <li>description: description</li>
  * </ul>
  */
 public class ImportSignupErrorDTO {
 	private Integer rowNum;
+
+	private Byte handleType;
 
 	private String description;
 
@@ -28,6 +31,14 @@ public class ImportSignupErrorDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Byte getHandleType() {
+		return handleType;
+	}
+
+	public void setHandleType(Byte handleType) {
+		this.handleType = handleType;
 	}
 
 	@Override

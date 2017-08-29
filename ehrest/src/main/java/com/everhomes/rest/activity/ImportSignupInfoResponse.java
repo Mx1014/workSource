@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.activity;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -9,7 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>fail: fail</li>
  *     <li>success: success</li>
  *     <li>update: update</li>
- *     <li>jobId: 任务id，用于导出错误信息到excel时使用</li>
+ *     <li>fileLocation: fileLocation {@link com.everhomes.rest.contentserver.CsFileLocationDTO}</li>
  * </ul>
  */
 public class ImportSignupInfoResponse {
@@ -18,7 +20,8 @@ public class ImportSignupInfoResponse {
 	private Integer fail;
 	private Integer success;
 	private Integer update;
-	private Long jobId;
+	@ItemType(CsFileLocationDTO.class)
+	private CsFileLocationDTO fileLocation;
 
 	public Integer getTotal() {
 		return total;
@@ -52,12 +55,12 @@ public class ImportSignupInfoResponse {
 		this.update = update;
 	}
 
-	public Long getJobId() {
-		return jobId;
+	public CsFileLocationDTO getFileLocation() {
+		return fileLocation;
 	}
 
-	public void setJobId(Long jobId) {
-		this.jobId = jobId;
+	public void setFileLocation(CsFileLocationDTO fileLocation) {
+		this.fileLocation = fileLocation;
 	}
 
 	@Override

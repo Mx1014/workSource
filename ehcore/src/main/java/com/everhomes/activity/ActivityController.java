@@ -176,20 +176,20 @@ public class ActivityController extends ControllerBase {
     	return restResponse;
     }
 
-    /**
-     *
-     * <p>导出活动错误信息</p>
-     * <b>URL: /activity/exportErrorInfo</b>
-     */
-    @RequestMapping("exportErrorInfo")
-    @RestReturn(value=String.class)
-    public RestResponse exportErrorInfo(@Valid ExportErrorInfoCommand cmd, HttpServletResponse response) {
-        activityService.exportErrorInfo(cmd, response);
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
+//    /**
+//     *
+//     * <p>导出活动错误信息</p>
+//     * <b>URL: /activity/exportErrorInfo</b>
+//     */
+//    @RequestMapping("exportErrorInfo")
+//    @RestReturn(value=String.class)
+//    public RestResponse exportErrorInfo(@Valid ExportErrorInfoCommand cmd, HttpServletResponse response) {
+//        activityService.exportErrorInfo(cmd, response);
+//        RestResponse restResponse = new RestResponse();
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
     
     /**
      * 

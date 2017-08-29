@@ -27,6 +27,7 @@ public interface ActivityLocalStringCode {
 	static final int ACTIVITY_REALNAME_EMPTY=22;
 	static final int ACTIVITY_ROSTER_ALREADY_EXISTS = 23;
 	static final int ACTIVITY_REPEAT_ROSTER_IN_EXCEL = 24;
+	static final int ACTIVITY_REPEAT_ALREADY_EXISTS_UPDATE = 25;
 	 
 	 
 }

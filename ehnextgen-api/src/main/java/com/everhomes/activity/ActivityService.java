@@ -198,6 +198,6 @@ public interface ActivityService {
 	 */
 	void syncActivitySignupAttendeeCount();
 
-	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
+//	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
 

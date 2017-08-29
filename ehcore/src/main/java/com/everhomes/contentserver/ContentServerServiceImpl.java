@@ -472,7 +472,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         try {
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addBinaryBody("upload_file", fileStream,
-                    ContentType.APPLICATION_OCTET_STREAM, fileSuffix);
+                    ContentType.APPLICATION_OCTET_STREAM, fileName);
             HttpEntity multipart = builder.build();
 
             httpPost.setEntity(multipart);

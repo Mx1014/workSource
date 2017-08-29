@@ -165,8 +165,8 @@ public interface ActivityProivider {
 	 */
 	void deleteActivityCategories(Long id);
 	
-	void createActivityRosterError(ActivityRosterError rosterError);
-
-	List<ActivityRosterError> listActivityRosterErrorByJobId(Long jobId);
+//	void createActivityRosterError(ActivityRosterError rosterError);
+//
+//	List<ActivityRosterError> listActivityRosterErrorByJobId(Long jobId);
 
 }

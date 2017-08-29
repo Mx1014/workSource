@@ -1394,36 +1394,36 @@ public class ActivityProviderImpl implements ActivityProivider {
 		return result;
 	}
 
-    @Override
-    public void createActivityRosterError(ActivityRosterError rosterError) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityRosterError.class));
-        rosterError.setId(id);
-        if(rosterError.getCreateTime() == null){
-            rosterError.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        }
+//    @Override
+//    public void createActivityRosterError(ActivityRosterError rosterError) {
+//        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityRosterError.class));
+//        rosterError.setId(id);
+//        if(rosterError.getCreateTime() == null){
+//            rosterError.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        }
+//
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//        EhActivityRosterErrorDao dao = new EhActivityRosterErrorDao(context.configuration());
+//        dao.insert(rosterError);
+//
+//        DaoHelper.publishDaoAction(DaoAction.CREATE, EhActivityRosterError.class, null);
+//    }
 
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhActivityRosterErrorDao dao = new EhActivityRosterErrorDao(context.configuration());
-        dao.insert(rosterError);
-
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhActivityRosterError.class, null);
-    }
-
-    @Override
-    public List<ActivityRosterError> listActivityRosterErrorByJobId(Long jobId) {
-        List<ActivityRosterError> result = new ArrayList<>();
-
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-
-        Condition condition = Tables.EH_ACTIVITY_ROSTER_ERROR.JOB_ID.eq(jobId);
-
-        SelectJoinStep<Record> query = context.select().from(Tables.EH_ACTIVITY_ROSTER_ERROR);
-        query.where(condition);
-        query.orderBy(Tables.EH_ACTIVITY_ROSTER_ERROR.ROW_NUM.asc());
-        query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, ActivityRosterError.class));
-            return null;
-        });
-        return result;
-    }
+//    @Override
+//    public List<ActivityRosterError> listActivityRosterErrorByJobId(Long jobId) {
+//        List<ActivityRosterError> result = new ArrayList<>();
+//
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//
+//        Condition condition = Tables.EH_ACTIVITY_ROSTER_ERROR.JOB_ID.eq(jobId);
+//
+//        SelectJoinStep<Record> query = context.select().from(Tables.EH_ACTIVITY_ROSTER_ERROR);
+//        query.where(condition);
+//        query.orderBy(Tables.EH_ACTIVITY_ROSTER_ERROR.ROW_NUM.asc());
+//        query.fetch().map((r) -> {
+//            result.add(ConvertHelper.convert(r, ActivityRosterError.class));
+//            return null;
+//        });
+//        return result;
+//    }
 }

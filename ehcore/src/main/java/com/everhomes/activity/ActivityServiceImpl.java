@@ -49,6 +49,8 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ActivityDetailActionData;
 import com.everhomes.rest.common.ActivityEnrollDetailActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -92,7 +94,15 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 import net.greghaines.jesque.Job;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
 import org.slf4j.Logger;
@@ -120,7 +130,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
@@ -1006,18 +1016,13 @@ public class ActivityServiceImpl implements ActivityService {
 						"beyond contraint quantity!");
 			}
 
-			Integer[] updateCount = new Integer[1];
-			updateCount[0] = 0;
 			dbProvider.execute(s->{
 				rosters.forEach(r -> {
 
 					ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activity.getId(), r.getPhone(), ActivityRosterStatus.NORMAL.getCode());
 					if(oldRoster != null){
-						r.setId(oldRoster.getId());
-						r.setActivityId(cmd.getActivityId());
-						r.setStatus(ActivityRosterStatus.NORMAL.getCode());
-						activityProvider.updateRoster(r);
-						updateCount[0]++;
+						getNewForImport(oldRoster, r);
+						activityProvider.updateRoster(oldRoster);
 					}else {
 						r.setConfirmUid(user.getId());
 						r.setActivityId(cmd.getActivityId());
@@ -1025,46 +1030,100 @@ public class ActivityServiceImpl implements ActivityService {
 						activityProvider.createActivityRoster(r);
 					}
 				});
-				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size() - updateCount[0]);
-	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + rosters.size() - updateCount[0]);
+				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size() - result.getUpdate());
+	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + rosters.size() - result.getUpdate());
 	            activityProvider.updateActivity(activity);
 	            
 				return null;
 			});
-			result.setUpdate(updateCount[0]);
 			return null;
 		});
 
 		return result;
 	}
 
+	//有新的信息，则填充新的信息
+	private void getNewForImport(ActivityRoster oldRoster, ActivityRoster importRoster){
+
+    	//真实姓名
+    	if(!StringUtils.isEmpty(importRoster.getRealName())){
+    		oldRoster.setRealName(importRoster.getRealName());
+		}
+
+		//性别
+		if(importRoster.getGender() != null && importRoster.getGender().byteValue() != UserGender.UNDISCLOSURED.getCode()){
+			oldRoster.setGender(importRoster.getGender());
+		}
+
+		//园区
+		if(!StringUtils.isEmpty(importRoster.getCommunityName())){
+			oldRoster.setCommunityName(importRoster.getCommunityName());
+		}
+
+		//公司
+		if(!StringUtils.isEmpty(importRoster.getOrganizationName())){
+			oldRoster.setOrganizationName(importRoster.getOrganizationName());
+			oldRoster.setOrganizationId(importRoster.getOrganizationId());
+		}
+
+		//职位
+		if(!StringUtils.isEmpty(importRoster.getPosition())){
+			oldRoster.setPosition(importRoster.getPosition());
+		}
+
+		//是否高管
+		if(importRoster.getLeaderFlag() != null){
+			oldRoster.setLeaderFlag(importRoster.getLeaderFlag());
+		}
+
+		//邮件
+		if(!StringUtils.isEmpty(importRoster.getEmail())){
+			oldRoster.setEmail(importRoster.getEmail());
+		}
+
+	}
+
 	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId) {
 		@SuppressWarnings("rawtypes")
-		List<ActivityRosterError> errorLists = new ArrayList<>();
+		List<ImportSignupErrorDTO> errorLists = new ArrayList<>();
 		ArrayList rows = processorExcel(file);
 		List<ActivityRoster> rosters = new ArrayList<>();
 
 		//此处添加陈宫失败数，因为过着这个方法后就拿不到总数和失败数了。 add by yajun 20170827
-		if(rows == null){
-			result.setTotal(0);
-			result.setFail(0);
-			result.setSuccess(0);
-			result.setUpdate(0);
+		result.setTotal(0);
+		result.setFail(0);
+		result.setSuccess(0);
+		result.setUpdate(0);
+		if(rows == null || rows.size() < 3){
 			return rosters;
 		}
-		result.setTotal(rows.size() - 1);
 
-		for(int i=1, len=rows.size(); i<len; i++) {
+		//Excel模板从第三行开始 edit by yanjun 20170829
+		for(int i=2, len=rows.size(); i<len; i++) {
+
+			//总数加一
+			result.setTotal(result.getTotal() + 1);
+
 			RowResult row = (RowResult) rows.get(i);
-
 			//检验Excel的数据   add by yanjun 20170815
-			ActivityRosterError rosterError = checkExcelRoster(rosters, row, activityId);
+			ImportSignupErrorDTO rosterError = checkExcelRoster(rosters, row, activityId);
 			if(rosterError != null){
 				rosterError.setRowNum(i);
-				errorLists.add(rosterError);
-				continue;
+
+				//失败或者更新加一
+				if(rosterError.getHandleType() == null || rosterError.getHandleType().byteValue() == SignupErrorHandleType.SKIP.getCode()){
+					result.setFail(result.getFail() + 1);
+					errorLists.add(rosterError);
+					continue;
+				}else {
+					result.setUpdate(result.getUpdate() + 1);
+				}
+
 			}
-			
+
+			//成功加一
+			result.setSuccess(result.getSuccess() + 1);
+
 			User user = getUserFromPhone(row.getA().trim());
 			ActivityRoster roster = new ActivityRoster();
 			roster.setUuid(UUID.randomUUID().toString());
@@ -1088,34 +1147,91 @@ public class ActivityServiceImpl implements ActivityService {
 	        rosters.add(roster);
 		}
 
-
-
-		result.setSuccess(rosters.size());
-		result.setFail(rows.size() - 1 - rosters.size());
 		//保存错误信息
 		if(errorLists != null && errorLists.size() > 0){
-			Long jobId = addActivityRosterErrorLog(errorLists);
-			result.setJobId(jobId);
+
+
+			CsFileLocationDTO fileLocationDTO = writeLogToExcel(file, errorLists);
+			result.setFileLocation(fileLocationDTO);
+//			Long jobId = addActivityRosterErrorLog(errorLists);
+//			result.setJobId(jobId);
 		}
 
 		return rosters;
 	}
 
-	private Long addActivityRosterErrorLog(List<ActivityRosterError> list){
-    	Long jobId = System.currentTimeMillis();
-    	Long uid = UserContext.currentUserId();
-    	list.forEach(r -> {
-    		r.setJobId(jobId);
-    		r.setCreateUid(uid);
-			activityProvider.createActivityRosterError(r);
-		});
+	private CsFileLocationDTO writeLogToExcel(MultipartFile file, List<ImportSignupErrorDTO> errorLists){
+		try {
+			InputStream is = file.getInputStream();
 
-    	return jobId;
+
+			XSSFWorkbook workbook = new XSSFWorkbook(is);
+
+			XSSFSheet sheet = workbook.getSheetAt(0);
+
+			int errorCellColumn = sheet.getRow(1).getLastCellNum() + 1;
+
+			sheet.setColumnWidth(errorCellColumn, 5000);
+			boolean shiftFlag;
+			for(int i = sheet.getLastRowNum(); i>=2; i--){
+				shiftFlag = true;
+				for(int j=0; j<errorLists.size(); j++){
+					if(i == errorLists.get(j).getRowNum()){
+						shiftFlag = false;
+						Row row = sheet.getRow(i);
+						row.getCell(errorCellColumn, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).setCellValue(errorLists.get(j).getDescription());
+						break;
+					}
+				}
+
+				if(shiftFlag){
+					removeRow(sheet, i);
+				}
+			}
+
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			BufferedOutputStream bos = new BufferedOutputStream(os);
+			workbook.write(bos);
+
+			InputStream ins = new ByteArrayInputStream(os.toByteArray());
+			String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+			String name = "importErrorLog_" + String.valueOf(System.currentTimeMillis()) + ".xls";
+			UploadCsFileResponse re = contentServerService.uploadFileToContentServer(ins, name, token);
+			if(re.getErrorCode() == 0){
+				return re.getResponse();
+			}
+		}catch (Exception ex){
+			LOGGER.error("Write log to Excel Error");
+		}
+		return null;
 	}
 
-	private ActivityRosterError checkExcelRoster(List<ActivityRoster> newRosters, RowResult row, Long activityId){
+	private void removeRow(XSSFSheet sheet, int rowIndex) {
+		int lastRowNum = sheet.getLastRowNum();
+		if (rowIndex >= 0 && rowIndex < lastRowNum)
+			sheet.shiftRows(rowIndex + 1, lastRowNum, -1);//将行号为rowIndex+1一直到行号为lastRowNum的单元格全部上移一行，以便删除rowIndex行
+		if (rowIndex == lastRowNum) {
+			XSSFRow removingRow = sheet.getRow(rowIndex);
+			if (removingRow != null)
+				sheet.removeRow(removingRow);
+		}
+	}
 
-		ActivityRosterError rosterError = new ActivityRosterError();
+//	private Long addActivityRosterErrorLog(List<ActivityRosterError> list){
+//    	Long jobId = System.currentTimeMillis();
+//    	Long uid = UserContext.currentUserId();
+//    	list.forEach(r -> {
+//    		r.setJobId(jobId);
+//    		r.setCreateUid(uid);
+//			activityProvider.createActivityRosterError(r);
+//		});
+//
+//    	return jobId;
+//	}
+
+	private ImportSignupErrorDTO checkExcelRoster(List<ActivityRoster> newRosters, RowResult row, Long activityId){
+
+		ImportSignupErrorDTO rosterError = new ImportSignupErrorDTO();
 		String  locale = UserContext.current().getUser().getLocale();
 		String scope = ActivityLocalStringCode.SCOPE;
 
@@ -1125,6 +1241,7 @@ public class ActivityServiceImpl implements ActivityService {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_PHONE_EMPTY);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "The phone number is empty");
 			rosterError.setDescription(errorString);
+			rosterError.setHandleType(SignupErrorHandleType.SKIP.getCode());
 			return rosterError;
 		}
 		//手机格式简单检验
@@ -1132,6 +1249,7 @@ public class ActivityServiceImpl implements ActivityService {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_INVALID_PHONE);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "Invalid phone number");
 			rosterError.setDescription(errorString);
+			rosterError.setHandleType(SignupErrorHandleType.SKIP.getCode());
 			return rosterError;
 		}
 
@@ -1140,18 +1258,9 @@ public class ActivityServiceImpl implements ActivityService {
 			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REALNAME_EMPTY);
 			errorString = localeStringService.getLocalizedString(scope, code, locale, "The realName is empty");
 			rosterError.setDescription(errorString);
+			rosterError.setHandleType(SignupErrorHandleType.SKIP.getCode());
 			return rosterError;
 		}
-
-		//此处不检查是否已经报名，已经报名的数据也需要保留到后面更新  edit by yanjun 20170828
-		//检查是否已经报过名
-//		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, row.getA(), ActivityRosterStatus.NORMAL.getCode());
-//		if(oldRoster != null){
-//			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_ROSTER_ALREADY_EXISTS);
-//			errorString = localeStringService.getLocalizedString(scope, code, locale, "The roster already exists, checked with phone");
-//			errorDTO.setDescription(errorString);
-//			return errorDTO;
-//		}
 
 		//检查Excel内是否存在重复
 		for(int i=0; i< newRosters.size(); i++){
@@ -1159,8 +1268,19 @@ public class ActivityServiceImpl implements ActivityService {
 				String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REPEAT_ROSTER_IN_EXCEL);
 				errorString = localeStringService.getLocalizedString(scope, code, locale, "Repeat roster in this Excel, checked with phone");
 				rosterError.setDescription(errorString);
+				rosterError.setHandleType(SignupErrorHandleType.SKIP.getCode());
 				return rosterError;
 			}
+		}
+
+		//检查是否已经报过名
+		ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, row.getA(), ActivityRosterStatus.NORMAL.getCode());
+		if(oldRoster != null){
+			String code = String.valueOf(ActivityLocalStringCode.ACTIVITY_REPEAT_ALREADY_EXISTS_UPDATE);
+			errorString = localeStringService.getLocalizedString(scope, code, locale, "The roster already exists, update now");
+			rosterError.setDescription(errorString);
+			rosterError.setHandleType(SignupErrorHandleType.UPDATE.getCode());
+			return rosterError;
 		}
 
     	return null;
@@ -5628,16 +5748,16 @@ public class ActivityServiceImpl implements ActivityService {
 		
 	}
 
-	@Override
-	public void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response) {
-		List<ActivityRosterError> dtos = activityProvider.listActivityRosterErrorByJobId(cmd.getJobId());
-		String fileName = String.format("异常信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
-		ExcelUtils excelUtils = new ExcelUtils(response, fileName, "异常信息");
-		List<String> propertyNames = new ArrayList<String>(Arrays.asList("rowNum", "description"));
-		List<String> titleNames = new ArrayList<String>(Arrays.asList( "行号", "异常内容"));
-		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList( 20, 100));
-
-		excelUtils.setNeedSequenceColumn(false);
-		excelUtils.writeExcel(propertyNames, titleNames, titleSizes, dtos);
-	}
+//	@Override
+//	public void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response) {
+//		List<ActivityRosterError> dtos = activityProvider.listActivityRosterErrorByJobId(cmd.getJobId());
+//		String fileName = String.format("异常信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+//		ExcelUtils excelUtils = new ExcelUtils(response, fileName, "异常信息");
+//		List<String> propertyNames = new ArrayList<String>(Arrays.asList("rowNum", "description"));
+//		List<String> titleNames = new ArrayList<String>(Arrays.asList( "行号", "异常内容"));
+//		List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList( 20, 100));
+//
+//		excelUtils.setNeedSequenceColumn(false);
+//		excelUtils.writeExcel(propertyNames, titleNames, titleSizes, dtos);
+//	}
 }
