@@ -3,14 +3,10 @@ package com.everhomes.activity;
 
 
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import com.everhomes.server.schema.tables.EhActivityRosterError;
 import com.everhomes.server.schema.tables.daos.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
