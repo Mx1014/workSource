@@ -668,7 +668,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public List<Community> listCommunitiesByKeyWord(ListingLocator locator,
-			int count, String keyword, Integer namespaceId) {
+			int count, String keyword, Integer namespaceId, Byte communityType) {
         if(namespaceId == null){
             namespaceId =UserContext.getCurrentNamespaceId(null);
         }
@@ -678,6 +678,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 		if(null != locator.getAnchor()){
 			cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
 		}
+		if(communityType != null){
+            cond = cond.and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));
+        }
 		
 		if(!StringUtils.isEmpty(keyword)){
 			cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));

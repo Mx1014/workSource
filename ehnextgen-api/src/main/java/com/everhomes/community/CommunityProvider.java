@@ -36,7 +36,7 @@ public interface CommunityProvider {
     List<Community> findCommunitiesByNameAndCityId(String name, long cityId, int namespaceId);
     List<Community> findCommunitiesByIds(List<Long> ids);
     Community findCommunityByUuid(String uuid);
-	List<Community> listCommunitiesByKeyWord(ListingLocator locator, int i, String keyword, Integer namespaceId);
+	List<Community> listCommunitiesByKeyWord(ListingLocator locator, int i, String keyword, Integer namespaceId, Byte communityType);
 	List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId);
 	
 	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId);
