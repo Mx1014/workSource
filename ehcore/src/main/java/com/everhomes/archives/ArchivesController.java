@@ -171,7 +171,7 @@ public class ArchivesController extends ControllerBase{
      * <p>9.离职员工列表</p>
      */
     @RequestMapping("listArchivesDismissEmployees")
-    @RestReturn(value = ListArchivesEmployeesResponse.class)
+    @RestReturn(value = ListArchivesDismissEmployeesResponse.class)
     public RestResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd){
         ListArchivesDismissEmployeesResponse res = archivesService.listArchivesDismissEmployees(cmd);
         RestResponse response = new RestResponse(res);

@@ -11,7 +11,7 @@ import java.util.List;
  * <li>detailId: 成员 detailId</li>
  * <li>contactName: 姓名</li>
  * <li>employeeStatus: 成员状态: 0-试用, 1-正式</li>
- * <li>jobPositions: 职务 {@link OrganizationDTO}</li>
+ * <li>jobPositions: 职务</li>
  * <li>departments: 部门 {@link OrganizationDTO}</li>
  * <li>contactToken: 手机号</li>
  * <li>email: 邮箱</li>
@@ -27,8 +27,7 @@ public class ArchivesEmployeeDTO {
 
     private String employeeStatus;
 
-    @ItemType(OrganizationDTO.class)
-    private List<OrganizationDTO> jobPositions;
+    private String jobPosition;
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
@@ -68,12 +67,12 @@ public class ArchivesEmployeeDTO {
         this.employeeStatus = employeeStatus;
     }
 
-    public List<OrganizationDTO> getJobPositions() {
-        return jobPositions;
+    public String getJobPosition() {
+        return jobPosition;
     }
 
-    public void setJobPositions(List<OrganizationDTO> jobPositions) {
-        this.jobPositions = jobPositions;
+    public void setJobPosition(String jobPosition) {
+        this.jobPosition = jobPosition;
     }
 
     public List<OrganizationDTO> getDepartments() {

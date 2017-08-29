@@ -44,7 +44,7 @@ public class GeneralFormFieldDTO {
 	private String fieldExtra;
 
 	//	added by R 20170825
-	private Long fieldGroupId;
+	private String fieldGroupName;
 
 	private String fieldValue;
 
@@ -152,12 +152,12 @@ public class GeneralFormFieldDTO {
 		this.fieldValue = fieldValue;
 	}
 
-	public Long getFieldGroupId() {
-		return fieldGroupId;
+	public String getFieldGroupName() {
+		return fieldGroupName;
 	}
 
-	public void setFieldGroupId(Long fieldGroupId) {
-		this.fieldGroupId = fieldGroupId;
+	public void setFieldGroupName(String fieldGroupName) {
+		this.fieldGroupName = fieldGroupName;
 	}
 
 	@Override
