@@ -2857,7 +2857,8 @@ public class CommunityServiceImpl implements CommunityService {
         List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
         List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(communityIds);
         if (null == orgs || orgs.size() == 0) {
-            return response;
+			LOGGER.debug("orgs is null");
+			return response;
         }
 
 		List<Long> orgIds = new ArrayList<>();
@@ -2903,6 +2904,8 @@ public class CommunityServiceImpl implements CommunityService {
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
                     cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
+			LOGGER.debug("wait approve organizationMembers cmd:" + cmd);
+			LOGGER.debug("wait approve organizationMembers is null");
         }
 
 		if(organizationMembers == null || organizationMembers.size() == 0) {
