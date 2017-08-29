@@ -28,7 +28,11 @@ public interface GeneralFormProvider {
 	//	added by R 20170828
 	GeneralFormGroups createGeneralFormGroup(GeneralFormGroups group);
 
+	void deleteGeneralFormGroupsNotInIds(Long formOriginId, Long organizationId, List<Long> groupIds);
+
 	GeneralFormGroups findGeneralFormGroupById(Long id);
+
+	GeneralFormGroups findGeneralFormGroupByNameAndOriginId(Long formOriginId, String groupName, Long organizationId);
 
 	void updateGeneralFormGroup(GeneralFormGroups group);
 

@@ -451,9 +451,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		form.setFormVersion(0L);
 		form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
 		this.generalFormProvider.createGeneralForm(form);
+
+		//  创建字段组(此时表单已经建立，故在建立字段组时即可同步)
 		if (cmd.getFormGroups() != null) {
 			for(GeneralFormGroupDTO dto : cmd.getFormGroups()){
-				syncGeneralFormGroupFormOriginId(form.getFormOriginId(),form.getFormVersion(),dto.getFieldGroupId());
+                createGeneralFormGroup(form,dto,cmd.getOwnerId(),cmd.getOwnerType(),cmd.getOrganizationId());
 			}
 		}
 		return processGeneralFormDTO(form);
@@ -466,14 +468,16 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		return dto;
 	}
 
-	private void syncGeneralFormGroupFormOriginId(Long formOriginId, Long formVersion, Long fieldGroupId) {
-		GeneralFormGroups group = generalFormProvider.findGeneralFormGroupById(fieldGroupId);
-		if (group != null) {
-			group.setFormOriginId(formOriginId);
-			group.setFormVersion(formVersion);
-			generalFormProvider.updateGeneralFormGroup(group);
-		}
-	}
+	private void createGeneralFormGroup(GeneralForm form, GeneralFormGroupDTO dto, Long ownerId, String ownerType, Long organizationId){
+        CreateGeneralFormGroupCommand createCommand = new CreateGeneralFormGroupCommand();
+        createCommand.setFormOriginId(form.getFormOriginId());
+        createCommand.setFormVersion(form.getFormVersion());
+        createCommand.setGroupName(dto.getFieldGroupName());
+        createCommand.setOwnerId(ownerId);
+        createCommand.setOwnerType(ownerType);
+        createCommand.setOrganizationId(organizationId);
+        createGeneralFormGroup(createCommand);
+    }
 
 	@Override
 	public GeneralFormDTO updateGeneralForm(UpdateApprovalFormCommand cmd) {
@@ -505,9 +509,37 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 				form.setUpdateTime(null);
 				this.generalFormProvider.createGeneralForm(form);
 			}
+
+			//  对字段组进行修改
+            if(cmd.getFormGroups() != null){
+			    List<Long> groupIds = new ArrayList<>();
+			    for(GeneralFormGroupDTO dto : cmd.getFormGroups()){
+			        if(dto.getFieldGroupId()!=null){
+                        //  若存在的则修改
+                        syncGeneralFormGroupFormOriginId(form.getFormOriginId(),form.getFormVersion(),dto.getFieldGroupId(),dto.getFieldGroupName());
+			            groupIds.add(dto.getFieldGroupId());
+                    }else{
+			            //  若不存在则新增
+                        createGeneralFormGroup(form,dto,cmd.getOwnerId(),cmd.getOwnerType(),cmd.getOrganizationId());
+                    }
+                }
+                //  删除用户删除的字段组
+                generalFormProvider.deleteGeneralFormGroupsNotInIds(form.getFormOriginId(),cmd.getOrganizationId(),groupIds);
+            }
 			return processGeneralFormDTO(form);
 		});
 	}
+
+
+    private void syncGeneralFormGroupFormOriginId(Long formOriginId, Long formVersion, Long fieldGroupId, String fieldGroupName) {
+        GeneralFormGroups group = generalFormProvider.findGeneralFormGroupById(fieldGroupId);
+        if (group != null) {
+            group.setFormOriginId(formOriginId);
+            group.setFormVersion(formVersion);
+            group.setGroupName(fieldGroupName);
+            generalFormProvider.updateGeneralFormGroup(group);
+        }
+    }
 
 	/**
 	 * 取状态不为失效的form
@@ -564,6 +596,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		group.setOwnerType(cmd.getOwnerType());
 		group.setNamespaceId(user.getNamespaceId());
 		group.setOperatorUid(user.getId());
+		if (cmd.getFormOriginId() != null)
+			group.setFormOriginId(cmd.getFormOriginId());
+		if (cmd.getFormVersion() != null)
+			group.setFormVersion(cmd.getFormVersion());
 		generalFormProvider.createGeneralFormGroup(group);
 	}
 

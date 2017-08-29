@@ -31,6 +31,9 @@ public class UpdateApprovalFormCommand {
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
 
+	@ItemType(GeneralFormGroupDTO.class)
+	List<GeneralFormGroupDTO> formGroups;
+
 	public Long getFormOriginId() {
 		return formOriginId;
 	}
@@ -93,6 +96,14 @@ public class UpdateApprovalFormCommand {
 
 	public void setFormFields(List<GeneralFormFieldDTO> formFields) {
 		this.formFields = formFields;
+	}
+
+	public List<GeneralFormGroupDTO> getFormGroups() {
+		return formGroups;
+	}
+
+	public void setFormGroups(List<GeneralFormGroupDTO> formGroups) {
+		this.formGroups = formGroups;
 	}
 
 	@Override

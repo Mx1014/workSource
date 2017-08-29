@@ -185,12 +185,31 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
+    public void deleteGeneralFormGroupsNotInIds(Long formOriginId, Long organizationId, List<Long> groupIds){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_GENERAL_FORM_GROUPS)
+                .where(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId))
+                .and(Tables.EH_GENERAL_FORM_GROUPS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_GENERAL_FORM_GROUPS.ID.notIn(groupIds));
+    }
+
+	@Override
 	public GeneralFormGroups findGeneralFormGroupById(Long id){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
 		EhGeneralFormGroups group = dao.findById(id);
 		return ConvertHelper.convert(group, GeneralFormGroups.class);
 	}
+
+    @Override
+    public GeneralFormGroups findGeneralFormGroupByNameAndOriginId(Long formOriginId, String groupName, Long organizationId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
+        query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
+        query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.GROUP_NAME.eq(groupName));
+        query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.ORGANIZATION_ID.eq(organizationId));
+        return query.fetchOneInto(GeneralFormGroups.class);
+    }
 
 	@Override
 	public void updateGeneralFormGroup(GeneralFormGroups group){
