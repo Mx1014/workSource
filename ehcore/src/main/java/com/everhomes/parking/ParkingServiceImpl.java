@@ -286,6 +286,7 @@ public class ParkingServiceImpl implements ParkingService {
 
         	FlowCase flowCase = createFlowCase(parkingCardRequest, flow, user.getId());
 
+			parkingCardRequest.setFlowId(flowId);
     		parkingCardRequest.setFlowCaseId(flowCase.getId());
     		parkingProvider.updateParkingCardRequest(parkingCardRequest);
     		return null;
