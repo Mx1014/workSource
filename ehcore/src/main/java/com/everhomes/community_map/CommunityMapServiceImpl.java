@@ -6,6 +6,8 @@ import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.address.AddressDTO;
@@ -47,6 +49,8 @@ public class CommunityMapServiceImpl implements CommunityMapService {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private CommunityService communityService;
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Override
     public ListCommunityMapSearchTypesResponse listCommunityMapSearchTypesByScene(ListCommunityMapSearchTypesCommand cmd) {
@@ -271,8 +275,42 @@ public class CommunityMapServiceImpl implements CommunityMapService {
     @Override
     public CommunityMapInitDataDTO getCommunityMapInitData(GetCommunityMapInitDataCommand cmd) {
 
-        CommunityMapInitDataDTO dto = new CommunityMapInitDataDTO();
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        return null;
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        Long communityId = userService.getCommunityIdBySceneToken(sceneToken);
+
+        CommunityMapInfo communityMapInfo = communityMapProvider.findCommunityMapInfo(namespaceId);
+
+        CommunityMapInitDataDTO dto = ConvertHelper.convert(communityMapInfo, CommunityMapInitDataDTO.class);
+
+        String url = contentServerService.parserUri(communityMapInfo.getMapUri(), EntityType.USER.getCode(), userId);
+        dto.setMapUrl(url);
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+
+        List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, Integer.MAX_VALUE, communityId,
+                namespaceId, null);
+
+        List<CommunityMapBuildingDTO> tempBuildings = buildings.stream().map(r -> {
+            CommunityMapBuildingDTO d = ConvertHelper.convert(r, CommunityMapBuildingDTO.class);
+            List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(r.getId());
+
+            if (!geos.isEmpty()) {
+
+                CommunityBuildingGeo centerGeo = geos.get(geos.size() - 1);
+                geos.remove(centerGeo);
+                d.setCenterLatitude(centerGeo.getLatitude());
+                d.setCenterLongitude(centerGeo.getLongitude());
+                d.setGeos(geos.stream().map(g -> ConvertHelper.convert(g, CommunityMapBuildingGeoDTO.class))
+                        .collect(Collectors.toList()));
+            }
+            return d;
+        }).collect(Collectors.toList());
+        dto.setBuildings(tempBuildings);
+
+        return dto;
     }
 }

@@ -61,6 +61,7 @@ public class CommunityMapProviderImpl implements CommunityMapProvider {
         SelectQuery<EhCommunityMapInfosRecord> query = context.selectQuery(Tables.EH_COMMUNITY_MAP_INFOS);
         query.addConditions(Tables.EH_COMMUNITY_MAP_INFOS.NAMESPACE_ID.eq(namespaceId));
         query.addOrderBy(Tables.EH_COMMUNITY_MAP_INFOS.VERSION.desc());
+        query.addLimit(1);
         return query.fetchOne().map((r) -> ConvertHelper.convert(r, CommunityMapInfo.class));
 
     }
