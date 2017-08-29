@@ -2721,7 +2721,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.debug("如果小区场景为0，通过园区查询默认小区");
 			}
 
-			if(default_community_two != null && default_community_one.getId() != null){
+			if(default_community_two != null && default_community_two.getId() != null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_two));
 			}else{
 				LOGGER.debug("找不到默认小区场景");
