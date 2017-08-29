@@ -44,7 +44,7 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
     @Autowired
     private FlowProvider flowProvider;
     @Autowired
-    private FlowCaseProvider flowCaseProvider;
+    FlowCaseProvider flowCaseProvider;
     @Autowired
     private DbProvider dbProvider;
 
