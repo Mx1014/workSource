@@ -4642,7 +4642,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         newPmOwner.setAvatar(memberUser.getAvatar());
         newPmOwner.setOrgOwnerTypeId(8L);// 没想到怎么做比较好, 先写死, 归类为"无"
         newPmOwner.setGender(memberUser.getGender());
-        newPmOwner.setCommunityId(memberUser.getCommunityId());
+        newPmOwner.setCommunityId(memberUser.getCommunityId() == null ? null : memberUser.getCommunityId().toString());
         newPmOwner.setContactType(ContactType.MOBILE.getCode());
         newPmOwner.setContactToken(contactToken);
         newPmOwner.setBirthday(memberUser.getBirthday());
@@ -4784,15 +4784,55 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Override
 	public void deletePMPropertyOwnerAddress(DeletePropOwnerAddressCommand cmd) {
 		CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
-		if(owner.getCommunityId() == cmd.getCommunityId()) {
-			this.dbProvider.execute((TransactionStatus status) -> {
-				propertyMgrProvider.deletePropOwner(owner);
-				pmOwnerSearcher.deleteById(owner.getId());
-				//tuichujiating
-				leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+		String ownerCommunity = owner.getCommunityId();
+		if(ownerCommunity != null) {
+			String[] communityIds = ownerCommunity.split(",");
+			List<String> ownerCommunities = new ArrayList<>();
+			for(String communityId : communityIds) {
+				if(!communityId.equals(cmd.getCommunityId())) {
+					ownerCommunities.add(communityId);
+				}
+			}
 
-				return null;
-			});
+			if(ownerCommunities.size() == 0) {
+				this.dbProvider.execute((TransactionStatus status) -> {
+					propertyMgrProvider.deletePropOwner(owner);
+					pmOwnerSearcher.deleteById(owner.getId());
+					//tuichujiating
+					leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+
+					return null;
+				});
+			} else {
+				StringBuilder sb = new StringBuilder();
+				ownerCommunities.forEach(community -> {
+					if(sb.length() == 0) {
+						sb.append(community);
+					} else {
+						sb.append(",");
+						sb.append(community);
+					}
+				});
+				this.dbProvider.execute((TransactionStatus status) -> {
+					owner.setCommunityId(sb.toString());
+					propertyMgrProvider.updatePropOwner(owner);
+					pmOwnerSearcher.feedDoc(owner);
+					//tuichujiating
+					leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+
+					return null;
+				});
+			}
+//		}
+//		if(owner.getCommunityId() == cmd.getCommunityId()) {
+//			this.dbProvider.execute((TransactionStatus status) -> {
+//				propertyMgrProvider.deletePropOwner(owner);
+//				pmOwnerSearcher.deleteById(owner.getId());
+//				//tuichujiating
+//				leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+//
+//				return null;
+//			});
 		} else {
 			LOGGER.error("deletePMPropertyOwnerAddress: id is not in the community! id = " + cmd.getId() + ", communityId = " + cmd.getCommunityId());
 			throw errorWith(PropertyServiceErrorCode.SCOPE,PropertyServiceErrorCode.ERROR_OWNER_COMMUNITY,
@@ -6036,7 +6076,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setNamespaceId(currentNamespaceId());
                 owner.setCreatorUid(userId);
                 owner.setOrganizationId(organizationId);
-                owner.setCommunityId(communityId);
+                owner.setCommunityId(communityId == null ? null : communityId.toString());
                 owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
 
 				long ownerId = propertyMgrProvider.createPropOwner(owner);

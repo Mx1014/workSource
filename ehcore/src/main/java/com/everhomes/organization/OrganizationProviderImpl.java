@@ -3111,7 +3111,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
-        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%" +communityId + "%"));
         if (queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
