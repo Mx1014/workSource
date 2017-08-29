@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.parking.handler.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,6 @@ import com.everhomes.express.guomao.GuoMaoEMSLogisticsItem;
 import com.everhomes.express.guomao.GuoMaoEMSLogisticsResponse;
 import com.everhomes.express.guomao.GuoMaoEMSResponseEntity;
 import com.everhomes.express.guomao.util.GuoMaoEMSSignHelper;
-import com.everhomes.express.guomao.util.Utils;
 import com.everhomes.rest.express.ExpressLogisticsStatus;
 import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressPayType;

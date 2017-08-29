@@ -9,7 +9,8 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>id: entity id</li>
+ *     <li>id: id</li>
+ *     <li>commoNo: 商品id</li>
  *     <li>posterUrl: 封面图url</li>
  *     <li>subject: 标题</li>
  *     <li>description: 内容</li>
@@ -20,6 +21,7 @@ import java.util.List;
 public class ModulePromotionEntityDTO {
 
     private Long id;
+    private String commoNo;
     private String posterUrl;
     private String subject;
     private String description;
@@ -27,12 +29,12 @@ public class ModulePromotionEntityDTO {
     @ItemType(ModulePromotionInfoDTO.class)
     private List<ModulePromotionInfoDTO> infoList = new ArrayList<>();
 
-    public Long getId() {
-        return id;
+    public String getCommoNo() {
+        return commoNo;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCommoNo(String commoNo) {
+        this.commoNo = commoNo;
     }
 
     public String getPosterUrl() {
@@ -73,6 +75,14 @@ public class ModulePromotionEntityDTO {
 
     public void setMetadata(String metadata) {
         this.metadata = metadata;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override
