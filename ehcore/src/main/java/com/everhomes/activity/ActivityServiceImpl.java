@@ -30,6 +30,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -4102,48 +4103,9 @@ public class ActivityServiceImpl implements ActivityService {
         List<Long> forumIds = new ArrayList<Long>();
         
         List<Long> communityIdList = new ArrayList<Long>();
-        // 获取所管理的所有小区对应的社区论坛
-//        if(organizationId != null) {
-//            ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-//            command.setOrganizationId(organizationId);
-//            List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
-//            if(communities != null){
-//                for (CommunityDTO communityDTO : communities) {
-//                    communityIdList.add(communityDTO.getId());
-//                    forumIds.add(communityDTO.getDefaultForumId());
-//                }
-//            }
-//        }
-//        // 办公地点所在园区对应的社区论坛
-//        if(communityId != null) {
-//            Community community = communityProvider.findCommunityById(communityId);
-//            communityIdList.add(community.getId());
-//            forumIds.add(community.getDefaultForumId());
-//        }
 
-        if(null == communityId){
-        	// 如果发送范围选择的公司圈，需要加上公司的论坛，add by tt, 20170307
-        	Organization organization = organizationProvider.findOrganizationById(organizationId);
-        	if (organization != null) {
-        		if (organization.getGroupId() != null) {
-        			Group group = groupProvider.findGroupById(organization.getGroupId());
-        			if (group != null) {
-        				forumIds.add(group.getOwningForumId());
-        			}
-        		}
-			}
-            List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
-            if(null != communities){
-                for (CommunityDTO communityDTO : communities) {
-                    communityIdList.add(communityDTO.getId());
-                    forumIds.add(communityDTO.getDefaultForumId());
-                }
-            }
-        }else{
-            Community community = communityProvider.findCommunityById(communityId);
-            communityIdList.add(community.getId());
-            forumIds.add(community.getDefaultForumId());
-        }
+		//获取园区id和论坛Id edit by yanjun 20170830
+		forumService.populateCommunityIdAndForumId(communityId, organizationId, cmd.getNamespaceId(), communityIdList, forumIds);
 
         // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
         if(forumIds.size() == 0) {

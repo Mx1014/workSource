@@ -30,6 +30,7 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.hotTag.HotTags;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateService;
@@ -1375,31 +1376,11 @@ public class ForumServiceImpl implements ForumService {
     	 Long organizationId = cmd.getOrganizationId();
          Long communityId = cmd.getCommunityId();
          List<Long> forumIds = new ArrayList<Long>();
-         Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
+         //Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
          List<Long> communityIdList = new ArrayList<Long>();
-         if(null == communityId){
-//        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-//         	command.setCommunityId(organization.getId());;
-//         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
-        	// 如果发送范围选择的公司圈，需要加上公司的论坛，add by tt, 20170307
-        	if (organization.getGroupId() != null) {
-				Group group = groupProvider.findGroupById(organization.getGroupId());
-				if (group != null) {
-					forumIds.add(group.getOwningForumId());
-				}
-			}
-         	List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
-         	if(null != communities){
-         		for (CommunityDTO communityDTO : communities) {
-         			communityIdList.add(communityDTO.getId());
-         			forumIds.add(communityDTO.getDefaultForumId());
- 				}
-         	}
-         }else{
-        	Community community = communityProvider.findCommunityById(communityId);
-         	communityIdList.add(community.getId());
-         	forumIds.add(community.getDefaultForumId());
-         }
+
+         //获取园区id和论坛Id edit by yanjun 20170830
+         populateCommunityIdAndForumId(communityId, organizationId, cmd.getNamespaceId(), communityIdList, forumIds);
          
          if(null != cmd.getEmbeddedAppId() && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
         	 ListActivitiesReponse response = activityService.listOfficialActivities(cmd);
@@ -1508,7 +1489,41 @@ public class ForumServiceImpl implements ForumService {
 	    	 return new ListPostCommandResponse(locator.getAnchor(), dtos); 
 	    }
     }
-    
+    @Override
+    public void populateCommunityIdAndForumId(Long communityId, Long organizationId, Integer namespaceId, List<Long> communityIds, List<Long> forumIds){
+        if(communityId != null){
+            Community community = communityProvider.findCommunityById(communityId);
+            communityIds.add(community.getId());
+            forumIds.add(community.getDefaultForumId());
+        }else if(organizationId != null){
+            // 如果发送范围选择的公司圈，需要加上公司的论坛，add by tt, 20170307
+            Organization organization = organizationProvider.findOrganizationById(organizationId);
+            if (organization.getGroupId() != null) {
+                Group group = groupProvider.findGroupById(organization.getGroupId());
+                if (group != null) {
+                    forumIds.add(group.getOwningForumId());
+                }
+            }
+            List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
+            if(null != communities){
+                for (CommunityDTO communityDTO : communities) {
+                    communityIds.add(communityDTO.getId());
+                    forumIds.add(communityDTO.getDefaultForumId());
+                }
+            }
+        }else if(namespaceId != null){
+            ListingLocator locator = new CrossShardListingLocator();
+            locator.setAnchor(null);
+            List<Community> communities = communityProvider.listCommunitiesByKeyWord(locator, 1000000, null, namespaceId, null);
+            if(null != communities){
+                for (Community community : communities) {
+                    communityIds.add(community.getId());
+                    forumIds.add(community.getDefaultForumId());
+                }
+            }
+        }
+    }
+
     /**
      * 独立出一个方法来专门查询官方活动，以简化帖子条件的查询条件；而原来使用listOrgTopics(QueryOrganizationTopicCommand cmd)
      * 存在着BUG：当一个机构没有管理小区或者以普通机构的身份访问时会查不到帖子；
@@ -2610,7 +2625,7 @@ public class ForumServiceImpl implements ForumService {
         if(organization == null) {
             LOGGER.error("Organization is not found, operatorId=" + operatorId + ", organizationId=" + organizationId
                 + ", tag=" + tag);
-            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
                 ForumServiceErrorCode.ERROR_FORUM_ORGANIZATION_NOT_FOUND, "Organization not found");
         } 
         

@@ -48,6 +48,9 @@ public interface ForumService {
     ListPostCommandResponse listUserRelatedTopics(ListUserRelatedTopicCommand cmd);
     ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd);
     CheckUserPostDTO checkUserPostStatus(CheckUserPostCommand cmd);
+
+    void populateCommunityIdAndForumId(Long communityId, Long organizationId, Integer namespaceId, List<Long> communityIds, List<Long> forumIds);
+
     /**
      * 机构查询自己可看的帖子列表
      * @param cmd 命令
