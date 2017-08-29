@@ -4530,15 +4530,13 @@ public class PunchServiceImpl implements PunchService {
 		XSSFCellStyle titleStyle = wb.createCellStyle();
 		titleStyle.setFont(font);
 		titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
-
-		int rowNum = 0;
-
+  
 		//  创建标题
-		XSSFRow rowTitle = sheet.createRow(rowNum++);
+		XSSFRow rowTitle = sheet.createRow(0);
 		rowTitle.createCell(0).setCellValue("按日统计");
 		rowTitle.setRowStyle(titleStyle);
 		//副标题
-		XSSFRow rowReminder = sheet.createRow(rowNum++);
+		XSSFRow rowReminder = sheet.createRow(1);
 		rowReminder.createCell(0).setCellValue("统计时间:"+dateSF.get().format(new Date(cmd.getStartDay())) +"~"
 		+dateSF.get().format(new Date(cmd.getEndDay())));
 		rowReminder.setRowStyle(titleStyle);
@@ -4577,7 +4575,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	
 	private void createPunchDetailsBookSheetHead(Sheet sheet) {
-		Row row = sheet.createRow(sheet.getLastRowNum());
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i =-1 ;
 		row.createCell(++i).setCellValue("时间");
 		row.createCell(++i).setCellValue("姓名");
