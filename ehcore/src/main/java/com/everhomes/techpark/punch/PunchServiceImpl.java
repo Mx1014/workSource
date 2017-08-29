@@ -6716,7 +6716,8 @@ public class PunchServiceImpl implements PunchService {
 				Organization organization = organizationProvider.findOrganizationById(pr.getOwnerId()); 
 				employeeDTO.setUserId(detaliId);
                 OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detaliId);
-                employeeDTO.setContactName(memberDetail.getContactName());
+                if(null != memberDetail)
+					employeeDTO.setContactName(memberDetail.getContactName());
 				
 				//循环每个人这个月每一天
 				Calendar start = Calendar.getInstance();
