@@ -4180,6 +4180,7 @@ public class PunchServiceImpl implements PunchService {
 					"Invalid owner type or  Id parameter in the command");
 		}
 		ListPunchCountCommandResponse response = new ListPunchCountCommandResponse();
+		response.setPunchCountList(new ArrayList<>());
 		List<PunchCountDTO> punchCountDTOList = new ArrayList<PunchCountDTO>();
 
 		Organization org = this.checkOrganization(cmd.getOwnerId());
@@ -4567,8 +4568,8 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(dto.getUserName());
 		row.createCell(++i).setCellValue(dto.getDeptName());
 		row.createCell(++i).setCellValue(dto.getPunchOrgName());
-		row.createCell(++i).setCellValue(datetimeSF.get().format(new Date(dto.getArriveTime())));
-		row.createCell(++i).setCellValue(datetimeSF.get().format(new Date(dto.getLeaveTime())));
+		row.createCell(++i).setCellValue((dto.getArriveTime()==null)?"":datetimeSF.get().format(new Date(dto.getArriveTime())));
+		row.createCell(++i).setCellValue((dto.getLeaveTime()==null)?"":datetimeSF.get().format(new Date(dto.getLeaveTime())));
 		row.createCell(++i).setCellValue(dto.getPunchCount());
 		row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
 		row.createCell(++i).setCellValue(dto.getStatuString());
@@ -4783,7 +4784,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 		
 		ListPunchDetailsResponse response = new ListPunchDetailsResponse();
-		
+		response.setPunchDayDetails(new ArrayList<>());
 		
 		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
 		Long ownerId =getTopEnterpriseId(cmd.getOwnerId());
