@@ -180,3 +180,7 @@ VALUES ((@organization_details_id := @organization_details_id + 1), 1035718, NUL
 -- NEW END--- 08/04 17:59
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- by dengs 国贸圈的菜单，加快递管理和快递设置 2017.08.29
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@menu_sc_id := @menu_sc_id + 1), 40710, '', 'EhNamespaces', 999968, 2);
+INSERT INTO `eh_web_menu_scopes` (id, menu_id, menu_name, owner_type, owner_id, apply_policy) VALUES ((@menu_sc_id := @menu_sc_id + 1), 40720, '', 'EhNamespaces', 999968, 2)
