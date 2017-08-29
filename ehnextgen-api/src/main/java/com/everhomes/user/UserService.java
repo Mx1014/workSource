@@ -226,4 +226,6 @@ public interface UserService {
     ListAuthFormsResponse listAuthForms();
 
 	GetFamilyButtonStatusResponse getFamilyButtonStatus();
+
+    List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
 }

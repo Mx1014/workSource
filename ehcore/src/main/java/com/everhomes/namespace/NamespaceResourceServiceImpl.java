@@ -5,6 +5,8 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.launchpad.LaunchPadItem;
+import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
@@ -27,6 +29,11 @@ import java.util.concurrent.Executors;
 public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NamespaceResourceServiceImpl.class);
 	ExecutorService pool = Executors.newFixedThreadPool(3);
+
+	//蒙版启用参数
+	private final static Integer MASK_ENABLE = 0;
+	private final static Integer MASK_DISABLE = 1;
+
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -39,8 +46,14 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 
+	@Autowired
+	private LaunchPadProvider launchPadProvider;
+
     @Autowired
     private CommunityService communityService;
+
+	@Autowired
+	private NamespacesProvider namespacesProvider;
 
     @Override
     public ListCommunityByNamespaceCommandResponse listCommunityByNamespace(ListCommunityByNamespaceCommand cmd) {
@@ -92,6 +105,7 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	
 	@Override
 	public NamespaceDetailDTO getNamespaceDetail(GetNamespaceDetailCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    NamespaceDetailDTO detailDto = null;
 	    
 	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(cmd.getNamespaceId());
@@ -104,6 +118,36 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
             CommunityAuthPopupConfigDTO communityAuthPopupConfig = communityService.getCommunityAuthPopupConfig(cmd1);
             detailDto.setAuthPopupConfig(communityAuthPopupConfig.getStatus());
         }
-        return detailDto;
+        
+		//读取蒙版的配置项
+		Integer maskFlag = this.configurationProvider.getIntValue(namespaceId, "mask.key", MASK_ENABLE);
+		detailDto.setMaskFlag(maskFlag);
+
+		if(maskFlag == 0){
+			//从配置中读取MaskDTO
+			List<MaskDTO> masks = this.namespacesProvider.listNamespaceMasks(namespaceId);
+			if(masks != null){
+				masks.forEach(r->{
+					//在圖標表中查找
+					LaunchPadItem item = this.launchPadProvider.searchLaunchPadItemsByItemName(namespaceId, r.getSceneType(), r.getItemName());
+					if(item != null){
+						//有效圖標
+						r.setId(item.getId());
+					}else{
+						//無效圖標
+						r.setId(0L);
+						r.setTips("cannot found item");
+					}
+				});
+			}
+			if(masks != null && masks.size()  > 0){
+				detailDto.setPmMasks(masks);
+			}
+		}else{
+			detailDto.setMaskFlag(MASK_DISABLE);
+		}
+
+		return detailDto;
 	}
+
 }

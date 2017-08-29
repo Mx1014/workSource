@@ -33,7 +33,7 @@ public enum ScopeType {
             if(value.getCode() == code.byteValue())
                 return value;
         }
-        
+
         return null;
     }
 }
