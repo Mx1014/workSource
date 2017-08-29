@@ -2109,6 +2109,8 @@ INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alli
 UPDATE `eh_launch_pad_items` SET action_type = 33, action_data = CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}') WHERE item_name = '松山湖酒店' AND `namespace_id` = @namespace_id;
 
 
+-- by dengs,更新图标
+UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE1ERTRNalJqT1dJNE5qZzJabVJpTjJJM1pHVmtNek0yTm1NNE5EZGhPQQ',item_label='共享汽车' WHERE namespace_id = 999979 AND item_label = '宜步出行';
 
 
 
