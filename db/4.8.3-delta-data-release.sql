@@ -54,6 +54,9 @@ UPDATE eh_web_menus SET  `name` = '订单管理' where id = 40720;
 SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
     VALUES (@configuration_id:=@configuration_id+1, 'guomao.payserver.url', 'http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record', '左邻支付平台地址', 0, NULL);
+-- 修改快递连接地址
+UPDATE eh_launch_pad_items SET action_data = '{"url":"https://core.zuolin.com/deliver/dist/index.html#/home_page#sign_suffix"}' WHERE namespace_id = 999985 AND item_label = '快递';
+
 -- by dengs,2017.08.28 快递2.0 end
 
 -- add by sw 20170828

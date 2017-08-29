@@ -3,6 +3,11 @@ update eh_configurations SET `value`='http://pay-beta.zuolin.com/EDS_PAY/rest/pa
 set @eh_configurations_id = (select Max(id) from eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id:=@eh_configurations_id+1), 
 'debug.flag', 'true', '国贸 debug flag', 0, NULL);
+
+
+-- 修改快递连接地址
+UPDATE eh_launch_pad_items SET action_data = '{"url":"http://beta.zuolin.com/deliver/dist/index.html#/home_page#sign_suffix"}' WHERE namespace_id = 999985 AND item_label = '快递';
+
 -- by dengs,2017.08.28 快递2.0 end
 
 DELETE from eh_parking_lots where id = 10002;
