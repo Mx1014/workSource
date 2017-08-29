@@ -25,7 +25,7 @@ public interface StatEventParamLogProvider {
      * @param minTime
      * @param maxTime    @return
      */
-    Map<String, Integer> countParamTotalCount(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
+    Map<String, StatEventCountDTO> countParamLogs(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
 
     /**
      * 根据eventName查询出来参数日志
@@ -52,32 +52,5 @@ public interface StatEventParamLogProvider {
              WHERE aa.event_name = 'launchpad_on_news_flash_item_click' AND aa.param_key = 'newsToken') AS subT
         GROUP BY subT.v1, subT.v2;
     */
-    Map<Map<String, String>, Integer> countParamTotalCount(Integer namespaceId, String eventName, String eventVersion, List<String> paramKeys, Timestamp minTime, Timestamp maxTime);
-
-    /**
-     * 统计参数的独立session数
-     * @param namespaceId
-     * @param eventName
-     * @param eventVersion
-     * @param paramKey
-     * @param minTime
-     * @param maxTime
-     * @return
-     */
-    Map<String,Integer> countDistinctSession(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
-
-    /**
-     * 统计参数的独立uid数
-     * @param namespaceId
-     * @param eventName
-     * @param eventVersion
-     * @param paramKey
-     * @param minTime
-     * @param maxTime
-     * @return
-     */
-    Map<String,Integer> countDistinctUid(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime);
-
-    // List<StatEventParamLog> listStatEventParamLog();
-
+    Map<Map<String, String>, StatEventCountDTO> countParamLogs(Integer namespaceId, String eventName, String eventVersion, List<String> paramKeys, Timestamp minTime, Timestamp maxTime);
 }

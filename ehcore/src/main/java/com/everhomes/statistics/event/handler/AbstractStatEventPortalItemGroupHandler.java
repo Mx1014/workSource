@@ -56,56 +56,17 @@ abstract public class AbstractStatEventPortalItemGroupHandler extends AbstractSt
             throw new RuntimeException("processedParams not found");
         }
 
-        // List<StatEventParamLog> eventParamLogs = statEventParamLogProvider.listEventParamLog(
-        //         namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), minTime, maxTime);
-
-        // Map<Long, List<StatEventParamLog>> eventLogIdToParamLogListMap = eventParamLogs.stream().collect(Collectors.groupingBy(StatEventParamLog::getEventLogId));
-
-        // 从paramLog组装identifierParamValue与layoutId映射的map
-        // Map<String, Long> identifierParamToValueToLayoutIdMap = new HashMap<>();
-        // for (Map.Entry<Long, List<StatEventParamLog>> entry : eventLogIdToParamLogListMap.entrySet()) {
-        //     List<StatEventParamLog> value = entry.getValue();
-        //     String identifierParamValue = null;
-        //     Long layoutId = null;
-        //     for (StatEventParamLog log : value) {
-        //         if (log.getParamKey().equals(identifierParam.getParamKey())) {
-        //             identifierParamValue = log.getStringValue();
-        //             // 如果identifierParam就是layoutId的时候
-        //             if (identifierParam.getParamKey().equals("layoutId")) {
-        //                 layoutId = Long.valueOf(log.getStringValue());
-        //             }
-        //         } else if (log.getParamKey().equals("layoutId")) {
-        //             layoutId = Long.valueOf(log.getStringValue());
-        //         }
-        //         if (identifierParamValue != null && layoutId != null) {
-        //             break;
-        //         }
-        //     }
-        //     identifierParamToValueToLayoutIdMap.putIfAbsent(identifierParamValue, layoutId);
-        // }
-
-        // map: {参数值:次数}
-        // Map<String, Integer> identifierParamValueToCountMap = statEventParamLogProvider.countParamTotalCount(
-        //         namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), identifierParam.getParamKey(), minTime, maxTime);
-
         List<String> keys = processedParams.stream().map(StatEventParam::getParamKey).collect(Collectors.toList());
 
-        Map<Map<String, String>, Integer> identifierParamValueToCountMap = statEventParamLogProvider.countParamTotalCount(
+        Map<Map<String, String>, StatEventCountDTO> identifierParamValueToCountMap = statEventParamLogProvider.countParamLogs(
                 namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), keys, minTime, maxTime);
-
-        // 独立session数map: {参数值:次数}
-        // Map<String, Integer> countDistinctSessionMap = statEventParamLogProvider.countDistinctSession(
-        //         namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), identifierParam.getParamKey(), minTime, maxTime);
-        //
-        // // 独立用户数 map: {参数值:次数}
-        // Map<String, Integer> countDistinctUidMap = statEventParamLogProvider.countDistinctUid(
-        //         namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), identifierParam.getParamKey(), minTime, maxTime);
 
         List<StatEventStatistic> statList = new ArrayList<>();
         // map: {参数值:次数}
-        for (Map.Entry<Map<String, String>, Integer> entry : identifierParamValueToCountMap.entrySet()) {
+        for (Map.Entry<Map<String, String>, StatEventCountDTO> entry : identifierParamValueToCountMap.entrySet()) {
 
             Map<String, String> map = entry.getKey();
+            StatEventCountDTO count = entry.getValue();
 
             Long layoutId = Long.valueOf(map.get("layoutId"));
 
@@ -131,13 +92,10 @@ abstract public class AbstractStatEventPortalItemGroupHandler extends AbstractSt
 
             eventStat.setStatDate(date);
             eventStat.setNamespaceId(namespace.getId());
-            eventStat.setTotalCount(entry.getValue().longValue());
 
-            // Integer completedSessions = countDistinctSessionMap.get(map);
-            // eventStat.setCompletedSessions(completedSessions.longValue());
-            //
-            // Integer uniqueUsers = countDistinctUidMap.get(map);
-            // eventStat.setUniqueUsers(uniqueUsers.longValue());
+            eventStat.setTotalCount(count.getTotalCount().longValue());
+            eventStat.setUniqueUsers(count.getUniqueUsers().longValue());
+            eventStat.setCompletedSessions(count.getCompletedSessions().longValue());
 
             eventStat.setEventName(statEvent.getEventName());
             eventStat.setEventPortalStatId(portalStat.getId());
@@ -160,5 +118,7 @@ abstract public class AbstractStatEventPortalItemGroupHandler extends AbstractSt
 
     abstract protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap);
 
-    abstract protected List<StatEventParam> getParams(List<StatEventParam> params);
+    protected List<StatEventParam> getParams(List<StatEventParam> params) {
+        return params;
+    }
 }

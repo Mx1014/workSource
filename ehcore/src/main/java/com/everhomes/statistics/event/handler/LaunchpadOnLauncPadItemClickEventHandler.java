@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,10 +61,5 @@ public class LaunchpadOnLauncPadItemClickEventHandler extends AbstractStatEventP
 
         eventStat.setParam(StringHelper.toJsonString(paramMap));
         return eventStat;
-    }
-
-    @Override
-    protected List<StatEventParam> getParams(List<StatEventParam> params) {
-        return params;
     }
 }

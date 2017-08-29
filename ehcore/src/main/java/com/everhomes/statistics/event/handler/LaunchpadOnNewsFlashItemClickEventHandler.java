@@ -5,7 +5,6 @@ import com.everhomes.news.News;
 import com.everhomes.news.NewsProvider;
 import com.everhomes.rest.launchpad.Widget;
 import com.everhomes.server.schema.tables.EhNews;
-import com.everhomes.statistics.event.StatEventParam;
 import com.everhomes.statistics.event.StatEventStatistic;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,10 +56,5 @@ public class LaunchpadOnNewsFlashItemClickEventHandler extends AbstractStatEvent
 
         eventStat.setParam(StringHelper.toJsonString(paramMap));
         return eventStat;
-    }
-
-    @Override
-    protected List<StatEventParam> getParams(List<StatEventParam> params) {
-        return params;
     }
 }

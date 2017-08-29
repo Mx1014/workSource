@@ -3,7 +3,6 @@ package com.everhomes.statistics.event.handler;
 
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.launchpad.Widget;
-import com.everhomes.statistics.event.StatEventParam;
 import com.everhomes.statistics.event.StatEventStatistic;
 import com.everhomes.util.StringHelper;
 import com.everhomes.yellowPage.ServiceAlliances;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,10 +57,5 @@ public class LaunchpadOnOppushServiceAllianceItemClickEventHandler extends Abstr
 
         eventStat.setParam(StringHelper.toJsonString(paramMap));
         return eventStat;
-    }
-
-    @Override
-    protected List<StatEventParam> getParams(List<StatEventParam> params) {
-        return params;
     }
 }
