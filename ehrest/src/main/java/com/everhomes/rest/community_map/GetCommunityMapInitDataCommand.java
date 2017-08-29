@@ -7,6 +7,16 @@ public class GetCommunityMapInitDataCommand {
     private String sceneToken;
     private String version;
 
+    private String geoType;
+
+    public String getGeoType() {
+        return geoType;
+    }
+
+    public void setGeoType(String geoType) {
+        this.geoType = geoType;
+    }
+
     public String getSceneToken() {
         return sceneToken;
     }
