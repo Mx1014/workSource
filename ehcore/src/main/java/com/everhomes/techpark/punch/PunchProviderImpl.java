@@ -15,7 +15,6 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record3;
 import org.jooq.Record5;
-import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectHavingStep;
 import org.jooq.SelectJoinStep;
@@ -87,7 +86,6 @@ import com.everhomes.server.schema.tables.records.EhPunchLocationRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
-import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchSpecialDaysRecord;
 import com.everhomes.server.schema.tables.records.EhPunchStatisticsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchTimeIntervalsRecord;
@@ -2423,7 +2421,7 @@ long id = sequenceProvider.getNextSequence(key);
 	//用于查询是否有过异常申请
 	@Override
 	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
-			Byte exceptionRequestType) {
+														   Integer exceptionRequestType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectConditionStep<Record> step = context.select().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS)
 				.where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId))

@@ -4530,7 +4530,7 @@ public class PunchServiceImpl implements PunchService {
 		XSSFCellStyle titleStyle = wb.createCellStyle();
 		titleStyle.setFont(font);
 		titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
-  
+
 		//  创建标题
 		XSSFRow rowTitle = sheet.createRow(0);
 		rowTitle.createCell(0).setCellValue("按日统计");

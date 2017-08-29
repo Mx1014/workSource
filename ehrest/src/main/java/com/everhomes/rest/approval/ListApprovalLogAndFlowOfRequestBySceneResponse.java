@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>title: 申请的标题文字-根据类型不同,文字不同</li>
  * <li>approvalLogAndFlowOfRequestList: 申请的审批日志 与审批流程列表，参考{@link com.everhomes.rest.approval.ApprovalLogAndFlowOfRequestDTO}</li>
  * <li>punchDate: 异常申请字段:打卡日期</li>
- * <li>exceptionRequestType: 异常申请字段:异常类型</li>
+ * <li>punchIntevalNo: 异常申请字段:第几个时间段</li>
  * <li>punchDetail:  异常申请字段 打卡详情</li>
  * <li>punchStatusName: 异常申请字段: 打卡状态名</li>
  * </ul>
@@ -29,7 +29,7 @@ public class ListApprovalLogAndFlowOfRequestBySceneResponse {
 	private List<ApprovalLogAndFlowOfRequestDTO> approvalLogAndFlowOfRequestList;
 
 	private Long punchDate;
-	private Byte exceptionRequestType;
+	private Integer punchIntevalNo;
 	private String punchDetail;
 	private String punchStatusName;
 	public ListApprovalLogAndFlowOfRequestBySceneResponse(){
@@ -90,14 +90,6 @@ public class ListApprovalLogAndFlowOfRequestBySceneResponse {
 		this.punchDate = punchDate;
 	}
 
-	public Byte getExceptionRequestType() {
-		return exceptionRequestType;
-	}
-
-	public void setExceptionRequestType(Byte exceptionRequestType) {
-		this.exceptionRequestType = exceptionRequestType;
-	}
-
 	public String getPunchDetail() {
 		return punchDetail;
 	}
@@ -112,5 +104,13 @@ public class ListApprovalLogAndFlowOfRequestBySceneResponse {
 
 	public void setPunchStatusName(String punchStatusName) {
 		this.punchStatusName = punchStatusName;
+	}
+
+	public Integer getPunchIntevalNo() {
+		return punchIntevalNo;
+	}
+
+	public void setPunchIntevalNo(Integer punchIntevalNo) {
+		this.punchIntevalNo = punchIntevalNo;
 	}
 }
