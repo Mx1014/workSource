@@ -70,7 +70,7 @@ public class PortalOnNavigationClickEventHandler extends AbstractStatEventPortal
             }
         }
 
-        Map<String, Integer> paramValueToCountMap = statEventParamLogProvider.countParamTotalCount(
+        Map<String, Integer> paramValueToCountMap = statEventParamLogProvider.countParamLogs(
                 namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), param.getParamKey(), minTime, maxTime);
 
         // 独立session数map: {参数值:次数}

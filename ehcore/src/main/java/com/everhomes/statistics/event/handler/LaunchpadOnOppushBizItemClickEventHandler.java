@@ -6,7 +6,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.oauth2client.HttpResponseEntity;
 import com.everhomes.oauth2client.handler.RestCallTemplate;
 import com.everhomes.rest.launchpad.Widget;
-import com.everhomes.statistics.event.StatEventParam;
 import com.everhomes.statistics.event.StatEventStatistic;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
@@ -96,10 +95,5 @@ public class LaunchpadOnOppushBizItemClickEventHandler extends AbstractStatEvent
 
         eventStat.setParam(StringHelper.toJsonString(paramMap));
         return eventStat;
-    }
-
-    @Override
-    protected List<StatEventParam> getParams(List<StatEventParam> params) {
-        return params;
     }
 }

@@ -77,8 +77,13 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
     }
 
     @Override
-    public Map<String, Integer> countParamTotalCount(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
-        return context().select(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE, DSL.count())
+    public Map<String, StatEventCountDTO> countParamLogs(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
+        return context().select(
+                Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE,
+                DSL.count().as("totalCount"),
+                DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.SESSION_ID).as("completedSessions"),
+                DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.UID).as("uniqueUsers")
+        )
                 .from(Tables.EH_STAT_EVENT_PARAM_LOGS)
                 .where(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME.eq(eventName))
@@ -86,7 +91,17 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
                 .and(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY.eq(paramKey))
                 .and(Tables.EH_STAT_EVENT_PARAM_LOGS.UPLOAD_TIME.between(minTime, maxTime))
                 .groupBy(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE)
-                .fetchMap(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE, DSL.count());
+                .fetchMap(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE,
+                        record -> {
+                    Integer totalCount = record.getValue(DSL.count().as("totalCount"));
+                    Integer completedSessions = record.getValue(DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.SESSION_ID).as("completedSessions"));
+                    Integer uniqueUsers = record.getValue(DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.UID).as("uniqueUsers"));
+                    StatEventCountDTO dto = new StatEventCountDTO();
+                    dto.setTotalCount(totalCount);
+                    dto.setCompletedSessions(completedSessions);
+                    dto.setUniqueUsers(uniqueUsers);
+                    return dto;
+                });
     }
 
     /*
@@ -105,7 +120,7 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
         GROUP BY subT.v1, subT.v2;
     */
     @Override
-    public Map<Map<String, String>, Integer> countParamTotalCount(Integer namespaceId, String eventName, String eventVersion, List<String> paramKeys, Timestamp minTime, Timestamp maxTime) {
+    public Map<Map<String, String>, StatEventCountDTO> countParamLogs(Integer namespaceId, String eventName, String eventVersion, List<String> paramKeys, Timestamp minTime, Timestamp maxTime) {
         DSLContext context = context();
 
         SelectQuery<Record> baseQuery = context.selectQuery();
@@ -115,6 +130,9 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
         SelectQuery<EhStatEventParamLogsRecord> query = context.selectFrom(tableAlias).getQuery();
         query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME));
         query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_LOG_ID));
+
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.UID));
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.SESSION_ID));
 
         Table<EhStatEventParamLogsRecord> queryAlias;
 
@@ -171,12 +189,113 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
         baseQuery.addSelect(queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE.as(paramKey+"_value")));
         baseQuery.addGroupBy(queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE.as(paramKey+"_value")));
 
-        baseQuery.addSelect(DSL.count().as("totalCount"));
+        Field<Integer> totalCountField = DSL.count().as("totalCount");
+        Field<Integer> completedSessionsField = DSL.countDistinct(queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.SESSION_ID)).as("completedSessions");
+        Field<Integer> uniqueUsersField = DSL.countDistinct(queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.UID)).as("uniqueUsers");
+
+        baseQuery.addSelect(totalCountField);
+        baseQuery.addSelect(completedSessionsField);
+        baseQuery.addSelect(uniqueUsersField);
+
         baseQuery.addFrom(queryAlias);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("namespaceId = {}, eventName = {}, sql: {}", namespaceId, eventName, baseQuery.getSQL(true));
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("namespaceId = {}, eventName = {}, sql: {}", namespaceId, eventName, baseQuery.getSQL(true));
+        // }
+
+        Map<Map<String, String>, StatEventCountDTO> result = new HashMap<>();
+        baseQuery.fetch().map(r -> {
+            Map<String, String> subMap = new HashMap<>();
+            for (String key : paramKeys) {
+                subMap.put(key, r.getValue(key+"_value").toString());
+            }
+
+            StatEventCountDTO dto = new StatEventCountDTO();
+            dto.setTotalCount(r.getValue(totalCountField));
+            dto.setCompletedSessions(r.getValue(completedSessionsField));
+            dto.setUniqueUsers(r.getValue(uniqueUsersField));
+
+            result.put(subMap, dto);
+            return null;
+        });
+        return result;
+    }
+
+    /*@Override
+    public Map<Map<String, String>, Integer> countDistinctSession(Integer namespaceId, String eventName, String eventVersion, List<String> paramKeys, Timestamp minTime, Timestamp maxTime) {
+        DSLContext context = context();
+
+        SelectQuery<Record> baseQuery = context.selectQuery();
+
+        Table<EhStatEventParamLogsRecord> tableAlias = Tables.EH_STAT_EVENT_PARAM_LOGS.asTable("tableAlias");
+
+        SelectQuery<EhStatEventParamLogsRecord> query = context.selectFrom(tableAlias).getQuery();
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME));
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_LOG_ID));
+        Field<String> fieldSessionId = tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.SESSION_ID);
+        query.addSelect(fieldSessionId);
+
+        Table<EhStatEventParamLogsRecord> queryAlias;
+
+        for (int i = 1; i < paramKeys.size(); i++) {
+            String paramKey = paramKeys.get(i);
+            SelectQuery<EhStatEventParamLogsRecord> subQuery = context.selectFrom(Tables.EH_STAT_EVENT_PARAM_LOGS).getQuery();
+
+            Table<EhStatEventParamLogsRecord> subQueryI = subQuery.asTable("sub" + i);
+
+            Field<String> pk = subQueryI.field(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY).as(paramKey);
+            query.addSelect(pk);
+
+            Field<String> pv = subQueryI.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE).as(paramKey + "_value");
+            query.addSelect(pv);
+
+            queryAlias = query.asTable("queryAlias");
+
+            Field<String> field = queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE.as(paramKey + "_value"));
+
+            baseQuery.addSelect(field);
+            baseQuery.addGroupBy(field);
+
+            subQuery.addSelect(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_LOG_ID);
+            subQuery.addSelect(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY);
+            subQuery.addSelect(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE);
+
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID.eq(namespaceId));
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME.eq(eventName));
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_VERSION.eq(eventVersion));
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY.eq(paramKey));
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.UPLOAD_TIME.between(minTime, maxTime));
+
+            tableAlias = query.asTable("tableAlias");
+
+            Field<Long> subQueryEventLogIdField = tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_LOG_ID);
+
+            query.addJoin(subQueryI, subQueryI.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_LOG_ID).eq(subQueryEventLogIdField));
         }
+
+        String paramKey = paramKeys.get(0);
+        tableAlias = Tables.EH_STAT_EVENT_PARAM_LOGS.asTable("tableAlias");
+
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID).eq(namespaceId));
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME).eq(eventName));
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_VERSION).eq(eventVersion));
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY).eq(paramKey));
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.UPLOAD_TIME).between(minTime, maxTime));
+
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY).as(paramKey));
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE).as(paramKey+"_value"));
+
+        queryAlias = query.asTable("queryAlias");
+
+        baseQuery.addSelect(queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE.as(paramKey+"_value")));
+        baseQuery.addGroupBy(queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE.as(paramKey+"_value")));
+
+        baseQuery.addSelect(DSL.countDistinct(fieldSessionId).as("countDistinctSession"));
+        baseQuery.addFrom(queryAlias);
+
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("namespaceId = {}, eventName = {}, sql: {}", namespaceId, eventName, baseQuery.getSQL(true));
+        // }
 
         Map<Map<String, String>, Integer> result = new HashMap<>();
         baseQuery.fetch().map(r -> {
@@ -184,44 +303,99 @@ public class StatEventParamLogProviderImpl implements StatEventParamLogProvider 
             for (String key : paramKeys) {
                 subMap.put(key, r.getValue(key+"_value").toString());
             }
-            result.put(subMap, r.getValue(DSL.count().as("totalCount")));
+            result.put(subMap, r.getValue(DSL.countDistinct(fieldSessionId).as("countDistinctSession")));
             return null;
         });
         return result;
     }
 
     @Override
-    public Map<String, Integer> countDistinctSession(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
-        return context().select(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE, DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.SESSION_ID))
-                .from(Tables.EH_STAT_EVENT_PARAM_LOGS)
-                .where(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME.eq(eventName))
-                .and(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_VERSION.eq(eventVersion))
-                .and(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY.eq(paramKey))
-                .and(Tables.EH_STAT_EVENT_PARAM_LOGS.UPLOAD_TIME.between(minTime, maxTime))
-                .groupBy(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE)
-                .fetchMap(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE, DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.SESSION_ID));
-    }
+    public Map<Map<String, String>, Integer> countDistinctUid(Integer namespaceId, String eventName, String eventVersion, List<String> paramKeys, Timestamp minTime, Timestamp maxTime) {
+        DSLContext context = context();
 
-    @Override
-    public Map<String, Integer> countDistinctUid(Integer namespaceId, String eventName, String eventVersion, String paramKey, Timestamp minTime, Timestamp maxTime) {
-        return context().select(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE, DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.UID))
-                .from(Tables.EH_STAT_EVENT_PARAM_LOGS)
-                .where(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME.eq(eventName))
-                .and(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_VERSION.eq(eventVersion))
-                .and(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY.eq(paramKey))
-                .and(Tables.EH_STAT_EVENT_PARAM_LOGS.UPLOAD_TIME.between(minTime, maxTime))
-                .groupBy(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE)
-                .fetchMap(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE, DSL.countDistinct(Tables.EH_STAT_EVENT_PARAM_LOGS.UID));
-    }
+        SelectQuery<Record> baseQuery = context.selectQuery();
 
-    // @Override
-	// public List<StatEventParamLog> listStatEventParamLog() {
-	// 	return getReadOnlyContext().select().from(Tables.EH_STAT_EVENT_PARAM_LOGS)
-	//			.orderBy(Tables.EH_STAT_EVENT_PARAM_LOGS.ID.asc())
-	//			.fetch().map(r -> ConvertHelper.convert(r, StatEventParamLog.class));
-	// }
+        Table<EhStatEventParamLogsRecord> tableAlias = Tables.EH_STAT_EVENT_PARAM_LOGS.asTable("tableAlias");
+
+        SelectQuery<EhStatEventParamLogsRecord> query = context.selectFrom(tableAlias).getQuery();
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME));
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_LOG_ID));
+        Field<Long> fieldUid = tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.UID);
+        query.addSelect(fieldUid);
+
+        Table<EhStatEventParamLogsRecord> queryAlias;
+
+        for (int i = 1; i < paramKeys.size(); i++) {
+            String paramKey = paramKeys.get(i);
+            SelectQuery<EhStatEventParamLogsRecord> subQuery = context.selectFrom(Tables.EH_STAT_EVENT_PARAM_LOGS).getQuery();
+
+            Table<EhStatEventParamLogsRecord> subQueryI = subQuery.asTable("sub" + i);
+
+            Field<String> pk = subQueryI.field(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY).as(paramKey);
+            query.addSelect(pk);
+
+            Field<String> pv = subQueryI.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE).as(paramKey + "_value");
+            query.addSelect(pv);
+
+            queryAlias = query.asTable("queryAlias");
+
+            Field<String> field = queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE.as(paramKey + "_value"));
+
+            baseQuery.addSelect(field);
+            baseQuery.addGroupBy(field);
+
+            subQuery.addSelect(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_LOG_ID);
+            subQuery.addSelect(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY);
+            subQuery.addSelect(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE);
+
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID.eq(namespaceId));
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME.eq(eventName));
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_VERSION.eq(eventVersion));
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY.eq(paramKey));
+            subQuery.addConditions(Tables.EH_STAT_EVENT_PARAM_LOGS.UPLOAD_TIME.between(minTime, maxTime));
+
+            tableAlias = query.asTable("tableAlias");
+
+            Field<Long> subQueryEventLogIdField = tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_LOG_ID);
+
+            query.addJoin(subQueryI, subQueryI.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_LOG_ID).eq(subQueryEventLogIdField));
+        }
+
+        String paramKey = paramKeys.get(0);
+        tableAlias = Tables.EH_STAT_EVENT_PARAM_LOGS.asTable("tableAlias");
+
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.NAMESPACE_ID).eq(namespaceId));
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_NAME).eq(eventName));
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.EVENT_VERSION).eq(eventVersion));
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY).eq(paramKey));
+        query.addConditions(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.UPLOAD_TIME).between(minTime, maxTime));
+
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.PARAM_KEY).as(paramKey));
+        query.addSelect(tableAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE).as(paramKey+"_value"));
+
+        queryAlias = query.asTable("queryAlias");
+
+        baseQuery.addSelect(queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE.as(paramKey+"_value")));
+        baseQuery.addGroupBy(queryAlias.field(Tables.EH_STAT_EVENT_PARAM_LOGS.STRING_VALUE.as(paramKey+"_value")));
+
+        baseQuery.addSelect(DSL.countDistinct(fieldUid).as("countDistinctUid"));
+        baseQuery.addFrom(queryAlias);
+
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("namespaceId = {}, eventName = {}, sql: {}", namespaceId, eventName, baseQuery.getSQL(true));
+        // }
+
+        Map<Map<String, String>, Integer> result = new HashMap<>();
+        baseQuery.fetch().map(r -> {
+            Map<String, String> subMap = new HashMap<>();
+            for (String key : paramKeys) {
+                subMap.put(key, r.getValue(key+"_value").toString());
+            }
+            result.put(subMap, r.getValue(DSL.countDistinct(fieldUid).as("countDistinctUid")));
+            return null;
+        });
+        return result;
+    }*/
 	
 	private EhStatEventParamLogsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

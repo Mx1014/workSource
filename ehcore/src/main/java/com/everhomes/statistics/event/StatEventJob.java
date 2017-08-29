@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.statistics.event;
 
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import org.quartz.JobExecutionContext;
@@ -27,16 +29,24 @@ public class StatEventJob extends QuartzJobBean {
     @Autowired
     private ScheduleProvider scheduleProvider;
 
+    @Autowired
+    private CoordinationProvider coordinationProvider;
+
     private final boolean manuallyExecute = false;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+
+            // 昨天
             LocalDate statDate = LocalDate.now().minusDays(1);
-            LOGGER.info("stat event job start [{}]", statDate);
-            StatEventTaskExecution taskExecution = statEventJobService.getTaskExecution(statDate, false);
-            statEventJobService.executeTask(taskExecution);
-            LOGGER.info("stat event job finish [{}]", statDate);
+
+            coordinationProvider.getNamedLock(CoordinationLocks.EVENT_STAT_SCHEDULE.getCode() + statDate.toString()).tryEnter(() -> {
+                LOGGER.info("stat event job start [{}]", statDate);
+                StatEventTaskExecution taskExecution = statEventJobService.getTaskExecution(statDate, false);
+                statEventJobService.executeTask(taskExecution);
+                LOGGER.info("stat event job finish [{}]", statDate);
+            });
         }
     }
 }
