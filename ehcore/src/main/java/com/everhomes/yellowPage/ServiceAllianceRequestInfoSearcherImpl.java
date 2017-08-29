@@ -935,7 +935,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             try {
 				Date date=format.parse(d);
 				b.field("createDate", date.getTime());
-			} catch (ParseException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
             
