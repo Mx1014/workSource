@@ -85,3 +85,10 @@ INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_n
   VALUES ('10012', 'community', '240111044331050371', '创投大厦停车场', 'XIAOMAO', NULL, '2', '1025', '2016-12-16 17:07:20', '0', NULL, '{\"tempfeeFlag\": 1, \"rateFlag\": 1, \"lockCarFlag\": 1, \"searchCarFlag\": 0, \"currentInfoType\": 1, \"contact\": \"18665331243\"}');
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `expired_recharge_json`, `config_json`)
   VALUES ('10013', 'community', '240111044331050369', '生态园停车场', 'Mybay', NULL, '2', '1025', '2016-12-16 17:07:20', '0', NULL, '{\"tempfeeFlag\": 1, \"rateFlag\": 0, \"lockCarFlag\": 0, \"searchCarFlag\": 0, \"currentInfoType\": 2, \"contact\": \"18665331243\"}');
+
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ( 'parking.mybay.url', 'http://220.160.111.114:9099', '深圳湾停车充值key', '0', NULL);
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ( 'parking.mybay.key', 'F7A0B971B199FD2A1017CEC5', '深圳湾停车充值key', '0', NULL);
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ( 'parking.mybay.user', 'ktapi', '深圳湾停车充值用户名', '0', NULL);
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ( 'parking.mybay.pwd', '0306A9', '深圳湾停车充值密码', '0', NULL);
+
+
