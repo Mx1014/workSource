@@ -584,7 +584,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
         Map<Long, CustomerProjectStatisticsDTO> result = new HashMap<>();
         query.fetch().map((r) -> {
-            if(r.getProjectSource() != null) {
+            if(r != null && r.getProjectSource() != null) {
                 String[] ids = r.getProjectSource().split(",");
                 for(String id : ids) {
                     BigDecimal projectAmount = r.getProjectAmount() == null ? BigDecimal.ZERO : r.getProjectAmount();
