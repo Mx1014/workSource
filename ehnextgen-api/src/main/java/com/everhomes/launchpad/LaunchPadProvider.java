@@ -47,4 +47,5 @@ public interface LaunchPadProvider {
     List<LaunchPadLayout> getLaunchPadLayouts(String name, Integer namespaceId);
     List<LaunchPadItem> listLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation,String itemGroup, Byte applyPolicy, ListingQueryBuilderCallback queryBuilderCallback);
     List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId);
+	LaunchPadItem searchLaunchPadItemsByItemName(Integer namespaceId, String sceneType, String itemName);
 }
