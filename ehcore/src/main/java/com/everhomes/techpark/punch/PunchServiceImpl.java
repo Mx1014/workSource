@@ -784,20 +784,9 @@ public class PunchServiceImpl implements PunchService {
         String statusList = "";
         if (statusArrary != null && statusArrary.length > 1) {
             for(int i = 0;i<statusArrary.length/2;i++){
-                String status = "";
-                if (statusArrary[2 * i].equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
-                    status = statusArrary[2 * i];
-                } else if (statusArrary[2 * i + 1].equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
-                    status = String.valueOf(PunchStatus.FORGOT.getCode());
-                } else if (statusArrary[2 * i + 1].equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
-                    if (statusArrary[2 * i].equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
-                        status = String.valueOf(PunchStatus.BLANDLE.getCode());
-                    } else if (statusArrary[2 * i].equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-                        status = String.valueOf(PunchStatus.BELATE.getCode());
-                    }
-                } else if (statusArrary[2 * i + 1].equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-                    status = statusArrary[2 * i];
-                }
+
+				String status = processIntevalStatus(statusArrary[2 * i],statusArrary[2 * i+1]);
+
                 if(i == 0){
                     statusList = status;
                 }else{
@@ -809,7 +798,26 @@ public class PunchServiceImpl implements PunchService {
         pdl.setStatusList(statusList);
         return  pdl;
     }
-    private PunchLogsDay calculateDayLogByeverypunch(Long userId, Long companyId,
+
+	private String processIntevalStatus(String arrStatus, String leaveStatus) {
+		String status = "";
+		if (arrStatus.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
+			status = arrStatus;
+		} else if (leaveStatus.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
+			status = String.valueOf(PunchStatus.FORGOT.getCode());
+		} else if (leaveStatus.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
+			if (arrStatus.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
+				status = String.valueOf(PunchStatus.BLANDLE.getCode());
+			} else if (arrStatus.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+				status = String.valueOf(PunchStatus.BELATE.getCode());
+			}
+		} else if (leaveStatus.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+			status = arrStatus ;
+		}
+		return status;
+	}
+
+	private PunchLogsDay calculateDayLogByeverypunch(Long userId, Long companyId,
                 Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
             List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 				companyId, dateSF.get().format(logDay.getTime()),
@@ -6826,7 +6834,7 @@ public class PunchServiceImpl implements PunchService {
 		Date punchTime = new Date();
 		PunchLogDTO punchLog = getPunchType(userId,cmd.getEnterpriseId(),punchTime);
 		GetPunchDayStatusResponse response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
-		response.setPunchLogs(new ArrayList<>());
+		response.setIntervals(new ArrayList<>());
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
 		if (null == pr  )
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -6834,38 +6842,63 @@ public class PunchServiceImpl implements PunchService {
 					"公司没有设置打卡规则");
 		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr, punchTime, userId);
         PunchDayLog pdl = punchProvider.findPunchDayLog(userId, cmd.getEnterpriseId(), new java.sql.Date(cmd.getQueryTime()));
-        if(null != pdl)
-            response.setStatusList(pdl.getStatusList());
+
+
         List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,cmd.getEnterpriseId(), dateSF.get().format(punchTime),
 				ClockCode.SUCESS.getCode());
 		if (null != ptrId) {
 			PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(ptrId);
+			String[] statusList =null;
+			if(null != pdl){
+				response.setStatusList(pdl.getStatusList());
+				if(null!=pdl.getStatusList()){
+					statusList = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+					if (statusList.length < ptr.getPunchTimesPerDay()) {
+						if(statusList.length == 1){
+							statusList = new String[ptr.getPunchTimesPerDay()];
+							for(int i =0;i< ptr.getPunchTimesPerDay();i++){
+								statusList[i] = pdl.getStatusList();
+							}
+						}else
+							statusList = null;
+					}
+				}
+			}
 			for(Integer punchIntervalNo= 1;punchIntervalNo <= ptr.getPunchTimesPerDay()/2;punchIntervalNo++) {
-				PunchLogDTO dto = null;
+				PunchLogDTO dto1 = null;
+				PunchIntevalLogDTO intervalDTO = new PunchIntevalLogDTO();
+				intervalDTO.setPunchIntevalNo(punchIntervalNo);
+				intervalDTO.setPunchLogs(new ArrayList<>());
 				PunchLog pl = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntervalNo);
 				if(null == pl){
-					dto = new PunchLogDTO();
-					dto.setClockStatus(PunchStatus.UNPUNCH.getCode());
-					dto.setPunchType(PunchType.ON_DUTY.getCode());
-					dto.setPunchIntervalNo(punchIntervalNo);
-					dto.setRuleTime(findRuleTime(ptr,dto.getPunchType(),punchIntervalNo));
+					dto1 = new PunchLogDTO();
+					dto1.setClockStatus(PunchStatus.UNPUNCH.getCode());
+					dto1.setPunchType(PunchType.ON_DUTY.getCode());
+					dto1.setPunchIntervalNo(punchIntervalNo);
+					dto1.setRuleTime(findRuleTime(ptr,dto1.getPunchType(),punchIntervalNo));
 				}else{
-					dto = ConvertHelper.convert(pl, PunchLogDTO.class);
+					dto1 = ConvertHelper.convert(pl, PunchLogDTO.class);
 				}
-				response.getPunchLogs().add(dto);
+				intervalDTO.getPunchLogs().add(dto1);
 
-				dto = null;
+				PunchLogDTO dto2 = null;
 				pl = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntervalNo);
 				if(null == pl){
-					dto = new PunchLogDTO();
-					dto.setClockStatus(PunchStatus.UNPUNCH.getCode());
-					dto.setPunchType(PunchType.OFF_DUTY.getCode());
-					dto.setPunchIntervalNo(punchIntervalNo);
-					dto.setRuleTime(findRuleTime(ptr,dto.getPunchType(),punchIntervalNo));
+					dto2 = new PunchLogDTO();
+					dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
+					dto2.setPunchType(PunchType.OFF_DUTY.getCode());
+					dto2.setPunchIntervalNo(punchIntervalNo);
+					dto2.setRuleTime(findRuleTime(ptr,dto2.getPunchType(),punchIntervalNo));
 				}else{
-					dto = ConvertHelper.convert(pl, PunchLogDTO.class);
+					dto2 = ConvertHelper.convert(pl, PunchLogDTO.class);
 				}
-				response.getPunchLogs().add(dto);
+				intervalDTO.getPunchLogs().add(dto2);
+				if (null == statusList) {
+					intervalDTO.setStatus(processIntevalStatus(String.valueOf(dto1.getClockStatus()),String.valueOf(dto2.getClockStatus())));
+				}else{
+					intervalDTO.setStatus(statusList[punchIntervalNo-1]);
+				}
+				response.getIntervals().add(intervalDTO);
 			}
 		}
 		return response;
