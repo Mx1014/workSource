@@ -381,7 +381,7 @@ CREATE TABLE `eh_stat_event_task_logs` (
 
 -- By lei.lv
 -- 关系表建表脚本
-DROP TABLE IF EXISTS `eh_community_default`;
+-- DROP TABLE IF EXISTS `eh_community_default`;
 CREATE TABLE `eh_community_default` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
@@ -393,7 +393,7 @@ CREATE TABLE `eh_community_default` (
 -- ----------------------------
 -- Table structure for eh_namespace_masks
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_namespace_masks`;
+-- DROP TABLE IF EXISTS `eh_namespace_masks`;
 CREATE TABLE `eh_namespace_masks` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
