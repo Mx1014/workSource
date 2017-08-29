@@ -2905,7 +2905,7 @@ public class CommunityServiceImpl implements CommunityService {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
                     cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
 			LOGGER.debug("wait approve organizationMembers cmd:" + cmd);
-			LOGGER.debug("wait approve organizationMembers is null");
+			LOGGER.debug("wait approve organizationMembers size " + organizationMembers.size());
         }
 
 		if(organizationMembers == null || organizationMembers.size() == 0) {
