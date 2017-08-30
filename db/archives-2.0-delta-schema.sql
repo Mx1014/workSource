@@ -54,7 +54,7 @@ CREATE TABLE `eh_general_form_templates` (
   `owner_id` BIGINT NOT NULL,
   `owner_type` VARCHAR(64) NOT NULL,
   `form_name` VARCHAR(64) NOT NULL,
-	`form_type` VARCHAR(64) NOT NULL COMMENT 'the form template type',
+	`form_module` VARCHAR(64) NOT NULL COMMENT 'the form template name',
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
   `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
