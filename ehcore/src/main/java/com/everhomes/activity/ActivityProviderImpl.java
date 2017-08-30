@@ -412,14 +412,21 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public List<ActivityRoster> listRosters(Long activityId) {
+    public List<ActivityRoster> listRosters(Long activityId, ActivityRosterStatus status) {
         List<ActivityRoster> rosters=new ArrayList<ActivityRoster>();
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class,activityId),null,
                 (context, obj) -> {
-                    context.select().from(Tables.EH_ACTIVITY_ROSTER)
-                            .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId)).fetch().forEach(item -> {
-                                rosters.add(ConvertHelper.convert(item, ActivityRoster.class));
-                            });
+                    SelectQuery<EhActivityRosterRecord> query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
+                    query.addConditions(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
+
+                    //add by yanjun 20170830
+                    if(status != null){
+                        query.addConditions(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(status.getCode()));
+                    }
+                    query.fetch().forEach(item -> {
+                        rosters.add(ConvertHelper.convert(item, ActivityRoster.class));
+                    });
+
                     return true;
                 });
         return rosters;

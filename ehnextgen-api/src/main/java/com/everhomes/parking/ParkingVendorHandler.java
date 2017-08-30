@@ -9,6 +9,10 @@ import com.everhomes.rest.parking.*;
 public interface ParkingVendorHandler {
     String PARKING_VENDOR_PREFIX = "ParkingVendor-";
 
+    int REQUEST_MONTH_COUNT = 2;
+    //ParkingCardExpiredRechargeType.ACTUAL.getCode()
+    byte REQUEST_RECHARGE_TYPE = 2;
+
     List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber);
     
     List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo);

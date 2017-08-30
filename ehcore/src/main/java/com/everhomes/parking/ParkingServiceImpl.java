@@ -101,7 +101,7 @@ public class ParkingServiceImpl implements ParkingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    
+
     @Autowired
     private ParkingProvider parkingProvider;
     @Autowired
@@ -197,9 +197,9 @@ public class ParkingServiceImpl implements ParkingService {
         ParkingVendorHandler handler = null;
         
         if(vendorName != null && vendorName.length() > 0) {
-            String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
-            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
-        }
+			String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
+			handler = PlatformContext.getComponent(handlerPrefix + vendorName);
+		}
         
         return handler;
     }
@@ -1203,13 +1203,23 @@ public class ParkingServiceImpl implements ParkingService {
         }
 		
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId(), flowId);
-		
-		ParkingRequestCardConfigDTO dto = ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
-		
-		String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 
+		ParkingRequestCardConfigDTO dto = null;
 		if(null != parkingFlow) {
+			dto = ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
+		
+			String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
+
+
 			dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
+		}else {
+			dto = ConvertHelper.convert(cmd, ParkingRequestCardConfigDTO.class);
+			dto.setCardAgreementFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			dto.setCardRequestTipFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			dto.setMaxIssueNumFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			dto.setMaxRequestNumFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			dto.setRequestMonthCount(ParkingVendorHandler.REQUEST_MONTH_COUNT);
+			dto.setRequestRechargeType(ParkingVendorHandler.REQUEST_RECHARGE_TYPE);
 		}
 		return dto;
 	}

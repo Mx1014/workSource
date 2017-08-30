@@ -399,8 +399,8 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
 				cmd.getParkingLotId(), flowCase.getFlowMainId());
 
-		Integer requestMonthCount = 2;
-		Byte requestRechargeType = ParkingCardExpiredRechargeType.ACTUAL.getCode();
+		Integer requestMonthCount = REQUEST_MONTH_COUNT;
+		Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
 		
 		if(null != parkingFlow) {
 			requestMonthCount = parkingFlow.getRequestMonthCount();
